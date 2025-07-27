@@ -1,89 +1,1124 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
-
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/12.0.0/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/12.0.0/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/12.0.0/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
-
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coastal Fresh - Premium Seafood Delivery</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      overflow-x: hidden;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    /* Header Styles */
+    header {
+      background: linear-gradient(135deg, #0077be 0%, #00a8cc 100%);
+      padding: 15px 0;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 5px 30px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+    }
+    
+    .logo {
+      font-size: 2rem;
+      font-weight: bold;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      animation: wave 2s ease-in-out infinite;
+    }
+    
+    @keyframes wave {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+    
+    nav {
+      display: flex;
+      gap: 30px;
+    }
+    
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 10px 15px;
+      border-radius: 25px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    nav a:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.2);
+      transition: left 0.3s ease;
+    }
+    
+    nav a:hover:before {
+      left: 0;
+    }
+    
+    nav a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #90caf9 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 120px 20px 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 20"><defs><radialGradient id="a" cx="50%" cy="50%"><stop offset="0%" stop-color="rgba(255,255,255,0.1)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><ellipse cx="50" cy="10" rx="50" ry="10" fill="url(%23a)"/></svg>') repeat-x;
+      animation: float 20s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateX(0px); }
+      50% { transform: translateX(-20px); }
+    }
+    
+    .hero-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 60px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .hero-text {
+      flex: 1;
+      animation: slideInLeft 1s ease-out;
+    }
+    
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .hero-text h1 {
+      font-size: 3.5rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #0077be, #00695c);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1.2;
+    }
+    
+    .hero-text p {
+      font-size: 1.2rem;
+      color: #555;
+      margin-bottom: 30px;
+      max-width: 500px;
+    }
+    
+    .hero-image {
+      flex: 1;
+      text-align: center;
+      animation: slideInRight 1s ease-out;
+    }
+    
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(50px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .hero-image img {
+      max-width: 500px;
+      width: 100%;
+      height: auto;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      transition: transform 0.3s ease;
+    }
+    
+    .hero-image img:hover {
+      transform: scale(1.05) rotate(1deg);
+    }
+    
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 30px;
+      background: linear-gradient(135deg, #28a745, #20c997);
+      color: white;
+      border: none;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 30px rgba(40, 167, 69, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cta:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+    
+    .cta:hover:before {
+      left: 100%;
+    }
+    
+    .cta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 35px rgba(40, 167, 69, 0.4);
+    }
+    
+    /* Section Styles */
+    .section {
+      padding: 80px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .section h2 {
+      font-size: 2.5rem;
+      text-align: center;
+      margin-bottom: 50px;
+      color: #0077be;
+      position: relative;
+    }
+    
+    .section h2:after {
+      content: '';
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(135deg, #28a745, #20c997);
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 2px;
+    }
+    
+    /* Benefits Section */
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-top: 50px;
+    }
+    
+    .benefit-card {
+      background: white;
+      border-radius: 15px;
+      padding: 40px 30px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      border: 1px solid #f0f0f0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .benefit-card:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(135deg, #28a745, #20c997);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+    
+    .benefit-card:hover:before {
+      transform: scaleX(1);
+    }
+    
+    .benefit-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    }
+    
+    .benefit-icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      display: block;
+    }
+    
+    .benefit-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      color: #333;
+    }
+    
+    .benefit-card p {
+      color: #666;
+      line-height: 1.6;
+    }
+    
+    /* Enhanced Product Cards */
+    .product-card {
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      position: relative;
+      min-height: 450px;
+    }
+    
+    .product-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    }
+    
+    .product-image {
+      width: 100%;
+      height: 220px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    
+    .product-card:hover .product-image img {
+      transform: scale(1.1);
+    }
+    
+    .offer-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: linear-gradient(135deg, #ff6b35, #f7931e);
+      color: white;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      box-shadow: 0 3px 10px rgba(255, 107, 53, 0.3);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    .product-info {
+      padding: 20px;
+      text-align: left;
+    }
+    
+    .product-info h3 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: bold;
+    }
+    
+    .price-section {
+      margin: 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .mrp-price {
+      font-size: 0.9rem;
+      color: #999;
+      text-decoration: line-through;
+    }
+    
+    .final-price {
+      font-size: 1.3rem;
+      color: #28a745;
+      font-weight: bold;
+    }
+    
+    .price-per {
+      font-size: 0.8rem;
+      color: #666;
+    }
+    
+    .weight-info {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin: 12px 0;
+      font-size: 0.9rem;
+      color: #555;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .weight-label {
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .product-description {
+      font-size: 0.9rem;
+      color: #666;
+      line-height: 1.4;
+      margin: 10px 0;
+    }
+    
+    .whatsapp-cta {
+      background: linear-gradient(135deg, #25d366, #128c7e);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: auto;
+    }
+    
+    .whatsapp-cta:hover {
+      transform: scale(1.02);
+      box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+    }
+    
+    .whatsapp-cta:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .whatsapp-cta:disabled:hover {
+      box-shadow: none;
+      transform: none;
+    }
+    
+    /* Footer */
+    footer {
+      background: linear-gradient(135deg, #333, #555);
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+      position: relative;
+    }
+    
+    footer:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    }
+    
+    /* Products Section */
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-top: 50px;
+    }
+    .product-filters {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+      padding: 10px 20px;
+      background: white;
+      border: 2px solid #e0e0e0;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      color: #666;
+    }
+    
+    .filter-btn:hover, .filter-btn.active {
+      background: linear-gradient(135deg, #0077be, #00a8cc);
+      color: white;
+      border-color: #0077be;
+      transform: translateY(-2px);
+    }
+    
+    /* Admin Panel */
+    .admin-panel {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border: 2px dashed #28a745;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    
+    .admin-panel h3 {
+      color: #28a745;
+      margin-bottom: 15px;
+    }
+    
+    .admin-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .admin-btn {
+      padding: 8px 15px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
+    
+    .admin-btn:hover {
+      background: #20c997;
+      transform: scale(1.05);
+    }
+    
+    /* Floating Admin Toggle */
+    .admin-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .admin-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    }
+    
+    /* Product status indicators */
+    .product-card.out-of-stock {
+      opacity: 0.6;
+      position: relative;
+    }
+    
+    .product-card.out-of-stock:before {
+      content: 'OUT OF STOCK';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #dc3545;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      z-index: 10;
+    }
+    @media (max-width: 768px) {
+      .hero-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 40px;
       }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Firebase Hosting Setup Complete</h1>
-      <p>You're seeing this because you've successfully setup Firebase Hosting. Now it's time to go build something extraordinary!</p>
-      <a target="_blank" href="https://firebase.google.com/docs/hosting/">Open Hosting Documentation</a>
+      
+      .hero-text h1 {
+        font-size: 2.5rem;
+      }
+      
+      nav {
+        display: none;
+      }
+      
+      .benefits {
+        grid-template-columns: 1fr;
+      }
+      
+      .products {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+    }
+    
+    /* Scroll Animations */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.6s ease;
+    }
+    
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    /* Floating WhatsApp Button */
+    .whatsapp-float {
+      position: fixed;
+      bottom: 100px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #25d366, #128c7e);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      color: white;
+      text-decoration: none;
+      box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
+      transition: all 0.3s ease;
+      z-index: 1000;
+      animation: pulse 2s infinite;
+    }
+    
+    .whatsapp-float:hover {
+      transform: scale(1.1);
+      box-shadow: 0 12px 35px rgba(37, 211, 102, 0.4);
+    }
+    
+    .whatsapp-counter {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #ff4444;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo">🌊 COASTAL FRESH</div>
+      <nav>
+        <a href="#home">Home</a>
+        <a href="#about">About Us</a>
+        <a href="#products">Products</a>
+        <a href="#order">Order Now</a>
+        <a href="#contact">Contact</a>
+      </nav>
     </div>
-    <p id="load">Firebase SDK Loading&hellip;</p>
+  </header>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>Fresh Seafood Delivered From Coast to Kitchen</h1>
+        <p>Experience the finest quality seafood, sourced directly from local fishermen and delivered fresh to your doorstep within 24 hours.</p>
+        <a href="https://wa.me/919876543210" target="_blank" class="cta">
+          <i class="fab fa-whatsapp"></i> Order via WhatsApp
+        </a>
+      </div>
+      <div class="hero-image">
+        <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Fresh Seafood" />
+      </div>
+    </div>
+  </section>
 
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
+  <section class="section fade-in" id="about">
+    <h2>Why Choose Coastal Fresh?</h2>
+    <div class="benefits">
+      <div class="benefit-card">
+        <span class="benefit-icon">🎣</span>
+        <h3>Sourced from Local Fishermen</h3>
+        <p>We work directly with coastal fishermen to ensure you get the freshest catch of the day, supporting local communities.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">✨</span>
+        <h3>Chemical-Free & Hygienic</h3>
+        <p>Our seafood is processed in hygienic conditions without any harmful chemicals or preservatives.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">🚚</span>
+        <h3>Next-Day Delivery</h3>
+        <p>Order today and receive fresh seafood at your doorstep tomorrow with our reliable cold-chain delivery.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section fade-in" id="products">
+    <h2>Our Fresh Products</h2>
+    
+    <!-- Product Filters -->
+    <div class="product-filters">
+      <button class="filter-btn active" onclick="filterProducts('all')">All Products</button>
+      <button class="filter-btn" onclick="filterProducts('fish')"><i class="fas fa-fish"></i> Fish</button>
+      <button class="filter-btn" onclick="filterProducts('shellfish')"><i class="fas fa-shrimp"></i> Shellfish</button>
+      <button class="filter-btn" onclick="filterProducts('other')"><i class="fas fa-water"></i> Others</button>
+    </div>
+    
+    <!-- Admin Panel (hidden by default) -->
+    <div class="admin-panel" id="adminPanel" style="display: none;">
+      <h3><i class="fas fa-tools"></i> Quick Admin Panel</h3>
+      <div class="admin-controls">
+        <button onclick="toggleAdmin()" class="admin-btn"><i class="fas fa-times"></i> Close Admin</button>
+        <button onclick="simulateDailyUpdate()" class="admin-btn"><i class="fas fa-sync"></i> Update Prices</button>
+        <button onclick="addNewProduct()" class="admin-btn"><i class="fas fa-plus"></i> Add Product</button>
+        <button onclick="exportProducts()" class="admin-btn"><i class="fas fa-download"></i> Export Data</button>
+      </div>
+    </div>
+    
+    <div class="products" id="productsContainer">
+      <!-- Products will be dynamically loaded here -->
+    </div>
+  </section>
+
+  <footer id="contact">
+    <p>&copy; 2025 Coastal Fresh. Bringing the ocean's finest to your table.</p>
+    <p><i class="fas fa-phone"></i> Contact: +91-9876543210 | <i class="fas fa-envelope"></i> info@coastalfresh.com</p>
+    <div class="social-links" style="margin-top: 15px;">
+      <a href="#" style="color: white; margin: 0 10px;"><i class="fab fa-facebook"></i></a>
+      <a href="#" style="color: white; margin: 0 10px;"><i class="fab fa-instagram"></i></a>
+      <a href="#" style="color: white; margin: 0 10px;"><i class="fab fa-twitter"></i></a>
+    </div>
+  </footer>
+
+  <!-- Floating WhatsApp Button -->
+  <a href="#" class="whatsapp-float" onclick="openWhatsApp()" id="whatsappFloat">
+    <i class="fab fa-whatsapp"></i>
+    <div class="whatsapp-counter" id="whatsappCounter">0</div>
+  </a>
+
+  <!-- Floating Admin Toggle -->
+  <button class="admin-toggle" onclick="toggleAdmin()" title="Admin Panel"><i class="fas fa-tools"></i></button>
+
+  <script>
+    // COMPREHENSIVE PRODUCT MANAGEMENT SYSTEM
+    // Complete product structure with all e-commerce fields
+    const products = [
+      {
+        id: 1,
+        name: "Fresh Tiger Prawns",
+        image: "https://images.unsplash.com/photo-1565680018434-b513d5e5fd47?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        emoji: "🦐",
+        mrp: 900,
+        finalPrice: 720,
+        offerPercent: 20,
+        grossWeight: "1000g",
+        netWeight: "900g",
+        available: true,
+        category: "shellfish",
+        description: "Large, juicy tiger prawns caught fresh daily from coastal waters"
+      },
+      {
+        id: 2,
+        name: "Live Mud Crab",
+        image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        emoji: "🦀",
+        mrp: 1400,
+        finalPrice: 1190,
+        offerPercent: 15,
+        grossWeight: "1200g",
+        netWeight: "1000g",
+        available: true,
+        category: "shellfish",
+        description: "Fresh live mud crabs with rich, sweet meat"
+      },
+      {
+        id: 3,
+        name: "King Fish Steaks",
+        image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        emoji: "🐟",
+        mrp: 800,
+        finalPrice: 680,
+        offerPercent: 15,
+        grossWeight: "1100g",
+        netWeight: "1000g",
+        available: true,
+        category: "fish",
+        description: "Premium king fish cut into perfect steaks"
+      },
+      {
+        id: 4,
+        name: "Silver Pomfret",
+        image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        emoji: "🐠",
+        mrp: 1600,
+        finalPrice: 1280,
+        offerPercent: 20,
+        grossWeight: "1200g",
+        netWeight: "1000g",
+        available: true,
+        category: "fish",
+        description: "Premium silver pomfret, perfect for frying and grilling"
+      },
+      {
+        id: 5,
+        name: "Seer Fish Curry Cut",
+        image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        emoji: "🍛",
+        mrp: 750,
+        finalPrice: 675,
+        offerPercent: 10,
+        grossWeight: "1100g",
+        netWeight: "1000g",
+        available: true,
+        category: "fish",
+        description: "Fresh seer fish cut perfect for curry preparation"
+      },
+      {
+        id: 6,
+        name: "Fresh Lobster",
+        image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        emoji: "🦞",
+        mrp: 3500,
+        finalPrice: 3150,
+        offerPercent: 10,
+        grossWeight: "800g",
+        netWeight: "700g",
+        available: false, // Out of stock example
+        category: "shellfish",
+        description: "Premium fresh lobsters - currently out of season"
+      },
+      {
+        id: 7,
+        name: "Red Snapper Whole",
+        image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        emoji: "🔴",
+        mrp: 950,
+        finalPrice: 760,
+        offerPercent: 20,
+        grossWeight: "1300g",
+        netWeight: "1000g",
+        available: true,
+        category: "fish",
+        description: "Fresh red snapper with delicate flavor and firm texture"
+      },
+      {
+        id: 8,
+        name: "Fresh Squid Cleaned",
+        image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80",
+        emoji: "🦑",
+        mrp: 500,
+        finalPrice: 400,
+        offerPercent: 20,
+        grossWeight: "600g",
+        netWeight: "500g",
+        available: true,
+        category: "other",
+        description: "Fresh cleaned squid, perfect for rings and curry"
+      }
+    ];
+
+    // WhatsApp order counter
+    let whatsappCount = 0;
+
+    // Function to render products dynamically
+    function renderProducts(productsToShow = products) {
+      const productsContainer = document.getElementById('productsContainer');
+      productsContainer.innerHTML = '';
+
+      productsToShow.forEach(product => {
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card';
+        
+        // Add out-of-stock styling
+        if (!product.available) {
+          productCard.classList.add('out-of-stock');
+        }
+
+        // Calculate discount amount for display
+        const discountAmount = product.mrp - product.finalPrice;
+        const savings = `Save ₹${discountAmount}`;
+
+        productCard.innerHTML = `
+          <div class="product-image">
+            <img src="${product.image}" alt="${product.name}" loading="lazy">
+            ${product.offerPercent > 0 ? `<div class="offer-badge">${product.offerPercent}% OFF</div>` : ''}
+          </div>
+          <div class="product-info">
+            <h3>${product.name}</h3>
+            
+            <div class="price-section">
+              <span class="mrp-price">₹${product.mrp}</span>
+              <span class="final-price">₹${product.finalPrice}</span>
+              <span class="price-per">per kg</span>
+            </div>
+            
+            <div class="weight-info">
+              <div>
+                <span class="weight-label">Gross:</span> ${product.grossWeight}
+              </div>
+              <div>
+                <span class="weight-label">Net:</span> ${product.netWeight}
+              </div>
+            </div>
+            
+            <p class="product-description">${product.description}</p>
+            
+            ${product.available 
+              ? `<button class="whatsapp-cta" onclick="orderProduct('${product.name}', ${product.finalPrice}, '${product.netWeight}')">
+                   <i class="fab fa-whatsapp"></i> Order via WhatsApp
+                 </button>`
+              : `<button class="whatsapp-cta" disabled>
+                   <i class="fas fa-ban"></i> Currently Out of Stock
+                 </button>`
+            }
+          </div>
+        `;
+        
+        productsContainer.appendChild(productCard);
+      });
+      
+      // Update filter button active state
+      updateFilterButtons();
+    }
+
+    // Update filter button states
+    function updateFilterButtons() {
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+    }
+
+    // Enhanced function to handle product orders with detailed info
+    function orderProduct(productName, price, weight) {
+      const product = products.find(p => p.name === productName);
+      const message = `🐟 *Coastal Fresh Order Inquiry*
+
+*Product:* ${productName}
+*Price:* ₹${price} per kg
+*Net Weight:* ${weight}
+*Offer:* ${product.offerPercent}% OFF (Save ₹${product.mrp - product.finalPrice})
+
+I'm interested in ordering this product. Please confirm:
+- Current availability
+- Delivery time
+- Payment options
+- Any bulk discounts
+
+Thank you!`;
+      
+      // Update WhatsApp counter
+      whatsappCount++;
+      document.getElementById('whatsappCounter').textContent = whatsappCount;
+      
+      const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+    }
+    
+    // Open WhatsApp directly
+    function openWhatsApp() {
+      const message = `Hello Coastal Fresh! I'm interested in your seafood products. Can you help me with my order?`;
+      const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+      
+      // Update WhatsApp counter
+      whatsappCount++;
+      document.getElementById('whatsappCounter').textContent = whatsappCount;
+    }
+
+    // Filter products by category
+    function filterProducts(category) {
+      // Update active button
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      if (category === 'all') {
+        renderProducts(products);
+      } else {
+        const filtered = products.filter(p => p.category === category);
+        renderProducts(filtered);
+      }
+    }
+
+    // ADMIN FUNCTIONS
+    function toggleAdmin() {
+      const panel = document.getElementById('adminPanel');
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function addNewProduct() {
+      const name = prompt('Product Name:');
+      const image = prompt('Product Image URL:');
+      const emoji = prompt('Product Emoji (🐟):');
+      const mrp = parseInt(prompt('MRP Price:'));
+      const finalPrice = parseInt(prompt('Final Price:'));
+      const grossWeight = prompt('Gross Weight (e.g., 1200g):');
+      const netWeight = prompt('Net Weight (e.g., 1000g):');
+      const category = prompt('Category (fish/shellfish/other):');
+      const description = prompt('Description:');
+      
+      if (name && image && mrp && finalPrice && grossWeight && netWeight && category) {
+        const offerPercent = Math.round(((mrp - finalPrice) / mrp) * 100);
+        const newProduct = {
+          id: products.length + 1,
+          name: name,
+          image: image,
+          emoji: emoji || '🐟',
+          mrp: mrp,
+          finalPrice: finalPrice,
+          offerPercent: offerPercent,
+          grossWeight: grossWeight,
+          netWeight: netWeight,
+          available: true,
+          category: category,
+          description: description || `Fresh ${name.toLowerCase()}`
+        };
+        
+        products.push(newProduct);
+        renderProducts();
+        alert(`${name} added successfully with ${offerPercent}% discount!`);
+      }
+    }
+
+    function exportProducts() {
+      const dataStr = JSON.stringify(products, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `coastal-fresh-products-${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+    }
+
+    // Initialize products when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      renderProducts();
+      
+      // Set first filter as active
+      document.querySelector('.filter-btn').classList.add('active');
+    });
+
+    // Scroll animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
         }
       });
-    </script>
-  </body>
+    }, observerOptions);
+
+    document.querySelectorAll('.fade-in').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Smooth scrolling for navigation
+    document.querySelectorAll('nav a').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const targetId = this.getAttribute('href');
+        const targetSection = document.querySelector(targetId);
+        if (targetSection) {
+          targetSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+
+    // Header scroll effect
+    window.addEventListener('scroll', () => {
+      const header = document.querySelector('header');
+      if (window.scrollY > 100) {
+        header.style.background = 'linear-gradient(135deg, rgba(0,119,190,0.95) 0%, rgba(0,168,204,0.95) 100%)';
+        header.style.backdropFilter = 'blur(10px)';
+      } else {
+        header.style.background = 'linear-gradient(135deg, #0077be 0%, #00a8cc 100%)';
+        header.style.backdropFilter = 'none';
+      }
+    });
+
+    // DAILY UPDATE SIMULATION with enhanced pricing
+    function simulateDailyUpdate() {
+      // Example: Update prices while maintaining discount structure
+      products.forEach(product => {
+        const variation = Math.random() * 0.1 - 0.05; // ±5% variation
+        const newMrp = Math.round(product.mrp * (1 + variation));
+        const discountAmount = Math.round(newMrp * (product.offerPercent / 100));
+        
+        product.mrp = newMrp;
+        product.finalPrice = newMrp - discountAmount;
+        
+        // Random availability changes (10% chance to change)
+        if (Math.random() < 0.1) {
+          product.available = !product.available;
+        }
+      });
+      
+      renderProducts();
+      alert('Products updated for today with new pricing!');
+    }
+  </script>
+</body>
 </html>
