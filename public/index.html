@@ -302,6 +302,7 @@
       flex-grow: 1;
     }
     
+    /* Enhanced WhatsApp Button */
     .whatsapp-cta {
       background: linear-gradient(135deg, #25d366, #128c7e);
       color: white;
@@ -316,21 +317,53 @@
       justify-content: center;
       gap: 8px;
       margin-top: 10px;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
     }
     
     .whatsapp-cta:hover {
-      transform: scale(1.02);
-      box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
+    }
+    
+    .whatsapp-cta::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: 0.5s;
+      z-index: -1;
+    }
+    
+    .whatsapp-cta:hover::before {
+      left: 100%;
     }
     
     .whatsapp-cta:active {
-      transform: scale(0.98);
+      transform: translateY(1px);
+    }
+    
+    .whatsapp-cta i {
+      transition: transform 0.3s ease;
+    }
+    
+    .whatsapp-cta:hover i {
+      transform: scale(1.2);
     }
     
     .whatsapp-cta:disabled {
       background: #ccc;
       cursor: not-allowed;
       transform: none;
+      box-shadow: none;
+    }
+    
+    .whatsapp-cta:disabled:hover::before {
+      left: -100%;
     }
     
     /* Product status indicators */
@@ -480,6 +513,12 @@
       box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
       transition: all 0.3s ease;
       z-index: 1000;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
     }
     
     .whatsapp-float:hover {
@@ -805,8 +844,8 @@
             <p class="product-description">${product.description}</p>
             
             ${product.available 
-              ? `<button class="whatsapp-cta" onclick="orderProduct('${product.name}', ${product.finalPrice}, '${product.netWeight}')">
-                   <i class="fab fa-whatsapp"></i> Order via WhatsApp
+              ? `<button class="whatsapp-cta" onclick="orderProduct('${product.name}', ${product.finalPrice}, '${product.netWeight}', '${product.offerPercent}')">
+                   <i class="fab fa-whatsapp"></i> Order Now
                  </button>`
               : `<button class="whatsapp-cta" disabled>
                    <i class="fas fa-ban"></i> Currently Out of Stock
@@ -830,7 +869,7 @@
     }
 
     // Handle product orders
-    function orderProduct(productName, price, weight) {
+    function orderProduct(productName, price, weight, offerPercent) {
       const product = products.find(p => p.name === productName);
       const discountAmount = product.mrp - product.finalPrice;
       const message = `🐟 *Coastal Fresh Order Inquiry*
@@ -838,7 +877,7 @@
 *Product:* ${productName}
 *Price:* ₹${price} per kg
 *Net Weight:* ${weight}
-*Offer:* ${product.offerPercent}% OFF (Save ₹${discountAmount})
+*Offer:* ${offerPercent}% OFF (Save ₹${discountAmount})
 
 I'm interested in ordering this product. Please confirm:
 - Current availability
@@ -851,6 +890,16 @@ Thank you!`;
       // Update WhatsApp counter
       whatsappCount++;
       document.getElementById('whatsappCounter').textContent = whatsappCount;
+      
+      // Show visual feedback
+      const button = event.currentTarget;
+      button.innerHTML = '<i class="fas fa-check"></i> Order Sent!';
+      button.classList.add('order-sent');
+      
+      setTimeout(() => {
+        button.innerHTML = '<i class="fab fa-whatsapp"></i> Order Now';
+        button.classList.remove('order-sent');
+      }, 2000);
       
       const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
@@ -919,3 +968,6 @@ Thank you!`;
   </script>
 </body>
 </html>
+
+
+
