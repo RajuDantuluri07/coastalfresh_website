@@ -1,974 +1,519 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buy Fresh Fish, Prawns & Crabs in Hyderabad | Coastal Fresh</title>
-  <meta name="description" content="Order premium seafood online in Hyderabad. Coastal Fresh offers fresh fish, tiger prawns, crabs & more with same-day home delivery.">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Charset & Viewport -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Primary SEO -->
+  <title>Premium Seafood Delivery in Hyderabad | Coastal Fresh</title>
+  <meta name="description" content="Order fresh fish, prawns & crabs in Hyderabad. Next‑day delivery of premium seafood sourced sustainably from Andhra Pradesh coastal waters.">
+  <meta name="keywords" content="fish delivery Hyderabad, prawns delivery Hyderabad, crab delivery Hyderabad, vanjaram fish price Hyderabad, buy seafood online, fresh seafood Hyderabad, online fish market Hyderabad, tiger prawns Hyderabad, fresh crabs Hyderabad, seafood home delivery Hyderabad, Coastal Fresh seafood"/>
+
+  <!-- Canonical & Robots -->
+  <link rel="canonical" href="https://www.coastalfresh.in/">
+  <meta name="robots" content="index,follow">
+
+  <!-- Favicons & Theme -->
+  <link rel="icon" href="/favicon.ico">
+  <meta name="theme-color" content="#0077be">
+
+  <!-- Performance Hints -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+  <link rel="dns-prefetch" href="https://res.cloudinary.com">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Coastal Fresh — Fresh Fish, Prawns & Crabs in Hyderabad">
+  <meta property="og:description" content="Premium seafood delivered next day in Hyderabad. Hygienic, cleaned & responsibly sourced.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://www.coastalfresh.in/">
+  <meta property="og:site_name" content="Coastal Fresh">
+  <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755531309/website_banner_1_1_1_1_ysypw8.png">
+  <meta property="og:image:alt" content="Coastal Fresh premium seafood banner">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Coastal Fresh — Fresh Seafood Delivery in Hyderabad">
+  <meta name="twitter:description" content="Order fresh fish, prawns & crabs online. Next‑day delivery.">
+  <meta name="twitter:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755531309/website_banner_1_1_1_1_ysypw8.png">
+
+  <!-- Icons / Fonts -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    
-    body {
-      background-color: #f8f9fa;
-      color: #333;
-      line-height: 1.6;
-      padding-top: 80px;
-    }
-    
-    /* Header Styles */
-    header {
-      background: linear-gradient(135deg, #0077be 0%, #00a8cc 100%);
-      padding: 15px 0;
-      position: fixed;
-      width: 100%;
-      top: 0;
-      z-index: 1000;
-      box-shadow: 0 5px 30px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-    }
-    
-    .header-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 20px;
-    }
-    
-    .logo {
-      font-size: 2rem;
-      font-weight: bold;
-      color: white;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-      animation: wave 2s ease-in-out infinite;
-    }
-    
-    @keyframes wave {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-5px); }
-    }
-    
-    nav {
-      display: flex;
-      gap: 20px;
-    }
-    
-    nav a {
-      color: white;
-      text-decoration: none;
-      font-weight: 500;
-      padding: 8px 15px;
-      border-radius: 25px;
-      transition: all 0.3s ease;
-    }
-    
-    nav a:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: translateY(-2px);
-    }
-    
-    /* Hero Section */
-    .hero {
-      background: linear-gradient(rgba(0, 119, 190, 0.8), rgba(0, 168, 204, 0.7)), url('https://images.unsplash.com/photo-1504470695779-75300268aa0e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80');
-      background-size: cover;
-      background-position: center;
-      height: 400px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 0 20px;
-      margin-bottom: 60px;
-      border-radius: 0 0 20px 20px;
-    }
-    
-    .hero h1 {
-      font-size: 3.5rem;
-      color: white;
-      margin-bottom: 20px;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    }
-    
-    .hero p {
-      font-size: 1.2rem;
-      color: white;
-      max-width: 700px;
-      margin-bottom: 30px;
-      text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    }
-    
-    .hero-btn {
-      background: linear-gradient(135deg, #ff6b35, #f7931e);
-      color: white;
-      padding: 14px 35px;
-      border: none;
-      border-radius: 30px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
-    }
-    
-    .hero-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(255, 107, 53, 0.4);
-    }
-    
-    /* Main Content */
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    
-    .section-title {
-      font-size: 2.2rem;
-      text-align: center;
-      margin: 20px 0 40px;
-      color: #0077be;
-      position: relative;
-    }
-    
-    .section-title:after {
-      content: '';
-      width: 80px;
-      height: 4px;
-      background: linear-gradient(135deg, #28a745, #20c997);
-      position: absolute;
-      bottom: -15px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-radius: 2px;
-    }
-    
-    /* Product Filters */
-    .product-filters {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
-    }
-    
-    .filter-btn {
-      padding: 10px 20px;
-      background: white;
-      border: 2px solid #e0e0e0;
-      border-radius: 25px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 500;
-      color: #666;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .filter-btn:hover, .filter-btn.active {
-      background: linear-gradient(135deg, #0077be, #00a8cc);
-      color: white;
-      border-color: #0077be;
-      transform: translateY(-2px);
-    }
-    
-    /* Products Grid */
-    .products-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 25px;
-      margin-bottom: 60px;
-    }
-    
-    .product-card {
-      background: white;
-      border-radius: 15px;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-      transition: all 0.3s ease;
-      position: relative;
-      min-height: 420px;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .product-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-    }
-    
-    .product-image {
-      width: 100%;
-      height: 200px;
-      position: relative;
-      overflow: hidden;
-      background: #f0f7ff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .product-image img {
-      max-width: 90%;
-      max-height: 90%;
-      object-fit: contain;
-      transition: transform 0.3s ease;
-    }
-    
-    .product-card:hover .product-image img {
-      transform: scale(1.05);
-    }
-    
-    .product-info {
-      padding: 20px;
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .product-info h3 {
-      font-size: 1.2rem;
-      margin-bottom: 8px;
-      color: #333;
-      font-weight: bold;
-    }
-    
-    .price-section {
-      margin: 12px 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    
-    .mrp-price {
-      font-size: 0.9rem;
-      color: #999;
-      text-decoration: line-through;
-    }
-    
-    .final-price {
-      font-size: 1.3rem;
-      color: #28a745;
-      font-weight: bold;
-    }
-    
-    .price-per {
-      font-size: 0.8rem;
-      color: #666;
-    }
-    
-    .savings {
-      background: #e8f5e9;
-      color: #28a745;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-top: 3px;
-    }
-    
-    .weight-info {
-      background: #f8f9fa;
-      border-radius: 8px;
-      padding: 8px 12px;
-      margin: 12px 0;
-      font-size: 0.9rem;
-      color: #555;
-      display: flex;
-      justify-content: space-between;
-    }
-    
-    .weight-label {
-      font-weight: 500;
-      color: #333;
-    }
-    
-    .product-description {
-      font-size: 0.9rem;
-      color: #666;
-      line-height: 1.4;
-      margin: 10px 0;
-      flex-grow: 1;
-    }
-    
-    /* Enhanced WhatsApp Button */
-    .whatsapp-cta {
-      background: linear-gradient(135deg, #25d366, #128c7e);
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 25px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 10px;
-      position: relative;
-      overflow: hidden;
-      z-index: 1;
-    }
-    
-    .whatsapp-cta:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
-    }
-    
-    .whatsapp-cta::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      transition: 0.5s;
-      z-index: -1;
-    }
-    
-    .whatsapp-cta:hover::before {
-      left: 100%;
-    }
-    
-    .whatsapp-cta:active {
-      transform: translateY(1px);
-    }
-    
-    .whatsapp-cta i {
-      transition: transform 0.3s ease;
-    }
-    
-    .whatsapp-cta:hover i {
-      transform: scale(1.2);
-    }
-    
-    .whatsapp-cta:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    
-    .whatsapp-cta:disabled:hover::before {
-      left: -100%;
-    }
-    
-    /* Product status indicators */
-    .product-card.out-of-stock {
-      opacity: 0.6;
-      position: relative;
-    }
-    
-    .product-card.out-of-stock:before {
-      content: 'OUT OF STOCK';
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #dc3545;
-      color: white;
-      padding: 5px 10px;
-      border-radius: 15px;
-      font-size: 0.7rem;
-      font-weight: bold;
-      z-index: 10;
-    }
-    
-    /* About Us Section - Simplified */
-    .about-section {
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9f7fe 100%);
-      padding: 80px 0;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .about-content {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 0 20px;
-      text-align: center;
-    }
-    
-    .about-title {
-      font-size: 2.5rem;
-      color: #0077be;
-      margin-bottom: 30px;
-      position: relative;
-    }
-    
-    .about-title::after {
-      content: '';
-      position: absolute;
-      bottom: -15px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100px;
-      height: 4px;
-      background: linear-gradient(135deg, #28a745, #20c997);
-      border-radius: 2px;
-    }
-    
-    .about-description {
-      font-size: 1.1rem;
-      line-height: 1.8;
-      margin-bottom: 25px;
-      color: #444;
-    }
-    
-    /* Footer */
-    footer {
-      background: linear-gradient(135deg, #333, #555);
-      color: white;
-      text-align: center;
-      padding: 40px 20px;
-      position: relative;
-    }
-    
-    footer:before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    }
-    
-    footer p {
-      margin: 10px 0;
-    }
-    
-    .social-links {
-      margin-top: 15px;
-    }
-    
-    .social-links a {
-      color: white;
-      margin: 0 10px;
-      font-size: 1.3rem;
-      transition: all 0.3s ease;
-    }
-    
-    .social-links a:hover {
-      color: #25d366;
-      transform: translateY(-3px);
-    }
-    
-    .newsletter {
-      max-width: 500px;
-      margin: 20px auto;
-      display: flex;
-    }
-    
-    .newsletter input {
-      flex: 1;
-      padding: 12px 15px;
-      border: none;
-      border-radius: 30px 0 0 30px;
-      font-size: 1rem;
-    }
-    
-    .newsletter button {
-      background: linear-gradient(135deg, #ff6b35, #f7931e);
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 0 30px 30px 0;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s ease;
-    }
-    
-    .newsletter button:hover {
-      background: linear-gradient(135deg, #f7931e, #ff6b35);
-    }
-    
-    /* Floating WhatsApp Button */
-    .whatsapp-float {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      width: 60px;
-      height: 60px;
-      background: linear-gradient(135deg, #25d366, #128c7e);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
-      color: white;
-      text-decoration: none;
-      box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
-      transition: all 0.3s ease;
-      z-index: 1000;
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-    
-    .whatsapp-float:hover {
-      transform: scale(1.1);
-      box-shadow: 0 12px 35px rgba(37, 211, 102, 0.4);
-    }
-    
-    .whatsapp-counter {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      background: #ff4444;
-      color: white;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      font-weight: bold;
-    }
-    
-    /* Back to top button */
-    .back-to-top {
-      position: fixed;
-      bottom: 100px;
-      right: 30px;
-      width: 50px;
-      height: 50px;
-      background: linear-gradient(135deg, #0077be, #00a8cc);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 1.2rem;
-      cursor: pointer;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-      z-index: 999;
-    }
-    
-    .back-to-top.visible {
-      opacity: 1;
-      visibility: visible;
-    }
-    
-    .back-to-top:hover {
-      transform: translateY(-3px);
-    }
-    
-    /* Responsive styles */
-    @media (max-width: 768px) {
-      .logo {
-        font-size: 1.5rem;
-      }
-      
-      nav {
-        gap: 10px;
-      }
-      
-      nav a {
-        padding: 6px 10px;
-        font-size: 0.9rem;
-      }
-      
-      .section-title {
-        font-size: 1.8rem;
-      }
-      
-      .hero h1 {
-        font-size: 2.5rem;
-      }
-      
-      .hero p {
-        font-size: 1rem;
-      }
-      
-      .product-filters {
-        gap: 10px;
-      }
-      
-      .filter-btn {
-        padding: 8px 15px;
-        font-size: 0.9rem;
-      }
-      
-      .products-grid {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      }
-      
-      .about-section {
-        padding: 50px 0;
-      }
-      
-      .about-title {
-        font-size: 2rem;
-      }
-      
-      .about-description {
-        font-size: 1rem;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .header-content {
-        flex-direction: column;
-        gap: 10px;
-      }
-      
-      nav {
-        width: 100%;
-        justify-content: center;
-      }
-      
-      .hero {
-        height: 350px;
-      }
-      
-      .hero h1 {
-        font-size: 2rem;
-      }
-      
-      .products-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .product-card {
-        min-height: auto;
-      }
-      
-      .about-title {
-        font-size: 1.8rem;
-      }
-      
-      .newsletter {
-        flex-direction: column;
-        gap: 10px;
-      }
-      
-      .newsletter input,
-      .newsletter button {
-        border-radius: 30px;
-        width: 100%;
-      }
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+    :root{
+      --primary:#0077be;--primary-light:#00a8cc;--accent:#ff6b35;--accent-alt:#f7931e;
+      --whatsapp:#25d366;--success:#28a745;--danger:#dc3545;
+      --text:#333;--text-light:#666;--bg:#f8f9fa;--card:#fff;--section:#e9f7fe;
+    }
+    body{background:var(--bg);color:var(--text);line-height:1.6;padding-top:80px}
+
+    /* Header */
+    header{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 100%);padding:15px 0;position:fixed;top:0;width:100%;z-index:1000;box-shadow:0 5px 30px rgba(0,0,0,.1)}
+    .header-content{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:0 20px}
+    .logo{display:flex;align-items:center;gap:12px}
+    .logo-img{height:80px;width:auto;object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
+    .logo-text{font-size:1.8rem;font-weight:700;color:#fff;text-shadow:2px 2px 4px rgba(0,0,0,.3)}
+    nav{display:flex;gap:16px;flex-wrap:wrap}
+    nav a{color:#fff;text-decoration:none;font-weight:500;padding:8px 14px;border-radius:25px;transition:.25s}
+    nav a:hover{background:rgba(255,255,255,.2);transform:translateY(-2px)}
+
+    /* Hero */
+    .hero{
+      background:linear-gradient(rgba(0,119,190,.85),rgba(0,168,204,.75)),
+        url('https://res.cloudinary.com/dpyniai9l/image/upload/v1755531309/website_banner_1_1_1_1_ysypw8.png') center/cover no-repeat;
+      height:500px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 20px;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.3)
+    }
+    .hero h1{font-size:3.2rem;margin-bottom:18px;max-width:860px}
+    .hero p{font-size:1.25rem;max-width:740px;margin-bottom:26px}
+    .hero-btn{background:linear-gradient(135deg,var(--accent),var(--accent-alt));color:#fff;padding:14px 34px;border:none;border-radius:30px;font-size:1.05rem;font-weight:600;cursor:pointer;transition:.25s;display:inline-flex;align-items:center;gap:10px;box-shadow:0 5px 15px rgba(255,107,53,.3)}
+    .hero-btn:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(255,107,53,.4)}
+
+    /* Section shell */
+    .container{max-width:1200px;margin:0 auto;padding:22px}
+
+    .section-title{font-size:2.1rem;text-align:center;margin:24px 0 36px;color:var(--primary);position:relative}
+    .section-title:after{content:'';width:82px;height:4px;background:linear-gradient(135deg,#28a745,#20c997);position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);border-radius:3px}
+
+    /* Product filters */
+    .filters{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:12px 0 22px}
+    .filter-btn{padding:10px 18px;background:#fff;border:2px solid #e6e6e6;border-radius:25px;cursor:pointer;transition:.2s;font-weight:600;color:#444}
+    .filter-btn.active,.filter-btn:hover{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border-color:transparent}
+
+    /* Product grid */
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px}
+    .card{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.07);display:flex;flex-direction:column;transition:.25s}
+    .card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,.12)}
+    .thumb{width:100%;aspect-ratio:1/1;position:relative;overflow:hidden;background:#eef6ff}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .info{padding:18px;display:flex;flex-direction:column;gap:10px;flex:1}
+    .title{font-size:1.15rem;font-weight:700;color:#222}
+    .price-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .mrp{text-decoration:line-through;color:#9aa0a6;font-size:.95rem}
+    .price{color:var(--success);font-size:1.25rem;font-weight:800}
+    .per{color:#666;font-size:.9rem}
+    .save{background:#e8f5e9;color:var(--success);padding:5px 8px;border-radius:6px;font-size:.85rem;font-weight:700;display:inline-block}
+    .weights{display:flex;justify-content:space-between;background:#f7f8fa;border-radius:10px;padding:8px 12px;font-size:.92rem}
+    .label{font-weight:700;color:#333}
+    .desc{color:#666;font-size:.94rem;line-height:1.5}
+    .cta{margin-top:auto;background:linear-gradient(135deg,var(--whatsapp),#128c7e);color:#fff;border:none;padding:11px 16px;border-radius:24px;font-weight:800;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+    .cta:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(37,211,102,.35)}
+
+    /* Why choose */
+    .why{background:linear-gradient(135deg,var(--section) 0%,#def3ff 100%);padding:72px 0}
+    .why .box{max-width:900px;margin:0 auto;background:#fff;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.06);padding:32px 28px;font-size:1.05rem}
+    .why .box p{margin-bottom:14px}
+    .why .box p:last-child{margin-bottom:0}
+    .why .box strong{color:var(--primary)}
+
+    /* How it works */
+    .how{background:#fff;padding:70px 0}
+    .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:14px}
+    .step{position:relative;background:#fff;border-radius:14px;padding:26px;box-shadow:0 10px 30px rgba(0,0,0,.08);text-align:center}
+    .step-num{position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent-alt));color:#fff;font-weight:800}
+    .step i{font-size:2rem;color:var(--primary);margin:10px 0 8px}
+    .step h3{color:var(--primary);margin:6px 0 8px}
+
+    /* FAQ */
+    .faq-wrap{background:var(--section);padding:72px 0}
+    .faq-list{max-width:820px;margin:0 auto}
+    .faq{background:#fff;border-radius:14px;box-shadow:0 5px 16px rgba(0,0,0,.06);margin:10px 0;overflow:hidden}
+    .q{padding:18px 20px;background:var(--primary);color:#fff;font-weight:700;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+    .a{display:none;padding:18px 20px;color:#555}
+    .faq.active .a{display:block}
+    .q i{transition:transform .2s}
+    .faq.active .q i{transform:rotate(180deg)}
+
+    /* Footer & utility */
+    footer{background:linear-gradient(135deg,#333,#555);color:#fff;text-align:center;padding:40px 20px;position:relative}
+    footer:before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)}
+    .newsletter{max-width:520px;margin:18px auto;display:flex}
+    .newsletter input{flex:1;padding:12px 15px;border:none;border-radius:30px 0 0 30px}
+    .newsletter button{background:linear-gradient(135deg,var(--accent),var(--accent-alt));color:#fff;border:none;padding:12px 18px;border-radius:0 30px 30px 0;font-weight:700;cursor:pointer}
+    .social a{color:#fff;margin:0 8px;font-size:1.25rem;transition:.2s}
+    .social a:hover{color:var(--whatsapp)}
+    .wafloat{position:fixed;bottom:28px;right:28px;width:60px;height:60px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--whatsapp),#128c7e);color:#fff;box-shadow:0 8px 25px rgba(37,211,102,.3);z-index:999}
+    .counter{position:absolute;top:-5px;right:-5px;background:#ff4d4f;color:#fff;border-radius:50%;width:20px;height:20px;display:grid;place-items:center;font-size:.7rem;font-weight:800}
+    .totop{position:fixed;bottom:96px;right:28px;width:50px;height:50px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:50%;display:grid;place-items:center;color:#fff;opacity:0;visibility:hidden;transition:.2s;box-shadow:0 5px 15px rgba(0,0,0,.1);z-index:998}
+    .totop.show{opacity:1;visibility:visible}
+
+    /* Responsive */
+    @media (max-width:768px){
+      .logo-text{font-size:1.55rem}
+      .hero{height:420px}
+      .hero h1{font-size:2.2rem}
+      .hero p{font-size:1.05rem}
+      .newsletter{flex-direction:column;gap:10px}
+      .newsletter input,.newsletter button{border-radius:30px}
+      .logo{justify-content:center;margin-bottom:6px}
+      .logo-img{height:60px}
+    }
+    @media (max-width:480px){
+      .hero{height:360px}
+      .hero h1{font-size:1.8rem}
     }
   </style>
+
+  <!-- LocalBusiness schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Coastal Fresh",
+    "url": "https://www.coastalfresh.in/",
+    "image": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png",
+    "telephone": "+91-99851-25678",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Hyderabad",
+      "addressRegion": "Telangana",
+      "postalCode": "500032",
+      "addressCountry": "IN"
+    },
+    "priceRange": "₹₹",
+    "sameAs": [
+      "https://www.facebook.com/",
+      "https://www.instagram.com/",
+      "https://twitter.com/"
+    ]
+  }
+  </script>
+
+  <!-- WebSite schema -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebSite",
+    "url":"https://www.coastalfresh.in/",
+    "name":"Coastal Fresh",
+    "potentialAction":{
+      "@type":"SearchAction",
+      "target":"https://www.coastalfresh.in/?q={search_term_string}",
+      "query-input":"required name=search_term_string"
+    }
+  }
+  </script>
+
+  <!-- FAQPage schema (mirrors on-page content) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {"@type":"Question","name":"Where is your seafood sourced from?","acceptedAnswer":{"@type":"Answer","text":"We work directly with local coastal fishermen and certified farmers from Coastal Andhra Pradesh. Our seafood is wild‑caught or farm‑fresh within 24 hours of delivery, ensuring export‑quality freshness every time."}},
+      {"@type":"Question","name":"How quickly will I receive my order?","acceptedAnswer":{"@type":"Answer","text":"All orders placed before 12 PM IST are delivered next day. Most customers receive their seafood within 24–48 hours. You’ll also get real‑time tracking updates once your order is shipped."}},
+      {"@type":"Question","name":"Is your seafood sustainable?","acceptedAnswer":{"@type":"Answer","text":"Yes. We partner with fisheries that follow responsible harvesting practices, use by‑catch reduction methods, and follow seasonal fishing guidelines to protect marine ecosystems."}},
+      {"@type":"Question","name":"How do you guarantee freshness during delivery?","acceptedAnswer":{"@type":"Answer","text":"Orders are packed in insulated boxes with ice gel packs to maintain the ideal temperature until delivery — keeping your seafood fresh, safe, and ready to cook."}},
+      {"@type":"Question","name":"Which payment methods do you accept?","acceptedAnswer":{"@type":"Answer","text":"We accept all major credit/debit cards (Visa, Mastercard, RuPay), UPI payments, Net Banking, and Cash on Delivery (COD)."}},
+      {"@type":"Question","name":"Do you deliver across Hyderabad?","acceptedAnswer":{"@type":"Answer","text":"Yes. We deliver to all major areas across Hyderabad, including Gachibowli, Kondapur, Madhapur, Jubilee Hills, Banjara Hills, Secunderabad, and many more."}},
+      {"@type":"Question","name":"Do you clean and cut seafood before delivery?","acceptedAnswer":{"@type":"Answer","text":"Absolutely. All seafood is hygienically cleaned, properly cut, and packed based on your preference — curry, fry, or grill. For prawns, we also provide cleaned & deveined options."}},
+      {"@type":"Question","name":"Do you handle bulk orders for restaurants and events?","acceptedAnswer":{"@type":"Answer","text":"Yes. We specialize in bulk seafood orders for restaurants, hotels, corporate events, weddings, caterers, festivals, and special occasions."}}
+    ]
+  }
+  </script>
 </head>
 <body>
-  <!-- Header with Logo -->
+  <!-- Header -->
   <header>
     <div class="header-content">
-      <div class="logo">COASTAL FRESH</div>
+      <div class="logo" aria-label="Coastal Fresh">
+        <img class="logo-img" src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png" alt="Coastal Fresh logo">
+        <div class="logo-text">COASTAL FRESH</div>
+      </div>
       <nav>
         <a href="#products">Products</a>
-        <a href="#about">About Us</a>
+        <a href="#why">Why Us</a>
+        <a href="#how">How It Works</a>
+        <a href="#faq">FAQs</a>
         <a href="#contact">Contact</a>
       </nav>
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <h1>Ocean Fresh Seafood Delivered</h1>
-    <p>Premium seafood sourced daily from coastal Andhra Pradesh, delivered to your doorstep in Hyderabad within hours.</p>
-    <button class="hero-btn" onclick="document.getElementById('products').scrollIntoView({behavior: 'smooth'})">
-      <i class="fas fa-fish"></i> Shop Now
+  <!-- Hero -->
+  <section class="hero" role="banner" aria-label="Premium seafood delivery hero">
+    <h1>Fresh Seafood Delivered to Your Doorstep</h1>
+    <p>Premium quality fish, prawns & crabs with next‑day delivery in Hyderabad.</p>
+    <button class="hero-btn" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})" aria-label="Browse products">
+      <i class="fas fa-fish" aria-hidden="true"></i> Browse Products
     </button>
   </section>
 
-  <!-- Main Content -->
-  <div class="container" id="products">
-    <h1 class="section-title">Premium Seafood Selection</h1>
-    <p style="text-align: center; max-width: 800px; margin: 0 auto 30px; color: #555;">
-      Fresh from the coast to your kitchen in Hyderabad. We source the finest seafood daily and deliver it to your doorstep within hours.
-    </p>
-    
-    <!-- Product Filters -->
-    <div class="product-filters">
-      <button class="filter-btn active" onclick="filterProducts('all')">All Products</button>
-      <button class="filter-btn" onclick="filterProducts('Sea Water fish')"><i class="fas fa-fish"></i> Sea Fish</button>
-      <button class="filter-btn" onclick="filterProducts('Fresh Water fish')"><i class="fas fa-water"></i> Freshwater Fish</button>
-      <button class="filter-btn" onclick="filterProducts('Prawns')"><i class="fas fa-shrimp"></i> Prawns</button>
-      <button class="filter-btn" onclick="filterProducts('Crab')"><i class="fas fa-crab"></i> Crabs</button>
-      <button class="filter-btn" onclick="filterProducts('Fish')"><i class="fas fa-shrimp"></i> Freshwater Prawns</button>
+  <!-- Products -->
+  <section class="container" id="products">
+    <h2 class="section-title">Premium Seafood Selection</h2>
+    <div class="filters" role="tablist" aria-label="Category filters">
+      <button class="filter-btn active" data-cat="all" aria-pressed="true">All</button>
+      <button class="filter-btn" data-cat="Fish" aria-pressed="false">Fish</button>
+      <button class="filter-btn" data-cat="Prawns" aria-pressed="false">Prawns</button>
+      <button class="filter-btn" data-cat="Crabs" aria-pressed="false">Crabs</button>
     </div>
-    
-    <!-- Products Grid -->
-    <div class="products-grid" id="productsContainer">
-      <!-- Products will be loaded here -->
+    <div id="grid" class="grid" aria-live="polite"></div>
+  </section>
+
+  <!-- Why choose -->
+  <section class="why" id="why">
+    <div class="container">
+      <h2 class="section-title">Why Choose Coastal Fresh?</h2>
+      <div class="box">
+        <p>At Coastal Fresh, we deliver premium, fresh seafood sourced daily from the coastal waters of Andhra Pradesh and trusted farms. From fish, prawns and crabs to specialty catches — we bring the best of the coast to your kitchen.</p>
+        <p>With a strong focus on <strong>quality, hygiene and sustainability</strong>, we work closely with local fishers and farmers to ensure every order is responsibly sourced, cleaned, and packed with care.</p>
+        <p>We’re committed to sustainable practices that protect marine ecosystems and support coastal communities — without compromising on freshness or taste.</p>
+      </div>
     </div>
-  </div>
-  
-  <!-- About Us Section - Simplified -->
-  <section class="about-section" id="about">
-    <div class="about-content">
-      <h2 class="about-title">About Coastal Fresh</h2>
-      <p class="about-description">
-        At Coastal Fresh, we deliver premium, fresh seafood sourced daily from the coastal waters of Andhra Pradesh and trusted organic farms. From sea fish, prawns, and crabs to dry fish and exotic catches—we bring the best of the coast to your kitchen.
-      </p>
-      <p class="about-description">
-        With a focus on quality, hygiene, and sustainability, we work closely with local fishers and farmers to ensure every order is fresh, clean, and responsibly sourced. Whether for home or bulk purchase, Coastal Fresh is your trusted partner for seafood, delivered with care.
-      </p>
+  </section>
+
+  <!-- How it works -->
+  <section class="how" id="how">
+    <div class="container">
+      <h2 class="section-title">How It Works</h2>
+      <div class="steps" role="list">
+        <div class="step" role="listitem">
+          <div class="step-num">1</div>
+          <i class="fas fa-list-ul" aria-hidden="true"></i>
+          <h3>Browse & Select</h3>
+          <p>Pick from our curated list of fresh fish, prawns, and crabs. Prices are updated daily based on the catch.</p>
+        </div>
+        <div class="step" role="listitem">
+          <div class="step-num">2</div>
+          <i class="fab fa-whatsapp" aria-hidden="true"></i>
+          <h3>Order on WhatsApp</h3>
+          <p>Tap “Order Now” on any product. We confirm availability, cleaning preference, and delivery slot.</p>
+        </div>
+        <div class="step" role="listitem">
+          <div class="step-num">3</div>
+          <i class="fas fa-truck" aria-hidden="true"></i>
+          <h3>Next‑Day Delivery</h3>
+          <p>We pack with insulated boxes and ice gel packs and deliver fresh to your doorstep.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-wrap" id="faq">
+    <div class="container">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <div class="faq-list">
+        <div class="faq">
+          <div class="q">Where is your seafood sourced from? <i class="fas fa-chevron-down" aria-hidden="true"></i></div>
+          <div class="a">We work directly with local coastal fishermen and certified farmers from Coastal Andhra Pradesh. Our seafood is wild‑caught or farm‑fresh within 24 hours of delivery, ensuring export‑quality freshness every time.</div>
+        </div>
+        <div class="faq">
+          <div class="q">How quickly will I receive my order? <i class="fas fa-chevron-down" aria-hidden="true"></i></div>
+          <div class="a">All orders placed before 12 PM IST are delivered next day. Most customers receive their seafood within 24–48 hours. You’ll also get real‑time tracking updates once your order is shipped.</div>
+        </div>
+        <div class="faq">
+          <div class="q">Is your seafood sustainable? <i class="fas fa-chevron-down" aria-hidden="true"></i></div>
+          <div class="a">Yes ✅. We only partner with fisheries that follow responsible harvesting practices. Our partners use by‑catch reduction methods and follow seasonal fishing guidelines to protect marine ecosystems.</div>
+        </div>
+        <div class="faq">
+          <div class="q">How do you guarantee freshness during delivery? <i class="fas fa-chevron-down" aria-hidden="true"></i></div>
+          <div class="a">Your order is packed in insulated boxes with ice gel packs to maintain the ideal temperature until it reaches your doorstep — keeping your seafood fresh, safe, and ready to cook.</div>
+        </div>
+        <div class="faq">
+          <div class="q">Which payment methods do you accept? <i class="fas fa-chevron-down" aria-hidden="true"></i></div>
+          <div class="a">We accept all major credit/debit cards (Visa, Mastercard, RuPay), UPI payments, Net Banking, and Cash on Delivery (COD).</div>
+        </div>
+        <div class="faq">
+          <div class="q">Do you deliver across Hyderabad? <i class="fas fa-chevron-down" aria-hidden="true"></i></div>
+          <div class="a">Yes. We deliver to all major areas across Hyderabad, including Gachibowli, Kondapur, Madhapur, Jubilee Hills, Banjara Hills, Secunderabad, and many more.</div>
+        </div>
+        <div class="faq">
+          <div class="q">Do you clean and cut seafood before delivery? <i class="fas fa-chevron-down" aria-hidden="true"></i></div>
+          <div class="a">Absolutely. All seafood is hygienically cleaned, properly cut, and packed based on your preference — curry, fry, or grill. For prawns, we also provide cleaned & deveined options.</div>
+        </div>
+        <div class="faq">
+          <div class="q">Do you handle bulk orders for restaurants and events? <i class="fas fa-chevron-down" aria-hidden="true"></i></div>
+          <div class="a">Yes ✅. We specialize in bulk seafood orders for restaurants, hotels, corporate events, weddings, caterers, festivals, and special occasions.</div>
+        </div>
+      </div>
     </div>
   </section>
 
   <!-- Footer -->
   <footer id="contact">
     <div class="container">
-      <h3 style="margin-bottom: 20px;">Stay Connected</h3>
-      
-      <div class="newsletter">
-        <input type="email" placeholder="Your email for seafood updates">
-        <button>Subscribe</button>
+      <h3 style="margin-bottom:14px;">Stay Connected</h3>
+      <div class="newsletter" role="form" aria-label="Email updates">
+        <input type="email" placeholder="Your email for seafood updates" aria-label="Email address">
+        <button type="button">Subscribe</button>
       </div>
-      
       <p>&copy; 2025 Coastal Fresh. Bringing the ocean's finest to your table.</p>
-      <p><i class="fas fa-phone"></i> Contact: +91-9876543210</p>
-      <p><i class="fas fa-envelope"></i> info@coastalfresh.in</p>
-      <p><i class="fas fa-map-marker-alt"></i> Serving all areas of Hyderabad</p>
-      
-      <div class="social-links">
-        <a href="#"><i class="fab fa-facebook"></i></a>
-        <a href="#"><i class="fab fa-instagram"></i></a>
-        <a href="#"><i class="fab fa-twitter"></i></a>
-        <a href="#"><i class="fab fa-whatsapp"></i></a>
+      <p><i class="fas fa-phone" aria-hidden="true"></i> +91 99851 25678 &nbsp; | &nbsp; <i class="fas fa-envelope" aria-hidden="true"></i> info@coastalfresh.in</p>
+      <p><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Serving all areas of Hyderabad</p>
+      <div class="social" aria-label="Social links">
+        <a href="#" aria-label="Facebook"><i class="fab fa-facebook" aria-hidden="true"></i></a>
+        <a href="#" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+        <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter" aria-hidden="true"></i></a>
+        <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp" aria-hidden="true"></i></a>
       </div>
     </div>
   </footer>
 
-  <!-- Floating WhatsApp Button -->
-  <a href="#" class="whatsapp-float" onclick="openWhatsApp()" id="whatsappFloat">
-    <i class="fab fa-whatsapp"></i>
-    <div class="whatsapp-counter" id="whatsappCounter">0</div>
+  <!-- Floating actions -->
+  <a class="wafloat" href="javascript:void(0)" onclick="openWhatsApp()" aria-label="Order on WhatsApp">
+    <i class="fab fa-whatsapp" aria-hidden="true"></i>
+    <span id="waCounter" class="counter">0</span>
   </a>
-  
-  <!-- Back to Top Button -->
-  <div class="back-to-top" id="backToTop" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
-    <i class="fas fa-arrow-up"></i>
-  </div>
+  <a class="totop" id="toTop" href="javascript:void(0)" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </a>
 
   <script>
-    // New Product data information
+    // -------- Product Data (categories: Fish, Prawns, Crabs) --------
     const products = [
-      { id: 1, name: "White Pomfret", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754203669/White_Pomfret_t3pi54.png", mrp: 800, finalPrice: 720, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Sea Water fish", description: "Fresh white pomfret sourced locally and hygienically packed" },
-      { id: 2, name: "Black Pomfret", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754208707/Black_Pomfret_qajvdv.png", mrp: 750, finalPrice: 675, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Sea Water fish", description: "Fresh black pomfret sourced locally and hygienically packed" },
-      { id: 3, name: "Sea Bass", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754208703/Sea_Bass_lvikv6.png", mrp: 750, finalPrice: 675, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Sea Water fish", description: "Fresh sea bass sourced locally and hygienically packed" },
-      { id: 4, name: "Yellowfin Tuna", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754209192/ChatGPT_Image_Aug_3_2025_01_49_22_PM_e1mnik.png", mrp: 950, finalPrice: 855, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Sea Water fish", description: "Fresh yellowfin tuna sourced locally and hygienically packed" },
-      { id: 5, name: "Pink Perch", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754209736/ChatGPT_Image_Aug_3_2025_01_58_06_PM_xcdyix.png", mrp: 380, finalPrice: 342, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Sea Water fish", description: "Fresh pink perch sourced locally and hygienically packed" },
-      { id: 6, name: "Koyyinga", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754208699/koyyangi_nknmim.png", mrp: 450, finalPrice: 405, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Sea Water fish", description: "Fresh koyyinga sourced locally and hygienically packed" },
-      { id: 7, name: "Kanagadathalu", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754208699/Kanagadathalu_hdsa8s.png", mrp: 480, finalPrice: 432, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Sea Water fish", description: "Fresh kanagadathalu sourced locally and hygienically packed" },
-      { id: 8, name: "Vanjaram", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754208696/Vanjaram_acvhaz.png", mrp: 950, finalPrice: 855, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Sea Water fish", description: "Fresh vanjaram sourced locally and hygienically packed" },
-      { id: 9, name: "Nettallu", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754208691/Nethallu_fhzaxz.png", mrp: 250, finalPrice: 225, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Sea Water fish", description: "Fresh nettallu sourced locally and hygienically packed" },
-      { id: 10, name: "Katte Parigelu", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754208682/Katte_Parigelu_n5xuob.png", mrp: 350, finalPrice: 315, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Sea Water fish", description: "Fresh katte parigelu sourced locally and hygienically packed" },
-      { id: 11, name: "Rohu", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754208702/Rohu_ofcltc.png", mrp: 250, finalPrice: 225, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Fresh Water fish", description: "Fresh rohu sourced locally and hygienically packed" },
-      { id: 12, name: "Rupchand Fish", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754210539/ChatGPT_Image_Aug_3_2025_02_11_45_PM_oxqyrv.png", mrp: 250, finalPrice: 225, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Fresh Water fish", description: "Fresh rupchand fish sourced locally and hygienically packed" },
-      { id: 13, name: "Catla", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754210975/ChatGPT_Image_Aug_3_2025_02_19_11_PM_g6lf4i.png", mrp: 270, finalPrice: 243, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Fresh Water fish", description: "Fresh catla sourced locally and hygienically packed" },
-      { id: 14, name: "Korameenu", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754208697/Korameenu_x5xix3.png", mrp: 550, finalPrice: 495, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Prawns", description: "Fresh korameenu sourced locally and hygienically packed" },
-      { id: 15, name: "Sea Tiger Prawns - 20C", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754204100/Tiger_Prawns_sqndlq.png", mrp: 750, finalPrice: 675, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Prawns", description: "Fresh 20-count sea tiger prawns sourced locally" },
-      { id: 16, name: "Sea Tiger Prawns - 40C", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754204100/Tiger_Prawns_sqndlq.png", mrp: 650, finalPrice: 585, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Prawns", description: "Fresh 40-count sea tiger prawns sourced locally" },
-      { id: 17, name: "Sea Tiger Prawns - 60C", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754204100/Tiger_Prawns_sqndlq.png", mrp: 550, finalPrice: 495, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Prawns", description: "Fresh 60-count sea tiger prawns sourced locally" },
-      { id: 18, name: "Chakuroyya / Godavari", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754208682/Freshwater_Parwns_psvn7h.png", mrp: 480, finalPrice: 432, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Prawns", description: "Popular Godavari chakuroyya prawns from local farms" },
-      { id: 19, name: "Freshwater Prawns - S", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754211726/resized_freshwater_prawns_cleaned_garnished_1_gvdfxa.jpg", mrp: 350, finalPrice: 315, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Fish", description: "Small-sized freshwater prawns, cleaned and fresh" },
-      { id: 20, name: "Freshwater Prawns - M", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754212178/ChatGPT_Image_Aug_3_2025_02_39_20_PM_ou2n1f.png", mrp: 450, finalPrice: 405, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Fish", description: "Medium-sized freshwater prawns, hygienically packed" },
-      { id: 21, name: "Freshwater Prawns - L", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754212178/ChatGPT_Image_Aug_3_2025_02_39_20_PM_ou2n1f.png", mrp: 650, finalPrice: 585, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Fish", description: "Large-sized freshwater prawns, fresh and juicy" },
-      { id: 22, name: "Live Crab", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754208681/Crab_vhbiv3.png", mrp: 1000, finalPrice: 900, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Crab", description: "Live crabs from coastal waters, best for masala" },
-      { id: 23, name: "Egg Crab", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754208681/Egg_Crab_fofgxt.png", mrp: 900, finalPrice: 810, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Crab", description: "Crabs with eggs — rich in flavor and nutrition" },
-      { id: 24, name: "Blue Crab", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754212836/ChatGPT_Image_Aug_3_2025_02_50_18_PM_ltcjvv.png", mrp: 650, finalPrice: 585, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Crab", description: "Fresh blue crabs caught from the ocean" },
-      { id: 25, name: "Manda Pitha", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754208681/Crab_vhbiv3.png", mrp: 600, finalPrice: 540, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Crab", description: "Special manda pitha variety crabs from Godavari" },
-      { id: 26, name: "3 Dot Crab", image: "https://res.cloudinary.com/dpyniai9l/image/upload/v1754208671/3_Dot_Crab_fkukdx.png", mrp: 500, finalPrice: 450, offerPercent: 10, grossWeight: "1000g", netWeight: "900g", available: true, category: "Crab", description: "Unique 3 dot crab, known for soft shell and sweet meat" }
+      {id:1,  name:"White Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577561/White_Pomfret_xliykk.png", mrp:800, finalPrice:720, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Fresh white pomfret sourced responsibly and hygienically packed."},
+      {id:2,  name:"Black Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Black_Pomfret_v14evb.png", mrp:750, finalPrice:675, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Firm texture and clean taste — great for fry and grill."},
+      {id:3,  name:"Sea Bass", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577561/Sea_Bass_oawfrs.png", mrp:750, finalPrice:675, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Premium sea bass, ideal for curries and grills."},
+      {id:4,  name:"Yellowfin Tuna", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577561/Yellowfin_Tuna_fsdwbu.png", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Meaty steaks with rich flavor."},
+      {id:5,  name:"Pink Perch", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577557/Pink_Perch_ybwhhi.png", mrp:380, finalPrice:342, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Delicate pink perch with mild flavor."},
+      {id:6,  name:"Koyyinga", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/koyyangi_si2oss.png", mrp:450, finalPrice:405, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Locally popular and tasty."},
+      {id:7,  name:"Kanagadathalu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Katte_Parigelu_lnxp73.png", mrp:480, finalPrice:432, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Versatile & flavorful — a classic."},
+      {id:8,  name:"Vanjaram (Seer)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Vanjaram_kl2iul.png", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Premium seer fish, cut and packed fresh."},
+      {id:9,  name:"Nettallu (Anchovies)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/Nethallu_rckaaj.png", mrp:250, finalPrice:225, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Perfect for fries and curries."},
+      {id:10, name:"Katte Parigelu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Katte_Parigelu_lnxp73.png", mrp:350, finalPrice:315, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Tasty and cleaned — ready to cook."},
+      {id:11, name:"Rohu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rohu_ctixmk.png", mrp:250, finalPrice:225, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Freshwater rohu from trusted sources."},
+      {id:12, name:"Rupchand", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rupchand_Fish_woqmzz.png", mrp:250, finalPrice:225, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Great value and taste."},
+      {id:13, name:"Catla", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Catla_-_Fish_tjb5hr.png", mrp:270, finalPrice:243, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Ideal for home cooking."},
+      {id:14, name:"Korameenu (Murrel)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577555/Korameenu_dkpfiw.png", mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Regional favourite — firm and tasty."},
+      {id:15, name:"Sea Tiger Prawns - 20C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:750, finalPrice:675, offer:10, gross:"1000g", net:"900g", available:true,  category:"Prawns", desc:"20‑count sea tiger prawns, firm & juicy."},
+      {id:16, name:"Sea Tiger Prawns - 40C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:650, finalPrice:585, offer:10, gross:"1000g", net:"900g", available:true,  category:"Prawns", desc:"40‑count tiger prawns — cleaned and deveined."},
+      {id:17, name:"Sea Tiger Prawns - 60C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"900g", available:true,  category:"Prawns", desc:"Great for fries and curries."},
+      {id:18, name:"Chakuroyya / Godavari", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:480, finalPrice:432, offer:10, gross:"1000g", net:"900g", available:true,  category:"Prawns", desc:"Popular Godavari freshwater prawns."},
+      {id:19, name:"Freshwater Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:390, finalPrice:380, offer:0, gross:"1000g", net:"900g", available:true,  category:"Prawns", desc:"Small size, cleaned and fresh."},
+      {id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577554/Fresh_Water_Prawns_-_M_lpvxiu.png", mrp:550, finalPrice:520, offer:0, gross:"1000g", net:"900g", available:true,  category:"Prawns", desc:"Medium size, hygienically packed."},
+      {id:21, name:"Freshwater Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/fresh_watre_prawns_-_L_h5fyn9.png", mrp:770, finalPrice:720, offer:0, gross:"1000g", net:"900g", available:true,  category:"Prawns", desc:"Large size, firm and flavorful."},
+      {id:22, name:"Live Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:1000, finalPrice:900, offer:10, gross:"1000g", net:"900g", available:true,  category:"Crabs", desc:"Live coastal crabs — best for masala."},
+      {id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:900, finalPrice:810, offer:10, gross:"1000g", net:"900g", available:true,  category:"Crabs", desc:"Crabs with roe — rich and flavorful."},
+      {id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577552/Blue_Crab_tzjkxm.png", mrp:650, finalPrice:585, offer:10, gross:"1000g", net:"900g", available:true,  category:"Crabs", desc:"Sweet meat and great taste."},
+      {id:25, name:"Manda Pitha", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:600, finalPrice:540, offer:10, gross:"1000g", net:"900g", available:true,  category:"Crabs", desc:"Special variety from Godavari."},
+      {id:26, name:"3 Dot Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png", mrp:500, finalPrice:450, offer:10, gross:"1000g", net:"900g", available:true,  category:"Crabs", desc:"Unique 3‑dot crab — soft shell & sweet meat."}
     ];
 
-    // WhatsApp order counter
-    let whatsappCount = 0;
+    // -------- Render logic --------
+    const gridEl = document.getElementById('grid');
+    const filterButtons = document.querySelectorAll('.filter-btn');
 
-    // Function to render products
-    function renderProducts(productsToShow = products) {
-      const productsContainer = document.getElementById('productsContainer');
-      productsContainer.innerHTML = '';
-
-      productsToShow.forEach(product => {
-        const productCard = document.createElement('div');
-        productCard.className = 'product-card';
-        
-        // Add out-of-stock styling
-        if (!product.available) {
-          productCard.classList.add('out-of-stock');
-        }
-
-        // Calculate discount amount
-        const discountAmount = product.mrp - product.finalPrice;
-
-        productCard.innerHTML = `
-          <div class="product-image">
-            <img src="${product.image}" alt="${product.name}" loading="lazy">
+    function render(list){
+      gridEl.innerHTML = '';
+      list.forEach(p=>{
+        const discount = p.mrp - p.finalPrice;
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="thumb">
+            <img src="${p.image}" alt="Buy ${p.name} online in Hyderabad - Coastal Fresh" loading="lazy">
           </div>
-          <div class="product-info">
-            <h3>${product.name}</h3>
-            
-            <div class="price-section">
-              <span class="mrp-price">₹${product.mrp}</span>
-              <span class="final-price">₹${product.finalPrice}</span>
-              <span class="price-per">per kg</span>
+          <div class="info">
+            <div class="title">${p.name}</div>
+            <div class="price-row">
+              <span class="mrp">₹${p.mrp}</span>
+              <span class="price">₹${p.finalPrice}</span>
+              <span class="per">per kg</span>
             </div>
-            
-            ${product.offerPercent > 0 ? 
-              `<div class="savings">Save ₹${discountAmount} (${product.offerPercent}% off)</div>` 
-              : ''
-            }
-            
-            <div class="weight-info">
-              <div>
-                <span class="weight-label">Gross:</span> ${product.grossWeight}
-              </div>
-              <div>
-                <span class="weight-label">Net:</span> ${product.netWeight}
-              </div>
+            ${p.offer ? `<span class="save">Save ₹${discount} (${p.offer}% off)</span>`:''}
+            <div class="weights">
+              <span><span class="label">Gross:</span> ${p.gross}</span>
+              <span><span class="label">Net:</span> ${p.net}</span>
             </div>
-            
-            <p class="product-description">${product.description}</p>
-            
-            ${product.available 
-              ? `<button class="whatsapp-cta" onclick="orderProduct('${product.name}', ${product.finalPrice}, '${product.netWeight}', '${product.offerPercent}')">
-                   <i class="fab fa-whatsapp"></i> Order Now
-                 </button>`
-              : `<button class="whatsapp-cta" disabled>
-                   <i class="fas fa-ban"></i> Currently Out of Stock
-                 </button>`
-            }
-          </div>
-        `;
-        
-        productsContainer.appendChild(productCard);
-      });
-      
-      // Update filter button active state
-      updateFilterButtons();
-    }
-
-    // Update filter button states
-    function updateFilterButtons() {
-      document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
+            <p class="desc">${p.desc}</p>
+            <button class="cta" onclick="orderWhatsApp('${encodeURIComponent(p.name)}', ${p.finalPrice}, '${p.net}', ${p.offer||0}, ${p.mrp})" aria-label="Order ${p.name} on WhatsApp">
+              <i class="fab fa-whatsapp" aria-hidden="true"></i> Order Now
+            </button>
+          </div>`;
+        gridEl.appendChild(card);
       });
     }
 
-    // Handle product orders
-    function orderProduct(productName, price, weight, offerPercent) {
-      const product = products.find(p => p.name === productName);
-      const discountAmount = product.mrp - product.finalPrice;
-      const message = `🐟 *Coastal Fresh Order Inquiry*
+    function applyFilter(cat){
+      filterButtons.forEach(b=>{
+        const isActive = b.dataset.cat===cat || (cat==='all' && b.dataset.cat==='all');
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+      if(cat==='all') return render(products);
+      render(products.filter(p=>p.category===cat));
+    }
 
-*Product:* ${productName}
+    filterButtons.forEach(btn=>{
+      btn.addEventListener('click', ()=>applyFilter(btn.dataset.cat));
+    });
+
+    // -------- WhatsApp ordering --------
+    function orderWhatsApp(nameEnc, price, net, offer, mrp){
+      const name = decodeURIComponent(nameEnc);
+      const discount = mrp - price;
+      const msg =
+`🐟 *Coastal Fresh Order Inquiry*
+
+*Product:* ${name}
 *Price:* ₹${price} per kg
-*Net Weight:* ${weight}
-*Offer:* ${offerPercent}% OFF (Save ₹${discountAmount})
+*Net Weight:* ${net}
+${offer?`*Offer:* ${offer}% OFF (Save ₹${discount})`:''}
 
-I'm interested in ordering this product. Please confirm:
-- Current availability
-- Delivery time
-- Payment options
-- Any bulk discounts
+Please confirm:
+• Availability
+• Delivery time
+• Cleaning/Cutting preference
+• Payment options
 
 Thank you!`;
-      
-      // Update WhatsApp counter
-      whatsappCount++;
-      document.getElementById('whatsappCounter').textContent = whatsappCount;
-      
-      // Show visual feedback
-      const button = event.currentTarget;
-      button.innerHTML = '<i class="fas fa-check"></i> Order Sent!';
-      button.classList.add('order-sent');
-      
-      setTimeout(() => {
-        button.innerHTML = '<i class="fab fa-whatsapp"></i> Order Now';
-        button.classList.remove('order-sent');
-      }, 2000);
-      
-      const whatsappUrl = `https://wa.me/919985125678?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
+      const url = `https://wa.me/919985125678?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank');
+      const c = document.getElementById('waCounter');
+      c.textContent = String((parseInt(c.textContent)||0)+1);
     }
-    
-    // Open WhatsApp directly
-    function openWhatsApp() {
-      const message = `Hello Coastal Fresh! I'm interested in your seafood products. Can you help me with my order?`;
-      const whatsappUrl = `https://wa.me/919985125678?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-      
-      // Update WhatsApp counter
-      whatsappCount++;
-      document.getElementById('whatsappCounter').textContent = whatsappCount;
-    }
+    window.openWhatsApp = ()=>orderWhatsApp(encodeURIComponent('General enquiry'),0,'','',0);
 
-    // Filter products by category
-    function filterProducts(category) {
-      // Update active button
-      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
-      
-      if (category === 'all') {
-        renderProducts(products);
-      } else {
-        const filtered = products.filter(p => p.category === category);
-        renderProducts(filtered);
-      }
-    }
-
-    // Back to top functionality
-    function handleScroll() {
-      const backToTop = document.getElementById('backToTop');
-      if (window.scrollY > 300) {
-        backToTop.classList.add('visible');
-      } else {
-        backToTop.classList.remove('visible');
-      }
-    }
-    
-    // Initialize products when page loads
-    document.addEventListener('DOMContentLoaded', () => {
-      renderProducts();
-      
-      // Set first filter as active
-      document.querySelector('.filter-btn').classList.add('active');
-      
-      // Add scroll event listener
-      window.addEventListener('scroll', handleScroll);
+    // -------- Back to top visibility --------
+    const toTop = document.getElementById('toTop');
+    window.addEventListener('scroll', ()=>{
+      if(window.scrollY>320){toTop.classList.add('show');}else{toTop.classList.remove('show');}
     });
 
-    // Smooth scrolling for navigation
-    document.querySelectorAll('nav a').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const targetId = this.getAttribute('href');
-        const targetSection = document.querySelector(targetId);
-        if (targetSection) {
-          targetSection.scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-          });
-        }
-      });
-    });
+    // -------- FAQ toggle --------
+    document.querySelectorAll('.faq').forEach(f=>f.querySelector('.q').addEventListener('click',()=>f.classList.toggle('active')));
+
+    // -------- Structured Data: ItemList from products --------
+    (function injectItemList(){
+      try{
+        const itemList = {
+          "@context":"https://schema.org",
+          "@type":"ItemList",
+          "itemListElement": products.map((p,i)=>({
+            "@type":"ListItem",
+            "position": i+1,
+            "url": "https://www.coastalfresh.in/#products",
+            "item":{
+              "@type":"Product",
+              "name": p.name,
+              "image": [p.image],
+              "description": p.desc,
+              "brand": {"@type":"Brand","name":"Coastal Fresh"},
+              "category": p.category,
+              "offers":{
+                "@type":"Offer",
+                "priceCurrency":"INR",
+                "price": String(p.finalPrice),
+                "availability": p.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                "url":"https://www.coastalfresh.in/#products",
+                "seller":{"@type":"Organization","name":"Coastal Fresh"}
+              }
+            }
+          }))
+        };
+        const s=document.createElement('script');
+        s.type='application/ld+json';
+        s.textContent = JSON.stringify(itemList);
+        document.head.appendChild(s);
+      }catch(e){}
+    })();
+
+    // -------- Init --------
+    render(products); // initial render (All)
   </script>
 </body>
 </html>
-
-
-
