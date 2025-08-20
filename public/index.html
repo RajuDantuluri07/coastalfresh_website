@@ -1,5 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- ===== Analytics: GA4 + Hotjar + WhatsApp tracking ===== -->
+<!-- 1) Google Analytics 4 (replace G-XXXXXXXXXX) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-GSHMPRYPW1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){ dataLayer.push(arguments); }
+  gtag('js', new Date());
+  gtag('config', 'G-GSHMPRYPW1'); // <-- your GA4 Measurement ID
+</script>
+
+<!-- 2) Hotjar (replace YOUR_HOTJAR_ID) -->
+<!-- Hotjar Tracking Code for Site 6498243 (name missing) -->
+<script>
+    (function(h,o,t,j,a,r){
+        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+        h._hjSettings={hjid:6498243,hjsv:6};
+        a=o.getElementsByTagName('head')[0];
+        r=o.createElement('script');r.async=1;
+        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+        a.appendChild(r);
+    })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+</script>
+
+<!-- 3) WhatsApp click tracking + automatic UTM tagging -->
+<script>
+  (function () {
+    // UTM values you want for all WhatsApp clicks
+    const utm = 'utm_source=website&utm_medium=whatsapp&utm_campaign=order_intent';
+
+    // Helper: add UTM params to a wa.me or api.whatsapp.com link
+    function withUTM(url) {
+      try {
+        const u = new URL(url);
+        // preserve existing text param if present
+        if (u.hostname.includes('wa.me') || u.hostname.includes('api.whatsapp.com')) {
+          // append UTM as extra query parts; WA ignores unknown params
+          if (u.search) { u.search += '&' + utm; } else { u.search = '?' + utm; }
+        }
+        return u.toString();
+      } catch(e) { return url; }
+    }
+
+    // Attach once DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      // 3a) AUTO-tag every WhatsApp link on the page
+      const waLinks = Array.from(document.querySelectorAll('a[href*="wa.me/"], a[href*="api.whatsapp.com/"]'));
+      waLinks.forEach(a => { a.href = withUTM(a.href); });
+
+      // 3b) Track WhatsApp clicks as GA4 events
+      function track(eventName, extra) {
+        if (typeof gtag === 'function') gtag('event', eventName, extra || {});
+      }
+      function onClick(e) {
+        const a = e.currentTarget;
+        track('whatsapp_click', {
+          link_text: (a.getAttribute('aria-label') || a.textContent || '').trim(),
+          link_href: a.href,
+          location: a.dataset.trackLocation || 'link'
+        });
+      }
+      waLinks.forEach(a => a.addEventListener('click', onClick));
+
+      // 3c) If you open WA via JS (your floating button), hook into your function:
+      // Wrap existing window.openWhatsApp if present, else create one.
+      const oldOpenWA = window.openWhatsApp;
+      window.openWhatsApp = function() {
+        track('whatsapp_click', { location: 'floating_button' });
+        if (typeof oldOpenWA === 'function') return oldOpenWA();
+      };
+
+      // 3d) If you create WA URLs dynamically elsewhere, call withUTM(url)
+      // Example: const url = withUTM(`https://wa.me/919985125678?text=${encodeURIComponent(msg)}`);
+    });
+  })();
+</script>
+<!-- ===== /Analytics block ===== -->
 <head>
   <!-- Coastal Fresh – Enhanced SEO + Technical Improvements -->
   <meta charset="UTF-8" />
