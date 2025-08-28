@@ -80,8 +80,8 @@
   <!-- Coastal Fresh – Enhanced SEO + Technical Improvements -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Buy Fresh Fish, Prawns & Crabs in Hyderabad | Coastal Fresh Seafood Delivery</title>
-  <meta name="description" content="Order premium fresh seafood in Hyderabad. Fresh fish, tiger prawns, crabs with hygienic cleaning and next-day delivery. Trusted local sourcing from Coastal Andhra Pradesh." />
+  <title>Buy Fresh Fish, Prawns, Crabs & Pickles in Hyderabad | Coastal Fresh Seafood Delivery</title>
+  <meta name="description" content="Order premium fresh seafood and authentic pickles in Hyderabad. Fresh fish, tiger prawns, crabs, and traditional pickles with next-day delivery. Trusted local sourcing from Coastal Andhra Pradesh." />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <link rel="canonical" href="https://www.coastalfresh.in/" />
   <meta name="theme-color" content="#0077be" />
@@ -90,19 +90,19 @@
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="Coastal Fresh" />
   <meta property="og:locale" content="en_IN" />
-  <meta property="og:title" content="Coastal Fresh | Buy Fresh Fish, Prawns & Crabs in Hyderabad" />
-  <meta property="og:description" content="Fresh Premium seafood delivered next-day across Hyderabad. Hygienic cleaning, careful packing, and responsible sourcing." />
+  <meta property="og:title" content="Coastal Fresh | Buy Fresh Fish, Prawns, Crabs & Pickles in Hyderabad" />
+  <meta property="og:description" content="Fresh Premium seafood and authentic pickles delivered next-day across Hyderabad. Hygienic cleaning, careful packing, and responsible sourcing." />
   <meta property="og:url" content="https://www.coastalfresh.in/" />
-  <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755531309/website_banner_1_1_1_1_ysypw8.png" />
+  <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Coastal Fresh – Premium Seafood in Hyderabad" />
-  <meta name="twitter:description" content="Fresh fish, prawns & crabs with next-day delivery and hygienic processing." />
-  <meta name="twitter:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755531309/website_banner_1_1_1_1_ysypw8.png" />
+  <meta name="twitter:title" content="Coastal Fresh – Premium Seafood & Pickles in Hyderabad" />
+  <meta name="twitter:description" content="Fresh fish, prawns, crabs & authentic pickles with next-day delivery and hygienic processing." />
+  <meta name="twitter:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png" />
 
   <!-- Keywords meta tag is less important but can be improved -->
-  <meta name="keywords" content="fresh fish delivery hyderabad, seafood delivery hyderabad, buy prawns online hyderabad, crab delivery hyderabad, hyderabad fish market online, fresh seafood home delivery, andhra seafood hyderabad" />
+  <meta name="keywords" content="fresh fish delivery hyderabad, seafood delivery hyderabad, buy prawns online hyderabad, crab delivery hyderabad, hyderabad fish market online, fresh seafood home delivery, andhra seafood hyderabad, authentic pickles hyderabad, prawn pickle, fish pickle, mutton pickle, chickee pickle" />
 
   <link rel="icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" href="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png">
@@ -128,7 +128,7 @@
     }
     body{background:var(--bg);color:var(--text);line-height:1.6;padding-top:80px}
     /* Offset anchors so fixed header doesn't cover content */
-    #products, #why, #how, #faq { scroll-margin-top: 110px; }
+    #products, #why, #how, #faq, #carousel { scroll-margin-top: 110px; }
 
     /* Header */
     header {background: linear-gradient(135deg, var(--primary), var(--primary-light));padding: 15px 0;position: fixed;top: 0;width: 100%;z-index: 1000;box-shadow: 0 5px 30px rgba(0,0,0,.1)}
@@ -140,12 +140,114 @@
     nav a {color: #fff;text-decoration: none;font-weight: 500;padding: 6px 12px;border-radius: 25px;transition: .25s;font-size: .9rem}
     nav a:hover,nav a[aria-current="page"] {background: rgba(255,255,255,.2);transform: translateY(-2px)}
 
-    /* Hero */
-    .hero {background: linear-gradient(rgba(0,119,190,.85), rgba(0,168,204,.75)), url('https://res.cloudinary.com/dpyniai9l/image/upload/f_auto,q_auto/v1755531309/website_banner_1_1_1_1_ysypw8.png') center/cover no-repeat;height: 350px;display: flex;flex-direction: column;justify-content: center;align-items: center;text-align: center;padding: 0 15px;color: #fff;text-shadow: 0 2px 10px rgba(0,0,0,.3)}
-    .hero h1 {font-size: 2rem;margin-bottom: 15px;max-width: 100%}
-    .hero p {font-size: 1rem;max-width: 100%;margin-bottom: 20px}
-    .hero-btn {background: linear-gradient(135deg, var(--accent), var(--accent-alt));color: #fff;padding: 12px 25px;border: none;border-radius: 30px;font-size: 1rem;font-weight: 600;cursor: pointer;transition: .25s;display: inline-flex;align-items: center;gap: 8px;box-shadow: 0 5px 15px rgba(255,107,53,.3)}
-    .hero-btn:hover {transform: translateY(-3px);box-shadow: 0 8px 20px rgba(255,107,53,.4)}
+    /* Carousel */
+    .carousel-container {
+      position: relative;
+      max-width: 1200px;
+      margin: 30px auto;
+      overflow: hidden;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.1);
+    }
+    .carousel {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+    .carousel-slide {
+      min-width: 100%;
+      position: relative;
+    }
+    .carousel-slide img {
+      width: 100%;
+      height: 350px;
+      object-fit: cover;
+      display: block;
+    }
+    .carousel-caption {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.8));
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .carousel-caption h3 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .carousel-caption p {
+      font-size: 1rem;
+      margin-bottom: 15px;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+    .carousel-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent-alt));
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 4px 15px rgba(255,107,53,.4);
+    }
+    .carousel-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255,107,53,.5);
+    }
+    .carousel-prev, .carousel-next {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.8);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      font-size: 1.2rem;
+      color: var(--primary);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      transition: 0.3s;
+    }
+    .carousel-prev:hover, .carousel-next:hover {
+      background: white;
+      transform: translateY(-50%) scale(1.1);
+    }
+    .carousel-prev {
+      left: 15px;
+    }
+    .carousel-next {
+      right: 15px;
+    }
+    .carousel-indicators {
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+    .carousel-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .carousel-indicator.active {
+      background: white;
+      transform: scale(1.2);
+    }
 
     /* Section shell */
     .container {max-width: 1200px;margin: 0 auto;padding: 20px 15px}
@@ -159,7 +261,7 @@
 
     /* Product grid */
     .grid {display: grid;grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));gap: 20px}
-    .card {background: var(--card);border-radius: 14px;overflow: hidden;box-shadow: 0 10px 30px rgba(0,0,0,.07);display: flex;flex-direction: column;transition: .25s}
+    .card {background: var(--card);border-radius: 14px;overflow: hidden;box-shadow: 0 10px 30px rgba(0,0,0,.07);display: flex;flex-direction:column;transition: .25s;cursor: pointer;}
     .card:hover {transform: translateY(-8px);box-shadow: 0 20px 40px rgba(0,0,0,.12)}
     .thumb {width: 100%;aspect-ratio: 1/1;position: relative;overflow: hidden;background: #eef6ff}
     .thumb img {width: 100%;height: 100%;object-fit: cover;display: block}
@@ -172,9 +274,137 @@
     .save {background: #e8f5e9;color: var(--success);padding: 4px 6px;border-radius: 6px;font-size: .8rem;font-weight: 700;display: inline-block}
     .weights {display: flex;justify-content: space-between;background: #f7f8fa;border-radius: 10px;padding: 6px 10px;font-size: .85rem}
     .label {font-weight: 700;color: #333}
-    .desc {color: #666;font-size: .9rem;line-height: 1.5}
     .cta {margin-top: auto;background: linear-gradient(135deg, var(--whatsapp), #128c7e);color: #fff;border: none;padding: 10px;border-radius: 24px;font-weight: 800;cursor: pointer;transition: .2s;display: flex;align-items: center;justify-content: center;gap: 8px;font-size: .95rem}
     .cta:hover {transform: translateY(-2px);box-shadow: 0 6px 18px rgba(37,211,102,.35)}
+
+    /* Product Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1001;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 40px auto;
+      max-width: 800px;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: modalFadeIn 0.3s;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+    @keyframes modalFadeIn {
+      from {opacity: 0; transform: translateY(-50px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    .modal-header {
+      padding: 20px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    .close-modal {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.8rem;
+      cursor: pointer;
+      padding: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-body {
+      padding: 25px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .modal-image-container {
+      display: flex;
+      justify-content: center;
+    }
+    .modal-image {
+      width: 100%;
+      max-width: 400px;
+      height: 300px;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .modal-details {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    .modal-detail {
+      background: #f7f8fa;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .modal-detail .label {
+      font-size: 0.9rem;
+      color: #666;
+      display: block;
+      margin-bottom: 5px;
+    }
+    .modal-detail .value {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--primary);
+    }
+    .modal-description {
+      margin-bottom: 20px;
+      line-height: 1.6;
+      font-size: 1.05rem;
+      color: #444;
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 10px;
+      border-left: 4px solid var(--primary);
+    }
+    .modal-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 15px;
+    }
+    .modal-whatsapp {
+      background: linear-gradient(135deg, var(--whatsapp), #128c7e);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 30px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: 0.3s;
+      font-size: 1.1rem;
+    }
+    .modal-whatsapp:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(37,211,102,.35);
+    }
 
     /* Why choose */
     .why {background: linear-gradient(135deg, var(--section) 0%, #def3ff 100%);padding: 50px 0}
@@ -216,9 +446,45 @@
     .totop.show {opacity: 1;visibility: visible}
 
     /* Responsive */
-    @media (max-width: 992px){.hero{height:320px}.hero h1{font-size:1.8rem}.section-title{font-size:1.6rem}.steps{grid-template-columns:1fr;max-width:500px;margin:15px auto}}
-    @media (max-width: 768px){body{padding-top:110px}.header-content{flex-direction:column;align-items:center}.logo{margin-bottom:8px}.logo-img{height:50px}.logo-text{font-size:1.4rem}nav{gap:5px}nav a{padding:5px 10px;font-size:.85rem}.hero{height:280px}.hero h1{font-size:1.6rem}.hero p{font-size:.95rem}.section-title{font-size:1.5rem;margin:15px 0 25px}.section-title:after{width:60px;bottom:-10px}.grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}.why .box{padding:20px 15px;font-size:.95rem}.faq-wrap{padding:40px 0}.q{padding:12px;font-size:.95rem}.a{padding:12px;font-size:.9rem}footer{padding:25px 15px}}
-    @media (max-width: 480px){body{padding-top:120px}.hero{height:250px}.hero h1{font-size:1.4rem}.hero p{font-size:.9rem}.hero-btn{padding:10px 20px;font-size:.95rem}.section-title{font-size:1.3rem}.filters{gap:5px}.filter-btn{padding:6px 12px;font-size:.85rem}.grid{grid-template-columns:1fr;gap:12px}.card{max-width:300px;margin:0 auto}.step{padding:18px 15px}.step h3{font-size:1.1rem}.step p{font-size:.9rem}.newsletter input,.newsletter button{font-size:.9rem}.social a{font-size:1.1rem}.wafloat{width:50px;height:50px;font-size:1.3rem}.totop{width:40px;height:40px;font-size:1rem;bottom:80px}}
+    @media (max-width: 992px){
+      .section-title{font-size:1.6rem}.steps{grid-template-columns:1fr;max-width:500px;margin:15px auto}
+      .carousel-slide img { height: 300px; }
+      .carousel-caption h3 { font-size: 1.3rem; }
+      .modal-content { max-width: 90%; }
+    }
+    @media (max-width: 768px){
+      body{padding-top:110px}.header-content{flex-direction:column;align-items:center}.logo{margin-bottom:8px}.logo-img{height:50px}.logo-text{font-size:1.4rem}nav{gap:5px}nav a{padding:5px 10px;font-size:.85rem}.section-title{font-size:1.5rem;margin:15px 0 25px}.section-title:after{width:60px;bottom:-10px}.grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}.why .box{padding:20px 15px;font-size:.95rem}.faq-wrap{padding:40px 0}.q{padding:12px;font-size:.95rem}.a{padding:12px;font-size:.9rem}footer{padding:25px 15px}
+      .carousel-slide img { height: 250px; }
+      .carousel-caption { padding: 15px; }
+      .carousel-caption h3 { font-size: 1.2rem; margin-bottom: 5px; }
+      .carousel-caption p { font-size: 0.9rem; margin-bottom: 10px; }
+      .carousel-btn { padding: 8px 16px; font-size: 0.9rem; }
+      .carousel-prev, .carousel-next { width: 35px; height: 35px; font-size: 1rem; }
+      .modal-content { margin: 20px auto; max-width: 95%; }
+      .modal-header { padding: 15px; }
+      .modal-header h2 { font-size: 1.5rem; }
+      .modal-body { padding: 20px; }
+      .modal-details { grid-template-columns: 1fr; }
+      .modal-image { height: 250px; max-width: 100%; }
+    }
+    @media (max-width: 480px){
+      body{padding-top:120px}.section-title{font-size:1.3rem}.filters{gap:5px}.filter-btn{padding:6px 12px;font-size:.85rem}.grid{grid-template-columns:1fr;gap:12px}.card{max-width:300px;margin:0 auto}.step{padding:18px 15px}.step h3{font-size:1.1rem}.step p{font-size:.9rem}.newsletter input,.newsletter button{font-size:.9rem}.social a{font-size:1.1rem}.wafloat{width:50px;height:50px;font-size:1.3rem}.totop{width:40px;height:40px;font-size:1rem;bottom:80px}
+      .carousel-slide img { height: 200px; }
+      .carousel-caption { padding: 10px; }
+      .carousel-caption h3 { font-size: 1.1rem; }
+      .carousel-caption p { font-size: 0.8rem; }
+      .carousel-btn { padding: 6px 12px; font-size: 0.8rem; }
+      .carousel-prev, .carousel-next { width: 30px; height: 30px; font-size: 0.9rem; }
+      .carousel-indicators { bottom: 10px; }
+      .carousel-indicator { width: 10px; height: 10px; }
+      .modal-header { padding: 12px; }
+      .modal-header h2 { font-size: 1.3rem; }
+      .modal-body { padding: 15px; }
+      .modal-image { height: 200px; }
+      .modal-detail { padding: 12px; }
+      .modal-detail .value { font-size: 1.1rem; }
+      .modal-whatsapp { padding: 12px 20px; font-size: 1rem; }
+    }
   </style>
 
   <!-- Structured Data Markup -->
@@ -228,7 +494,7 @@
     "@type": "WebSite",
     "url": "https://www.coastalfresh.in/",
     "name": "Coastal Fresh",
-    "description": "Premium fresh seafood delivery service in Hyderabad offering fish, prawns, and crabs with next-day delivery",
+    "description": "Premium fresh seafood and authentic pickles delivery service in Hyderabad offering fish, prawns, crabs, and pickles with next-day delivery",
     "potentialAction": {
       "@type": "SearchAction",
       "target": "https://www.coastalfresh.in/#products",
@@ -255,24 +521,56 @@
     </div>
   </header>
 
-  <!-- Hero -->
-  <section class="hero" role="banner" aria-label="Premium seafood delivery hero">
-    <h1>Fresh Seafood Delivered to Your Doorstep in Hyderabad</h1>
-    <p>Premium quality fish, prawns & crabs with next-day delivery across Hyderabad. Sourced fresh daily from Coastal Andhra Pradesh.</p>
-    <button class="hero-btn" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})" aria-label="Browse our seafood products">
-      <i class="fas fa-fish" aria-hidden="true"></i> Browse Products
-    </button>
+  <!-- Carousel Banner Section -->
+  <section id="carousel" class="carousel-container" aria-label="Promotional banners">
+    <div class="carousel">
+      <!-- Banner 1 -->
+      <div class="carousel-slide">
+        <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756371209/Banner_1_virxbd.png" alt="Fresh seafood delivery in Hyderabad" loading="lazy">
+        <div class="carousel-caption">
+          <h3>Fresh From The Coast to your Door</h3>
+          <p>Premium quality seafood delivered to your doorstep</p>
+          <button class="carousel-btn" onclick="trackCarouselClick('banner1')">Shop Now</button>
+        </div>
+      </div>
+      <!-- Banner 2 -->
+      <div class="carousel-slide">
+        <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756371718/Banner2_1_tzmz71.png" alt="Special offers on fish" loading="lazy">
+        <div class="carousel-caption">
+          <h3>Special Offers This Week</h3>
+          <p>Get 10% off on selected Sea food varieties</p>
+          <button class="carousel-btn" onclick="trackCarouselClick('banner2')">View Offers</button>
+        </div>
+      </div>
+      <!-- Banner 3 -->
+      <div class="carousel-slide">
+        <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756371209/Banner_3_cswmpx.png" alt="Fresh tiger prawns available" loading="lazy">
+        <div class="carousel-caption">
+          <h3>Fresh Water Prawns</h3>
+          <p>Now available in multiple sizes</p>
+          <button class="carousel-btn" onclick="trackCarouselClick('banner3')">Order Now</button>
+        </div>
+      </div>
+    </div>
+    <button class="carousel-prev" aria-label="Previous slide">&#10094;</button>
+    <button class="carousel-next" aria-label="Next slide">&#10095;</button>
+    <div class="carousel-indicators">
+      <div class="carousel-indicator active" data-index="0"></div>
+      <div class="carousel-indicator" data-index="1"></div>
+      <div class="carousel-indicator" data-index="2"></div>
+    </div>
   </section>
 
   <!-- Products -->
   <section class="container" id="products" itemscope itemtype="https://schema.org/ItemList">
-    <h2 class="section-title">Premium Seafood Selection</h2>
-    <p style="text-align:center;margin-bottom:20px;">We offer the freshest seafood delivered straight to your home across Hyderabad</p>
+    <h1 class="section-title">Premium Seafood & Pickles Selection</h1>
+    <p style="text-align:center;margin-bottom:20px;">We offer the freshest seafood and authentic pickles delivered straight to your home across Hyderabad</p>
     <div class="filters" role="tablist" aria-label="Category filters">
-      <button class="filter-btn active" data-cat="all" aria-pressed="true">All Seafood</button>
+      <button class="filter-btn active" data-cat="all" aria-pressed="true">All Products</button>
       <button class="filter-btn" data-cat="Fish" aria-pressed="false">Fish</button>
       <button class="filter-btn" data-cat="Prawns" aria-pressed="false">Prawns</button>
       <button class="filter-btn" data-cat="Crabs" aria-pressed="false">Crabs</button>
+      <button class="filter-btn" data-cat="Pickles" aria-pressed="false">Pickles</button>
     </div>
     <div id="grid" class="grid" aria-live="polite"></div>
 
@@ -306,19 +604,62 @@
         <li>Blue Crab – ₹585/kg (Save 10%)</li>
         <li>Manda Pitha – ₹540/kg (Save 10%)</li>
         <li>3 Dot Crab – ₹450/kg (Save 10%)</li>
+        <li>Prawns Pickle – ₹350/jar</li>
+        <li>Chickee Pickle – ₹320/jar</li>
+        <li>Fish Pickle – ₹380/jar</li>
+        <li>Mutton Pickle – ₹420/jar</li>
       </ul>
       <p>To order, WhatsApp us at <a href="https://wa.me/919985125678">+91 99851 25678</a>.</p>
     </noscript>
   </section>
+
+  <!-- Product Modal -->
+  <div id="productModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modalTitle">Product Name</h2>
+        <button class="close-modal" aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-image-container">
+          <img id="modalImage" src="" alt="" class="modal-image">
+        </div>
+        <div class="modal-details">
+          <div class="modal-detail">
+            <span class="label">Price</span>
+            <span class="value" id="modalPrice"></span>
+          </div>
+          <div class="modal-detail">
+            <span class="label">Discount</span>
+            <span class="value" id="modalDiscount"></span>
+          </div>
+          <div class="modal-detail">
+            <span class="label">Gross Weight</span>
+            <span class="value" id="modalGross"></span>
+          </div>
+          <div class="modal-detail">
+            <span class="label">Net Weight</span>
+            <span class="value" id="modalNet"></span>
+          </div>
+        </div>
+        <div class="modal-description" id="modalDescription"></div>
+        <div class="modal-actions">
+          <button class="modal-whatsapp" id="modalWhatsApp">
+            <i class="fab fa-whatsapp"></i> Order on WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Why choose -->
   <section class="why" id="why">
     <div class="container">
       <h2 class="section-title">Why Choose Coastal Fresh?</h2>
       <div class="box">
-        <p>At Coastal Fresh, we deliver premium, fresh seafood sourced daily from the coastal waters of Andhra Pradesh and trusted farms. From fish, prawns and crabs to specialty catches — we bring the best of the coast to your kitchen in Hyderabad.</p>
-        <p>With a strong focus on <strong>quality, hygiene and sustainability</strong>, we work closely with local fishers and farmers to ensure every order is responsibly sourced, cleaned, and packed with care.</p>
-        <p>We're committed to sustainable practices that protect marine ecosystems and support coastal communities — without compromising on freshness or taste.</p>
+        <p>At Coastal Fresh, we bridge heritage and innovation. With roots in generations of aquaculture and over 20+ years of farming experience, we’ve grown from tradition into a modern retail brand.</p>
+        <p>From responsibly sourced prawns, fish, and crabs to specialty coastal catches, every order is fresh, hygienic, and sustainably packed — ensuring authentic taste and top quality.</p>
+        <p>Our mission is to make fresh, premium seafood accessible to every home in Hyderabad — delivering trust, freshness, and care straight from the coast to your door.</p>
       </div>
     </div>
   </section>
@@ -332,19 +673,19 @@
           <div class="step-num">1</div>
           <i class="fas fa-list-ul" aria-hidden="true"></i>
           <h3>Browse & Select</h3>
-          <p>Pick from our curated list of fresh fish, prawns, and crabs. Prices are updated daily based on the catch.</p>
+          <p>Choose from our curated range of fresh fish, prawns, crabs, and authentic pickles. Prices are updated daily based on catch availability.</p>
         </div>
         <div class="step" role="listitem">
           <div class="step-num">2</div>
           <i class="fab fa-whatsapp" aria-hidden="true"></i>
           <h3>Order on WhatsApp</h3>
-          <p>Tap "Order Now" on any product. We confirm availability, cleaning preference, and delivery slot.</p>
+          <p>Tap “Order Now” on any product. Our team will confirm availability, cleaning preferences, and delivery slot instantly.</p>
         </div>
         <div class="step" role="listitem">
           <div class="step-num">3</div>
           <i class="fas fa-truck" aria-hidden="true"></i>
           <h3>Next-Day Delivery</h3>
-          <p>We pack with insulated boxes and ice gel packs and deliver fresh to your doorstep across Hyderabad.</p>
+          <p>Every catch is hygienically cleaned, sustainably packed, and delivered ice-fresh to your doorstep across Hyderabad.</p>
         </div>
       </div>
     </div>
@@ -426,7 +767,7 @@
       "addressCountry": "IN"
     },
     "areaServed": "Hyderabad",
-    "description": "Premium fresh seafood delivery service in Hyderabad offering fish, prawns, and crabs with next-day delivery",
+    "description": "Premium fresh seafood and authentic pickles delivery service in Hyderabad offering fish, prawns, crabs, and pickles with next-day delivery",
     "openingHours": "Mo-Su 08:00-20:00",
     "priceRange": "₹₹",
     "sameAs": [
@@ -456,42 +797,267 @@
 
   <!-- App Script -->
   <script>
-    // Full product catalog
+    /* ===========================
+       Coastal Fresh – App Script
+       - 30 products with SEO fields
+       - Dynamic meta title & description on modal open
+       =========================== */
+
+    // --- Product catalog (with metaTitle & metaDesc) ---
     const products = [
-      {id:1,  name:"White Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577561/White_Pomfret_xliykk.png", mrp:800, finalPrice:720, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Fresh white pomfret sourced responsibly and hygienically packed."},
-      {id:2,  name:"Black Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Black_Pomfret_v14evb.png", mrp:750, finalPrice:675, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Firm texture and clean taste — great for fry and grill."},
-      {id:3,  name:"Sea Bass", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577561/Sea_Bass_oawfrs.png", mrp:750, finalPrice:675, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Premium sea bass, ideal for curries and grills."},
-      {id:4,  name:"Yellowfin Tuna", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577561/Yellowfin_Tuna_fsdwbu.png", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Meaty steaks with rich flavor."},
-      {id:5,  name:"Pink Perch", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577557/Pink_Perch_ybwhhi.png", mrp:380, finalPrice:342, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Delicate pink perch with mild flavor."},
-      {id:6,  name:"Koyyinga", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/koyyangi_si2oss.png", mrp:450, finalPrice:405, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Locally popular and tasty."},
-      {id:7,  name:"Kanagadathalu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Katte_Parigelu_lnxp73.png", mrp:480, finalPrice:432, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Versatile & flavorful — a classic."},
-      {id:8,  name:"Vanjaram (Seer)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Vanjaram_kl2iul.png", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Premium seer fish, cut and packed fresh."},
-      {id:9,  name:"Nettallu (Anchovies)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/Nethallu_rckaaj.png", mrp:250, finalPrice:225, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Perfect for fries and curries."},
-      {id:10, name:"Katte Parigelu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Katte_Parigelu_lnxp73.png", mrp:350, finalPrice:315, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Tasty and cleaned — ready to cook."},
-      {id:11, name:"Rohu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rohu_ctixmk.png", mrp:250, finalPrice:225, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Freshwater rohu from trusted sources."},
-      {id:12, name:"Rupchand", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rupchand_Fish_woqmzz.png", mrp:250, finalPrice:225, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Great value and taste."},
-      {id:13, name:"Catla", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Catla_-_Fish_tjb5hr.png", mrp:270, finalPrice:243, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Ideal for home cooking."},
-      {id:14, name:"Korameenu (Murrel)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577555/Korameenu_dkpfiw.png", mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"900g", available:true,  category:"Fish", desc:"Regional favourite — firm and tasty."},
-      {id:15, name:"Sea Tiger Prawns - 20C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:750, finalPrice:675, offer:10, gross:"1000g", net:"900g", available:true,  category:"Prawns", desc:"20-count sea tiger prawns, firm & juicy."},
-      {id:16, name:"Sea Tiger Prawns - 40C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:650, finalPrice:585, offer:10, gross:"1000g", net:"900g", available:true,  category:"Prawns", desc:"40-count tiger prawns — cleaned and deveined."},
-      {id:17, name:"Sea Tiger Prawns - 60C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"900g", available:true,  category:"Prawns", desc:"Great for fries and curries."},
-      {id:18, name:"Chakuroyya / Godavari", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:480, finalPrice:432, offer:10, gross:"1000g", net:"900g", available:true,  category:"Prawns", desc:"Popular Godavari freshwater prawns."},
-      {id:19, name:"Freshwater Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:390, finalPrice:380, offer:0, gross:"1000g", net:"900g", available:true,  category:"Prawns", desc:"Small size, cleaned and fresh."},
-      {id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577554/Fresh_Water_Prawns_-_M_lpvxiu.png", mrp:550, finalPrice:520, offer:0, gross:"1000g", net:"900g", available:true,  category:"Prawns", desc:"Medium size, hygienically packed."},
-      {id:21, name:"Freshwater Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/fresh_watre_prawns_-_L_h5fyn9.png", mrp:770, finalPrice:720, offer:0, gross:"1000g", net:"900g", available:true,  category:"Prawns", desc:"Large size, firm and flavorful."},
-      {id:22, name:"Live Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:1000, finalPrice:900, offer:10, gross:"1000g", net:"900g", available:true,  category:"Crabs", desc:"Live coastal crabs — best for masala."},
-      {id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:900, finalPrice:810, offer:10, gross:"1000g", net:"900g", available:true,  category:"Crabs", desc:"Crabs with roe — rich and flavorful."},
-      {id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577552/Blue_Crab_tzjkxm.png", mrp:650, finalPrice:585, offer:10, gross:"1000g", net:"900g", available:true,  category:"Crabs", desc:"Sweet meat and great taste."},
-      {id:25, name:"Manda Pitha", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:600, finalPrice:540, offer:10, gross:"1000g", net:"900g", available:true,  category:"Crabs", desc:"Special variety from Godavari."},
-      {id:26, name:"3 Dot Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png", mrp:500, finalPrice:450, offer:10, gross:"1000g", net:"900g", available:true,  category:"Crabs", desc:"Unique 3-dot crab — soft shell & sweet meat."}
+      {
+        id:1, name:"White Pomfret",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577561/White_Pomfret_xliykk.png",
+        mrp:800, finalPrice:720, offer:10, gross:"1000g", net:"900g", available:true, category:"Fish",
+        desc:"Buy White Pomfret online in Hyderabad – premium coastal fish with mild taste and firm flesh. Perfect for fry, grill, or curry. Hygienically cleaned and delivered fresh next day.",
+        metaTitle:"Buy Fresh White Pomfret Fish Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Order premium White Pomfret fish in Hyderabad. Mild taste, firm flesh, hygienically packed, next-day delivery. Great for curry, fry, or grill."
+      },
+      {
+        id:2, name:"Black Pomfret",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Black_Pomfret_v14evb.png",
+        mrp:750, finalPrice:675, offer:10, gross:"1000g", net:"900g", available:true, category:"Fish",
+        desc:"Order Black Pomfret in Hyderabad – firm texture, rich flavor, and ideal for spicy Andhra fish curry, grills, and fries. Packed fresh and delivered with care by Coastal Fresh.",
+        metaTitle:"Buy Black Pomfret Fish Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Fresh Black Pomfret delivery in Hyderabad – firm texture, rich flavor, perfect for curry or grill. Hygienically packed, next-day home delivery."
+      },
+      {
+        id:3, name:"Sea Bass",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577561/Sea_Bass_oawfrs.png",
+        mrp:750, finalPrice:675, offer:10, gross:"1000g", net:"900g", available:true, category:"Fish",
+        desc:"Fresh Sea Bass fish delivery in Hyderabad – mild flavor, firm texture, and nutrient-rich. Great for curries, grills, or pan-seared dishes. Cleaned and delivered ice-fresh.",
+        metaTitle:"Buy Fresh Sea Bass Fish Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Premium Sea Bass fish in Hyderabad. Mild flavor, firm flaky texture, rich in protein. Perfect for curry or grill. Fresh, clean, and next-day delivery."
+      },
+      {
+        id:4, name:"Yellowfin Tuna",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577561/Yellowfin_Tuna_fsdwbu.png",
+        mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"900g", available:true, category:"Fish",
+        desc:"Buy Yellowfin Tuna steaks in Hyderabad – meaty cuts, rich taste, and perfect for grilling, searing, or curry. High in protein and omega-3, packed fresh and delivered fast.",
+        metaTitle:"Buy Yellowfin Tuna Fish Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Order Yellowfin Tuna in Hyderabad – meaty steaks, rich ocean flavor. Ideal for curry, grills, or sushi. Hygienically packed and delivered fresh."
+      },
+      {
+        id:5, name:"Pink Perch",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577557/Pink_Perch_ybwhhi.png",
+        mrp:380, finalPrice:342, offer:10, gross:"1000g", net:"900g", available:true, category:"Fish",
+        desc:"Order Pink Perch fish – soft flesh, mild taste, and budget-friendly. Great for crispy fry, tangy curry, or homely meals. Sourced daily and hygienically packed for Hyderabad delivery.",
+        metaTitle:"Buy Fresh Pink Perch Fish Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Pink Perch fish delivery in Hyderabad – mild taste, soft flesh, perfect for fry or curry. Affordable, hygienically packed, and next-day delivery."
+      },
+      {
+        id:6, name:"Koyyinga",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/koyyangi_si2oss.png",
+        mrp:450, finalPrice:405, offer:10, gross:"1000g", net:"900g", available:true, category:"Fish",
+        desc:"Fresh Koyyinga fish online – Andhra favorite with bold flavor and firm texture. Perfect for spicy curries or deep-fried recipes. Delivered fresh across Hyderabad.",
+        metaTitle:"Buy Koyyinga Fish Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Koyyinga fish in Hyderabad – bold flavor, firm texture, great for Andhra curry or fry. Freshly sourced, hygienically packed, next-day delivery."
+      },
+      {
+        id:7, name:"Kanagadathalu",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Katte_Parigelu_lnxp73.png",
+        mrp:480, finalPrice:432, offer:10, gross:"1000g", net:"900g", available:true, category:"Fish",
+        desc:"Kanagadathalu fish delivery – coastal classic with versatile flavor. Suited for curry, grills, or fry. Responsibly sourced and delivered fresh by Coastal Fresh in Hyderabad.",
+        metaTitle:"Buy Kanagadathalu Fish Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Order Kanagadathalu fish in Hyderabad – versatile taste, perfect for curry or fry. Freshly sourced, cleaned, and delivered with care."
+      },
+      {
+        id:8, name:"Vanjaram (Seer)",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Vanjaram_kl2iul.png",
+        mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"900g", available:true, category:"Fish",
+        desc:"Buy Vanjaram Seer Fish in Hyderabad – king of South Indian seafood with boneless cuts, rich taste, and firm flesh. Ideal for fry or curry. Packed fresh and delivered next day.",
+        metaTitle:"Buy Vanjaram Seer Fish Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Vanjaram (Seer) fish delivery in Hyderabad – premium boneless cuts, rich taste. Perfect for Andhra fry or curry. Hygienically packed and delivered."
+      },
+      {
+        id:9, name:"Nettallu (Anchovies)",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/Nethallu_rckaaj.png",
+        mrp:250, finalPrice:225, offer:10, gross:"1000g", net:"900g", available:true, category:"Fish",
+        desc:"Anchovies (Nettallu) online – tiny fish with bold taste. Excellent for crispy fry, chutneys, or tamarind curry. Calcium and omega-3 rich, delivered fresh in Hyderabad.",
+        metaTitle:"Buy Nettallu Anchovies Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Fresh Anchovies (Nettallu) in Hyderabad – bold flavor, rich in calcium and omega-3. Great for fry or curry. Next-day delivery by Coastal Fresh."
+      },
+      {
+        id:10, name:"Katte Parigelu",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Katte_Parigelu_lnxp73.png",
+        mrp:350, finalPrice:315, offer:10, gross:"1000g", net:"900g", available:true, category:"Fish",
+        desc:"Katte Parigelu fish delivery – tasty, tender, and ready-to-cook. Suited for coastal curries and deep-fry recipes. Fresh catch delivered to your Hyderabad doorstep.",
+        metaTitle:"Buy Katte Parigelu Fish Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Katte Parigelu fish in Hyderabad – tasty coastal fish, great for fry or curry. Freshly sourced and hygienically packed for next-day delivery."
+      },
+      {
+        id:11, name:"Rohu",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rohu_ctixmk.png",
+        mrp:250, finalPrice:225, offer:10, gross:"1000g", net:"900g", available:true, category:"Fish",
+        desc:"Buy Rohu fish online in Hyderabad – freshwater favorite with mild taste. Perfect for Bengali or Andhra curries, fry, or homely meals. Packed hygienically for freshness.",
+        metaTitle:"Buy Fresh Rohu Fish Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Fresh Rohu fish in Hyderabad – mild taste, freshwater favorite for curry or fry. Hygienically cleaned, responsibly sourced, next-day home delivery."
+      },
+      {
+        id:12, name:"Rupchand",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rupchand_Fish_woqmzz.png",
+        mrp:250, finalPrice:225, offer:10, gross:"1000g", net:"900g", available:true, category:"Fish",
+        desc:"Order Rupchand fish in Hyderabad – affordable, mild-flavored, and versatile. Ideal for everyday curries or fry dishes. Fresh catch, cleaned and delivered across the city.",
+        metaTitle:"Buy Rupchand Fish Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Order Rupchand fish in Hyderabad – mild, versatile, great for daily curries and fry. Cleaned, packed with care, and delivered fresh the next day."
+      },
+      {
+        id:13, name:"Catla",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Catla_-_Fish_tjb5hr.png",
+        mrp:270, finalPrice:243, offer:10, gross:"1000g", net:"900g", available:true, category:"Fish",
+        desc:"Catla fish delivery in Hyderabad – freshwater fish with large cuts and tasty flesh. Popular for Andhra fish curry, fry, or homestyle meals. Hygienically processed and packed.",
+        metaTitle:"Buy Catla Fish Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Fresh Catla fish in Hyderabad – large cuts, tasty flesh, perfect for Andhra fish curry or fry. Hygienically processed with next-day delivery."
+      },
+      {
+        id:14, name:"Korameenu (Murrel)",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577555/Korameenu_dkpfiw.png",
+        mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"900g", available:true, category:"Fish",
+        desc:"Fresh Korameenu Murrel fish – prized Andhra delicacy with firm flesh and rich taste. Ideal for spicy fry and traditional curry. Delivered ice-packed across Hyderabad.",
+        metaTitle:"Buy Korameenu (Murrel) Fish Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Korameenu (Murrel) in Hyderabad – firm flesh, rich taste, Andhra specialty for spicy fry & curries. Cleaned, ice-packed, and delivered next day."
+      },
+      {
+        id:15, name:"Sea Tiger Prawns - 20C",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png",
+        mrp:750, finalPrice:675, offer:10, gross:"1000g", net:"900g", available:true, category:"Prawns",
+        desc:"Buy Sea Tiger Prawns 20-count – large, juicy, and premium. Perfect for grills, biryani, or curry. Cleaned, deveined, and delivered fresh to your Hyderabad home.",
+        metaTitle:"Buy Sea Tiger Prawns 20C Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Large 20-count Tiger Prawns – juicy, cleaned & deveined. Ideal for grill, biryani, or curry. Fresh coastal supply with next-day Hyderabad delivery."
+      },
+      {
+        id:16, name:"Sea Tiger Prawns - 40C",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png",
+        mrp:650, finalPrice:585, offer:10, gross:"1000g", net:"900g", available:true, category:"Prawns",
+        desc:"Medium Sea Tiger Prawns 40-count – sweet flavor, cleaned and ready to cook. Ideal for curries, fry, or stir-fries. Freshly sourced and delivered across Hyderabad.",
+        metaTitle:"Buy Sea Tiger Prawns 40C Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Medium 40-count Tiger Prawns – sweet flavor, ready to cook. Great for curries, stir-fries & fry. Hygienic pack, fast delivery in Hyderabad."
+      },
+      {
+        id:17, name:"Sea Tiger Prawns - 60C",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png",
+        mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"900g", available:true, category:"Prawns",
+        desc:"Sea Tiger Prawns 60-count – smaller size, big on flavor. Perfect for masala curry, fried rice, or snacks. Cleaned and delivered hygienically in Hyderabad.",
+        metaTitle:"Buy Sea Tiger Prawns 60C Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Small 60-count Tiger Prawns – full of flavor, perfect for masala, fried rice & snacks. Cleaned, fresh, next-day delivery across Hyderabad."
+      },
+      {
+        id:18, name:"Chakuroyya / Godavari",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg",
+        mrp:480, finalPrice:432, offer:10, gross:"1000g", net:"900g", available:true, category:"Prawns",
+        desc:"Godavari Chakuroyya freshwater prawns – authentic Andhra taste with sweet flavor. Perfect for traditional prawn curry or fry. Delivered fresh and cleaned in Hyderabad.",
+        metaTitle:"Buy Godavari Chakuroyya Prawns Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Authentic Godavari freshwater prawns – sweet Andhra taste for traditional curry or fry. Farm-fresh, cleaned, and delivered across Hyderabad."
+      },
+      {
+        id:19, name:"Freshwater Prawns - S",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg",
+        mrp:390, finalPrice:380, offer:0, gross:"1000g", net:"900g", available:true, category:"Prawns",
+        desc:"Small Freshwater Prawns – affordable, cleaned, and ready to cook. Great for prawn fry, biryani, or curries. Fresh from farms, delivered across Hyderabad.",
+        metaTitle:"Buy Freshwater Prawns (Small) Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Small freshwater prawns – affordable, cleaned & ready. Ideal for prawn fry, biryani & curries. Farm-fresh with next-day delivery in Hyderabad."
+      },
+      {
+        id:20, name:"Freshwater Prawns - M",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577554/Fresh_Water_Prawns_-_M_lpvxiu.png",
+        mrp:550, finalPrice:520, offer:0, gross:"1000g", net:"900g", available:true, category:"Prawns",
+        desc:"Medium Freshwater Prawns – balanced size, firm flesh, and great for grills, curries, or pasta. Hygienically cleaned and delivered ice-fresh in Hyderabad.",
+        metaTitle:"Buy Freshwater Prawns (Medium) Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Medium freshwater prawns – firm texture, versatile for grills, curries & pasta. Hygienically packed and delivered ice-fresh in Hyderabad."
+      },
+      {
+        id:21, name:"Freshwater Prawns - L",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/fresh_watre_prawns_-_L_h5fyn9.png",
+        mrp:770, finalPrice:720, offer:0, gross:"1000g", net:"900g", available:true, category:"Prawns",
+        desc:"Large Freshwater Prawns – premium size, juicy texture, and perfect for butter garlic, grills, or party dishes. Farm fresh and delivered across Hyderabad.",
+        metaTitle:"Buy Freshwater Prawns (Large) Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Large freshwater prawns – premium size, juicy texture. Perfect for butter-garlic, grills & party dishes. Farm-fresh, next-day Hyderabad delivery."
+      },
+      {
+        id:22, name:"Live Crab",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png",
+        mrp:1000, finalPrice:900, offer:10, gross:"1000g", net:"900g", available:true, category:"Crabs",
+        desc:"Buy Live Crab in Hyderabad – delivered live, ensuring top freshness. Sweet meat, great for masala, curry, or steam. Hygienically packed and farm-sourced.",
+        metaTitle:"Buy Live Crab Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Live crabs delivered in Hyderabad – sweetest meat for masala, curry or steam. Sourced fresh, hygienically packed, delivered fast to your door."
+      },
+      {
+        id:23, name:"Egg Crab",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png",
+        mrp:900, finalPrice:810, offer:10, gross:"1000g", net:"900g", available:true, category:"Crabs",
+        desc:"Egg Crab delivery – crabs with roe (eggs) for rich, creamy flavor. Popular in traditional Andhra crab curry. Fresh, sweet meat delivered hygienically across Hyderabad.",
+        metaTitle:"Buy Egg Crab (Roe) Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Egg Crab with roe – rich, creamy flavor for Andhra crab curry. Fresh, sweet meat, hygienically packed and delivered across Hyderabad."
+      },
+      {
+        id:24, name:"Blue Crab",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577552/Blue_Crab_tzjkxm.png",
+        mrp:650, finalPrice:585, offer:10, gross:"1000g", net:"900g", available:true, category:"Crabs",
+        desc:"Fresh Blue Crab delivery – delicate, sweet meat, smaller in size but packed with flavor. Great for curry, soups, and stir-fries. Delivered ice-packed in Hyderabad.",
+        metaTitle:"Buy Blue Crab Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Blue crabs – delicate, sweet meat, perfect for curries, soups & stir-fries. Fresh coastal catch, ice-packed, next-day delivery in Hyderabad."
+      },
+      {
+        id:25, name:"Manda Pitha",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png",
+        mrp:600, finalPrice:540, offer:10, gross:"1000g", net:"900g", available:true, category:"Crabs",
+        desc:"Manda Pitha crab – Godavari special variety, highly flavorful and tender. Ideal for spicy masala curries. Freshly sourced and delivered to Hyderabad homes.",
+        metaTitle:"Buy Manda Pitha Crab Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Godavari’s Manda Pitha crab – specialty variety with unique flavor. Ideal for spicy masala curry. Freshly sourced and delivered across Hyderabad."
+      },
+      {
+        id:26, name:"3 Dot Crab",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png",
+        mrp:500, finalPrice:450, offer:10, gross:"1000g", net:"900g", available:true, category:"Crabs",
+        desc:"3 Dot Crab delivery – unique shell markings, soft meat, and sweet taste. Perfect for fry or curry recipes. Delivered fresh and cleaned in Hyderabad.",
+        metaTitle:"Buy 3 Dot Crab Online in Hyderabad | Coastal Fresh",
+        metaDesc:"3 Dot crab – soft, sweet meat with unique shell marks. Great for fry or curry recipes. Cleaned and delivered fresh in Hyderabad."
+      },
+      {
+        id:27, name:"Prawns Pickle",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png",
+        mrp:350, finalPrice:350, offer:0, gross:"500g", net:"500g", available:true, category:"Pickles",
+        desc:"Authentic Andhra Prawns Pickle – made with fresh prawns, cold-pressed oil, and stone-ground spices. Spicy, tangy, and preservative-free. Delivered across Hyderabad.",
+        metaTitle:"Buy Andhra Prawns Pickle Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Authentic Andhra prawns pickle – fresh prawns, cold-pressed oil, stone-ground spices. Spicy & tangy, preservative-free. Home delivery in Hyderabad."
+      },
+      {
+        id:28, name:"Chickee Pickle",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/koyyangi_si2oss.png",
+        mrp:320, finalPrice:320, offer:0, gross:"500g", net:"500g", available:true, category:"Pickles",
+        desc:"Traditional Chickee (small fish) Pickle – authentic Andhra recipe with bold spices and fresh catch. Rich in calcium and omega-3. Perfect with hot rice, delivered in Hyderabad.",
+        metaTitle:"Buy Chickee Fish Pickle Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Traditional Chickee (small fish) pickle – bold spices, calcium & omega-3 rich. Perfect with hot rice. Fresh jars delivered in Hyderabad."
+      },
+      {
+        id:29, name:"Fish Pickle",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577561/White_Pomfret_xliykk.png",
+        mrp:380, finalPrice:380, offer:0, gross:"500g", net:"500g", available:true, category:"Pickles",
+        desc:"Andhra Fish Pickle – made with firm fish pieces, slow-cooked in spices, garlic, and oil. Rich, robust flavor, preservative-free, and home-style taste. Delivered fresh jars in Hyderabad.",
+        metaTitle:"Buy Fish Pickle Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Premium fish pickle – firm fish pieces slow-cooked in Andhra spices. Robust, home-style flavor; preservative-free. Doorstep delivery in Hyderabad."
+      },
+      {
+        id:30, name:"Mutton Pickle",
+        image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Black_Pomfret_v14evb.png",
+        mrp:420, finalPrice:420, offer:0, gross:"500g", net:"500g", available:true, category:"Pickles",
+        desc:"Premium Mutton Pickle – tender mutton pieces marinated in traditional Andhra spices. Rich, spicy, and preservative-free. Best with rice, roti, or curd. Delivered in Hyderabad.",
+        metaTitle:"Buy Mutton Pickle Online in Hyderabad | Coastal Fresh",
+        metaDesc:"Tender mutton pickle – marinated in traditional Andhra spices. Rich & spicy, preservative-free. Enjoy with rice or roti. Delivered across Hyderabad."
+      }
     ];
 
-    // Render logic
+    // --- Cached DOM refs (existing structure on page) ---
     const gridEl = document.getElementById('grid');
     const filterButtons = document.querySelectorAll('.filter-btn');
+    const modal = document.getElementById('productModal');
+    const closeModal = document.querySelector('.close-modal');
+    const modalWhatsApp = document.getElementById('modalWhatsApp');
 
-    function currency(n){return `₹${Number(n).toLocaleString('en-IN')}`}
+    // --- Helpers ---
+    function currency(n){ return `₹${Number(n).toLocaleString('en-IN')}`; }
 
+    // --- Render product grid ---
     function render(list){
       gridEl.innerHTML = '';
       list.forEach(p=>{
@@ -507,27 +1073,33 @@
           <div class="info">
             <h3 class="title" itemprop="name">${p.name}</h3>
             <div class="price-row">
-              <span class="mrp">${currency(p.mrp)}</span>
+              <span class="mrp">${p.offer ? currency(p.mrp) : ''}</span>
               <span class="price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
                 <meta itemprop="priceCurrency" content="INR" />
                 <span itemprop="price">${p.finalPrice}</span>
               </span>
-              <span class="per">per kg</span>
+              <span class="per">${p.category === 'Pickles' ? 'per jar' : 'per kg'}</span>
             </div>
             ${p.offer ? `<span class="save">Save ${currency(discount)} (${p.offer}% off)</span>`:''}
             <div class="weights">
               <span><span class="label">Gross:</span> ${p.gross}</span>
               <span><span class="label">Net:</span> ${p.net}</span>
             </div>
-            <p class="desc" itemprop="description">${p.desc}</p>
             <button class="cta" onclick="orderWhatsApp('${encodeURIComponent(p.name)}', ${p.finalPrice}, '${p.net}', ${p.offer||0}, ${p.mrp})" aria-label="Order ${p.name} on WhatsApp">
               <i class="fab fa-whatsapp" aria-hidden="true"></i> Order Now
             </button>
           </div>`;
+        // Click to open modal (ignore WhatsApp button)
+        card.addEventListener('click', (e) => {
+          if (!e.target.closest('.cta')) {
+            showProductModal(p);
+          }
+        });
         gridEl.appendChild(card);
       });
     }
 
+    // --- Filters ---
     function applyFilter(cat){
       filterButtons.forEach(b=>{
         const isActive = b.dataset.cat===cat || (cat==='all' && b.dataset.cat==='all');
@@ -543,39 +1115,154 @@
       btn.addEventListener('keyup', (e)=>{ if(e.key==='Enter' || e.key===' '){applyFilter(btn.dataset.cat)} });
     });
 
-    // WhatsApp ordering
+    // --- Dynamic META injection (Title + Description) ---
+    const DEFAULT_TITLE = "Buy Fresh Fish, Prawns, Crabs & Pickles in Hyderabad | Coastal Fresh Seafood Delivery";
+    const DEFAULT_DESC  = "Order premium fresh seafood and authentic pickles in Hyderabad. Fresh fish, tiger prawns, crabs, and traditional pickles with next-day delivery. Trusted local sourcing from Coastal Andhra Pradesh.";
+
+    function updateMeta(product){
+      // <title>
+      document.title = product.metaTitle || `${product.name} | Coastal Fresh`;
+      // <meta name="description">
+      let descTag = document.querySelector('meta[name="description"]');
+      if (!descTag) {
+        descTag = document.createElement('meta');
+        descTag.setAttribute('name','description');
+        document.head.appendChild(descTag);
+      }
+      descTag.setAttribute('content', product.metaDesc || DEFAULT_DESC);
+    }
+
+    function restoreDefaultMeta(){
+      document.title = DEFAULT_TITLE;
+      const descTag = document.querySelector('meta[name="description"]');
+      if (descTag) descTag.setAttribute('content', DEFAULT_DESC);
+    }
+
+    // --- Product Modal ---
+    function showProductModal(product) {
+      const discount = product.mrp - product.finalPrice;
+
+      document.getElementById('modalTitle').textContent = product.name;
+      document.getElementById('modalImage').src = product.image;
+      document.getElementById('modalImage').alt = product.name;
+      document.getElementById('modalPrice').textContent = `${currency(product.finalPrice)}${product.category === 'Pickles' ? '/jar' : '/kg'}`;
+      document.getElementById('modalDiscount').textContent = product.offer ? `${product.offer}% (Save ${currency(discount)})` : 'No discount';
+      document.getElementById('modalGross').textContent = product.gross;
+      document.getElementById('modalNet').textContent = product.net;
+      document.getElementById('modalDescription').textContent = product.desc;
+
+      // WhatsApp CTA
+      modalWhatsApp.onclick = () => {
+        orderWhatsApp(encodeURIComponent(product.name), product.finalPrice, product.net, product.offer||0, product.mrp);
+        closeProductModal();
+      };
+
+      // Show modal
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+
+      // 🔹 Inject product-specific meta
+      updateMeta(product);
+
+      // GA4 view event
+      if (typeof gtag === 'function') {
+        gtag('event', 'view_item', {
+          'items': [{
+            'item_id': product.id.toString(),
+            'item_name': product.name,
+            'price': product.finalPrice,
+            'item_category': product.category,
+            'currency': 'INR'
+          }]
+        });
+      }
+    }
+
+    function closeProductModal() {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+
+      // 🔹 Restore homepage meta
+      restoreDefaultMeta();
+    }
+
+    // Close modal interactions
+    closeModal.addEventListener('click', closeProductModal);
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeProductModal(); });
+
+    // --- WhatsApp ordering ---
     function orderWhatsApp(nameEnc, price, net, offer, mrp){
       const name = decodeURIComponent(nameEnc);
       const discount = mrp - price;
-      const msg =
-`🐟 *Coastal Fresh Order Inquiry*
-
-*Product:* ${name}
-*Price:* ${currency(price)} per kg
-*Net Weight:* ${net}
-${offer?`*Offer:* ${offer}% OFF (Save ${currency(discount)})`:''}
-
-Please confirm:
-• Availability
-• Delivery time
-• Cleaning/Cutting preference
-• Payment options
-
-Thank you!`;
+      const msg = `🐟 *Coastal Fresh Order Inquiry*\n\n*Product:* ${name}\n*Price:* ${currency(price)} ${name.toLowerCase().includes('pickle') ? 'per jar' : 'per kg'}\n*Net Weight:* ${net}\n${offer?`*Offer:* ${offer}% OFF (Save ${currency(discount)})\n`:''}\nPlease confirm:\n• Availability\n• Delivery time\n• Cleaning/Cutting preference (if applicable)\n• Payment options\n\nThank you!`;
       const url = `https://wa.me/919985125678?text=${encodeURIComponent(msg)}`;
       window.open(url, '_blank', 'noopener');
+
       const c = document.getElementById('waCounter');
       c.textContent = String((parseInt(c.textContent)||0)+1);
+
+      if (typeof gtag === 'function') {
+        gtag('event', 'product_order', {
+          'product_name': name,
+          'product_price': price,
+          'product_category': products.find(p => p.name === name)?.category || 'Unknown',
+          'currency': 'INR',
+          'discount': discount,
+          'offer_percentage': offer
+        });
+      }
     }
     window.openWhatsApp = ()=>orderWhatsApp(encodeURIComponent('General enquiry'),0,'','',0);
 
-    // Back to top visibility
+    // --- Carousel ---
+    function initCarousel() {
+      const carousel = document.querySelector('.carousel');
+      const slides = document.querySelectorAll('.carousel-slide');
+      const indicators = document.querySelectorAll('.carousel-indicator');
+      const prevBtn = document.querySelector('.carousel-prev');
+      const nextBtn = document.querySelector('.carousel-next');
+
+      let currentSlide = 0;
+      const slideCount = slides.length;
+
+      function updateCarousel() {
+        carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
+        indicators.forEach((indicator, index) => {
+          indicator.classList.toggle('active', index === currentSlide);
+        });
+      }
+      function nextSlide(){ currentSlide = (currentSlide + 1) % slideCount; updateCarousel(); }
+      function prevSlide(){ currentSlide = (currentSlide - 1 + slideCount) % slideCount; updateCarousel(); }
+      function goToSlide(index){ currentSlide = index; updateCarousel(); }
+
+      nextBtn.addEventListener('click', nextSlide);
+      prevBtn.addEventListener('click', prevSlide);
+      indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', () => goToSlide(index));
+      });
+
+      setInterval(nextSlide, 5000);
+    }
+
+    // --- Banner click tracking + scroll ---
+    function trackCarouselClick(bannerId) {
+      if (typeof gtag === 'function') {
+        gtag('event', 'banner_click', {
+          'banner_id': bannerId,
+          'banner_name': document.querySelector(`.carousel-slide:nth-child(${parseInt(bannerId.slice(-1))}) h3`).textContent
+        });
+      }
+      document.getElementById('products').scrollIntoView({behavior: 'smooth'});
+    }
+    window.trackCarouselClick = trackCarouselClick;
+
+    // --- Back to top ---
     const toTop = document.getElementById('toTop');
     window.addEventListener('scroll', ()=>{
       if(window.scrollY>320){toTop.classList.add('show');}else{toTop.classList.remove('show');}
     });
 
-    // FAQ toggle (a11y)
+    // --- FAQ toggle ---
     document.querySelectorAll('.faq').forEach(f=>{
       const q = f.querySelector('.q');
       q.addEventListener('click', ()=>{
@@ -584,7 +1271,7 @@ Thank you!`;
       });
     });
 
-    // Nav smooth scroll + aria-current
+    // --- Smooth nav ---
     document.querySelectorAll('nav a[href^="#"]').forEach(a=>{
       a.addEventListener('click', (e)=>{
         const id = a.getAttribute('href').slice(1);
@@ -595,10 +1282,28 @@ Thank you!`;
       });
     });
 
-    // Initial render
-    render(products);
+    // --- Init on DOM ready ---
+    document.addEventListener('DOMContentLoaded', function() {
+      render(products);
+      initCarousel();
 
-    // Product ItemList schema from source array
+      // GA4: initial product impressions
+      if (typeof gtag === 'function') {
+        products.forEach(product => {
+          gtag('event', 'view_item', {
+            'items': [{
+              'item_id': product.id.toString(),
+              'item_name': product.name,
+              'price': product.finalPrice,
+              'item_category': product.category,
+              'currency': 'INR'
+            }]
+          });
+        });
+      }
+    });
+
+    // --- Inject ItemList schema from array (unchanged) ---
     (function injectProductSchema(){
       try{
         const itemList = {
@@ -616,11 +1321,9 @@ Thank you!`;
                 "@type":"Offer",
                 "priceCurrency":"INR",
                 "price": String(p.finalPrice),
+                "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                 "availability": p.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-                "seller": {
-                  "@type": "SeafoodBusiness",
-                  "name": "Coastal Fresh"
-                }
+                "seller": { "@type": "SeafoodBusiness", "name": "Coastal Fresh" }
               }
             }
           }))
