@@ -64,6 +64,8 @@
   <!-- Coastal Fresh – Enhanced SEO + Technical Improvements -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>Buy Fresh Fish, Prawns, Crabs & Pickles in Hyderabad | Coastal Fresh Seafood Delivery</title>
   <meta name="description" content="Order premium fresh seafood and authentic pickles in Hyderabad. Fresh fish, tiger prawns, crabs, and traditional pickles with next-day delivery. Trusted local sourcing from Coastal Andhra Pradesh." />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -177,7 +179,7 @@
       overflow: hidden;
       border-radius: 0;
       box-shadow: none;
-      aspect-ratio: 1900/600; /* Use exact banner aspect ratio */
+      aspect-ratio: 1920/600; /* Use exact banner aspect ratio */
       background:#e9f3ff;
     }
     .carousel {display:flex;transition: transform 0.5s ease;height: 100%;}
@@ -238,6 +240,9 @@
     
     /* Cart Button */
     .add-to-cart {flex: 1; margin-top: 0; background: linear-gradient(135deg, var(--primary), var(--primary-light));color: #fff;border: none;padding: 8px 12px;border-radius: 20px;font-weight: 600;cursor: pointer;transition: .2s;display: flex;align-items: center;justify-content: center;gap: 6px;font-size: 0.85rem; min-height: 36px;} /* Added min-height for consistency */
+
+    /* Delivery Info in Cards */
+    .delivery-info-card {display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;font-size:0.75rem;color:#28a745;font-weight:600;background:#f0fff4;padding:5px 10px;border-radius:12px;border:1px dashed #28a745;}
 
     /* Show More Button */
     .show-more-container {display:flex;justify-content:center;margin:30px 0 20px;width:100%}
@@ -349,29 +354,18 @@
     .totop {position: fixed;bottom: 150px;right: 20px;width: 45px;height: 45px;background: linear-gradient(135deg, var(--primary), var(--primary-light));border-radius: 50%;display: grid;place-items: center;color: #fff;opacity: 0;visibility: hidden;transition: .2s;box-shadow: 0 5px 15px rgba(0,0,0,.1);z-index: 998;font-size: 1.2rem}
     .totop.show {opacity: 1;visibility: visible}
 
-    /* Sale Timer */
-    .sale-timer {text-align:center;margin:20px 0;padding:15px;background:linear-gradient(135deg,#ff6b35,#f7931e);border-radius:12px;color:#fff}
-    .sale-timer h3 {margin-bottom:10px;font-size:1.2rem}
-    .timer {display:flex;justify-content:center;gap:10px;font-size:1.5rem;font-weight:700}
-    .timer-unit {display:flex;flex-direction:column;align-items:center;min-width:60px}
-    .timer-value {font-size:2rem;line-height:1}
-    .timer-label {font-size:0.8rem;text-transform:uppercase;margin-top:5px}
-
     /* Responsive */
     @media (max-width: 992px){
       .section-title{font-size:1.6rem}.steps{grid-template-columns:1fr;max-width:500px;margin:15px auto}
       .carousel-container { aspect-ratio: 2.5/1; }
       .focus-safe h3{font-size:1.3rem}
       .modal-content { max-width: 90%; }
-      .timer {font-size:1.2rem}
-      .timer-value {font-size:1.6rem}
-      .timer-unit {min-width:50px}
     }
     @media (max-width: 768px){
       body{padding-top:170px}
       .header-content{flex-direction:column;align-items:center}.logo{margin-bottom:8px}.logo-img{height:50px}.logo-text{font-size:1.4rem}nav{gap:5px}nav a{padding:5px 10px;font-size:.85rem}
       .section-title{font-size:1.5rem;margin:15px 0 25px}.section-title:after{width:60px;bottom:-10px}
-      .grid{grid-template-columns:repeat(3, 1fr);gap:15px} /* 3 products in a row on mobile */
+      .grid{grid-template-columns:repeat(2, 1fr);gap:15px} /* 2 products in a row on mobile */
       .faq-wrap{padding:40px 0}.q{padding:12px;font-size:.95rem}.a{padding:12px;font-size:.9rem}
       .carousel-container { aspect-ratio: 1.5/1; margin: 0 auto; } /* Changed aspect ratio for mobile */
       .focus-safe{padding:16px}
@@ -409,9 +403,6 @@
         font-size: 0.75rem !important; /* Slightly smaller font if needed */
         padding: 6px 8px !important; /* Adjust padding for mobile */
       }
-      .timer {font-size:1rem;gap:8px}
-      .timer-value {font-size:1.4rem}
-      .timer-unit {min-width:40px}
     }
     @media (max-width: 480px){
       body{padding-top:178px}
@@ -445,10 +436,6 @@
         font-size: 0.7rem !important;
         padding: 5px 6px !important;
       }
-      .timer {font-size:0.9rem;gap:5px}
-      .timer-value {font-size:1.2rem}
-      .timer-unit {min-width:35px}
-      .timer-label {font-size:0.7rem}
     }
 
     /* Utility for hiding ticker when disabled via data attribute */
@@ -521,7 +508,7 @@
           <div class="focus-safe">
             <h3>Fresh Water Prawns</h3>
             <p>Premium quality seafood delivered to your doorstep</p>
-            <button class="carousel-btn" onclick="trackCarouselClick('banner1')">Order Now</button>
+            <button class="carousel-btn" onclick="trackCarouselClick('banner1')">Shop Now</button>
           </div>
         </div>
         <!-- Banner 2 -->
@@ -532,7 +519,7 @@
           </picture>
           <div class="focus-safe">
             <h3>Special Offers This Week</h3>
-            <p>Get 25% off on selected Products</p>
+            <p>Fresh seafood delivered to your home</p>
             <button class="carousel-btn" onclick="trackCarouselClick('banner2')">View Offers</button>
           </div>
         </div>
@@ -545,7 +532,7 @@
           <div class="focus-safe">
             <h3>Hygienically Cleaned & Packed</h3>
             <p>Delivered ice-fresh to your doorstep</p>
-            <button class="carousel-btn" onclick="trackCarouselClick('banner3')">Order Now</button>
+            <button class="carousel-btn" onclick="trackCarouselClick('banner3')">Shop Now</button>
           </div>
         </div>
       </div>
@@ -564,25 +551,6 @@
   <section class="container" id="products" itemscope itemtype="https://schema.org/ItemList">
     <h1 class="section-title">Premium Seafood & Pickles Selection</h1>
     <p style="text-align:center;margin-bottom:20px;">We offer the freshest seafood and authentic pickles delivered straight to your home across Hyderabad</p>
-    
-    <!-- Sale Timer -->
-    <div class="sale-timer">
-      <h3>🔥 FLASH SALE ENDS IN:</h3>
-      <div class="timer" id="saleTimer">
-        <div class="timer-unit">
-          <span class="timer-value" id="hours">24</span>
-          <span class="timer-label">HOURS</span>
-        </div>
-        <div class="timer-unit">
-          <span class="timer-value" id="minutes">00</span>
-          <span class="timer-label">MINS</span>
-        </div>
-        <div class="timer-unit">
-          <span class="timer-value" id="seconds">00</span>
-          <span class="timer-label">SECS</span>
-        </div>
-      </div>
-    </div>
     
     <div class="filters" role="tablist" aria-label="Category filters">
       <button class="filter-btn active" data-cat="all" aria-pressed="true">All Products</button>
@@ -680,9 +648,6 @@
           <button class="modal-add-cart" id="modalAddCart">
             <i class="fas fa-cart-plus" aria-hidden="true"></i> Add to Cart
           </button>
-          <button class="modal-whatsapp" id="modalWhatsApp">
-            <i class="fab fa-whatsapp" aria-hidden="true"></i> Order Now
-          </button>
           <button class="modal-share" id="modalShare">
             <i class="fas fa-share-alt" aria-hidden="true"></i> Share
           </button>
@@ -750,7 +715,7 @@
           <div class="step-num">2</div>
           <i class="fab fa-whatsapp" aria-hidden="true"></i>
           <h3>Order on WhatsApp</h3>
-          <p>Tap "Order Now" on any product. Our team will confirm availability, cleaning preferences, and delivery slot instantly.</p>
+          <p>Add products to cart and checkout. Our team will confirm availability, cleaning preferences, and delivery slot instantly.</p>
         </div>
         <div class="step" role="listitem">
           <div class="step-num">3</div>
@@ -977,7 +942,6 @@
     const filterButtons = document.querySelectorAll('.filter-btn');
     const modal = document.getElementById('productModal');
     const closeModal = document.querySelector('.close-modal');
-    const modalWhatsApp = document.getElementById('modalWhatsApp');
     const modalAddCart = document.getElementById('modalAddCart');
     const modalQty = document.getElementById('modalQty');
     const modalIncrease = document.getElementById('modalIncrease');
@@ -1152,7 +1116,7 @@
     }
 
     // ------- Show More -------
-    let visibleProducts = 12; // Show 12 products initially
+    let visibleProducts = 6; // Show 6 products initially
     let currentProducts = [...products];
     function currency(n){ return `₹${Number(n).toLocaleString('en-IN')}`; }
 
@@ -1188,14 +1152,15 @@
             </div>
             <div class="card-actions">
               <button class="add-to-cart" onclick="event.stopPropagation(); addToCartDirect(${p.id})" aria-label="Add ${p.name} to cart">
-                <i class="fas fa-cart-plus" aria-hidden="true"></i> Add
-              </button>
-              <button class="cta" onclick="event.stopPropagation(); orderWhatsApp('${encodeURIComponent(p.name)}', ${p.finalPrice}, '${p.net}', ${p.offer||0}, ${p.mrp})" aria-label="Order ${p.name} on WhatsApp">
-                <i class="fab fa-whatsapp" aria-hidden="true"></i> Order
+                <i class="fas fa-cart-plus" aria-hidden="true"></i> Add to Cart
               </button>
             </div>
+            <div class="delivery-info-card">
+              <i class="fas fa-motorcycle"></i>
+              <span>Tomorrow Morning Delivery</span>
+            </div>
           </div>`;
-        card.addEventListener('click', (e) => { if (!e.target.closest('.cta') && !e.target.closest('.add-to-cart')) { showProductModal(p); } });
+        card.addEventListener('click', (e) => { if (!e.target.closest('.add-to-cart')) { showProductModal(p); } });
         gridEl.appendChild(card);
       });
     }
@@ -1213,7 +1178,7 @@
     showMoreBtn.addEventListener('click', () => {
       visibleProducts += 6;
       render(currentProducts, true);
-      if (visibleProducts > 12) {
+      if (visibleProducts > 6) {
         const newProducts = gridEl.children[visibleProducts - 6];
         if (newProducts) newProducts.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
@@ -1226,7 +1191,7 @@
         b.classList.toggle('active', isActive);
         b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
       });
-      visibleProducts = 12;
+      visibleProducts = 6;
       if(cat==='all') { currentProducts = [...products]; return render(products, true); }
       currentProducts = products.filter(p=>p.category===cat);
       render(currentProducts, true);
@@ -1266,11 +1231,6 @@
       document.getElementById('modalNet').textContent = product.net;
       document.getElementById('modalDescription').textContent = product.desc;
       document.getElementById('modalQty').textContent = currentModalQty;
-
-      modalWhatsApp.onclick = () => {
-        orderWhatsApp(encodeURIComponent(product.name), product.finalPrice, product.net, product.offer||0, product.mrp);
-        closeProductModal();
-      };
 
       modalAddCart.onclick = () => {
         addToCart(product, currentModalQty);
@@ -1370,34 +1330,6 @@
       setInterval(nextSlide, 5000);
     }
 
-    // ------- Sale Timer -------
-    function startSaleTimer() {
-      const hoursElement = document.getElementById('hours');
-      const minutesElement = document.getElementById('minutes');
-      const secondsElement = document.getElementById('seconds');
-      
-      // Set the timer for 24 hours from now
-      let totalSeconds = 24 * 60 * 60;
-      
-      const timerInterval = setInterval(() => {
-        if (totalSeconds <= 0) {
-          clearInterval(timerInterval);
-          // Reset timer for another 24 hours
-          totalSeconds = 24 * 60 * 60;
-        }
-        
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        
-        hoursElement.textContent = hours.toString().padStart(2, '0');
-        minutesElement.textContent = minutes.toString().padStart(2, '0');
-        secondsElement.textContent = seconds.toString().padStart(2, '0');
-        
-        totalSeconds--;
-      }, 1000);
-    }
-
     // ------- Banner click tracking + smooth scroll -------
     function trackCarouselClick(bannerId) {
       if (typeof gtag === 'function') {
@@ -1446,7 +1378,6 @@
       // Products + carousel
       render(products, true);
       initCarousel();
-      startSaleTimer();
       
       // Initialize cart - Ensure cart is empty for new users
       if (!localStorage.getItem('coastalFreshCart')) {
