@@ -177,7 +177,7 @@
       overflow: hidden;
       border-radius: 0;
       box-shadow: none;
-      aspect-ratio: 1920/600; /* Use exact banner aspect ratio */
+      aspect-ratio: 1900/600; /* Use exact banner aspect ratio */
       background:#e9f3ff;
     }
     .carousel {display:flex;transition: transform 0.5s ease;height: 100%;}
@@ -268,6 +268,13 @@
     .modal-whatsapp:hover {transform:translateY(-2px);box-shadow:0 6px 18px rgba(37,211,102,.35)}
     .modal-add-cart {background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border:none;padding:12px 25px;border-radius:30px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.3s;font-size:1rem;flex:1;justify-content:center;max-width:300px}
     .modal-add-cart:hover {transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,119,190,.35)}
+    
+    /* Delivery Info */
+    .delivery-info {display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;font-size:0.9rem;color:#28a745;font-weight:600}
+    
+    /* Share Button */
+    .modal-share {background:linear-gradient(135deg,#6c757d,#495057);color:#fff;border:none;padding:12px 25px;border-radius:30px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.3s;font-size:1rem;flex:1;justify-content:center;max-width:300px}
+    .modal-share:hover {transform:translateY(-2px);box-shadow:0 6px 18px rgba(108,117,125,.35)}
 
     /* Cart Modal - COMPLETELY REDESIGNED (Amazon/Flipkart style) */
     .cart-modal {display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.7);z-index:1003;overflow-y:auto;padding:20px 10px}
@@ -342,18 +349,29 @@
     .totop {position: fixed;bottom: 150px;right: 20px;width: 45px;height: 45px;background: linear-gradient(135deg, var(--primary), var(--primary-light));border-radius: 50%;display: grid;place-items: center;color: #fff;opacity: 0;visibility: hidden;transition: .2s;box-shadow: 0 5px 15px rgba(0,0,0,.1);z-index: 998;font-size: 1.2rem}
     .totop.show {opacity: 1;visibility: visible}
 
+    /* Sale Timer */
+    .sale-timer {text-align:center;margin:20px 0;padding:15px;background:linear-gradient(135deg,#ff6b35,#f7931e);border-radius:12px;color:#fff}
+    .sale-timer h3 {margin-bottom:10px;font-size:1.2rem}
+    .timer {display:flex;justify-content:center;gap:10px;font-size:1.5rem;font-weight:700}
+    .timer-unit {display:flex;flex-direction:column;align-items:center;min-width:60px}
+    .timer-value {font-size:2rem;line-height:1}
+    .timer-label {font-size:0.8rem;text-transform:uppercase;margin-top:5px}
+
     /* Responsive */
     @media (max-width: 992px){
       .section-title{font-size:1.6rem}.steps{grid-template-columns:1fr;max-width:500px;margin:15px auto}
       .carousel-container { aspect-ratio: 2.5/1; }
       .focus-safe h3{font-size:1.3rem}
       .modal-content { max-width: 90%; }
+      .timer {font-size:1.2rem}
+      .timer-value {font-size:1.6rem}
+      .timer-unit {min-width:50px}
     }
     @media (max-width: 768px){
       body{padding-top:170px}
       .header-content{flex-direction:column;align-items:center}.logo{margin-bottom:8px}.logo-img{height:50px}.logo-text{font-size:1.4rem}nav{gap:5px}nav a{padding:5px 10px;font-size:.85rem}
       .section-title{font-size:1.5rem;margin:15px 0 25px}.section-title:after{width:60px;bottom:-10px}
-      .grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
+      .grid{grid-template-columns:repeat(3, 1fr);gap:15px} /* 3 products in a row on mobile */
       .faq-wrap{padding:40px 0}.q{padding:12px;font-size:.95rem}.a{padding:12px;font-size:.9rem}
       .carousel-container { aspect-ratio: 1.5/1; margin: 0 auto; } /* Changed aspect ratio for mobile */
       .focus-safe{padding:16px}
@@ -371,7 +389,7 @@
       .modal-detail .value { font-size: 1rem; }
       .modal-description { padding: 12px; font-size: 0.95rem; }
       .modal-actions { flex-direction: column; gap: 10px; }
-      .modal-whatsapp, .modal-add-cart { max-width: 100%; padding: 12px 20px; }
+      .modal-whatsapp, .modal-add-cart, .modal-share { max-width: 100%; padding: 12px 20px; }
       .ticker-item{font-size:.85rem}
       .wafloat { bottom: 20px; right: 20px; width: 50px; height: 50px; font-size: 1.3rem; }
       .cartfloat { bottom: 85px; right: 20px; width: 50px; height: 50px; font-size: 1.3rem; }
@@ -391,12 +409,16 @@
         font-size: 0.75rem !important; /* Slightly smaller font if needed */
         padding: 6px 8px !important; /* Adjust padding for mobile */
       }
+      .timer {font-size:1rem;gap:8px}
+      .timer-value {font-size:1.4rem}
+      .timer-unit {min-width:40px}
     }
     @media (max-width: 480px){
       body{padding-top:178px}
       .section-title{font-size:1.3rem}
       .filters{gap:5px}.filter-btn{padding:6px 12px;font-size:.85rem}
-      .grid{grid-template-columns:1fr;gap:12px}.card{max-width:300px;margin:0 auto}
+      .grid{grid-template-columns:repeat(2, 1fr);gap:12px} /* 2 products in a row on very small screens */
+      .card{max-width:300px;margin:0 auto}
       .carousel-container { aspect-ratio: 1.2/1; border-radius: 0; } /* Adjusted for small mobile */
       .focus-safe{padding:12px}
       .focus-safe h3{font-size:1.1rem}
@@ -423,10 +445,21 @@
         font-size: 0.7rem !important;
         padding: 5px 6px !important;
       }
+      .timer {font-size:0.9rem;gap:5px}
+      .timer-value {font-size:1.2rem}
+      .timer-unit {min-width:35px}
+      .timer-label {font-size:0.7rem}
     }
 
     /* Utility for hiding ticker when disabled via data attribute */
     body[data-ticker="off"] .ticker-container{display:none}
+    
+    /* Hide navigation buttons on mobile */
+    @media (max-width: 768px) {
+      .carousel-prev, .carousel-next, .carousel-indicators {
+        display: none;
+      }
+    }
   </style>
 
   <!-- Structured Data Markup -->
@@ -482,7 +515,7 @@
         <div class="carousel-slide">
           <picture>
             <!-- Updated mobile-first source with proper sizing -->
-            <source media="(max-width: 768px)" srcset="https://res.cloudinary.com/dpyniai9l/image/upload/c_fill,w_768,h_240,q_auto/v1756388252/Coastal_Fresh_Banner_1_uroxup.png">
+            <source media="(max-width: 768px)" srcset="https://res.cloudinary.com/dpyniai9l/image/upload/c_fill,w_768,h_512,q_auto/v1756388252/Coastal_Fresh_Banner_1_uroxup.png">
             <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756388252/Coastal_Fresh_Banner_1_uroxup.png" alt="Fresh prawns delivered in Hyderabad">
           </picture>
           <div class="focus-safe">
@@ -494,7 +527,7 @@
         <!-- Banner 2 -->
         <div class="carousel-slide">
           <picture>
-            <source media="(max-width: 768px)" srcset="https://res.cloudinary.com/dpyniai9l/image/upload/c_fill,w_768,h_240,q_auto/v1756388255/Banner_2_tvjrid.png">
+            <source media="(max-width: 768px)" srcset="https://res.cloudinary.com/dpyniai9l/image/upload/c_fill,w_768,h_512,q_auto/v1756388255/Banner_2_tvjrid.png">
             <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756388255/Banner_2_tvjrid.png" alt="Weekly seafood and pickles offers">
           </picture>
           <div class="focus-safe">
@@ -506,7 +539,7 @@
         <!-- Banner 3 -->
         <div class="carousel-slide">
           <picture>
-            <source media="(max-width: 768px)" srcset="https://res.cloudinary.com/dpyniai9l/image/upload/c_fill,w_768,h_240,q_auto/v1756388255/Coastal_Fresh_Banner_3_wqpv8c.png">
+            <source media="(max-width: 768px)" srcset="https://res.cloudinary.com/dpyniai9l/image/upload/c_fill,w_768,h_512,q_auto/v1756388255/Coastal_Fresh_Banner_3_wqpv8c.png">
             <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756388255/Coastal_Fresh_Banner_3_wqpv8c.png" alt="Hygienically cleaned and sustainably packed seafood">
           </picture>
           <div class="focus-safe">
@@ -531,6 +564,26 @@
   <section class="container" id="products" itemscope itemtype="https://schema.org/ItemList">
     <h1 class="section-title">Premium Seafood & Pickles Selection</h1>
     <p style="text-align:center;margin-bottom:20px;">We offer the freshest seafood and authentic pickles delivered straight to your home across Hyderabad</p>
+    
+    <!-- Sale Timer -->
+    <div class="sale-timer">
+      <h3>🔥 FLASH SALE ENDS IN:</h3>
+      <div class="timer" id="saleTimer">
+        <div class="timer-unit">
+          <span class="timer-value" id="hours">24</span>
+          <span class="timer-label">HOURS</span>
+        </div>
+        <div class="timer-unit">
+          <span class="timer-value" id="minutes">00</span>
+          <span class="timer-label">MINS</span>
+        </div>
+        <div class="timer-unit">
+          <span class="timer-value" id="seconds">00</span>
+          <span class="timer-label">SECS</span>
+        </div>
+      </div>
+    </div>
+    
     <div class="filters" role="tablist" aria-label="Category filters">
       <button class="filter-btn active" data-cat="all" aria-pressed="true">All Products</button>
       <button class="filter-btn" data-cat="Fish" aria-pressed="false">Fish</button>
@@ -619,12 +672,19 @@
           <button id="modalIncrease">+</button>
         </div>
         <div class="modal-description" id="modalDescription"></div>
+        <div class="delivery-info">
+          <i class="fas fa-motorcycle"></i>
+          <span>Tomorrow Morning Delivery Available</span>
+        </div>
         <div class="modal-actions">
           <button class="modal-add-cart" id="modalAddCart">
             <i class="fas fa-cart-plus" aria-hidden="true"></i> Add to Cart
           </button>
           <button class="modal-whatsapp" id="modalWhatsApp">
             <i class="fab fa-whatsapp" aria-hidden="true"></i> Order Now
+          </button>
+          <button class="modal-share" id="modalShare">
+            <i class="fas fa-share-alt" aria-hidden="true"></i> Share
           </button>
         </div>
       </div>
@@ -922,6 +982,7 @@
     const modalQty = document.getElementById('modalQty');
     const modalIncrease = document.getElementById('modalIncrease');
     const modalDecrease = document.getElementById('modalDecrease');
+    const modalShare = document.getElementById('modalShare');
     const showMoreBtn = document.getElementById('showMoreBtn');
     const cartModal = document.getElementById('cartModal');
     const closeCart = document.querySelector('.close-cart');
@@ -1091,7 +1152,7 @@
     }
 
     // ------- Show More -------
-    let visibleProducts = 6;
+    let visibleProducts = 12; // Show 12 products initially
     let currentProducts = [...products];
     function currency(n){ return `₹${Number(n).toLocaleString('en-IN')}`; }
 
@@ -1127,10 +1188,10 @@
             </div>
             <div class="card-actions">
               <button class="add-to-cart" onclick="event.stopPropagation(); addToCartDirect(${p.id})" aria-label="Add ${p.name} to cart">
-                <i class="fas fa-cart-plus" aria-hidden="true"></i> Add to Cart
+                <i class="fas fa-cart-plus" aria-hidden="true"></i> Add
               </button>
               <button class="cta" onclick="event.stopPropagation(); orderWhatsApp('${encodeURIComponent(p.name)}', ${p.finalPrice}, '${p.net}', ${p.offer||0}, ${p.mrp})" aria-label="Order ${p.name} on WhatsApp">
-                <i class="fab fa-whatsapp" aria-hidden="true"></i> Order Now
+                <i class="fab fa-whatsapp" aria-hidden="true"></i> Order
               </button>
             </div>
           </div>`;
@@ -1165,7 +1226,7 @@
         b.classList.toggle('active', isActive);
         b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
       });
-      visibleProducts = 6;
+      visibleProducts = 12;
       if(cat==='all') { currentProducts = [...products]; return render(products, true); }
       currentProducts = products.filter(p=>p.category===cat);
       render(currentProducts, true);
@@ -1215,6 +1276,10 @@
         addToCart(product, currentModalQty);
         closeProductModal();
       };
+      
+      modalShare.onclick = () => {
+        shareProduct(product);
+      };
 
       modalIncrease.onclick = () => {
         currentModalQty++;
@@ -1238,6 +1303,14 @@
         });
       }
     }
+    
+    // Share product via WhatsApp
+    function shareProduct(product) {
+      const message = `Check out this ${product.name} from Coastal Fresh! ${product.desc.substring(0, 100)}...\n\nPrice: ₹${product.finalPrice}\n\nOrder now: https://www.coastalfresh.in`;
+      const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank', 'noopener');
+    }
+    
     function closeProductModal() {
       modal.style.display = 'none';
       document.body.style.overflow = '';
@@ -1297,6 +1370,34 @@
       setInterval(nextSlide, 5000);
     }
 
+    // ------- Sale Timer -------
+    function startSaleTimer() {
+      const hoursElement = document.getElementById('hours');
+      const minutesElement = document.getElementById('minutes');
+      const secondsElement = document.getElementById('seconds');
+      
+      // Set the timer for 24 hours from now
+      let totalSeconds = 24 * 60 * 60;
+      
+      const timerInterval = setInterval(() => {
+        if (totalSeconds <= 0) {
+          clearInterval(timerInterval);
+          // Reset timer for another 24 hours
+          totalSeconds = 24 * 60 * 60;
+        }
+        
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        
+        hoursElement.textContent = hours.toString().padStart(2, '0');
+        minutesElement.textContent = minutes.toString().padStart(2, '0');
+        secondsElement.textContent = seconds.toString().padStart(2, '0');
+        
+        totalSeconds--;
+      }, 1000);
+    }
+
     // ------- Banner click tracking + smooth scroll -------
     function trackCarouselClick(bannerId) {
       if (typeof gtag === 'function') {
@@ -1345,6 +1446,7 @@
       // Products + carousel
       render(products, true);
       initCarousel();
+      startSaleTimer();
       
       // Initialize cart - Ensure cart is empty for new users
       if (!localStorage.getItem('coastalFreshCart')) {
@@ -1358,6 +1460,13 @@
       cartModal.addEventListener('click', (e) => { if (e.target === cartModal) closeCartModal(); });
       cartCheckout.addEventListener('click', checkoutWhatsApp);
       cartContinue.addEventListener('click', closeCartModal);
+      
+      // Share button event listener
+      modalShare.addEventListener('click', () => {
+        if (currentProduct) {
+          shareProduct(currentProduct);
+        }
+      });
 
       // GA4 initial impressions
       if (typeof gtag === 'function') {
@@ -1406,6 +1515,7 @@
     window.addToCartDirect = addToCartDirect;
     window.updateCartItemQuantity = updateCartItemQuantity;
     window.removeFromCart = removeFromCart;
+    window.shareProduct = shareProduct;
   </script>
 </body>
 </html>
