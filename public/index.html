@@ -125,12 +125,6 @@
     nav a {color: #fff;text-decoration: none;font-weight: 500;padding: 6px 12px;border-radius: 25px;transition: .25s;font-size: .9rem}
     nav a:hover,nav a[aria-current="page"] {background: rgba(255,255,255,.2);transform: translateY(-2px)}
 
-    /* Cart Button in Header */
-    .header-cart {position: absolute; top: 15px; right: 15px;}
-    .cart-header-btn {width: 45px; height: 45px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent-alt)); color: #fff; box-shadow: 0 4px 12px rgba(255,107,53,.3); transition: .3s; font-size: 1.2rem; border: none; cursor: pointer;}
-    .cart-header-btn:hover {transform: translateY(-2px); box-shadow: 0 6px 18px rgba(255,107,53,.4);}
-    .cart-header-counter {position: absolute; top: -5px; right: -5px; background: #ff4d4f; color: #fff; border-radius: 50%; width: 18px; height: 18px; display: grid; place-items: center; font-size: .65rem; font-weight: 800}
-
     /* Live Ticker — FIXED: orange, above content, toggle, accessible, visible */
     .ticker-container{
       position: fixed;
@@ -143,7 +137,7 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
       border-bottom: 1px solid rgba(0,0,0,0.06);
     }
-    .ticker{display:flex;white-space:nowrap;animation: ticker-scroll 40s linear infinite}
+    .ticker{display:flex;white-space:nowrap;animation: ticker-scroll 30s linear infinite}
     .ticker-item{display:flex;align-items:center;padding:0 22px;font-size:.95rem;font-weight:700}
     .ticker-item i{margin-right:10px;font-size:.9rem}
     .ticker-container:hover .ticker{animation-play-state:paused} /* fixed selector */
@@ -151,21 +145,21 @@
     @media (prefers-reduced-motion: reduce){.ticker{animation:none}}
 
     /* Carousel - UPDATED for consistent sizing + mobile safety */
-    .carousel-wrap{position: relative;}
+    .carousel-wrap{position: relative; margin-top: 0; margin-bottom: 0;}
     .carousel-container {
       position: relative;
-      max-width: 1200px;
-      margin: 30px auto;
+      max-width: 100%;
+      margin: 0 auto;
       overflow: hidden;
-      border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.1);
+      border-radius: 0;
+      box-shadow: none;
       aspect-ratio: 3/1; /* desktop default */
       background:#e9f3ff;
     }
     .carousel {display:flex;transition: transform 0.5s ease;height: 100%;}
     .carousel-slide {min-width:100%;position:relative;height:100%}
     .carousel-slide picture, .carousel-slide img{width:100%;height:100%;display:block}
-    .carousel-slide img{object-fit:contain;object-position:center} /* Changed from cover to contain to fix banner cropping */
+    .carousel-slide img{object-fit:cover;object-position:center} /* Changed to cover to fill banner space */
     .focus-safe{ /* keeps text readable on busy images */
       position:absolute;inset:auto 0 0 0;
       background: linear-gradient(transparent 10%, rgba(0,0,0,0.75));
@@ -227,7 +221,7 @@
     .show-more-btn:hover {transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,119,190,0.4)}
     .show-more-btn.hidden {display:none}
 
-    /* Product Modal */
+    /* Product Modal - ENHANCED */
     .modal {display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.7);z-index:1002;overflow-y:auto;padding:20px 10px}
     .modal-content {background:#fff;margin:40px auto;max-width:600px;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:modalFadeIn .3s;max-height:85vh;display:flex;flex-direction:column;width:95%}
     @keyframes modalFadeIn {from{opacity:0;transform:translateY(-50px)}to{opacity:1;transform:translateY(0)}}
@@ -251,7 +245,7 @@
     .modal-add-cart {background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border:none;padding:12px 25px;border-radius:30px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:.3s;font-size:1rem;flex:1;justify-content:center;max-width:300px}
     .modal-add-cart:hover {transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,119,190,.35)}
 
-    /* Cart Modal - COMPLETELY REDESIGNED */
+    /* Cart Modal - COMPLETELY REDESIGNED (Amazon/Flipkart style) */
     .cart-modal {display:none;position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(0,0,0,0.7);z-index:1003;overflow-y:auto;padding:20px 10px}
     .cart-content {background:#fff;margin:40px auto;max-width:600px;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:modalFadeIn .3s;max-height:85vh;display:flex;flex-direction:column;width:95%}
     .cart-header {padding:15px 20px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;display:flex;justify-content:space-between;align-items:center}
@@ -316,8 +310,10 @@
     .newsletter button {background: linear-gradient(135deg, var(--accent), var(--accent-alt));color: #fff;border: none;padding: 10px 15px;border-radius: 30px;font-weight: 700;cursor: pointer;font-size: 1rem}
     .social a {color: #fff;margin: 0 8px;font-size: 1.2rem;transition: .2s}
     .social a:hover {color: var(--whatsapp)}
+    
+    /* Floating buttons - UPDATED: cart button moved above WhatsApp */
     .wafloat {position: fixed;bottom: 20px;right: 20px;width: 55px;height: 55px;border-radius: 50%;display: grid;place-items: center;background: linear-gradient(135deg, var(--whatsapp), #128c7e);color: #fff;box-shadow: 0 8px 25px rgba(37,211,102,.3);z-index: 1002;font-size: 1.5rem}
-    .cartfloat {display: none;} /* Hide the floating cart button as we moved it to header */
+    .cartfloat {position: fixed;bottom: 90px;right: 20px;width: 55px;height: 55px;border-radius: 50%;display: grid;place-items: center;background: linear-gradient(135deg, var(--primary), var(--primary-light));color: #fff;box-shadow: 0 8px 25px rgba(0,119,190,.3);z-index: 1002;font-size: 1.5rem}
     .counter {position: absolute;top: -5px;right: -5px;background: #ff4d4f;color: #fff;border-radius: 50%;width: 18px;height: 18px;display: grid;place-items: center;font-size: .65rem;font-weight: 800}
     .totop {position: fixed;bottom: 150px;right: 20px;width: 45px;height: 45px;background: linear-gradient(135deg, var(--primary), var(--primary-light));border-radius: 50%;display: grid;place-items: center;color: #fff;opacity: 0;visibility: hidden;transition: .2s;box-shadow: 0 5px 15px rgba(0,0,0,.1);z-index: 998;font-size: 1.2rem}
     .totop.show {opacity: 1;visibility: visible}
@@ -332,11 +328,10 @@
     @media (max-width: 768px){
       body{padding-top:170px}
       .header-content{flex-direction:column;align-items:center}.logo{margin-bottom:8px}.logo-img{height:50px}.logo-text{font-size:1.4rem}nav{gap:5px}nav a{padding:5px 10px;font-size:.85rem}
-      .header-cart {position: static; margin-top: 10px; margin-bottom: 10px;}
       .section-title{font-size:1.5rem;margin:15px 0 25px}.section-title:after{width:60px;bottom:-10px}
       .grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
       .faq-wrap{padding:40px 0}.q{padding:12px;font-size:.95rem}.a{padding:12px;font-size:.9rem}
-      .carousel-container { aspect-ratio: 1.5/1; margin: 20px auto; } /* Changed aspect ratio for mobile */
+      .carousel-container { aspect-ratio: 1.5/1; margin: 0 auto; } /* Changed aspect ratio for mobile */
       .focus-safe{padding:16px}
       .focus-safe h3{font-size:1.2rem;margin-bottom:6px}
       .focus-safe p{font-size:.9rem;margin-bottom:10px}
@@ -355,6 +350,7 @@
       .modal-whatsapp, .modal-add-cart { max-width: 100%; padding: 12px 20px; }
       .ticker-item{font-size:.85rem}
       .wafloat { bottom: 20px; right: 20px; width: 50px; height: 50px; font-size: 1.3rem; }
+      .cartfloat { bottom: 85px; right: 20px; width: 50px; height: 50px; font-size: 1.3rem; }
       .totop { bottom: 150px; right: 20px; width: 40px; height: 40px; font-size: 1rem; }
       /* Cart responsive */
       .cart-item { grid-template-columns: 60px 1fr; }
@@ -366,7 +362,7 @@
       .section-title{font-size:1.3rem}
       .filters{gap:5px}.filter-btn{padding:6px 12px;font-size:.85rem}
       .grid{grid-template-columns:1fr;gap:12px}.card{max-width:300px;margin:0 auto}
-      .carousel-container { aspect-ratio: 1.2/1; border-radius: 10px; } /* Adjusted for small mobile */
+      .carousel-container { aspect-ratio: 1.2/1; border-radius: 0; } /* Adjusted for small mobile */
       .focus-safe{padding:12px}
       .focus-safe h3{font-size:1.1rem}
       .focus-safe p{display:none}
@@ -421,13 +417,6 @@
         <a href="#faq">FAQs</a>
         <a href="#contact">Contact</a>
       </nav>
-      <!-- Cart button in header -->
-      <div class="header-cart">
-        <button class="cart-header-btn" onclick="openCart()" aria-label="View cart">
-          <i class="fas fa-shopping-cart" aria-hidden="true"></i>
-          <span id="cartHeaderCounter" class="cart-header-counter">0</span>
-        </button>
-      </div>
     </div>
   </header>
 
@@ -714,7 +703,11 @@
     </div>
   </footer>
 
-  <!-- Floating actions -->
+  <!-- Floating actions - UPDATED: cart button moved above WhatsApp button -->
+  <a class="cartfloat" href="javascript:void(0)" onclick="openCart()" aria-label="View cart">
+    <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+    <span id="cartFloatCounter" class="counter">0</span>
+  </a>
   <a class="wafloat" href="javascript:void(0)" onclick="openWhatsApp()" aria-label="Order on WhatsApp">
     <i class="fab fa-whatsapp" aria-hidden="true"></i>
     <span id="waCounter" class="counter">0</span>
@@ -780,7 +773,6 @@
       TICKER_MESSAGES: [
         { icon: '🏷️', text: 'NEW USERS: 10% OFF on your 1st order' },
         { icon: '🗒️', text: 'Prices may change daily based on market & availability' },
-        { icon: '🍤', text: 'Fresh catch daily from Coastal Andhra – Cleaned, Deveined & Delivered' },
         { icon: '⚠️', text: 'Book 1 Day in Advance for Guaranteed Freshness' },
         { icon: '⭐', text: 'Loved by 100+ Hyderabad customers (4.8★ average)' }
       ]
@@ -876,7 +868,7 @@
     const cartTotalAmount = document.getElementById('cartTotalAmount');
     const cartCheckout = document.getElementById('cartCheckout');
     const cartContinue = document.getElementById('cartContinue');
-    const cartCounter = document.getElementById('cartHeaderCounter'); // Updated to header counter
+    const cartCounter = document.getElementById('cartFloatCounter'); // Updated to floating cart counter
     const cartFloat = document.querySelector('.cartfloat');
 
     // ------- CART SYSTEM -------
