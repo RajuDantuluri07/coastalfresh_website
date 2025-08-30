@@ -34,7 +34,7 @@
         }
         return u.toString();
       } catch(e) { return url; }
-    }
+      }
     document.addEventListener('DOMContentLoaded', function() {
       const waLinks = Array.from(document.querySelectorAll('a[href*="wa.me/"], a[href*="api.whatsapp.com/"]'));
       waLinks.forEach(a => { a.href = withUTM(a.href); });
@@ -144,6 +144,30 @@
     @keyframes ticker-scroll {0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
     @media (prefers-reduced-motion: reduce){.ticker{animation:none}}
 
+    /* Toast notification styles */
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background-color: var(--success);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1004;
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
     /* Carousel - UPDATED for consistent sizing + mobile safety */
     .carousel-wrap{position: relative; margin-top: 0; margin-bottom: 0;}
     .carousel-container {
@@ -153,13 +177,13 @@
       overflow: hidden;
       border-radius: 0;
       box-shadow: none;
-      aspect-ratio: 3/1; /* desktop default */
+      aspect-ratio: 1920/600; /* Use exact banner aspect ratio */
       background:#e9f3ff;
     }
     .carousel {display:flex;transition: transform 0.5s ease;height: 100%;}
     .carousel-slide {min-width:100%;position:relative;height:100%}
     .carousel-slide picture, .carousel-slide img{width:100%;height:100%;display:block}
-    .carousel-slide img{object-fit:cover;object-position:center} /* Changed to cover to fill banner space */
+    .carousel-slide img{object-fit:cover;object-position:center}
     .focus-safe{ /* keeps text readable on busy images */
       position:absolute;inset:auto 0 0 0;
       background: linear-gradient(transparent 10%, rgba(0,0,0,0.75));
@@ -356,6 +380,17 @@
       .cart-item { grid-template-columns: 60px 1fr; }
       .cart-item-total { grid-column: 1 / -1; text-align: left; margin-left: 72px; margin-top: 5px; }
       .cart-item-remove { top: 5px; right: 5px; }
+      
+      /* Fix for mobile CTA buttons - ensure they stay in a row */
+      .card-actions {
+        flex-direction: row !important; /* Force row layout on mobile */
+        flex-wrap: nowrap; /* Prevent wrapping */
+      }
+      .cta, .add-to-cart {
+        min-width: auto; /* Allow buttons to shrink if needed */
+        font-size: 0.75rem !important; /* Slightly smaller font if needed */
+        padding: 6px 8px !important; /* Adjust padding for mobile */
+      }
     }
     @media (max-width: 480px){
       body{padding-top:178px}
@@ -379,7 +414,15 @@
       .cart-item-price { font-size: 0.9rem; }
       .cart-item-net { font-size: 0.8rem; }
       .cart-item-quantity button { width: 25px; height: 25px; }
-      .card-actions { flex-direction: column; } /* Stack buttons on mobile */
+      
+      /* Further adjustments for CTA buttons on very small screens */
+      .card-actions {
+        gap: 5px;
+      }
+      .cta, .add-to-cart {
+        font-size: 0.7rem !important;
+        padding: 5px 6px !important;
+      }
     }
 
     /* Utility for hiding ticker when disabled via data attribute */
@@ -403,6 +446,12 @@
   </script>
 </head>
 <body itemscope itemtype="https://schema.org/WebPage">
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <i class="fas fa-check-circle"></i>
+    <span class="toast-message"></span>
+  </div>
+
   <!-- Header -->
   <header id="siteHeader">
     <div class="header-content">
@@ -433,7 +482,7 @@
         <div class="carousel-slide">
           <picture>
             <!-- Updated mobile-first source with proper sizing -->
-            <source media="(max-width: 768px)" srcset="https://res.cloudinary.com/dpyniai9l/image/upload/c_scale,w_800/v1756388252/Coastal_Fresh_Banner_1_uroxup.png">
+            <source media="(max-width: 768px)" srcset="https://res.cloudinary.com/dpyniai9l/image/upload/c_fill,w_768,h_240,q_auto/v1756388252/Coastal_Fresh_Banner_1_uroxup.png">
             <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756388252/Coastal_Fresh_Banner_1_uroxup.png" alt="Fresh prawns delivered in Hyderabad">
           </picture>
           <div class="focus-safe">
@@ -445,7 +494,7 @@
         <!-- Banner 2 -->
         <div class="carousel-slide">
           <picture>
-            <source media="(max-width: 768px)" srcset="https://res.cloudinary.com/dpyniai9l/image/upload/c_scale,w_800/v1756388255/Banner_2_tvjrid.png">
+            <source media="(max-width: 768px)" srcset="https://res.cloudinary.com/dpyniai9l/image/upload/c_fill,w_768,h_240,q_auto/v1756388255/Banner_2_tvjrid.png">
             <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756388255/Banner_2_tvjrid.png" alt="Weekly seafood and pickles offers">
           </picture>
           <div class="focus-safe">
@@ -457,7 +506,7 @@
         <!-- Banner 3 -->
         <div class="carousel-slide">
           <picture>
-            <source media="(max-width: 768px)" srcset="https://res.cloudinary.com/dpyniai9l/image/upload/c_scale,w_800/v1756388255/Coastal_Fresh_Banner_3_wqpv8c.png">
+            <source media="(max-width: 768px)" srcset="https://res.cloudinary.com/dpyniai9l/image/upload/c_fill,w_768,h_240,q_auto/v1756388255/Coastal_Fresh_Banner_3_wqpv8c.png">
             <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756388255/Coastal_Fresh_Banner_3_wqpv8c.png" alt="Hygienically cleaned and sustainably packed seafood">
           </picture>
           <div class="focus-safe">
@@ -817,6 +866,20 @@
       });
     }
 
+    // Toast notification function
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.querySelector('.toast-message');
+      
+      toastMessage.textContent = message;
+      toast.classList.add('show');
+      
+      // Hide after 2 seconds
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
     // ------- PRODUCTS (your existing catalog) -------
     const products = [
       { id:1, name:"White Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577561/White_Pomfret_xliykk.png", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy White Pomfret online in Hyderabad – premium coastal fish with mild taste and firm flesh. Perfect for fry, grill, or curry. Hygienically cleaned and delivered fresh next day.", metaTitle:"Buy Fresh White Pomfret Fish Online in Hyderabad | Coastal Fresh", metaDesc:"Order premium White Pomfret fish in Hyderabad. Mild taste, firm flesh, hygienically packed, next-day delivery. Great for curry, fry, or grill." },
@@ -903,6 +966,10 @@
       }
       
       saveCart();
+      
+      // Show toast notification
+      showToast(`${product.name} added to cart!`);
+      
       if (typeof gtag === 'function') {
         gtag('event', 'add_to_cart', {
           'items': [{
