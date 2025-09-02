@@ -14,6 +14,26 @@
   <!-- Analytics: GA4 + Hotjar + WhatsApp tracking -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-GSHMPRYPW1"></script>
   <script>
+    // Track first visit
+    if (!localStorage.getItem('firstVisit')) {
+      localStorage.setItem('firstVisit', new Date().toISOString());
+      // Track first visit
+      if (typeof gtag === 'function') {
+        gtag('event', 'first_visit', {
+          'event_category': 'engagement',
+          'event_label': 'New User'
+        });
+      }
+    } else {
+      // Track repeat visit
+      if (typeof gtag === 'function') {
+        gtag('event', 'repeat_visit', {
+          'event_category': 'engagement',
+          'event_label': 'Returning User'
+        });
+      }
+    }
+
     window.dataLayer = window.dataLayer || [];
     function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
@@ -211,6 +231,316 @@
       background-position: center; 
     }
     
+    /* Trust Icons Strip - UPDATED */
+    .trust-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: stretch;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      padding: 20px 16px;
+      gap: 12px;
+      box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.08),
+        0 4px 16px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      overflow: hidden;
+      max-width: 1200px;
+      margin: 16px auto;
+      animation: slideUp 0.8s ease-out;
+    }
+
+    .trust-strip::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+      animation: shine 3s ease-in-out infinite;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes shine {
+      0%, 100% { left: -100%; }
+      50% { left: 100%; }
+    }
+
+    .trust-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+      padding: 16px 8px;
+      border-radius: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      position: relative;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .trust-item:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 
+        0 15px 35px rgba(0, 0, 0, 0.15),
+        0 5px 15px rgba(0, 0, 0, 0.08);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .trust-item:nth-child(1):hover { box-shadow: 0 15px 35px rgba(59, 130, 246, 0.3); }
+    .trust-item:nth-child(2):hover { box-shadow: 0 15px 35px rgba(16, 185, 129, 0.3); }
+    .trust-item:nth-child(3):hover { box-shadow: 0 15px 35px rgba(245, 158, 11, 0.3); }
+    .trust-item:nth-child(4):hover { box-shadow: 0 15px 35px rgba(168, 85, 247, 0.3); }
+
+    .icon-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      font-size: 22px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 2px;
+    }
+
+    .trust-item:nth-child(1) .icon-container {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: white;
+    }
+
+    .trust-item:nth-child(2) .icon-container {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white;
+    }
+
+    .trust-item:nth-child(3) .icon-container {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+    }
+
+    .trust-item:nth-child(4) .icon-container {
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      color: white;
+    }
+
+    .trust-item:hover .icon-container {
+      transform: rotate(5deg) scale(1.1);
+    }
+
+    .icon-container::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+      transform: translate(-50%, -50%) scale(0);
+      border-radius: 50%;
+      transition: transform 0.6s ease;
+    }
+
+    .trust-item:hover .icon-container::after {
+      transform: translate(-50%, -50%) scale(1.5);
+    }
+
+    .trust-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      align-items: center;
+      text-align: center;
+    }
+
+    .trust-item strong {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1f2937;
+      line-height: 1.2;
+      letter-spacing: -0.025em;
+      transition: color 0.3s ease;
+    }
+
+    .trust-item:hover strong {
+      color: #111827;
+    }
+
+    .trust-item p {
+      font-size: 11px;
+      color: #6b7280;
+      margin: 0;
+      line-height: 1.3;
+      font-weight: 400;
+      transition: color 0.3s ease;
+    }
+
+    .trust-item:hover p {
+      color: #4b5563;
+    }
+
+    .trust-item::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), transparent, rgba(255, 255, 255, 0.2));
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask-composite: xor;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .trust-item:hover::before {
+      opacity: 1;
+    }
+
+    /* Staggered animation */
+    .trust-item:nth-child(1) { animation-delay: 0.1s; }
+    .trust-item:nth-child(2) { animation-delay: 0.2s; }
+    .trust-item:nth-child(3) { animation-delay: 0.3s; }
+    .trust-item:nth-child(4) { animation-delay: 0.4s; }
+
+    .trust-item {
+      animation: fadeInUp 0.6s ease-out both;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Mobile Responsive for Trust Strip */
+    @media (max-width: 768px) {
+      .trust-strip {
+        padding: 16px 12px;
+        gap: 8px;
+        border-radius: 12px;
+      }
+
+      .trust-item {
+        padding: 12px 6px;
+        gap: 6px;
+      }
+
+      .icon-container {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        border-radius: 10px;
+      }
+
+      .trust-item strong {
+        font-size: 11px;
+      }
+
+      .trust-item p {
+        font-size: 9px;
+        line-height: 1.2;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .trust-strip {
+        margin: 0 8px;
+        padding: 12px 8px;
+        border-radius: 10px;
+        gap: 6px;
+      }
+
+      .trust-item {
+        padding: 10px 4px;
+        gap: 4px;
+        border-radius: 8px;
+      }
+
+      .icon-container {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+        border-radius: 8px;
+        margin-bottom: 1px;
+      }
+
+      .trust-item strong {
+        font-size: 10px;
+      }
+
+      .trust-item p {
+        font-size: 8px;
+        line-height: 1.1;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .trust-strip {
+        padding: 10px 6px;
+        gap: 4px;
+      }
+
+      .trust-item {
+        padding: 8px 3px;
+        gap: 3px;
+      }
+
+      .icon-container {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        border-radius: 6px;
+      }
+
+      .trust-item strong {
+        font-size: 9px;
+      }
+
+      .trust-item p {
+        font-size: 7px;
+      }
+    }
+
+    /* Subtle pulse animation for icons */
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .icon-container {
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    .trust-item:nth-child(1) .icon-container { animation-delay: 0s; }
+    .trust-item:nth-child(2) .icon-container { animation-delay: 1s; }
+    .trust-item:nth-child(3) .icon-container { animation-delay: 2s; }
+    .trust-item:nth-child(4) .icon-container { animation-delay: 3s; }
+    
     /* Categories */
     .section-title { 
       font-size: 18px; 
@@ -401,10 +731,13 @@
     .share-btn { 
       font-size: 20px; 
       cursor: pointer; 
+      margin-left: 12px;
+      color: #25D366;
     }
     .popup-body { 
       padding: 16px; 
       overflow-y: auto; 
+      position: relative;
     }
     .popup-body img { 
       width: 80%; 
@@ -678,15 +1011,12 @@
       transform: translateX(-50%) translateY(0); 
     }
     
-    /* Why Choose, How It Works, FAQ Sections */
+    /* Why Choose, FAQ Sections */
     .section { 
       padding: 30px 16px; 
     }
     .why { 
       background: linear-gradient(135deg, #e9f7fe 0%, #def3ff 100%); 
-    }
-    .how { 
-      background: white; 
     }
     .faq-wrap { 
       background: #e9f7fe; 
@@ -706,53 +1036,6 @@
     }
     .box p { 
       margin-bottom: 12px; 
-    }
-    
-    /* How It Works - Updated for single row */
-    .steps { 
-      display: flex; 
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 16px; 
-      margin-top: 20px; 
-    }
-    .step { 
-      position: relative; 
-      background: white; 
-      border-radius: 12px; 
-      padding: 24px 16px 20px; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
-      text-align: center; 
-      flex: 1;
-      min-width: 250px;
-      max-width: 350px;
-    }
-    .step-num { 
-      position: absolute; 
-      top: -15px; 
-      left: 50%; 
-      transform: translateX(-50%); 
-      width: 40px; 
-      height: 40px; 
-      border-radius: 50%; 
-      display: grid; 
-      place-items: center; 
-      background: linear-gradient(135deg, #ff6b35, #f7931e); 
-      color: white; 
-      font-weight: 800; 
-    }
-    .step i { 
-      font-size: 32px; 
-      color: #2563eb; 
-      margin: 8px 0; 
-    }
-    .step h3 { 
-      color: #2563eb; 
-      margin: 8px 0 6px; 
-      font-size: 18px; 
-    }
-    .step p { 
-      font-size: 15px; 
     }
     
     .faq-list { 
@@ -857,14 +1140,6 @@
     
     /* Responsive adjustments */
     @media (max-width: 768px) {
-      .steps {
-        flex-direction: column;
-        align-items: center;
-      }
-      .step {
-        width: 100%;
-        max-width: 100%;
-      }
       .logo-text {
         font-size: 16px;
       }
@@ -913,6 +1188,38 @@
     </div>
   </div>
 
+  <!-- Trust Icons Strip - UPDATED -->
+  <section class="trust-strip">
+    <div class="trust-item">
+      <div class="icon-container">🧊</div>
+      <div class="trust-content">
+        <strong>Freshness Guarantee</strong>
+        <p>Freshly cut after your order</p>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="icon-container">🌱</div>
+      <div class="trust-content">
+        <strong>Safe & Healthy</strong>
+        <p>Chemical & Antibiotics Free</p>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="icon-container">📦</div>
+      <div class="trust-content">
+        <strong>Clean & Packed</strong>
+        <p>Neatly cleaned & carefully packed</p>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="icon-container">💵</div>
+      <div class="trust-content">
+        <strong>Cash on Delivery</strong>
+        <p>Pay when you receive</p>
+      </div>
+    </div>
+  </section>
+
   <!-- Categories -->
   <div class="section-title">Categories</div>
   <div class="category-nav">
@@ -938,31 +1245,6 @@
     </div>
   </section>
 
-  <!-- How It Works - Updated for single row -->
-  <section class="section how" id="how">
-    <h2>How It Works</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <i class="fas fa-list-ul"></i>
-        <h3>Browse & Select</h3>
-        <p>Choose from our curated range of fresh fish, prawns, crabs, and authentic pickles. Prices are updated daily based on catch availability.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <i class="fab fa-whatsapp"></i>
-        <h3>Order on WhatsApp</h3>
-        <p>Add products to cart and checkout. Our team will confirm availability, cleaning preferences, and delivery slot instantly.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <i class="fas fa-truck"></i>
-        <h3>Next-Day Delivery</h3>
-        <p>Every catch is hygienically cleaned, sustainably packed, and delivered ice-fresh to your doorstep across Hyderabad.</p>
-      </div>
-    </div>
-  </section>
-
   <!-- FAQ -->
   <section class="section faq-wrap" id="faq">
     <h2>Frequently Asked Questions</h2>
@@ -985,7 +1267,7 @@
       </div>
       <div class="faq">
         <button class="q">What areas in Hyderabad do you deliver to? <i class="fas fa-chevron-down"></i></button>
-        <div class="a">We deliver across all areas of Hyderabad including Gachibowli, Hitech City, Banjara Hills, Jubilee Hills, Secunderabad, and surrounding regions.</div>
+        <div class="a">We deliver across all areas of Hyderabad including Gachibowli, Hitech City, Banjara Hills, Flim Nagar, Jubilee Hills, and surrounding regions.</div>
       </div>
     </div>
   </section>
@@ -1028,7 +1310,7 @@
     <div class="popup-header">
       <span class="back-btn">‹</span>
       <span class="popup-title" id="popupTitle">Product Name</span>
-      <span class="share-btn">⤴</span>
+      <span class="share-btn"><i class="fab fa-whatsapp"></i></span>
     </div>
     <div class="popup-body" id="popupBody"></div>
     <div class="popup-footer">
@@ -1096,7 +1378,7 @@
       { id:2, name:"Black Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/Blac_qnztqj.jpg", mrp:850, finalPrice:750, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Black Pomfret in Hyderabad – firm texture, rich flavor, and ideal for spicy Andhra fish curry, grills, and fries. Packed fresh and delivered with care by Coastal Fresh." },
       { id:3, name:"Sea Bass", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/SeaBas_cd21dd.jpg", mrp:850, finalPrice:765, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Sea Bass fish delivery in Hyderabad – mild flavor, firm texture, and nutrient-rich. Great for curries, grills, or pan-seared dishes. Cleaned and delivered ice-fresh." },
       { id:4, name:"Yellowfin Tuna", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/YellowTun_tzidzi.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy Yellowfin Tuna steaks in Hyderabad – meaty cuts, rich taste, and perfect for grilling, searing, or curry. High in protein and omega-3, packed fresh and delivered fast." },
-      { id:5, name:"Pink Perch", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/PinkPerc_r8g3me.jpg", mrp:450, finalPrice:405, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Pink Perch fish – soft flesh, mild taste, and budget-friendly. Great for crispy fry, tangy curry, or homely meals. Sourced daily and hygienically packed for Hyderabad delivery." },
+      { id:5, name:"Pink Percept", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/PinkPerc_r8g3me.jpg", mrp:450, finalPrice:405, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Pink Perch fish – soft flesh, mild taste, and budget-friendly. Great for crispy fry, tangy curry, or homely meals. Sourced daily and hygienically packed for Hyderabad delivery." },
       { id:6, name:"Koyyinga", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/koyyangi_si2oss.png", mrp:500, finalPrice:450, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Koyyinga fish online – Andhra favorite with bold flavor and firm texture. Perfect for spicy curries or deep-fried recipes. Delivered fresh across Hyderabad." },
       { id:7, name:"Kanagadathalu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Kanagadathal_lvwazy.jpg", mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Kanagadathalu fish delivery – coastal classic with versatile flavor. Suited for curry, grills, or fry. Responsibly sourced and delivered fresh by Coastal Fresh in Hyderabad." },
       { id:8, name:"Vanjaram (Seer)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Vanjara_ikhy6c.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy Vanjaram Seer Fish in Hyderabad – king of South Indian seafood with boneless cuts, rich taste, and firm flesh. Ideal for fry or curry. Packed fresh and delivered next day." },
@@ -1190,6 +1472,9 @@
           faq.classList.toggle('active');
         });
       });
+
+      // Share button event listener
+      document.querySelector('.share-btn').addEventListener('click', shareProduct);
     }
 
     // Render products based on filters
@@ -1330,6 +1615,22 @@
       cart[id] = (cart[id] || 0) + 1;
       saveCart();
       showToast('Added to cart!');
+      
+      // Track add to cart event
+      if (typeof gtag === 'function') {
+        const product = products.find(p => p.id === id);
+        gtag('event', 'add_to_cart', {
+          'currency': 'INR',
+          'value': product.finalPrice,
+          'items': [{
+            'item_id': product.id,
+            'item_name': product.name,
+            'item_category': product.category,
+            'price': product.finalPrice,
+            'quantity': 1
+          }]
+        });
+      }
     }
 
     function changeQty(id, delta) {
@@ -1398,8 +1699,36 @@
       closePopup();
     }
 
+    // Share product functionality
+    function shareProduct() {
+      if (!popupProduct) return;
+      
+      const message = `Check out this ${popupProduct.name} from Coastal Fresh! ${popupProduct.desc.substring(0, 100)}...`;
+      const shareUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      
+      // Track share event
+      if (typeof gtag === 'function') {
+        gtag('event', 'share', {
+          'method': 'WhatsApp',
+          'content_type': 'product',
+          'item_id': popupProduct.id
+        });
+      }
+      
+      window.open(shareUrl, '_blank');
+    }
+
     // Cart page
     function openCart() {
+      // Track view cart event
+      if (typeof gtag === 'function') {
+        gtag('event', 'view_cart', {
+          'currency': 'INR',
+          'value': calculateCartTotal(),
+          'items': getCartItemsForAnalytics()
+        });
+      }
+      
       const cartItems = document.getElementById('cartItems');
       const originalTotal = document.getElementById('originalTotal');
       const finalTotal = document.getElementById('finalTotal');
@@ -1477,11 +1806,44 @@
       document.getElementById('cartPage').style.display = 'none';
     }
 
+    function calculateCartTotal() {
+      let total = 0;
+      for (let [id, qty] of Object.entries(cart)) {
+        let p = products.find(pp => pp.id == id);
+        total += p.finalPrice * qty;
+      }
+      return total;
+    }
+
+    function getCartItemsForAnalytics() {
+      const items = [];
+      for (let [id, qty] of Object.entries(cart)) {
+        let p = products.find(pp => pp.id == id);
+        items.push({
+          'item_id': p.id,
+          'item_name': p.name,
+          'item_category': p.category,
+          'price': p.finalPrice,
+          'quantity': qty
+        });
+      }
+      return items;
+    }
+
     // Place order via WhatsApp
     function placeOrder() {
       if (Object.keys(cart).length === 0) {
         showToast('Your cart is empty!');
         return;
+      }
+      
+      // Track place order event
+      if (typeof gtag === 'function') {
+        gtag('event', 'begin_checkout', {
+          'currency': 'INR',
+          'value': calculateCartTotal(),
+          'items': getCartItemsForAnalytics()
+        });
       }
       
       let message = "Hi Coastal Fresh,%0A%0AI would like to order:%0A%0A";
