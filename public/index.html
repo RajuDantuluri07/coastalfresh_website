@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coastal Fresh - Premium Seafood Delivery in Hyderabad</title>
+  <title>Coastal Fresh - Premium Seafood Delivery in Hyderabad | Fresh Fish, Prawns & Pickles</title>
   
   <!-- Preconnect to external domains for performance -->
   <link rel="preconnect" href="https://res.cloudinary.com">
@@ -11,6 +11,28 @@
   <link rel="preconnect" href="https://static.hotjar.com">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Order premium fresh seafood and authentic pickles in Hyderabad. Fresh fish, tiger prawns, crabs, and traditional pickles with next-day delivery. Trusted local sourcing from Coastal Andhra Pradesh." />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <link rel="canonical" href="https://www.coastalfresh.in" />
+  <meta name="theme-color" content="#0077be" />
+  <meta name="keywords" content="fresh fish delivery hyderabad, seafood delivery hyderabad, buy prawns online hyderabad, crab delivery hyderabad, hyderabad fish online, fresh seafood home delivery, andhra seafood hyderabad, online pickles hyderabad, prawn pickle online, fish pickle, mutton pickle, chicken pickle online" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Coastal Fresh" />
+  <meta property="og:locale" content="en_IN" />
+  <meta property="og:title" content="Coastal Fresh | Buy Fresh Fish, Prawns, Crabs & Pickles in Hyderabad" />
+  <meta property="og:description" content="Fresh Premium seafood and authentic pickles delivered next-day across Hyderabad. Hygienic cleaning, careful packing, and responsible sourcing." />
+  <meta property="og:url" content="https://www.coastalfresh.in" />
+  <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Coastal Fresh – Premium Seafood & Pickles in Hyderabad" />
+  <meta name="twitter:description" content="Fresh fish, prawns, crabs & authentic pickles with next-day delivery and hygienic processing." />
+  <meta name="twitter:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" />
+
   <!-- Analytics: GA4 + Hotjar + WhatsApp tracking -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-GSHMPRYPW1"></script>
   <script>
@@ -87,28 +109,6 @@
       });
     })();
   </script>
-  
-  <!-- SEO Meta Tags -->
-  <meta name="description" content="Order premium fresh seafood and authentic pickles in Hyderabad. Fresh fish, tiger prawns, crabs, and traditional pickles with next-day delivery. Trusted local sourcing from Coastal Andhra Pradesh." />
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-  <link rel="canonical" href="https://www.coastalfresh.in" />
-  <meta name="theme-color" content="#0077be" />
-  <meta name="keywords" content="fresh fish delivery hyderabad, seafood delivery hyderabad, buy prawns online hyderabad, crab delivery hyderabad, hyderabad fish online, fresh seafood home delivery, andhra seafood hyderabad, online pickles hyderabad, prawn pickle online, fish pickle, mutton pickle, chicken pickle online" />
-
-  <!-- Open Graph / Twitter -->
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Coastal Fresh" />
-  <meta property="og:locale" content="en_IN" />
-  <meta property="og:title" content="Coastal Fresh | Buy Fresh Fish, Prawns, Crabs & Pickles in Hyderabad" />
-  <meta property="og:description" content="Fresh Premium seafood and authentic pickles delivered next-day across Hyderabad. Hygienic cleaning, careful packing, and responsible sourcing." />
-  <meta property="og:url" content="https://www.coastalfresh.in" />
-  <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Coastal Fresh – Premium Seafood & Pickles in Hyderabad" />
-  <meta name="twitter:description" content="Fresh fish, prawns, crabs & authentic pickles with next-day delivery and hygienic processing." />
-  <meta name="twitter:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" />
 
   <link rel="icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" href="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png">
@@ -122,11 +122,7 @@
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f9ff; color: #333; line-height: 1.6; }
     .container { max-width: 100%; margin: 0 auto; }
     
-    /* Desktop Background Styling - TASK 2 */
-    :root {
-      --desktop-bg: url("https://res.cloudinary.com/dpyniai9l/image/upload/f_auto,q_auto,w_1920,h_1080,c_fill/v1754203583/samples/landscapes/beach-boat.jpg");
-    }
-
+    /* Desktop Background Styling - TASK 2 - REMOVED shimmer animation */
     #appWrapper {
       max-width: 480px;        /* lock mobile width like a phone */
       margin: 0 auto;          /* center in the middle */
@@ -137,51 +133,14 @@
       z-index: 2;
     }
 
-    /* Desktop background */
-    #background {
-      display: none;
-    }
-
+    /* Desktop background - TASK 1: Removed desktop background and shimmer animation */
     @media (min-width: 769px) {
-      #background {
-        display: block;
-        position: fixed;
-        inset: 0;
-        z-index: 1;
-        background: var(--desktop-bg) center/cover no-repeat;
-        transform: scale(1);
-        animation: bgZoom 40s ease-in-out infinite alternate;
-      }
-
-      /* Slow zoom */
-      @keyframes bgZoom {
-        from { transform: scale(1); }
-        to   { transform: scale(1.08); }
-      }
-
-      /* Soft shimmer */
-      #background::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          120deg,
-          rgba(255,255,255,0.05) 0%,
-          rgba(255,255,255,0.15) 20%,
-          rgba(255,255,255,0.05) 40%
-        );
-        background-size: 200% 100%;
-        animation: shimmer 15s linear infinite;
-        pointer-events: none;
-      }
-
-      @keyframes shimmer {
-        0% { background-position: -200% 0; }
-        100% { background-position: 200% 0; }
+      body {
+        background: #f5f9ff;
       }
     }
     
-    /* Header - Updated for Task 1 */
+    /* Header */
     .header { 
       background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); 
       padding: 12px 16px; 
@@ -276,7 +235,7 @@
       100% { transform: translateX(-100%); } 
     }
     
-    /* Carousel - Updated (removed text overlay) */
+    /* Carousel */
     .carousel { 
       margin: 16px; 
       overflow: hidden; 
@@ -296,7 +255,7 @@
       background-position: center; 
     }
     
-    /* Trust Icons Strip - UPDATED for Task 2 */
+    /* Trust Icons Strip */
     .trust-strip {
       display: flex;
       justify-content: space-between;
@@ -314,7 +273,7 @@
       position: relative;
       overflow: hidden;
       max-width: 1200px;
-      margin: 16px 12px; /* Better mobile margins */
+      margin: 16px 12px;
       animation: slideUp 0.8s ease-out;
     }
 
@@ -350,9 +309,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px; /* Reduced for mobile */
+      gap: 6px;
       text-align: center;
-      padding: 12px 6px; /* Mobile-optimized padding */
+      padding: 12px 6px;
       border-radius: 12px;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
@@ -452,7 +411,7 @@
     }
 
     .trust-item p {
-      font-size: 10px; /* Readable on mobile */
+      font-size: 10px;
       color: #6b7280;
       margin: 0;
       line-height: 1.3;
@@ -602,7 +561,7 @@
     .trust-item:nth-child(3) .icon-container { animation-delay: 2s; }
     .trust-item:nth-child(4) .icon-container { animation-delay: 3s; }
     
-    /* Search Bar - TASK 3 */
+    /* Search Bar */
     .search-container {
       margin: 16px;
       position: relative;
@@ -657,7 +616,7 @@
       font-weight: 600; 
     }
     
-    /* Products - Updated for Task 3 */
+    /* Products */
     .product-grid { 
       display: grid; 
       grid-template-columns: repeat(2, 1fr); 
@@ -754,12 +713,13 @@
       font-size: 16px; 
     }
     
-    /* Refer & Earn Banner - TASK 1 */
+    /* Refer & Earn Banner - TASK 4: Made clickable */
     .refer-banner {
       margin: 20px 16px 0;
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      cursor: pointer;
     }
     
     .refer-banner img {
@@ -796,12 +756,14 @@
       font-weight: 600; 
     }
     
-    /* WhatsApp CTA */
+    /* WhatsApp CTA - TASK 3: Fixed positioning for desktop */
     .whatsapp-cta { 
       position: fixed; 
       bottom: 0; 
-      left: 0; 
-      right: 0; 
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
       background: #25d366; 
       color: white; 
       text-align: center; 
@@ -810,6 +772,7 @@
       font-size: 16px; 
       cursor: pointer; 
       z-index: 100; 
+      margin: 0 auto;
     }
     
     /* Product Popup */
@@ -931,7 +894,7 @@
       border: none; 
     }
     
-    /* Cart Page - Updated for better visibility - TASK 6 & 7 */
+    /* Cart Page - TASK 2: Updated for empty cart state */
     .cart-page { 
       position: fixed; 
       top: 0; 
@@ -964,6 +927,7 @@
       padding: 4px 8px; 
       border-radius: 6px; 
       margin-left: 8px; 
+      display: none; /* Hidden by default */
     }
     .delivery-banner { 
       background: #f0fdf4; 
@@ -974,6 +938,7 @@
       gap: 8px; 
       font-size: 14px; 
       font-weight: 600; 
+      display: none; /* Hidden by default */
     }
     .cart-items-container {
       flex: 1;
@@ -1053,6 +1018,7 @@
       position: sticky;
       bottom: 0;
       z-index: 10;
+      display: none; /* Hidden by default */
     }
     .summary-row { 
       display: flex; 
@@ -1094,6 +1060,7 @@
       font-size: 16px; 
       position: relative; 
       cursor: pointer;
+      display: none; /* Hidden by default */
     }
     .place .order-total { 
       position: absolute; 
@@ -1105,6 +1072,22 @@
       padding: 4px 10px; 
       border-radius: 12px; 
       font-size: 14px; 
+    }
+    
+    /* Empty cart state - TASK 2 */
+    .empty-cart {
+      text-align: center;
+      padding: 40px 20px;
+      color: #666;
+    }
+    .empty-cart-icon {
+      font-size: 60px;
+      margin-bottom: 16px;
+      color: #ccc;
+    }
+    .empty-cart-text {
+      font-size: 16px;
+      margin-bottom: 20px;
     }
     
     /* Toast Notification */
@@ -1131,7 +1114,7 @@
       transform: translateX(-50%) translateY(0); 
     }
     
-    /* Why Choose, FAQ Sections - Updated for Task 6 */
+    /* Why Choose, FAQ Sections */
     .section { 
       padding: 30px 16px; 
     }
@@ -1158,7 +1141,7 @@
       margin-bottom: 12px; 
     }
     
-    /* Optimized Why Choose Section for Task 6 */
+    /* Optimized Why Choose Section */
     .why-choose {
       padding: 24px 16px;
       background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
@@ -1278,7 +1261,7 @@
       box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
     }
 
-    /* Optimized FAQ Section for Task 6 */
+    /* Optimized FAQ Section */
     .faq-wrap {
       padding: 32px 16px;
       background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
@@ -1554,7 +1537,7 @@
       display: none;
     }
     
-    /* Footer - Updated for Task 4 (removed newsletter) */
+    /* Footer */
     footer { 
       background: linear-gradient(135deg, #333, #555); 
       color: white; 
@@ -1598,18 +1581,15 @@
   </style>
 </head>
 <body>
-  <!-- Background for Desktop - TASK 2 -->
-  <div id="background"></div>
-  
-  <!-- App Wrapper for Desktop - TASK 2 -->
+  <!-- App Wrapper for Desktop -->
   <div id="appWrapper">
-    <!-- Toast Notification - Fixed -->
+    <!-- Toast Notification -->
     <div id="toast" class="toast">
       <i class="fas fa-check-circle"></i>
       <span class="toast-message"></span>
     </div>
 
-    <!-- Header - Updated for Task 1 -->
+    <!-- Header -->
     <div class="header">
       <div class="logo">
         <img class="logo-img" src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png" alt="Coastal Fresh logo" width="60" height="40" loading="lazy">
@@ -1632,7 +1612,7 @@
       </div>
     </div>
 
-    <!-- Carousel - Updated (removed text overlay) -->
+    <!-- Carousel -->
     <div class="carousel">
       <div class="slides" id="slides">
         <div class="slide" style="background-image: url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z.png');"></div>
@@ -1641,7 +1621,7 @@
       </div>
     </div>
 
-    <!-- Trust Icons Strip - UPDATED for Task 2 -->
+    <!-- Trust Icons Strip -->
     <section class="trust-strip">
       <div class="trust-item">
         <div class="icon-container">🧊</div>
@@ -1673,7 +1653,7 @@
       </div>
     </section>
 
-    <!-- Search Bar - TASK 3 -->
+    <!-- Search Bar -->
     <div class="search-container">
       <input type="text" id="searchInput" class="search-input" placeholder="Search for products...">
       <i class="fas fa-search search-icon"></i>
@@ -1694,12 +1674,12 @@
     <div class="product-grid" id="productGrid"></div>
     <button class="show-more-btn" id="showMoreBtn">➕ Show More Products</button>
 
-    <!-- Refer & Earn Banner - TASK 1 -->
-    <div class="refer-banner">
+    <!-- Refer & Earn Banner - TASK 4: Made clickable -->
+    <div class="refer-banner" id="referBanner">
       <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756885955/refer_earn_1_nguvrb.jpg" alt="Refer and Earn - Get ₹200 off when you refer a friend">
     </div>
 
-    <!-- Why Choose Us - Updated for Task 6 - Fixed broken HTML -->
+    <!-- Why Choose Us -->
     <section class="why-choose">
       <div class="header-section">
         <h2>Why Choose Coastal Fresh?</h2>
@@ -1733,7 +1713,7 @@
       </div>
     </section>
 
-    <!-- FAQ - Updated for Task 6 -->
+    <!-- FAQ -->
     <section class="section faq-wrap" id="faq">
       <div class="faq-header">
         <h2>Frequently Asked Questions</h2>
@@ -1813,7 +1793,7 @@
       </div>
     </section>
 
-    <!-- Footer - Updated for Task 4 -->
+    <!-- Footer -->
     <footer id="contact">
       <h3>Stay Connected</h3>
       <p>Coastal Fresh – Fresh Catch, Fresh Taste</p>
@@ -1837,7 +1817,7 @@
       <div id="cartTotal">₹0</div>
     </div>
 
-    <!-- WhatsApp CTA -->
+    <!-- WhatsApp CTA - TASK 3: Fixed positioning for desktop -->
     <div class="whatsapp-cta" id="whatsappCta">
       📩 Place Order on WhatsApp
     </div>
@@ -1856,20 +1836,24 @@
       </div>
     </div>
 
-    <!-- Cart Page - Fixed duplicate buttons -->
+    <!-- Cart Page - TASK 2: Updated for empty cart state -->
     <div class="cart-page" id="cartPage">
       <div class="cart-header">
         <span class="back-btn">‹</span>
         <span class="cart-title">Cart</span>
         <span class="savings-badge" id="savingsBadge">Saved ₹0</span>
       </div>
-      <div class="delivery-banner">
+      <div class="delivery-banner" id="deliveryBanner">
         ✓ Free delivery auto applied on this order!
       </div>
       <div class="cart-items-container">
         <div class="cart-items" id="cartItems"></div>
+        <div class="empty-cart" id="emptyCart" style="display: none;">
+          <div class="empty-cart-icon">🛒</div>
+          <div class="empty-cart-text">There are no items in your cart.</div>
+        </div>
       </div>
-      <div class="order-summary">
+      <div class="order-summary" id="orderSummary">
         <div class="summary-row">
           <span class="original-total" id="originalTotal">₹0</span>
           <span class="total-price" id="finalTotal">₹0</span>
@@ -1878,14 +1862,14 @@
       </div>
       <div class="cart-actions">
         <button class="continue">Continue Shopping</button>
-        <button class="place">
+        <button class="place" id="placeOrderBtn">
           <div class="order-total" id="placeTotal">₹0</div>
           Place Order
         </button>
       </div>
     </div>
 
-    <!-- Structured Data - Fixed schema type - TASK 5 -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -1912,7 +1896,7 @@
   </div> <!-- End of appWrapper -->
 
   <script>
-    // Product data - Reduced to 7 items as requested
+    // Product data
     const products = [
       { id:1, name:"White Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728284/Whitt_spxhew.jpg", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy White Pomfret online in Hyderabad – premium coastal fish with mild taste and firm flesh. Perfect for fry, grill, or curry. Hygienically cleaned and delivered fresh next day." },
       { id:2, name:"Black Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/Blac_qnztqj.jpg", mrp:850, finalPrice:750, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Black Pomfret in Hyderabad – firm texture, rich flavor, and ideal for spicy Andhra fish curry, grills, and fries. Packed fresh and delivered with care by Coastal Fresh." },
@@ -1937,7 +1921,7 @@
       { id:21, name:"Freshwater Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/fresh_watre_prawns_-_L_h5fyn9.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Large Freshwater Prawns – premium size, juicy texture, and perfect for butter garlic, grills, or party dishes. Farm fresh and delivered across Hyderabad." },
       { id:22, name:"Live Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:1000, finalPrice:1000, offer:0, gross:"1000g", net:"800g", available:true, category:"Crabs", desc:"Buy Live Crab in Hyderabad – delivered live, ensuring top freshness. Sweet meat, great for masala, curry, or steam. Hygienically packed and farm-sourced." },
       { id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:900, finalPrice:900, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Egg Crab delivery – crabs with roe (eggs) for rich, creamy flavor. Popular in traditional Andhra crab curry. Fresh, sweet meat delivered hygienically across Hyderabad." },
-      { id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577552/Blue_Crab_tzjkxm.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Fresh Blue Crab delivery – delicate, sweet meat, smaller in size but packed with flavor. Great for curry, soups, and stir-fries. Delivered ice-packed in Hyderabad." },
+      { id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577552/Blue_C Crab_tzjkxm.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Fresh Blue Crab delivery – delicate, sweet meat, smaller in size but packed with flavor. Great for curry, soups, and stir-fries. Delivered ice-packed in Hyderabad." },
       { id:25, name:"Manda Pitha", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:600, finalPrice:600, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Manda Pitha crab – Godavari special variety, highly flavorful and tender. Ideal for spicy masala curries. Freshly sourced and delivered to Hyderabad homes." },
       { id:26, name:"3 Dot Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png", mrp:500, finalPrice:500, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"3 Dot Crab delivery – unique shell markings, soft meat, and sweet taste. Perfect for fry or curry recipes. Delivered fresh and cleaned in Hyderabad." },
       { id:27, name:"Prawns Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1900, finalPrice:1710, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra Prawns Pickle – made with fresh prawns, cold-pressed oil, and stone-ground spices. Spicy, tangy, and preservative-free. Delivered across Hyderabad." },
@@ -1965,6 +1949,13 @@
     const headerCartAmount = document.getElementById('headerCartAmount');
     const headerCart = document.getElementById('headerCart');
     const searchInput = document.getElementById('searchInput');
+    const referBanner = document.getElementById('referBanner');
+    const emptyCart = document.getElementById('emptyCart');
+    const cartItems = document.getElementById('cartItems');
+    const orderSummary = document.getElementById('orderSummary');
+    const deliveryBanner = document.getElementById('deliveryBanner');
+    const savingsBadge = document.getElementById('savingsBadge');
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
 
     // Initialize the app
     function init() {
@@ -1980,7 +1971,7 @@
           const category = e.target.dataset.category;
           filterCategory(category);
           
-          // Track category selection for analytics (Task 5)
+          // Track category selection for analytics
           if (typeof gtag === 'function') {
             gtag('event', 'select_category', {
               'event_category': 'engagement',
@@ -1990,23 +1981,30 @@
         }
       });
       
-      // Search functionality - TASK 3
+      // Search functionality - TASK 5: Fixed search
       searchInput.addEventListener('input', function() {
         currentSearch = this.value.trim().toLowerCase();
         currentPage = 1;
         renderProducts();
+        
+        // Track search event for analytics
+        if (currentSearch && typeof gtag === 'function') {
+          gtag('event', 'search', {
+            'search_term': currentSearch
+          });
+        }
       });
       
-      // Event delegation for product grid - FIX FOR TASK 1
+      // Event delegation for product grid
       productGrid.addEventListener('click', function(e) {
         // Handle add button clicks - prevent opening product popup
         if (e.target.classList.contains('add-btn')) {
-          e.stopPropagation(); // Prevent event from bubbling to product card
+          e.stopPropagation();
           const productCard = e.target.closest('.product-card');
           if (productCard) {
             const productId = parseInt(productCard.dataset.id);
             addToCart(productId);
-            return; // Exit early to prevent opening popup
+            return;
           }
         }
         
@@ -2047,6 +2045,23 @@
       
       // Share button event listener
       document.querySelector('.share-btn').addEventListener('click', shareProduct);
+
+      // TASK 4: Refer & Earn banner click event
+      referBanner.addEventListener('click', function() {
+        // Generate referral message
+        const message = "Hey! I've been ordering fresh seafood from Coastal Fresh 🐟🦐 – super clean, tasty & delivered right to my home in Hyderabad! You should try it too 👉 https://bit.ly/coastalfresh";
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        
+        // Track refer & earn click for analytics
+        if (typeof gtag === 'function') {
+          gtag('event', 'refer_earn_click', {
+            'event_category': 'engagement',
+            'event_label': 'Refer & Earn Banner Clicked'
+          });
+        }
+        
+        window.open(whatsappUrl, '_blank');
+      });
 
       // Add touch feedback and animations for FAQ
       document.addEventListener('DOMContentLoaded', function() {
@@ -2092,12 +2107,13 @@
     function renderProducts() {
       productGrid.innerHTML = '';
       
-      // Filter products
+      // Filter products - TASK 5: Fixed search functionality
       let filtered = products.filter(p => {
         const matchesCategory = currentCategory === 'All' || p.category === currentCategory;
         const matchesSearch = !currentSearch || 
           p.name.toLowerCase().includes(currentSearch) || 
-          p.desc.toLowerCase().includes(currentSearch);
+          p.desc.toLowerCase().includes(currentSearch) ||
+          p.category.toLowerCase().includes(currentSearch);
         return matchesCategory && matchesSearch;
       });
       
@@ -2162,7 +2178,7 @@
       currentPage++;
       renderProducts();
       
-      // Track show more event for analytics (Task 5)
+      // Track show more event for analytics
       if (typeof gtag === 'function') {
         gtag('event', 'show_more_products', {
           'event_category': 'engagement',
@@ -2207,7 +2223,7 @@
       // Toggle current FAQ
       faq.classList.toggle('active', !isActive);
       
-      // Track FAQ interaction for analytics (Task 5)
+      // Track FAQ interaction for analytics
       if (typeof gtag === 'function') {
         gtag('event', 'faq_interaction', {
           'event_category': 'engagement',
@@ -2247,7 +2263,7 @@
       headerCartCount.textContent = count;
       headerCartAmount.textContent = '₹' + total;
       
-      // Show/hide cart footer and header elements based on cart items (Task 1)
+      // Show/hide cart footer and header elements based on cart items
       if (count > 0) {
         cartFooter.style.display = 'flex';
         headerCart.classList.add('has-items');
@@ -2262,7 +2278,7 @@
       saveCart();
       showToast('Added to cart!');
       
-      // Track add to cart event (Task 5)
+      // Track add to cart event
       if (typeof gtag === 'function') {
         const product = products.find(p => p.id === id);
         gtag('event', 'add_to_cart', {
@@ -2287,7 +2303,7 @@
         }
         saveCart();
         
-        // Track quantity change for analytics (Task 5)
+        // Track quantity change for analytics
         if (typeof gtag === 'function') {
           const product = products.find(p => p.id == id);
           gtag('event', delta > 0 ? 'increase_quantity' : 'decrease_quantity', {
@@ -2314,7 +2330,7 @@
       delete cart[id];
       saveCart();
       
-      // Track remove from cart for analytics (Task 5)
+      // Track remove from cart for analytics
       if (typeof gtag === 'function') {
         const product = products.find(p => p.id == id);
         gtag('event', 'remove_from_cart', {
@@ -2377,7 +2393,7 @@
       closePopup();
     }
 
-    // Share product functionality - UPDATED FOR TASK 3
+    // Share product functionality
     function shareProduct() {
       if (!popupProduct) return;
       
@@ -2388,7 +2404,7 @@
       const message = `Check out this ${popupProduct.name} from Coastal Fresh! ${popupProduct.desc.substring(0, 100)}... ${shareUrl}`;
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
       
-      // Track share event (Task 5)
+      // Track share event
       if (typeof gtag === 'function') {
         gtag('event', 'share', {
           'method': 'WhatsApp',
@@ -2400,9 +2416,9 @@
       window.open(whatsappUrl, '_blank');
     }
 
-    // Cart page
+    // Cart page - TASK 2: Updated for empty cart state
     function openCart() {
-      // Track view cart event (Task 5)
+      // Track view cart event
       if (typeof gtag === 'function') {
         gtag('event', 'view_cart', {
           'currency': 'INR',
@@ -2463,6 +2479,25 @@
       savingsBadge.textContent = 'Saved ₹' + savings;
       savingsText.textContent = 'Total Savings ₹' + savings;
       
+      // TASK 2: Show/hide elements based on cart items
+      if (Object.keys(cart).length === 0) {
+        // Empty cart state
+        emptyCart.style.display = 'block';
+        cartItems.style.display = 'none';
+        orderSummary.style.display = 'none';
+        deliveryBanner.style.display = 'none';
+        savingsBadge.style.display = 'none';
+        placeOrderBtn.style.display = 'none';
+      } else {
+        // Cart has items
+        emptyCart.style.display = 'none';
+        cartItems.style.display = 'block';
+        orderSummary.style.display = 'block';
+        deliveryBanner.style.display = 'flex';
+        savingsBadge.style.display = 'flex';
+        placeOrderBtn.style.display = 'block';
+      }
+      
       // Add event listeners to quantity buttons
       document.querySelectorAll('.quantity-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -2512,14 +2547,14 @@
       return items;
     }
 
-    // Place order via WhatsApp - UPDATED FOR TASK 4 (encoding fix)
+    // Place order via WhatsApp
     function placeOrder() {
       if (Object.keys(cart).length === 0) {
         showToast('Your cart is empty!');
         return;
       }
       
-      // Track place order event (Task 5)
+      // Track place order event
       if (typeof gtag === 'function') {
         gtag('event', 'begin_checkout', {
           'currency': 'INR',
@@ -2540,7 +2575,7 @@
         total += itemTotal;
         origTotal += itemOrig;
         
-        // TASK 4: Properly encode product name for WhatsApp
+        // Properly encode product name for WhatsApp
         const productName = encodeURIComponent(p.name);
         message += `- ${productName} (${p.net}) x ${qty} = ₹${itemTotal}%0A`;
       }
@@ -2552,8 +2587,8 @@
         message += `You saved: ₹${savings}%0A`;
       }
       
-      // Add the refer & earn message - TASK 1
-      message += "%0A%0A" + encodeURIComponent("Hey! I’ve been ordering fresh seafood from Coastal Fresh 🐟🦐 – super clean, tasty & delivered right to my home in Hyderabad! You should try it too 👉  https://bit.ly/coastalfresh");
+      // Add the refer & earn message
+      message += "%0A%0A" + encodeURIComponent("Hey! I've been ordering fresh seafood from Coastal Fresh 🐟🦐 – super clean, tasty & delivered right to my home in Hyderabad! You should try it too 👉  https://bit.ly/coastalfresh");
       
       message += "%0A%0APlease confirm availability and delivery timing.";
       
@@ -2561,7 +2596,7 @@
       window.open(url, '_blank');
     }
 
-    // Toast notification - Fixed
+    // Toast notification
     function showToast(message) {
       toastMessage.textContent = message;
       toast.classList.add('show');
@@ -2576,11 +2611,11 @@
       // Initialize the app
       init();
       
-      // Generate product schema for SEO - TASK 5
+      // Generate product schema for SEO
       generateProductSchema();
     });
     
-    // Generate product schema for SEO - TASK 5
+    // Generate product schema for SEO
     function generateProductSchema() {
       const productSchemas = products.map(product => {
         return {
