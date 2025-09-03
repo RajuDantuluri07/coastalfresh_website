@@ -15,7 +15,7 @@
   <meta name="description" content="Order premium fresh seafood and authentic pickles in Hyderabad. Fresh fish, tiger prawns, crabs, and traditional pickles with next-day delivery. Trusted local sourcing from Coastal Andhra Pradesh." />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <link rel="canonical" href="https://www.coastalfresh.in" />
-  <meta name="theme-color" content="#0077be" />
+  <meta name="theme-color" content="#1e40af" />
   <meta name="keywords" content="fresh fish delivery hyderabad, seafood delivery hyderabad, buy prawns online hyderabad, crab delivery hyderabad, hyderabad fish online, fresh seafood home delivery, andhra seafood hyderabad, online pickles hyderabad, prawn pickle online, fish pickle, mutton pickle, chicken pickle online" />
 
   <!-- Open Graph / Twitter -->
@@ -131,6 +131,7 @@
       box-shadow: 0 0 30px rgba(0,0,0,0.25);
       position: relative;
       z-index: 2;
+      overflow: hidden;
     }
 
     /* Desktop background - TASK 2: Configurable via CSS variable */
@@ -143,6 +144,7 @@
         left: 50%;
         transform: translateX(-50%);
         max-width: 480px;
+        width: 100%;
       }
     }
     
@@ -207,12 +209,12 @@
       display: flex; /* Show when cart has items */
     }
     
-    /* Ticker */
+    /* Ticker - Updated to blue gradient */
     .ticker-container { 
       position: sticky; 
       top: 60px; 
       z-index: 99; 
-      background: #FFA500; 
+      background: linear-gradient(90deg, #1e40af, #3b82f6); 
       color: white; 
       padding: 8px 0; 
       overflow: hidden; 
@@ -261,7 +263,7 @@
       background-position: center; 
     }
     
-    /* Trust Icons Strip */
+    /* Trust Icons Strip - Updated with blue theme */
     .trust-strip {
       display: flex;
       justify-content: space-between;
@@ -336,9 +338,9 @@
     }
 
     .trust-item:nth-child(1):hover { box-shadow: 0 15px 35px rgba(59, 130, 246, 0.3); }
-    .trust-item:nth-child(2):hover { box-shadow: 0 15px 35px rgba(16, 185, 129, 0.3); }
-    .trust-item:nth-child(3):hover { box-shadow: 0 15px 35px rgba(245, 158, 11, 0.3); }
-    .trust-item:nth-child(4):hover { box-shadow: 0 15px 35px rgba(168, 85, 247, 0.3); }
+    .trust-item:nth-child(2):hover { box-shadow: 0 15px 35px rgba(59, 130, 246, 0.3); }
+    .trust-item:nth-child(3):hover { box-shadow: 0 15px 35px rgba(59, 130, 246, 0.3); }
+    .trust-item:nth-child(4):hover { box-shadow: 0 15px 35px rgba(59, 130, 246, 0.3); }
 
     .icon-container {
       display: flex;
@@ -352,47 +354,8 @@
       position: relative;
       overflow: hidden;
       margin-bottom: 2px;
-    }
-
-    .trust-item:nth-child(1) .icon-container {
       background: linear-gradient(135deg, #3b82f6, #1d4ed8);
       color: white;
-    }
-
-    .trust-item:nth-child(2) .icon-container {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-    }
-
-    .trust-item:nth-child(3) .icon-container {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: white;
-    }
-
-    .trust-item:nth-child(4) .icon-container {
-      background: linear-gradient(135deg, #a855f7, #7c3aed);
-      color: white;
-    }
-
-    .trust-item:hover .icon-container {
-      transform: rotate(5deg) scale(1.1);
-    }
-
-    .icon-container::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
-      transform: translate(-50%, -50%) scale(0);
-      border-radius: 50%;
-      transition: transform 0.6s ease;
-    }
-
-    .trust-item:hover .icon-container::after {
-      transform: translate(-50%, -50%) scale(1.5);
     }
 
     .trust-content {
@@ -594,9 +557,10 @@
     
     /* Categories */
     .section-title { 
-      font-size: 18px; 
-      font-weight: 600; 
+      font-size: 20px; 
+      font-weight: 700; 
       margin: 20px 16px 12px; 
+      color: #1e293b;
     }
     .category-nav { 
       display: flex; 
@@ -622,7 +586,7 @@
       font-weight: 600; 
     }
     
-    /* Products */
+    /* Products - Updated with hover effects and better typography */
     .product-grid { 
       display: grid; 
       grid-template-columns: repeat(2, 1fr); 
@@ -640,6 +604,10 @@
       flex-direction: column; 
       transition: transform 0.2s, box-shadow 0.2s; 
     }
+    .product-card:hover { 
+      transform: translateY(-4px); 
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
+    }
     .product-card:active { 
       transform: scale(0.98); 
     }
@@ -651,7 +619,7 @@
       margin-bottom: 8px; 
     }
     .product-price { 
-      font-size: 16px; 
+      font-size: 18px; 
       font-weight: 700; 
       color: #111; 
     }
@@ -662,22 +630,23 @@
       margin-left: 4px; 
     }
     .product-name { 
-      font-size: 14px; 
-      color: #444; 
+      font-size: 16px; 
+      color: #374151; 
       margin: 4px 0; 
       line-height: 1.3; 
       flex-grow: 1; 
+      font-weight: 500;
     }
     .product-weight { 
       font-size: 12px; 
       color: #666; 
-      margin-bottom: 30px; 
+      margin-bottom: 40px; 
     }
     .offer-tag {
       position: absolute;
       top: 8px;
       left: 8px;
-      background: linear-gradient(135deg, #ff6b35, #f7931e);
+      background: linear-gradient(135deg, #1e40af, #3b82f6);
       color: white;
       padding: 4px 8px;
       border-radius: 4px;
@@ -693,15 +662,15 @@
       background: #2563eb; 
       color: white; 
       border: none; 
-      width: 32px; 
-      height: 32px; 
-      border-radius: 50%; 
+      padding: 8px 12px;
+      border-radius: 20px; 
       cursor: pointer; 
-      font-size: 16px; 
+      font-size: 14px; 
       display: flex; 
       align-items: center; 
       justify-content: center; 
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      gap: 4px;
     }
     .add-btn:active { 
       transform: scale(0.9); 
@@ -717,9 +686,10 @@
       font-weight: 600; 
       cursor: pointer; 
       font-size: 16px; 
+      text-transform: uppercase;
     }
     
-    /* Refer & Earn Banner - TASK 4: Made clickable */
+    /* Refer & Earn Banner */
     .refer-banner {
       margin: 20px 16px 0;
       border-radius: 12px;
@@ -762,7 +732,7 @@
       font-weight: 600; 
     }
     
-    /* WhatsApp CTA - TASK 3: Fixed positioning for desktop */
+    /* WhatsApp CTA - Updated styling */
     .whatsapp-cta { 
       position: fixed; 
       bottom: 0; 
@@ -779,9 +749,11 @@
       cursor: pointer; 
       z-index: 100; 
       margin: 0 auto;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
-    /* Product Popup - TASK 1: Constrained to mobile wrapper */
+    /* Product Popup - Fixed positioning */
     .product-popup { 
       position: fixed; 
       top: 0; 
@@ -792,12 +764,17 @@
       z-index: 1000; 
       display: none; 
       flex-direction: column; 
+      overflow-y: auto;
     }
     .popup-header { 
       display: flex; 
       align-items: center; 
       padding: 16px; 
       border-bottom: 1px solid #ddd; 
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 10;
     }
     .back-btn { 
       font-size: 24px; 
@@ -819,6 +796,7 @@
       padding: 16px; 
       overflow-y: auto; 
       position: relative;
+      flex: 1;
     }
     .popup-body img { 
       width: 80%; 
@@ -870,7 +848,7 @@
       margin-bottom: 16px; 
     }
     .popup-footer { 
-      position: absolute; 
+      position: sticky; 
       bottom: 0; 
       left: 0; 
       width: 100%; 
@@ -879,6 +857,7 @@
       padding: 16px; 
       border-top: 1px solid #ddd; 
       background: white; 
+      z-index: 10;
     }
     .popup-footer button { 
       flex: 1; 
@@ -888,6 +867,7 @@
       border-radius: 8px; 
       cursor: pointer; 
       font-size: 16px; 
+      text-transform: uppercase;
     }
     .popup-footer .close-btn { 
       background: white; 
@@ -900,7 +880,7 @@
       border: none; 
     }
     
-    /* Cart Page - TASK 1: Constrained to mobile wrapper */
+    /* Cart Page - Fixed positioning */
     .cart-page { 
       position: fixed; 
       top: 0; 
@@ -911,6 +891,7 @@
       z-index: 2000; 
       display: none; 
       flex-direction: column; 
+      overflow-y: auto;
     }
     .cart-header { 
       display: flex; 
@@ -919,6 +900,9 @@
       padding: 16px; 
       border-bottom: 1px solid #ddd; 
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     .cart-title { 
       font-weight: 600; 
@@ -1047,6 +1031,9 @@
       padding: 16px; 
       border-top: 1px solid #ddd; 
       box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
     }
     .continue { 
       flex: 1; 
@@ -1058,6 +1045,7 @@
       font-weight: 600; 
       font-size: 16px; 
       cursor: pointer;
+      text-transform: uppercase;
     }
     .place { 
       flex: 1; 
@@ -1070,6 +1058,7 @@
       font-size: 16px; 
       position: relative; 
       cursor: pointer;
+      text-transform: uppercase;
       display: none; /* Hidden by default */
     }
     .place .order-total { 
@@ -1084,7 +1073,7 @@
       font-size: 14px; 
     }
     
-    /* Empty cart state - TASK 2 */
+    /* Empty cart state */
     .empty-cart {
       text-align: center;
       padding: 40px 20px;
@@ -1404,6 +1393,7 @@
 
     .answer-content {
       padding: 0 20px 20px 20px;
+      font-size: 14px;
     }
 
     .answer-content p {
@@ -1588,6 +1578,36 @@
         font-size: 13px;
       }
     }
+
+    /* Desktop hover effects */
+    @media (min-width: 769px) {
+      .product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
+      }
+    }
+
+    /* Fix for popups on desktop - constrain to app wrapper */
+    @media (min-width: 769px) {
+      .product-popup,
+      .cart-page {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 480px;
+        height: 100%;
+        border-radius: 12px;
+        box-shadow: 0 0 30px rgba(0,0,0,0.3);
+        z-index: 1000;
+      }
+
+      /* Prevent body scroll when popup is open */
+      body.popup-open {
+        overflow: hidden;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1612,13 +1632,13 @@
       </div>
     </div>
 
-    <!-- Ticker -->
+    <!-- Ticker - Updated content -->
     <div class="ticker-container">
       <div class="ticker">
-        <div class="ticker-item"><i class="fas fa-tag"></i> NEW USERS: 10% OFF on your 1st order</div>
-        <div class="ticker-item"><i class="fas fa-clipboard"></i> Prices may change daily based on market & availability</div>
-        <div class="ticker-item"><i class="fas fa-exclamation-circle"></i> Book 1 Day in Advance for Guaranteed Freshness</div>
-        <div class="ticker-item"><i class="fas fa-star"></i> Loved by 500+ Hyderabad customers (4.8★ average)</div>
+        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
+        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
+        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
+        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
       </div>
     </div>
 
@@ -1631,7 +1651,7 @@
       </div>
     </div>
 
-    <!-- Trust Icons Strip -->
+    <!-- Trust Icons Strip - Updated with blue theme -->
     <section class="trust-strip">
       <div class="trust-item">
         <div class="icon-container">🧊</div>
@@ -1682,9 +1702,9 @@
     <!-- Products -->
     <div class="section-title">Premium Seafood & Pickles</div>
     <div class="product-grid" id="productGrid"></div>
-    <button class="show-more-btn" id="showMoreBtn">➕ Show More Products</button>
+    <button class="show-more-btn" id="showMoreBtn">SHOW MORE PRODUCTS</button>
 
-    <!-- Refer & Earn Banner - TASK 4: Made clickable -->
+    <!-- Refer & Earn Banner -->
     <div class="refer-banner" id="referBanner">
       <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756885955/refer_earn_1_nguvrb.jpg" alt="Refer and Earn - Get ₹200 off when you refer a friend">
     </div>
@@ -1795,7 +1815,7 @@
           </button>
           <div class="a">
             <div class="answer-content">
-              <p>Yes! All our seafood is carefully cleaned, deveined, and neatly packed — so it’s 100% ready to cook when it reaches your kitchen.</p>
+              <p>Yes! All our seafood is carefully cleaned, deveined, and neatly packed — so it's 100% ready to cook when it reaches your kitchen.</p>
               <div class="answer-highlight">✨ Hygienically cleaned & ready to cook</div>
             </div>
           </div>
@@ -1827,12 +1847,12 @@
       <div id="cartTotal">₹0</div>
     </div>
 
-    <!-- WhatsApp CTA - TASK 3: Fixed positioning for desktop -->
+    <!-- WhatsApp CTA -->
     <div class="whatsapp-cta" id="whatsappCta">
-      📩 Place Order on WhatsApp
+      PLACE ORDER VIA WHATSAPP
     </div>
 
-    <!-- Product Popup - TASK 1: Now constrained to mobile wrapper -->
+    <!-- Product Popup - Fixed positioning -->
     <div class="product-popup" id="productPopup">
       <div class="popup-header">
         <span class="back-btn">‹</span>
@@ -1841,12 +1861,12 @@
       </div>
       <div class="popup-body" id="popupBody"></div>
       <div class="popup-footer">
-        <button class="close-btn">Close</button>
-        <button class="add">Add to cart</button>
+        <button class="close-btn">CLOSE</button>
+        <button class="add">ADD TO CART</button>
       </div>
     </div>
 
-    <!-- Cart Page - TASK 1: Now constrained to mobile wrapper -->
+    <!-- Cart Page - Fixed positioning -->
     <div class="cart-page" id="cartPage">
       <div class="cart-header">
         <span class="back-btn">‹</span>
@@ -1871,10 +1891,10 @@
         <div class="savings-text" id="savingsText"></div>
       </div>
       <div class="cart-actions">
-        <button class="continue">Continue Shopping</button>
+        <button class="continue">CONTINUE SHOPPING</button>
         <button class="place" id="placeOrderBtn">
           <div class="order-total" id="placeTotal">₹0</div>
-          Place Order
+          PLACE ORDER
         </button>
       </div>
     </div>
@@ -1886,7 +1906,7 @@
       "@type": "LocalBusiness",
       "name": "Coastal Fresh",
       "image": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png",
-      "url": "https://www.coastalfresh.in/",
+      "url": "https://www.coastalfresh.in",
       "telephone": "+91 99851 25678",
       "email": "info@coastalfresh.in",
       "address": { "@type": "PostalAddress", "addressLocality": "Hyderabad", "addressRegion": "Telangana", "addressCountry": "IN" },
@@ -1895,7 +1915,7 @@
       "openingHours": "Mo-Su 08:00-20:00",
       "priceRange": "₹₹",
       "sameAs": [
-        "https://www.facebook.com/CoastalFresh.in/",
+        "https://www.facebook.com/CoastalFresh.in",
         "https://www.instagram.com/coastalfresh.in",
         "https://www.youtube.com/@CoastalFresh",
         "https://t.me/coastalfreshseafoods",
@@ -1907,7 +1927,7 @@
 
   <script>
     // TASK 2: Configurable desktop background
-    const desktopBackgroundImage = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1756388255/Coastal_Fresh_Banner_3_wqpv8c.png';
+    const desktopBackgroundImage = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1756914772/Coastal_Fresh_Sea_food_hyderabad_-_website_banner_shqapq.png';
     document.documentElement.style.setProperty('--desktop-bg-image', `url(${desktopBackgroundImage})`);
 
     // Product data
@@ -1931,7 +1951,7 @@
       { id:17, name:"Sea Tiger Prawns - 60C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:550, finalPrice:550, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Sea Tiger Prawns 60-count – smaller size, big on flavor. Perfect for masala curry, fried rice, or snacks. Cleaned and delivered hygienically in Hyderabad." },
       { id:18, name:"Chakuroyya / Godavari", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Godavari Chakuroyya freshwater prawns – authentic Andhra taste with sweet flavor. Perfect for traditional prawn curry or fry. Delivered fresh and cleaned in Hyderabad." },
       { id:19, name:"Freshwater Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:380, finalPrice:380, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Small Freshwater Prawns – affordable, cleaned, and ready to cook. Great for prawn fry, biryani, or curries. Fresh from farms, delivered across Hyderabad." },
-      { id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577554/Fresh_Water_Prawns_-_M_lpvxiu.png", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium Freshwater Prawns – balanced size, firm flesh, and great for grills, curries, or pasta. Hygienically cleaned and delivered ice-fresh in Hyderabad." },
+      { id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577554/Fresh_Water_Prawns_-_M_lpvxiu.png", mrp:480, finalPrice:480, offer:0, gross:"1000", net:"500g", available:true, category:"Prawns", desc:"Medium Freshwater Prawns – balanced size, firm flesh, and great for grills, curries, or pasta. Hygienically cleaned and delivered ice-fresh in Hyderabad." },
       { id:21, name:"Freshwater Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/fresh_watre_prawns_-_L_h5fyn9.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Large Freshwater Prawns – premium size, juicy texture, and perfect for butter garlic, grills, or party dishes. Farm fresh and delivered across Hyderabad." },
       { id:22, name:"Live Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:1000, finalPrice:1000, offer:0, gross:"1000g", net:"800g", available:true, category:"Crabs", desc:"Buy Live Crab in Hyderabad – delivered live, ensuring top freshness. Sweet meat, great for masala, curry, or steam. Hygienically packed and farm-sourced." },
       { id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:900, finalPrice:900, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Egg Crab delivery – crabs with roe (eggs) for rich, creamy flavor. Popular in traditional Andhra crab curry. Fresh, sweet meat delivered hygienically across Hyderabad." },
@@ -1995,7 +2015,7 @@
         }
       });
       
-      // Search functionality - TASK 5: Fixed search
+      // Search functionality
       searchInput.addEventListener('input', function() {
         currentSearch = this.value.trim().toLowerCase();
         currentPage = 1;
@@ -2060,7 +2080,7 @@
       // Share button event listener
       document.querySelector('.share-btn').addEventListener('click', shareProduct);
 
-      // TASK 4: Refer & Earn banner click event
+      // Refer & Earn banner click event
       referBanner.addEventListener('click', function() {
         // Generate referral message
         const message = "Hey! I've been ordering fresh seafood from Coastal Fresh 🐟🦐 – super clean, tasty & delivered right to my home in Hyderabad! You should try it too 👉 https://bit.ly/coastalfresh";
@@ -2097,11 +2117,11 @@
 
         // Auto-open first FAQ for engagement
         setTimeout(() => {
-          const firstFAQ = document.querySelector('.faq[data-priority="high"]');
-          if (firstFAQ) {
-            firstFAQ.classList.add('active');
-          }
-        }, 1000);
+  const firstFAQ = document.querySelector('.faq[data-priority="high"]');
+  if (firstFAQ) {
+    firstFAQ.classList.add('active');
+  }
+}, 1000);
 
         // Touch feedback for why-choose items
         const items = document.querySelectorAll('.why-item');
@@ -2121,7 +2141,7 @@
     function renderProducts() {
       productGrid.innerHTML = '';
       
-      // Filter products - TASK 5: Fixed search functionality
+      // Filter products
       let filtered = products.filter(p => {
         const matchesCategory = currentCategory === 'All' || p.category === currentCategory;
         const matchesSearch = !currentSearch || 
@@ -2145,7 +2165,7 @@
           <div class="product-price">₹${p.finalPrice}${p.mrp > p.finalPrice ? `<span class="product-original-price">₹${p.mrp}</span>` : ''}</div>
           <div class="product-name">${p.name}</div>
           <div class="product-weight">${p.net}</div>
-          <button class="add-btn">+</button>
+          <button class="add-btn">+ ADD</button>
         `;
         productGrid.appendChild(div);
       });
@@ -2354,7 +2374,7 @@
             'item_id': product.id,
             'item_name': product.name,
             'item_category': product.category,
-            'price': product.finalPrice
+            'pice': product.finalPrice
           }]
         });
       }
@@ -2391,6 +2411,7 @@
         `;
         
         document.getElementById('productPopup').style.display = 'flex';
+        document.body.classList.add('popup-open');
         
         if (productCard) {
           productCard.classList.remove('loading');
@@ -2400,6 +2421,7 @@
 
     function closePopup() {
       document.getElementById('productPopup').style.display = 'none';
+      document.body.classList.remove('popup-open');
     }
 
     function addPopupToCart() {
@@ -2430,7 +2452,7 @@
       window.open(whatsappUrl, '_blank');
     }
 
-    // Cart page - TASK 2: Updated for empty cart state
+    // Cart page
     function openCart() {
       // Track view cart event
       if (typeof gtag === 'function') {
@@ -2493,7 +2515,7 @@
       savingsBadge.textContent = 'Saved ₹' + savings;
       savingsText.textContent = 'Total Savings ₹' + savings;
       
-      // TASK 2: Show/hide elements based on cart items
+      // Show/hide elements based on cart items
       if (Object.keys(cart).length === 0) {
         // Empty cart state
         emptyCart.style.display = 'block';
@@ -2531,10 +2553,12 @@
       
       // Show cart page
       document.getElementById('cartPage').style.display = 'flex';
+      document.body.classList.add('popup-open');
     }
 
     function closeCart() {
       document.getElementById('cartPage').style.display = 'none';
+      document.body.classList.remove('popup-open');
     }
 
     function calculateCartTotal() {
@@ -2561,7 +2585,7 @@
       return items;
     }
 
-    // TASK 3: Fixed WhatsApp message formatting
+    // WhatsApp order placement
     function placeOrder() {
       if (Object.keys(cart).length === 0) {
         showToast('Your cart is empty!');
