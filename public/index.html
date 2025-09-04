@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Coastal Fresh - Premium Seafood Delivery in Hyderabad | Fresh Fish, Prawns & Pickles</title>
-  
-  <!-- Preconnect to external domains for performance -->
+
+  <!-- Preconnects -->
   <link rel="preconnect" href="https://res.cloudinary.com">
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://static.hotjar.com">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-  
-  <!-- SEO Meta Tags -->
+
+  <!-- SEO -->
   <meta name="description" content="Order premium fresh seafood and authentic pickles in Hyderabad. Fresh fish, tiger prawns, crabs, and traditional pickles with next-day delivery. Trusted local sourcing from Coastal Andhra Pradesh." />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <link rel="canonical" href="https://www.coastalfresh.in" />
@@ -33,33 +33,22 @@
   <meta name="twitter:description" content="Fresh fish, prawns, crabs & authentic pickles with next-day delivery and hygienic processing." />
   <meta name="twitter:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" />
 
-  <!-- Analytics: GA4 + Hotjar + WhatsApp tracking -->
+  <!-- Analytics: GA4 (clean params) + Hotjar + WhatsApp tracking -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-GSHMPRYPW1"></script>
   <script>
-    // Track first visit
-    if (!localStorage.getItem('firstVisit')) {
-      localStorage.setItem('firstVisit', new Date().toISOString());
-      // Track first visit
-      if (typeof gtag === 'function') {
-        gtag('event', 'first_visit', {
-          'event_category': 'engagement',
-          'event_label': 'New User'
-        });
-      }
-    } else {
-      // Track repeat visit
-      if (typeof gtag === 'function') {
-        gtag('event', 'repeat_visit', {
-          'event_category': 'engagement',
-          'event_label': 'Returning User'
-        });
-      }
-    }
-
     window.dataLayer = window.dataLayer || [];
     function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-GSHMPRYPW1');
+
+    try {
+      if (!localStorage.getItem('firstVisit')) {
+        localStorage.setItem('firstVisit', new Date().toISOString());
+        gtag('set', 'user_properties', { user_type: 'new' });
+      } else {
+        gtag('set', 'user_properties', { user_type: 'returning' });
+      }
+    } catch (_) {}
   </script>
 
   <script>
@@ -88,21 +77,24 @@
       document.addEventListener('DOMContentLoaded', function() {
         const waLinks = Array.from(document.querySelectorAll('a[href*="wa.me/"], a[href*="api.whatsapp.com/"]'));
         waLinks.forEach(a => { a.href = withUTM(a.href); });
+
         function track(eventName, extra) {
           if (typeof gtag === 'function') gtag('event', eventName, extra || {});
         }
         function onClick(e) {
           const a = e.currentTarget;
-          track('whatsapp_click', {
+          track('click', {
             link_text: (a.getAttribute('aria-label') || a.textContent || '').trim(),
-            link_href: a.href,
-            location: a.dataset.trackLocation || 'link'
+            link_url: a.href,
+            link_target: a.target || '_self',
+            location: a.dataset.trackLocation || 'link',
+            outbound: a.host && a.host !== location.host
           });
         }
         waLinks.forEach(a => a.addEventListener('click', onClick));
         const oldOpenWA = window.openWhatsApp;
         window.openWhatsApp = function() {
-          track('whatsapp_click', { location: 'floating_button' });
+          track('click', { location: 'floating_button', link_text: 'WhatsApp CTA', link_url: 'https://wa.me' });
           if (typeof oldOpenWA === 'function') return oldOpenWA();
         };
         window.withUTM = withUTM;
@@ -112,1508 +104,218 @@
 
   <link rel="icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" href="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png">
-
-  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <style>
-    /* Reset and Base Styles */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f9ff; color: #333; line-height: 1.6; }
-    .container { max-width: 100%; margin: 0 auto; }
-    
-    /* Desktop Background Styling - TASK 2: Configurable background */
-    #appWrapper {
-      max-width: 480px;        /* lock mobile width like a phone */
-      margin: 0 auto;          /* center in the middle */
-      background: #fff;        /* white app background */
-      min-height: 100vh;       /* take full height */
-      box-shadow: 0 0 30px rgba(0,0,0,0.25);
-      position: relative;
-      z-index: 2;
-      overflow: hidden;
+    /* ===== Brand tokens & base ===== */
+    :root{
+      --brand:#1976ff;
+      --ink:#1b2430;
+      --sub:#6b7280;
+      --bg:#f7f9fc;
+      --line:#e9eef6;
+      --save:#16a34a;
+      --mrp:#98a1b2;
+      --radius-card:14px;
+      --radius-img:14px;
+      --desktop-bg-image:none;
+      --cta-grad: linear-gradient(135deg,#1e40af 0%,#3b82f6 100%);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+    a{text-decoration:none;color:inherit}
+    img{max-width:100%;display:block}
+
+    /* App wrapper (mobile viewport on desktop) */
+    #appWrapper{max-width:480px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 30px rgba(0,0,0,.25);position:relative;z-index:2;overflow:hidden}
+    @media (min-width:769px){
+      body{background:#f5f9ff var(--desktop-bg-image) center/cover no-repeat fixed}
+      .product-popup,.cart-page{left:50%;transform:translateX(-50%);max-width:480px;width:100%}
+      body.popup-open{overflow:hidden}
     }
 
-    /* Desktop background - TASK 2: Configurable via CSS variable */
-    @media (min-width: 769px) {
-      body {
-        background: #f5f9ff var(--desktop-bg-image, none) center/cover no-repeat fixed;
-      }
-      /* TASK 1: Constrain popups to mobile wrapper */
-      .product-popup, .cart-page {
-        left: 50%;
-        transform: translateX(-50%);
-        max-width: 480px;
-        width: 100%;
-      }
-    }
-    
     /* Header */
-    .header { 
-      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); 
-      padding: 12px 16px; 
-      color: white; 
-      position: sticky; 
-      top: 0; 
-      z-index: 100; 
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .logo { 
-      display: flex; 
-      align-items: center; 
-      gap: 10px; 
-    }
-    .logo-img { 
-      height: 36px; 
-      width: auto; 
-      filter: drop-shadow(0 1px 1px rgba(0,0,0,.15)); 
-    }
-    .logo-text {
-      font-size: 18px;
-      font-weight: 700;
-    }
-    .cart-summary {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255, 255, 255, 0.2);
-      padding: 8px 12px;
-      border-radius: 20px;
-      cursor: pointer;
-    }
-    .cart-icon-header {
-      font-size: 18px;
-    }
-    .cart-count {
-      background: #ff4757;
-      color: white;
-      border-radius: 50%;
-      width: 22px;
-      height: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: bold;
-      display: none; /* Hidden by default */
-    }
-    .cart-amount {
-      font-size: 14px;
-      font-weight: 600;
-      display: none; /* Hidden by default */
-    }
-    .cart-summary.has-items .cart-count,
-    .cart-summary.has-items .cart-amount {
-      display: flex; /* Show when cart has items */
-    }
-    
-    /* Ticker - Updated to blue gradient */
-    .ticker-container { 
-      position: sticky; 
-      top: 60px; 
-      z-index: 99; 
-      background: linear-gradient(90deg, #1e40af, #3b82f6); 
-      color: white; 
-      padding: 8px 0; 
-      overflow: hidden; 
-    }
-    .ticker { 
-      display: flex; 
-      white-space: nowrap; 
-      animation: ticker-scroll 30s linear infinite; 
-    }
-    .ticker-item { 
-      display: flex; 
-      align-items: center; 
-      padding: 0 16px; 
-      font-size: 14px; 
-      font-weight: 700; 
-    }
-    .ticker-item i { 
-      margin-right: 8px; 
-      font-size: 12px; 
-    }
-    .ticker-container:hover .ticker { 
-      animation-play-state: paused; 
-    }
-    @keyframes ticker-scroll { 
-      0% { transform: translateX(0); } 
-      100% { transform: translateX(-100%); } 
-    }
-    
-    /* Carousel */
-    .carousel { 
-      margin: 16px; 
-      overflow: hidden; 
-      border-radius: 12px; 
-      position: relative; 
-      height: 150px; 
-    }
-    .slides { 
-      display: flex; 
-      transition: transform 0.5s ease; 
-      height: 100%; 
-    }
-    .slide { 
-      min-width: 100%; 
-      height: 100%; 
-      background-size: cover; 
-      background-position: center; 
-    }
-    
-    /* Trust Icons Strip - Updated with blue theme */
-    .trust-strip {
-      display: flex;
-      justify-content: space-between;
-      align-items: stretch;
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(20px);
-      border-radius: 16px;
-      padding: 16px 12px;
-      gap: 8px;
-      box-shadow: 
-        0 10px 30px rgba(0, 0, 0, 0.08),
-        0 4px 16px rgba(0, 0, 0, 0.04),
-        inset 0 1px 0 rgba(255, 255, 255, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      position: relative;
-      overflow: hidden;
-      max-width: 1200px;
-      margin: 16px 12px;
-      animation: slideUp 0.8s ease-out;
-    }
-
-    .trust-strip::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-      animation: shine 3s ease-in-out infinite;
-    }
-
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes shine {
-      0%, 100% { left: -100%; }
-      50% { left: 100%; }
-    }
-
-    .trust-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      text-align: center;
-      padding: 12px 6px;
-      border-radius: 12px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      cursor: pointer;
-      position: relative;
-      background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .trust-item:hover {
-      transform: translateY(-5px) scale(1.02);
-      box-shadow: 
-        0 15px 35px rgba(0, 0, 0, 0.15),
-        0 5px 15px rgba(0, 0, 0, 0.08);
-      background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    .trust-item:nth-child(1):hover { box-shadow: 0 15px 35px rgba(59, 130, 246, 0.3); }
-    .trust-item:nth-child(2):hover { box-shadow: 0 15px 35px rgba(59, 130, 246, 0.3); }
-    .trust-item:nth-child(3):hover { box-shadow: 0 15px 35px rgba(59, 130, 246, 0.3); }
-    .trust-item:nth-child(4):hover { box-shadow: 0 15px 35px rgba(59, 130, 246, 0.3); }
-
-    .icon-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      font-size: 20px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 2px;
-      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-      color: white;
-    }
-
-    .trust-content {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      align-items: center;
-      text-align: center;
-    }
-
-    .trust-item strong {
-      font-size: 13px;
-      font-weight: 600;
-      color: #1f2937;
-      line-height: 1.2;
-      letter-spacing: -0.025em;
-      transition: color 0.3s ease;
-    }
-
-    .trust-item:hover strong {
-      color: #111827;
-    }
-
-    .trust-item p {
-      font-size: 10px;
-      color: #6b7280;
-      margin: 0;
-      line-height: 1.3;
-      font-weight: 400;
-      transition: color 0.3s ease;
-    }
-
-    .trust-item::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      padding: 1px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), transparent, rgba(255, 255, 255, 0.2));
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: xor;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .trust-item:hover::before {
-      opacity: 1;
-    }
-
-    /* Staggered animation */
-    .trust-item:nth-child(1) { animation-delay: 0.1s; }
-    .trust-item:nth-child(2) { animation-delay: 0.2s; }
-    .trust-item:nth-child(3) { animation-delay: 0.3s; }
-    .trust-item:nth-child(4) { animation-delay: 0.4s; }
-
-    .trust-item {
-      animation: fadeInUp 0.6s ease-out both;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Mobile Responsive for Trust Strip */
-    @media (max-width: 768px) {
-      .trust-strip {
-        padding: 16px 12px;
-        gap: 8px;
-        border-radius: 12px;
-      }
-
-      .trust-item {
-        padding: 12px 6px;
-        gap: 6px;
-      }
-
-      .icon-container {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
-        border-radius: 10px;
-      }
-
-      .trust-item strong {
-        font-size: 11px;
-      }
-
-      .trust-item p {
-        font-size: 9px;
-        line-height: 1.2;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .trust-strip {
-        margin: 0 8px;
-        padding: 12px 8px;
-        border-radius: 10px;
-        gap: 6px;
-      }
-
-      .trust-item {
-        padding: 10px 4px;
-        gap: 4px;
-        border-radius: 8px;
-      }
-
-      .icon-container {
-        width: 36px;
-        height: 36px;
-        font-size: 16px;
-        border-radius: 8px;
-        margin-bottom: 1px;
-      }
-
-      .trust-item strong {
-        font-size: 10px;
-      }
-
-      .trust-item p {
-        font-size: 8px;
-        line-height: 1.1;
-      }
-    }
-
-    @media (max-width: 360px) {
-      .trust-strip {
-        padding: 10px 6px;
-        gap: 4px;
-      }
-
-      .trust-item {
-        padding: 8px 3px;
-        gap: 3px;
-      }
-
-      .icon-container {
-        width: 32px;
-        height: 32px;
-        font-size: 14px;
-        border-radius: 6px;
-      }
-
-      .trust-item strong {
-        font-size: 9px;
-      }
-
-      .trust-item p {
-        font-size: 7px;
-      }
-    }
-
-    /* Subtle pulse animation for icons */
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-
-    .icon-container {
-      animation: pulse 4s ease-in-out infinite;
-    }
-
-    .trust-item:nth-child(1) .icon-container { animation-delay: 0s; }
-    .trust-item:nth-child(2) .icon-container { animation-delay: 1s; }
-    .trust-item:nth-child(3) .icon-container { animation-delay: 2s; }
-    .trust-item:nth-child(4) .icon-container { animation-delay: 3s; }
-    
-    /* Search Bar */
-    .search-container {
-      margin: 16px;
-      position: relative;
-    }
-    
-    .search-input {
-      width: 100%;
-      padding: 12px 45px 12px 16px;
-      border-radius: 25px;
-      border: 1px solid #ddd;
-      font-size: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      outline: none;
-    }
-    
-    .search-icon {
-      position: absolute;
-      right: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #666;
-      font-size: 18px;
-    }
-    
-    /* Categories */
-    .section-title { 
-      font-size: 20px; 
-      font-weight: 700; 
-      margin: 20px 16px 12px; 
-      color: #1e293b;
-    }
-    .category-nav { 
-      display: flex; 
-      overflow-x: auto; 
-      gap: 16px; 
-      padding: 0 16px 12px; 
-      scrollbar-width: none; 
-    }
-    .category-nav::-webkit-scrollbar { 
-      display: none; 
-    }
-    .category-item { 
-      text-decoration: none; 
-      color: #666; 
-      font-size: 14px; 
-      padding-bottom: 6px; 
-      border-bottom: 2px solid transparent; 
-      white-space: nowrap; 
-    }
-    .category-item.active { 
-      color: #2563eb; 
-      border-color: #2563eb; 
-      font-weight: 600; 
-    }
-    
-    /* Products - Updated with hover effects and better typography */
-    .product-grid { 
-      display: grid; 
-      grid-template-columns: repeat(2, 1fr); 
-      gap: 12px; 
-      padding: 0 12px 20px; 
-    }
-    .product-card { 
-      background: white; 
-      border: 1px solid #e5e7eb; 
-      border-radius: 10px; 
-      padding: 12px; 
-      position: relative; 
-      height: 100%; 
-      display: flex; 
-      flex-direction: column; 
-      transition: transform 0.2s, box-shadow 0.2s; 
-    }
-    .product-card:hover { 
-      transform: translateY(-4px); 
-      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
-    }
-    .product-card:active { 
-      transform: scale(0.98); 
-    }
-    .product-card img { 
-      width: 100%; 
-      height: 120px; 
-      object-fit: contain; 
-      border-radius: 6px; 
-      margin-bottom: 8px; 
-    }
-    .product-price { 
-      font-size: 18px; 
-      font-weight: 700; 
-      color: #111; 
-    }
-    .product-original-price { 
-      font-size: 13px; 
-      color: #9ca3af; 
-      text-decoration: line-through; 
-      margin-left: 4px; 
-    }
-    .product-name { 
-      font-size: 16px; 
-      color: #374151; 
-      margin: 4px 0; 
-      line-height: 1.3; 
-      flex-grow: 1; 
-      font-weight: 500;
-    }
-    .product-weight { 
-      font-size: 12px; 
-      color: #666; 
-      margin-bottom: 40px; 
-    }
-    .offer-tag {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      background: linear-gradient(135deg, #1e40af, #3b82f6);
-      color: white;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      font-weight: 700;
-      z-index: 2;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .add-btn { 
-      position: absolute; 
-      bottom: 12px; 
-      right: 12px; 
-      background: #2563eb; 
-      color: white; 
-      border: none; 
-      padding: 8px 12px;
-      border-radius: 20px; 
-      cursor: pointer; 
-      font-size: 14px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      gap: 4px;
-    }
-    .add-btn:active { 
-      transform: scale(0.9); 
-    }
-    .show-more-btn { 
-      margin: 0 16px 100px; 
-      width: calc(100% - 32px); 
-      padding: 14px; 
-      background: #2563eb; 
-      color: white; 
-      border: none; 
-      border-radius: 8px; 
-      font-weight: 600; 
-      cursor: pointer; 
-      font-size: 16px; 
-      text-transform: uppercase;
-    }
-    
-    /* Refer & Earn Banner */
-    .refer-banner {
-      margin: 20px 16px 0;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      cursor: pointer;
-    }
-    
-    .refer-banner img {
-      width: 100%;
-      display: block;
-    }
-    
-    /* Cart Footer */
-    .cart-footer { 
-      position: fixed; 
-      bottom: 60px; 
-      left: 0; 
-      right: 0; 
-      background: white; 
-      padding: 12px 16px; 
-      border-top: 1px solid #e5e7eb; 
-      display: none; 
-      justify-content: space-between; 
-      align-items: center; 
-      z-index: 90; 
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.1); 
-    }
-    .cart-info { 
-      display: flex; 
-      gap: 8px; 
-      align-items: center; 
-      cursor: pointer; 
-    }
-    .cart-icon { 
-      font-size: 20px; 
-    }
-    .cart-text { 
-      font-size: 14px; 
-      font-weight: 600; 
-    }
-    
-    /* WhatsApp CTA - Updated styling */
-    .whatsapp-cta { 
-      position: fixed; 
-      bottom: 0; 
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: 480px;
-      background: #25d366; 
-      color: white; 
-      text-align: center; 
-      padding: 16px; 
-      font-weight: 600; 
-      font-size: 16px; 
-      cursor: pointer; 
-      z-index: 100; 
-      margin: 0 auto;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    /* Product Popup - Fixed positioning */
-    .product-popup { 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%; 
-      background: white; 
-      z-index: 1000; 
-      display: none; 
-      flex-direction: column; 
-      overflow-y: auto;
-    }
-    .popup-header { 
-      display: flex; 
-      align-items: center; 
-      padding: 16px; 
-      border-bottom: 1px solid #ddd; 
-      position: sticky;
-      top: 0;
-      background: white;
-      z-index: 10;
-    }
-    .back-btn { 
-      font-size: 24px; 
-      margin-right: 12px; 
-      cursor: pointer; 
-    }
-    .popup-title { 
-      font-size: 18px; 
-      font-weight: 600; 
-      flex: 1; 
-    }
-    .share-btn { 
-      font-size: 20px; 
-      cursor: pointer; 
-      margin-left: 12px;
-      color: #25D366;
-    }
-    .popup-body { 
-      padding: 16px; 
-      overflow-y: auto; 
-      position: relative;
-      flex: 1;
-    }
-    .popup-body img { 
-      width: 80%; 
-      max-height: 200px; 
-      object-fit: contain; 
-      border-radius: 12px; 
-      margin: 0 auto 16px; 
-      display: block; 
-    }
-    .popup-sub { 
-      font-size: 14px; 
-      color: #666; 
-      margin-bottom: 8px; 
-    }
-    .popup-price { 
-      display: flex; 
-      align-items: center; 
-      gap: 8px; 
-      margin-bottom: 12px; 
-    }
-    .popup-price .now { 
-      font-size: 20px; 
-      font-weight: 700; 
-      color: #111; 
-    }
-    .popup-price .old { 
-      text-decoration: line-through; 
-      color: #999; 
-      font-size: 16px; 
-    }
-    .popup-price .offer { 
-      background: #dcfce7; 
-      color: #16a34a; 
-      font-size: 14px; 
-      padding: 4px 8px; 
-      border-radius: 6px; 
-      font-weight: 600; 
-    }
-    .delivery-info { 
-      background: #f0fdf4; 
-      padding: 12px; 
-      border-radius: 8px; 
-      color: #16a34a; 
-      font-size: 14px; 
-      font-weight: 600; 
-      display: flex; 
-      gap: 8px; 
-      align-items: center; 
-      margin-bottom: 16px; 
-    }
-    .popup-footer { 
-      position: sticky; 
-      bottom: 0; 
-      left: 0; 
-      width: 100%; 
-      display: flex; 
-      justify-content: space-between; 
-      padding: 16px; 
-      border-top: 1px solid #ddd; 
-      background: white; 
-      z-index: 10;
-    }
-    .popup-footer button { 
-      flex: 1; 
-      margin: 0 6px; 
-      padding: 14px; 
-      font-weight: 600; 
-      border-radius: 8px; 
-      cursor: pointer; 
-      font-size: 16px; 
-      text-transform: uppercase;
-    }
-    .popup-footer .close-btn { 
-      background: white; 
-      color: #666; 
-      border: 1px solid #ddd; 
-    }
-    .popup-footer .add { 
-      background: #2563eb; 
-      color: white; 
-      border: none; 
-    }
-    
-    /* Cart Page - Fixed positioning */
-    .cart-page { 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%; 
-      background: #f1f5f9; 
-      z-index: 2000; 
-      display: none; 
-      flex-direction: column; 
-      overflow-y: auto;
-    }
-    .cart-header { 
-      display: flex; 
-      align-items: center; 
-      background: white; 
-      padding: 16px; 
-      border-bottom: 1px solid #ddd; 
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-    .cart-title { 
-      font-weight: 600; 
-      font-size: 18px; 
-      margin-left: 12px; 
-    }
-    .savings-badge { 
-      background: #dcfce7; 
-      color: #16a34a; 
-      font-size: 14px; 
-      font-weight: 600; 
-      padding: 4px 8px; 
-      border-radius: 6px; 
-      margin-left: 8px; 
-      display: none; /* Hidden by default */
-    }
-    .delivery-banner { 
-      background: #f0fdf4; 
-      color: #16a34a; 
-      padding: 12px 16px; 
-      display: flex; 
-      align-items: center; 
-      gap: 8px; 
-      font-size: 14px; 
-      font-weight: 600; 
-      display: none; /* Hidden by default */
-    }
-    .cart-items-container {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px;
-    }
-    .cart-items { 
-      background: white; 
-      border-radius: 12px; 
-      padding: 12px; 
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      margin-bottom: 12px;
-    }
-    .cart-item { 
-      display: flex; 
-      align-items: center; 
-      gap: 12px; 
-      border-bottom: 1px solid #eee; 
-      padding: 12px 0; 
-    }
-    .cart-item:last-child { 
-      border-bottom: none; 
-    }
-    .cart-item img { 
-      width: 60px; 
-      height: 60px; 
-      object-fit: contain; 
-      border-radius: 8px; 
-    }
-    .item-details { 
-      flex: 1; 
-      min-width: 0;
-    }
-    .item-name { 
-      font-size: 16px; 
-      font-weight: 600; 
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .item-weight { 
-      font-size: 14px; 
-      color: #666; 
-    }
-    .quantity-controls { 
-      display: flex; 
-      align-items: center; 
-      gap: 10px; 
-      margin-top: 4px; 
-    }
-    .quantity-btn { 
-      width: 28px; 
-      height: 28px; 
-      border: 1px solid #ddd; 
-      background: white; 
-      border-radius: 6px; 
-      cursor: pointer; 
-      font-size: 16px; 
-    }
-    .item-price { 
-      font-weight: 600; 
-      font-size: 16px; 
-    }
-    .item-original { 
-      font-size: 14px; 
-      color: #999; 
-      text-decoration: line-through; 
-    }
-    .remove-btn { 
-      color: #ff3b30; 
-      cursor: pointer; 
-      font-size: 18px; 
-      padding: 8px; 
-    }
-    .order-summary { 
-      background: white; 
-      border-radius: 12px; 
-      padding: 16px; 
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      margin: 0 12px;
-      position: sticky;
-      bottom: 0;
-      z-index: 10;
-      display: none; /* Hidden by default */
-    }
-    .summary-row { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      margin-top: 8px; 
-    }
-    .total-price { 
-      font-size: 20px; 
-      font-weight: 700; 
-    }
-    .cart-actions { 
-      display: flex; 
-      gap: 12px; 
-      background: white; 
-      padding: 16px; 
-      border-top: 1px solid #ddd; 
-      box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
-      position: sticky;
-      bottom: 0;
-      z-index: 10;
-    }
-    .continue { 
-      flex: 1; 
-      background: white; 
-      border: 2px solid #2563eb; 
-      color: #2563eb; 
-      border-radius: 8px; 
-      padding: 14px; 
-      font-weight: 600; 
-      font-size: 16px; 
-      cursor: pointer;
-      text-transform: uppercase;
-    }
-    .place { 
-      flex: 1; 
-      background: #2563eb; 
-      color: white; 
-      border: none; 
-      border-radius: 8px; 
-      padding: 14px; 
-      font-weight: 600; 
-      font-size: 16px; 
-      position: relative; 
-      cursor: pointer;
-      text-transform: uppercase;
-      display: none; /* Hidden by default */
-    }
-    .place .order-total { 
-      position: absolute; 
-      top: -10px; 
-      left: 50%; 
-      transform: translateX(-50%); 
-      background: #1e40af; 
-      color: white; 
-      padding: 4px 10px; 
-      border-radius: 12px; 
-      font-size: 14px; 
-    }
-    
-    /* Empty cart state */
-    .empty-cart {
-      text-align: center;
-      padding: 40px 20px;
-      color: #666;
-    }
-    .empty-cart-icon {
-      font-size: 60px;
-      margin-bottom: 16px;
-      color: #ccc;
-    }
-    .empty-cart-text {
-      font-size: 16px;
-      margin-bottom: 20px;
-    }
-    
-    /* Toast Notification */
-    .toast { 
-      position: fixed; 
-      bottom: 100px; 
-      left: 50%; 
-      transform: translateX(-50%) translateY(100px); 
-      background-color: #28a745; 
-      color: white; 
-      padding: 12px 24px; 
-      border-radius: 30px; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
-      z-index: 1004; 
-      opacity: 0; 
-      transition: transform 0.3s ease, opacity 0.3s ease; 
-      display: flex; 
-      align-items: center; 
-      gap: 10px; 
-      font-weight: 600; 
-    }
-    .toast.show { 
-      opacity: 1; 
-      transform: translateX(-50%) translateY(0); 
-    }
-    
-    /* Why Choose, FAQ Sections */
-    .section { 
-      padding: 30px 16px; 
-    }
-    .why { 
-      background: linear-gradient(135deg, #e9f7fe 0%, #def3ff 100%); 
-    }
-    .faq-wrap { 
-      background: #e9f7fe; 
-    }
-    .section h2 { 
-      font-size: 22px; 
-      text-align: center; 
-      margin-bottom: 20px; 
-      color: #1e40af; 
-    }
-    .box { 
-      background: white; 
-      border-radius: 12px; 
-      padding: 20px; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
-      font-size: 16px; 
-    }
-    .box p { 
-      margin-bottom: 12px; 
-    }
-    
-    /* Optimized Why Choose Section */
-    .why-choose {
-      padding: 24px 16px;
-      background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .why-choose::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .header-section {
-      text-align: center;
-      margin-bottom: 24px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .why-choose h2 {
-      font-size: 24px;
-      color: #1e40af;
-      margin-bottom: 8px;
-      font-weight: 800;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    }
-
-    .trust-line {
-      font-size: 13px;
-      color: #3b82f6;
-      font-weight: 600;
-      background: rgba(59, 130, 246, 0.1);
-      padding: 4px 12px;
-      border-radius: 20px;
-      display: inline-block;
-    }
-
-    .why-grid {
-      display: flex;
-      gap: 8px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .why-item {
-      flex: 1;
-      background: #fff;
-      padding: 16px 12px;
-      border-radius: 16px;
-      text-align: center;
-      position: relative;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      border: 1px solid rgba(59, 130, 246, 0.1);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      min-width: 0;
-    }
-
-    .why-item:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 30px rgba(59, 130, 246, 0.15);
-      border-color: rgba(59, 130, 246, 0.3);
-    }
-
-    .step-badge {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      background: linear-gradient(135deg, #ef4444, #dc2626);
-      color: white;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 700;
-      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
-    }
-
-    .why-icon {
-      font-size: 24px;
-      margin-bottom: 8px;
-      display: block;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-    }
-
-    .why-item h3 {
-      font-size: 13px;
-      color: #1e40af;
-      margin-bottom: 6px;
-      font-weight: 700;
-      line-height: 1.2;
-    }
-
-    .why-item p {
-      font-size: 10px;
-      color: #475569;
-      line-height: 1.3;
-      margin-bottom: 8px;
-    }
-
-    .highlight {
-      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-      color: white;
-      font-size: 9px;
-      padding: 3px 8px;
-      border-radius: 10px;
-      font-weight: 600;
-      display: inline-block;
-      box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
-    }
-
-    /* Optimized FAQ Section */
-    .faq-wrap {
-      padding: 32px 16px;
-      background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .faq-wrap::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 100%;
-      height: 100%;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .faq-header {
-      text-align: center;
-      margin-bottom: 28px;
-      position: relative;
-      z-index: 2;
-    }
-
-    .faq-wrap h2 {
-      font-size: 24px;
-      color: #1e40af;
-      margin-bottom: 8px;
-      font-weight: 800;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    }
-
-    .faq-subtitle {
-      font-size: 13px;
-      color: #3b82f6;
-      font-weight: 600;
-      background: rgba(59, 130, 246, 0.1);
-      padding: 4px 12px;
-      border-radius: 20px;
-      display: inline-block;
-    }
-
-    .faq-list {
-      max-width: 100%;
-      margin: 0 auto;
-      position: relative;
-      z-index: 2;
-    }
-
-    .faq {
-      background: #fff;
-      border-radius: 16px;
-      margin-bottom: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      border: 1px solid rgba(59, 130, 246, 0.1);
-      overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .faq:hover {
-      box-shadow: 0 8px 30px rgba(59, 130, 246, 0.15);
-      border-color: rgba(59, 130, 246, 0.3);
-    }
-
-    .faq[data-priority="high"] {
-      border-left: 4px solid #ef4444;
-    }
-
-    .faq[data-priority="medium"] {
-      border-left: 4px solid #f59e0b;
-    }
-
-    .faq[data-priority="low"] {
-      border-left: 4px solid #10b981;
-    }
-
-    .q {
-      width: 100%;
-      background: none;
-      border: none;
-      padding: 16px 20px;
-      text-align: left;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #1e40af;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-
-    .q:hover {
-      background: rgba(59, 130, 246, 0.05);
-    }
-
-    .q-icon {
-      font-size: 18px;
-      flex-shrink: 0;
-    }
+    .header{background:var(--cta-grad);padding:12px 16px;color:#fff;position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center}
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo-img{height:36px;width:auto;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
+    .logo-text{font-size:18px;font-weight:700}
+    .cart-summary{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.2);padding:8px 12px;border-radius:20px;cursor:pointer}
+    .cart-icon-header{font-size:18px}
+    .cart-count{background:#ff4757;color:#fff;border-radius:50%;width:22px;height:22px;display:none;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+    .cart-amount{font-size:14px;font-weight:600;display:none}
+    .cart-summary.has-items .cart-count,.cart-summary.has-items .cart-amount{display:flex}
+    @media(max-width:768px){.logo-text{font-size:16px}.cart-amount{font-size:13px}}
+
+    /* Ticker + Carousel */
+    .ticker-container{position:sticky;top:60px;z-index:99;background:linear-gradient(90deg,#1e40af,#3b82f6);color:#fff;padding:8px 0;overflow:hidden}
+    .ticker{display:flex;white-space:nowrap;animation:ticker-scroll 30s linear infinite}
+    .ticker-item{display:flex;align-items:center;padding:0 16px;font-size:14px;font-weight:700}
+    .ticker-container:hover .ticker{animation-play-state:paused}
+    @keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    .carousel{margin:16px;overflow:hidden;border-radius:12px;position:relative;height:150px}
+    .slides{display:flex;transition:transform .5s ease;height:100%}
+    .slide{min-width:100%;height:100%;background-size:cover;background-position:center}
+
+    /* ===== Trust icons ===== */
+    .trust-strip{display:flex;justify-content:space-between;align-items:stretch;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:16px;padding:16px 12px;gap:8px;box-shadow:0 10px 30px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.3);position:relative;overflow:hidden;max-width:1200px;margin:16px 12px}
+    .trust-strip::before{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shine 3s ease-in-out infinite}
+    @keyframes shine{0%,100%{left:-100%}50%{left:100%}}
+    .trust-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:12px 6px;border-radius:12px;transition:all .3s cubic-bezier(.4,0,.2,1);cursor:pointer;background:linear-gradient(145deg,rgba(255,255,255,.1),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.1)}
+    .trust-item:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 15px 35px rgba(59,130,246,.3);background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.1));border-color:rgba(255,255,255,.2)}
+    .icon-container{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;font-size:20px;margin-bottom:2px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;animation:pulse 4s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    .trust-title{font-size:13px;font-weight:600;color:#1f2937;line-height:1.2}
+    .trust-sub{font-size:10px;color:#6b7280;line-height:1.3}
+
+    /* ===== Tabs (categories) with PNG icons ===== */
+    .container{max-width:440px;margin:0 auto;padding:12px}
+    .tabs{display:flex;gap:18px;overflow:auto hidden;padding:8px 4px 6px;position:sticky;top:0;z-index:5;background:linear-gradient(#fff,#fff);border-bottom:1px solid var(--line)}
+    .tab{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:10px 2px 12px;color:#4b5563;text-decoration:none;font-weight:700;font-size:14px;position:relative;white-space:nowrap}
+    .tab img.icon{width:20px;height:20px;border-radius:6px;object-fit:cover;box-shadow:0 0 0 1px #e5e7eb}
+    .tab[aria-current="page"]{color:var(--brand)}
+    .tab[aria-current="page"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px;background:var(--brand)}
+    .section-title{font-weight:800;font-size:16px;margin:12px 4px}
+
+    /* ===== Grid (3-up) & Card ===== */
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:6px 2px 20px}
+    .card{background:#fff;border-radius:var(--radius-card);padding:8px;box-shadow:0 2px 8px rgba(10,30,70,.06)}
+    .img{position:relative;border-radius:var(--radius-img);overflow:hidden;aspect-ratio:1/1;background:#e8f0ff}
+    .img>img{width:100%;height:100%;object-fit:cover}
+    .add-pill{position:absolute;right:8px;bottom:8px;background:#fff;color:var(--brand);border:2px solid var(--brand);font-weight:800;font-size:12px;line-height:1;padding:7px 12px;border-radius:999px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+    .qty{position:absolute;right:8px;bottom:8px;display:none;align-items:center;gap:10px;background:#fff;border-radius:999px;padding:4px 6px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+    .qty button{width:28px;height:28px;border-radius:999px;border:2px solid var(--brand);background:#fff;color:var(--brand);font-weight:900;font-size:16px;line-height:0}
+    .qty .num{min-width:16px;text-align:center;font-weight:800}
+    .price-row{display:flex;align-items:baseline;gap:6px;margin-top:6px}
+    .price-now{font-weight:900;font-size:14px}
+    .price-mrp{color:var(--mrp);text-decoration:line-through;font-size:12px}
+    .save{color:var(--save);font-size:12px;font-weight:800;margin-top:2px}
+    .meta{font-size:12px;color:var(--sub);margin-top:4px}
+    .name{margin-top:4px;font-size:12px;font-weight:700;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    @media (max-width:360px){.name{font-size:11px}.price-now{font-size:13px}}
+
+    /* Search bar + typewriter placeholder (Search static, product names animate) */
+    .search-container{margin:16px;position:relative}
+    .search-input{width:100%;padding:12px 45px 12px 16px;border-radius:25px;border:1px solid #ddd;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.1);outline:none}
+    .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#666;font-size:18px}
+
+    /* Floating Cart CTA */
+    .cart-footer{
+      position:fixed;
+      bottom:70px;
+      left:50%;
+      transform:translateX(-50%);
+      background:var(--cta-grad);
+      color:#fff;
+      padding:10px 16px;
+      border-radius:999px;
+      display:none;
+      align-items:center;
+      gap:10px;
+      z-index:96;
+      box-shadow:0 10px 24px rgba(30,64,175,.35);
+      border:1px solid rgba(255,255,255,.25);
+      cursor:pointer;
+      width:auto;
+    }
+    .cart-info{display:flex;gap:8px;align-items:center}
+    .cart-icon{font-size:18px}
+    .cart-text{font-size:14px;font-weight:700}
+    #cartTotal{font-size:14px;font-weight:800;background:rgba(255,255,255,.18);padding:6px 10px;border-radius:20px}
+
+    /* WhatsApp CTA */
+    .whatsapp-cta{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#25d366;color:#fff;text-align:center;padding:16px;font-weight:600;font-size:16px;cursor:pointer;z-index:100;margin:0 auto;text-transform:uppercase;letter-spacing:.5px}
+
+    /* Popup & Cart page */
+    .product-popup{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:1000;display:none;flex-direction:column;overflow-y:auto}
+    .popup-header{display:flex;align-items:center;padding:16px;border-bottom:1px solid #ddd;position:sticky;top:0;background:#fff;z-index:10}
+    .back-btn{font-size:24px;margin-right:12px;cursor:pointer}
+    .popup-title{font-size:18px;font-weight:600;flex:1}
+    .share-btn{font-size:20px;cursor:pointer;margin-left:12px;color:#25D366}
+    .popup-body{padding:16px;overflow-y:auto;position:relative;flex:1}
+    .popup-body img{width:80%;max-height:200px;object-fit:contain;border-radius:12px;margin:0 auto 16px;display:block}
+    .popup-sub{font-size:14px;color:#666;margin-bottom:8px}
+    .popup-price{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+    .popup-price .now{font-size:20px;font-weight:700;color:#111}
+    .popup-price .old{text-decoration:line-through;color:#999;font-size:16px}
+    .popup-price .offer{background:#dcfce7;color:#16a34a;font-size:14px;padding:4px 8px;border-radius:6px;font-weight:600}
+    .delivery-info{background:#f0fdf4;padding:12px;border-radius:8px;color:#16a34a;font-size:14px;font-weight:600;display:flex;gap:8px;align-items:center;margin-bottom:16px}
+    .popup-footer{position:sticky;bottom:0;left:0;width:100%;display:flex;justify-content:space-between;padding:16px;border-top:1px solid #ddd;background:#fff;z-index:10}
+    .popup-footer button{flex:1;margin:0 6px;padding:14px;font-weight:600;border-radius:8px;cursor:pointer;font-size:16px;text-transform:uppercase}
+    .popup-footer .close-btn{background:#fff;color:#666;border:1px solid #ddd}
+    .popup-footer .add{background:#2563eb;color:#fff;border:none}
+
+    .cart-page{position:fixed;top:0;left:0;width:100%;height:100%;background:#f1f5f9;z-index:2000;display:none;flex-direction:column;overflow-y:auto}
+    .cart-header{display:flex;align-items:center;background:#fff;padding:16px;border-bottom:1px solid #ddd;box-shadow:0 2px 4px rgba(0,0,0,.1);position:sticky;top:0;z-index:10}
+    .cart-title{font-weight:600;font-size:18px;margin-left:12px}
+    .savings-badge{background:#dcfce7;color:#16a34a;font-size:14px;font-weight:600;padding:4px 8px;border-radius:6px;margin-left:8px;display:none}
+    .delivery-banner{background:#f0fdf4;color:#16a34a;padding:12px 16px;display:none;align-items:center;gap:8px;font-size:14px;font-weight:600}
+
+    .cart-items-container{flex:1;overflow-y:auto;padding:12px}
+    .cart-items{background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:12px}
+    .cart-item{display:flex;align-items:center;gap:12px;border-bottom:1px solid #eee;padding:12px 0}
+    .cart-item:last-child{border-bottom:none}
+    .cart-item img{width:60px;height:60px;object-fit:contain;border-radius:8px}
+    .item-details{flex:1;min-width:0}
+    .item-name{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .item-weight{font-size:14px;color:#666}
+    .quantity-controls{display:flex;align-items:center;gap:10px;margin-top:4px}
+    .quantity-btn{width:28px;height:28px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;font-size:16px}
+    .item-price{font-weight:600;font-size:16px}
+    .item-original{font-size:14px;color:#999;text-decoration:line-through}
+    .remove-btn{color:#ff3b30;cursor:pointer;font-size:18px;padding:8px}
+    .order-summary{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin:0 12px;position:sticky;bottom:0;z-index:10;display:none}
+    .summary-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+    .total-price{font-size:20px;font-weight:700}
+    .cart-actions{display:flex;gap:12px;background:#fff;padding:16px;border-top:1px solid #ddd;box-shadow:0 -2px 4px rgba(0,0,0,.1);position:sticky;bottom:0;z-index:10}
+    .continue{flex:1;background:#fff;border:2px solid #2563eb;color:#2563eb;border-radius:8px;padding:14px;font-weight:600;font-size:16px;cursor:pointer;text-transform:uppercase}
+    .place{flex:1;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:14px;font-weight:600;font-size:16px;position:relative;cursor:pointer;text-transform:uppercase;display:none}
+    .place .order-total{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#1e40af;color:#fff;padding:4px 10px;border-radius:12px;font-size:14px}
+
+    /* Empty cart & Toast */
+    .empty-cart{text-align:center;padding:40px 20px;color:#666}
+    .empty-cart-icon{font-size:60px;margin-bottom:16px;color:#ccc}
+    .empty-cart-text{font-size:16px;margin-bottom:20px}
+    .toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(100px);background:#16a34a;color:#fff;padding:12px 24px;border-radius:30px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:1004;opacity:0;transition:transform .3s ease,opacity .3s ease;display:flex;align-items:center;gap:10px;font-weight:700}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    /* Sections (brief) */
+    .section{padding:30px 16px}
+    .section h2{font-size:22px;text-align:center;margin-bottom:20px;color:#1e40af}
+    .why-choose{padding:24px 16px;background:linear-gradient(135deg,#e0f2fe 0%, #f0f9ff 100%);position:relative;overflow:hidden}
+    .why-grid{display:flex;gap:8px}
+    .why-item{flex:1;background:#fff;padding:16px 12px;border-radius:16px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.08);border:1px solid rgba(59,130,246,.1)}
+    .faq-wrap{padding:32px 16px;background:linear-gradient(135deg,#e0f2fe 0%, #f0f9ff 100%)}
+    .faq{background:#fff;border-radius:16px;margin-bottom:12px;box-shadow:0 4px 20px rgba(0,0,0,.08);border:1px solid rgba(59,130,246,.1);overflow:hidden}
+    .q{width:100%;background:none;border:none;padding:16px 20px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:#1e40af}
+    .a{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1);background:rgba(59,130,246,.02)}
+    .faq.active .a{max-height:200px}
+    .answer-content{padding:0 20px 20px 20px;font-size:14px}
 
-    .q-text {
-      flex: 1;
-      line-height: 1.4;
-    }
-
-    .chevron {
-      font-size: 12px;
-      color: #3b82f6;
-      transition: transform 0.3s ease;
-      flex-shrink: 0;
-    }
-
-    .faq.active .chevron {
-      transform: rotate(180deg);
-    }
-
-    .a {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      background: rgba(59, 130, 246, 0.02);
-    }
-
-    .faq.active .a {
-      max-height: 200px;
-    }
-
-    .answer-content {
-      padding: 0 20px 20px 20px;
-      font-size: 14px;
-    }
-
-    .answer-content p {
-      font-size: 13px;
-      color: #475569;
-      line-height: 1.5;
-      margin-bottom: 12px;
-    }
-
-    .answer-highlight {
-      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-      color: white;
-      font-size: 11px;
-      padding: 6px 12px;
-      border-radius: 12px;
-      font-weight: 600;
-      display: inline-block;
-      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-    }
-
-    .faq-cta {
-      display: none;
-    }
-
-    /* Mobile Optimizations */
-    @media (max-width: 480px) {
-      .faq-wrap {
-        padding: 24px 12px;
-      }
-      
-      .faq-wrap h2 {
-        font-size: 22px;
-      }
-      
-      .q {
-        padding: 14px 16px;
-        font-size: 13px;
-        gap: 10px;
-      }
-      
-      .q-icon {
-        font-size: 16px;
-      }
-      
-      .answer-content {
-        padding: 0 16px 16px 16px;
-      }
-      
-      .answer-content p {
-        font-size: 12px;
-      }
-      
-      .answer-highlight {
-        font-size: 10px;
-        padding: 4px 8px;
-      }
-      
-      .faq-contact-btn {
-        font-size: 13px;
-        padding: 10px 20px;
-      }
-
-      /* Why Choose mobile adjustments */
-      .why-choose {
-        padding: 20px 12px;
-      }
-      
-      .why-choose h2 {
-        font-size: 22px;
-      }
-      
-      .why-grid {
-        gap: 6px;
-      }
-      
-      .why-item {
-        padding: 14px 8px;
-      }
-      
-      .why-item h3 {
-        font-size: 12px;
-      }
-      
-      .why-item p {
-        font-size: 9px;
-      }
-      
-      .highlight {
-        font-size: 8px;
-        padding: 2px 6px;
-      }
-    }
-
-    /* Ultra-small screens */
-    @media (max-width: 320px) {
-      .why-grid {
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-      
-      .why-item:nth-child(1),
-      .why-item:nth-child(2) {
-        flex: 0 0 calc(50% - 4px);
-      }
-      
-      .why-item:nth-child(3) {
-        flex: 0 0 100%;
-        margin-top: 4px;
-      }
-    }
-
-    /* Loading animations */
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .why-item, .faq {
-      animation: slideUp 0.6s ease forwards;
-    }
-
-    .why-item:nth-child(1) { animation-delay: 0.1s; }
-    .why-item:nth-child(2) { animation-delay: 0.2s; }
-    .why-item:nth-child(3) { animation-delay: 0.3s; }
-
-    .faq:nth-child(1) { animation-delay: 0.1s; }
-    .faq:nth-child(2) { animation-delay: 0.2s; }
-    .faq:nth-child(3) { animation-delay: 0.3s; }
-    .faq:nth-child(4) { animation-delay: 0.4s; }
-    .faq:nth-child(5) { animation-delay: 0.5s; }
-
-    /* Hide removed elements */
-    .cta-container,
-    .guarantee-badge {
-      display: none;
-    }
-    
     /* Footer */
-    footer { 
-      background: linear-gradient(135deg, #333, #555); 
-      color: white; 
-      text-align: center; 
-      padding: 30px 16px; 
-    }
-    .social { 
-      margin: 15px 0; 
-    }
-    .social a { 
-      color: white; 
-      margin: 0 12px; 
-      font-size: 20px; 
-      transition: 0.2s; 
-    }
-    .social a:hover { 
-      color: #25d366; 
-    }
-    footer p { 
-      margin: 8px 0; 
-    }
-    
-    /* Utility Classes */
-    .hidden { 
-      display: none !important; 
-    }
-    .loading { 
-      opacity: 0.7; 
-      pointer-events: none; 
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .logo-text {
-        font-size: 16px;
-      }
-      .cart-amount {
-        font-size: 13px;
-      }
-    }
+    footer{background:linear-gradient(135deg,#333,#555);color:#fff;text-align:center;padding:30px 16px}
+    footer .social{margin:15px 0}
+    footer .social a{color:#fff;margin:0 12px;font-size:20px;transition:.2s}
+    footer .social a:hover{color:#25d366}
 
-    /* Desktop hover effects */
-    @media (min-width: 769px) {
-      .product-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
-      }
-    }
+    .hidden{display:none !important}
+    .loading{opacity:.7;pointer-events:none}
 
-    /* Fix for popups on desktop - constrain to app wrapper */
-    @media (min-width: 769px) {
-      .product-popup,
-      .cart-page {
-        position: fixed;
-        top: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100%;
-        max-width: 480px;
-        height: 100%;
-        border-radius: 12px;
-        box-shadow: 0 0 30px rgba(0,0,0,0.3);
-        z-index: 1000;
-      }
-
-      /* Prevent body scroll when popup is open */
-      body.popup-open {
-        overflow: hidden;
-      }
+    /* Improved Show More CTA */
+    .show-more-btn{
+      appearance:none;border:none;cursor:pointer;
+      margin:4px auto 18px;display:block;padding:12px 18px;border-radius:999px;
+      background:linear-gradient(135deg,#e0e7ff,#dbeafe);
+      box-shadow:0 6px 14px rgba(37,99,235,.18);
+      font-weight:800;letter-spacing:.3px;color:#1e3a8a;
+      transition:transform .15s ease, box-shadow .15s ease, background .3s ease;
     }
+    .show-more-btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(37,99,235,.24)}
+    .show-more-btn:active{transform:translateY(0)}
   </style>
 </head>
 <body>
-  <!-- App Wrapper for Desktop -->
   <div id="appWrapper">
-    <!-- Toast Notification -->
+    <!-- Toast -->
     <div id="toast" class="toast">
       <i class="fas fa-check-circle"></i>
       <span class="toast-message"></span>
@@ -1632,7 +334,7 @@
       </div>
     </div>
 
-    <!-- Ticker - Updated content -->
+    <!-- Ticker -->
     <div class="ticker-container">
       <div class="ticker">
         <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
@@ -1645,105 +347,51 @@
     <!-- Carousel -->
     <div class="carousel">
       <div class="slides" id="slides">
-        <div class="slide" style="background-image: url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z.png');"></div>
-        <div class="slide" style="background-image: url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png');"></div>
-        <div class="slide" style="background-image: url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756388255/Coastal_Fresh_Banner_3_wqpv8c.png');"></div>
+        <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z.png')"></div>
+        <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png')"></div>
+        <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756388255/Coastal_Fresh_Banner_3_wqpv8c.png')"></div>
       </div>
     </div>
 
-    <!-- Trust Icons Strip - Updated with blue theme -->
-    <section class="trust-strip">
-      <div class="trust-item">
-        <div class="icon-container">🧊</div>
-        <div class="trust-content">
-          <strong>Freshness Guarantee</strong>
-          <p>Freshly cut after your order</p>
-        </div>
-      </div>
-      <div class="trust-item">
-        <div class="icon-container">🌱</div>
-        <div class="trust-content">
-          <strong>Safe & Healthy</strong>
-          <p>Chemical & Antibiotics Free</p>
-        </div>
-      </div>
-      <div class="trust-item">
-        <div class="icon-container">📦</div>
-        <div class="trust-content">
-          <strong>Clean & Packed</strong>
-          <p>Neatly cleaned & carefully packed</p>
-        </div>
-      </div>
-      <div class="trust-item">
-        <div class="icon-container">💵</div>
-        <div class="trust-content">
-          <strong>Cash on Delivery</strong>
-          <p>Pay when you receive</p>
-        </div>
-      </div>
-    </section>
+    <!-- Trust Icons (config via JS) -->
+    <section class="trust-strip" id="trustStrip"></section>
 
-    <!-- Search Bar -->
+    <!-- Search -->
     <div class="search-container">
-      <input type="text" id="searchInput" class="search-input" placeholder="Search for products...">
+      <input type="text" id="searchInput" class="search-input" placeholder='Search — Prawns'>
       <i class="fas fa-search search-icon"></i>
     </div>
 
-    <!-- Categories -->
-    <div class="section-title">Categories</div>
-    <div class="category-nav">
-      <a href="#" class="category-item active" data-category="All">All</a>
-      <a href="#" class="category-item" data-category="Fish">Fish</a>
-      <a href="#" class="category-item" data-category="Prawns">Prawns</a>
-      <a href="#" class="category-item" data-category="Crabs">Crabs</a>
-      <a href="#" class="category-item" data-category="Pickles">Pickles</a>
-    </div>
+    <!-- Tabs (Categories) -->
+    <div class="container">
+      <nav class="tabs" id="categoryTabs" aria-label="Categories"></nav>
 
-    <!-- Products -->
-    <div class="section-title">Premium Seafood & Pickles</div>
-    <div class="product-grid" id="productGrid"></div>
-    <button class="show-more-btn" id="showMoreBtn">SHOW MORE PRODUCTS</button>
+      <h2 class="section-title" id="productsTitle">Premium Seafood & Pickles</h2>
+
+      <!-- 3-up Grid -->
+      <section class="grid" id="productGrid"></section>
+      <button class="show-more-btn hidden" id="showMoreBtn">Show more products</button>
+    </div>
 
     <!-- Refer & Earn Banner -->
     <div class="refer-banner" id="referBanner">
       <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756885955/refer_earn_1_nguvrb.jpg" alt="Refer and Earn - Get ₹200 off when you refer a friend">
     </div>
 
-    <!-- Why Choose Us -->
+    <!-- Why Choose -->
     <section class="why-choose">
       <div class="header-section">
         <h2>Why Choose Coastal Fresh?</h2>
         <p class="trust-line">Trusted by 500+ families across Hyderabad</p>
       </div>
-      
       <div class="why-grid">
-        <div class="why-item" data-step="1">
-          <div class="step-badge">1</div>
-          <div class="why-icon">🏆</div>
-          <h3>20+ Years Heritage</h3>
-          <p>Generations of expertise in premium seafood Industry</p>
-          <div class="highlight">Since 2000</div>
-        </div>
-        
-        <div class="why-item" data-step="2">
-          <div class="step-badge">2</div>
-          <div class="why-icon">✨</div>
-          <h3>Fresh & Certified</h3>
-          <p>Hygienically processed with 100% freshness guarantee</p>
-          <div class="highlight">Quality Assured</div>
-        </div>
-        
-        <div class="why-item" data-step="3">
-          <div class="step-badge">3</div>
-          <div class="why-icon">🚀</div>
-          <h3>Fast Delivery</h3>
-          <p>Next-day delivery across Hyderabad</p>
-          <div class="highlight">Under 24 Hours</div>
-        </div>
+        <div class="why-item"><div class="why-icon">🏆</div><h3>20+ Years Heritage</h3><p>Generations of expertise in premium seafood Industry</p></div>
+        <div class="why-item"><div class="why-icon">✨</div><h3>Fresh & Certified</h3><p>Hygienically processed with 100% freshness guarantee</p></div>
+        <div class="why-item"><div class="why-icon">🚀</div><h3>Fast Delivery</h3><p>Next-day delivery across Hyderabad</p></div>
       </div>
     </section>
 
-    <!-- FAQ -->
+   <!-- FAQ -->
     <section class="section faq-wrap" id="faq">
       <div class="faq-header">
         <h2>Frequently Asked Questions</h2>
@@ -1838,7 +486,7 @@
       </div>
     </footer>
 
-    <!-- Cart Footer -->
+    <!-- Floating Cart CTA -->
     <div class="cart-footer" id="cartFooter">
       <div class="cart-info">
         <span class="cart-icon">🛒</span>
@@ -1848,11 +496,9 @@
     </div>
 
     <!-- WhatsApp CTA -->
-    <div class="whatsapp-cta" id="whatsappCta">
-      PLACE ORDER VIA WHATSAPP
-    </div>
+    <div class="whatsapp-cta" id="whatsappCta">PLACE ORDER VIA WHATSAPP</div>
 
-    <!-- Product Popup - Fixed positioning -->
+    <!-- Product Popup -->
     <div class="product-popup" id="productPopup">
       <div class="popup-header">
         <span class="back-btn">‹</span>
@@ -1866,19 +512,18 @@
       </div>
     </div>
 
-    <!-- Cart Page - Fixed positioning -->
+    <!-- Cart Page -->
     <div class="cart-page" id="cartPage">
       <div class="cart-header">
         <span class="back-btn">‹</span>
         <span class="cart-title">Cart</span>
         <span class="savings-badge" id="savingsBadge">Saved ₹0</span>
       </div>
-      <div class="delivery-banner" id="deliveryBanner">
-        ✓ Free delivery auto applied on this order!
-      </div>
+      <div class="delivery-banner" id="deliveryBanner">✓ Free delivery auto applied on this order!</div>
+
       <div class="cart-items-container">
         <div class="cart-items" id="cartItems"></div>
-        <div class="empty-cart" id="emptyCart" style="display: none;">
+        <div class="empty-cart" id="emptyCart" style="display:none;">
           <div class="empty-cart-icon">🛒</div>
           <div class="empty-cart-text">There are no items in your cart.</div>
         </div>
@@ -1892,10 +537,7 @@
       </div>
       <div class="cart-actions">
         <button class="continue">CONTINUE SHOPPING</button>
-        <button class="place" id="placeOrderBtn">
-          <div class="order-total" id="placeTotal">₹0</div>
-          PLACE ORDER
-        </button>
+        <button class="place" id="placeOrderBtn"><div class="order-total" id="placeTotal">₹0</div>PLACE ORDER</button>
       </div>
     </div>
 
@@ -1923,54 +565,74 @@
       ]
     }
     </script>
-  </div> <!-- End of appWrapper -->
+  </div>
 
   <script>
-    // TASK 2: Configurable desktop background
+    /* ===== Configurable desktop background ===== */
     const desktopBackgroundImage = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1756914772/Coastal_Fresh_Sea_food_hyderabad_-_website_banner_shqapq.png';
     document.documentElement.style.setProperty('--desktop-bg-image', `url(${desktopBackgroundImage})`);
 
-    // Product data
-    const products = [
-      { id:1, name:"White Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728284/Whitt_spxhew.jpg", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy White Pomfret online in Hyderabad – premium coastal fish with mild taste and firm flesh. Perfect for fry, grill, or curry. Hygienically cleaned and delivered fresh next day." },
-      { id:2, name:"Black Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/Blac_qnztqj.jpg", mrp:850, finalPrice:750, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Black Pomfret in Hyderabad – firm texture, rich flavor, and ideal for spicy Andhra fish curry, grills, and fries. Packed fresh and delivered with care by Coastal Fresh." },
-      { id:3, name:"Sea Bass", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/SeaBas_cd21dd.jpg", mrp:850, finalPrice:765, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Sea Bass fish delivery in Hyderabad – mild flavor, firm texture, and nutrient-rich. Great for curries, grills, or pan-seared dishes. Cleaned and delivered ice-fresh." },
-      { id:4, name:"Yellowfin Tuna", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/YellowTun_tzidzi.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy Yellowfin Tuna steaks in Hyderabad – meaty cuts, rich taste, and perfect for grilling, searing, or curry. High in protein and omega-3, packed fresh and delivered fast." },
-      { id:5, name:"Pink Percept", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/PinkPerc_r8g3me.jpg", mrp:450, finalPrice:405, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Pink Perch fish – soft flesh, mild taste, and budget-friendly. Great for crispy fry, tangy curry, or homely meals. Sourced daily and hygienically packed for Hyderabad delivery." },
-      { id:6, name:"Koyyinga", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/koyyangi_si2oss.png", mrp:500, finalPrice:450, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Koyyinga fish online – Andhra favorite with bold flavor and firm texture. Perfect for spicy curries or deep-fried recipes. Delivered fresh across Hyderabad." },
-      { id:7, name:"Kanagadathalu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Kanagadathal_lvwazy.jpg", mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Kanagadathalu fish delivery – coastal classic with versatile flavor. Suited for curry, grills, or fry. Responsibly sourced and delivered fresh by Coastal Fresh in Hyderabad." },
-      { id:8, name:"Vanjaram (Seer)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Vanjara_ikhy6c.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy Vanjaram Seer Fish in Hyderabad – king of South Indian seafood with boneless cuts, rich taste, and firm flesh. Ideal for fry or curry. Packed fresh and delivered next day." },
-      { id:9, name:"Nettallu (Anchovies)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/Nethallu_rckaaj.png", mrp:300, finalPrice:270, offer:10, gross:"1000g", net:"800g", available:true, category:"Fish", desc:"Anchovies (Nettallu) online – tiny fish with bold taste. Excellent for crispy fry, chutneys, or tamarind curry. Calcium and omega-3 rich, delivered fresh in Hyderabad." },
-      { id:10, name:"Katte Parigelu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Katte_Parigelu_lnxp73.png", mrp:400, finalPrice:360, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Katte Parigelu fish delivery – tasty, tender, and ready-to-cook. Suited for coastal curries and deep-fry recipes. Fresh catch delivered to your Hyderabad doorstep." },
-      { id:11, name:"Rohu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rohu_ctixmk.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy Rohu fish online in Hyderabad – freshwater favorite with mild taste. Perfect for Bengali or Andhra curries, fry, or homely meals. Packed hygienically for freshness." },
-      { id:12, name:"Rupchand", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rupchand_Fish_woqmzz.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Rupchand fish in Hyderabad – affordable, mild-flavored, and versatile. Ideal for everyday curries or fry dishes. Fresh catch, cleaned and delivered across the city." },
-      { id:13, name:"Catla", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Catla_-_Fish_tjb5hr.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Catla fish delivery in Hyderabad – freshwater fish with large cuts and tasty flesh. Popular for Andhra fish curry, fry, or homestyle meals. Hygienically processed and packed." },
-      { id:14, name:"Korameenu (Murrel)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577555/Korameenu_dkpfiw.png", mrp:780, finalPrice:700, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Korameenu Murrel fish – prized Andhra delicacy with firm flesh and rich taste. Ideal for spicy fry and traditional curry. Delivered ice-packed across Hyderabad." },
-      { id:15, name:"Sea Tiger Prawns - 20C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:750, finalPrice:750, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Buy Sea Tiger Prawns 20-count – large, juicy, and premium. Perfect for grills, biryani, or curry. Cleaned, deveined, and delivered fresh to your Hyderabad home." },
-      { id:16, name:"Sea Tiger Prawns - 40C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium Sea Tiger Prawns 40-count – sweet flavor, cleaned and ready to cook. Ideal for curries, fry, or stir-fries. Freshly sourced and delivered across Hyderabad." },
-      { id:17, name:"Sea Tiger Prawns - 60C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:550, finalPrice:550, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Sea Tiger Prawns 60-count – smaller size, big on flavor. Perfect for masala curry, fried rice, or snacks. Cleaned and delivered hygienically in Hyderabad." },
-      { id:18, name:"Chakuroyya / Godavari", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Godavari Chakuroyya freshwater prawns – authentic Andhra taste with sweet flavor. Perfect for traditional prawn curry or fry. Delivered fresh and cleaned in Hyderabad." },
-      { id:19, name:"Freshwater Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:380, finalPrice:380, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Small Freshwater Prawns – affordable, cleaned, and ready to cook. Great for prawn fry, biryani, or curries. Fresh from farms, delivered across Hyderabad." },
-      { id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577554/Fresh_Water_Prawns_-_M_lpvxiu.png", mrp:480, finalPrice:480, offer:0, gross:"1000", net:"500g", available:true, category:"Prawns", desc:"Medium Freshwater Prawns – balanced size, firm flesh, and great for grills, curries, or pasta. Hygienically cleaned and delivered ice-fresh in Hyderabad." },
-      { id:21, name:"Freshwater Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/fresh_watre_prawns_-_L_h5fyn9.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Large Freshwater Prawns – premium size, juicy texture, and perfect for butter garlic, grills, or party dishes. Farm fresh and delivered across Hyderabad." },
-      { id:22, name:"Live Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:1000, finalPrice:1000, offer:0, gross:"1000g", net:"800g", available:true, category:"Crabs", desc:"Buy Live Crab in Hyderabad – delivered live, ensuring top freshness. Sweet meat, great for masala, curry, or steam. Hygienically packed and farm-sourced." },
-      { id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:900, finalPrice:900, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Egg Crab delivery – crabs with roe (eggs) for rich, creamy flavor. Popular in traditional Andhra crab curry. Fresh, sweet meat delivered hygienically across Hyderabad." },
-      { id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577552/Blue_C Crab_tzjkxm.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Fresh Blue Crab delivery – delicate, sweet meat, smaller in size but packed with flavor. Great for curry, soups, and stir-fries. Delivered ice-packed in Hyderabad." },
-      { id:25, name:"Manda Pitha", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:600, finalPrice:600, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Manda Pitha crab – Godavari special variety, highly flavorful and tender. Ideal for spicy masala curries. Freshly sourced and delivered to Hyderabad homes." },
-      { id:26, name:"3 Dot Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png", mrp:500, finalPrice:500, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"3 Dot Crab delivery – unique shell markings, soft meat, and sweet taste. Perfect for fry or curry recipes. Delivered fresh and cleaned in Hyderabad." },
-      { id:27, name:"Prawns Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1900, finalPrice:1710, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra Prawns Pickle – made with fresh prawns, cold-pressed oil, and stone-ground spices. Spicy, tangy, and preservative-free. Delivered across Hyderabad." },
-      { id:28, name:"Chicken Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1500, finalPrice:1500, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra-style Chicken Pickle made with fresh cuts and bold spices. Packed with traditional flavor." }
+    /* ===== Trust Icons CONFIG ===== */
+    const TRUST_ICONS = [
+      { icon: '🧊', title: 'Freshness Guarantee', text: 'Freshly cut after your order' },
+      { icon: '🌱', title: 'Safe & Healthy', text: 'Chemical & Antibiotics Free' },
+      { icon: '📦', title: 'Clean & Packed', text: 'Neatly cleaned & carefully packed' },
+      { icon: '💵', title: 'Cash on Delivery', text: 'Pay when you receive' }
     ];
 
-    // App state
+    /* ===== Category Tabs CONFIG (PNG icons) ===== */
+    const CATEGORIES = [
+      { key: 'All',    label: 'All',    icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/shopping_yblohc.png' },
+      { key: 'Fish',   label: 'Fish',   icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/food_yircgb.png' },
+      { key: 'Prawns', label: 'Prawns', icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005093/shrimp_1_yzblqb.png' },
+      { key: 'Crabs',  label: 'Crabs',  icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/crab_n5ukwx.png' },
+      { key: 'Pickles',label: 'Pickles',icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005242/mason-jar_a5mtg4.png' }
+    ];
+
+    /* ===== Products DATA ===== */
+    const products = [
+      { id:1, name:"White Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728284/Whitt_spxhew.jpg", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy White Pomfret online in Hyderabad – premium coastal fish with mild taste and firm flesh. Perfect for fry, grill, or curry. Hygienically cleaned and delivered fresh next day." },
+      { id:2, name:"Black Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/Blac_qnztqj.jpg", mrp:850, finalPrice:750, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Black Pomfret in Hyderabad – firm texture, rich flavor, ideal for spicy curries, grills, and fries." },
+      { id:3, name:"Sea Bass", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/SeaBas_cd21dd.jpg", mrp:850, finalPrice:765, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Sea Bass – mild flavor, firm texture. Great for curries, grills, pan-seared." },
+      { id:4, name:"Yellowfin Tuna", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/YellowTun_tzidzi.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Meaty steaks, rich taste; perfect for grilling, searing, curry." },
+      { id:5, name:"Pink Perch", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/PinkPerc_r8g3me.jpg", mrp:450, finalPrice:405, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Soft flesh, mild taste, budget-friendly for fry/curry." },
+      { id:6, name:"Koyyinga", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/koyyangi_si2oss.png", mrp:500, finalPrice:450, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Andhra favorite; bold flavor, firm texture." },
+      { id:7, name:"Kanagadathalu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Kanagadathal_lvwazy.jpg", mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Versatile for curry, grills, fry." },
+      { id:8, name:"Vanjaram (Seer)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Vanjara_ikhy6c.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Boneless cuts, rich taste; king of South Indian seafood." },
+      { id:9, name:"Nettallu (Anchovies)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/Nethallu_rckaaj.png", mrp:300, finalPrice:270, offer:10, gross:"1000g", net:"800g", available:true, category:"Fish", desc:"Tiny fish, bold taste; great for fry/chutneys." },
+      { id:10, name:"Katte Parigelu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Katte_Parigelu_lnxp73.png", mrp:400, finalPrice:360, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Tasty, tender, ready-to-cook." },
+      { id:11, name:"Rohu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rohu_ctixmk.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Freshwater favorite; curries or fry." },
+      { id:12, name:"Rupchand", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rupchand_Fish_woqmzz.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Affordable, mild, versatile." },
+      { id:13, name:"Catla", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Catla_-_Fish_tjb5hr.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Large cuts; great for Andhra curry." },
+      { id:14, name:"Korameenu (Murrel)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577555/Korameenu_dkpfiw.png", mrp:780, finalPrice:700, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Prized delicacy; firm flesh." },
+      { id:15, name:"Sea Tiger Prawns - 20C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:750, finalPrice:750, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Large, juicy; grills & biryani." },
+      { id:16, name:"Sea Tiger Prawns - 40C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium, sweet flavor." },
+      { id:17, name:"Sea Tiger Prawns - 60C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:550, finalPrice:550, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Smaller size, big flavor." },
+      { id:18, name:"Chakuroyya / Godavari", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Authentic Andhra taste." },
+      { id:19, name:"Freshwater Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:380, finalPrice:380, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Great for prawn fry." },
+      { id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577554/Fresh_Water_Prawns_-_M_lpvxiu.png", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Balanced size, firm flesh." },
+      { id:21, name:"Freshwater Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/fresh_watre_prawns_-_L_h5fyn9.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Premium size; grills/party." },
+      { id:22, name:"Live Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:1000, finalPrice:1000, offer:0, gross:"1000g", net:"800g", available:true, category:"Crabs", desc:"Delivered live; top freshness." },
+      { id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:900, finalPrice:900, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Roe for rich, creamy flavor." },
+      { id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577552/Blue_C%20Crab_tzjkxm.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Delicate, sweet meat." },
+      { id:25, name:"Manda Pitha", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:600, finalPrice:600, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Godavari special; flavorful." },
+      { id:26, name:"3 Dot Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png", mrp:500, finalPrice:500, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Unique markings; sweet taste." },
+      { id:27, name:"Prawns Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1900, finalPrice:1710, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra Prawns Pickle; cold-pressed oil; no preservatives." },
+      { id:28, name:"Chicken Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1500, finalPrice:1500, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Andhra-style Chicken Pickle with bold spices." }
+    ];
+
+    /* ===== App State ===== */
     let cart = {};
     let popupProduct = null;
-    let itemsPerPage = 8;
+    let itemsPerPage = 9; // 3 per row * 3 rows
     let currentPage = 1;
     let currentCategory = 'All';
     let currentSearch = '';
+    const FREE_DELIVERY_THRESHOLD = 1500;
+    let lastSavings = 0;
+    let freeUnlocked = false;
 
-    // DOM elements
+    /* ===== DOM ===== */
     const productGrid = document.getElementById('productGrid');
     const showMoreBtn = document.getElementById('showMoreBtn');
     const cartFooter = document.getElementById('cartFooter');
@@ -1990,82 +652,23 @@
     const deliveryBanner = document.getElementById('deliveryBanner');
     const savingsBadge = document.getElementById('savingsBadge');
     const placeOrderBtn = document.getElementById('placeOrderBtn');
+    const categoryTabs = document.getElementById('categoryTabs');
+    const trustStrip = document.getElementById('trustStrip');
 
-    // Initialize the app
-    function init() {
+    /* ===== Init ===== */
+    document.addEventListener('DOMContentLoaded', function () {
+      renderTrustIcons();
+      renderCategoryTabs();
       renderProducts();
       initCarousel();
       initFAQ();
       loadCart();
-      
-      // Event delegation for categories
-      document.querySelector('.category-nav').addEventListener('click', function(e) {
-        if (e.target.classList.contains('category-item')) {
-          e.preventDefault();
-          const category = e.target.dataset.category;
-          filterCategory(category);
-          
-          // Track category selection for analytics
-          if (typeof gtag === 'function') {
-            gtag('event', 'select_category', {
-              'event_category': 'engagement',
-              'event_label': category
-            });
-          }
-        }
-      });
-      
-      // Search functionality
-      searchInput.addEventListener('input', function() {
-        currentSearch = this.value.trim().toLowerCase();
-        currentPage = 1;
-        renderProducts();
-        
-        // Track search event for analytics
-        if (currentSearch && typeof gtag === 'function') {
-          gtag('event', 'search', {
-            'search_term': currentSearch
-          });
-        }
-      });
-      
-      // Event delegation for product grid
-      productGrid.addEventListener('click', function(e) {
-        // Handle add button clicks - prevent opening product popup
-        if (e.target.classList.contains('add-btn')) {
-          e.stopPropagation();
-          const productCard = e.target.closest('.product-card');
-          if (productCard) {
-            const productId = parseInt(productCard.dataset.id);
-            addToCart(productId);
-            return;
-          }
-        }
-        
-        // Handle product card clicks (excluding add button)
-        const productCard = e.target.closest('.product-card');
-        if (productCard && !e.target.classList.contains('add-btn')) {
-          const productId = parseInt(productCard.dataset.id);
-          openPopup(productId);
-          
-          // Track product view for analytics
-          if (typeof gtag === 'function') {
-            const product = products.find(p => p.id === productId);
-            gtag('event', 'view_item', {
-              'currency': 'INR',
-              'value': product.finalPrice,
-              'items': [{
-                'item_id': product.id,
-                'item_name': product.name,
-                'item_category': product.category,
-                'price': product.finalPrice
-              }]
-            });
-          }
-        }
-      });
-      
-      // Other event listeners
+      startTypewriter();
+
+      // Events
+      categoryTabs.addEventListener('click', onTabClick);
+      searchInput.addEventListener('input', onSearchInput);
+      productGrid.addEventListener('click', onProductGridClick);
       showMoreBtn.addEventListener('click', showMore);
       document.querySelector('.popup-header .back-btn').addEventListener('click', closePopup);
       document.querySelector('.popup-footer .close-btn').addEventListener('click', closePopup);
@@ -2076,108 +679,142 @@
       cartFooter.addEventListener('click', openCart);
       headerCart.addEventListener('click', openCart);
       whatsappCta.addEventListener('click', placeOrder);
-      
-      // Share button event listener
       document.querySelector('.share-btn').addEventListener('click', shareProduct);
 
-      // Refer & Earn banner click event
+      // Refer & Earn
       referBanner.addEventListener('click', function() {
-        // Generate referral message
         const message = "Hey! I've been ordering fresh seafood from Coastal Fresh 🐟🦐 – super clean, tasty & delivered right to my home in Hyderabad! You should try it too 👉 https://bit.ly/coastalfresh";
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-        
-        // Track refer & earn click for analytics
-        if (typeof gtag === 'function') {
-          gtag('event', 'refer_earn_click', {
-            'event_category': 'engagement',
-            'event_label': 'Refer & Earn Banner Clicked'
-          });
-        }
-        
+        if (typeof gtag === 'function') gtag('event', 'select_promotion', { promotion_id: 'refer_earn_1', promotion_name: 'Refer & Earn Banner' });
         window.open(whatsappUrl, '_blank');
       });
 
-      // Add touch feedback and animations for FAQ
-      document.addEventListener('DOMContentLoaded', function() {
-        // Touch feedback for FAQ items
-        const faqButtons = document.querySelectorAll('.q');
-        faqButtons.forEach(button => {
-          button.addEventListener('touchstart', function() {
-            this.style.background = 'rgba(59, 130, 246, 0.1)';
-          });
-          
-          button.addEventListener('touchend', function() {
-            setTimeout(() => {
-              if (!this.closest('.faq').classList.contains('active')) {
-                this.style.background = 'none';
-              }
-            }, 150);
-          });
-        });
+      // Auto-open first FAQ for engagement
+      setTimeout(() => {
+        const firstFAQ = document.querySelector('.faq[data-priority="high"]');
+        if (firstFAQ) firstFAQ.classList.add('active');
+      }, 800);
 
-        // Auto-open first FAQ for engagement
-        setTimeout(() => {
-  const firstFAQ = document.querySelector('.faq[data-priority="high"]');
-  if (firstFAQ) {
-    firstFAQ.classList.add('active');
-  }
-}, 1000);
+      // Add limited product schema
+      generateProductSchema();
+    });
 
-        // Touch feedback for why-choose items
-        const items = document.querySelectorAll('.why-item');
-        items.forEach(item => {
-          item.addEventListener('touchstart', function() {
-            this.style.transform = 'scale(0.98)';
-          });
-          
-          item.addEventListener('touchend', function() {
-            this.style.transform = 'scale(1)';
-          });
+    /* ===== Trust Icons render ===== */
+    function renderTrustIcons(){
+      trustStrip.innerHTML = TRUST_ICONS.map((t,i)=>`
+        <div class="trust-item" data-index="${i}" data-title="${t.title}">
+          <div class="icon-container" style="animation-delay:${i}s">${t.icon}</div>
+          <div class="trust-content">
+            <div class="trust-title">${t.title}</div>
+            <div class="trust-sub">${t.text}</div>
+          </div>
+        </div>
+      `).join('');
+      trustStrip.querySelectorAll('.trust-item').forEach(el=>{
+        el.addEventListener('click',()=>{
+          if (typeof gtag==='function') gtag('event','click',{ location:'trust_strip', item_title:el.dataset.title, item_index:+el.dataset.index });
         });
       });
     }
 
-    // Render products based on filters
-    function renderProducts() {
+    /* ===== Tabs render/handlers (with PNG icons) ===== */
+    function renderCategoryTabs(){
+      categoryTabs.innerHTML = CATEGORIES.map(cat => `
+        <a class="tab" href="#" data-category="${cat.key}" ${cat.key==='All'?'aria-current="page"':''}>
+          <img class="icon" src="${cat.icon}" alt="${cat.label} icon" loading="lazy" width="20" height="20"/> ${cat.label}
+        </a>
+      `).join('');
+    }
+    function onTabClick(e){
+      const a = e.target.closest('.tab');
+      if (!a) return;
+      e.preventDefault();
+      const cat = a.dataset.category;
+      filterCategory(cat);
+      if (typeof gtag==='function') gtag('event','select_category',{ category:cat });
+      categoryTabs.querySelectorAll('.tab').forEach(t=>t.removeAttribute('aria-current'));
+      a.setAttribute('aria-current','page');
+    }
+
+    /* ===== Search & Typewriter (Search static) ===== */
+    function onSearchInput(){
+      currentSearch = this.value.trim().toLowerCase();
+      currentPage = 1;
+      renderProducts();
+      if (currentSearch && typeof gtag==='function') gtag('event','view_search_results',{ search_term: currentSearch });
+    }
+    function startTypewriter(){
+      const base = 'Search — ';
+      const names = ['Rohu','Tiger Prawns','Sea Bass','Crab','Pickle'];
+      let i=0, pos=0, dir=1, pause=0;
+
+      function tick(){
+        if (document.activeElement === searchInput || searchInput.value){ setTimeout(tick, 700); return; }
+        const full = names[i];
+        if (pause>0){ pause--; return void setTimeout(tick, 80); }
+
+        const text = full.slice(0,pos);
+        searchInput.setAttribute('placeholder', base + text);
+
+        pos += dir;
+        if (pos > full.length){ pause=10; dir=-1; }
+        if (pos < 0){ dir=1; i=(i+1)%names.length; }
+
+        setTimeout(tick, 60);
+      }
+      tick();
+    }
+
+    /* ===== Products render (card spec) ===== */
+    function renderProducts(){
       productGrid.innerHTML = '';
-      
-      // Filter products
-      let filtered = products.filter(p => {
-        const matchesCategory = currentCategory === 'All' || p.category === currentCategory;
-        const matchesSearch = !currentSearch || 
-          p.name.toLowerCase().includes(currentSearch) || 
-          p.desc.toLowerCase().includes(currentSearch) ||
-          p.category.toLowerCase().includes(currentSearch);
+      const q = currentSearch;
+      let filtered = products.filter(p=>{
+        const matchesCategory = currentCategory==='All' || p.category===currentCategory;
+        const matchesSearch = !q || p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
         return matchesCategory && matchesSearch;
       });
-      
-      // Determine how many to show
-      let shown = filtered.slice(0, itemsPerPage * currentPage);
-      
-      // Render products
-      shown.forEach(p => {
-        let div = document.createElement('div');
-        div.className = 'product-card';
-        div.dataset.id = p.id;
-        div.innerHTML = `
-          ${p.offer > 0 ? `<div class="offer-tag">${p.offer}% OFF</div>` : ''}
-          <img src="${p.image}" alt="${p.name}" loading="lazy">
-          <div class="product-price">₹${p.finalPrice}${p.mrp > p.finalPrice ? `<span class="product-original-price">₹${p.mrp}</span>` : ''}</div>
-          <div class="product-name">${p.name}</div>
-          <div class="product-weight">${p.net}</div>
-          <button class="add-btn">+ ADD</button>
+
+      const shown = filtered.slice(0, itemsPerPage * currentPage);
+      shown.forEach(p=>{
+        const inCartQty = cart[p.id] || 0;
+        const saveAmt = Math.max(0, (p.mrp||0) - (p.finalPrice||0));
+        const hasMrp = p.mrp && p.mrp > p.finalPrice;
+
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.dataset.id = p.id;
+
+        card.innerHTML = `
+          <div class="img">
+            <img src="${p.image}" alt="${p.name}" loading="lazy" />
+            <button class="add-pill" ${inCartQty>0?'style="display:none"':''}>ADD</button>
+            <div class="qty" aria-label="Quantity" style="${inCartQty>0?'display:flex':''}">
+              <button class="dec">–</button>
+              <span class="num">${inCartQty || 1}</span>
+              <button class="inc">+</button>
+            </div>
+          </div>
+          <div class="price-row">
+            <span class="price-now">₹${p.finalPrice}</span>
+            ${hasMrp?`<span class="price-mrp">₹${p.mrp}</span>`:''}
+          </div>
+          ${hasMrp?`<div class="save">SAVE ₹${saveAmt}</div>`:''}
+          <div class="meta">${p.net}</div>
+          <div class="name">${p.name}</div>
         `;
-        productGrid.appendChild(div);
+        productGrid.appendChild(card);
       });
-      
-      // Show/hide "Show More" button
-      if (filtered.length > itemsPerPage * currentPage) {
+
+      // Enhanced "Show more" CTA
+      const remaining = Math.max(0, filtered.length - (itemsPerPage * currentPage));
+      if (remaining > 0) {
+        showMoreBtn.textContent = `Show ${Math.min(itemsPerPage, remaining)} more products (${remaining} left)`;
         showMoreBtn.classList.remove('hidden');
       } else {
         showMoreBtn.classList.add('hidden');
       }
-      
-      // If no products found
+
       if (filtered.length === 0) {
         productGrid.innerHTML = `
           <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #666;">
@@ -2190,211 +827,150 @@
       }
     }
 
-    // Filter by category
-    function filterCategory(cat) {
-      currentCategory = cat;
-      currentPage = 1;
-      searchInput.value = ''; // Clear search when changing category
-      currentSearch = '';
-      
-      // Update active class
-      document.querySelectorAll('.category-item').forEach(el => {
-        el.classList.remove('active');
-      });
-      document.querySelector(`.category-item[data-category="${cat}"]`).classList.add('active');
-      
-      renderProducts();
-      scrollToProducts();
+    /* ===== Grid interactions ===== */
+    function onProductGridClick(e){
+      const card = e.target.closest('.card');
+      if (!card) return;
+      const id = parseInt(card.dataset.id,10);
+      const addBtn = card.querySelector('.add-pill');
+      const qtyBox = card.querySelector('.qty');
+      const num = qtyBox.querySelector('.num');
+
+      if (e.target.classList.contains('add-pill')) {
+        cart[id] = 1;
+        num.textContent = 1;
+        addBtn.style.display = 'none';
+        qtyBox.style.display = 'flex';
+        saveCart();
+        showToast('Added to cart!');
+        trackAddToCart(id, 1);
+        return;
+      }
+      if (e.target.classList.contains('inc')) {
+        cart[id] = (cart[id]||1) + 1;
+        num.textContent = cart[id];
+        saveCart();
+        trackChangeQty(id, +1);
+        return;
+      }
+      if (e.target.classList.contains('dec')) {
+        const next = Math.max(0, (cart[id]||1) - 1);
+        if (next===0){
+          delete cart[id];
+          qtyBox.style.display='none';
+          addBtn.style.display='inline-flex';
+        } else {
+          num.textContent = next;
+          cart[id]=next;
+        }
+        saveCart();
+        trackChangeQty(id, -1);
+        return;
+      }
+
+      // Open popup when non-button area clicked
+      openPopup(id);
+      const p = products.find(p=>p.id===id);
+      if (p && typeof gtag==='function'){
+        gtag('event','view_item',{
+          currency:'INR',
+          value:p.finalPrice,
+          items:[{ item_id:p.id, item_name:p.name, item_category:p.category, price:p.finalPrice }]
+        });
+      }
     }
 
-    // Show more products
-    function showMore() {
+    function showMore(){
       currentPage++;
       renderProducts();
-      
-      // Track show more event for analytics
-      if (typeof gtag === 'function') {
-        gtag('event', 'show_more_products', {
-          'event_category': 'engagement',
-          'event_label': 'Show More Products Clicked'
-        });
-      }
+      const el = document.getElementById('productsTitle');
+      if (el) el.scrollIntoView({ behavior:'smooth' });
+      if (typeof gtag==='function') gtag('event','show_more',{ page: currentPage, page_size: itemsPerPage });
     }
 
-    // Scroll to products section
-    function scrollToProducts() {
-      document.querySelector('.section-title').scrollIntoView({ behavior: 'smooth' });
+    function filterCategory(cat){
+      currentCategory = cat;
+      currentPage = 1;
+      searchInput.value = '';
+      currentSearch = '';
+      renderProducts();
+      const el = document.getElementById('productsTitle');
+      if (el) el.scrollIntoView({ behavior:'smooth' });
     }
 
-    // Carousel functionality
-    function initCarousel() {
+    /* ===== Carousel ===== */
+    function initCarousel(){
       let idx = 0;
       const slides = document.getElementById('slides');
-      
-      setInterval(() => {
-        idx = (idx + 1) % 3;
-        slides.style.transform = `translateX(${-idx * 100}%)`;
-      }, 5000);
+      setInterval(()=>{ idx = (idx+1)%3; slides.style.transform = `translateX(${-idx*100}%)`; }, 5000);
     }
 
-    // FAQ functionality
-    function initFAQ() {
-      // Already handled by inline onclick in the new FAQ structure
-    }
-
-    // Toggle FAQ function for new FAQ structure
-    function toggleFAQ(button) {
+    /* ===== FAQ ===== */
+    function initFAQ(){}
+    function toggleFAQ(button){
       const faq = button.closest('.faq');
       const isActive = faq.classList.contains('active');
-      
-      // Close all other FAQs
-      document.querySelectorAll('.faq.active').forEach(item => {
-        if (item !== faq) {
-          item.classList.remove('active');
-        }
-      });
-      
-      // Toggle current FAQ
+      document.querySelectorAll('.faq.active').forEach(item=>{ if(item!==faq) item.classList.remove('active'); });
       faq.classList.toggle('active', !isActive);
-      
-      // Track FAQ interaction for analytics
-      if (typeof gtag === 'function') {
-        gtag('event', 'faq_interaction', {
-          'event_category': 'engagement',
-          'event_label': button.querySelector('.q-text').textContent
-        });
-      }
+      if (typeof gtag==='function') gtag('event','faq_click',{ question: button.querySelector('.q-text').textContent });
     }
 
-    // Cart functionality
-    function loadCart() {
+    /* ===== Cart state ===== */
+    function loadCart(){
       const savedCart = localStorage.getItem('coastalFreshCart');
-      if (savedCart) {
-        cart = JSON.parse(savedCart);
-        updateCartUI();
-      }
+      if (savedCart){ cart = JSON.parse(savedCart); }
+      updateCartUI();
     }
-
-    function saveCart() {
+    function saveCart(){
       localStorage.setItem('coastalFreshCart', JSON.stringify(cart));
       updateCartUI();
     }
-
-    function updateCartUI() {
-      // Calculate cart totals
-      let count = 0;
-      let total = 0;
-      
-      for (let [id, qty] of Object.entries(cart)) {
+    function updateCartUI(){
+      let count=0,total=0, savings=0;
+      for (let [id, qty] of Object.entries(cart)){
+        const p = products.find(pp=>pp.id==id);
+        if(!p) continue;
         count += qty;
-        let p = products.find(pp => pp.id == id);
         total += p.finalPrice * qty;
+        savings += Math.max(0, (p.mrp || p.finalPrice) - p.finalPrice) * qty;
       }
-      
-      // Update UI
-      cartCount.textContent = count + ' item' + (count !== 1 ? 's' : '');
+      cartCount.textContent = count + ' item' + (count!==1?'s':'');
       cartTotal.textContent = '₹' + total;
       headerCartCount.textContent = count;
       headerCartAmount.textContent = '₹' + total;
-      
-      // Show/hide cart footer and header elements based on cart items
-      if (count > 0) {
-        cartFooter.style.display = 'flex';
-        headerCart.classList.add('has-items');
+
+      if (count>0){ cartFooter.style.display='flex'; headerCart.classList.add('has-items'); }
+      else { cartFooter.style.display='none'; headerCart.classList.remove('has-items'); }
+
+      // Simple free-delivery banner (no progress bars)
+      if (total >= FREE_DELIVERY_THRESHOLD){
+        if (!freeUnlocked){
+          freeUnlocked = true;
+          deliveryBanner.style.display = 'flex';
+          showToast('Free Delivery unlocked!');
+        }
       } else {
-        cartFooter.style.display = 'none';
-        headerCart.classList.remove('has-items');
+        freeUnlocked = false;
+        deliveryBanner.style.display = 'none';
       }
+
+      updateSavingsCelebration(savings);
     }
 
-    function addToCart(id) {
-      cart[id] = (cart[id] || 0) + 1;
-      saveCart();
-      showToast('Added to cart!');
-      
-      // Track add to cart event
-      if (typeof gtag === 'function') {
-        const product = products.find(p => p.id === id);
-        gtag('event', 'add_to_cart', {
-          'currency': 'INR',
-          'value': product.finalPrice,
-          'items': [{
-            'item_id': product.id,
-            'item_name': product.name,
-            'item_category': product.category,
-            'price': product.finalPrice,
-            'quantity': 1
-          }]
-        });
+    function updateSavingsCelebration(savings){
+      if (savings > 0 && savings !== lastSavings){
+        showToast(`You saved ₹${savings}!`);
       }
+      lastSavings = savings;
     }
 
-    function changeQty(id, delta) {
-      if (cart[id]) {
-        cart[id] += delta;
-        if (cart[id] <= 0) {
-          delete cart[id];
-        }
-        saveCart();
-        
-        // Track quantity change for analytics
-        if (typeof gtag === 'function') {
-          const product = products.find(p => p.id == id);
-          gtag('event', delta > 0 ? 'increase_quantity' : 'decrease_quantity', {
-            'currency': 'INR',
-            'value': product.finalPrice,
-            'items': [{
-              'item_id': product.id,
-              'item_name': product.name,
-              'item_category': product.category,
-              'price': product.finalPrice,
-              'quantity': cart[id] || 0
-            }]
-          });
-        }
-        
-        // If cart page is open, refresh it
-        if (document.getElementById('cartPage').style.display === 'flex') {
-          openCart();
-        }
-      }
-    }
-
-    function removeFromCart(id) {
-      delete cart[id];
-      saveCart();
-      
-      // Track remove from cart for analytics
-      if (typeof gtag === 'function') {
-        const product = products.find(p => p.id == id);
-        gtag('event', 'remove_from_cart', {
-          'currency': 'INR',
-          'value': product.finalPrice,
-          'items': [{
-            'item_id': product.id,
-            'item_name': product.name,
-            'item_category': product.category,
-            'pice': product.finalPrice
-          }]
-        });
-      }
-      
-      // If cart page is open, refresh it
-      if (document.getElementById('cartPage').style.display === 'flex') {
-        openCart();
-      }
-    }
-
-    // Product popup
-    function openPopup(id) {
-      const productCard = document.querySelector(`.product-card[data-id="${id}"]`);
-      if (productCard) {
-        productCard.classList.add('loading');
-      }
-      
-      setTimeout(() => {
-        popupProduct = products.find(p => p.id === id);
-        
+    /* ===== Popup ===== */
+    function openPopup(id){
+      const productCard = document.querySelector(`.card[data-id="${id}"]`);
+      if (productCard) productCard.classList.add('loading');
+      setTimeout(()=>{
+        popupProduct = products.find(p=>p.id===id);
+        if (!popupProduct) return;
         document.getElementById('popupTitle').textContent = popupProduct.name;
         document.getElementById('popupBody').innerHTML = `
           <img src="${popupProduct.image}" alt="${popupProduct.name}" loading="lazy">
@@ -2404,90 +980,54 @@
             ${popupProduct.offer > 0 ? `<span class="offer">${popupProduct.offer}% OFF</span>` : ''}
             ${popupProduct.mrp > popupProduct.finalPrice ? `<span class="old">₹${popupProduct.mrp}</span>` : ''}
           </div>
-          <div class="delivery-info">
-            <i class="fas fa-truck"></i> Delivered next day morning
-          </div>
+          <div class="delivery-info"><i class="fas fa-truck"></i> Delivered next day morning</div>
           <p>${popupProduct.desc}</p>
         `;
-        
-        document.getElementById('productPopup').style.display = 'flex';
+        document.getElementById('productPopup').style.display='flex';
         document.body.classList.add('popup-open');
-        
-        if (productCard) {
-          productCard.classList.remove('loading');
-        }
-      }, 100);
+        if (productCard) productCard.classList.remove('loading');
+      },100);
     }
-
-    function closePopup() {
-      document.getElementById('productPopup').style.display = 'none';
+    function closePopup(){
+      document.getElementById('productPopup').style.display='none';
       document.body.classList.remove('popup-open');
     }
-
-    function addPopupToCart() {
-      addToCart(popupProduct.id);
-      closePopup();
-    }
-
-    // Share product functionality
-    function shareProduct() {
+    function addPopupToCart(){
       if (!popupProduct) return;
-      
-      // Generate UTM parameters for sharing
-      const utmParams = `utm_source=product_share&utm_medium=whatsapp&utm_campaign=product_referral&utm_content=product_${popupProduct.id}`;
-      const shareUrl = `https://www.coastalfresh.in?${utmParams}`;
-      
-      const message = `Check out this ${popupProduct.name} from Coastal Fresh! ${popupProduct.desc.substring(0, 100)}... ${shareUrl}`;
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-      
-      // Track share event
-      if (typeof gtag === 'function') {
-        gtag('event', 'share', {
-          'method': 'WhatsApp',
-          'content_type': 'product',
-          'item_id': popupProduct.id
-        });
+      cart[popupProduct.id] = (cart[popupProduct.id]||0) + 1;
+      saveCart();
+      showToast('Added to cart!');
+      trackAddToCart(popupProduct.id,1);
+      closePopup();
+      const card = document.querySelector(`.card[data-id="${popupProduct.id}"]`);
+      if (card){
+        card.querySelector('.add-pill').style.display='none';
+        const qtyBox = card.querySelector('.qty');
+        qtyBox.style.display='flex';
+        qtyBox.querySelector('.num').textContent = cart[popupProduct.id];
       }
-      
-      window.open(whatsappUrl, '_blank');
     }
 
-    // Cart page
-    function openCart() {
-      // Track view cart event
-      if (typeof gtag === 'function') {
-        gtag('event', 'view_cart', {
-          'currency': 'INR',
-          'value': calculateCartTotal(),
-          'items': getCartItemsForAnalytics()
-        });
-      }
-      
-      const cartItems = document.getElementById('cartItems');
+    /* ===== Cart page ===== */
+    function openCart(){
+      if (typeof gtag==='function') gtag('event','view_cart',{ currency:'INR', value:calculateCartTotal(), items:getCartItemsForAnalytics() });
+
+      const cartItemsEl = document.getElementById('cartItems');
       const originalTotal = document.getElementById('originalTotal');
       const finalTotal = document.getElementById('finalTotal');
       const placeTotal = document.getElementById('placeTotal');
-      const savingsBadge = document.getElementById('savingsBadge');
-      const savingsText = document.getElementById('savingsText');
-      
-      // Calculate totals
-      let orig = 0;
-      let total = 0;
-      let savings = 0;
-      
-      cartItems.innerHTML = '';
-      
-      for (let [id, qty] of Object.entries(cart)) {
-        let p = products.find(pp => pp.id == id);
-        let itemOrig = p.mrp * qty;
-        let itemTotal = p.finalPrice * qty;
-        let itemSavings = itemOrig - itemTotal;
-        
-        orig += itemOrig;
-        total += itemTotal;
-        savings += itemSavings;
-        
-        cartItems.innerHTML += `
+
+      let orig=0,total=0,savings=0;
+      cartItemsEl.innerHTML='';
+
+      for (let [id, qty] of Object.entries(cart)){
+        const p = products.find(pp=>pp.id==id);
+        if (!p) continue;
+        const itemOrig = (p.mrp||p.finalPrice) * qty;
+        const itemTotal = p.finalPrice * qty;
+        orig += itemOrig; total += itemTotal; savings += (itemOrig - itemTotal);
+
+        cartItemsEl.innerHTML += `
           <div class="cart-item">
             <img src="${p.image}" alt="${p.name}" loading="lazy">
             <div class="item-details">
@@ -2501,185 +1041,165 @@
             </div>
             <div class="item-pricing">
               <div class="item-price">₹${itemTotal}</div>
-              <div class="item-original">₹${itemOrig}</div>
+              ${p.mrp>p.finalPrice?`<div class="item-original">₹${itemOrig}</div>`:''}
             </div>
             <i class="fas fa-trash-alt remove-btn" data-id="${id}"></i>
           </div>
         `;
       }
-      
-      // Update totals
+
       originalTotal.textContent = '₹' + orig;
       finalTotal.textContent = '₹' + total;
       placeTotal.textContent = '₹' + total;
       savingsBadge.textContent = 'Saved ₹' + savings;
-      savingsText.textContent = 'Total Savings ₹' + savings;
-      
-      // Show/hide elements based on cart items
-      if (Object.keys(cart).length === 0) {
-        // Empty cart state
-        emptyCart.style.display = 'block';
-        cartItems.style.display = 'none';
-        orderSummary.style.display = 'none';
-        deliveryBanner.style.display = 'none';
-        savingsBadge.style.display = 'none';
-        placeOrderBtn.style.display = 'none';
+
+      if (Object.keys(cart).length===0){
+        emptyCart.style.display='block';
+        cartItemsEl.style.display='none';
+        orderSummary.style.display='none';
+        deliveryBanner.style.display='none';
+        savingsBadge.style.display='none';
+        placeOrderBtn.style.display='none';
       } else {
-        // Cart has items
-        emptyCart.style.display = 'none';
-        cartItems.style.display = 'block';
-        orderSummary.style.display = 'block';
-        deliveryBanner.style.display = 'flex';
-        savingsBadge.style.display = 'flex';
-        placeOrderBtn.style.display = 'block';
+        emptyCart.style.display='none';
+        cartItemsEl.style.display='block';
+        orderSummary.style.display='block';
+        savingsBadge.style.display= savings>0 ? 'flex':'none';
+        placeOrderBtn.style.display='block';
+        // Banner is handled by updateCartUI, which already ran on saveCart()
       }
-      
-      // Add event listeners to quantity buttons
-      document.querySelectorAll('.quantity-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+
+      document.querySelectorAll('.quantity-btn').forEach(btn=>{
+        btn.addEventListener('click',function(){
           const id = this.dataset.id;
           const action = this.dataset.action;
-          changeQty(parseInt(id), action === 'increase' ? 1 : -1);
+          changeQty(parseInt(id,10), action==='increase'?1:-1);
         });
       });
-      
-      // Add event listeners to remove buttons
-      document.querySelectorAll('.remove-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const id = this.dataset.id;
-          removeFromCart(parseInt(id));
-        });
+      document.querySelectorAll('.remove-btn').forEach(btn=>{
+        btn.addEventListener('click',function(){ removeFromCart(parseInt(this.dataset.id,10)); });
       });
-      
-      // Show cart page
-      document.getElementById('cartPage').style.display = 'flex';
+
+      document.getElementById('cartPage').style.display='flex';
       document.body.classList.add('popup-open');
     }
-
-    function closeCart() {
-      document.getElementById('cartPage').style.display = 'none';
+    function closeCart(){
+      document.getElementById('cartPage').style.display='none';
       document.body.classList.remove('popup-open');
+      renderProducts(); // sync qty pills
     }
-
-    function calculateCartTotal() {
-      let total = 0;
-      for (let [id, qty] of Object.entries(cart)) {
-        let p = products.find(pp => pp.id == id);
+    function calculateCartTotal(){
+      let total=0;
+      for (let [id, qty] of Object.entries(cart)){
+        const p = products.find(pp=>pp.id==id);
+        if (!p) continue;
         total += p.finalPrice * qty;
       }
       return total;
     }
-
-    function getCartItemsForAnalytics() {
-      const items = [];
-      for (let [id, qty] of Object.entries(cart)) {
-        let p = products.find(pp => pp.id == id);
-        items.push({
-          'item_id': p.id,
-          'item_name': p.name,
-          'item_category': p.category,
-          'price': p.finalPrice,
-          'quantity': qty
-        });
+    function getCartItemsForAnalytics(){
+      const items=[];
+      for (let [id, qty] of Object.entries(cart)){
+        const p = products.find(pp=>pp.id==id);
+        if (!p) continue;
+        items.push({ item_id:p.id, item_name:p.name, item_category:p.category, price:p.finalPrice, quantity:qty });
       }
       return items;
     }
-
-    // WhatsApp order placement
-    function placeOrder() {
-      if (Object.keys(cart).length === 0) {
-        showToast('Your cart is empty!');
-        return;
+    function changeQty(id, delta){
+      if (cart[id]){
+        cart[id] += delta;
+        if (cart[id] <= 0) delete cart[id];
+        saveCart();
+        trackChangeQty(id, delta);
+        const card = document.querySelector(`.card[data-id="${id}"]`);
+        if (card){
+          const addBtn = card.querySelector('.add-pill');
+          const qtyBox = card.querySelector('.qty');
+          const num = qtyBox.querySelector('.num');
+          const q = cart[id]||0;
+          if (q<=0){ qtyBox.style.display='none'; addBtn.style.display='inline-flex'; }
+          else { qtyBox.style.display='flex'; num.textContent = q; addBtn.style.display='none'; }
+        }
+        if (document.getElementById('cartPage').style.display==='flex') openCart();
       }
-      
-      // Track place order event
-      if (typeof gtag === 'function') {
-        gtag('event', 'begin_checkout', {
-          'currency': 'INR',
-          'value': calculateCartTotal(),
-          'items': getCartItemsForAnalytics()
-        });
+    }
+    function removeFromCart(id){
+      delete cart[id];
+      saveCart();
+      if (typeof gtag==='function'){
+        const p = products.find(p=>p.id==id);
+        if (p) gtag('event','remove_from_cart',{ currency:'INR', value:p.finalPrice, items:[{ item_id:p.id,item_name:p.name,item_category:p.category,price:p.finalPrice }] });
       }
-      
-      let message = "Hi Coastal Fresh,%0A%0AI would like to order:%0A%0A";
-      let total = 0;
-      let origTotal = 0;
-      
-      for (let [id, qty] of Object.entries(cart)) {
-        let p = products.find(pp => pp.id == id);
-        let itemTotal = p.finalPrice * qty;
-        let itemOrig = p.mrp * qty;
-        
-        total += itemTotal;
-        origTotal += itemOrig;
-        
-        // Properly encode product name for WhatsApp
-        const productName = encodeURIComponent(p.name);
-        message += `- ${productName} (${p.net}) x ${qty} = ₹${itemTotal}%0A`;
-      }
-      
-      let savings = origTotal - total;
-      
-      message += `%0ATotal: ₹${total}%0A`;
-      if (savings > 0) {
-        message += `You saved: ₹${savings}%0A`;
-      }
-      
-      message += "%0APlease confirm availability and delivery timing.";
-      
-      const url = `https://wa.me/919985125678?text=${message}`;
-      window.open(url, '_blank');
+      if (document.getElementById('cartPage').style.display==='flex') openCart();
     }
 
-    // Toast notification
-    function showToast(message) {
+    /* ===== Share product ===== */
+    function shareProduct(){
+      if (!popupProduct) return;
+      const utmParams = `utm_source=product_share&utm_medium=whatsapp&utm_campaign=product_referral&utm_content=product_${popupProduct.id}`;
+      const shareUrl = `https://www.coastalfresh.in?${utmParams}`;
+      const message = `Check out this ${popupProduct.name} from Coastal Fresh! ${popupProduct.desc.substring(0, 100)}... ${shareUrl}`;
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      if (typeof gtag==='function') gtag('event','share',{ method:'WhatsApp', content_type:'product', item_id:String(popupProduct.id) });
+      window.open(whatsappUrl,'_blank');
+    }
+
+    /* ===== Place order (WhatsApp) ===== */
+    function placeOrder(){
+      if (Object.keys(cart).length===0){ showToast('Your cart is empty!'); return; }
+      if (typeof gtag==='function'){
+        gtag('event','begin_checkout',{ currency:'INR', value:calculateCartTotal(), items:getCartItemsForAnalytics() });
+        gtag('event','click',{ location:'checkout_cta', link_text:'Place Order (WhatsApp)', link_url:'https://wa.me/919985125678' });
+      }
+      let lines = ["Hi Coastal Fresh,","","I would like to order:",""];
+      let total=0,origTotal=0;
+      for (let [id, qty] of Object.entries(cart)){
+        const p = products.find(pp=>pp.id==id); if(!p) continue;
+        const itemTotal = p.finalPrice * qty;
+        const itemOrig = (p.mrp||p.finalPrice) * qty;
+        total += itemTotal; origTotal += itemOrig;
+        lines.push(`- ${p.name} (${p.net}) x ${qty} = ₹${itemTotal}`);
+      }
+      const savings = origTotal - total;
+      lines.push("","Total: ₹"+total);
+      if (savings>0) lines.push(`You saved: ₹${savings}`);
+      lines.push("","Please confirm availability and delivery timing.");
+      const url = `https://wa.me/919985125678?text=${encodeURIComponent(lines.join('\n'))}`;
+      window.open(url,'_blank');
+    }
+
+    /* ===== Toast ===== */
+    function showToast(message){
       toastMessage.textContent = message;
       toast.classList.add('show');
-      
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 2000);
+      setTimeout(()=>toast.classList.remove('show'), 2000);
     }
 
-    // Initialize the app when DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize the app
-      init();
-      
-      // Generate product schema for SEO
-      generateProductSchema();
-    });
-    
-    // Generate product schema for SEO
-    function generateProductSchema() {
-      const productSchemas = products.map(product => {
-        return {
-          "@context": "https://schema.org/",
-          "@type": "Product",
-          "name": product.name,
-          "image": product.image,
-          "description": product.desc,
-          "offers": {
-            "@type": "Offer",
-            "url": "https://www.coastalfresh.in/",
-            "priceCurrency": "INR",
-            "price": product.finalPrice,
-            "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
-            "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-            "itemCondition": "https://schema.org/NewCondition"
-          }
-        };
+    /* ===== Product schema (limited) ===== */
+    function generateProductSchema(){
+      const productSchemas = products.map(product => ({
+        "@context":"https://schema.org/","@type":"Product",
+        "name":product.name,"image":product.image,"description":product.desc,
+        "offers":{"@type":"Offer","url":"https://www.coastalfresh.in/","priceCurrency":"INR","price":product.finalPrice,
+          "priceValidUntil":new Date(Date.now()+30*24*60*60*1000).toISOString().split('T')[0],
+          "availability":product.available?"https://schema.org/InStock":"https://schema.org/OutOfStock","itemCondition":"https://schema.org/NewCondition"}
+      }));
+      productSchemas.slice(0,5).forEach(schema=>{
+        const s=document.createElement('script');s.type='application/ld+json';s.textContent=JSON.stringify(schema);document.head.appendChild(s);
       });
-      
-      // Add the first few product schemas to the page (to avoid too much JSON-LD)
-      const limitedSchemas = productSchemas.slice(0, 5);
-      
-      limitedSchemas.forEach(schema => {
-        const script = document.createElement('script');
-        script.type = 'application/ld+json';
-        script.textContent = JSON.stringify(schema);
-        document.head.appendChild(script);
-      });
+    }
+
+    /* ===== Analytics helpers ===== */
+    function trackAddToCart(id, qty){
+      const p = products.find(p=>p.id===id);
+      if (!p || typeof gtag!=='function') return;
+      gtag('event','add_to_cart',{ currency:'INR', value:p.finalPrice*qty, items:[{ item_id:p.id,item_name:p.name,item_category:p.category,price:p.finalPrice,quantity:qty }] });
+    }
+    function trackChangeQty(id, delta){
+      const p = products.find(p=>p.id===id);
+      if (!p || typeof gtag!=='function') return;
+      gtag('event','change_cart_quantity',{ change:delta, item_id:p.id, item_name:p.name, item_category:p.category, price:p.finalPrice, quantity: cart[id]||0 });
     }
   </script>
 </body>
