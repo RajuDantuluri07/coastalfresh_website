@@ -154,9 +154,10 @@
 
   .section-title{font-weight:800;font-size:16px;margin:12px 4px;color:var(--logo-text)}
 
-  /* Grid – 2 products per row as requested */
+  /* Grid – 2 products per row as requested (DEFAULT) */
   .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:6px 2px 20px}
-  @media (max-width:420px){ .grid{grid-template-columns:repeat(1,1fr)} }
+  /* keep 2 columns on most phones; only switch to 1 column on very tiny screens */
+  @media (max-width:320px){ .grid{grid-template-columns:repeat(1,1fr)} }
 
   /* Card visual */
   .card{background:#fff;border-radius:var(--radius-card);padding:8px;box-shadow:0 2px 8px rgba(10,30,70,.04)}
@@ -290,7 +291,7 @@
   <div class="ticker-container" aria-hidden="false">
     <div class="ticker" id="ticker">
       <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
-      <div class="ticker-item">🧊 Freshly packed — Cold chain maintained</div>
+      <div class="ticker-item">🐟 100% Hygienic Cleaning – Ready to Cook in Minutes</div>
       <div class="ticker-item">🚚 Free delivery on orders above ₹1500</div>
       <!-- duplicated items help seamless scroll -->
       <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
@@ -313,7 +314,7 @@
     <!-- Tabs (category bar) -->
     <nav class="tabs" id="categoryTabs" aria-label="Categories"></nav>
 
-    <h2 class="section-title" id="productsTitle">Premium Seafood & Pickles</h2>
+    <h2 class="section-title" id="productsTitle">From Coast to Kitchen – Fresh Fish, Prawns & Crabs</h2>
 
     <!-- Grid: productGrid is populated by JS -->
     <section class="grid" id="productGrid" aria-live="polite"></section>
@@ -420,33 +421,33 @@
     /* ===== Data & State (unchanged) ===== */
     const products = [
       { id:1, name:"White Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728284/Whitt_spxhew.jpg", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy White Pomfret online in Hyderabad – premium coastal fish with mild taste and firm flesh. Perfect for fry, grill, or curry. Hygienically cleaned and delivered fresh next day." },
-      { id:2, name:"Black Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/Blac_qnztqj.jpg", mrp:850, finalPrice:750, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Black Pomfret in Hyderabad – firm texture, rich flavor, ideal for spicy curries, grills, and fries." },
-      { id:3, name:"Sea Bass", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/SeaBas_cd21dd.jpg", mrp:850, finalPrice:765, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Sea Bass – mild flavor, firm texture. Great for curries, grills, pan-seared." },
-      { id:4, name:"Yellowfin Tuna", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/YellowTun_tzidzi.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Meaty steaks, rich taste; perfect for grilling, searing, curry." },
-      { id:5, name:"Pink Perch", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/PinkPerc_r8g3me.jpg", mrp:450, finalPrice:405, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Soft flesh, mild taste, budget-friendly for fry/curry." },
-      { id:6, name:"Koyyinga", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/koyyangi_si2oss.png", mrp:500, finalPrice:450, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Andhra favorite; bold flavor, firm texture." },
-      { id:7, name:"Kanagadathalu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Kanagadathal_lvwazy.jpg", mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Versatile for curry, grills, fry." },
-      { id:8, name:"Vanjaram (Seer)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Vanjara_ikhy6c.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Boneless cuts, rich taste; king of South Indian seafood." },
-      { id:9, name:"Nettallu (Anchovies)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/Nethallu_rckaaj.png", mrp:300, finalPrice:270, offer:10, gross:"1000g", net:"800g", available:true, category:"Fish", desc:"Tiny fish, bold taste; great for fry/chutneys." },
-      { id:10, name:"Katte Parigelu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Katte_Parigelu_lnxp73.png", mrp:400, finalPrice:360, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Tasty, tender, ready-to-cook." },
-      { id:11, name:"Rohu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rohu_ctixmk.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Freshwater favorite; curries or fry." },
-      { id:12, name:"Rupchand", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rupchand_Fish_woqmzz.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Affordable, mild, versatile." },
-      { id:13, name:"Catla", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Catla_-_Fish_tjb5hr.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Large cuts; great for Andhra curry." },
-      { id:14, name:"Korameenu (Murrel)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577555/Korameenu_dkpfiw.png", mrp:780, finalPrice:700, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Prized delicacy; firm flesh." },
-      { id:15, name:"Sea Tiger Prawns - 20C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:750, finalPrice:750, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Large, juicy; grills & biryani." },
-      { id:16, name:"Sea Tiger Prawns - 40C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium, sweet flavor." },
-      { id:17, name:"Sea Tiger Prawns - 60C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:550, finalPrice:550, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Smaller size, big flavor." },
-      { id:18, name:"Chakuroyya / Godavari", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Authentic Andhra taste." },
-      { id:19, name:"Freshwater Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:380, finalPrice:380, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Great for prawn fry." },
-      { id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577554/Fresh_Water_Prawns_-_M_lpvxiu.png", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Balanced size, firm flesh." },
-      { id:21, name:"Freshwater Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/fresh_watre_prawns_-_L_h5fyn9.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Premium size; grills/party." },
-      { id:22, name:"Live Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:1000, finalPrice:1000, offer:0, gross:"1000g", net:"800g", available:true, category:"Crabs", desc:"Delivered live; top freshness." },
-      { id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:900, finalPrice:900, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Roe for rich, creamy flavor." },
-      { id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577552/Blue_C%20Crab_tzjkxm.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Delicate, sweet meat." },
-      { id:25, name:"Manda Pitha", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:600, finalPrice:600, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Godavari special; flavorful." },
-      { id:26, name:"3 Dot Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png", mrp:500, finalPrice:500, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Unique markings; sweet taste." },
-      { id:27, name:"Prawns Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1900, finalPrice:1710, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra Prawns Pickle; cold-pressed oil; no preservatives." },
-      { id:28, name:"Chicken Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1500, finalPrice:1500, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Andhra-style Chicken Pickle with bold spices." }
+      { id:2, name:"Black Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/Blac_qnztqj.jpg", mrp:850, finalPrice:750, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Black Pomfret in Hyderabad – firm texture, rich flavor, and ideal for spicy Andhra fish curry, grills, and fries. Packed fresh and delivered with care by Coastal Fresh." },
+      { id:3, name:"Sea Bass", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/SeaBas_cd21dd.jpg", mrp:850, finalPrice:765, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Sea Bass fish delivery in Hyderabad – mild flavor, firm texture, and nutrient-rich. Great for curries, grills, or pan-seared dishes. Cleaned and delivered ice-fresh." },
+      { id:4, name:"Yellowfin Tuna", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/YellowTun_tzidzi.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy Yellowfin Tuna steaks in Hyderabad – meaty cuts, rich taste, and perfect for grilling, searing, or curry. High in protein and omega-3, packed fresh and delivered fast." },
+      { id:5, name:"Pink Percept", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/PinkPerc_r8g3me.jpg", mrp:450, finalPrice:405, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Pink Perch fish – soft flesh, mild taste, and budget-friendly. Great for crispy fry, tangy curry, or homely meals. Sourced daily and hygienically packed for Hyderabad delivery." },
+      { id:6, name:"Koyyinga", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/koyyangi_si2oss.png", mrp:500, finalPrice:450, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Koyyinga fish online – Andhra favorite with bold flavor and firm texture. Perfect for spicy curries or deep-fried recipes. Delivered fresh across Hyderabad." },
+      { id:7, name:"Kanagadathalu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Kanagadathal_lvwazy.jpg", mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Kanagadathalu fish delivery – coastal classic with versatile flavor. Suited for curry, grills, or fry. Responsibly sourced and delivered fresh by Coastal Fresh in Hyderabad." },
+      { id:8, name:"Vanjaram (Seer)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Vanjara_ikhy6c.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy Vanjaram Seer Fish in Hyderabad – king of South Indian seafood with boneless cuts, rich taste, and firm flesh. Ideal for fry or curry. Packed fresh and delivered next day." },
+      { id:9, name:"Nettallu (Anchovies)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/Nethallu_rckaaj.png", mrp:300, finalPrice:270, offer:10, gross:"1000g", net:"800g", available:true, category:"Fish", desc:"Anchovies (Nettallu) online – tiny fish with bold taste. Excellent for crispy fry, chutneys, or tamarind curry. Calcium and omega-3 rich, delivered fresh in Hyderabad." },
+      { id:10, name:"Katte Parigelu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Katte_Parigelu_lnxp73.png", mrp:400, finalPrice:360, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Katte Parigelu fish delivery – tasty, tender, and ready-to-cook. Suited for coastal curries and deep-fry recipes. Fresh catch delivered to your Hyderabad doorstep." },
+      { id:11, name:"Rohu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rohu_ctixmk.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy Rohu fish online in Hyderabad – freshwater favorite with mild taste. Perfect for Bengali or Andhra curries, fry, or homely meals. Packed hygienically for freshness." },
+      { id:12, name:"Rupchand", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rupchand_Fish_woqmzz.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Rupchand fish in Hyderabad – affordable, mild-flavored, and versatile. Ideal for everyday curries or fry dishes. Fresh catch, cleaned and delivered across the city." },
+      { id:13, name:"Catla", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Catla_-_Fish_tjb5hr.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Catla fish delivery in Hyderabad – freshwater fish with large cuts and tasty flesh. Popular for Andhra fish curry, fry, or homestyle meals. Hygienically processed and packed." },
+      { id:14, name:"Korameenu (Murrel)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577555/Korameenu_dkpfiw.png", mrp:780, finalPrice:700, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Korameenu Murrel fish – prized Andhra delicacy with firm flesh and rich taste. Ideal for spicy fry and traditional curry. Delivered ice-packed across Hyderabad." },
+      { id:15, name:"Sea Tiger Prawns - 20C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:750, finalPrice:750, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Buy Sea Tiger Prawns 20-count – large, juicy, and premium. Perfect for grills, biryani, or curry. Cleaned, deveined, and delivered fresh to your Hyderabad home." },
+      { id:16, name:"Sea Tiger Prawns - 40C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium Sea Tiger Prawns 40-count – sweet flavor, cleaned and ready to cook. Ideal for curries, fry, or stir-fries. Freshly sourced and delivered across Hyderabad." },
+      { id:17, name:"Sea Tiger Prawns - 60C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:550, finalPrice:550, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Sea Tiger Prawns 60-count – smaller size, big on flavor. Perfect for masala curry, fried rice, or snacks. Cleaned and delivered hygienically in Hyderabad." },
+      { id:18, name:"Chakuroyya / Godavari", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Godavari Chakuroyya freshwater prawns – authentic Andhra taste with sweet flavor. Perfect for traditional prawn curry or fry. Delivered fresh and cleaned in Hyderabad." },
+      { id:19, name:"Freshwater Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:380, finalPrice:380, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Small Freshwater Prawns – affordable, cleaned, and ready to cook. Great for prawn fry, biryani, or curries. Fresh from farms, delivered across Hyderabad." },
+      { id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577554/Fresh_Water_Prawns_-_M_lpvxiu.png", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium Freshwater Prawns – balanced size, firm flesh, and great for grills, curries, or pasta. Hygienically cleaned and delivered ice-fresh in Hyderabad." },
+      { id:21, name:"Freshwater Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/fresh_watre_prawns_-_L_h5fyn9.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Large Freshwater Prawns – premium size, juicy texture, and perfect for butter garlic, grills, or party dishes. Farm fresh and delivered across Hyderabad." },
+      { id:22, name:"Live Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:1000, finalPrice:1000, offer:0, gross:"1000g", net:"800g", available:true, category:"Crabs", desc:"Buy Live Crab in Hyderabad – delivered live, ensuring top freshness. Sweet meat, great for masala, curry, or steam. Hygienically packed and farm-sourced." },
+      { id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:900, finalPrice:900, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Egg Crab delivery – crabs with roe (eggs) for rich, creamy flavor. Popular in traditional Andhra crab curry. Fresh, sweet meat delivered hygienically across Hyderabad." },
+      { id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577552/Blue_Crab_tzjkxm.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Fresh Blue Crab delivery – delicate, sweet meat, smaller in size but packed with flavor. Great for curry, soups, and stir-fries. Delivered ice-packed in Hyderabad." },
+      { id:25, name:"Manda Pitha", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:600, finalPrice:600, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Manda Pitha crab – Godavari special variety, highly flavorful and tender. Ideal for spicy masala curries. Freshly sourced and delivered to Hyderabad homes." },
+      { id:26, name:"3 Dot Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png", mrp:500, finalPrice:500, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"3 Dot Crab delivery – unique shell markings, soft meat, and sweet taste. Perfect for fry or curry recipes. Delivered fresh and cleaned in Hyderabad." },
+      { id:27, name:"Prawns Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1900, finalPrice:1710, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra Prawns Pickle – made with fresh prawns, cold-pressed oil, and stone-ground spices. Spicy, tangy, and preservative-free. Delivered across Hyderabad." },
+      { id:28, name:"Chicken Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1500, finalPrice:1500, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra-style Chicken Pickle made with fresh cuts and bold spices. Packed with traditional flavor." }
     ];
 
     let cart = Object.create(null);
@@ -545,7 +546,11 @@
     }
 
     function renderCategoryTabs(){
-      categoryTabs.innerHTML = CATEGORIES.map(cat => `\n        <a class="tab" href="#" data-category="${cat.key}" ${cat.key==='All'?'aria-current="page"':''}>\n          <img class="icon" src="${cat.icon}" alt="${cat.label} icon" loading="lazy" width="20" height="20"/> ${cat.label}\n        </a>\n      `).join('');
+      categoryTabs.innerHTML = CATEGORIES.map(cat => `
+        <a class="tab" href="#" data-category="${cat.key}" ${cat.key==='All'?'aria-current="page"':''}>
+          <img class="icon" src="${cat.icon}" alt="${cat.label} icon" loading="lazy" width="20" height="20"/> ${cat.label}
+        </a>
+      `).join('');
     }
     function onTabClick(e){
       const a = e.target.closest('.tab');
@@ -605,7 +610,24 @@
         card.dataset.name = p.name;
         card.dataset.weight = p.net;
 
-        card.innerHTML = `\n          <div class="img">\n            <img src="${p.image}" alt="${p.name}" loading="lazy" />\n            <button class="add-pill" type="button" ${inCartQty>0?'style="display:none"':''}>ADD</button>\n            <div class="qty" aria-label="Quantity" style="${inCartQty>0?'display:flex':''}">\n              <button class="dec" type="button">-</button>\n              <span class="num">${inCartQty>0?inCartQty:1}</span>\n              <button class="inc" type="button">+</button>\n            </div>\n          </div>\n          <div class="price-row">\n            <span class="price-now">₹${p.finalPrice}</span>\n            ${hasMrp?`<span class="price-mrp">₹${p.mrp}</span>`:''}\n          </div>\n          ${hasMrp?`<div class="save">SAVE ₹${saveAmt}</div>`:''}\n          <div class="meta">${p.net}</div>\n          <div class="name">${p.name}</div>\n        `;
+        card.innerHTML = `
+          <div class="img">
+            <img src="${p.image}" alt="${p.name}" loading="lazy" />
+            <button class="add-pill" type="button" ${inCartQty>0?'style="display:none"':''}>ADD</button>
+            <div class="qty" aria-label="Quantity" style="${inCartQty>0?'display:flex':''}">
+              <button class="dec" type="button">-</button>
+              <span class="num">${inCartQty>0?inCartQty:1}</span>
+              <button class="inc" type="button">+</button>
+            </div>
+          </div>
+          <div class="price-row">
+            <span class="price-now">₹${p.finalPrice}</span>
+            ${hasMrp?`<span class="price-mrp">₹${p.mrp}</span>`:''}
+          </div>
+          ${hasMrp?`<div class="save">SAVE ₹${saveAmt}</div>`:''}
+          <div class="meta">${p.net}</div>
+          <div class="name">${p.name}</div>
+        `;
         productGrid.appendChild(card);
       });
 
@@ -618,7 +640,13 @@
       }
 
       if (filtered.length === 0) {
-        productGrid.innerHTML = `\n          <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #666;">\n            <i class="fas fa-search" style="font-size: 48px; margin-bottom: 16px;"></i>\n            <h3>No products found</h3>\n            <p>Try a different search or category</p>\n          </div>\n        `;
+        productGrid.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #666;">
+            <i class="fas fa-search" style="font-size: 48px; margin-bottom: 16px;"></i>
+            <h3>No products found</h3>
+            <p>Try a different search or category</p>
+          </div>
+        `;
         showMoreBtn.classList.add('hidden');
       }
     }
@@ -784,7 +812,17 @@
       if (!p) return;
       popupProduct = p;
       popupTitle.textContent = popupProduct.name;
-      popupBody.innerHTML = `\n        <img src="${popupProduct.image}" alt="${popupProduct.name}" loading="lazy">\n        <div class="popup-sub">Net QTY: ${popupProduct.gross} / ${popupProduct.net}</div>\n        <div class="popup-price">\n          <span class="now">₹${popupProduct.finalPrice}</span>\n          ${popupProduct.offer > 0 ? `<span class="offer">${popupProduct.offer}% OFF</span>` : ''}\n          ${popupProduct.mrp > popupProduct.finalPrice ? `<span class="old">₹${popupProduct.mrp}</span>` : ''}\n        </div>\n        <div class="delivery-info"><i class="fas fa-truck"></i> Delivered next day morning</div>\n        <p>${popupProduct.desc}</p>\n      `;
+      popupBody.innerHTML = `
+        <img src="${popupProduct.image}" alt="${popupProduct.name}" loading="lazy">
+        <div class="popup-sub">Net QTY: ${popupProduct.gross} / ${popupProduct.net}</div>
+        <div class="popup-price">
+          <span class="now">₹${popupProduct.finalPrice}</span>
+          ${popupProduct.offer > 0 ? `<span class="offer">${popupProduct.offer}% OFF</span>` : ''}
+          ${popupProduct.mrp > popupProduct.finalPrice ? `<span class="old">₹${popupProduct.mrp}</span>` : ''}
+        </div>
+        <div class="delivery-info"><i class="fas fa-truck"></i> Delivered next day morning</div>
+        <p>${popupProduct.desc}</p>
+      `;
       productPopup.style.display='flex';
       productPopup.setAttribute('aria-hidden','false');
       document.body.classList.add('popup-open');
@@ -800,7 +838,25 @@
         const itemOrig = (p.mrp||p.finalPrice) * qty;
         const itemTotal = p.finalPrice * qty;
         orig += itemOrig; total += itemTotal; savings += (itemOrig - itemTotal);
-        cartItemsEl.innerHTML += `\n          <div class="cart-item">\n            <img src="${p.image}" alt="${p.name}" loading="lazy">\n            <div class="item-details">\n              <div class="item-name">${p.name}</div>\n              <div class="item-weight">${p.net}</div>\n              <div class="quantity-controls">\n                <button class="quantity-btn" data-id="${p.id}" data-action="decrease">-</button>\n                <span>${qty}</span>\n                <button class="quantity-btn" data-id="${p.id}" data-action="increase">+</button>\n              </div>\n            </div>\n            <div class="item-pricing">\n              <div class="item-price">₹${itemTotal}</div>\n              ${p.mrp>p.finalPrice?`<div class="item-original">₹${itemOrig}</div>`:''}\n            </div>\n            <i class="fas fa-trash-alt remove-btn" data-id="${p.id}"></i>\n          </div>\n        `;
+        cartItemsEl.innerHTML += `
+          <div class="cart-item">
+            <img src="${p.image}" alt="${p.name}" loading="lazy">
+            <div class="item-details">
+              <div class="item-name">${p.name}</div>
+              <div class="item-weight">${p.net}</div>
+              <div class="quantity-controls">
+                <button class="quantity-btn" data-id="${p.id}" data-action="decrease">-</button>
+                <span>${qty}</span>
+                <button class="quantity-btn" data-id="${p.id}" data-action="increase">+</button>
+              </div>
+            </div>
+            <div class="item-pricing">
+              <div class="item-price">₹${itemTotal}</div>
+              ${p.mrp>p.finalPrice?`<div class="item-original">₹${itemOrig}</div>`:''}
+            </div>
+            <i class="fas fa-trash-alt remove-btn" data-id="${p.id}"></i>
+          </div>
+        `;
       }
       originalTotal.textContent = '₹' + orig;
       finalTotal.textContent = '₹' + total;
