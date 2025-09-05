@@ -3,26 +3,25 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Coastal Fresh – Products</title>
-
-  <!-- Preconnects + SEO + OG (kept) -->
+  <title>Fresh Fish, Prawns, Crabs & Pickles in Hyderabad | Coastal Fresh</title>
+  <meta name="description" content="Order premium fresh seafood and authentic pickles in Hyderabad. Fresh fish, tiger prawns, crabs, and traditional pickles with next-day delivery from Coastal Fresh." />
+  <meta name="keywords" content="fresh fish Hyderabad, prawns delivery Hyderabad, buy fish online Hyderabad, crab delivery, Andhra pickles, Coastal Fresh" />
+  <link rel="canonical" href="https://www.coastalfresh.in/" />
+  <meta name="theme-color" content="#1e40af" />
+  <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" />
+  <link rel="icon" href="/favicon.ico" />
   <link rel="preconnect" href="https://res.cloudinary.com">
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://static.hotjar.com">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-  <meta name="description" content="Order premium fresh seafood and authentic pickles in Hyderabad. Fresh fish, tiger prawns, crabs, and traditional pickles with next-day delivery. Trusted local sourcing from Coastal Andhra Pradesh." />
-  <meta name="theme-color" content="#1e40af" />
-  <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" />
-  <link rel="icon" href="/favicon.ico" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <!-- GA4 + Hotjar (kept) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-GSHMPRYPW1"></script>
+
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
-    gtag('config', 'G-GSHMPRYPW1');
+    gtag('config', 'G-GSHMPRYPW1', { 'send_page_view': true });
     try {
       if (!localStorage.getItem('firstVisit')) {
         localStorage.setItem('firstVisit', new Date().toISOString());
@@ -32,6 +31,7 @@
       }
     } catch (_) {}
   </script>
+
   <script>
     (function(h,o,t,j,a,r){
       h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)}
@@ -43,54 +43,13 @@
     })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
   </script>
 
-  <script>
-    (function () {
-      const utm = 'utm_source=website&utm_medium=whatsapp&utm_campaign=order_intent';
-      function withUTM(url) {
-        try {
-          const u = new URL(url);
-          if (u.hostname.includes('wa.me') || u.hostname.includes('api.whatsapp.com')) {
-            if (u.search) { u.search += '&' + utm; } else { u.search = '?' + utm; }
-          }
-          return u.toString();
-        } catch(e) { return url; }
-      }
-      document.addEventListener('DOMContentLoaded', function() {
-        const waLinks = Array.from(document.querySelectorAll('a[href*="wa.me/"], a[href*="api.whatsapp.com/"]'));
-        waLinks.forEach(a => { a.href = withUTM(a.href); });
-        function track(eventName, extra) {
-          if (typeof gtag === 'function') gtag('event', eventName, extra || {});
-        }
-        function onClick(e) {
-          const a = e.currentTarget;
-          track('click', {
-            link_text: (a.getAttribute('aria-label') || a.textContent || '').trim(),
-            link_url: a.href,
-            link_target: a.target || '_self',
-            location: a.dataset.trackLocation || 'link',
-            outbound: a.host && a.host !== location.host
-          });
-        }
-        waLinks.forEach(a => a.addEventListener('click', onClick));
-        const oldOpenWA = window.openWhatsApp;
-        window.openWhatsApp = function() {
-          track('click', { location: 'floating_button', link_text: 'WhatsApp CTA', link_url: 'https://wa.me' });
-          if (typeof oldOpenWA === 'function') return oldOpenWA();
-        };
-        window.withUTM = withUTM;
-      });
-    })();
-  </script>
-
   <style>
-  /* ===== Updated design CSS – primary brand now #0aace0 & white ===== */
-
   :root{
-    --brand:#0aace0; /* changed to your requested primary */
-    --logo-text:#0aace0; /* explicit */
+    --brand:#0aace0;
+    --logo-text:#0aace0;
     --ink:#1b2430;
     --sub:#6b7280;
-    --bg:#ffffff; /* use white background for consistency; cards still white */
+    --bg:#ffffff;
     --line:#e9eef6;
     --save:#16a34a;
     --mrp:#98a1b2;
@@ -111,20 +70,16 @@
   }
   a{color:inherit;text-decoration:none}
   img{display:block;max-width:100%}
-
   .container{max-width:480px;margin:0 auto;padding:12px}
-
   .header{
     position:fixed;top:0;left:0;right:0;z-index:120;
-    background:var(--logo-text); /* header uses primary */
-    color:#fff;border-bottom:1px solid rgba(255,255,255,0.06);
+    background:var(--logo-text); color:#fff;border-bottom:1px solid rgba(255,255,255,0.06);
     height:var(--header-height);display:flex;align-items:center;
     padding:0 12px;gap:12px;
   }
   .logo{font-weight:900;font-size:18px;color:#fff;flex:0 0 auto;display:flex;align-items:center;gap:8px}
   .logo img{height:34px;width:auto}
   .logo span{ color:#fff; font-weight:800; letter-spacing:0.6px }
-
   .search-bar{flex:1;position:relative}
   .search-input{
     width:100%;padding:10px 16px 10px 42px;border:2px solid rgba(255,255,255,0.12);
@@ -137,29 +92,19 @@
   .cart-btn{position:relative;background:none;border:none;padding:8px;color:#fff;cursor:pointer;border-radius:8px}
   .cart-btn:hover{background:rgba(255,255,255,0.06)}
   .cart-badge{position:absolute;top:6px;right:6px;background:#fff;color:var(--logo-text);font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center}
-
-  /* Ticker (new) */
   .ticker-container{position:sticky;top:var(--header-height);z-index:119;background:linear-gradient(90deg,var(--logo-text),#2563eb);color:#fff;padding:8px 0;overflow:hidden}
   .ticker{display:flex;white-space:nowrap;animation:ticker-scroll 30s linear infinite}
   .ticker-item{display:flex;align-items:center;padding:0 16px;font-size:14px;font-weight:700}
   .ticker-container:hover .ticker{animation-play-state:paused}
   @keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-
-  /* Tabs */
   .tabs{display:flex; gap:12px; overflow:auto hidden; padding:8px 4px 6px; position:sticky; top:calc(var(--header-height) + 40px); z-index:5;background:linear-gradient(#fff,#fff); border-bottom:1px solid var(--line);}
   .tab{flex:0 0 auto; display:flex; align-items:center; gap:8px; padding:10px 2px 12px; color:var(--sub); font-weight:700; font-size:14px; position:relative}
   .tab img.icon{width:20px;height:20px;border-radius:6px;object-fit:cover}
   .tab[aria-current="page"]{color:var(--logo-text)}
   .tab[aria-current="page"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px;background:var(--logo-text)}
-
   .section-title{font-weight:800;font-size:16px;margin:12px 4px;color:var(--logo-text)}
-
-  /* Grid – 2 products per row as requested (DEFAULT) */
   .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:6px 2px 20px}
-  /* keep 2 columns on most phones; only switch to 1 column on very tiny screens */
   @media (max-width:320px){ .grid{grid-template-columns:repeat(1,1fr)} }
-
-  /* Card visual */
   .card{background:#fff;border-radius:var(--radius-card);padding:8px;box-shadow:0 2px 8px rgba(10,30,70,.04)}
   .img{position:relative;border-radius:var(--radius-img);overflow:hidden;aspect-ratio:1/1;background:#f3fbff}
   .img>img{width:100%;height:100%;object-fit:cover}
@@ -173,32 +118,22 @@
   .save{color:var(--save);font-size:12px;font-weight:800;margin-top:2px}
   .meta{font-size:12px;color:var(--sub);margin-top:4px}
   .name{margin-top:4px;font-size:12px;font-weight:700;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-
-  /* Carousel styles */
   .carousel{margin:12px 0 6px;overflow:hidden;border-radius:12px;position:relative;height:150px}
   .slides{display:flex;transition:transform .5s ease;height:100%}
   .slide{min-width:100%;height:100%;background-size:cover;background-position:center}
   .carousel-indicators{position:absolute;left:50%;transform:translateX(-50%);bottom:8px;display:flex;gap:6px}
   .carousel-indicators button{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.6);border:none}
   .carousel-indicators button.active{background:#fff}
-
-  /* Bottom Navigation */
   .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:110;background:#fff;border-top:1px solid var(--line);height:var(--bottom-nav-height);display:flex;box-shadow:0 -2px 12px rgba(0,0,0,.06)}
   .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:var(--sub);font-size:11px;font-weight:600;gap:4px;padding:8px 4px;position:relative}
   .nav-item.active{color:var(--logo-text)}
   .nav-item svg{width:22px;height:22px}
   .nav-badge{position:absolute;top:6px;right:50%;transform:translateX(50%);background:var(--save);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:-8px}
-
-  /* WhatsApp floating */
   .whatsapp-float{position:fixed;bottom:85px;right:16px;z-index:115;width:56px;height:56px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(37,211,102,.3);text-decoration:none;transition:transform .12s ease}
   .whatsapp-float:hover{transform:scale(1.05)}
   .whatsapp-float svg{width:30px;height:30px;color:#fff}
-
-  /* Toast */
   .toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(100px);background:#16a34a;color:#fff;padding:12px 24px;border-radius:30px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:200;opacity:0;transition:transform .3s ease,opacity .3s ease;display:flex;align-items:center;gap:10px;font-weight:700}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-  /* Popup & Cart page */
   .product-popup{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:500;display:none;flex-direction:column;overflow-y:auto}
   .popup-header{display:flex;align-items:center;padding:16px;border-bottom:1px solid #ddd;position:sticky;top:0;background:#fff;z-index:10}
   .back-btn{font-size:24px;margin-right:12px;cursor:pointer}
@@ -216,14 +151,11 @@
   .popup-footer button{flex:1;margin:0 6px;padding:12px;font-weight:600;border-radius:8px;cursor:pointer;font-size:16px;text-transform:uppercase}
   .popup-footer .close-btn{background:#fff;color:#666;border:1px solid #ddd}
   .popup-footer .add{background:var(--logo-text);color:#fff;border:none}
-
-  /* Cart page */
   .cart-page{position:fixed;top:0;left:0;width:100%;height:100%;background:#f8fafc;z-index:600;display:none;flex-direction:column;overflow-y:auto}
   .cart-header{display:flex;align-items:center;background:#fff;padding:16px;border-bottom:1px solid #ddd;box-shadow:0 2px 4px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}
   .cart-title{font-weight:600;font-size:18px;margin-left:12px}
   .savings-badge{background:#dcfce7;color:#16a34a;font-size:14px;font-weight:600;padding:4px 8px;border-radius:6px;margin-left:8px;display:none}
   .delivery-banner{background:#f0fdf4;color:#16a34a;padding:12px 16px;display:none;align-items:center;gap:8px;font-size:14px;font-weight:600}
-
   .cart-items-container{flex:1;overflow-y:auto;padding:12px}
   .cart-items{background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:12px}
   .cart-item{display:flex;align-items:center;gap:12px;border-bottom:1px solid #eee;padding:12px 0}
@@ -240,23 +172,17 @@
   .order-summary{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin:0 12px;position:sticky;bottom:0;z-index:10;display:none}
   .summary-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
   .total-price{font-size:20px;font-weight:700}
-
-  /* Only one CTA on cart — primary place order sticky */
   .cart-actions{display:flex;gap:12px;background:#fff;padding:12px;border-top:1px solid #ddd;box-shadow:0 -2px 8px rgba(0,0,0,.06);position:sticky;bottom:0;z-index:10;justify-content:center}
   .continue{display:none}
   .place{flex:1;background:var(--logo-text);color:#fff;border:none;border-radius:10px;padding:14px;font-weight:700;font-size:16px;cursor:pointer;text-transform:uppercase;display:flex;align-items:center;justify-content:center}
-
-  /* Empty cart */
   .empty-cart{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;color:#374151;gap:12px;min-height:36vh;text-align:center}
   .empty-cart-icon{font-size:72px;color:#9ca3af;margin-bottom:6px}
   .empty-cart-text{font-size:18px;color:#374151;font-weight:700}
   .empty-cart-sub{font-size:14px;color:#6b7280}
   .empty-cta{margin-top:12px;background:var(--logo-text);color:#fff;padding:10px 18px;border-radius:999px;font-weight:800;box-shadow:0 10px 20px rgba(10, 172, 224, .18);border:none;cursor:pointer}
-
   .show-more-btn{appearance:none;border:none;cursor:pointer;margin:14px auto 28px;display:block;padding:14px 20px;border-radius:999px;background:var(--logo-text);box-shadow:0 12px 30px rgba(10,172,224,.12);font-weight:800;letter-spacing:.3px;color:#fff;font-size:15px;transition:transform .15s ease, box-shadow .15s ease, opacity .25s ease;text-align:center;max-width:360px}
   .show-more-btn:hover{transform:translateY(-3px);box-shadow:0 18px 34px rgba(10,172,224,.18)}
   .show-more-btn.hidden{display:none !important}
-
   @media (max-width:360px){
     .name{font-size:11px}
     .price-now{font-size:13px}
@@ -276,24 +202,22 @@
     </div>
 
     <div class="search-bar">
-      <svg class="search-icon" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2"/></svg>
-      <input id="searchInput" class="search-input" placeholder="Search products..." type="text" />
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2"/></svg>
+      <input id="searchInput" class="search-input" placeholder="Search products..." type="text" aria-label="Search products" />
     </div>
 
     <div id="headerCart" class="cart-btn" aria-label="Open cart" title="Open cart" role="button" tabindex="0">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-6m8 0V9a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4.01" stroke="currentColor" stroke-width="1.6"/></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-6m8 0V9a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4.01" stroke="currentColor" stroke-width="1.6"/></svg>
       <span id="headerCartCount" class="cart-badge" style="display:none">0</span>
       <div style="display:none" id="headerCartAmount">₹0</div>
     </div>
   </div>
 
-  <!-- Ticker (below header, sticky) -->
   <div class="ticker-container" aria-hidden="false">
     <div class="ticker" id="ticker">
       <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
       <div class="ticker-item">🐟 100% Hygienic Cleaning – Ready to Cook in Minutes</div>
       <div class="ticker-item">🚚 Free delivery on orders above ₹1500</div>
-      <!-- duplicated items help seamless scroll -->
       <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
       <div class="ticker-item">🧊 Freshly packed — Cold chain maintained</div>
       <div class="ticker-item">🚚 Free delivery on orders above ₹1500</div>
@@ -301,8 +225,7 @@
   </div>
 
   <div class="container">
-    <!-- Carousel (3 banners) -->
-    <div class="carousel" id="heroCarousel" aria-roledescription="carousel">
+    <div class="carousel" id="heroCarousel" aria-roledescription="carousel" aria-label="Promotions">
       <div class="slides" id="slides">
         <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z.png')" aria-hidden="false"></div>
         <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png')" aria-hidden="true"></div>
@@ -311,64 +234,57 @@
       <div class="carousel-indicators" id="carouselIndicators"></div>
     </div>
 
-    <!-- Tabs (category bar) -->
     <nav class="tabs" id="categoryTabs" aria-label="Categories"></nav>
 
     <h2 class="section-title" id="productsTitle">From Coast to Kitchen – Fresh Fish, Prawns & Crabs</h2>
 
-    <!-- Grid: productGrid is populated by JS -->
     <section class="grid" id="productGrid" aria-live="polite"></section>
 
     <button class="show-more-btn hidden" id="showMoreBtn" type="button">Show more products</button>
   </div>
 
-  <!-- WhatsApp floating -->
-  <a class="whatsapp-float" id="whatsappFloat" href="https://wa.me/919985125678" target="_blank" aria-label="WhatsApp Chat">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+  <a class="whatsapp-float" id="whatsappFloat" href="https://wa.me/919985125678" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Chat">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
   </a>
 
-  <!-- Bottom navigation -->
   <nav class="bottom-nav" aria-label="Bottom Navigation">
     <a class="nav-item active" href="#" aria-current="page">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2"/><polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="2"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2"/><polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="2"/></svg>
       Home
     </a>
-    <a class="nav-item" href="#">
-      <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2"/></svg>
+    <a class="nav-item" href="#search">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2"/></svg>
       Search
     </a>
     <a class="nav-item" href="#" id="navCartBtn">
-      <svg viewBox="0 0 24 24" fill="none"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-6m8 0V9a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4.01" stroke="currentColor" stroke-width="2"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-6m8 0V9a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4.01" stroke="currentColor" stroke-width="2"/></svg>
       <span class="nav-badge" id="navCartBadge" style="display:none">0</span>
       Cart
     </a>
     <a class="nav-item" href="#" onclick="openWhatsApp()" id="navChat">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
       Chat
     </a>
   </nav>
 
-  <!-- Toast -->
-  <div id="toast" class="toast" aria-hidden="true"><i class="fas fa-check-circle"></i><span class="toast-message"></span></div>
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true" aria-hidden="true"><i class="fas fa-check-circle" aria-hidden="true"></i><span class="toast-message"></span></div>
 
-  <!-- Product popup -->
   <div class="product-popup" id="productPopup" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="popup-header">
-      <span class="back-btn" id="popupBack">‹</span>
+      <button class="back-btn" id="popupBack" aria-label="Close product dialog">‹</button>
       <span class="popup-title" id="popupTitle">Product Name</span>
-      <span class="share-btn" id="popupShare"><i class="fab fa-whatsapp"></i></span>
+      <button class="share-btn" id="popupShare" aria-label="Share product"><i class="fab fa-whatsapp" aria-hidden="true"></i></button>
     </div>
     <div class="popup-body" id="popupBody"></div>
     <div class="popup-footer">
-      <button class="close-btn">CLOSE</button>
-      <button class="add">ADD TO CART</button>
+      <button class="close-btn" aria-label="Close">CLOSE</button>
+      <button class="add" aria-label="Add to cart">ADD TO CART</button>
     </div>
   </div>
 
-  <!-- Cart page -->
   <div class="cart-page" id="cartPage" aria-hidden="true">
     <div class="cart-header">
-      <span class="back-btn" id="cartBack">‹</span>
+      <button class="back-btn" id="cartBack" aria-label="Close cart">‹</button>
       <span class="cart-title">Cart</span>
       <span class="savings-badge" id="savingsBadge">Saved ₹0</span>
     </div>
@@ -378,7 +294,7 @@
       <div class="cart-items" id="cartItems"></div>
 
       <div class="empty-cart" id="emptyCart" style="display:none">
-        <div class="empty-cart-icon">🛒</div>
+        <div class="empty-cart-icon" aria-hidden="true">🛒</div>
         <div class="empty-cart-text">Your cart is empty</div>
         <div class="empty-cart-sub">Add fresh seafood & pickles to get started.</div>
         <button class="empty-cta" id="emptyContinueBtn">Continue shopping</button>
@@ -398,7 +314,6 @@
     </div>
   </div>
 
-  <!-- Structured Data -->
   <script type="application/ld+json">
   {
     "@context":"https://schema.org",
@@ -411,14 +326,13 @@
     "address":{"@type":"PostalAddress","addressLocality":"Hyderabad","addressRegion":"Telangana","addressCountry":"IN"},
     "areaServed":"Hyderabad",
     "description":"Premium fresh seafood and authentic pickles delivery service in Hyderabad offering fish, prawns, crabs, and pickles with next-day delivery",
-    "openingHours":"Mo-Su 08:00-20:00",
+    "openingHours":["Mo-Su 08:00-20:00"],
     "priceRange":"₹₹"
   }
   </script>
 
-  <!-- App JS (merged + fixes) -->
   <script>
-    /* ===== Data & State (unchanged) ===== */
+    /* ===== Data & State (unchanged products list) ===== */
     const products = [
       { id:1, name:"White Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728284/Whitt_spxhew.jpg", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy White Pomfret online in Hyderabad – premium coastal fish with mild taste and firm flesh. Perfect for fry, grill, or curry. Hygienically cleaned and delivered fresh next day." },
       { id:2, name:"Black Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/Blac_qnztqj.jpg", mrp:850, finalPrice:750, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Black Pomfret in Hyderabad – firm texture, rich flavor, and ideal for spicy Andhra fish curry, grills, and fries. Packed fresh and delivered with care by Coastal Fresh." },
@@ -459,6 +373,7 @@
     const FREE_DELIVERY_THRESHOLD = 1500;
     let lastSavings = 0;
     let freeUnlocked = false;
+    let lastFocusedElement = null;
 
     const productGrid = document.getElementById('productGrid');
     const categoryTabs = document.getElementById('categoryTabs');
@@ -520,9 +435,9 @@
 
     document.addEventListener('DOMContentLoaded', function(){
       renderCategoryTabs();
-      renderProducts();
       initCarousel();
-      loadCart();
+      loadCart();              // <--- load cart before rendering products
+      renderProducts();        // now render products after cart loaded
       startTypewriter();
       attachGlobalEvents();
       generateProductSchema();
@@ -540,9 +455,25 @@
       document.querySelector('.cart-actions .place').addEventListener('click', placeOrder);
       headerCart.addEventListener('click', openCart);
       document.getElementById('navCartBtn')?.addEventListener('click', openCart);
-      document.getElementById('whatsappFloat')?.addEventListener('click', openWhatsApp);
+      document.getElementById('whatsappFloat')?.addEventListener('click', function(e){ trackWhatsappClick('floating_button'); });
       popupShare.addEventListener('click', shareProduct);
       emptyContinueBtn?.addEventListener('click', ()=>{ closeCart(); showToast('Continue shopping'); document.getElementById('productsTitle')?.scrollIntoView({behavior:'smooth'}); });
+
+      // keyboard handlers
+      document.addEventListener('keydown', (ev)=>{
+        if (ev.key === 'Escape'){
+          if (productPopup.style.display === 'flex') closePopup();
+          else if (cartPage.style.display === 'flex') closeCart();
+        }
+      });
+
+      // make ESC and click outside behavior robust for popup
+      productPopup.addEventListener('click', (e)=> {
+        if (e.target === productPopup) closePopup();
+      });
+      cartPage.addEventListener('click', (e)=> {
+        if (e.target === cartPage) closeCart();
+      });
     }
 
     function renderCategoryTabs(){
@@ -611,13 +542,13 @@
         card.dataset.weight = p.net;
 
         card.innerHTML = `
-          <div class="img">
+          <div class="img" tabindex="0" role="button" aria-label="${p.name} details">
             <img src="${p.image}" alt="${p.name}" loading="lazy" />
-            <button class="add-pill" type="button" ${inCartQty>0?'style="display:none"':''}>ADD</button>
+            <button class="add-pill" type="button" ${inCartQty>0?'style="display:none"':''} aria-label="Add ${p.name} to cart">ADD</button>
             <div class="qty" aria-label="Quantity" style="${inCartQty>0?'display:flex':''}">
-              <button class="dec" type="button">-</button>
+              <button class="dec" type="button" aria-label="Decrease quantity">-</button>
               <span class="num">${inCartQty>0?inCartQty:1}</span>
-              <button class="inc" type="button">+</button>
+              <button class="inc" type="button" aria-label="Increase quantity">+</button>
             </div>
           </div>
           <div class="price-row">
@@ -630,6 +561,9 @@
         `;
         productGrid.appendChild(card);
       });
+
+      // sync UI for any cards that might not match cart (in case)
+      syncCardsWithCart();
 
       const remaining = Math.max(0, filtered.length - (itemsPerPage * currentPage));
       if (remaining > 0) {
@@ -664,8 +598,8 @@
       const num = qtyBox.querySelector('.num');
 
       if (e.target.classList.contains('add-pill')) {
-        cart[id] = 1;
-        num.textContent = 1;
+        cart[id] = (cart[id] || 0) + 1;
+        num.textContent = cart[id];
         addBtn.style.display = 'none';
         qtyBox.style.display = 'flex';
         saveCart();
@@ -724,7 +658,6 @@
       document.getElementById('productsTitle')?.scrollIntoView({ behavior:'smooth' });
     }
 
-    /* Carousel implementation */
     function initCarousel(){
       const slides = document.getElementById('slides');
       const indicatorRoot = document.getElementById('carouselIndicators');
@@ -798,6 +731,28 @@
         deliveryBanner.style.display = 'none';
       }
       updateSavingsCelebration(savings);
+      // keep product cards in sync with cart state
+      syncCardsWithCart();
+    }
+
+    function syncCardsWithCart(){
+      // ensure each rendered card reflects cart state (used after renderProducts or saveCart)
+      document.querySelectorAll('.card').forEach(card=>{
+        const id = Number(card.dataset.id);
+        const inQty = cart[id] || 0;
+        const addBtn = card.querySelector('.add-pill');
+        const qtyBox = card.querySelector('.qty');
+        const num = qtyBox.querySelector('.num');
+        if (inQty > 0){
+          addBtn.style.display = 'none';
+          qtyBox.style.display = 'flex';
+          num.textContent = inQty;
+        } else {
+          addBtn.style.display = 'inline-flex';
+          qtyBox.style.display = 'none';
+          num.textContent = '1';
+        }
+      });
     }
 
     function updateSavingsCelebration(savings){
@@ -820,17 +775,22 @@
           ${popupProduct.offer > 0 ? `<span class="offer">${popupProduct.offer}% OFF</span>` : ''}
           ${popupProduct.mrp > popupProduct.finalPrice ? `<span class="old">₹${popupProduct.mrp}</span>` : ''}
         </div>
-        <div class="delivery-info"><i class="fas fa-truck"></i> Delivered next day morning</div>
+        <div class="delivery-info" aria-hidden="true"><i class="fas fa-truck" aria-hidden="true"></i> Delivered next day morning</div>
         <p>${popupProduct.desc}</p>
       `;
+      lastFocusedElement = document.activeElement;
       productPopup.style.display='flex';
       productPopup.setAttribute('aria-hidden','false');
+      document.querySelector('.popup-footer .add').focus();
       document.body.classList.add('popup-open');
+      if (typeof gtag==='function') gtag('event','open_product_popup',{ item_id:p.id, item_name:p.name });
     }
-    function closePopup(){ productPopup.style.display='none'; productPopup.setAttribute('aria-hidden','true'); document.body.classList.remove('popup-open'); }
+    function closePopup(){ productPopup.style.display='none'; productPopup.setAttribute('aria-hidden','true'); document.body.classList.remove('popup-open'); if (lastFocusedElement) lastFocusedElement.focus(); }
+
     function addPopupToCart(){ if (!popupProduct) return; const id = popupProduct.id; const next = Math.min(99, (cart[id]||0) + 1); cart[id] = next; saveCart(); showToast('Added to cart!'); trackAddToCart(id,1); const card = document.querySelector(`.card[data-id="${id}"]`); if (card){ card.querySelector('.add-pill').style.display='none'; const qtyBox = card.querySelector('.qty'); qtyBox.style.display='flex'; qtyBox.querySelector('.num').textContent = cart[id]; } closePopup(); }
 
-    function openCart(){ if (typeof gtag==='function') gtag('event','view_cart',{ currency:'INR', value:calculateCartTotal(), items:getCartItemsForAnalytics() });
+    function openCart(){
+      if (typeof gtag==='function') gtag('event','view_cart',{ currency:'INR', value:calculateCartTotal(), items:getCartItemsForAnalytics() });
       let orig=0,total=0,savings=0; cartItemsEl.innerHTML = '';
       for (const [id, qty] of Object.entries(cart)){
         const p = getValidProductById(id);
@@ -845,16 +805,16 @@
               <div class="item-name">${p.name}</div>
               <div class="item-weight">${p.net}</div>
               <div class="quantity-controls">
-                <button class="quantity-btn" data-id="${p.id}" data-action="decrease">-</button>
+                <button class="quantity-btn" data-id="${p.id}" data-action="decrease" aria-label="Decrease quantity">-</button>
                 <span>${qty}</span>
-                <button class="quantity-btn" data-id="${p.id}" data-action="increase">+</button>
+                <button class="quantity-btn" data-id="${p.id}" data-action="increase" aria-label="Increase quantity">+</button>
               </div>
             </div>
             <div class="item-pricing">
               <div class="item-price">₹${itemTotal}</div>
               ${p.mrp>p.finalPrice?`<div class="item-original">₹${itemOrig}</div>`:''}
             </div>
-            <i class="fas fa-trash-alt remove-btn" data-id="${p.id}"></i>
+            <i class="fas fa-trash-alt remove-btn" data-id="${p.id}" role="button" aria-label="Remove item"></i>
           </div>
         `;
       }
@@ -873,28 +833,74 @@
       document.querySelectorAll('.remove-btn').forEach(btn=>{ btn.addEventListener('click', function(){ const id = parseInt(this.dataset.id,10); removeFromCart(id); }); });
 
       cartPage.style.display = 'flex'; cartPage.setAttribute('aria-hidden','false'); document.body.classList.add('popup-open');
+      document.querySelector('#cartBack')?.focus();
     }
-    function closeCart(){ cartPage.style.display = 'none'; cartPage.setAttribute('aria-hidden','true'); document.body.classList.remove('popup-open'); renderProducts(); }
+    function closeCart(){ cartPage.style.display = 'none'; cartPage.setAttribute('aria-hidden','true'); document.body.classList.remove('popup-open'); renderProducts(); if (lastFocusedElement) lastFocusedElement.focus(); }
 
     function calculateCartTotal(){ let total=0; for (const [id, qty] of Object.entries(cart)){ const p = getValidProductById(id); if (!p) continue; total += p.finalPrice * qty; } return total; }
     function getCartItemsForAnalytics(){ const items=[]; for (const [id, qty] of Object.entries(cart)){ const p = getValidProductById(id); if (!p) continue; items.push({ item_id:p.id, item_name:p.name, item_category:p.category, price:p.finalPrice, quantity:qty }); } return items; }
     function changeQty(id, delta){ if (!getValidProductById(id)) return; if (cart[id]){ cart[id] = Math.max(0, Math.min(99, cart[id] + delta)); if (cart[id] === 0) delete cart[id]; saveCart(); trackChangeQty(id, delta); const card = document.querySelector(`.card[data-id="${id}"]`); if (card){ const addBtn = card.querySelector('.add-pill'); const qtyBox = card.querySelector('.qty'); const num = qtyBox.querySelector('.num'); const q = cart[id]||0; if (q<=0){ qtyBox.style.display='none'; addBtn.style.display='inline-flex'; } else { qtyBox.style.display='flex'; num.textContent = q; addBtn.style.display='none'; } } if (cartPage.style.display === 'flex') openCart(); } }
     function removeFromCart(id){ delete cart[id]; saveCart(); if (typeof gtag === 'function'){ const p = getValidProductById(id); if (p) gtag('event','remove_from_cart',{ currency:'INR', value:p.finalPrice, items:[{ item_id:p.id,item_name:p.name,item_category:p.category,price:p.finalPrice }] }); } if (cartPage.style.display === 'flex') openCart(); }
 
-    function shareProduct(){ if (!popupProduct) return; const utmParams = `utm_source=product_share&utm_medium=whatsapp&utm_campaign=product_referral&utm_content=product_${popupProduct.id}`; const shareUrl = `https://www.coastalfresh.in?${utmParams}`; const message = `Check out this ${popupProduct.name} from Coastal Fresh! ${popupProduct.desc.substring(0, 100)}... ${shareUrl}`; const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`; if (typeof gtag==='function') gtag('event','share',{ method:'WhatsApp', content_type:'product', item_id:String(popupProduct.id) }); window.open(whatsappUrl,'_blank'); }
+    function shareProduct(){ if (!popupProduct) return; const utmParams = `utm_source=product_share&utm_medium=whatsapp&utm_campaign=product_referral&utm_content=product_${popupProduct.id}`; const shareUrl = `https://www.coastalfresh.in?${utmParams}`; const message = `Check out this ${popupProduct.name} from Coastal Fresh! ${popupProduct.desc.substring(0, 100)}... ${shareUrl}`; const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`; if (typeof gtag==='function') gtag('event','share',{ method:'WhatsApp', content_type:'product', item_id:String(popupProduct.id) }); window.open(whatsappUrl,'_blank','noopener'); }
 
     function placeOrder(){ if (Object.keys(cart).length===0){ showToast('Your cart is empty!'); return; } if (typeof gtag==='function'){ gtag('event','begin_checkout',{ currency:'INR', value:calculateCartTotal(), items:getCartItemsForAnalytics() }); gtag('event','click',{ location:'checkout_cta', link_text:'Place Order (WhatsApp)', link_url:'https://wa.me/919985125678' }); }
       let lines = ["Hi Coastal Fresh,","","I would like to order:",""]; let total=0,origTotal=0; for (const [id, qty] of Object.entries(cart)){ const p = getValidProductById(id); if(!p) continue; const itemTotal = p.finalPrice * qty; const itemOrig = (p.mrp||p.finalPrice) * qty; total += itemTotal; origTotal += itemOrig; lines.push(`- ${p.name} (${p.net}) x ${qty} = ₹${itemTotal}`); }
-      const savings = origTotal - total; lines.push("","Total: ₹"+total); if (savings>0) lines.push(`You saved: ₹${savings}`); lines.push("","Please confirm availability and delivery timing."); const url = `https://wa.me/919985125678?text=${encodeURIComponent(lines.join('\n'))}`; window.open(url,'_blank'); }
+      const savings = origTotal - total; lines.push("","Total: ₹"+total); if (savings>0) lines.push(`You saved: ₹${savings}`); lines.push("","Please confirm availability and delivery timing."); const url = `https://wa.me/919985125678?text=${encodeURIComponent(lines.join('\n'))}`; trackWhatsappClick('checkout_whatsapp'); window.open(url,'_blank','noopener'); }
 
-    function showToast(message){ toastMessage.textContent = message; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 1600); }
+    function showToast(message){ toastMessage.textContent = message; toast.setAttribute('aria-hidden','false'); toast.classList.add('show'); setTimeout(()=>{ toast.classList.remove('show'); toast.setAttribute('aria-hidden','true'); }, 1800); }
 
-    function generateProductSchema(){ const productSchemas = products.map(product => ({ "@context":"https://schema.org","@type":"Product", "name":product.name,"image":product.image,"description":product.desc, "offers":{"@type":"Offer","url":"https://www.coastalfresh.in/","priceCurrency":"INR","price":product.finalPrice, "priceValidUntil":new Date(Date.now()+30*24*60*60*1000).toISOString().split('T')[0], "availability":product.available?"https://schema.org/InStock":"https://schema.org/OutOfStock","itemCondition":"https://schema.org/NewCondition"} })); productSchemas.slice(0,5).forEach(schema=>{ const s=document.createElement('script');s.type='application/ld+json';s.textContent=JSON.stringify(schema);document.head.appendChild(s); }); }
+    function generateProductSchema(){
+      try{
+        // ItemList & Products
+        const itemList = {
+          "@context":"https://schema.org",
+          "@type":"ItemList",
+          "itemListElement": products.map((p, idx) => ({
+            "@type":"ListItem","position": idx+1,
+            "url":`https://www.coastalfresh.in/?product=${p.id}`,
+            "name": p.name
+          }))
+        };
+        const sItem = document.createElement('script'); sItem.type='application/ld+json'; sItem.textContent = JSON.stringify(itemList); document.head.appendChild(sItem);
+
+        products.forEach(product => {
+          const schema = {
+            "@context":"https://schema.org",
+            "@type":"Product",
+            "name": product.name,
+            "image": [product.image],
+            "description": product.desc,
+            "sku": String(product.id),
+            "brand": {"@type":"Brand","name":"Coastal Fresh"},
+            "offers": {
+              "@type":"Offer",
+              "url":"https://www.coastalfresh.in/",
+              "priceCurrency":"INR",
+              "price": product.finalPrice,
+              "priceValidUntil": new Date(Date.now()+30*24*60*60*1000).toISOString().split('T')[0],
+              "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              "itemCondition":"https://schema.org/NewCondition"
+            }
+          };
+          const s=document.createElement('script');s.type='application/ld+json';s.textContent=JSON.stringify(schema);document.head.appendChild(s);
+        });
+      }catch(e){ console.warn('schema error', e); }
+    }
 
     function trackAddToCart(id, qty){ const p = getValidProductById(id); if (!p || typeof gtag!=='function') return; gtag('event','add_to_cart',{ currency:'INR', value:p.finalPrice*qty, items:[{ item_id:p.id,item_name:p.name,item_category:p.category,price:p.finalPrice,quantity:qty }] }); }
     function trackChangeQty(id, delta){ const p = getValidProductById(id); if (!p || typeof gtag!=='function') return; gtag('event','change_cart_quantity',{ change:delta, item_id:p.id, item_name:p.name, item_category:p.category, price:p.finalPrice, quantity: cart[id]||0 }); }
+    function trackWhatsappClick(location){
+      if (typeof gtag==='function') gtag('event','whatsapp_click',{ location, link_url:'https://wa.me/919985125678' });
+    }
 
-    function openWhatsApp(){ window.open('https://wa.me/919985125678?text=Hi%2C%20I%20need%20help%20with%20my%20order','_blank'); }
+    function openWhatsApp(){ trackWhatsappClick('floating_button'); window.open('https://wa.me/919985125678?text=Hi%2C%20I%20need%20help%20with%20my%20order','_blank','noopener'); }
   </script>
+
+  <noscript>
+    <div style="padding:12px;background:#fff4e5;color:#333;text-align:center;border-top:1px solid #f0e6d8;">
+      JavaScript is required for the full ordering experience. Call or WhatsApp us at +91 99851 25678 to place your order.
+    </div>
+  </noscript>
 </body>
 </html>
