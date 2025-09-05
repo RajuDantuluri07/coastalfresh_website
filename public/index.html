@@ -1,27 +1,46 @@
-<!doctype html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fresh Fish, Prawns, Crabs & Pickles in Hyderabad | Coastal Fresh</title>
-  <meta name="description" content="Order premium fresh seafood and authentic pickles in Hyderabad. Fresh fish, tiger prawns, crabs, and traditional pickles with next-day delivery from Coastal Fresh." />
-  <meta name="keywords" content="fresh fish Hyderabad, prawns delivery Hyderabad, buy fish online Hyderabad, crab delivery, Andhra pickles, Coastal Fresh" />
-  <link rel="canonical" href="https://www.coastalfresh.in/" />
-  <meta name="theme-color" content="#1e40af" />
-  <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" />
-  <link rel="icon" href="/favicon.ico" />
+  <title>Coastal Fresh - Premium Seafood Delivery in Hyderabad | Fresh Fish, Prawns & Pickles</title>
+
+  <!-- Preconnects -->
   <link rel="preconnect" href="https://res.cloudinary.com">
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://static.hotjar.com">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GSHMPRYPW1"></script>
 
+  <!-- SEO -->
+  <meta name="description" content="Order premium fresh seafood and authentic pickles in Hyderabad. Fresh fish, tiger prawns, crabs, and traditional pickles with next-day delivery. Trusted local sourcing from Coastal Andhra Pradesh." />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <link rel="canonical" href="https://www.coastalfresh.in" />
+  <meta name="theme-color" content="#1e40af" />
+  <meta name="keywords" content="fresh fish delivery hyderabad, seafood delivery hyderabad, buy prawns online hyderabad, crab delivery hyderabad, hyderabad fish online, fresh seafood home delivery, andhra seafood hyderabad, online pickles hyderabad, prawn pickle online, fish pickle, mutton pickle, chicken pickle online" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Coastal Fresh" />
+  <meta property="og:locale" content="en_IN" />
+  <meta property="og:title" content="Coastal Fresh | Buy Fresh Fish, Prawns, Crabs & Pickles in Hyderabad" />
+  <meta property="og:description" content="Fresh Premium seafood and authentic pickles delivered next-day across Hyderabad. Hygienic cleaning, careful packing, and responsible sourcing." />
+  <meta property="og:url" content="https://www.coastalfresh.in" />
+  <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Coastal Fresh – Premium Seafood & Pickles in Hyderabad" />
+  <meta name="twitter:description" content="Fresh fish, prawns, crabs & authentic pickles with next-day delivery and hygienic processing." />
+  <meta name="twitter:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" />
+
+  <!-- Analytics: GA4 (clean params) + Hotjar + WhatsApp tracking -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GSHMPRYPW1"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
-    gtag('config', 'G-GSHMPRYPW1', { 'send_page_view': true });
+    gtag('config', 'G-GSHMPRYPW1');
+
     try {
       if (!localStorage.getItem('firstVisit')) {
         localStorage.setItem('firstVisit', new Date().toISOString());
@@ -43,396 +62,626 @@
     })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
   </script>
 
+  <script>
+    (function () {
+      const utm = 'utm_source=website&utm_medium=whatsapp&utm_campaign=order_intent';
+      function withUTM(url) {
+        try {
+          const u = new URL(url);
+          if (u.hostname.includes('wa.me') || u.hostname.includes('api.whatsapp.com')) {
+            if (u.search) { u.search += '&' + utm; } else { u.search = '?' + utm; }
+          }
+          return u.toString();
+        } catch(e) { return url; }
+      }
+      document.addEventListener('DOMContentLoaded', function() {
+        const waLinks = Array.from(document.querySelectorAll('a[href*="wa.me/"], a[href*="api.whatsapp.com/"]'));
+        waLinks.forEach(a => { a.href = withUTM(a.href); });
+
+        function track(eventName, extra) {
+          if (typeof gtag === 'function') gtag('event', eventName, extra || {});
+        }
+        function onClick(e) {
+          const a = e.currentTarget;
+          track('click', {
+            link_text: (a.getAttribute('aria-label') || a.textContent || '').trim(),
+            link_url: a.href,
+            link_target: a.target || '_self',
+            location: a.dataset.trackLocation || 'link',
+            outbound: a.host && a.host !== location.host
+          });
+        }
+        waLinks.forEach(a => a.addEventListener('click', onClick));
+        const oldOpenWA = window.openWhatsApp;
+        window.openWhatsApp = function() {
+          track('click', { location: 'floating_button', link_text: 'WhatsApp CTA', link_url: 'https://wa.me' });
+          if (typeof oldOpenWA === 'function') return oldOpenWA();
+        };
+        window.withUTM = withUTM;
+      });
+    })();
+  </script>
+
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
   <style>
-  :root{
-    --brand:#0aace0;
-    --logo-text:#0aace0;
-    --ink:#1b2430;
-    --sub:#6b7280;
-    --bg:#ffffff;
-    --line:#e9eef6;
-    --save:#16a34a;
-    --mrp:#98a1b2;
-    --radius-card:14px;
-    --radius-img:14px;
-    --header-height:65px;
-    --bottom-nav-height:70px;
-    --cta-grad: linear-gradient(135deg,#0aace0 0%,#2563eb 100%);
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
-    background:var(--bg);color:var(--ink);
-    padding-top:var(--header-height);
-    padding-bottom:var(--bottom-nav-height);
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-  }
-  a{color:inherit;text-decoration:none}
-  img{display:block;max-width:100%}
-  .container{max-width:480px;margin:0 auto;padding:12px}
-  .header{
-    position:fixed;top:0;left:0;right:0;z-index:120;
-    background:var(--logo-text); color:#fff;border-bottom:1px solid rgba(255,255,255,0.06);
-    height:var(--header-height);display:flex;align-items:center;
-    padding:0 12px;gap:12px;
-  }
-  .logo{font-weight:900;font-size:18px;color:#fff;flex:0 0 auto;display:flex;align-items:center;gap:8px}
-  .logo img{height:34px;width:auto}
-  .logo span{ color:#fff; font-weight:800; letter-spacing:0.6px }
-  .search-bar{flex:1;position:relative}
-  .search-input{
-    width:100%;padding:10px 16px 10px 42px;border:2px solid rgba(255,255,255,0.12);
-    border-radius:25px;background:rgba(255,255,255,0.12);font-size:14px;color:#fff;
-    transition:all .18s ease;
-  }
-  .search-input::placeholder{color:rgba(255,255,255,0.9)}
-  .search-input:focus{outline:none;border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.15)}
-  .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:rgba(255,255,255,0.9);pointer-events:none}
+    /* ===== Brand tokens & base ===== */
+    :root{
+      --brand:#1976ff;
+      --ink:#1b2430;
+      --sub:#6b7280;
+      --bg:#f7f9fc;
+      --line:#e9eef6;
+      --save:#16a34a;
+      --mrp:#98a1b2;
+      --radius-card:14px;
+      --radius-img:14px;
+      --desktop-bg-image:none;
+      --cta-grad: linear-gradient(135deg,#1e40af 0%,#3b82f6 100%);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+    a{text-decoration:none;color:inherit}
+    img{max-width:100%;display:block}
 
-  /* improved cart icon wrapper */
-  .cart-btn{position:relative;background:none;border:none;padding:6px;color:#fff;cursor:pointer;border-radius:10px;display:inline-flex;align-items:center;justify-content:center}
-  .cart-btn:hover{background:rgba(255,255,255,0.06)}
-  .cart-icon-wrap{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center}
-  .cart-icon-wrap svg{width:22px;height:22px}
-  .cart-badge{position:absolute;top:-4px;right:-4px;background:#fff;color:var(--logo-text);font-size:11px;font-weight:800;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.12)}
-  /* end improved cart */
+    /* App wrapper (mobile viewport on desktop) */
+    #appWrapper{max-width:480px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 30px rgba(0,0,0,.25);position:relative;z-index:2;overflow:hidden;padding-bottom:74px}
+    @media (min-width:769px){
+      body{background:#f5f9ff var(--desktop-bg-image) center/cover no-repeat fixed}
+      .product-popup,.cart-page{left:50%;transform:translateX(-50%);max-width:480px;width:100%}
+      body.popup-open{overflow:hidden}
+    }
+    /* DESKTOP: keep popup/cart inside the 480px app width */
+    @media (min-width:769px){
+      #appWrapper{ position:relative; }
+      .product-popup,
+      .cart-page{
+        left:50% !important;
+        right:auto !important;
+        transform:translateX(-50%) !important;
+        width:100% !important;
+        max-width:480px !important;
+        height:100%;
+        border-radius:16px;
+        box-shadow:0 10px 30px rgba(0,0,0,.18);
+        overflow:auto; /* allow container scroll as a fallback */
+      }
+    }
 
-  /* loader */
-  .loader-wrap{display:flex;align-items:center;justify-content:center;padding:40px 0;grid-column:1/-1}
-  .loader{
-    width:36px;height:36px;border-radius:50%;border:4px solid rgba(255,255,255,0.2);border-top-color:rgba(10,172,224,0.98);animation:spin .9s linear infinite;background:transparent;
-  }
-  @keyframes spin{to{transform:rotate(360deg)}}
+    /* Header */
+    .header{background:var(--cta-grad);padding:12px 16px;color:#fff;position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center}
+    .logo{display:flex;align-items:center;gap:10px}
+    .logo-img{height:36px;width:auto;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
+    .logo-text{font-size:18px;font-weight:700}
+    .cart-summary{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.2);padding:8px 12px;border-radius:20px;cursor:pointer}
+    .cart-icon-header{font-size:18px}
+    .cart-count{background:#ff4757;color:#fff;border-radius:50%;width:22px;height:22px;display:none;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+    .cart-amount{font-size:14px;font-weight:600;display:none}
+    .cart-summary.has-items .cart-count,.cart-summary.has-items .cart-amount{display:flex}
+    @media(max-width:768px){.logo-text{font-size:16px}.cart-amount{font-size:13px}}
 
-  .ticker-container{position:sticky;top:var(--header-height);z-index:119;background:linear-gradient(90deg,var(--logo-text),#2563eb);color:#fff;padding:8px 0;overflow:hidden}
-  /* faster ticker: 12s loop */
-  .ticker{display:flex;white-space:nowrap;animation:ticker-scroll 12s linear infinite}
-  .ticker-item{display:flex;align-items:center;padding:0 16px;font-size:14px;font-weight:700}
-  .ticker-container:hover .ticker{animation-play-state:paused}
-  @keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-    .tabs{display:flex; gap:12px; overflow:auto hidden; padding:8px 4px 6px; position:sticky; top:calc(var(--header-height) + 40px); z-index:5;background:linear-gradient(#fff,#fff); border-bottom:1px solid var(--line);}
-  .tab{flex:0 0 auto; display:flex; align-items:center; gap:8px; padding:10px 2px 12px; color:var(--sub); font-weight:700; font-size:14px; position:relative}
-  .tab img.icon{width:20px;height:20px;border-radius:6px;object-fit:cover}
-  .tab[aria-current="page"]{color:var(--logo-text)}
-  .tab[aria-current="page"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px;background:var(--logo-text)}
-  .section-title{font-weight:800;font-size:16px;margin:12px 4px;color:var(--logo-text)}
-  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:6px 2px 20px}
-  @media (max-width:320px){ .grid{grid-template-columns:repeat(1,1fr)} }
-  .card{background:#fff;border-radius:var(--radius-card);padding:8px;box-shadow:0 2px 8px rgba(10,30,70,.04)}
-  .img{position:relative;border-radius:var(--radius-img);overflow:hidden;aspect-ratio:1/1;background:#f3fbff}
-  .img>img{width:100%;height:100%;object-fit:cover}
-  .add-pill{position:absolute; right:8px; bottom:8px; z-index:2; background:var(--logo-text); color:#fff; border:none; font-weight:800; font-size:12px; padding:8px 12px; border-radius:999px; box-shadow:0 6px 18px rgba(10,172,224,.18); cursor:pointer}
-  .qty{position:absolute; right:8px; bottom:8px; display:none; align-items:center; gap:8px; background:#fff;border-radius:999px;padding:4px 6px; box-shadow:0 4px 10px rgba(0,0,0,.06)}
-  .qty button{width:28px;height:28px;border-radius:999px;border:2px solid var(--logo-text);background:#fff;color:var(--logo-text);font-weight:900;font-size:16px;line-height:0;cursor:pointer}
-  .qty .num{min-width:16px;text-align:center;font-weight:800}
+    /* Ticker + Carousel */
+    .ticker-container{position:sticky;top:60px;z-index:99;background:linear-gradient(90deg,#1e40af,#3b82f6);color:#fff;padding:8px 0;overflow:hidden}
+    .ticker{display:flex;white-space:nowrap;animation:ticker-scroll 30s linear infinite}
+    .ticker-item{display:flex;align-items:center;padding:0 16px;font-size:14px;font-weight:700}
+    .ticker-container:hover .ticker{animation-play-state:paused}
+    @keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    .carousel{margin:16px;overflow:hidden;border-radius:12px;position:relative;height:150px}
+    .slides{display:flex;transition:transform .5s ease;height:100%}
+    .slide{min-width:100%;height:100%;background-size:cover;background-position:center}
 
-  /* layout tweak — show name first, then price & offer, then meta */
-  .card .name{margin-top:4px;font-size:14px;font-weight:800;line-height:1.2}
-  .price-row{display:flex;align-items:baseline;gap:8px;margin-top:8px}
-  .price-now{font-weight:900;font-size:16px}
-  .price-mrp{color:var(--mrp);text-decoration:line-through;font-size:12px}
-  .offer-badge{background:#ffefdb;color:#b45309;font-weight:800;font-size:12px;padding:4px 8px;border-radius:8px}
-  .save{color:var(--save);font-size:12px;font-weight:800;margin-top:4px}
-  .meta{font-size:12px;color:var(--sub);margin-top:6px}
+    /* ===== Trust icons ===== */
+    .trust-strip{display:flex;justify-content:space-between;align-items:stretch;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:16px;padding:16px 12px;gap:8px;box-shadow:0 10px 30px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.3);position:relative;overflow:hidden;max-width:1200px;margin:16px 12px}
+    .trust-strip::before{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shine 3s ease-in-out infinite}
+    @keyframes shine{0%,100%{left:-100%}50%{left:100%}}
+    .trust-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:12px 6px;border-radius:12px;transition:all .3s cubic-bezier(.4,0,.2,1);cursor:pointer;background:linear-gradient(145deg,rgba(255,255,255,.1),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.1)}
+    .trust-item:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 15px 35px rgba(59,130,246,.3);background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.1));border-color:rgba(255,255,255,.2)}
+    .icon-container{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;font-size:20px;margin-bottom:2px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;animation:pulse 4s ease-in-out infinite}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    .trust-title{font-size:13px;font-weight:600;color:#1f2937;line-height:1.2}
+    .trust-sub{font-size:10px;color:#6b7280;line-height:1.3}
 
-  .carousel{margin:12px 0 6px;overflow:hidden;border-radius:12px;position:relative;height:150px}
-  .slides{display:flex;transition:transform .5s ease;height:100%}
-  .slide{min-width:100%;height:100%;background-size:cover;background-position:center}
-  .carousel-indicators{position:absolute;left:50%;transform:translateX(-50%);bottom:8px;display:flex;gap:6px}
-  .carousel-indicators button{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.6);border:none}
-  .carousel-indicators button.active{background:#fff}
-  .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:110;background:#fff;border-top:1px solid var(--line);height:var(--bottom-nav-height);display:flex;box-shadow:0 -2px 12px rgba(0,0,0,.06)}
-  .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:var(--sub);font-size:11px;font-weight:600;gap:4px;padding:8px 4px;position:relative}
-  .nav-item.active{color:var(--logo-text)}
-  .nav-item svg{width:22px;height:22px}
-  .nav-badge{position:absolute;top:8px;right:20%;background:var(--save);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:-8px}
-  .whatsapp-float{position:fixed;bottom:85px;right:16px;z-index:115;width:56px;height:56px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(37,211,102,.3);text-decoration:none;transition:transform .12s ease}
-  .whatsapp-float:hover{transform:scale(1.05)}
-  .whatsapp-float svg{width:30px;height:30px;color:#fff}
-  .toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(100px);background:#16a34a;color:#fff;padding:12px 24px;border-radius:30px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:200;opacity:0;transition:transform .3s ease,opacity .3s ease;display:flex;align-items:center;gap:10px;font-weight:700}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  .product-popup{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:500;display:none;flex-direction:column;overflow-y:auto}
-  .popup-header{display:flex;align-items:center;padding:16px;border-bottom:1px solid #ddd;position:sticky;top:0;background:#fff;z-index:10}
-  .back-btn{font-size:24px;margin-right:12px;cursor:pointer}
-  .popup-title{font-size:18px;font-weight:600;flex:1}
-  .share-btn{font-size:20px;cursor:pointer;margin-left:12px;color:#25D366}
-  .popup-body{padding:16px;overflow-y:auto;position:relative;flex:1}
-  .popup-body img{width:80%;max-height:200px;object-fit:contain;border-radius:12px;margin:0 auto 16px;display:block}
-  .popup-sub{font-size:14px;color:#666;margin-bottom:8px}
-  .popup-price{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-  .popup-price .now{font-size:20px;font-weight:700;color:#111}
-  .popup-price .old{text-decoration:line-through;color:#999;font-size:16px}
-  .popup-price .offer{background:#dcfce7;color:#16a34a;font-size:14px;padding:4px 8px;border-radius:6px;font-weight:600}
-  .delivery-info{background:#f0fdf4;padding:12px;border-radius:8px;color:#16a34a;font-size:14px;font-weight:600;display:flex;gap:8px;align-items:center;margin-bottom:16px}
-  .popup-footer{position:sticky;bottom:0;left:0;width:100%;display:flex;justify-content:center;padding:12px;border-top:1px solid #ddd;background:#fff;z-index:10}
-  .popup-footer button{flex:1;margin:0 6px;padding:12px;font-weight:600;border-radius:8px;cursor:pointer;font-size:16px;text-transform:uppercase}
-  .popup-footer .close-btn{background:#fff;color:#666;border:1px solid #ddd}
-  .popup-footer .add{background:var(--logo-text);color:#fff;border:none}
-  .cart-page{position:fixed;top:0;left:0;width:100%;height:100%;background:#f8fafc;z-index:600;display:none;flex-direction:column;overflow-y:auto}
-  .cart-header{display:flex;align-items:center;background:#fff;padding:16px;border-bottom:1px solid #ddd;box-shadow:0 2px 4px rgba(0,0,0,.06);position:sticky;top:0;z-index:10}
-  .cart-title{font-weight:600;font-size:18px;margin-left:12px}
-  .savings-badge{background:#dcfce7;color:#16a34a;font-size:14px;font-weight:600;padding:4px 8px;border-radius:6px;margin-left:8px;display:none}
-  .delivery-banner{background:#f0fdf4;color:#16a34a;padding:12px 16px;display:none;align-items:center;gap:8px;font-size:14px;font-weight:600}
-  .cart-items-container{flex:1;overflow-y:auto;padding:12px}
-  .cart-items{background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin-bottom:12px}
-  .cart-item{display:flex;align-items:center;gap:12px;border-bottom:1px solid #eee;padding:12px 0}
-  .cart-item:last-child{border-bottom:none}
-  .cart-item img{width:60px;height:60px;object-fit:contain;border-radius:8px}
-  .item-details{flex:1;min-width:0}
-  .item-name{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .item-weight{font-size:14px;color:#666}
-  .quantity-controls{display:flex;align-items:center;gap:10px;margin-top:4px}
-  .quantity-btn{width:28px;height:28px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;font-size:16px}
-  .item-price{font-weight:600;font-size:16px}
-  .item-original{font-size:14px;color:#999;text-decoration:line-through}
-  .remove-btn{color:#ff3b30;cursor:pointer;font-size:18px;padding:8px}
-  .order-summary{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.06);margin:0 12px;position:sticky;bottom:0;z-index:10;display:none}
-  .summary-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
-  .total-price{font-size:20px;font-weight:700}
-  .cart-actions{display:flex;gap:12px;background:#fff;padding:12px;border-top:1px solid #ddd;box-shadow:0 -2px 8px rgba(0,0,0,.06);position:sticky;bottom:0;z-index:10;justify-content:center}
-  .continue{display:none}
-  .place{flex:1;background:var(--logo-text);color:#fff;border:none;border-radius:10px;padding:14px;font-weight:700;font-size:16px;cursor:pointer;text-transform:uppercase;display:flex;align-items:center;justify-content:center}
-  .empty-cart{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;color:#374151;gap:12px;min-height:36vh;text-align:center}
-  .empty-cart-icon{font-size:72px;color:#9ca3af;margin-bottom:6px}
-  .empty-cart-text{font-size:18px;color:#374151;font-weight:700}
-  .empty-cart-sub{font-size:14px;color:#6b7280}
-  .empty-cta{margin-top:12px;background:var(--logo-text);color:#fff;padding:10px 18px;border-radius:999px;font-weight:800;box-shadow:0 10px 20px rgba(10, 172, 224, .18);border:none;cursor:pointer}
-  .show-more-btn{appearance:none;border:none;cursor:pointer;margin:14px auto 28px;display:block;padding:14px 20px;border-radius:999px;background:var(--logo-text);box-shadow:0 12px 30px rgba(10,172,224,.12);font-weight:800;letter-spacing:.3px;color:#fff;font-size:15px;transition:transform .15s ease, box-shadow .15s ease, opacity .25s ease;text-align:center;max-width:360px}
-  .show-more-btn:hover{transform:translateY(-3px);box-shadow:0 18px 34px rgba(10,172,224,.18)}
-  .show-more-btn.hidden{display:none !important}
-  @media (max-width:360px){
-    .name{font-size:13px}
-    .price-now{font-size:14px}
-    .logo{font-size:16px;}
-    .search-input{padding:8px 14px 8px 36px;font-size:13px;}
-    .show-more-btn{font-size:14px;padding:12px 16px;max-width:320px}
-    .empty-cart-icon{font-size:60px}
-    .empty-cart-text{font-size:16px}
-  }
+    /* ===== Tabs (categories) with PNG icons ===== */
+    .container{max-width:440px;margin:0 auto;padding:12px}
+    .tabs{display:flex;gap:18px;overflow:auto hidden;padding:8px 4px 6px;position:sticky;top:0;z-index:5;background:linear-gradient(#fff,#fff);border-bottom:1px solid var(--line)}
+    .tab{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:10px 2px 12px;color:#4b5563;text-decoration:none;font-weight:700;font-size:14px;position:relative;white-space:nowrap}
+    .tab img.icon{width:20px;height:20px;border-radius:6px;object-fit:cover;box-shadow:0 0 0 1px #e5e7eb}
+    .tab[aria-current="page"]{color:var(--brand)}
+    .tab[aria-current="page"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px;background:var(--brand)}
+    .section-title{font-weight:800;font-size:16px;margin:12px 4px}
+
+    /* ===== Grid (now 2-up) & Card ===== */
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:6px 2px 20px}
+    .card{background:#fff;border-radius:var(--radius-card);padding:8px;box-shadow:0 2px 8px rgba(10,30,70,.06)}
+    .img{position:relative;border-radius:var(--radius-img);overflow:hidden;aspect-ratio:1/1;background:#e8f0ff}
+    .img>img{width:100%;height:100%;object-fit:cover}
+    .add-pill{position:absolute;right:8px;bottom:8px;background:#fff;color:var(--brand);border:2px solid var(--brand);font-weight:800;font-size:12px;line-height:1;padding:7px 12px;border-radius:999px;box-shadow:0 4px 10px rgba(0,0,0,.08);cursor:pointer}
+    .qty{position:absolute;right:8px;bottom:8px;display:none;align-items:center;gap:10px;background:#fff;border-radius:999px;padding:4px 6px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
+    .qty button{width:28px;height:28px;border-radius:999px;border:2px solid var(--brand);background:#fff;color:#brand;font-weight:900;font-size:16px;line-height:0;cursor:pointer}
+    .qty .num{min-width:16px;text-align:center;font-weight:800}
+    .price-row{display:flex;align-items:baseline;gap:6px;margin-top:6px}
+    .price-now{font-weight:900;font-size:14px}
+    .price-mrp{color:var(--mrp);text-decoration:line-through;font-size:12px}
+    .save{color:var(--save);font-size:12px;font-weight:800;margin-top:2px}
+    .meta{font-size:12px;color:var(--sub);margin-top:4px}
+    .name{margin-top:4px;font-size:12px;font-weight:700;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    @media (max-width:360px){.name{font-size:11px}.price-now{font-size:13px}}
+
+    /* Search bar + typewriter placeholder */
+    .search-container{margin:16px;position:relative}
+    .search-input{width:100%;padding:12px 45px 12px 16px;border-radius:25px;border:1px solid #ddd;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.1);outline:none}
+    .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#666;font-size:18px}
+
+    /* Floating Cart CTA */
+    .cart-footer{
+      position:fixed;
+      bottom:70px;
+      left:50%;
+      transform:translateX(-50%);
+      background:var(--cta-grad);
+      color:#fff;
+      padding:10px 16px;
+      border-radius:999px;
+      display:none;
+      align-items:center;
+      gap:10px;
+      z-index:96;
+      box-shadow:0 10px 24px rgba(30,64,175,.35);
+      border:1px solid rgba(255,255,255,.25);
+      cursor:pointer;
+      width:auto;
+    }
+    .cart-info{display:flex;gap:8px;align-items:center}
+    .cart-icon{font-size:18px}
+    .cart-text{font-size:14px;font-weight:700}
+    #cartTotal{font-size:14px;font-weight:800;background:rgba(255,255,255,.18);padding:6px 10px;border-radius:20px}
+
+    /* Popup & Cart page */
+    .product-popup{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:1000;display:none;flex-direction:column;overflow-y:auto}
+    .popup-header{display:flex;align-items:center;padding:16px;border-bottom:1px solid #ddd;position:sticky;top:0;background:#fff;z-index:10}
+    .back-btn{font-size:24px;margin-right:12px;cursor:pointer}
+    .popup-title{font-size:18px;font-weight:600;flex:1}
+    .share-btn{font-size:20px;cursor:pointer;margin-left:12px;color:#25D366}
+    .popup-body{padding:16px;overflow-y:auto;position:relative;flex:1}
+    .popup-body img{width:80%;max-height:200px;object-fit:contain;border-radius:12px;margin:0 auto 16px;display:block}
+    .popup-sub{font-size:14px;color:#666;margin-bottom:8px}
+    .popup-price{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+    .popup-price .now{font-size:20px;font-weight:700;color:#111}
+    .popup-price .old{text-decoration:line-through;color:#999;font-size:16px}
+    .popup-price .offer{background:#dcfce7;color:#16a34a;font-size:14px;padding:4px 8px;border-radius:6px;font-weight:600}
+    .delivery-info{background:#f0fdf4;padding:12px;border-radius:8px;color:#16a34a;font-size:14px;font-weight:600;display:flex;gap:8px;align-items:center;margin-bottom:16px}
+    .popup-footer{position:sticky;bottom:0;left:0;width:100%;display:flex;justify-content:space-between;padding:16px;border-top:1px solid #ddd;background:#fff;z-index:10}
+    .popup-footer button{flex:1;margin:0 6px;padding:14px;font-weight:600;border-radius:8px;cursor:pointer;font-size:16px;text-transform:uppercase}
+    .popup-footer .close-btn{background:#fff;color:#666;border:1px solid #ddd}
+    .popup-footer .add{background:#2563eb;color:#fff;border:none}
+
+    .cart-page{position:fixed;top:0;left:0;width:100%;height:100%;background:#f1f5f9;z-index:2000;display:none;flex-direction:column;overflow-y:auto}
+    .cart-header{display:flex;align-items:center;background:#fff;padding:16px;border-bottom:1px solid #ddd;box-shadow:0 2px 4px rgba(0,0,0,.1);position:sticky;top:0;z-index:10}
+    .cart-title{font-weight:600;font-size:18px;margin-left:12px}
+    .savings-badge{background:#dcfce7;color:#16a34a;font-size:14px;font-weight:600;padding:4px 8px;border-radius:6px;margin-left:8px;display:none}
+    .delivery-banner{background:#f0fdf4;color:#16a34a;padding:12px 16px;display:none;align-items:center;gap:8px;font-size:14px;font-weight:600}
+
+    .cart-items-container{flex:1;overflow-y:auto;padding:12px}
+    .cart-items{background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:12px}
+    .cart-item{display:flex;align-items:center;gap:12px;border-bottom:1px solid #eee;padding:12px 0}
+    .cart-item:last-child{border-bottom:none}
+    .cart-item img{width:60px;height:60px;object-fit:contain;border-radius:8px}
+    .item-details{flex:1;min-width:0}
+    .item-name{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .item-weight{font-size:14px;color:#666}
+    .quantity-controls{display:flex;align-items:center;gap:10px;margin-top:4px}
+    .quantity-btn{width:28px;height:28px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;font-size:16px}
+    .item-price{font-weight:600;font-size:16px}
+    .item-original{font-size:14px;color:#999;text-decoration:line-through}
+    .remove-btn{color:#ff3b30;cursor:pointer;font-size:18px;padding:8px}
+    .order-summary{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin:0 12px;position:sticky;bottom:0;z-index:10;display:none}
+    .summary-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+    .total-price{font-size:20px;font-weight:700}
+    .cart-actions{display:flex;gap:12px;background:#fff;padding:16px;border-top:1px solid #ddd;box-shadow:0 -2px 4px rgba(0,0,0,.1);position:sticky;bottom:0;z-index:10}
+    .continue{flex:1;background:#fff;border:2px solid #2563eb;color:#2563eb;border-radius:8px;padding:14px;font-weight:600;font-size:16px;cursor:pointer;text-transform:uppercase}
+    .place{flex:1;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:14px;font-weight:600;font-size:16px;position:relative;cursor:pointer;text-transform:uppercase;display:none}
+    .place .order-total{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#1e40af;color:#fff;padding:4px 10px;border-radius:12px;font-size:14px}
+
+    /* Empty cart & Toast */
+    .empty-cart{text-align:center;padding:40px 20px;color:#666}
+    .empty-cart-icon{font-size:60px;margin-bottom:16px;color:#ccc}
+    .empty-cart-text{font-size:16px;margin-bottom:20px}
+    .toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(100px);background:#16a34a;color:#fff;padding:12px 24px;border-radius:30px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:1004;opacity:0;transition:transform .3s ease,opacity .3s ease;display:flex;align-items:center;gap:10px;font-weight:700}
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+    /* Sections (brief) */
+    .section{padding:30px 16px}
+    .section h2{font-size:22px;text-align:center;margin-bottom:20px;color:#1e40af}
+    .why-choose{padding:24px 16px;background:linear-gradient(135deg,#e0f2fe 0%, #f0f9ff 100%);position:relative;overflow:hidden}
+    .why-grid{display:flex;gap:8px}
+    .why-item{flex:1;background:#fff;padding:16px 12px;border-radius:16px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.08);border:1px solid rgba(59,130,246,.1)}
+    .faq-wrap{padding:32px 16px;background:linear-gradient(135deg,#e0f2fe 0%, #f0f9ff 100%)}
+    .faq{background:#fff;border-radius:16px;margin-bottom:12px;box-shadow:0 4px 20px rgba(0,0,0,.08);border:1px solid rgba(59,130,246,.1);overflow:hidden}
+    .q{width:100%;background:none;border:none;padding:16px 20px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:#1e40af}
+    .a{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1);background:rgba(59,130,246,.02)}
+    .faq.active .a{max-height:200px}
+    .answer-content{padding:0 20px 20px 20px;font-size:14px}
+
+    /* Footer */
+    footer{background:linear-gradient(135deg,#333,#555);color:#fff;text-align:center;padding:30px 16px}
+    footer .social{margin:15px 0}
+    footer .social a{color:#fff;margin:0 12px;font-size:20px;transition:.2s}
+    footer .social a:hover{color:#25d366}
+
+    .hidden{display:none !important}
+    .loading{opacity:.7;pointer-events:none}
+
+    /* Improved Show More CTA */
+    .show-more-btn{
+      appearance:none;border:none;cursor:pointer;
+      margin:4px auto 18px;display:block;padding:12px 18px;border-radius:999px;
+      background:linear-gradient(135deg,#e0e7ff,#dbeafe);
+      box-shadow:0 6px 14px rgba(37,99,235,.18);
+      font-weight:800;letter-spacing:.3px;color:#1e3a8a;
+      transition:transform .15s ease, box-shadow .15s ease, background .3s ease;
+    }
+    .show-more-btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(37,99,235,.24)}
+    .show-more-btn:active{transform:translateY(0)}
+
+    /* ===== Bottom Navigation Bar (new) ===== */
+    .bottom-nav {
+      position:fixed;
+      bottom:0;
+      left:50%;
+      transform:translateX(-50%);
+      width:100%;
+      max-width:480px;
+      height:64px;
+      background:#fff;
+      border-radius:12px 12px 0 0;
+      box-shadow:0 -8px 28px rgba(3,7,18,0.12);
+      display:flex;
+      align-items:center;
+      justify-content:space-around;
+      gap:6px;
+      z-index:110;
+      border-top:1px solid rgba(0,0,0,0.06);
+      padding:6px 8px;
+    }
+    .bottom-nav button {
+      background:transparent;
+      border:none;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+      font-size:12px;
+      color:#263238;
+      cursor:pointer;
+      width:64px;
+      height:56px;
+      border-radius:10px;
+    }
+    .bottom-nav button .icon {
+      font-size:18px;
+      line-height:1;
+    }
+    .bottom-nav button.active { color: var(--brand); }
+    .bottom-nav .badge {
+      position:absolute;
+      top:6px;
+      right:14px;
+      background:#ff4757;
+      color:#fff;
+      font-size:11px;
+      padding:2px 6px;
+      border-radius:999px;
+      min-width:20px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      height:20px;
+    }
+
+    /* ensure content above bottom nav */
+    @media (max-width:480px) {
+      #appWrapper { padding-bottom:90px; }
+    }
   </style>
 </head>
 <body>
-  <div class="header" role="banner">
-    <div class="logo">
-      <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png" alt="Coastal Fresh logo">
-      <span>Coastal Fresh</span>
+  <div id="appWrapper">
+    <!-- Toast -->
+    <div id="toast" class="toast">
+      <i class="fas fa-check-circle"></i>
+      <span class="toast-message"></span>
     </div>
 
-    <div class="search-bar">
-      <svg class="search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2"/></svg>
-      <input id="searchInput" class="search-input" placeholder="Search products..." type="text" aria-label="Search products" />
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <img class="logo-img" src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png" alt="Coastal Fresh logo" width="60" height="40" loading="lazy">
+        <span class="logo-text">COASTAL FRESH</span>
+      </div>
+      <div class="cart-summary" id="headerCart" role="button" aria-label="Open cart">
+        <span class="cart-icon-header">🛒</span>
+        <span class="cart-count" id="headerCartCount">0</span>
+        <span class="cart-amount" id="headerCartAmount">₹0</span>
+      </div>
     </div>
 
-    <!-- removed header call/support button as requested -> only cart in header -->
-    <!-- improved header cart -->
-    <div id="headerCart" class="cart-btn" aria-label="Open cart" title="Open cart" role="button" tabindex="0">
-      <span class="cart-icon-wrap" aria-hidden="true">
-        <!-- improved cart/basket SVG -->
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
-          <path d="M6 6h15l-1.5 9.5a2 2 0 0 1-2 1.5H9a2 2 0 0 1-2-1.5L5 3H3"></path>
-          <circle cx="10" cy="20" r="1"></circle>
-          <circle cx="18" cy="20" r="1"></circle>
-        </svg>
-      </span>
-      <span id="headerCartCount" class="cart-badge" style="display:none">0</span>
-      <div style="display:none" id="headerCartAmount">₹0</div>
+    <!-- Ticker -->
+    <div class="ticker-container">
+      <div class="ticker">
+        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
+        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
+        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
+        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
+      </div>
     </div>
-  </div>
 
-  <div class="ticker-container" aria-hidden="false">
-    <div class="ticker" id="ticker">
-      <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
-      <div class="ticker-item">🐟 100% Hygienic Cleaning – Ready to Cook in Minutes</div>
-      <div class="ticker-item">🚚 Free delivery on orders above ₹1500</div>
-      <div class="ticker-item">🧊 Freshly packed — Cold chain maintained</div>
-      <!-- duplicate content intentionally reduced so the loop is smooth -->
-      <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
-      <div class="ticker-item">🚚 Free delivery on orders above ₹1500</div>
-    </div>
-  </div>
-
-  <div class="container">
-    <div class="carousel" id="heroCarousel" aria-roledescription="carousel" aria-label="Promotions">
+    <!-- Carousel -->
+    <div class="carousel">
       <div class="slides" id="slides">
-        <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z.png')" aria-hidden="false"></div>
-        <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png')" aria-hidden="true"></div>
-        <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756388255/Coastal_Fresh_Banner_3_wqpv8c.png')" aria-hidden="true"></div>
-      </div>
-      <div class="carousel-indicators" id="carouselIndicators" role="tablist" aria-label="Carousel indicators"></div>
-    </div>
-
-    <nav class="tabs" id="categoryTabs" aria-label="Categories"></nav>
-
-    <h2 class="section-title" id="productsTitle">From Coast to Kitchen – Fresh Fish, Prawns & Crabs</h2>
-
-    <section class="grid" id="productGrid" aria-live="polite"></section>
-
-    <button class="show-more-btn hidden" id="showMoreBtn" type="button">Show more products</button>
-  </div>
-
-  <a class="whatsapp-float" id="whatsappFloat" href="https://wa.me/919985125678" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp Chat">
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
-  </a>
-
-  <nav class="bottom-nav" aria-label="Bottom Navigation">
-    <a class="nav-item active" href="#" aria-current="page">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2"/><polyline points="9,22 9,12 15,12 15,22" stroke="currentColor" stroke-width="2"/></svg>
-      Home
-    </a>
-    <a class="nav-item" href="#search">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2"/></svg>
-      Search
-    </a>
-    <a class="nav-item" href="#" id="navCartBtn">
-      <!-- bottom nav cart (keeps same shape as header) -->
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 6h15l-1.5 9.5a2 2 0 0 1-2 1.5H9a2 2 0 0 1-2-1.5L5 3H3"></path>
-        <circle cx="10" cy="20" r="1"></circle>
-        <circle cx="18" cy="20" r="1"></circle>
-      </svg>
-      <span class="nav-badge" id="navCartBadge" style="display:none">0</span>
-      Cart
-    </a>
-    <a class="nav-item" href="#" onclick="openWhatsApp()" id="navChat" aria-label="WhatsApp">
-      <!-- replaced chat svg with WhatsApp -->
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
-      WhatsApp
-    </a>
-  </nav>
-  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true" aria-hidden="true"><i class="fas fa-check-circle" aria-hidden="true"></i><span class="toast-message"></span></div>
-
-  <div class="product-popup" id="productPopup" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="popup-header">
-      <button class="back-btn" id="popupBack" aria-label="Close product dialog">‹</button>
-      <span class="popup-title" id="popupTitle">Product Name</span>
-      <button class="share-btn" id="popupShare" aria-label="Share product"><i class="fab fa-whatsapp" aria-hidden="true"></i></button>
-    </div>
-    <div class="popup-body" id="popupBody"></div>
-    <div class="popup-footer">
-      <button class="close-btn" aria-label="Close">CLOSE</button>
-      <button class="add" aria-label="Add to cart">ADD TO CART</button>
-    </div>
-  </div>
-
-  <div class="cart-page" id="cartPage" aria-hidden="true">
-    <div class="cart-header">
-      <button class="back-btn" id="cartBack" aria-label="Close cart">‹</button>
-      <span class="cart-title">Cart</span>
-      <span class="savings-badge" id="savingsBadge">Saved ₹0</span>
-    </div>
-    <div class="delivery-banner" id="deliveryBanner">✓ Free delivery auto applied on this order!</div>
-
-    <div class="cart-items-container">
-      <div class="cart-items" id="cartItems"></div>
-
-      <div class="empty-cart" id="emptyCart" style="display:none">
-        <div class="empty-cart-icon" aria-hidden="true">🛒</div>
-        <div class="empty-cart-text">Your cart is empty</div>
-        <div class="empty-cart-sub">Add fresh seafood & pickles to get started.</div>
-        <button class="empty-cta" id="emptyContinueBtn">Continue shopping</button>
+        <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z.png')"></div>
+        <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png')"></div>
+        <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756388255/Coastal_Fresh_Banner_3_wqpv8c.png')"></div>
       </div>
     </div>
 
-    <div class="order-summary" id="orderSummary" style="display:none">
-      <div class="summary-row">
-        <span class="original-total" id="originalTotal">₹0</span>
-        <span class="total-price" id="finalTotal">₹0</span>
+    <!-- Trust Icons -->
+    <section class="trust-strip" id="trustStrip"></section>
+
+    <!-- Search -->
+    <div class="search-container">
+      <input type="text" id="searchInput" class="search-input" placeholder='Search — Prawns' aria-label="Search products">
+      <i class="fas fa-search search-icon" aria-hidden="true"></i>
+    </div>
+
+    <!-- Tabs (Categories) -->
+    <div class="container">
+      <nav class="tabs" id="categoryTabs" aria-label="Categories"></nav>
+
+      <h2 class="section-title" id="productsTitle">Premium Seafood & Pickles</h2>
+
+      <!-- 2-up Grid -->
+      <section class="grid" id="productGrid"></section>
+      <button class="show-more-btn hidden" id="showMoreBtn" type="button">Show more products</button>
+    </div>
+
+    <!-- Refer & Earn Banner -->
+    <div class="refer-banner" id="referBanner" role="button" aria-label="Refer and Earn">
+      <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756885955/refer_earn_1_nguvrb.jpg" alt="Refer and Earn - Get ₹200 off when you refer a friend">
+    </div>
+
+    <!-- Why Choose -->
+    <section class="why-choose">
+      <div class="header-section">
+        <h2>Why Choose Coastal Fresh?</h2>
+        <p class="trust-line">Trusted by 500+ families across Hyderabad</p>
       </div>
-      <div class="savings-text" id="savingsText"></div>
+      <div class="why-grid">
+        <div class="why-item"><div class="why-icon">🏆</div><h3>20+ Years Heritage</h3><p>Generations of expertise in premium seafood Industry</p></div>
+        <div class="why-item"><div class="why-icon">✨</div><h3>Fresh & Certified</h3><p>Hygienically processed with 100% freshness guarantee</p></div>
+        <div class="why-item"><div class="why-icon">🚀</div><h3>Fast Delivery</h3><p>Next-day delivery across Hyderabad</p></div>
+      </div>
+    </section>
+
+   <!-- FAQ -->
+    <section class="section faq-wrap" id="faq">
+      <div class="faq-header">
+        <h2>Frequently Asked Questions</h2>
+        <p class="faq-subtitle">Everything you need to know about fresh seafood delivery</p>
+      </div>
+      
+      <div class="faq-list">
+        <div class="faq" data-priority="high">
+          <button class="q" onclick="toggleFAQ(this)">
+            <span class="q-icon">🕐</span>
+            <span class="q-text">How quickly will I receive my order?</span>
+            <i class="chevron">▼</i>
+          </button>
+          <div class="a">
+            <div class="answer-content">
+              <p><strong>Next-day delivery available!</strong> All other orders arrive next day with real-time tracking.</p>
+              <div class="answer-highlight">⚡ Most orders delivered in under 24 hours</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq" data-priority="high">
+          <button class="q" onclick="toggleFAQ(this)">
+            <span class="q-icon">❄️</span>
+            <span class="q-text">How do you guarantee freshness during delivery?</span>
+            <i class="chevron">▼</i>
+          </button>
+          <div class="a">
+            <div class="answer-content">
+              <p>Premium insulated packaging with ice thermocol box maintains ideal temperature. Your seafood stays fresh, safe, and ready to cook from our coast to your kitchen.</p>
+              <div class="answer-highlight">🧊 Temperature-controlled throughout delivery</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq" data-priority="medium">
+          <button class="q" onclick="toggleFAQ(this)">
+            <span class="q-icon">🌊</span>
+            <span class="q-text">Where is your seafood sourced from?</span>
+            <i class="chevron">▼</i>
+          </button>
+          <div class="a">
+            <div class="answer-content">
+              <p>We source from the best suppliers in Coastal Andhra, with our own fish & prawn farms plus direct ties to local fishermen for fresh wild-caught seafood.</p>
+              <div class="answer-highlight">🐟 Export-quality, locally sourced</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq" data-priority="medium">
+          <button class="q" onclick="toggleFAQ(this)">
+            <span class="q-icon">📍</span>
+            <span class="q-text">What areas in Hyderabad do you deliver to?</span>
+            <i class="chevron">▼</i>
+          </button>
+          <div class="a">
+            <div class="answer-content">
+              <p>We deliver across all major areas including Gachibowli, Hitech City, Banjara Hills, Film Nagar, Jubilee Hills, Madhapur, Kondapur, and surrounding regions.</p>
+              <div class="answer-highlight">🏠 Free delivery above ₹1500</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq" data-priority="low">
+          <button class="q" onclick="toggleFAQ(this)">
+            <span class="q-icon">🔪</span>
+            <span class="q-text">Is your seafood cleaned and ready to cook?</span>
+            <i class="chevron">▼</i>
+          </button>
+          <div class="a">
+            <div class="answer-content">
+              <p>Yes! All our seafood is carefully cleaned, deveined, and neatly packed — so it's 100% ready to cook when it reaches your kitchen.</p>
+              <div class="answer-highlight">✨ Hygienically cleaned & ready to cook</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+      <h3>Stay Connected</h3>
+      <p>Coastal Fresh – Fresh Catch, Fresh Taste</p>
+      <p><i class="fas fa-phone"></i> <a href="tel:+919985125678" style="color:#fff;text-decoration:underline">+91 99851 25678</a> &nbsp; | &nbsp; <i class="fas fa-envelope"></i> <a href="mailto:info@coastalfresh.in" style="color:#fff;text-decoration:underline">info@coastalfresh.in</a></p>
+      <p><i class="fas fa-map-marker-alt"></i> Serving all areas of Hyderabad</p>
+      <div class="social">
+        <a href="https://www.facebook.com/CoastalFresh.in/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+        <a href="https://www.instagram.com/coastalfresh.in" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.youtube.com/@CoastalFresh" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        <a href="https://t.me/coastalfreshseafoods" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+        <a href="https://wa.me/919985125678" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+      </div>
+    </footer>
+
+    <!-- Floating Cart CTA -->
+    <div class="cart-footer" id="cartFooter" role="button" aria-label="Open cart">
+      <div class="cart-info">
+        <span class="cart-icon">🛒</span>
+        <span class="cart-text" id="cartCount">0 items</span>
+      </div>
+      <div id="cartTotal">₹0</div>
     </div>
 
-    <div class="cart-actions">
-      <button class="place" id="placeOrderBtn"><div class="order-total" id="placeTotal">₹0</div> PLACE ORDER</button>
+    <!-- Product Popup -->
+    <div class="product-popup" id="productPopup">
+      <div class="popup-header">
+        <span class="back-btn">‹</span>
+        <span class="popup-title" id="popupTitle">Product Name</span>
+        <span class="share-btn"><i class="fab fa-whatsapp"></i></span>
+      </div>
+      <div class="popup-body" id="popupBody"></div>
+      <div class="popup-footer">
+        <button class="close-btn" type="button">CLOSE</button>
+        <button class="add" type="button">ADD TO CART</button>
+      </div>
     </div>
+
+    <!-- Cart Page -->
+    <div class="cart-page" id="cartPage">
+      <div class="cart-header">
+        <span class="back-btn">‹</span>
+        <span class="cart-title">Cart</span>
+        <span class="savings-badge" id="savingsBadge">Saved ₹0</span>
+      </div>
+      <div class="delivery-banner" id="deliveryBanner">✓ Free delivery auto applied on this order!</div>
+
+      <div class="cart-items-container">
+        <div class="cart-items" id="cartItems"></div>
+        <div class="empty-cart" id="emptyCart" style="display:none;">
+          <div class="empty-cart-icon">🛒</div>
+          <div class="empty-cart-text">There are no items in your cart.</div>
+        </div>
+      </div>
+      <div class="order-summary" id="orderSummary">
+        <div class="summary-row">
+          <span class="original-total" id="originalTotal">₹0</span>
+          <span class="total-price" id="finalTotal">₹0</span>
+        </div>
+        <div class="savings-text" id="savingsText"></div>
+      </div>
+      <div class="cart-actions">
+        <button class="continue" type="button">CONTINUE SHOPPING</button>
+        <button class="place" id="placeOrderBtn" type="button"><div class="order-total" id="placeTotal">₹0</div>PLACE ORDER</button>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation (new) -->
+    <nav class="bottom-nav" role="navigation" aria-label="Bottom navigation">
+      <button id="navHome" class="nav-btn" aria-label="Home">
+        <span class="icon"><i class="fas fa-home"></i></span>
+        <span class="label">Home</span>
+      </button>
+
+      <button id="navSearch" class="nav-btn" aria-label="Search">
+        <span class="icon"><i class="fas fa-search"></i></span>
+        <span class="label">Search</span>
+      </button>
+
+      <button id="navCart" class="nav-btn" aria-label="Cart" style="position:relative;">
+        <span class="icon"><i class="fas fa-shopping-cart"></i></span>
+        <span class="label">Cart</span>
+        <span id="navCartBadge" class="badge" style="display:none">0</span>
+      </button>
+
+      <button id="navRefer" class="nav-btn" aria-label="Refer">
+        <span class="icon"><i class="fas fa-user-friends"></i></span>
+        <span class="label">Refer</span>
+      </button>
+
+      <button id="navSupport" class="nav-btn" aria-label="Support">
+        <span class="icon"><i class="fas fa-headset"></i></span>
+        <span class="label">Support</span>
+      </button>
+    </nav>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "Coastal Fresh",
+      "image": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png",
+      "url": "https://www.coastalfresh.in",
+      "telephone": "+91 99851 25678",
+      "email": "info@coastalfresh.in",
+      "address": { "@type": "PostalAddress", "addressLocality": "Hyderabad", "addressRegion": "Telangana", "addressCountry": "IN" },
+      "areaServed": "Hyderabad",
+      "description": "Premium fresh seafood and authentic pickles delivery service in Hyderabad offering fish, prawns, crabs, and pickles with next-day delivery",
+      "openingHours": "Mo-Su 08:00-20:00",
+      "priceRange": "₹₹",
+      "sameAs": [
+        "https://www.facebook.com/CoastalFresh.in",
+        "https://www.instagram.com/coastalfresh.in",
+        "https://www.youtube.com/@CoastalFresh",
+        "https://t.me/coastalfreshseafoods",
+        "https://wa.me/919985125678"
+      ]
+    }
+    </script>
   </div>
-
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"LocalBusiness",
-    "name":"Coastal Fresh",
-    "image":"https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png",
-    "url":"https://www.coastalfresh.in",
-    "telephone":"+91 99851 25678",
-    "email":"info@coastalfresh.in",
-    "address":{"@type":"PostalAddress","addressLocality":"Hyderabad","addressRegion":"Telangana","addressCountry":"IN"},
-    "areaServed":"Hyderabad",
-    "description":"Premium fresh seafood and authentic pickles delivery service in Hyderabad offering fish, prawns, crabs, and pickles with next-day delivery",
-    "openingHours":["Mo-Su 08:00-20:00"],
-    "priceRange":"₹₹"
-  }
-  </script>
 
   <script>
-    /* ===== Data & State (unchanged products list) ===== */
-    const products = [
-      { id:1, name:"White Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728284/Whitt_spxhew.jpg", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy White Pomfret online in Hyderabad – premium coastal fish with mild taste and firm flesh. Perfect for fry, grill, or curry. Hygienically cleaned and delivered fresh next day." },
-      { id:2, name:"Black Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/Blac_qnztqj.jpg", mrp:850, finalPrice:750, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Black Pomfret in Hyderabad – firm texture, rich flavor, and ideal for spicy Andhra fish curry, grills, and fries. Packed fresh and delivered with care by Coastal Fresh." },
-      { id:3, name:"Sea Bass", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/SeaBas_cd21dd.jpg", mrp:850, finalPrice:765, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Sea Bass fish delivery in Hyderabad – mild flavor, firm texture, and nutrient-rich. Great for curries, grills, or pan-seared dishes. Cleaned and delivered ice-fresh." },
-      { id:4, name:"Yellowfin Tuna", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/YellowTun_tzidzi.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy Yellowfin Tuna steaks in Hyderabad – meaty cuts, rich taste, and perfect for grilling, searing, or curry. High in protein and omega-3, packed fresh and delivered fast." },
-      { id:5, name:"Pink Percept", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/PinkPerc_r8g3me.jpg", mrp:450, finalPrice:405, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Pink Perch fish – soft flesh, mild taste, and budget-friendly. Great for crispy fry, tangy curry, or homely meals. Sourced daily and hygienically packed for Hyderabad delivery." },
-      { id:6, name:"Koyyinga", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/koyyangi_si2oss.png", mrp:500, finalPrice:450, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Koyyinga fish online – Andhra favorite with bold flavor and firm texture. Perfect for spicy curries or deep-fried recipes. Delivered fresh across Hyderabad." },
-      { id:7, name:"Kanagadathalu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Kanagadathal_lvwazy.jpg", mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Kanagadathalu fish delivery – coastal classic with versatile flavor. Suited for curry, grills, or fry. Responsibly sourced and delivered fresh by Coastal Fresh in Hyderabad." },
-      { id:8, name:"Vanjaram (Seer)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Vanjara_ikhy6c.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy Vanjaram Seer Fish in Hyderabad – king of South Indian seafood with boneless cuts, rich taste, and firm flesh. Ideal for fry or curry. Packed fresh and delivered next day." },
-      { id:9, name:"Nettallu (Anchovies)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/Nethallu_rckaaj.png", mrp:300, finalPrice:270, offer:10, gross:"1000g", net:"800g", available:true, category:"Fish", desc:"Anchovies (Nettallu) online – tiny fish with bold taste. Excellent for crispy fry, chutneys, or tamarind curry. Calcium and omega-3 rich, delivered fresh in Hyderabad." },
-      { id:10, name:"Katte Parigelu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/Katte_Parigelu_lnxp73.png", mrp:400, finalPrice:360, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Katte Parigelu fish delivery – tasty, tender, and ready-to-cook. Suited for coastal curries and deep-fry recipes. Fresh catch delivered to your Hyderabad doorstep." },
-      { id:11, name:"Rohu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rohu_ctixmk.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy Rohu fish online in Hyderabad – freshwater favorite with mild taste. Perfect for Bengali or Andhra curries, fry, or homely meals. Packed hygienically for freshness." },
-      { id:12, name:"Rupchand", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rupchand_Fish_woqmzz.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Rupchand fish in Hyderabad – affordable, mild-flavored, and versatile. Ideal for everyday curries or fry dishes. Fresh catch, cleaned and delivered across the city." },
-      { id:13, name:"Catla", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Catla_-_Fish_tjb5hr.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Catla fish delivery in Hyderabad – freshwater fish with large cuts and tasty flesh. Popular for Andhra fish curry, fry, or homestyle meals. Hygienically processed and packed." },
-      { id:14, name:"Korameenu (Murrel)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577555/Korameenu_dkpfiw.png", mrp:780, finalPrice:700, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Korameenu Murrel fish – prized Andhra delicacy with firm flesh and rich taste. Ideal for spicy fry and traditional curry. Delivered ice-packed across Hyderabad." },
-      { id:15, name:"Sea Tiger Prawns - 20C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:750, finalPrice:750, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Buy Sea Tiger Prawns 20-count – large, juicy, and premium. Perfect for grills, biryani, or curry. Cleaned, deveined, and delivered fresh to your Hyderabad home." },
-      { id:16, name:"Sea Tiger Prawns - 40C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium Sea Tiger Prawns 40-count – sweet flavor, cleaned and ready to cook. Ideal for curries, fry, or stir-fries. Freshly sourced and delivered across Hyderabad." },
-      { id:17, name:"Sea Tiger Prawns - 60C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:550, finalPrice:550, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Sea Tiger Prawns 60-count – smaller size, big on flavor. Perfect for masala curry, fried rice, or snacks. Cleaned and delivered hygienically in Hyderabad." },
-      { id:18, name:"Chakuroyya / Godavari", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Godavari Chakuroyya freshwater prawns – authentic Andhra taste with sweet flavor. Perfect for traditional prawn curry or fry. Delivered fresh and cleaned in Hyderabad." },
-      { id:19, name:"Freshwater Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:380, finalPrice:380, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Small Freshwater Prawns – affordable, cleaned, and ready to cook. Great for prawn fry, biryani, or curries. Fresh from farms, delivered across Hyderabad." },
-      { id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577554/Fresh_Water_Prawns_-_M_lpvxiu.png", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium Freshwater Prawns – balanced size, firm flesh, and great for grills, curries, or pasta. Hygienically cleaned and delivered ice-fresh in Hyderabad." }
+    /* ===== Configurable desktop background ===== */
+    const desktopBackgroundImage = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1756914772/Coastal_Fresh_Sea_food_hyderabad_-_website_banner_shqapq.png';
+    document.documentElement.style.setProperty('--desktop-bg-image', `url(${desktopBackgroundImage})`);
+
+    /* ===== Trust Icons CONFIG ===== */
+    const TRUST_ICONS = [
+      { icon: '🧊', title: 'Freshness Guarantee', text: 'Freshly cut after your order' },
+      { icon: '🌱', title: 'Safe & Healthy', text: 'Chemical & Antibiotics Free' },
+      { icon: '📦', title: 'Clean & Packed', text: 'Neatly cleaned & carefully packed' },
+      { icon: '💵', title: 'Cash on Delivery', text: 'Pay when you receive' }
     ];
 
-    /* ===== state ===== */
-    let cart = Object.create(null);
-    let popupProduct = null;
-    let itemsPerPage = 8;
-    let currentPage = 1;
-    let currentCategory = 'All';
-    let currentSearch = '';
-    const FREE_DELIVERY_THRESHOLD = 1500;
-    let lastSavings = 0;
-    let freeUnlocked = false;
-    let lastFocusedElement = null;
-    let toastTimer = null;
-
-    /* ===== elements ===== */
-    const productGrid = document.getElementById('productGrid');
-    const categoryTabs = document.getElementById('categoryTabs');
-    const showMoreBtn = document.getElementById('showMoreBtn');
-    const searchInput = document.getElementById('searchInput');
-    const headerCart = document.getElementById('headerCart');
-    const headerCartCount = document.getElementById('headerCartCount');
-    const headerCartAmount = document.getElementById('headerCartAmount');
-    const navCartBadge = document.getElementById('navCartBadge');
-    const toast = document.getElementById('toast');
-    const toastMessage = document.querySelector('.toast-message');
-    const productPopup = document.getElementById('productPopup');
-    const popupTitle = document.getElementById('popupTitle');
-    const popupBody = document.getElementById('popupBody');
-    const popupBack = document.getElementById('popupBack');
-    const popupShare = document.getElementById('popupShare');
-    const cartPage = document.getElementById('cartPage');
-    const cartBack = document.getElementById('cartBack');
-    const cartItemsEl = document.getElementById('cartItems');
-    const emptyCart = document.getElementById('emptyCart');
-    const emptyContinueBtn = document.getElementById('emptyContinueBtn');
-    const orderSummary = document.getElementById('orderSummary');
-    const deliveryBanner = document.getElementById('deliveryBanner');
-    const savingsBadge = document.getElementById('savingsBadge');
-    const placeOrderBtn = document.getElementById('placeOrderBtn');
-    const originalTotal = document.getElementById('originalTotal');
-    const finalTotal = document.getElementById('finalTotal');
-    const placeTotal = document.getElementById('placeTotal');
-
-    const whatsappSupportBtn = document.getElementById('whatsappSupport'); // null now (guarded usage)
-const CATEGORIES = [
+    /* ===== Category Tabs CONFIG (PNG icons) ===== */
+    const CATEGORIES = [
       { key: 'All',    label: 'All',    icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/shopping_yblohc.png' },
       { key: 'Fish',   label: 'Fish',   icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/food_yircgb.png' },
       { key: 'Prawns', label: 'Prawns', icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005093/shrimp_1_yzblqb.png' },
@@ -440,6 +689,80 @@ const CATEGORIES = [
       { key: 'Pickles',label: 'Pickles',icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005242/mason-jar_a5mtg4.png' }
     ];
 
+    /* ===== Products DATA ===== */
+    const products = [
+      { id:1, name:"White Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728284/Whitt_spxhew.jpg", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy White Pomfret online in Hyderabad – premium coastal fish with mild taste and firm flesh. Perfect for fry, grill, or curry. Hygienically cleaned and delivered fresh next day." },
+      { id:2, name:"Black Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/Blac_qnztqj.jpg", mrp:850, finalPrice:750, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Black Pomfret in Hyderabad – firm texture, rich flavor, ideal for spicy curries, grills, and fries." },
+      { id:3, name:"Sea Bass", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/SeaBas_cd21dd.jpg", mrp:850, finalPrice:765, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Sea Bass – mild flavor, firm texture. Great for curries, grills, pan-seared." },
+      { id:4, name:"Yellowfin Tuna", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/YellowTun_tzidzi.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Meaty steaks, rich taste; perfect for grilling, searing, curry." },
+      { id:5, name:"Pink Perch", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/PinkPerc_r8g3me.jpg", mrp:450, finalPrice:405, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Soft flesh, mild taste, budget-friendly for fry/curry." },
+      { id:6, name:"Koyyinga", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/koyyangi_si2oss.png", mrp:500, finalPrice:450, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Andhra favorite; bold flavor, firm texture." },
+      { id:7, name:"Kanagadathalu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Kanagadathal_lvwazy.jpg", mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Versatile for curry, grills, fry." },
+      { id:8, name:"Vanjaram (Seer)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Vanjara_ikhy6c.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Boneless cuts, rich taste; king of South Indian seafood." },
+      { id:9, name:"Nettallu (Anchovies)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/Nethallu_rckaaj.png", mrp:300, finalPrice:270, offer:10, gross:"1000g", net:"800g", available:true, category:"Fish", desc:"Tiny fish, bold taste; great for fry/chutneys." },
+      { id:10, name:"Katte Parigelu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Katte_Parigelu_lnxp73.png", mrp:400, finalPrice:360, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Tasty, tender, ready-to-cook." },
+      { id:11, name:"Rohu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rohu_ctixmk.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Freshwater favorite; curries or fry." },
+      { id:12, name:"Rupchand", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rupchand_Fish_woqmzz.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Affordable, mild, versatile." },
+      { id:13, name:"Catla", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Catla_-_Fish_tjb5hr.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Large cuts; great for Andhra curry." },
+      { id:14, name:"Korameenu (Murrel)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577555/Korameenu_dkpfiw.png", mrp:780, finalPrice:700, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Prized delicacy; firm flesh." },
+      { id:15, name:"Sea Tiger Prawns - 20C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:750, finalPrice:750, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Large, juicy; grills & biryani." },
+      { id:16, name:"Sea Tiger Prawns - 40C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium, sweet flavor." },
+      { id:17, name:"Sea Tiger Prawns - 60C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:550, finalPrice:550, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Smaller size, big flavor." },
+      { id:18, name:"Chakuroyya / Godavari", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Authentic Andhra taste." },
+      { id:19, name:"Freshwater Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:380, finalPrice:380, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Great for prawn fry." },
+      { id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577554/Fresh_Water_Prawns_-_M_lpvxiu.png", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Balanced size, firm flesh." },
+      { id:21, name:"Freshwater Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/fresh_watre_prawns_-_L_h5fyn9.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Premium size; grills/party." },
+      { id:22, name:"Live Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:1000, finalPrice:1000, offer:0, gross:"1000g", net:"800g", available:true, category:"Crabs", desc:"Delivered live; top freshness." },
+      { id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:900, finalPrice:900, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Roe for rich, creamy flavor." },
+      { id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577552/Blue_C%20Crab_tzjkxm.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Delicate, sweet meat." },
+      { id:25, name:"Manda Pitha", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:600, finalPrice:600, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Godavari special; flavorful." },
+      { id:26, name:"3 Dot Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png", mrp:500, finalPrice:500, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Unique markings; sweet taste." },
+      { id:27, name:"Prawns Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1900, finalPrice:1710, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra Prawns Pickle; cold-pressed oil; no preservatives." },
+      { id:28, name:"Chicken Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1500, finalPrice:1500, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Andhra-style Chicken Pickle with bold spices." }
+    ];
+
+    /* ===== App State ===== */
+    let cart = Object.create(null); // safer plain object
+    let popupProduct = null;
+    let itemsPerPage = 8; // 2 per row * 4 rows
+    let currentPage = 1;
+    let currentCategory = 'All';
+    let currentSearch = '';
+    const FREE_DELIVERY_THRESHOLD = 1500;
+    let lastSavings = 0;
+    let freeUnlocked = false;
+
+    /* ===== DOM ===== */
+    const productGrid = document.getElementById('productGrid');
+    const showMoreBtn = document.getElementById('showMoreBtn');
+    const cartFooter = document.getElementById('cartFooter');
+    const cartCount = document.getElementById('cartCount');
+    const cartTotal = document.getElementById('cartTotal');
+    const toast = document.getElementById('toast');
+    const toastMessage = document.querySelector('.toast-message');
+    const headerCartCount = document.getElementById('headerCartCount');
+    const headerCartAmount = document.getElementById('headerCartAmount');
+    const headerCart = document.getElementById('headerCart');
+    const searchInput = document.getElementById('searchInput');
+    const referBanner = document.getElementById('referBanner');
+    const emptyCart = document.getElementById('emptyCart');
+    const cartItems = document.getElementById('cartItems');
+    const orderSummary = document.getElementById('orderSummary');
+    const deliveryBanner = document.getElementById('deliveryBanner');
+    const savingsBadge = document.getElementById('savingsBadge');
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    const categoryTabs = document.getElementById('categoryTabs');
+    const trustStrip = document.getElementById('trustStrip');
+
+    /* Bottom nav elements */
+    const navHome = document.getElementById('navHome');
+    const navSearch = document.getElementById('navSearch');
+    const navCart = document.getElementById('navCart');
+    const navRefer = document.getElementById('navRefer');
+    const navSupport = document.getElementById('navSupport');
+    const navCartBadge = document.getElementById('navCartBadge');
+
+    /* ===== Helpers ===== */
     function getValidProductById(id){
       const pid = Number(id);
       if (!Number.isInteger(pid)) return null;
@@ -452,59 +775,130 @@ const CATEGORIES = [
         for (const [idStr, qtyRaw] of entries){
           const p = getValidProductById(idStr);
           const n = Number(qtyRaw);
-          if (!Number.isFinite(n)) continue;
-          const qty = Math.max(0, Math.min(99, Math.floor(n)));
+          if (!Number.isFinite(n)) continue; // strict guard
+          const qty = Math.max(0, Math.min(99, n));
           if (p && Number.isFinite(qty) && qty > 0){
             cleaned[p.id] = qty;
           }
         }
-      }catch(_){ }
+      }catch(_){}
       return cleaned;
     }
 
-    document.addEventListener('DOMContentLoaded', function(){
+    /* ===== Init ===== */
+    document.addEventListener('DOMContentLoaded', function () {
+      renderTrustIcons();
       renderCategoryTabs();
+      renderProducts();
       initCarousel();
-      loadCart();              // <--- load cart before rendering products
-      renderProducts();        // now render products after cart loaded
+      initFAQ();
+      loadCart();
       startTypewriter();
-      attachGlobalEvents();
-      generateProductSchema();
-    });
 
-    function attachGlobalEvents(){
+      // Events
       categoryTabs.addEventListener('click', onTabClick);
       searchInput.addEventListener('input', onSearchInput);
       productGrid.addEventListener('click', onProductGridClick);
       showMoreBtn.addEventListener('click', showMore);
-      popupBack.addEventListener('click', closePopup);
+      document.querySelector('.popup-header .back-btn').addEventListener('click', closePopup);
       document.querySelector('.popup-footer .close-btn').addEventListener('click', closePopup);
       document.querySelector('.popup-footer .add').addEventListener('click', addPopupToCart);
-      cartBack.addEventListener('click', closeCart);
+      document.querySelector('.cart-header .back-btn').addEventListener('click', closeCart);
+      document.querySelector('.cart-actions .continue').addEventListener('click', closeCart);
       document.querySelector('.cart-actions .place').addEventListener('click', placeOrder);
+      cartFooter.addEventListener('click', openCart);
       headerCart.addEventListener('click', openCart);
-      document.getElementById('navCartBtn')?.addEventListener('click', openCart);
-      document.getElementById('whatsappFloat')?.addEventListener('click', function(e){ trackWhatsappClick('floating_button'); });
-      popupShare.addEventListener('click', shareProduct);
-      emptyContinueBtn?.addEventListener('click', ()=>{ closeCart(); showToast('Continue shopping'); document.getElementById('productsTitle')?.scrollIntoView({behavior:'smooth'}); });
+      document.querySelector('.share-btn').addEventListener('click', shareProduct);
 
-      // keyboard handlers
-      document.addEventListener('keydown', (ev)=>{
-        if (ev.key === 'Escape'){
-          if (productPopup.style.display === 'flex') closePopup();
-          else if (cartPage.style.display === 'flex') closeCart();
-        }
+      // Bottom nav handlers
+      navHome.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('home'); });
+      navSearch.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('search'); });
+      navCart.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('cart'); });
+      navRefer.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('refer'); });
+      navSupport.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('support'); });
+
+      // Refer & Earn
+      referBanner.addEventListener('click', function() {
+        const message = "Hey! I've been ordering fresh seafood from Coastal Fresh 🐟🦐 – super clean, tasty & delivered right to my home in Hyderabad! You should try it too 👉 https://bit.ly/coastalfresh";
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        if (typeof gtag === 'function') gtag('event', 'select_promotion', { promotion_id: 'refer_earn_1', promotion_name: 'Refer & Earn Banner' });
+        window.open(whatsappUrl, '_blank');
       });
 
-      // make ESC and click outside behavior robust for popup
-      productPopup.addEventListener('click', (e)=> {
-        if (e.target === productPopup) closePopup();
-      });
-      cartPage.addEventListener('click', (e)=> {
-        if (e.target === cartPage) closeCart();
+      // Auto-open first FAQ for engagement
+      setTimeout(() => {
+        const firstFAQ = document.querySelector('.faq[data-priority="high"]');
+        if (firstFAQ) firstFAQ.classList.add('active');
+      }, 800);
+
+      // Add limited product schema
+      generateProductSchema();
+
+      // set initial bottom nav visuals
+      updateBottomNavUI();
+    });
+
+    /* ===== Bottom-nav helpers ===== */
+    function handleNavClick(key){
+      if (typeof gtag === 'function') gtag('event','navigation_click',{ nav:key });
+      // visual active
+      document.querySelectorAll('.bottom-nav .nav-btn').forEach(b => b.classList.remove('active'));
+      if (key === 'home') {
+        navHome.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'});
+      }
+      if (key === 'search') {
+        navSearch.classList.add('active'); searchInput.focus();
+      }
+      if (key === 'cart') {
+        navCart.classList.add('active'); openCart();
+      }
+      if (key === 'refer') {
+        navRefer.classList.add('active');
+        // open the refer share flow (same as referBanner)
+        const message = "Hey! I've been ordering fresh seafood from Coastal Fresh 🐟🦐 – super clean, tasty & delivered right to my home in Hyderabad! You should try it too 👉 https://bit.ly/coastalfresh";
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+      }
+      if (key === 'support') {
+        navSupport.classList.add('active');
+        // Open WhatsApp support pre-filled or call fallback
+        const supportNumber = '+919985125678';
+        const supportMsg = encodeURIComponent('Hello Coastal Fresh, I need help with my order/support.');
+        const waLink = `https://wa.me/919985125678?text=${supportMsg}`;
+        // prefer WhatsApp chat
+        window.open(waLink, '_blank');
+      }
+    }
+
+    function updateBottomNavUI(){
+      const count = Object.values(cart).reduce((s,n)=>s+n,0);
+      if (count>0){
+        navCartBadge.style.display='inline-flex';
+        navCartBadge.textContent = String(count);
+      } else {
+        navCartBadge.style.display='none';
+      }
+    }
+
+    /* ===== Trust Icons render ===== */
+    function renderTrustIcons(){
+      trustStrip.innerHTML = TRUST_ICONS.map((t,i)=>`
+        <div class="trust-item" data-index="${i}" data-title="${t.title}">
+          <div class="icon-container" style="animation-delay:${i}s">${t.icon}</div>
+          <div class="trust-content">
+            <div class="trust-title">${t.title}</div>
+            <div class="trust-sub">${t.text}</div>
+          </div>
+        </div>
+      `).join('');
+      trustStrip.querySelectorAll('.trust-item').forEach(el=>{
+        el.addEventListener('click',()=>{
+          if (typeof gtag==='function') gtag('event','click',{ location:'trust_strip', item_title:el.dataset.title, item_index:+el.dataset.index });
+        });
       });
     }
 
+    /* ===== Tabs render/handlers (with PNG icons) ===== */
     function renderCategoryTabs(){
       categoryTabs.innerHTML = CATEGORIES.map(cat => `
         <a class="tab" href="#" data-category="${cat.key}" ${cat.key==='All'?'aria-current="page"':''}>
@@ -518,11 +912,12 @@ const CATEGORIES = [
       e.preventDefault();
       const cat = a.dataset.category;
       filterCategory(cat);
+      if (typeof gtag==='function') gtag('event','select_category',{ category:cat });
       categoryTabs.querySelectorAll('.tab').forEach(t=>t.removeAttribute('aria-current'));
       a.setAttribute('aria-current','page');
-      if (typeof gtag==='function') gtag('event','select_category',{ category:cat });
     }
 
+    /* ===== Search & Typewriter ===== */
     function onSearchInput(){
       currentSearch = this.value.trim().toLowerCase();
       currentPage = 1;
@@ -533,26 +928,31 @@ const CATEGORIES = [
       const base = 'Search — ';
       const names = ['Rohu','Tiger Prawns','Sea Bass','Crab','Pickle'];
       let i=0, pos=0, dir=1, pause=0;
+
       function tick(){
         if (document.activeElement === searchInput || searchInput.value){ setTimeout(tick, 700); return; }
         const full = names[i];
         if (pause>0){ pause--; return void setTimeout(tick, 80); }
+
         const text = full.slice(0,pos);
         searchInput.setAttribute('placeholder', base + text);
+
         pos += dir;
         if (pos > full.length){ pause=10; dir=-1; }
         if (pos < 0){ dir=1; i=(i+1)%names.length; }
+
         setTimeout(tick, 60);
       }
       tick();
     }
 
+    /* ===== Products render (card spec) ===== */
     function renderProducts(){
       productGrid.innerHTML = '';
       const q = currentSearch;
       let filtered = products.filter(p=>{
         const matchesCategory = currentCategory==='All' || p.category===currentCategory;
-        const matchesSearch = !q || p.name.toLowerCase().includes(q) || (p.desc||'').toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
+        const matchesSearch = !q || p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
         return matchesCategory && matchesSearch;
       });
 
@@ -565,19 +965,15 @@ const CATEGORIES = [
         const card = document.createElement('article');
         card.className = 'card';
         card.dataset.id = p.id;
-        card.dataset.price = p.finalPrice;
-        card.dataset.mrp = p.mrp || 0;
-        card.dataset.name = p.name;
-        card.dataset.weight = p.net;
 
         card.innerHTML = `
-          <div class="img" tabindex="0" role="button" aria-label="${p.name} details">
+          <div class="img">
             <img src="${p.image}" alt="${p.name}" loading="lazy" />
-            <button class="add-pill" type="button" ${inCartQty>0?'style="display:none"':''} aria-label="Add ${p.name} to cart">ADD</button>
+            <button class="add-pill" type="button" ${inCartQty>0?'style="display:none"':''}>ADD</button>
             <div class="qty" aria-label="Quantity" style="${inCartQty>0?'display:flex':''}">
-              <button class="dec" type="button" aria-label="Decrease quantity">-</button>
+              <button class="dec" type="button">-</button>
               <span class="num">${inCartQty>0?inCartQty:1}</span>
-              <button class="inc" type="button" aria-label="Increase quantity">+</button>
+              <button class="inc" type="button">+</button>
             </div>
           </div>
           <div class="price-row">
@@ -591,9 +987,7 @@ const CATEGORIES = [
         productGrid.appendChild(card);
       });
 
-      // sync UI for any cards that might not match cart (in case)
-      syncCardsWithCart();
-
+      // Enhanced "Show more" CTA
       const remaining = Math.max(0, filtered.length - (itemsPerPage * currentPage));
       if (remaining > 0) {
         showMoreBtn.textContent = `Show ${Math.min(itemsPerPage, remaining)} more products (${remaining} left)`;
@@ -614,21 +1008,26 @@ const CATEGORIES = [
       }
     }
 
+    /* ===== Grid interactions (guarded) ===== */
     function onProductGridClick(e){
+      // Bulletproof: if the Show More button ever moves into the grid, ignore it
       if (e.target.closest('#showMoreBtn')) return;
-      const interactive = e.target.closest('.add-pill, .inc, .dec, .qty');
+
+      const interactive = e.target.closest('.add-pill, .inc, .dec, .qty'); // treat qty as interactive too
       const card = e.target.closest('.card');
       if (!card) return;
       const id = parseInt(card.dataset.id,10);
       const p = getValidProductById(id);
       if (!p) return;
+
       const addBtn = card.querySelector('.add-pill');
       const qtyBox = card.querySelector('.qty');
       const num = qtyBox.querySelector('.num');
 
+      // Explicit controls
       if (e.target.classList.contains('add-pill')) {
-        cart[id] = (cart[id] || 0) + 1;
-        num.textContent = cart[id];
+        cart[id] = 1;
+        num.textContent = 1;
         addBtn.style.display = 'none';
         qtyBox.style.display = 'flex';
         saveCart();
@@ -659,6 +1058,7 @@ const CATEGORIES = [
         return;
       }
 
+      // Non-interactive area: open popup only
       if (!interactive) {
         openPopup(id);
         if (typeof gtag==='function'){
@@ -674,7 +1074,8 @@ const CATEGORIES = [
     function showMore(){
       currentPage++;
       renderProducts();
-      document.getElementById('productsTitle')?.scrollIntoView({ behavior:'smooth' });
+      const el = document.getElementById('productsTitle');
+      if (el) el.scrollIntoView({ behavior:'smooth' });
       if (typeof gtag==='function') gtag('event','show_more',{ page: currentPage, page_size: itemsPerPage });
     }
 
@@ -684,45 +1085,46 @@ const CATEGORIES = [
       searchInput.value = '';
       currentSearch = '';
       renderProducts();
-      document.getElementById('productsTitle')?.scrollIntoView({ behavior:'smooth' });
+      const el = document.getElementById('productsTitle');
+      if (el) el.scrollIntoView({ behavior:'smooth' });
     }
 
+    /* ===== Carousel ===== */
     function initCarousel(){
+      let idx = 0;
       const slides = document.getElementById('slides');
-      const indicatorRoot = document.getElementById('carouselIndicators');
-      const slideCount = slides.children.length;
-      let index = 0;
-      for (let i=0;i<slideCount;i++){
-        const btn = document.createElement('button');
-        btn.setAttribute('aria-label','Show slide '+(i+1));
-        btn.addEventListener('click', ()=>{ goTo(i); });
-        indicatorRoot.appendChild(btn);
-      }
-      function update(){
-        slides.style.transform = `translateX(-${index*100}%)`;
-        Array.from(indicatorRoot.children).forEach((b,idx)=> b.classList.toggle('active', idx===index));
-        if (typeof gtag==='function') gtag('event','carousel_view',{ slide_index:index });
-      }
-      function goTo(i){ index = (i+slideCount)%slideCount; update(); }
-      let timer = setInterval(()=>{ index = (index+1)%slideCount; update(); }, 4000);
-      slides.parentElement.addEventListener('mouseenter', ()=>clearInterval(timer));
-      slides.parentElement.addEventListener('mouseleave', ()=>{ timer = setInterval(()=>{ index = (index+1)%slideCount; update(); }, 4000); });
-      update();
+      const total = slides.children.length || 1;
+      setInterval(()=>{ idx = (idx+1)%total; slides.style.transform = `translateX(${-idx*100}%)`; }, 5000);
     }
 
+    /* ===== FAQ ===== */
+    function initFAQ(){}
+    function toggleFAQ(button){
+      const faq = button.closest('.faq');
+      const isActive = faq.classList.contains('active');
+      document.querySelectorAll('.faq.active').forEach(item=>{ if(item!==faq) item.classList.remove('active'); });
+      faq.classList.toggle('active', !isActive);
+      if (typeof gtag==='function') gtag('event','faq_click',{ question: button.querySelector('.q-text').textContent });
+    }
+
+    /* ===== Cart state (validated) ===== */
     function loadCart(){
       try{
         const saved = JSON.parse(localStorage.getItem('coastalFreshCart') || '{}');
         const cleaned = sanitizeCartShape(saved);
+        // If too many items (legacy corruption), keep only known IDs
         if (Object.keys(cleaned).length > products.length){
           cart = Object.create(null);
         } else {
           cart = cleaned;
         }
-      }catch(_){ cart = Object.create(null); }
+      }catch(_){
+        cart = Object.create(null);
+      }
       updateCartUI();
     }
     function saveCart(){
+      // ensure cart is clean before storing
       cart = sanitizeCartShape(cart);
       localStorage.setItem('coastalFreshCart', JSON.stringify(cart));
       updateCartUI();
@@ -736,19 +1138,22 @@ const CATEGORIES = [
         total += p.finalPrice * qty;
         savings += Math.max(0, (p.mrp || p.finalPrice) - p.finalPrice) * qty;
       }
+      cartCount.textContent = count + ' item' + (count!==1?'s':'');
+      cartTotal.textContent = '₹' + total;
       headerCartCount.textContent = String(count);
       headerCartAmount.textContent = '₹' + total;
+
       if (count>0){
-        headerCartCount.style.display='flex';
-        navCartBadge.style.display='flex';
-        headerCartCount.textContent = count;
-        navCartBadge.textContent = count;
+        cartFooter.style.display='flex';
+        headerCart.classList.add('has-items');
       } else {
-        headerCartCount.style.display='none';
-        navCartBadge.style.display='none';
+        cartFooter.style.display='none';
+        headerCart.classList.remove('has-items');
+        headerCartCount.textContent = '0';
         headerCartAmount.textContent = '₹0';
       }
 
+      // Simple free-delivery banner (no progress bars)
       if (total >= FREE_DELIVERY_THRESHOLD){
         if (!freeUnlocked){
           freeUnlocked = true;
@@ -759,29 +1164,9 @@ const CATEGORIES = [
         freeUnlocked = false;
         deliveryBanner.style.display = 'none';
       }
-      updateSavingsCelebration(savings);
-      // keep product cards in sync with cart state
-      syncCardsWithCart();
-    }
 
-    function syncCardsWithCart(){
-      // ensure each rendered card reflects cart state (used after renderProducts or saveCart)
-      document.querySelectorAll('.card').forEach(card=>{
-        const id = Number(card.dataset.id);
-        const inQty = cart[id] || 0;
-        const addBtn = card.querySelector('.add-pill');
-        const qtyBox = card.querySelector('.qty');
-        const num = qtyBox.querySelector('.num');
-        if (inQty > 0){
-          addBtn.style.display = 'none';
-          qtyBox.style.display = 'flex';
-          num.textContent = inQty;
-        } else {
-          addBtn.style.display = 'inline-flex';
-          qtyBox.style.display = 'none';
-          num.textContent = '1';
-        }
-      });
+      updateSavingsCelebration(savings);
+      updateBottomNavUI();
     }
 
     function updateSavingsCelebration(savings){
@@ -791,42 +1176,74 @@ const CATEGORIES = [
       lastSavings = savings;
     }
 
+    /* ===== Popup ===== */
     function openPopup(id){
       const p = getValidProductById(id);
       if (!p) return;
-      popupProduct = p;
-      popupTitle.textContent = popupProduct.name;
-      popupBody.innerHTML = `
-        <img src="${popupProduct.image}" alt="${popupProduct.name}" loading="lazy">
-        <div class="popup-sub">Net QTY: ${popupProduct.gross} / ${popupProduct.net}</div>
-        <div class="popup-price">
-          <span class="now">₹${popupProduct.finalPrice}</span>
-          ${popupProduct.offer > 0 ? `<span class="offer">${popupProduct.offer}% OFF</span>` : ''}
-          ${popupProduct.mrp > popupProduct.finalPrice ? `<span class="old">₹${popupProduct.mrp}</span>` : ''}
-        </div>
-        <div class="delivery-info" aria-hidden="true"><i class="fas fa-truck" aria-hidden="true"></i> Delivered next day morning</div>
-        <p>${popupProduct.desc}</p>
-      `;
-      lastFocusedElement = document.activeElement;
-      productPopup.style.display='flex';
-      productPopup.setAttribute('aria-hidden','false');
-      document.querySelector('.popup-footer .add').focus();
-      document.body.classList.add('popup-open');
-      if (typeof gtag==='function') gtag('event','open_product_popup',{ item_id:p.id, item_name:p.name });
+      const productCard = document.querySelector(`.card[data-id="${id}"]`);
+      if (productCard) productCard.classList.add('loading');
+      setTimeout(()=>{
+        popupProduct = p;
+        document.getElementById('popupTitle').textContent = popupProduct.name;
+        document.getElementById('popupBody').innerHTML = `
+          <img src="${popupProduct.image}" alt="${popupProduct.name}" loading="lazy">
+          <div class="popup-sub">Net QTY: ${popupProduct.gross} / ${popupProduct.net}</div>
+          <div class="popup-price">
+            <span class="now">₹${popupProduct.finalPrice}</span>
+            ${popupProduct.offer > 0 ? `<span class="offer">${popupProduct.offer}% OFF</span>` : ''}
+            ${popupProduct.mrp > popupProduct.finalPrice ? `<span class="old">₹${popupProduct.mrp}</span>` : ''}
+          </div>
+          <div class="delivery-info"><i class="fas fa-truck"></i> Delivered next day morning</div>
+          <p>${popupProduct.desc}</p>
+        `;
+        document.getElementById('productPopup').style.display='flex';
+        document.body.classList.add('popup-open');
+        if (productCard) productCard.classList.remove('loading');
+      },100);
     }
-    function closePopup(){ productPopup.style.display='none'; productPopup.setAttribute('aria-hidden','true'); document.body.classList.remove('popup-open'); if (lastFocusedElement) lastFocusedElement.focus(); }
+    function closePopup(){
+      document.getElementById('productPopup').style.display='none';
+      document.body.classList.remove('popup-open');
+    }
+    function addPopupToCart(){
+      if (!popupProduct) return;
+      const id = popupProduct.id;
+      const next = Math.min(99, (cart[id]||0) + 1);
+      cart[id] = next;
+      saveCart();
+      showToast('Added to cart!');
+      trackAddToCart(id,1);
 
-    function addPopupToCart(){ if (!popupProduct) return; const id = popupProduct.id; const next = Math.min(99, (cart[id]||0) + 1); cart[id] = next; saveCart(); showToast('Added to cart!'); trackAddToCart(id,1); const card = document.querySelector(`.card[data-id="${id}"]`); if (card){ card.querySelector('.add-pill').style.display='none'; const qtyBox = card.querySelector('.qty'); qtyBox.style.display='flex'; qtyBox.querySelector('.num').textContent = cart[id]; } closePopup(); }
+      // Update UI BEFORE closing popup to avoid race on fast taps
+      const card = document.querySelector(`.card[data-id="${id}"]`);
+      if (card){
+        card.querySelector('.add-pill').style.display='none';
+        const qtyBox = card.querySelector('.qty');
+        qtyBox.style.display='flex';
+        qtyBox.querySelector('.num').textContent = cart[id];
+      }
+      closePopup();
+    }
 
+    /* ===== Cart page ===== */
     function openCart(){
       if (typeof gtag==='function') gtag('event','view_cart',{ currency:'INR', value:calculateCartTotal(), items:getCartItemsForAnalytics() });
-      let orig=0,total=0,savings=0; cartItemsEl.innerHTML = '';
+
+      const cartItemsEl = document.getElementById('cartItems');
+      const originalTotal = document.getElementById('originalTotal');
+      const finalTotal = document.getElementById('finalTotal');
+      const placeTotal = document.getElementById('placeTotal');
+
+      let orig=0,total=0,savings=0;
+      cartItemsEl.innerHTML='';
+
       for (const [id, qty] of Object.entries(cart)){
         const p = getValidProductById(id);
         if (!p) continue;
         const itemOrig = (p.mrp||p.finalPrice) * qty;
         const itemTotal = p.finalPrice * qty;
         orig += itemOrig; total += itemTotal; savings += (itemOrig - itemTotal);
+
         cartItemsEl.innerHTML += `
           <div class="cart-item">
             <img src="${p.image}" alt="${p.name}" loading="lazy">
@@ -834,104 +1251,177 @@ const CATEGORIES = [
               <div class="item-name">${p.name}</div>
               <div class="item-weight">${p.net}</div>
               <div class="quantity-controls">
-                <button class="quantity-btn" data-id="${p.id}" data-action="decrease" aria-label="Decrease quantity">-</button>
+                <button class="quantity-btn" data-id="${p.id}" data-action="decrease">-</button>
                 <span>${qty}</span>
-                <button class="quantity-btn" data-id="${p.id}" data-action="increase" aria-label="Increase quantity">+</button>
+                <button class="quantity-btn" data-id="${p.id}" data-action="increase">+</button>
               </div>
             </div>
             <div class="item-pricing">
               <div class="item-price">₹${itemTotal}</div>
               ${p.mrp>p.finalPrice?`<div class="item-original">₹${itemOrig}</div>`:''}
             </div>
-            <i class="fas fa-trash-alt remove-btn" data-id="${p.id}" role="button" aria-label="Remove item"></i>
+            <i class="fas fa-trash-alt remove-btn" data-id="${p.id}"></i>
           </div>
         `;
       }
+
       originalTotal.textContent = '₹' + orig;
       finalTotal.textContent = '₹' + total;
       placeTotal.textContent = '₹' + total;
       savingsBadge.textContent = 'Saved ₹' + savings;
 
-      if (Object.keys(cart).length === 0){
-        emptyCart.style.display = 'block'; cartItemsEl.style.display = 'none'; orderSummary.style.display = 'none'; deliveryBanner.style.display = 'none'; savingsBadge.style.display = 'none'; placeOrderBtn.style.display = 'none';
+      if (Object.keys(cart).length===0){
+        emptyCart.style.display='block';
+        cartItemsEl.style.display='none';
+        orderSummary.style.display='none';
+        deliveryBanner.style.display='none';
+        savingsBadge.style.display='none';
+        placeOrderBtn.style.display='none';
       } else {
-        emptyCart.style.display = 'none'; cartItemsEl.style.display = 'block'; orderSummary.style.display = 'block'; savingsBadge.style.display = savings>0 ? 'flex':'none'; placeOrderBtn.style.display = 'flex';
+        emptyCart.style.display='none';
+        cartItemsEl.style.display='block';
+        orderSummary.style.display='block';
+        savingsBadge.style.display= savings>0 ? 'flex':'none';
+        placeOrderBtn.style.display='block';
+        // Banner is handled by updateCartUI
       }
 
-      document.querySelectorAll('.quantity-btn').forEach(btn=>{ btn.addEventListener('click', function(){ const id = parseInt(this.dataset.id,10); const action = this.dataset.action; changeQty(id, action === 'increase' ? 1 : -1); }); });
-      document.querySelectorAll('.remove-btn').forEach(btn=>{ btn.addEventListener('click', function(){ const id = parseInt(this.dataset.id,10); removeFromCart(id); }); });
-
-      cartPage.style.display = 'flex'; cartPage.setAttribute('aria-hidden','false'); document.body.classList.add('popup-open');
-      document.querySelector('#cartBack')?.focus();
-    }
-    function closeCart(){ cartPage.style.display = 'none'; cartPage.setAttribute('aria-hidden','true'); document.body.classList.remove('popup-open'); renderProducts(); if (lastFocusedElement) lastFocusedElement.focus(); }
-
-    function calculateCartTotal(){ let total=0; for (const [id, qty] of Object.entries(cart)){ const p = getValidProductById(id); if (!p) continue; total += p.finalPrice * qty; } return total; }
-    function getCartItemsForAnalytics(){ const items=[]; for (const [id, qty] of Object.entries(cart)){ const p = getValidProductById(id); if (!p) continue; items.push({ item_id:p.id, item_name:p.name, item_category:p.category, price:p.finalPrice, quantity:qty }); } return items; }
-    function changeQty(id, delta){ if (!getValidProductById(id)) return; if (cart[id]){ cart[id] = Math.max(0, Math.min(99, cart[id] + delta)); if (cart[id] === 0) delete cart[id]; saveCart(); trackChangeQty(id, delta); const card = document.querySelector(`.card[data-id="${id}"]`); if (card){ const addBtn = card.querySelector('.add-pill'); const qtyBox = card.querySelector('.qty'); const num = qtyBox.querySelector('.num'); const q = cart[id]||0; if (q<=0){ qtyBox.style.display='none'; addBtn.style.display='inline-flex'; } else { qtyBox.style.display='flex'; num.textContent = q; addBtn.style.display='none'; } } if (cartPage.style.display === 'flex') openCart(); } }
-    function removeFromCart(id){ delete cart[id]; saveCart(); if (typeof gtag === 'function'){ const p = getValidProductById(id); if (p) gtag('event','remove_from_cart',{ currency:'INR', value:p.finalPrice, items:[{ item_id:p.id,item_name:p.name,item_category:p.category,price:p.finalPrice }] }); } if (cartPage.style.display === 'flex') openCart(); }
-
-    function shareProduct(){ if (!popupProduct) return; const utmParams = `utm_source=product_share&utm_medium=whatsapp&utm_campaign=product_referral&utm_content=product_${popupProduct.id}`; const shareUrl = `https://www.coastalfresh.in?${utmParams}`; const message = `Check out this ${popupProduct.name} from Coastal Fresh! ${popupProduct.desc.substring(0, 100)}... ${shareUrl}`; const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`; if (typeof gtag==='function') gtag('event','share',{ method:'WhatsApp', content_type:'product', item_id:String(popupProduct.id) }); window.open(whatsappUrl,'_blank','noopener'); }
-
-    function placeOrder(){ if (Object.keys(cart).length===0){ showToast('Your cart is empty!'); return; } if (typeof gtag==='function'){ gtag('event','begin_checkout',{ currency:'INR', value:calculateCartTotal(), items:getCartItemsForAnalytics() }); gtag('event','click',{ location:'checkout_cta', link_text:'Place Order (WhatsApp)', link_url:'https://wa.me/919985125678' }); }
-      let lines = ["Hi Coastal Fresh,","","I would like to order:",""]; let total=0,origTotal=0; for (const [id, qty] of Object.entries(cart)){ const p = getValidProductById(id); if(!p) continue; const itemTotal = p.finalPrice * qty; const itemOrig = (p.mrp||p.finalPrice) * qty; total += itemTotal; origTotal += itemOrig; lines.push(`- ${p.name} (${p.net}) x ${qty} = ₹${itemTotal}`); }
-      const savings = origTotal - total; lines.push("","Total: ₹"+total); if (savings>0) lines.push(`You saved: ₹${savings}`); lines.push("","Please confirm availability and delivery timing."); const url = `https://wa.me/919985125678?text=${encodeURIComponent(lines.join('\n'))}`; trackWhatsappClick('checkout_whatsapp'); window.open(url,'_blank','noopener'); }
-
-    function showToast(message){ toastMessage.textContent = message; toast.setAttribute('aria-hidden','false'); toast.classList.add('show'); setTimeout(()=>{ toast.classList.remove('show'); toast.setAttribute('aria-hidden','true'); }, 1800); }
-
-    function generateProductSchema(){
-      try{
-        // ItemList & Products
-        const itemList = {
-          "@context":"https://schema.org",
-          "@type":"ItemList",
-          "itemListElement": products.map((p, idx) => ({
-            "@type":"ListItem","position": idx+1,
-            "url":`https://www.coastalfresh.in/?product=${p.id}`,
-            "name": p.name
-          }))
-        };
-        const sItem = document.createElement('script'); sItem.type='application/ld+json'; sItem.textContent = JSON.stringify(itemList); document.head.appendChild(sItem);
-
-        products.forEach(product => {
-          const schema = {
-            "@context":"https://schema.org",
-            "@type":"Product",
-            "name": product.name,
-            "image": [product.image],
-            "description": product.desc,
-            "sku": String(product.id),
-            "brand": {"@type":"Brand","name":"Coastal Fresh"},
-            "offers": {
-              "@type":"Offer",
-              "url":"https://www.coastalfresh.in/",
-              "priceCurrency":"INR",
-              "price": product.finalPrice,
-              "priceValidUntil": new Date(Date.now()+30*24*60*60*1000).toISOString().split('T')[0],
-              "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-              "itemCondition":"https://schema.org/NewCondition"
-            }
-          };
-          const s=document.createElement('script');s.type='application/ld+json';s.textContent=JSON.stringify(schema);document.head.appendChild(s);
+      document.querySelectorAll('.quantity-btn').forEach(btn=>{
+        btn.addEventListener('click',function(){
+          const id = parseInt(this.dataset.id,10);
+          const action = this.dataset.action;
+          changeQty(id, action==='increase'?1:-1);
         });
-      }catch(e){ console.warn('schema error', e); }
+      });
+      document.querySelectorAll('.remove-btn').forEach(btn=>{
+        btn.addEventListener('click',function(){
+          const id = parseInt(this.dataset.id,10);
+          removeFromCart(id);
+        });
+      });
+
+      document.getElementById('cartPage').style.display='flex';
+      document.body.classList.add('popup-open');
+    }
+    function closeCart(){
+      document.getElementById('cartPage').style.display='none';
+      document.body.classList.remove('popup-open');
+      renderProducts(); // sync qty pills
+    }
+    function calculateCartTotal(){
+      let total=0;
+      for (const [id, qty] of Object.entries(cart)){
+        const p = getValidProductById(id);
+        if (!p) continue;
+        total += p.finalPrice * qty;
+      }
+      return total;
+    }
+    function getCartItemsForAnalytics(){
+      const items=[];
+      for (const [id, qty] of Object.entries(cart)){
+        const p = getValidProductById(id);
+        if (!p) continue;
+        items.push({ item_id:p.id, item_name:p.name, item_category:p.category, price:p.finalPrice, quantity:qty });
+      }
+      return items;
+    }
+    function changeQty(id, delta){
+      if (!getValidProductById(id)) return;
+      if (cart[id]){
+        cart[id] = Math.max(0, Math.min(99, cart[id] + delta));
+        if (cart[id] === 0) delete cart[id];
+        saveCart();
+        trackChangeQty(id, delta);
+        const card = document.querySelector(`.card[data-id="${id}"]`);
+        if (card){
+          const addBtn = card.querySelector('.add-pill');
+          const qtyBox = card.querySelector('.qty');
+          const num = qtyBox.querySelector('.num');
+          const q = cart[id]||0;
+          if (q<=0){ qtyBox.style.display='none'; addBtn.style.display='inline-flex'; }
+          else { qtyBox.style.display='flex'; num.textContent = q; addBtn.style.display='none'; }
+        }
+        if (document.getElementById('cartPage').style.display==='flex') openCart();
+      }
+    }
+    function removeFromCart(id){
+      delete cart[id];
+      saveCart();
+      if (typeof gtag==='function'){
+        const p = getValidProductById(id);
+        if (p) gtag('event','remove_from_cart',{ currency:'INR', value:p.finalPrice, items:[{ item_id:p.id,item_name:p.name,item_category:p.category,price:p.finalPrice }] });
+      }
+      if (document.getElementById('cartPage').style.display==='flex') openCart();
     }
 
-    function trackAddToCart(id, qty){ const p = getValidProductById(id); if (!p || typeof gtag!=='function') return; gtag('event','add_to_cart',{ currency:'INR', value:p.finalPrice*qty, items:[{ item_id:p.id,item_name:p.name,item_category:p.category,price:p.finalPrice,quantity:qty }] }); }
-    function trackChangeQty(id, delta){ const p = getValidProductById(id); if (!p || typeof gtag!=='function') return; gtag('event','change_cart_quantity',{ change:delta, item_id:p.id, item_name:p.name, item_category:p.category, price:p.finalPrice, quantity: cart[id]||0 }); }
-    function trackWhatsappClick(location){
-      if (typeof gtag==='function') gtag('event','whatsapp_click',{ location, link_url:'https://wa.me/919985125678' });
+    /* ===== Share product ===== */
+    function shareProduct(){
+      if (!popupProduct) return;
+      const utmParams = `utm_source=product_share&utm_medium=whatsapp&utm_campaign=product_referral&utm_content=product_${popupProduct.id}`;
+      const shareUrl = `https://www.coastalfresh.in?${utmParams}`;
+      const message = `Check out this ${popupProduct.name} from Coastal Fresh! ${popupProduct.desc.substring(0, 100)}... ${shareUrl}`;
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      if (typeof gtag==='function') gtag('event','share',{ method:'WhatsApp', content_type:'product', item_id:String(popupProduct.id) });
+      window.open(whatsappUrl,'_blank');
     }
 
-    function openWhatsApp(){ trackWhatsappClick('floating_button'); window.open('https://wa.me/919985125678?text=Hi%2C%20I%20need%20help%20with%20my%20order','_blank','noopener'); }
+    /* ===== Place order (WhatsApp) ===== */
+    function placeOrder(){
+      if (Object.keys(cart).length===0){ showToast('Your cart is empty!'); return; }
+      if (typeof gtag==='function'){
+        gtag('event','begin_checkout',{ currency:'INR', value:calculateCartTotal(), items:getCartItemsForAnalytics() });
+        gtag('event','click',{ location:'checkout_cta', link_text:'Place Order (WhatsApp)', link_url:'https://wa.me/919985125678' });
+      }
+      let lines = ["Hi Coastal Fresh,","","I would like to order:",""];
+      let total=0,origTotal=0;
+      for (const [id, qty] of Object.entries(cart)){
+        const p = getValidProductById(id); if(!p) continue;
+        const itemTotal = p.finalPrice * qty;
+        const itemOrig = (p.mrp||p.finalPrice) * qty;
+        total += itemTotal; origTotal += itemOrig;
+        lines.push(`- ${p.name} (${p.net}) x ${qty} = ₹${itemTotal}`);
+      }
+      const savings = origTotal - total;
+      lines.push("","Total: ₹"+total);
+      if (savings>0) lines.push(`You saved: ₹${savings}`);
+      lines.push("","Please confirm availability and delivery timing.");
+      const url = `https://wa.me/919985125678?text=${encodeURIComponent(lines.join('\n'))}`;
+      window.open(url,'_blank');
+    }
+
+    /* ===== Toast ===== */
+    function showToast(message){
+      toastMessage.textContent = message;
+      toast.classList.add('show');
+      setTimeout(()=>toast.classList.remove('show'), 1800);
+    }
+
+    /* ===== Product schema (limited) ===== */
+    function generateProductSchema(){
+      const productSchemas = products.map(product => ({
+        "@context":"https://schema.org/","@type":"Product",
+        "name":product.name,"image":product.image,"description":product.desc,
+        "offers":{"@type":"Offer","url":"https://www.coastalfresh.in/","priceCurrency":"INR","price":product.finalPrice,
+          "priceValidUntil":new Date(Date.now()+30*24*60*60*1000).toISOString().split('T')[0],
+          "availability":product.available?"https://schema.org/InStock":"https://schema.org/OutOfStock","itemCondition":"https://schema.org/NewCondition"}
+      }));
+      productSchemas.slice(0,5).forEach(schema=>{
+        const s=document.createElement('script');s.type='application/ld+json';s.textContent=JSON.stringify(schema);document.head.appendChild(s);
+      });
+    }
+
+    /* ===== Analytics helpers ===== */
+    function trackAddToCart(id, qty){
+      const p = getValidProductById(id);
+      if (!p || typeof gtag!=='function') return;
+      gtag('event','add_to_cart',{ currency:'INR', value:p.finalPrice*qty, items:[{ item_id:p.id,item_name:p.name,item_category:p.category,price:p.finalPrice,quantity:qty }] });
+    }
+    function trackChangeQty(id, delta){
+      const p = getValidProductById(id);
+      if (!p || typeof gtag!=='function') return;
+      gtag('event','change_cart_quantity',{ change:delta, item_id:p.id, item_name:p.name, item_category:p.category, price:p.finalPrice, quantity: cart[id]||0 });
+    }
   </script>
-
-  <noscript>
-    <div style="padding:12px;background:#fff4e5;color:#333;text-align:center;border-top:1px solid #f0e6d8;">
-      JavaScript is required for the full ordering experience. Call or WhatsApp us at +91 99851 25678 to place your order.
-    </div>
-  </noscript>
 </body>
 </html>
-
-  
