@@ -89,15 +89,29 @@
   .search-input::placeholder{color:rgba(255,255,255,0.9)}
   .search-input:focus{outline:none;border-color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.15)}
   .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:rgba(255,255,255,0.9);pointer-events:none}
-  .cart-btn{position:relative;background:none;border:none;padding:8px;color:#fff;cursor:pointer;border-radius:8px}
+
+  /* improved cart icon wrapper */
+  .cart-btn{position:relative;background:none;border:none;padding:6px;color:#fff;cursor:pointer;border-radius:10px;display:inline-flex;align-items:center;justify-content:center}
   .cart-btn:hover{background:rgba(255,255,255,0.06)}
-  .cart-badge{position:absolute;top:6px;right:6px;background:#fff;color:var(--logo-text);font-size:10px;font-weight:800;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+  .cart-icon-wrap{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center}
+  .cart-icon-wrap svg{width:22px;height:22px}
+  .cart-badge{position:absolute;top:-4px;right:-4px;background:#fff;color:var(--logo-text);font-size:11px;font-weight:800;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 8px rgba(0,0,0,.12)}
+  /* end improved cart */
+
+  /* loader */
+  .loader-wrap{display:flex;align-items:center;justify-content:center;padding:40px 0;grid-column:1/-1}
+  .loader{
+    width:36px;height:36px;border-radius:50%;border:4px solid rgba(255,255,255,0.2);border-top-color:rgba(10,172,224,0.98);animation:spin .9s linear infinite;background:transparent;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
   .ticker-container{position:sticky;top:var(--header-height);z-index:119;background:linear-gradient(90deg,var(--logo-text),#2563eb);color:#fff;padding:8px 0;overflow:hidden}
-  .ticker{display:flex;white-space:nowrap;animation:ticker-scroll 30s linear infinite}
+  /* faster ticker: 12s loop */
+  .ticker{display:flex;white-space:nowrap;animation:ticker-scroll 12s linear infinite}
   .ticker-item{display:flex;align-items:center;padding:0 16px;font-size:14px;font-weight:700}
   .ticker-container:hover .ticker{animation-play-state:paused}
   @keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-  .tabs{display:flex; gap:12px; overflow:auto hidden; padding:8px 4px 6px; position:sticky; top:calc(var(--header-height) + 40px); z-index:5;background:linear-gradient(#fff,#fff); border-bottom:1px solid var(--line);}
+    .tabs{display:flex; gap:12px; overflow:auto hidden; padding:8px 4px 6px; position:sticky; top:calc(var(--header-height) + 40px); z-index:5;background:linear-gradient(#fff,#fff); border-bottom:1px solid var(--line);}
   .tab{flex:0 0 auto; display:flex; align-items:center; gap:8px; padding:10px 2px 12px; color:var(--sub); font-weight:700; font-size:14px; position:relative}
   .tab img.icon{width:20px;height:20px;border-radius:6px;object-fit:cover}
   .tab[aria-current="page"]{color:var(--logo-text)}
@@ -112,12 +126,16 @@
   .qty{position:absolute; right:8px; bottom:8px; display:none; align-items:center; gap:8px; background:#fff;border-radius:999px;padding:4px 6px; box-shadow:0 4px 10px rgba(0,0,0,.06)}
   .qty button{width:28px;height:28px;border-radius:999px;border:2px solid var(--logo-text);background:#fff;color:var(--logo-text);font-weight:900;font-size:16px;line-height:0;cursor:pointer}
   .qty .num{min-width:16px;text-align:center;font-weight:800}
-  .price-row{display:flex;align-items:baseline;gap:6px;margin-top:6px}
-  .price-now{font-weight:900;font-size:14px}
+
+  /* layout tweak — show name first, then price & offer, then meta */
+  .card .name{margin-top:4px;font-size:14px;font-weight:800;line-height:1.2}
+  .price-row{display:flex;align-items:baseline;gap:8px;margin-top:8px}
+  .price-now{font-weight:900;font-size:16px}
   .price-mrp{color:var(--mrp);text-decoration:line-through;font-size:12px}
-  .save{color:var(--save);font-size:12px;font-weight:800;margin-top:2px}
-  .meta{font-size:12px;color:var(--sub);margin-top:4px}
-  .name{margin-top:4px;font-size:12px;font-weight:700;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .offer-badge{background:#ffefdb;color:#b45309;font-weight:800;font-size:12px;padding:4px 8px;border-radius:8px}
+  .save{color:var(--save);font-size:12px;font-weight:800;margin-top:4px}
+  .meta{font-size:12px;color:var(--sub);margin-top:6px}
+
   .carousel{margin:12px 0 6px;overflow:hidden;border-radius:12px;position:relative;height:150px}
   .slides{display:flex;transition:transform .5s ease;height:100%}
   .slide{min-width:100%;height:100%;background-size:cover;background-position:center}
@@ -128,7 +146,7 @@
   .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:var(--sub);font-size:11px;font-weight:600;gap:4px;padding:8px 4px;position:relative}
   .nav-item.active{color:var(--logo-text)}
   .nav-item svg{width:22px;height:22px}
-  .nav-badge{position:absolute;top:6px;right:50%;transform:translateX(50%);background:var(--save);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:-8px}
+  .nav-badge{position:absolute;top:8px;right:20%;background:var(--save);color:#fff;font-size:9px;font-weight:800;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:-8px}
   .whatsapp-float{position:fixed;bottom:85px;right:16px;z-index:115;width:56px;height:56px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(37,211,102,.3);text-decoration:none;transition:transform .12s ease}
   .whatsapp-float:hover{transform:scale(1.05)}
   .whatsapp-float svg{width:30px;height:30px;color:#fff}
@@ -184,8 +202,8 @@
   .show-more-btn:hover{transform:translateY(-3px);box-shadow:0 18px 34px rgba(10,172,224,.18)}
   .show-more-btn.hidden{display:none !important}
   @media (max-width:360px){
-    .name{font-size:11px}
-    .price-now{font-size:13px}
+    .name{font-size:13px}
+    .price-now{font-size:14px}
     .logo{font-size:16px;}
     .search-input{padding:8px 14px 8px 36px;font-size:13px;}
     .show-more-btn{font-size:14px;padding:12px 16px;max-width:320px}
@@ -206,8 +224,17 @@
       <input id="searchInput" class="search-input" placeholder="Search products..." type="text" aria-label="Search products" />
     </div>
 
+    <!-- removed header call/support button as requested -> only cart in header -->
+    <!-- improved header cart -->
     <div id="headerCart" class="cart-btn" aria-label="Open cart" title="Open cart" role="button" tabindex="0">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-6m8 0V9a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4.01" stroke="currentColor" stroke-width="1.6"/></svg>
+      <span class="cart-icon-wrap" aria-hidden="true">
+        <!-- improved cart/basket SVG -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+          <path d="M6 6h15l-1.5 9.5a2 2 0 0 1-2 1.5H9a2 2 0 0 1-2-1.5L5 3H3"></path>
+          <circle cx="10" cy="20" r="1"></circle>
+          <circle cx="18" cy="20" r="1"></circle>
+        </svg>
+      </span>
       <span id="headerCartCount" class="cart-badge" style="display:none">0</span>
       <div style="display:none" id="headerCartAmount">₹0</div>
     </div>
@@ -218,8 +245,9 @@
       <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
       <div class="ticker-item">🐟 100% Hygienic Cleaning – Ready to Cook in Minutes</div>
       <div class="ticker-item">🚚 Free delivery on orders above ₹1500</div>
-      <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
       <div class="ticker-item">🧊 Freshly packed — Cold chain maintained</div>
+      <!-- duplicate content intentionally reduced so the loop is smooth -->
+      <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
       <div class="ticker-item">🚚 Free delivery on orders above ₹1500</div>
     </div>
   </div>
@@ -231,7 +259,7 @@
         <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png')" aria-hidden="true"></div>
         <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756388255/Coastal_Fresh_Banner_3_wqpv8c.png')" aria-hidden="true"></div>
       </div>
-      <div class="carousel-indicators" id="carouselIndicators"></div>
+      <div class="carousel-indicators" id="carouselIndicators" role="tablist" aria-label="Carousel indicators"></div>
     </div>
 
     <nav class="tabs" id="categoryTabs" aria-label="Categories"></nav>
@@ -257,16 +285,21 @@
       Search
     </a>
     <a class="nav-item" href="#" id="navCartBtn">
-      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17M17 13v6a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-6m8 0V9a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4.01" stroke="currentColor" stroke-width="2"/></svg>
+      <!-- bottom nav cart (keeps same shape as header) -->
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 6h15l-1.5 9.5a2 2 0 0 1-2 1.5H9a2 2 0 0 1-2-1.5L5 3H3"></path>
+        <circle cx="10" cy="20" r="1"></circle>
+        <circle cx="18" cy="20" r="1"></circle>
+      </svg>
       <span class="nav-badge" id="navCartBadge" style="display:none">0</span>
       Cart
     </a>
-    <a class="nav-item" href="#" onclick="openWhatsApp()" id="navChat">
+    <a class="nav-item" href="#" onclick="openWhatsApp()" id="navChat" aria-label="WhatsApp">
+      <!-- replaced chat svg with WhatsApp -->
       <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg>
-      Chat
+      WhatsApp
     </a>
   </nav>
-
   <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true" aria-hidden="true"><i class="fas fa-check-circle" aria-hidden="true"></i><span class="toast-message"></span></div>
 
   <div class="product-popup" id="productPopup" role="dialog" aria-modal="true" aria-hidden="true">
@@ -343,7 +376,7 @@
       { id:7, name:"Kanagadathalu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Kanagadathal_lvwazy.jpg", mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Kanagadathalu fish delivery – coastal classic with versatile flavor. Suited for curry, grills, or fry. Responsibly sourced and delivered fresh by Coastal Fresh in Hyderabad." },
       { id:8, name:"Vanjaram (Seer)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Vanjara_ikhy6c.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy Vanjaram Seer Fish in Hyderabad – king of South Indian seafood with boneless cuts, rich taste, and firm flesh. Ideal for fry or curry. Packed fresh and delivered next day." },
       { id:9, name:"Nettallu (Anchovies)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/Nethallu_rckaaj.png", mrp:300, finalPrice:270, offer:10, gross:"1000g", net:"800g", available:true, category:"Fish", desc:"Anchovies (Nettallu) online – tiny fish with bold taste. Excellent for crispy fry, chutneys, or tamarind curry. Calcium and omega-3 rich, delivered fresh in Hyderabad." },
-      { id:10, name:"Katte Parigelu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Katte_Parigelu_lnxp73.png", mrp:400, finalPrice:360, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Katte Parigelu fish delivery – tasty, tender, and ready-to-cook. Suited for coastal curries and deep-fry recipes. Fresh catch delivered to your Hyderabad doorstep." },
+      { id:10, name:"Katte Parigelu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/Katte_Parigelu_lnxp73.png", mrp:400, finalPrice:360, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Katte Parigelu fish delivery – tasty, tender, and ready-to-cook. Suited for coastal curries and deep-fry recipes. Fresh catch delivered to your Hyderabad doorstep." },
       { id:11, name:"Rohu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rohu_ctixmk.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy Rohu fish online in Hyderabad – freshwater favorite with mild taste. Perfect for Bengali or Andhra curries, fry, or homely meals. Packed hygienically for freshness." },
       { id:12, name:"Rupchand", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rupchand_Fish_woqmzz.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Rupchand fish in Hyderabad – affordable, mild-flavored, and versatile. Ideal for everyday curries or fry dishes. Fresh catch, cleaned and delivered across the city." },
       { id:13, name:"Catla", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Catla_-_Fish_tjb5hr.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Catla fish delivery in Hyderabad – freshwater fish with large cuts and tasty flesh. Popular for Andhra fish curry, fry, or homestyle meals. Hygienically processed and packed." },
@@ -353,17 +386,10 @@
       { id:17, name:"Sea Tiger Prawns - 60C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Tiger_Prawns_nfswwk.png", mrp:550, finalPrice:550, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Sea Tiger Prawns 60-count – smaller size, big on flavor. Perfect for masala curry, fried rice, or snacks. Cleaned and delivered hygienically in Hyderabad." },
       { id:18, name:"Chakuroyya / Godavari", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Godavari Chakuroyya freshwater prawns – authentic Andhra taste with sweet flavor. Perfect for traditional prawn curry or fry. Delivered fresh and cleaned in Hyderabad." },
       { id:19, name:"Freshwater Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577560/Freshwater_-_S_fj7h5q.jpg", mrp:380, finalPrice:380, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Small Freshwater Prawns – affordable, cleaned, and ready to cook. Great for prawn fry, biryani, or curries. Fresh from farms, delivered across Hyderabad." },
-      { id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577554/Fresh_Water_Prawns_-_M_lpvxiu.png", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium Freshwater Prawns – balanced size, firm flesh, and great for grills, curries, or pasta. Hygienically cleaned and delivered ice-fresh in Hyderabad." },
-      { id:21, name:"Freshwater Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/fresh_watre_prawns_-_L_h5fyn9.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Large Freshwater Prawns – premium size, juicy texture, and perfect for butter garlic, grills, or party dishes. Farm fresh and delivered across Hyderabad." },
-      { id:22, name:"Live Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:1000, finalPrice:1000, offer:0, gross:"1000g", net:"800g", available:true, category:"Crabs", desc:"Buy Live Crab in Hyderabad – delivered live, ensuring top freshness. Sweet meat, great for masala, curry, or steam. Hygienically packed and farm-sourced." },
-      { id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:900, finalPrice:900, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Egg Crab delivery – crabs with roe (eggs) for rich, creamy flavor. Popular in traditional Andhra crab curry. Fresh, sweet meat delivered hygienically across Hyderabad." },
-      { id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577552/Blue_Crab_tzjkxm.png", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Fresh Blue Crab delivery – delicate, sweet meat, smaller in size but packed with flavor. Great for curry, soups, and stir-fries. Delivered ice-packed in Hyderabad." },
-      { id:25, name:"Manda Pitha", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:600, finalPrice:600, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Manda Pitha crab – Godavari special variety, highly flavorful and tender. Ideal for spicy masala curries. Freshly sourced and delivered to Hyderabad homes." },
-      { id:26, name:"3 Dot Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png", mrp:500, finalPrice:500, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"3 Dot Crab delivery – unique shell markings, soft meat, and sweet taste. Perfect for fry or curry recipes. Delivered fresh and cleaned in Hyderabad." },
-      { id:27, name:"Prawns Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1900, finalPrice:1710, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra Prawns Pickle – made with fresh prawns, cold-pressed oil, and stone-ground spices. Spicy, tangy, and preservative-free. Delivered across Hyderabad." },
-      { id:28, name:"Chicken Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1500, finalPrice:1500, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra-style Chicken Pickle made with fresh cuts and bold spices. Packed with traditional flavor." }
+      { id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577554/Fresh_Water_Prawns_-_M_lpvxiu.png", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium Freshwater Prawns – balanced size, firm flesh, and great for grills, curries, or pasta. Hygienically cleaned and delivered ice-fresh in Hyderabad." }
     ];
 
+    /* ===== state ===== */
     let cart = Object.create(null);
     let popupProduct = null;
     let itemsPerPage = 8;
@@ -374,7 +400,9 @@
     let lastSavings = 0;
     let freeUnlocked = false;
     let lastFocusedElement = null;
+    let toastTimer = null;
 
+    /* ===== elements ===== */
     const productGrid = document.getElementById('productGrid');
     const categoryTabs = document.getElementById('categoryTabs');
     const showMoreBtn = document.getElementById('showMoreBtn');
@@ -403,7 +431,8 @@
     const finalTotal = document.getElementById('finalTotal');
     const placeTotal = document.getElementById('placeTotal');
 
-    const CATEGORIES = [
+    const whatsappSupportBtn = document.getElementById('whatsappSupport'); // null now (guarded usage)
+const CATEGORIES = [
       { key: 'All',    label: 'All',    icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/shopping_yblohc.png' },
       { key: 'Fish',   label: 'Fish',   icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/food_yircgb.png' },
       { key: 'Prawns', label: 'Prawns', icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005093/shrimp_1_yzblqb.png' },
@@ -904,3 +933,5 @@
   </noscript>
 </body>
 </html>
+
+  
