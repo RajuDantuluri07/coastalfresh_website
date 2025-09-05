@@ -1,4 +1,4 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -10,6 +10,17 @@
   <link rel="preconnect" href="https://www.googletagmanager.com">
   <link rel="preconnect" href="https://static.hotjar.com">
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Google Fonts (fallback) -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Preload (remote example and local fonts) -->
+  <link rel="preload" href="https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxM.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/roboto-300.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/roboto-400.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/roboto-500.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/roboto-700.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- SEO -->
   <meta name="description" content="Order premium fresh seafood and authentic pickles in Hyderabad. Fresh fish, tiger prawns, crabs, and traditional pickles with next-day delivery. Trusted local sourcing from Coastal Andhra Pradesh." />
@@ -107,6 +118,60 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <style>
+    /* ===== Roboto self-hosted @font-face + root font token ===== */
+    :root {
+      --font-sans: "Roboto", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    @font-face{
+      font-family: "Roboto";
+      font-style: normal;
+      font-weight: 300;
+      font-display: swap;
+      src: url("/fonts/roboto-300.woff2") format("woff2");
+    }
+    @font-face{
+      font-family: "Roboto";
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url("/fonts/roboto-400.woff2") format("woff2");
+    }
+    @font-face{
+      font-family: "Roboto";
+      font-style: normal;
+      font-weight: 500;
+      font-display: swap;
+      src: url("/fonts/roboto-500.woff2") format("woff2");
+    }
+    @font-face{
+      font-family: "Roboto";
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url("/fonts/roboto-700.woff2") format("woff2");
+    }
+
+    /* Base using Roboto */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html, body {
+      font-family: var(--font-sans);
+      font-weight: 400;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      background:var(--bg, #f7f9fc);
+      color:var(--ink, #1b2430);
+      line-height:1.6;
+    }
+
+    h1, h2, h3, .btn, .amount {
+      font-weight: 500;
+    }
+    h1 { font-size: 2rem; line-height: 1.15; }
+    h2 { font-size: 1.5rem; line-height: 1.2; }
+    p { font-size: 0.95rem; line-height: 1.45; }
+    .amount { font-weight: 700; letter-spacing: 0.2px; }
+
     /* ===== Brand tokens & base ===== */
     :root{
       --brand:#1976ff;
@@ -121,8 +186,8 @@
       --desktop-bg-image:none;
       --cta-grad: linear-gradient(135deg,#1e40af 0%,#3b82f6 100%);
     }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6}
+
+    body{background:var(--bg);color:var(--ink)}
     a{text-decoration:none;color:inherit}
     img{max-width:100%;display:block}
 
@@ -294,9 +359,7 @@
     /* Sections (brief) */
     .section{padding:30px 16px}
     .section h2{font-size:22px;text-align:center;margin-bottom:20px;color:#1e40af}
-    .why-choose{padding:24px 16px;background:linear-gradient(135deg,#e0f2fe 0%, #f0f9ff 100%);position:relative;overflow:hidden}
-    .why-grid{display:flex;gap:8px}
-    .why-item{flex:1;background:#fff;padding:16px 12px;border-radius:16px;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,.08);border:1px solid rgba(59,130,246,.1)}
+
     .faq-wrap{padding:32px 16px;background:linear-gradient(135deg,#e0f2fe 0%, #f0f9ff 100%)}
     .faq{background:#fff;border-radius:16px;margin-bottom:12px;box-shadow:0 4px 20px rgba(0,0,0,.08);border:1px solid rgba(59,130,246,.1);overflow:hidden}
     .q{width:100%;background:none;border:none;padding:16px 20px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:#1e40af}
@@ -447,31 +510,13 @@
       <button class="show-more-btn hidden" id="showMoreBtn" type="button">Show more products</button>
     </div>
 
-    <!-- Refer & Earn Banner -->
-    <div class="refer-banner" id="referBanner" role="button" aria-label="Refer and Earn">
-      <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756885955/refer_earn_1_nguvrb.jpg" alt="Refer and Earn - Get ₹200 off when you refer a friend">
-    </div>
-
-    <!-- Why Choose -->
-    <section class="why-choose">
-      <div class="header-section">
-        <h2>Why Choose Coastal Fresh?</h2>
-        <p class="trust-line">Trusted by 500+ families across Hyderabad</p>
-      </div>
-      <div class="why-grid">
-        <div class="why-item"><div class="why-icon">🏆</div><h3>20+ Years Heritage</h3><p>Generations of expertise in premium seafood Industry</p></div>
-        <div class="why-item"><div class="why-icon">✨</div><h3>Fresh & Certified</h3><p>Hygienically processed with 100% freshness guarantee</p></div>
-        <div class="why-item"><div class="why-icon">🚀</div><h3>Fast Delivery</h3><p>Next-day delivery across Hyderabad</p></div>
-      </div>
-    </section>
-
-   <!-- FAQ -->
+    <!-- FAQ -->
     <section class="section faq-wrap" id="faq">
       <div class="faq-header">
         <h2>Frequently Asked Questions</h2>
         <p class="faq-subtitle">Everything you need to know about fresh seafood delivery</p>
       </div>
-      
+
       <div class="faq-list">
         <div class="faq" data-priority="high">
           <button class="q" onclick="toggleFAQ(this)">
@@ -744,7 +789,6 @@
     const headerCartAmount = document.getElementById('headerCartAmount');
     const headerCart = document.getElementById('headerCart');
     const searchInput = document.getElementById('searchInput');
-    const referBanner = document.getElementById('referBanner');
     const emptyCart = document.getElementById('emptyCart');
     const cartItems = document.getElementById('cartItems');
     const orderSummary = document.getElementById('orderSummary');
@@ -817,14 +861,6 @@
       navRefer.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('refer'); });
       navSupport.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('support'); });
 
-      // Refer & Earn
-      referBanner.addEventListener('click', function() {
-        const message = "Hey! I've been ordering fresh seafood from Coastal Fresh 🐟🦐 – super clean, tasty & delivered right to my home in Hyderabad! You should try it too 👉 https://bit.ly/coastalfresh";
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-        if (typeof gtag === 'function') gtag('event', 'select_promotion', { promotion_id: 'refer_earn_1', promotion_name: 'Refer & Earn Banner' });
-        window.open(whatsappUrl, '_blank');
-      });
-
       // Auto-open first FAQ for engagement
       setTimeout(() => {
         const firstFAQ = document.querySelector('.faq[data-priority="high"]');
@@ -854,7 +890,7 @@
       }
       if (key === 'refer') {
         navRefer.classList.add('active');
-        // open the refer share flow (same as referBanner)
+        // open the refer share flow
         const message = "Hey! I've been ordering fresh seafood from Coastal Fresh 🐟🦐 – super clean, tasty & delivered right to my home in Hyderabad! You should try it too 👉 https://bit.ly/coastalfresh";
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
@@ -865,7 +901,6 @@
         const supportNumber = '+919985125678';
         const supportMsg = encodeURIComponent('Hello Coastal Fresh, I need help with my order/support.');
         const waLink = `https://wa.me/919985125678?text=${supportMsg}`;
-        // prefer WhatsApp chat
         window.open(waLink, '_blank');
       }
     }
