@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Coastal Fresh - Premium Seafood Delivery in Hyderabad | Fresh Fish, Prawns & Pickles</title>
+  <title>Fresh Fish & Prawns — Coastal Fresh | Hyderabad Delivery</title>
+  <meta name="description" content="Order premium fresh fish, prawns, crabs & authentic Andhra pickles in Hyderabad. Hygienically cleaned, packed & next-day delivery across the city." />
+
 
   <!-- Preconnects -->
   <link rel="preconnect" href="https://res.cloudinary.com">
@@ -36,7 +38,7 @@
   <meta property="og:title" content="Coastal Fresh | Buy Fresh Fish, Prawns, Crabs & Pickles in Hyderabad" />
   <meta property="og:description" content="Fresh Premium seafood and authentic pickles delivered next-day across Hyderabad. Hygienic cleaning, careful packing, and responsible sourcing." />
   <meta property="og:url" content="https://www.coastalfresh.in" />
-  <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" />
+  <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1757139649/refer_eran_whats_app_ryhhmi.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -251,7 +253,7 @@
     /* ===== Tabs (categories) with PNG icons ===== */
     .container{max-width:440px;margin:0 auto;padding:12px}
     .tabs{display:flex;gap:18px;overflow:auto hidden;padding:8px 4px 6px;position:sticky;top:0;z-index:5;background:linear-gradient(#fff,#fff);border-bottom:1px solid var(--line)}
-    .tab{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:10px 2px 12px;color:#4b5563;text-decoration:none;font-weight:700;font-size:14px;position:relative;white-space:nowrap}
+    .tab{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:10px 2px 12px;color:#4b5563;text-decoration:none;font-weight:700;font-size:14px;position:relative;white-space:nowrap;background:transparent;border:none;cursor:pointer}
     .tab img.icon{width:20px;height:20px;border-radius:6px;object-fit:cover;box-shadow:0 0 0 1px #e5e7eb}
     .tab[aria-current="page"]{color:var(--brand)}
     .tab[aria-current="page"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px;background:var(--brand)}
@@ -933,23 +935,23 @@
       });
     }
 
-    /* ===== Tabs render/handlers (with PNG icons) ===== */
+    /* ===== Tabs render/handlers (changed to buttons to avoid anchor jumps) ===== */
     function renderCategoryTabs(){
       categoryTabs.innerHTML = CATEGORIES.map(cat => `
-        <a class="tab" href="#" data-category="${cat.key}" ${cat.key==='All'?'aria-current="page"':''}>
+        <button class="tab" type="button" data-category="${cat.key}" ${cat.key==='All'?'aria-current="page"':''}>
           <img class="icon" src="${cat.icon}" alt="${cat.label} icon" loading="lazy" width="20" height="20"/> ${cat.label}
-        </a>
+        </button>
       `).join('');
     }
     function onTabClick(e){
-      const a = e.target.closest('.tab');
-      if (!a) return;
-      e.preventDefault();
-      const cat = a.dataset.category;
+      const btn = e.target.closest('.tab');
+      if (!btn) return;
+      // don't call preventDefault for buttons
+      const cat = btn.dataset.category;
       filterCategory(cat);
       if (typeof gtag==='function') gtag('event','select_category',{ category:cat });
       categoryTabs.querySelectorAll('.tab').forEach(t=>t.removeAttribute('aria-current'));
-      a.setAttribute('aria-current','page');
+      btn.setAttribute('aria-current','page');
     }
 
     /* ===== Search & Typewriter ===== */
@@ -1107,21 +1109,19 @@
     }
 
     function showMore(){
+      // increment page & re-render only — do NOT scroll the page (fixes reported "page goes up")
       currentPage++;
       renderProducts();
-      const el = document.getElementById('productsTitle');
-      if (el) el.scrollIntoView({ behavior:'smooth' });
       if (typeof gtag==='function') gtag('event','show_more',{ page: currentPage, page_size: itemsPerPage });
     }
 
     function filterCategory(cat){
+      // set category, reset pagination and search, re-render — do NOT change scroll position (fixes reported "page scrolls down")
       currentCategory = cat;
       currentPage = 1;
       searchInput.value = '';
       currentSearch = '';
       renderProducts();
-      const el = document.getElementById('productsTitle');
-      if (el) el.scrollIntoView({ behavior:'smooth' });
     }
 
     /* ===== Carousel ===== */
