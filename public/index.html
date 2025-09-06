@@ -4,8 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Coastal Fresh | Buy Fresh Fish, Prawns & Seafood Online in Hyderabad</title>
-  <meta name="description" content="Order Fresh premium seafood online in Hyderabad with Coastal Fresh. Fresh fish, tiger prawns, crabs & pickles – delivered clean & hygienic with next-day delivery." />
 
+  <!-- canonical description (single) -->
+  <meta name="description" content="Order Fresh premium seafood online in Hyderabad with Coastal Fresh. Fresh fish, tiger prawns, crabs & pickles – delivered clean & hygienic with next-day delivery." />
 
   <!-- Preconnects -->
   <link rel="preconnect" href="https://res.cloudinary.com">
@@ -17,15 +18,10 @@
   <!-- Google Fonts (fallback) -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-  <!-- Preload (remote example and local fonts) -->
+  <!-- Preload fonts (keep / adjust depending on what you actually serve) -->
   <link rel="preload" href="https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxM.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/roboto-300.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/roboto-400.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/roboto-500.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/roboto-700.woff2" as="font" type="font/woff2" crossorigin>
 
   <!-- SEO -->
-  <meta name="description" content="Order Fresh premium seafood online in Hyderabad with Coastal Fresh. Fresh fish, tiger prawns, crabs & pickles – delivered clean & hygienic with next-day delivery." />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <link rel="canonical" href="https://www.coastalfresh.in" />
   <meta name="theme-color" content="#1e40af" />
@@ -80,7 +76,7 @@
       const utm = 'utm_source=website&utm_medium=whatsapp&utm_campaign=order_intent';
       function withUTM(url) {
         try {
-          const u = new URL(url);
+          const u = new URL(url, location.origin);
           if (u.hostname.includes('wa.me') || u.hostname.includes('api.whatsapp.com')) {
             if (u.search) { u.search += '&' + utm; } else { u.search = '?' + utm; }
           }
@@ -119,63 +115,12 @@
   <link rel="apple-touch-icon" href="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+  <!-- DOMPurify (for final safe sanitization if needed) -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js" crossorigin="anonymous"></script>
+
   <style>
-    /* ===== Roboto self-hosted @font-face + root font token ===== */
     :root {
       --font-sans: "Roboto", "Helvetica Neue", Arial, sans-serif;
-    }
-
-    @font-face{
-      font-family: "Roboto";
-      font-style: normal;
-      font-weight: 300;
-      font-display: swap;
-      src: url("/fonts/roboto-300.woff2") format("woff2");
-    }
-    @font-face{
-      font-family: "Roboto";
-      font-style: normal;
-      font-weight: 400;
-      font-display: swap;
-      src: url("/fonts/roboto-400.woff2") format("woff2");
-    }
-    @font-face{
-      font-family: "Roboto";
-      font-style: normal;
-      font-weight: 500;
-      font-display: swap;
-      src: url("/fonts/roboto-500.woff2") format("woff2");
-    }
-    @font-face{
-      font-family: "Roboto";
-      font-style: normal;
-      font-weight: 700;
-      font-display: swap;
-      src: url("/fonts/roboto-700.woff2") format("woff2");
-    }
-
-    /* Base using Roboto */
-    *{box-sizing:border-box;margin:0;padding:0}
-    html, body {
-      font-family: var(--font-sans);
-      font-weight: 400;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      background:var(--bg, #f7f9fc);
-      color:var(--ink, #1b2430);
-      line-height:1.6;
-    }
-
-    h1, h2, h3, .btn, .amount {
-      font-weight: 500;
-    }
-    h1 { font-size: 2rem; line-height: 1.15; }
-    h2 { font-size: 1.5rem; line-height: 1.2; }
-    p { font-size: 0.95rem; line-height: 1.45; }
-    .amount { font-weight: 700; letter-spacing: 0.2px; }
-
-    /* ===== Brand tokens & base ===== */
-    :root{
       --brand:#1976ff;
       --ink:#1b2430;
       --sub:#6b7280;
@@ -189,49 +134,31 @@
       --cta-grad: linear-gradient(135deg,#1e40af 0%,#3b82f6 100%);
     }
 
-    body{background:var(--bg);color:var(--ink)}
+    @font-face{font-family:"Roboto";font-style:normal;font-weight:300;font-display:swap;src:url("/fonts/roboto-300.woff2") format("woff2")}
+    @font-face{font-family:"Roboto";font-style:normal;font-weight:400;font-display:swap;src:url("/fonts/roboto-400.woff2") format("woff2")}
+    @font-face{font-family:"Roboto";font-style:normal;font-weight:500;font-display:swap;src:url("/fonts/roboto-500.woff2") format("woff2")}
+    @font-face{font-family:"Roboto";font-style:normal;font-weight:700;font-display:swap;src:url("/fonts/roboto-700.woff2") format("woff2")}
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html, body { font-family: var(--font-sans);font-weight:400;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background:var(--bg);color:var(--ink);line-height:1.6; }
+    h1,h2,h3,.btn,.amount{font-weight:500}
+    h1{font-size:2rem;line-height:1.15}h2{font-size:1.5rem;line-height:1.2}p{font-size:0.95rem}
     a{text-decoration:none;color:inherit}
     img{max-width:100%;display:block}
 
-    /* App wrapper (mobile viewport on desktop) */
     #appWrapper{max-width:480px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 30px rgba(0,0,0,.25);position:relative;z-index:2;overflow:hidden;padding-bottom:74px}
-    @media (min-width:769px){
-      body{background:#f5f9ff var(--desktop-bg-image) center/cover no-repeat fixed}
-      .product-popup,.cart-page{left:50%;transform:translateX(-50%);max-width:480px;width:100%}
-      body.popup-open{overflow:hidden}
-    }
-    /* DESKTOP: keep popup/cart inside the 480px app width */
-    @media (min-width:769px){
-      #appWrapper{ position:relative; }
-      .product-popup,
-      .cart-page{
-        left:50% !important;
-        right:auto !important;
-        transform:translateX(-50%) !important;
-        width:100% !important;
-        max-width:480px !important;
-        height:100%;
-        border-radius:16px;
-        box-shadow:0 10px 30px rgba(0,0,0,.18);
-        overflow:auto; /* allow container scroll as a fallback */
-      }
-    }
+    @media (min-width:769px){ body{background:#f5f9ff var(--desktop-bg-image) center/cover no-repeat fixed} .product-popup,.cart-page{left:50%;transform:translateX(-50%);max-width:480px;width:100%} body.popup-open{overflow:hidden} }
+    @media (min-width:769px){ #appWrapper{ position:relative; } .product-popup, .cart-page{ left:50% !important; right:auto !important; transform:translateX(-50%) !important; width:100% !important; max-width:480px !important; height:100%; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.18); overflow:auto; } }
 
-    /* Header */
     .header{background:var(--cta-grad);padding:12px 16px;color:#fff;position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center}
-    .logo{display:flex;align-items:center;gap:10px}
-    .logo-img{height:36px;width:auto;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
-    .logo-text{font-size:18px;font-weight:700}
+    .logo{display:flex;align-items:center;gap:10px}.logo-img{height:36px;width:auto;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}.logo-text{font-size:18px;font-weight:700}
     .cart-summary{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.2);padding:8px 12px;border-radius:20px;cursor:pointer}
-    .cart-icon-header{font-size:18px}
-    .cart-count{background:#ff4757;color:#fff;border-radius:50%;width:22px;height:22px;display:none;align-items:center;justify-content:center;font-size:12px;font-weight:700}
-    .cart-amount{font-size:14px;font-weight:600;display:none}
+    .cart-icon-header{font-size:18px}.cart-count{background:#ff4757;color:#fff;border-radius:50%;width:22px;height:22px;display:none;align-items:center;justify-content:center;font-size:12px;font-weight:700}.cart-amount{font-size:14px;font-weight:600;display:none}
     .cart-summary.has-items .cart-count,.cart-summary.has-items .cart-amount{display:flex}
     @media(max-width:768px){.logo-text{font-size:16px}.cart-amount{font-size:13px}}
 
-    /* Ticker + Carousel */
     .ticker-container{position:sticky;top:60px;z-index:99;background:linear-gradient(90deg,#1e40af,#3b82f6);color:#fff;padding:8px 0;overflow:hidden}
-    .ticker{display:flex;white-space:nowrap;animation:ticker-scroll 30s linear infinite}
+    .ticker{display:flex;white-space:nowrap;animation:ticker-scroll 9s linear infinite}
     .ticker-item{display:flex;align-items:center;padding:0 16px;font-size:14px;font-weight:700}
     .ticker-container:hover .ticker{animation-play-state:paused}
     @keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
@@ -239,27 +166,19 @@
     .slides{display:flex;transition:transform .5s ease;height:100%}
     .slide{min-width:100%;height:100%;background-size:cover;background-position:center}
 
-    /* ===== Trust icons ===== */
     .trust-strip{display:flex;justify-content:space-between;align-items:stretch;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:16px;padding:16px 12px;gap:8px;box-shadow:0 10px 30px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.3);position:relative;overflow:hidden;max-width:1200px;margin:16px 12px}
-    .trust-strip::before{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shine 3s ease-in-out infinite}
-    @keyframes shine{0%,100%{left:-100%}50%{left:100%}}
     .trust-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:12px 6px;border-radius:12px;transition:all .3s cubic-bezier(.4,0,.2,1);cursor:pointer;background:linear-gradient(145deg,rgba(255,255,255,.1),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.1)}
-    .trust-item:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 15px 35px rgba(59,130,246,.3);background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.1));border-color:rgba(255,255,255,.2)}
-    .icon-container{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;font-size:20px;margin-bottom:2px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;animation:pulse 4s ease-in-out infinite}
-    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    .icon-container{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;font-size:20px;margin-bottom:2px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff}
     .trust-title{font-size:13px;font-weight:600;color:#1f2937;line-height:1.2}
-    .trust-sub{font-size:10px;color:#6b7280;line-height:1.3}
+    .trust-sub{font-size:12px;color:#6b7280;line-height:1.3}
 
-    /* ===== Tabs (categories) with PNG icons ===== */
     .container{max-width:440px;margin:0 auto;padding:12px}
     .tabs{display:flex;gap:18px;overflow:auto hidden;padding:8px 4px 6px;position:sticky;top:0;z-index:5;background:linear-gradient(#fff,#fff);border-bottom:1px solid var(--line)}
     .tab{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:10px 2px 12px;color:#4b5563;text-decoration:none;font-weight:700;font-size:14px;position:relative;white-space:nowrap;background:transparent;border:none;cursor:pointer}
     .tab img.icon{width:20px;height:20px;border-radius:6px;object-fit:cover;box-shadow:0 0 0 1px #e5e7eb}
     .tab[aria-current="page"]{color:var(--brand)}
-    .tab[aria-current="page"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px;background:var(--brand)}
     .section-title{font-weight:800;font-size:16px;margin:12px 4px}
 
-    /* ===== Grid (now 2-up) & Card ===== */
     .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:6px 2px 20px}
     .card{background:#fff;border-radius:var(--radius-card);padding:8px;box-shadow:0 2px 8px rgba(10,30,70,.06)}
     .img{position:relative;border-radius:var(--radius-img);overflow:hidden;aspect-ratio:1/1;background:#e8f0ff}
@@ -271,41 +190,18 @@
     .price-row{display:flex;align-items:baseline;gap:6px;margin-top:6px}
     .price-now{font-weight:900;font-size:14px}
     .price-mrp{color:var(--mrp);text-decoration:line-through;font-size:12px}
-    .save{color:var(--save);font-size:12px;font-weight:800;margin-top:2px}
+    .save{color:var(--save);font-size:12px;font-weight:800;margin-top:6px}
     .meta{font-size:12px;color:var(--sub);margin-top:4px}
     .name{margin-top:4px;font-size:12px;font-weight:700;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
     @media (max-width:360px){.name{font-size:11px}.price-now{font-size:13px}}
 
-    /* Search bar + typewriter placeholder */
     .search-container{margin:16px;position:relative}
     .search-input{width:100%;padding:12px 45px 12px 16px;border-radius:25px;border:1px solid #ddd;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.1);outline:none}
     .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#666;font-size:18px}
 
-    /* Floating Cart CTA */
-    .cart-footer{
-      position:fixed;
-      bottom:70px;
-      left:50%;
-      transform:translateX(-50%);
-      background:var(--cta-grad);
-      color:#fff;
-      padding:10px 16px;
-      border-radius:999px;
-      display:none;
-      align-items:center;
-      gap:10px;
-      z-index:96;
-      box-shadow:0 10px 24px rgba(30,64,175,.35);
-      border:1px solid rgba(255,255,255,.25);
-      cursor:pointer;
-      width:auto;
-    }
-    .cart-info{display:flex;gap:8px;align-items:center}
-    .cart-icon{font-size:18px}
-    .cart-text{font-size:14px;font-weight:700}
-    #cartTotal{font-size:14px;font-weight:800;background:rgba(255,255,255,.18);padding:6px 10px;border-radius:20px}
+    .cart-footer{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--cta-grad);color:#fff;padding:10px 16px;border-radius:999px;display:none;align-items:center;gap:10px;z-index:96;box-shadow:0 10px 24px rgba(30,64,175,.35);border:1px solid rgba(255,255,255,.25);cursor:pointer;width:auto;}
+    .cart-info{display:flex;gap:8px;align-items:center}.cart-icon{font-size:18px}.cart-text{font-size:14px;font-weight:700}#cartTotal{font-size:14px;font-weight:800;background:rgba(255,255,255,.18);padding:6px 10px;border-radius:20px}
 
-    /* Popup & Cart page */
     .product-popup{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:1000;display:none;flex-direction:column;overflow-y:auto}
     .popup-header{display:flex;align-items:center;padding:16px;border-bottom:1px solid #ddd;position:sticky;top:0;background:#fff;z-index:10}
     .back-btn{font-size:24px;margin-right:12px;cursor:pointer}
@@ -329,11 +225,9 @@
     .cart-title{font-weight:600;font-size:18px;margin-left:12px}
     .savings-badge{background:#dcfce7;color:#16a34a;font-size:14px;font-weight:600;padding:4px 8px;border-radius:6px;margin-left:8px;display:none}
     .delivery-banner{background:#f0fdf4;color:#16a34a;padding:12px 16px;display:none;align-items:center;gap:8px;font-size:14px;font-weight:600}
-
     .cart-items-container{flex:1;overflow-y:auto;padding:12px}
     .cart-items{background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:12px}
     .cart-item{display:flex;align-items:center;gap:12px;border-bottom:1px solid #eee;padding:12px 0}
-    .cart-item:last-child{border-bottom:none}
     .cart-item img{width:60px;height:60px;object-fit:contain;border-radius:8px}
     .item-details{flex:1;min-width:0}
     .item-name{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -351,17 +245,11 @@
     .place{flex:1;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:14px;font-weight:600;font-size:16px;position:relative;cursor:pointer;text-transform:uppercase;display:none}
     .place .order-total{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#1e40af;color:#fff;padding:4px 10px;border-radius:12px;font-size:14px}
 
-    /* Empty cart & Toast */
     .empty-cart{text-align:center;padding:40px 20px;color:#666}
-    .empty-cart-icon{font-size:60px;margin-bottom:16px;color:#ccc}
-    .empty-cart-text{font-size:16px;margin-bottom:20px}
     .toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(100px);background:#16a34a;color:#fff;padding:12px 24px;border-radius:30px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:1004;opacity:0;transition:transform .3s ease,opacity .3s ease;display:flex;align-items:center;gap:10px;font-weight:700}
     .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-    /* Sections (brief) */
     .section{padding:30px 16px}
-    .section h2{font-size:22px;text-align:center;margin-bottom:20px;color:#1e40af}
-
     .faq-wrap{padding:32px 16px;background:linear-gradient(135deg,#e0f2fe 0%, #f0f9ff 100%)}
     .faq{background:#fff;border-radius:16px;margin-bottom:12px;box-shadow:0 4px 20px rgba(0,0,0,.08);border:1px solid rgba(59,130,246,.1);overflow:hidden}
     .q{width:100%;background:none;border:none;padding:16px 20px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:#1e40af}
@@ -369,7 +257,6 @@
     .faq.active .a{max-height:200px}
     .answer-content{padding:0 20px 20px 20px;font-size:14px}
 
-    /* Footer */
     footer{background:linear-gradient(135deg,#333,#555);color:#fff;text-align:center;padding:30px 16px}
     footer .social{margin:15px 0}
     footer .social a{color:#fff;margin:0 12px;font-size:20px;transition:.2s}
@@ -378,95 +265,38 @@
     .hidden{display:none !important}
     .loading{opacity:.7;pointer-events:none}
 
-    /* Improved Show More CTA */
-    .show-more-btn{
-      appearance:none;border:none;cursor:pointer;
-      margin:4px auto 18px;display:block;padding:12px 18px;border-radius:999px;
-      background:linear-gradient(135deg,#e0e7ff,#dbeafe);
-      box-shadow:0 6px 14px rgba(37,99,235,.18);
-      font-weight:800;letter-spacing:.3px;color:#1e3a8a;
-      transition:transform .15s ease, box-shadow .15s ease, background .3s ease;
-    }
+    .show-more-btn{appearance:none;border:none;cursor:pointer;margin:4px auto 18px;display:block;padding:12px 18px;border-radius:999px;background:linear-gradient(135deg,#e0e7ff,#dbeafe);box-shadow:0 6px 14px rgba(37,99,235,.18);font-weight:800;letter-spacing:.3px;color:#1e3a8a;transition:transform .15s ease, box-shadow .15s ease, background .3s ease;}
     .show-more-btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(37,99,235,.24)}
     .show-more-btn:active{transform:translateY(0)}
 
-    /* ===== Bottom Navigation Bar (new) ===== */
-    .bottom-nav {
-      position:fixed;
-      bottom:0;
-      left:50%;
-      transform:translateX(-50%);
-      width:100%;
-      max-width:480px;
-      height:64px;
-      background:#fff;
-      border-radius:12px 12px 0 0;
-      box-shadow:0 -8px 28px rgba(3,7,18,0.12);
-      display:flex;
-      align-items:center;
-      justify-content:space-around;
-      gap:6px;
-      z-index:110;
-      border-top:1px solid rgba(0,0,0,0.06);
-      padding:6px 8px;
-    }
-    .bottom-nav button {
-      background:transparent;
-      border:none;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:4px;
-      font-size:12px;
-      color:#263238;
-      cursor:pointer;
-      width:64px;
-      height:56px;
-      border-radius:10px;
-    }
-    .bottom-nav button .icon {
-      font-size:18px;
-      line-height:1;
-    }
+    .bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; height:64px; background:#fff; border-radius:12px 12px 0 0; box-shadow:0 -8px 28px rgba(3,7,18,0.12); display:flex; align-items:center; justify-content:space-around; gap:6px; z-index:110; border-top:1px solid rgba(0,0,0,0.06); padding:6px 8px; }
+    .bottom-nav button { background:transparent; border:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; font-size:12px; color:#263238; cursor:pointer; width:64px; height:56px; border-radius:10px; }
+    .bottom-nav button .icon { font-size:18px; line-height:1; }
     .bottom-nav button.active { color: var(--brand); }
-    .bottom-nav .badge {
-      position:absolute;
-      top:6px;
-      right:14px;
-      background:#ff4757;
-      color:#fff;
-      font-size:11px;
-      padding:2px 6px;
-      border-radius:999px;
-      min-width:20px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      height:20px;
-    }
+    .bottom-nav .badge { position:absolute; top:6px; right:14px; background:#ff4757; color:#fff; font-size:11px; padding:2px 6px; border-radius:999px; min-width:20px; display:inline-flex; align-items:center; justify-content:center; height:20px; }
 
-    /* ensure content above bottom nav */
-    @media (max-width:480px) {
-      #appWrapper { padding-bottom:90px; }
+    @media (max-width:480px) { #appWrapper { padding-bottom:90px; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ticker, .icon-container, .trust-strip::before, .slides { animation: none !important; transition: none !important; }
     }
   </style>
 </head>
 <body>
   <div id="appWrapper">
-    <!-- Toast -->
-    <div id="toast" class="toast">
-      <i class="fas fa-check-circle"></i>
+    <!-- Toast (screen-reader friendly) -->
+    <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
+      <i class="fas fa-check-circle" aria-hidden="true"></i>
       <span class="toast-message"></span>
     </div>
 
     <!-- Header -->
     <div class="header">
       <div class="logo">
-        <img class="logo-img" src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png" alt="Coastal Fresh logo" width="60" height="40" loading="lazy">
+        <img class="logo-img" src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png" alt="Coastal Fresh logo" width="60" height="40" loading="eager">
         <span class="logo-text">COASTAL FRESH</span>
       </div>
-      <div class="cart-summary" id="headerCart" role="button" aria-label="Open cart">
+      <div class="cart-summary" id="headerCart" role="button" aria-label="Open cart" tabindex="0">
         <span class="cart-icon-header">🛒</span>
         <span class="cart-count" id="headerCartCount">0</span>
         <span class="cart-amount" id="headerCartAmount">₹0</span>
@@ -475,17 +305,17 @@
 
     <!-- Ticker -->
     <div class="ticker-container">
-      <div class="ticker">
+      <div class="ticker" aria-hidden="true">
         <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
-        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
-        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
+        <div class="ticker-item">🦐 Clean, Deveined Prawns – Ready to Cook</div>
+        <div class="ticker-item">🐟 From Coast to Kitchen – Super Fresh</div>
         <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
       </div>
     </div>
 
     <!-- Carousel -->
     <div class="carousel">
-      <div class="slides" id="slides">
+      <div class="slides" id="slides" aria-hidden="true">
         <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z.png')"></div>
         <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png')"></div>
         <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756388255/Coastal_Fresh_Banner_3_wqpv8c.png')"></div>
@@ -493,7 +323,7 @@
     </div>
 
     <!-- Trust Icons -->
-    <section class="trust-strip" id="trustStrip"></section>
+    <section class="trust-strip" id="trustStrip" aria-label="Trust and features"></section>
 
     <!-- Search -->
     <div class="search-container">
@@ -508,7 +338,7 @@
       <h2 class="section-title" id="productsTitle">Premium Seafood & Pickles</h2>
 
       <!-- 2-up Grid -->
-      <section class="grid" id="productGrid"></section>
+      <section class="grid" id="productGrid" aria-live="polite"></section>
       <button class="show-more-btn hidden" id="showMoreBtn" type="button">Show more products</button>
     </div>
 
@@ -556,8 +386,8 @@
           </button>
           <div class="a">
             <div class="answer-content">
-              <p>We source from the best suppliers in Coastal Andhra, with our own fish & prawn farms plus direct ties to local fishermen for fresh wild-caught seafood.</p>
-              <div class="answer-highlight">🐟 Export-quality, locally sourced</div>
+              <p>Sourced across Coastal Andhra — from trusted suppliers, our own fish & prawn farms, and local fishermen — for fresh, restaurant-quality seafood.</p>
+              <div class="answer-highlight">🐟 Fresh from coast to kitchen</div>
             </div>
           </div>
         </div>
@@ -608,7 +438,7 @@
     </footer>
 
     <!-- Floating Cart CTA -->
-    <div class="cart-footer" id="cartFooter" role="button" aria-label="Open cart">
+    <div class="cart-footer" id="cartFooter" role="button" aria-label="Open cart" tabindex="0">
       <div class="cart-info">
         <span class="cart-icon">🛒</span>
         <span class="cart-text" id="cartCount">0 items</span>
@@ -617,11 +447,11 @@
     </div>
 
     <!-- Product Popup -->
-    <div class="product-popup" id="productPopup">
+    <div class="product-popup" id="productPopup" aria-hidden="true">
       <div class="popup-header">
-        <span class="back-btn">‹</span>
+        <button class="back-btn" type="button" aria-label="Close product">‹</button>
         <span class="popup-title" id="popupTitle">Product Name</span>
-        <span class="share-btn"><i class="fab fa-whatsapp"></i></span>
+        <button class="share-btn" type="button" aria-label="Share product"><i class="fab fa-whatsapp" aria-hidden="true"></i></button>
       </div>
       <div class="popup-body" id="popupBody"></div>
       <div class="popup-footer">
@@ -631,16 +461,16 @@
     </div>
 
     <!-- Cart Page -->
-    <div class="cart-page" id="cartPage">
+    <div class="cart-page" id="cartPage" aria-hidden="true">
       <div class="cart-header">
-        <span class="back-btn">‹</span>
+        <button class="back-btn" type="button" aria-label="Close cart">‹</button>
         <span class="cart-title">Cart</span>
         <span class="savings-badge" id="savingsBadge">Saved ₹0</span>
       </div>
       <div class="delivery-banner" id="deliveryBanner">✓ Free delivery auto applied on this order!</div>
 
       <div class="cart-items-container">
-        <div class="cart-items" id="cartItems"></div>
+        <div class="cart-items" id="cartItems" role="list"></div>
         <div class="empty-cart" id="emptyCart" style="display:none;">
           <div class="empty-cart-icon">🛒</div>
           <div class="empty-cart-text">There are no items in your cart.</div>
@@ -662,28 +492,28 @@
     <!-- Bottom Navigation (new) -->
     <nav class="bottom-nav" role="navigation" aria-label="Bottom navigation">
       <button id="navHome" class="nav-btn" aria-label="Home">
-        <span class="icon"><i class="fas fa-home"></i></span>
+        <span class="icon"><i class="fas fa-home" aria-hidden="true"></i></span>
         <span class="label">Home</span>
       </button>
 
       <button id="navSearch" class="nav-btn" aria-label="Search">
-        <span class="icon"><i class="fas fa-search"></i></span>
+        <span class="icon"><i class="fas fa-search" aria-hidden="true"></i></span>
         <span class="label">Search</span>
       </button>
 
       <button id="navCart" class="nav-btn" aria-label="Cart" style="position:relative;">
-        <span class="icon"><i class="fas fa-shopping-cart"></i></span>
+        <span class="icon"><i class="fas fa-shopping-cart" aria-hidden="true"></i></span>
         <span class="label">Cart</span>
         <span id="navCartBadge" class="badge" style="display:none">0</span>
       </button>
 
       <button id="navRefer" class="nav-btn" aria-label="Refer">
-        <span class="icon"><i class="fas fa-user-friends"></i></span>
+        <span class="icon"><i class="fas fa-user-friends" aria-hidden="true"></i></span>
         <span class="label">Refer</span>
       </button>
 
       <button id="navSupport" class="nav-btn" aria-label="Support">
-        <span class="icon"><i class="fas fa-headset"></i></span>
+        <span class="icon"><i class="fas fa-headset" aria-hidden="true"></i></span>
         <span class="label">Support</span>
       </button>
     </nav>
@@ -702,7 +532,7 @@
       "address": { "@type": "PostalAddress", "addressLocality": "Hyderabad", "addressRegion": "Telangana", "addressCountry": "IN" },
       "areaServed": "Hyderabad",
       "description": "Premium fresh seafood and authentic pickles delivery service in Hyderabad offering fish, prawns, crabs, and pickles with next-day delivery",
-      "openingHours": "Mo-Su 08:00-20:00",
+      "openingHours": ["Mo-Su 08:00-20:00"],
       "priceRange": "₹₹",
       "sameAs": [
         "https://www.facebook.com/CoastalFresh.in",
@@ -737,7 +567,7 @@
       { key: 'Pickles',label: 'Pickles',icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005242/mason-jar_a5mtg4.png' }
     ];
 
-    /* ===== Products DATA ===== */
+    /* ===== Products DATA (unchanged) ===== */
     const products = [
       { id:1, name:"White Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728284/Whitt_spxhew.jpg", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy White Pomfret online in Hyderabad – premium coastal fish with mild taste and firm flesh. Perfect for fry, grill, or curry. Hygienically cleaned and delivered fresh next day." },
       { id:2, name:"Black Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/Blac_qnztqj.jpg", mrp:850, finalPrice:750, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Black Pomfret in Hyderabad – firm texture, rich flavor, ideal for spicy curries, grills, and fries." },
@@ -763,16 +593,15 @@
       { id:22, name:"Live Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:1000, finalPrice:1000, offer:0, gross:"1000g", net:"600g", available:true, category:"Crabs", desc:"Delivered live; top freshness." },
       { id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153104/egg-carb_bcbh9w.jpg", mrp:900, finalPrice:900, offer:0, gross:"1000g", net:"600g", available:true, category:"Crabs", desc:"Roe for rich, creamy flavor." },
       { id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153103/blue-carb_z6k74h.jpg", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"600g", available:true, category:"Crabs", desc:"Delicate, sweet meat." },
-      
       { id:26, name:"3 Dot Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png", mrp:500, finalPrice:500, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Unique markings; sweet taste." },
       { id:27, name:"Prawns Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1900, finalPrice:1710, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra Prawns Pickle; cold-pressed oil; no preservatives." },
       { id:28, name:"Chicken Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1500, finalPrice:1500, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Andhra-style Chicken Pickle with bold spices." }
     ];
 
     /* ===== App State ===== */
-    let cart = Object.create(null); // safer plain object
+    let cart = Object.create(null);
     let popupProduct = null;
-    let itemsPerPage = 8; // 2 per row * 4 rows
+    let itemsPerPage = 8;
     let currentPage = 1;
     let currentCategory = 'All';
     let currentSearch = '';
@@ -780,7 +609,7 @@
     let lastSavings = 0;
     let freeUnlocked = false;
 
-    /* ===== DOM ===== */
+    /* ===== DOM refs (safe queries) ===== */
     const productGrid = document.getElementById('productGrid');
     const showMoreBtn = document.getElementById('showMoreBtn');
     const cartFooter = document.getElementById('cartFooter');
@@ -801,7 +630,7 @@
     const categoryTabs = document.getElementById('categoryTabs');
     const trustStrip = document.getElementById('trustStrip');
 
-    /* Bottom nav elements */
+    /* Bottom nav elements (guarded access later) */
     const navHome = document.getElementById('navHome');
     const navSearch = document.getElementById('navSearch');
     const navCart = document.getElementById('navCart');
@@ -822,7 +651,7 @@
         for (const [idStr, qtyRaw] of entries){
           const p = getValidProductById(idStr);
           const n = Number(qtyRaw);
-          if (!Number.isFinite(n)) continue; // strict guard
+          if (!Number.isFinite(n)) continue;
           const qty = Math.max(0, Math.min(99, n));
           if (p && Number.isFinite(qty) && qty > 0){
             cleaned[p.id] = qty;
@@ -842,27 +671,41 @@
       loadCart();
       startTypewriter();
 
-      // Events
-      categoryTabs.addEventListener('click', onTabClick);
-      searchInput.addEventListener('input', onSearchInput);
-      productGrid.addEventListener('click', onProductGridClick);
-      showMoreBtn.addEventListener('click', showMore);
-      document.querySelector('.popup-header .back-btn').addEventListener('click', closePopup);
-      document.querySelector('.popup-footer .close-btn').addEventListener('click', closePopup);
-      document.querySelector('.popup-footer .add').addEventListener('click', addPopupToCart);
-      document.querySelector('.cart-header .back-btn').addEventListener('click', closeCart);
-      document.querySelector('.cart-actions .continue').addEventListener('click', closeCart);
-      document.querySelector('.cart-actions .place').addEventListener('click', placeOrder);
-      cartFooter.addEventListener('click', openCart);
-      headerCart.addEventListener('click', openCart);
-      document.querySelector('.share-btn').addEventListener('click', shareProduct);
+      // Events (guarded attachments)
+      if (categoryTabs) categoryTabs.addEventListener('click', onTabClick);
+      if (searchInput) searchInput.addEventListener('input', onSearchInput);
+      if (productGrid) productGrid.addEventListener('click', onProductGridClick);
+      if (showMoreBtn) showMoreBtn.addEventListener('click', showMore);
+
+      const popupBack = document.querySelector('.popup-header .back-btn');
+      if (popupBack) popupBack.addEventListener('click', closePopup);
+      const popupClose = document.querySelector('.popup-footer .close-btn');
+      if (popupClose) popupClose.addEventListener('click', closePopup);
+      const popupAdd = document.querySelector('.popup-footer .add');
+      if (popupAdd) popupAdd.addEventListener('click', addPopupToCart);
+
+      const cartBack = document.querySelector('.cart-header .back-btn');
+      if (cartBack) cartBack.addEventListener('click', closeCart);
+      const continueBtn = document.querySelector('.cart-actions .continue');
+      if (continueBtn) continueBtn.addEventListener('click', closeCart);
+      const placeBtn = document.querySelector('.cart-actions .place');
+      if (placeBtn) placeBtn.addEventListener('click', placeOrder);
+
+      if (cartFooter) cartFooter.addEventListener('click', openCart);
+      if (headerCart) {
+        headerCart.addEventListener('click', openCart);
+        headerCart.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCart(); } });
+      }
+
+      const shareBtn = document.querySelector('.share-btn');
+      if (shareBtn) shareBtn.addEventListener('click', shareProduct);
 
       // Bottom nav handlers
-      navHome.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('home'); });
-      navSearch.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('search'); });
-      navCart.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('cart'); });
-      navRefer.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('refer'); });
-      navSupport.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('support'); });
+      if (navHome) navHome.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('home'); });
+      if (navSearch) navSearch.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('search'); });
+      if (navCart) navCart.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('cart'); });
+      if (navRefer) navRefer.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('refer'); });
+      if (navSupport) navSupport.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('support'); });
 
       // Auto-open first FAQ for engagement
       setTimeout(() => {
@@ -880,28 +723,18 @@
     /* ===== Bottom-nav helpers ===== */
     function handleNavClick(key){
       if (typeof gtag === 'function') gtag('event','navigation_click',{ nav:key });
-      // visual active
       document.querySelectorAll('.bottom-nav .nav-btn').forEach(b => b.classList.remove('active'));
-      if (key === 'home') {
-        navHome.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'});
-      }
-      if (key === 'search') {
-        navSearch.classList.add('active'); searchInput.focus();
-      }
-      if (key === 'cart') {
-        navCart.classList.add('active'); openCart();
-      }
+      if (key === 'home') { if (navHome) navHome.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'}); }
+      if (key === 'search') { if (navSearch) navSearch.classList.add('active'); if (searchInput) searchInput.focus(); }
+      if (key === 'cart') { if (navCart) navCart.classList.add('active'); openCart(); }
       if (key === 'refer') {
-        navRefer.classList.add('active');
-        // open the refer share flow
+        if (navRefer) navRefer.classList.add('active');
         const message = "Hey! I’ve been ordering seafood from Coastal Fresh – always fresh, neatly cleaned and delivered to my home in Hyderabad. You should try it 👉 https://coastalfresh.in";
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
       }
       if (key === 'support') {
-        navSupport.classList.add('active');
-        // Open WhatsApp support pre-filled or call fallback
-        const supportNumber = '+919985125678';
+        if (navSupport) navSupport.classList.add('active');
         const supportMsg = encodeURIComponent('Hello Coastal Fresh, I need help with my order/support.');
         const waLink = `https://wa.me/919985125678?text=${supportMsg}`;
         window.open(waLink, '_blank');
@@ -910,44 +743,71 @@
 
     function updateBottomNavUI(){
       const count = Object.values(cart).reduce((s,n)=>s+n,0);
-      if (count>0){
-        navCartBadge.style.display='inline-flex';
-        navCartBadge.textContent = String(count);
-      } else {
-        navCartBadge.style.display='none';
+      if (navCartBadge) {
+        if (count>0){
+          navCartBadge.style.display='inline-flex';
+          navCartBadge.textContent = String(count);
+        } else {
+          navCartBadge.style.display='none';
+        }
       }
     }
 
-    /* ===== Trust Icons render ===== */
+    /* ===== Trust Icons render (safe DOM creation) ===== */
     function renderTrustIcons(){
-      trustStrip.innerHTML = TRUST_ICONS.map((t,i)=>`
-        <div class="trust-item" data-index="${i}" data-title="${t.title}">
-          <div class="icon-container" style="animation-delay:${i}s">${t.icon}</div>
-          <div class="trust-content">
-            <div class="trust-title">${t.title}</div>
-            <div class="trust-sub">${t.text}</div>
-          </div>
-        </div>
-      `).join('');
-      trustStrip.querySelectorAll('.trust-item').forEach(el=>{
-        el.addEventListener('click',()=>{
-          if (typeof gtag==='function') gtag('event','click',{ location:'trust_strip', item_title:el.dataset.title, item_index:+el.dataset.index });
+      if (!trustStrip) return;
+      trustStrip.innerHTML = '';
+      TRUST_ICONS.forEach((t,i)=>{
+        const item = document.createElement('div');
+        item.className = 'trust-item';
+        item.setAttribute('data-index', String(i));
+        item.setAttribute('data-title', t.title);
+
+        const iconWrap = document.createElement('div');
+        iconWrap.className = 'icon-container';
+        iconWrap.style.animationDelay = `${i}s`;
+        iconWrap.textContent = t.icon;
+
+        const content = document.createElement('div');
+        content.className = 'trust-content';
+        const title = document.createElement('div'); title.className='trust-title'; title.textContent = t.title;
+        const sub = document.createElement('div'); sub.className='trust-sub'; sub.textContent = t.text;
+
+        content.appendChild(title); content.appendChild(sub);
+        item.appendChild(iconWrap); item.appendChild(content);
+        item.addEventListener('click', ()=> {
+          if (typeof gtag==='function') gtag('event','click',{ location:'trust_strip', item_title:t.title, item_index:i });
         });
+        trustStrip.appendChild(item);
       });
     }
 
-    /* ===== Tabs render/handlers (changed to buttons to avoid anchor jumps) ===== */
+    /* ===== Tabs render/handlers (safe DOM creation) ===== */
     function renderCategoryTabs(){
-      categoryTabs.innerHTML = CATEGORIES.map(cat => `
-        <button class="tab" type="button" data-category="${cat.key}" ${cat.key==='All'?'aria-current="page"':''}>
-          <img class="icon" src="${cat.icon}" alt="${cat.label} icon" loading="lazy" width="20" height="20"/> ${cat.label}
-        </button>
-      `).join('');
+      if (!categoryTabs) return;
+      categoryTabs.innerHTML = '';
+      CATEGORIES.forEach((cat)=>{
+        const btn = document.createElement('button');
+        btn.className = 'tab';
+        btn.type = 'button';
+        btn.dataset.category = cat.key;
+        if (cat.key === 'All') btn.setAttribute('aria-current','page');
+
+        const img = document.createElement('img');
+        img.className = 'icon';
+        img.src = cat.icon;
+        img.alt = cat.label + ' icon';
+        img.loading = 'lazy';
+        img.width = 20; img.height = 20;
+
+        btn.appendChild(img);
+        btn.insertAdjacentText('beforeend', ' ' + cat.label);
+        categoryTabs.appendChild(btn);
+      });
     }
     function onTabClick(e){
       const btn = e.target.closest('.tab');
       if (!btn) return;
-      // don't call preventDefault for buttons
       const cat = btn.dataset.category;
       filterCategory(cat);
       if (typeof gtag==='function') gtag('event','select_category',{ category:cat });
@@ -957,7 +817,7 @@
 
     /* ===== Search & Typewriter ===== */
     function onSearchInput(){
-      currentSearch = this.value.trim().toLowerCase();
+      currentSearch = (this.value || '').trim().toLowerCase();
       currentPage = 1;
       renderProducts();
       if (currentSearch && typeof gtag==='function') gtag('event','view_search_results',{ search_term: currentSearch });
@@ -966,14 +826,13 @@
       const base = 'Search — ';
       const names = ['Rohu','Tiger Prawns','Sea Bass','Crab','Pickle'];
       let i=0, pos=0, dir=1, pause=0;
-
       function tick(){
-        if (document.activeElement === searchInput || searchInput.value){ setTimeout(tick, 700); return; }
+        if (document.activeElement === searchInput || (searchInput && searchInput.value)){ setTimeout(tick, 700); return; }
         const full = names[i];
-        if (pause>0){ pause--; return void setTimeout(tick, 80); }
+        if (pause>0){ pause--; setTimeout(tick,80); return; }
 
         const text = full.slice(0,pos);
-        searchInput.setAttribute('placeholder', base + text);
+        if (searchInput) searchInput.setAttribute('placeholder', base + text);
 
         pos += dir;
         if (pos > full.length){ pause=10; dir=-1; }
@@ -984,13 +843,14 @@
       tick();
     }
 
-    /* ===== Products render (card spec) ===== */
+    /* ===== Products render (safe DOM creation) ===== */
     function renderProducts(){
+      if (!productGrid) return;
       productGrid.innerHTML = '';
       const q = currentSearch;
       let filtered = products.filter(p=>{
         const matchesCategory = currentCategory==='All' || p.category===currentCategory;
-        const matchesSearch = !q || p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
+        const matchesSearch = !q || (p.name && p.name.toLowerCase().includes(q)) || (p.desc && p.desc.toLowerCase().includes(q)) || (p.category && p.category.toLowerCase().includes(q));
         return matchesCategory && matchesSearch;
       });
 
@@ -1004,28 +864,54 @@
         card.className = 'card';
         card.dataset.id = p.id;
 
-        card.innerHTML = `
-          <div class="img">
-            <img src="${p.image}" alt="${p.name}" loading="lazy" />
-            <button class="add-pill" type="button" ${inCartQty>0?'style="display:none"':''}>ADD</button>
-            <div class="qty" aria-label="Quantity" style="${inCartQty>0?'display:flex':''}">
-              <button class="dec" type="button">-</button>
-              <span class="num">${inCartQty>0?inCartQty:1}</span>
-              <button class="inc" type="button">+</button>
-            </div>
-          </div>
-          <div class="price-row">
-            <span class="price-now">₹${p.finalPrice}</span>
-            ${hasMrp?`<span class="price-mrp">₹${p.mrp}</span>`:''}
-          </div>
-          ${hasMrp?`<div class="save">SAVE ₹${saveAmt}</div>`:''}
-          <div class="meta">${p.net}</div>
-          <div class="name">${p.name}</div>
-        `;
+        // image container
+        const imgWrap = document.createElement('div'); imgWrap.className = 'img';
+        const img = document.createElement('img'); img.src = p.image; img.alt = p.name || ''; img.loading = 'lazy';
+        imgWrap.appendChild(img);
+
+        const addBtn = document.createElement('button');
+        addBtn.className = 'add-pill';
+        addBtn.type = 'button';
+        addBtn.textContent = 'ADD';
+        if (inCartQty > 0) addBtn.style.display = 'none';
+        imgWrap.appendChild(addBtn);
+
+        const qtyBox = document.createElement('div');
+        qtyBox.className = 'qty';
+        qtyBox.setAttribute('aria-label','Quantity');
+        if (inCartQty > 0) qtyBox.style.display = 'flex';
+        const dec = document.createElement('button'); dec.className='dec'; dec.type='button'; dec.textContent='-';
+        const num = document.createElement('span'); num.className='num'; num.textContent = inCartQty>0? String(inCartQty) : '1';
+        const inc = document.createElement('button'); inc.className='inc'; inc.type='button'; inc.textContent='+';
+        qtyBox.appendChild(dec); qtyBox.appendChild(num); qtyBox.appendChild(inc);
+        imgWrap.appendChild(qtyBox);
+
+        // price row
+        const priceRow = document.createElement('div'); priceRow.className='price-row';
+        const priceNow = document.createElement('span'); priceNow.className='price-now'; priceNow.textContent = '₹' + p.finalPrice;
+        priceRow.appendChild(priceNow);
+        if (hasMrp){ const pm = document.createElement('span'); pm.className='price-mrp'; pm.textContent = '₹' + p.mrp; priceRow.appendChild(pm); }
+
+        // Save element should appear directly below price row (fixed placement)
+        let saveEl = null;
+        if (hasMrp){
+          saveEl = document.createElement('div'); saveEl.className='save'; saveEl.textContent = 'SAVE ₹' + saveAmt;
+        }
+
+        const meta = document.createElement('div'); meta.className='meta'; meta.textContent = p.net;
+        const name = document.createElement('div'); name.className='name'; name.textContent = p.name;
+
+        // Append in correct order: image, priceRow, save (if any), meta, name
+        card.appendChild(imgWrap);
+        card.appendChild(priceRow);
+        if (saveEl) card.appendChild(saveEl);
+        card.appendChild(meta);
+        card.appendChild(name);
+
         productGrid.appendChild(card);
       });
 
-      // Enhanced "Show more" CTA
+      // "Show more" CTA
       const remaining = Math.max(0, filtered.length - (itemsPerPage * currentPage));
       if (remaining > 0) {
         showMoreBtn.textContent = `Show ${Math.min(itemsPerPage, remaining)} more products (${remaining} left)`;
@@ -1035,23 +921,21 @@
       }
 
       if (filtered.length === 0) {
-        productGrid.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #666;">
-            <i class="fas fa-search" style="font-size: 48px; margin-bottom: 16px;"></i>
-            <h3>No products found</h3>
-            <p>Try a different search or category</p>
-          </div>
-        `;
+        const empty = document.createElement('div');
+        empty.style.gridColumn = '1 / -1';
+        empty.style.textAlign = 'center';
+        empty.style.padding = '40px 20px';
+        empty.style.color = '#666';
+        empty.innerHTML = `<i class="fas fa-search" style="font-size:48px;margin-bottom:16px" aria-hidden="true"></i><h3>No products found</h3><p>Try a different search or category</p>`;
+        productGrid.appendChild(empty);
         showMoreBtn.classList.add('hidden');
       }
     }
 
-    /* ===== Grid interactions (guarded) ===== */
+    /* ===== Grid interactions (guarded and safe) ===== */
     function onProductGridClick(e){
-      // Bulletproof: if the Show More button ever moves into the grid, ignore it
       if (e.target.closest('#showMoreBtn')) return;
-
-      const interactive = e.target.closest('.add-pill, .inc, .dec, .qty'); // treat qty as interactive too
+      const interactive = e.target.closest('.add-pill, .inc, .dec, .qty');
       const card = e.target.closest('.card');
       if (!card) return;
       const id = parseInt(card.dataset.id,10);
@@ -1060,35 +944,37 @@
 
       const addBtn = card.querySelector('.add-pill');
       const qtyBox = card.querySelector('.qty');
-      const num = qtyBox.querySelector('.num');
+      const num = qtyBox ? qtyBox.querySelector('.num') : null;
 
-      // Explicit controls
+      // Add button
       if (e.target.classList.contains('add-pill')) {
         cart[id] = 1;
-        num.textContent = 1;
-        addBtn.style.display = 'none';
-        qtyBox.style.display = 'flex';
+        if (num) num.textContent = '1';
+        if (addBtn) addBtn.style.display = 'none';
+        if (qtyBox) qtyBox.style.display = 'flex';
         saveCart();
         showToast('Added to cart!');
         trackAddToCart(id, 1);
         return;
       }
+      // increment
       if (e.target.classList.contains('inc')) {
         const next = Math.min(99, (cart[id]||1) + 1);
         cart[id] = next;
-        num.textContent = cart[id];
+        if (num) num.textContent = String(cart[id]);
         saveCart();
         trackChangeQty(id, +1);
         return;
       }
+      // decrement
       if (e.target.classList.contains('dec')) {
         const next = Math.max(0, (cart[id]||1) - 1);
         if (next===0){
           delete cart[id];
-          qtyBox.style.display='none';
-          addBtn.style.display='inline-flex';
+          if (qtyBox) qtyBox.style.display='none';
+          if (addBtn) addBtn.style.display='inline-flex';
         } else {
-          num.textContent = next;
+          if (num) num.textContent = String(next);
           cart[id]=next;
         }
         saveCart();
@@ -1096,7 +982,7 @@
         return;
       }
 
-      // Non-interactive area: open popup only
+      // non-interactive area -> open popup
       if (!interactive) {
         openPopup(id);
         if (typeof gtag==='function'){
@@ -1110,37 +996,53 @@
     }
 
     function showMore(){
-      // increment page & re-render only — do NOT scroll the page (fixes reported "page goes up")
       currentPage++;
       renderProducts();
       if (typeof gtag==='function') gtag('event','show_more',{ page: currentPage, page_size: itemsPerPage });
     }
 
     function filterCategory(cat){
-      // set category, reset pagination and search, re-render — do NOT change scroll position (fixes reported "page scrolls down")
       currentCategory = cat;
       currentPage = 1;
-      searchInput.value = '';
+      if (searchInput) searchInput.value = '';
       currentSearch = '';
       renderProducts();
     }
 
-    /* ===== Carousel ===== */
+    /* ===== Carousel (robust) ===== */
+    let carouselTimer = null;
     function initCarousel(){
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
       let idx = 0;
       const slides = document.getElementById('slides');
+      if (!slides) return;
       const total = slides.children.length || 1;
-      setInterval(()=>{ idx = (idx+1)%total; slides.style.transform = `translateX(${-idx*100}%)`; }, 5000);
+
+      function next(){ idx = (idx+1)%total; slides.style.transform = `translateX(${-idx*100}%)`; }
+
+      carouselTimer = setInterval(next, 5000);
+
+      slides.parentElement.addEventListener('mouseenter', ()=> { if (carouselTimer) clearInterval(carouselTimer); });
+      slides.parentElement.addEventListener('mouseleave', ()=> { if (carouselTimer) clearInterval(carouselTimer); carouselTimer = setInterval(next,5000); });
+
+      document.addEventListener('visibilitychange', ()=>{
+        if (document.hidden) { if (carouselTimer) clearInterval(carouselTimer); }
+        else { if (carouselTimer) clearInterval(carouselTimer); carouselTimer = setInterval(next,5000); }
+      });
+      window.addEventListener('beforeunload', ()=> { if (carouselTimer) clearInterval(carouselTimer); });
     }
 
     /* ===== FAQ ===== */
     function initFAQ(){}
     function toggleFAQ(button){
       const faq = button.closest('.faq');
+      if (!faq) return;
       const isActive = faq.classList.contains('active');
       document.querySelectorAll('.faq.active').forEach(item=>{ if(item!==faq) item.classList.remove('active'); });
       faq.classList.toggle('active', !isActive);
-      if (typeof gtag==='function') gtag('event','faq_click',{ question: button.querySelector('.q-text').textContent });
+      const qTextEl = button.querySelector('.q-text');
+      const qText = qTextEl ? qTextEl.textContent : '';
+      if (typeof gtag==='function') gtag('event','faq_click',{ question: qText });
     }
 
     /* ===== Cart state (validated) ===== */
@@ -1148,7 +1050,6 @@
       try{
         const saved = JSON.parse(localStorage.getItem('coastalFreshCart') || '{}');
         const cleaned = sanitizeCartShape(saved);
-        // If too many items (legacy corruption), keep only known IDs
         if (Object.keys(cleaned).length > products.length){
           cart = Object.create(null);
         } else {
@@ -1160,9 +1061,8 @@
       updateCartUI();
     }
     function saveCart(){
-      // ensure cart is clean before storing
       cart = sanitizeCartShape(cart);
-      localStorage.setItem('coastalFreshCart', JSON.stringify(cart));
+      try { localStorage.setItem('coastalFreshCart', JSON.stringify(cart)); } catch(_) {}
       updateCartUI();
     }
     function updateCartUI(){
@@ -1174,31 +1074,30 @@
         total += p.finalPrice * qty;
         savings += Math.max(0, (p.mrp || p.finalPrice) - p.finalPrice) * qty;
       }
-      cartCount.textContent = count + ' item' + (count!==1?'s':'');
-      cartTotal.textContent = '₹' + total;
-      headerCartCount.textContent = String(count);
-      headerCartAmount.textContent = '₹' + total;
+      if (cartCount) cartCount.textContent = count + ' item' + (count!==1?'s':'');
+      if (cartTotal) cartTotal.textContent = '₹' + total;
+      if (headerCartCount) headerCartCount.textContent = String(count);
+      if (headerCartAmount) headerCartAmount.textContent = '₹' + total;
 
       if (count>0){
-        cartFooter.style.display='flex';
-        headerCart.classList.add('has-items');
+        if (cartFooter) cartFooter.style.display='flex';
+        if (headerCart) headerCart.classList.add('has-items');
       } else {
-        cartFooter.style.display='none';
-        headerCart.classList.remove('has-items');
-        headerCartCount.textContent = '0';
-        headerCartAmount.textContent = '₹0';
+        if (cartFooter) cartFooter.style.display='none';
+        if (headerCart) headerCart.classList.remove('has-items');
+        if (headerCartCount) headerCartCount.textContent = '0';
+        if (headerCartAmount) headerCartAmount.textContent = '₹0';
       }
 
-      // Simple free-delivery banner (no progress bars)
       if (total >= FREE_DELIVERY_THRESHOLD){
         if (!freeUnlocked){
           freeUnlocked = true;
-          deliveryBanner.style.display = 'flex';
+          if (deliveryBanner) deliveryBanner.style.display = 'flex';
           showToast('Free Delivery unlocked!');
         }
       } else {
         freeUnlocked = false;
-        deliveryBanner.style.display = 'none';
+        if (deliveryBanner) deliveryBanner.style.display = 'none';
       }
 
       updateSavingsCelebration(savings);
@@ -1212,7 +1111,7 @@
       lastSavings = savings;
     }
 
-    /* ===== Popup ===== */
+    /* ===== Popup (safe DOM insertion using DOMPurify for desc) ===== */
     function openPopup(id){
       const p = getValidProductById(id);
       if (!p) return;
@@ -1220,25 +1119,40 @@
       if (productCard) productCard.classList.add('loading');
       setTimeout(()=>{
         popupProduct = p;
-        document.getElementById('popupTitle').textContent = popupProduct.name;
-        document.getElementById('popupBody').innerHTML = `
-          <img src="${popupProduct.image}" alt="${popupProduct.name}" loading="lazy">
-          <div class="popup-sub">Net QTY: ${popupProduct.gross} / ${popupProduct.net}</div>
-          <div class="popup-price">
-            <span class="now">₹${popupProduct.finalPrice}</span>
-            ${popupProduct.offer > 0 ? `<span class="offer">${popupProduct.offer}% OFF</span>` : ''}
-            ${popupProduct.mrp > popupProduct.finalPrice ? `<span class="old">₹${popupProduct.mrp}</span>` : ''}
-          </div>
-          <div class="delivery-info"><i class="fas fa-truck"></i> Delivered next day morning</div>
-          <p>${popupProduct.desc}</p>
-        `;
-        document.getElementById('productPopup').style.display='flex';
+        const popupTitle = document.getElementById('popupTitle');
+        const popupBody = document.getElementById('popupBody');
+        if (popupTitle) popupTitle.textContent = popupProduct.name;
+        if (popupBody) {
+          popupBody.innerHTML = ''; // clear
+          const img = document.createElement('img'); img.src = popupProduct.image; img.alt = popupProduct.name; img.loading = 'lazy';
+          popupBody.appendChild(img);
+
+          const sub = document.createElement('div'); sub.className='popup-sub'; sub.textContent = `Net QTY: ${popupProduct.gross} / ${popupProduct.net}`;
+          popupBody.appendChild(sub);
+
+          const pRow = document.createElement('div'); pRow.className = 'popup-price';
+          const now = document.createElement('span'); now.className='now'; now.textContent = '₹' + popupProduct.finalPrice;
+          pRow.appendChild(now);
+          if (popupProduct.offer > 0) { const off = document.createElement('span'); off.className='offer'; off.textContent = popupProduct.offer + '% OFF'; pRow.appendChild(off); }
+          if (popupProduct.mrp > popupProduct.finalPrice) { const old = document.createElement('span'); old.className='old'; old.textContent = '₹' + popupProduct.mrp; pRow.appendChild(old); }
+          popupBody.appendChild(pRow);
+
+          const deliveryInfo = document.createElement('div'); deliveryInfo.className='delivery-info'; deliveryInfo.innerHTML = '<i class="fas fa-truck" aria-hidden="true"></i> Delivered next day morning';
+          popupBody.appendChild(deliveryInfo);
+
+          const safeHtml = DOMPurify.sanitize(String(popupProduct.desc || ''));
+          const descP = document.createElement('p'); descP.innerHTML = safeHtml;
+          popupBody.appendChild(descP);
+        }
+        const productPopup = document.getElementById('productPopup');
+        if (productPopup) productPopup.style.display='flex';
         document.body.classList.add('popup-open');
         if (productCard) productCard.classList.remove('loading');
       },100);
     }
     function closePopup(){
-      document.getElementById('productPopup').style.display='none';
+      const productPopup = document.getElementById('productPopup');
+      if (productPopup) productPopup.style.display='none';
       document.body.classList.remove('popup-open');
     }
     function addPopupToCart(){
@@ -1250,18 +1164,21 @@
       showToast('Added to cart!');
       trackAddToCart(id,1);
 
-      // Update UI BEFORE closing popup to avoid race on fast taps
       const card = document.querySelector(`.card[data-id="${id}"]`);
       if (card){
-        card.querySelector('.add-pill').style.display='none';
+        const addBtn = card.querySelector('.add-pill');
+        if (addBtn) addBtn.style.display = 'none';
         const qtyBox = card.querySelector('.qty');
-        qtyBox.style.display='flex';
-        qtyBox.querySelector('.num').textContent = cart[id];
+        if (qtyBox) {
+          qtyBox.style.display='flex';
+          const num = qtyBox.querySelector('.num');
+          if (num) num.textContent = String(cart[id]);
+        }
       }
       closePopup();
     }
 
-    /* ===== Cart page ===== */
+    /* ===== Cart page (safe DOM creation for list items) ===== */
     function openCart(){
       if (typeof gtag==='function') gtag('event','view_cart',{ currency:'INR', value:calculateCartTotal(), items:getCartItemsForAnalytics() });
 
@@ -1270,6 +1187,7 @@
       const finalTotal = document.getElementById('finalTotal');
       const placeTotal = document.getElementById('placeTotal');
 
+      if (!cartItemsEl) return;
       let orig=0,total=0,savings=0;
       cartItemsEl.innerHTML='';
 
@@ -1280,69 +1198,78 @@
         const itemTotal = p.finalPrice * qty;
         orig += itemOrig; total += itemTotal; savings += (itemOrig - itemTotal);
 
-        cartItemsEl.innerHTML += `
-          <div class="cart-item">
-            <img src="${p.image}" alt="${p.name}" loading="lazy">
-            <div class="item-details">
-              <div class="item-name">${p.name}</div>
-              <div class="item-weight">${p.net}</div>
-              <div class="quantity-controls">
-                <button class="quantity-btn" data-id="${p.id}" data-action="decrease">-</button>
-                <span>${qty}</span>
-                <button class="quantity-btn" data-id="${p.id}" data-action="increase">+</button>
-              </div>
-            </div>
-            <div class="item-pricing">
-              <div class="item-price">₹${itemTotal}</div>
-              ${p.mrp>p.finalPrice?`<div class="item-original">₹${itemOrig}</div>`:''}
-            </div>
-            <i class="fas fa-trash-alt remove-btn" data-id="${p.id}"></i>
-          </div>
-        `;
+        const item = document.createElement('div'); item.className='cart-item';
+        const img = document.createElement('img'); img.src = p.image; img.alt = p.name; img.loading='lazy';
+        item.appendChild(img);
+
+        const details = document.createElement('div'); details.className='item-details';
+        const itemName = document.createElement('div'); itemName.className='item-name'; itemName.textContent = p.name;
+        const itemWeight = document.createElement('div'); itemWeight.className='item-weight'; itemWeight.textContent = p.net;
+        const qtyControls = document.createElement('div'); qtyControls.className='quantity-controls';
+        const decBtn = document.createElement('button'); decBtn.className='quantity-btn'; decBtn.dataset.id = p.id; decBtn.dataset.action='decrease'; decBtn.textContent='-';
+        const qtySpan = document.createElement('span'); qtySpan.textContent = String(qty);
+        const incBtn = document.createElement('button'); incBtn.className='quantity-btn'; incBtn.dataset.id = p.id; incBtn.dataset.action='increase'; incBtn.textContent='+';
+        qtyControls.appendChild(decBtn); qtyControls.appendChild(qtySpan); qtyControls.appendChild(incBtn);
+
+        details.appendChild(itemName); details.appendChild(itemWeight); details.appendChild(qtyControls);
+        item.appendChild(details);
+
+        const pricing = document.createElement('div'); pricing.className='item-pricing';
+        const itemPrice = document.createElement('div'); itemPrice.className='item-price'; itemPrice.textContent = '₹' + itemTotal;
+        pricing.appendChild(itemPrice);
+        if (p.mrp>p.finalPrice){ const origDiv = document.createElement('div'); origDiv.className='item-original'; origDiv.textContent = '₹' + itemOrig; pricing.appendChild(origDiv); }
+        item.appendChild(pricing);
+
+        const remove = document.createElement('i'); remove.className='fas fa-trash-alt remove-btn'; remove.dataset.id = p.id;
+        remove.style.cursor = 'pointer';
+        item.appendChild(remove);
+
+        cartItemsEl.appendChild(item);
       }
 
-      originalTotal.textContent = '₹' + orig;
-      finalTotal.textContent = '₹' + total;
-      placeTotal.textContent = '₹' + total;
-      savingsBadge.textContent = 'Saved ₹' + savings;
+      if (originalTotal) originalTotal.textContent = '₹' + orig;
+      if (finalTotal) finalTotal.textContent = '₹' + total;
+      if (placeTotal) placeTotal.textContent = '₹' + total;
+      if (savingsBadge) savingsBadge.textContent = 'Saved ₹' + savings;
 
       if (Object.keys(cart).length===0){
-        emptyCart.style.display='block';
+        if (emptyCart) emptyCart.style.display='block';
         cartItemsEl.style.display='none';
-        orderSummary.style.display='none';
-        deliveryBanner.style.display='none';
-        savingsBadge.style.display='none';
-        placeOrderBtn.style.display='none';
+        if (orderSummary) orderSummary.style.display='none';
+        if (deliveryBanner) deliveryBanner.style.display='none';
+        if (savingsBadge) savingsBadge.style.display='none';
+        if (placeOrderBtn) placeOrderBtn.style.display='none';
       } else {
-        emptyCart.style.display='none';
+        if (emptyCart) emptyCart.style.display='none';
         cartItemsEl.style.display='block';
-        orderSummary.style.display='block';
-        savingsBadge.style.display= savings>0 ? 'flex':'none';
-        placeOrderBtn.style.display='block';
-        // Banner is handled by updateCartUI
+        if (orderSummary) orderSummary.style.display='block';
+        if (savingsBadge) savingsBadge.style.display= savings>0 ? 'flex':'none';
+        if (placeOrderBtn) placeOrderBtn.style.display='block';
       }
 
-      document.querySelectorAll('.quantity-btn').forEach(btn=>{
+      cartItemsEl.querySelectorAll('.quantity-btn').forEach(btn=>{
         btn.addEventListener('click',function(){
           const id = parseInt(this.dataset.id,10);
           const action = this.dataset.action;
           changeQty(id, action==='increase'?1:-1);
         });
       });
-      document.querySelectorAll('.remove-btn').forEach(btn=>{
+      cartItemsEl.querySelectorAll('.remove-btn').forEach(btn=>{
         btn.addEventListener('click',function(){
           const id = parseInt(this.dataset.id,10);
           removeFromCart(id);
         });
       });
 
-      document.getElementById('cartPage').style.display='flex';
+      const cartPage = document.getElementById('cartPage');
+      if (cartPage) cartPage.style.display='flex';
       document.body.classList.add('popup-open');
     }
     function closeCart(){
-      document.getElementById('cartPage').style.display='none';
+      const cartPage = document.getElementById('cartPage');
+      if (cartPage) cartPage.style.display='none';
       document.body.classList.remove('popup-open');
-      renderProducts(); // sync qty pills
+      renderProducts();
     }
     function calculateCartTotal(){
       let total=0;
@@ -1373,12 +1300,13 @@
         if (card){
           const addBtn = card.querySelector('.add-pill');
           const qtyBox = card.querySelector('.qty');
-          const num = qtyBox.querySelector('.num');
+          const num = qtyBox ? qtyBox.querySelector('.num') : null;
           const q = cart[id]||0;
-          if (q<=0){ qtyBox.style.display='none'; addBtn.style.display='inline-flex'; }
-          else { qtyBox.style.display='flex'; num.textContent = q; addBtn.style.display='none'; }
+          if (q<=0){ if (qtyBox) qtyBox.style.display='none'; if (addBtn) addBtn.style.display='inline-flex'; }
+          else { if (qtyBox) qtyBox.style.display='flex'; if (num) num.textContent = q; if (addBtn) addBtn.style.display='none'; }
         }
-        if (document.getElementById('cartPage').style.display==='flex') openCart();
+        const cartPage = document.getElementById('cartPage');
+        if (cartPage && cartPage.style.display==='flex') openCart();
       }
     }
     function removeFromCart(id){
@@ -1388,7 +1316,8 @@
         const p = getValidProductById(id);
         if (p) gtag('event','remove_from_cart',{ currency:'INR', value:p.finalPrice, items:[{ item_id:p.id,item_name:p.name,item_category:p.category,price:p.finalPrice }] });
       }
-      if (document.getElementById('cartPage').style.display==='flex') openCart();
+      const cartPage = document.getElementById('cartPage');
+      if (cartPage && cartPage.style.display==='flex') openCart();
     }
 
     /* ===== Share product ===== */
@@ -1396,7 +1325,7 @@
       if (!popupProduct) return;
       const utmParams = `utm_source=product_share&utm_medium=whatsapp&utm_campaign=product_referral&utm_content=product_${popupProduct.id}`;
       const shareUrl = `https://www.coastalfresh.in?${utmParams}`;
-      const message = `Check out this ${popupProduct.name} from Coastal Fresh! ${popupProduct.desc.substring(0, 100)}... ${shareUrl}`;
+      const message = `Check out this ${popupProduct.name} from Coastal Fresh! ${String(popupProduct.desc||'').substring(0, 100)}... ${shareUrl}`;
       const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
       if (typeof gtag==='function') gtag('event','share',{ method:'WhatsApp', content_type:'product', item_id:String(popupProduct.id) });
       window.open(whatsappUrl,'_blank');
@@ -1428,6 +1357,7 @@
 
     /* ===== Toast ===== */
     function showToast(message){
+      if (!toast || !toastMessage) return;
       toastMessage.textContent = message;
       toast.classList.add('show');
       setTimeout(()=>toast.classList.remove('show'), 1800);
