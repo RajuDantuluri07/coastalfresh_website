@@ -158,12 +158,12 @@
     @media(max-width:768px){.logo-text{font-size:16px}.cart-amount{font-size:13px}}
 
     .ticker-container{position:sticky;top:60px;z-index:99;background:linear-gradient(90deg,#1e40af,#3b82f6);color:#fff;padding:8px 0;overflow:hidden}
-    .ticker{display:flex;white-space:nowrap;animation:ticker-scroll 9s linear infinite}
+    .ticker{display:flex;white-space:nowrap;animation:ticker-scroll 6s linear infinite}
     .ticker-item{display:flex;align-items:center;padding:0 16px;font-size:14px;font-weight:700}
     .ticker-container:hover .ticker{animation-play-state:paused}
     @keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
     .carousel{margin:16px;overflow:hidden;border-radius:12px;position:relative;height:150px}
-    .slides{display:flex;transition:transform .5s ease;height:100%}
+    .slides{display:flex;transition:transform .30s ease;height:100%}
     .slide{min-width:100%;height:100%;background-size:cover;background-position:center}
 
     .trust-strip{display:flex;justify-content:space-between;align-items:stretch;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:16px;padding:16px 12px;gap:8px;box-shadow:0 10px 30px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.3);position:relative;overflow:hidden;max-width:1200px;margin:16px 12px}
@@ -306,10 +306,8 @@
     <!-- Ticker -->
     <div class="ticker-container">
       <div class="ticker" aria-hidden="true">
-        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
-        <div class="ticker-item">🦐 Clean, Deveined Prawns – Ready to Cook</div>
+        <div class="ticker-item">🚚 Order Now & Get Delivered on Sunday</div>
         <div class="ticker-item">🐟 From Coast to Kitchen – Super Fresh</div>
-        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
       </div>
     </div>
 
@@ -358,8 +356,8 @@
           </button>
           <div class="a">
             <div class="answer-content">
-              <p><strong>Next-day delivery available!</strong> All other orders arrive next day with real-time tracking.</p>
-              <div class="answer-highlight">⚡ Most orders delivered in under 24 hours</div>
+              <p><strong>Next-day delivery available!</strong> All orders are delivered on **Sunday mornings** to ensure peak freshness. </p>
+              <div class="answer-highlight">⚡ Guaranteed fresh-catch quality you can trust</div>
             </div>
           </div>
         </div>
@@ -550,7 +548,7 @@
     const desktopBackgroundImage = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1756914772/Coastal_Fresh_Sea_food_hyderabad_-_website_banner_shqapq.png';
     document.documentElement.style.setProperty('--desktop-bg-image', `url(${desktopBackgroundImage})`);
 
-     /* ===== Trust Icons CONFIG (short but powerful) ===== */
+    /* ===== Trust Icons CONFIG (short but powerful) ===== */
 const TRUST_ICONS = [
   { icon: '🧊', title: 'Fresh', text: 'Daily catch' },
   { icon: '🌱', title: '100% Natural', text: 'No chemicals' },
@@ -1137,7 +1135,7 @@ const TRUST_ICONS = [
           if (popupProduct.mrp > popupProduct.finalPrice) { const old = document.createElement('span'); old.className='old'; old.textContent = '₹' + popupProduct.mrp; pRow.appendChild(old); }
           popupBody.appendChild(pRow);
 
-          const deliveryInfo = document.createElement('div'); deliveryInfo.className='delivery-info'; deliveryInfo.innerHTML = '<i class="fas fa-truck" aria-hidden="true"></i> Delivered next day morning';
+          const deliveryInfo = document.createElement('div'); deliveryInfo.className='delivery-info'; deliveryInfo.innerHTML = '<i class="fas fa-truck" aria-hidden="true"></i> Delivered Sunday morning';
           popupBody.appendChild(deliveryInfo);
 
           const safeHtml = DOMPurify.sanitize(String(popupProduct.desc || ''));
