@@ -113,6 +113,36 @@
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js" crossorigin="anonymous"></script>
 
   <style>
+    /* CSS Variables for consistency */
+    :root {
+      --app-max-width: 480px;
+      --header-padding: 12px 16px;
+      --logo-height: 36px;
+      --cart-badge-size: 22px;
+      --carousel-height: 150px;
+      --carousel-transition: .5s;
+      --trust-icon-height: 44px;
+      --tabs-icon-size: 20px;
+      --grid-gap: 12px;
+      --radius-card: 14px;
+      --radius-img: 14px;
+      --add-pill-padding: 7px 12px;
+      --add-pill-font-size: 12px;
+      --qty-btn-size: 28px;
+      --qty-font-size: 16px;
+      --price-now-font-size: 14px;
+      --product-name-font-size: 12px;
+      --search-padding: 12px 45px 12px 48px; 
+      --search-radius: 25px;
+      --search-font-size: 16px;
+      --floating-cart-bottom: 70px;
+      --bottom-nav-height: 64px;
+      --bottom-nav-btn-width: 64px;
+      --bottom-nav-icon-size: 18px;
+      --toast-bottom: 150px;
+      --toast-animation: 1800ms;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -127,8 +157,9 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    /* App wrapper with max-width constraint */
     .app {
-      max-width: 414px;
+      max-width: var(--app-max-width);
       margin: 0 auto;
       background: white;
       min-height: 100vh;
@@ -148,7 +179,7 @@
     }
 
     /* Desktop background */
-    @media (min-width: 415px) {
+    @media (min-width: 481px) {
       body {
         background-image: url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756914772/Coastal_Fresh_Sea_food_hyderabad_-_website_banner_shqapq.png');
         background-size: cover;
@@ -206,7 +237,7 @@
     /* Header */
     .header {
       background: white;
-      padding: 15px 20px;
+      padding: var(--header-padding);
       border-bottom: 1px solid #f0f0f0;
       position: sticky;
       top: 34px; /* Height of ticker */
@@ -250,7 +281,7 @@
     }
 
     .logo-img {
-      height: 32px;
+      height: var(--logo-height);
       width: auto;
     }
 
@@ -281,8 +312,8 @@
       background: #FF3B30;
       color: white;
       border-radius: 50%;
-      width: 18px;
-      height: 18px;
+      width: var(--cart-badge-size);
+      height: var(--cart-badge-size);
       font-size: 11px;
       font-weight: 600;
       display: none;
@@ -313,9 +344,9 @@
     .search {
       background: #F2F2F7;
       border: none;
-      border-radius: 12px;
-      padding: 12px 16px 12px 42px;
-      font-size: 16px;
+      border-radius: var(--search-radius);
+      padding: var(--search-padding);
+      font-size: var(--search-font-size);
       width: 100%;
       color: #1a1a1a;
       transition: all 0.2s;
@@ -324,7 +355,7 @@
     .search:focus {
       outline: none;
       background: #e8e8ed;
-      box-shadow: 0 0 0 2px rgba(0,122,255,0.2);
+      box-shadow:   0 0 2px rgba(0,122,255,0.2);
     }
 
     .search::placeholder {
@@ -332,13 +363,15 @@
     }
 
     .search-icon {
-      position: absolute;
-      left: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #8E8E93;
-      font-size: 16px;
-    }
+  position: absolute;
+  left: 14px;                 /* nudge icon a little inward; adjust if needed */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #8E8E93;
+  font-size: 16px;
+  pointer-events: none;       /* so clicks go through to the input */
+  z-index: 2;                 /* sits above input content */
+}
 
     /* Section */
     .section {
@@ -367,13 +400,13 @@
       overflow: hidden;
       border-radius: 16px;
       position: relative;
-      height: 160px;
+      height: var(--carousel-height);
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     .slides {
       display: flex;
-      transition: transform .35s ease;
+      transition: transform var(--carousel-transition) ease;
       height: 100%;
     }
 
@@ -436,7 +469,7 @@
       border-radius: 12px;
       transition: all .3s cubic-bezier(.4,0,.2,1);
       cursor: pointer;
-      background: linear-gradient(145deg,rgba(255,255,255,.1),rgdata:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23343a40' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z'/%3E%3C/svg%3Eba(255,255,255,.05));
+      background: linear-gradient(145deg,rgba(255,255,255,.1),rgba(255,255,255,.05));
       border: 1px solid rgba(255,255,255,.1);
     }
 
@@ -448,8 +481,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 44px;
-      height: 44px;
+      width: var(--trust-icon-height);
+      height: var(--trust-icon-height);
       border-radius: 12px;
       font-size: 20px;
       margin-bottom: 2px;
@@ -474,7 +507,7 @@
     .featured-products {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      gap: var(--grid-gap);
     }
 
     /* Categories for Catalog */
@@ -515,12 +548,12 @@
     .products {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+      gap: var(--grid-gap);
     }
 
     .product {
       background: white;
-      border-radius: 16px;
+      border-radius: var(--radius-card);
       overflow: hidden;
       box-shadow: 0 2px 12px rgba(0,0,0,0.08);
       cursor: pointer;
@@ -583,11 +616,13 @@
     }
 
     .product-name {
-      font-size: 16px;
+      font-size: var(--product-name-font-size);
       font-weight: 600;
       margin-bottom: 4px;
       color: #1a1a1a;
-      white-space: nowrap;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
     }
@@ -605,7 +640,7 @@
     }
 
     .price {
-      font-size: 18px;
+      font-size: var(--price-now-font-size);
       font-weight: 700;
       color: #007AFF;
     }
@@ -634,13 +669,13 @@
       background: white;
       border: none;
       border-radius: 50%;
-      width: 28px;
-      height: 28px;
+      width: var(--qty-btn-size);
+      height: var(--qty-btn-size);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 14px;
+      font-size: var(--qty-font-size);
       font-weight: 600;
       color: #007AFF;
       transition: all 0.2s;
@@ -680,7 +715,7 @@
       transform: scale(0.9);
     }
 
-    /* Product Popup - FIXED: Full mobile screen with proper header and sticky footer */
+    /* Product Popup - Updated Design */
     .product-popup {
       position: fixed;
       top: 0;
@@ -698,14 +733,14 @@
       border-radius: 0;
     }
 
-    @media (min-width: 415px) {
+    @media (min-width: 481px) {
       .product-popup {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
         width: 95%;
         height: auto;
-        max-width: 414px;
+        max-width: var(--app-max-width);
         max-height: 90vh;
         border-radius: 20px;
         box-shadow: 0 0 50px rgba(0,0,0,0.2);
@@ -716,141 +751,303 @@
       display: flex;
     }
 
+    /* Updated popup header to match new design */
     .popup-header {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      padding: 16px;
-      border-bottom: 1px solid #f0f0f0;
+      padding: var(--header-padding);
       background: white;
-      position: relative;
+      border-bottom: 1px solid #e0e0e0;
+      position: sticky;
+      top: 0;
       z-index: 10;
-      flex-shrink: 0;
     }
 
     .popup-back-btn {
-      background: none;
-      border: none;
-      font-size: 20px;
-      color: #007AFF;
+      width: 24px;
+      height: 24px;
       cursor: pointer;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 12px;
-    }
-
-    .popup-title {
+      border: none;
+      background: none;
       font-size: 18px;
-      font-weight: 600;
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      padding-right: 10px;
+      color: #007AFF;
     }
 
-    .popup-close-btn {
-      background: none;
+    .popup-header-actions {
+      display: flex;
+      gap: 16px;
+    }
+
+    .popup-action-btn {
+      width: 24px;
+      height: 24px;
       border: none;
-      font-size: 20px;
-      color: #8E8E93;
+      background: none;
       cursor: pointer;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+      font-size: 18px;
+      color: #333;
+    }
+
+    /* Product Image Section */
+    .popup-image-section {
+      position: relative;
+      background: white;
+      padding: 20px;
+    }
+
+    .popup-image-container {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      background: #f8f8f8;
+      border-radius: var(--radius-img);
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .popup-content-wrapper {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      -webkit-overflow-scrolling: touch;
     }
 
     .popup-image {
-      height: 300px;
-      background: #f8f8f8;
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .popup-image img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      border-radius: var(--radius-img);
     }
 
-    .popup-content {
-      padding: 20px;
-      flex: 1;
+    .popup-image-nav {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .popup-image-indicators {
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 12px;
     }
 
-    .popup-name {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 6px;
+    .popup-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ddd;
+    }
+
+    .popup-indicator.active {
+      background: #333;
+    }
+
+    /* Product Info */
+    .popup-info {
+      padding: 20px;
+      background: white;
+    }
+
+    .popup-delivery-time {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      color: #4CAF50;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .popup-rating {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .popup-stars {
+      color: #FFB000;
+      font-size: 14px;
+    }
+
+    .popup-rating-text {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .popup-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
     }
 
     .popup-weight {
-      color: #8E8E93;
-      margin-bottom: 16px;
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 12px;
     }
 
-    .popup-price {
+    .popup-price-section {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 8px;
+      margin-bottom: 8px;
     }
 
-    .popup-price .price {
-      font-size: 28px;
+    .popup-current-price {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
     }
 
-    .popup-offer {
-      background: #34C759;
-      color: white;
-      padding: 4px 12px;
-      border-radius: 12px;
+    .popup-original-price {
       font-size: 14px;
+      color: #999;
+      text-decoration: line-through;
+    }
+
+    .popup-discount {
+      background: #4CAF50;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
       font-weight: 600;
     }
 
-    .popup-description {
-      font-size: 16px;
-      line-height: 1.6;
+    .popup-unit-price {
+      font-size: 12px;
       color: #666;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
     }
 
-    .quantity-selector {
+    .popup-details-btn {
+      color: #4CAF50;
+      background: none;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+
+    /* Features Section */
+    .popup-features {
+      display: flex;
+      justify-content: space-around;
+      padding: 20px;
+      background: #f9f9f9;
+      margin: 0 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .popup-feature {
+      text-align: center;
+      flex: 1;
+    }
+
+    .popup-feature-icon {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 8px;
+      background: #f0f0f0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .popup-feature-title {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .popup-feature-subtitle {
+      font-size: 10px;
+      color: #666;
+    }
+
+    /* Highlights Section */
+    .popup-highlights-section {
+      padding: 20px;
+      background: white;
+    }
+
+    .popup-highlights-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .popup-highlights-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .popup-expand-btn {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .popup-highlight-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .popup-highlight-item:last-child {
+      border-bottom: none;
+    }
+
+    .popup-highlight-label {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .popup-highlight-value {
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    /* Quantity selector in popup */
+    .popup-quantity-selector {
       display: flex;
       align-items: center;
       gap: 16px;
-      margin-bottom: 24px;
+      margin: 20px 0;
     }
 
-    .quantity-label {
+    .popup-quantity-label {
       font-weight: 600;
       font-size: 16px;
     }
 
-    .quantity-controls {
+    .popup-quantity-controls {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .qty-btn {
+    .popup-qty-btn {
       background: #F2F2F7;
       border: none;
       border-radius: 8px;
@@ -865,58 +1062,112 @@
       transition: all 0.2s;
     }
 
-    .qty-btn:active {
+    .popup-qty-btn:active {
       background: #E5E5EA;
     }
 
-    .qty {
+    .popup-qty {
       font-weight: 600;
       min-width: 24px;
       text-align: center;
       font-size: 18px;
     }
 
-    .popup-actions {
-      margin-top: auto;
-      padding: 20px;
-      position: sticky;
+    /* Bottom Section */
+    .popup-bottom-section {
+      position: fixed;
       bottom: 0;
+      left: 0;
+      right: 0;
       background: white;
-      border-top: 1px solid #f0f0f0;
-      flex-shrink: 0;
+      padding: 16px 20px;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    .popup-cta {
+    .popup-price-info {
+      flex: 1;
+    }
+
+    .popup-bottom-price {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .popup-bottom-mrp {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .popup-taxes-info {
+      font-size: 10px;
+      color: #666;
+    }
+
+    .popup-add-to-cart-btn {
       background: #007AFF;
       color: white;
       border: none;
-      border-radius: 12px;
-      padding: 18px;
-      font-size: 18px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
       font-weight: 600;
-      width: 100%;
       cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(0,122,255,0.3);
+      transition: background-color 0.3s;
     }
 
-    .popup-cta:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 6px rgba(0,122,255,0.3);
+    .popup-add-to-cart-btn:hover {
+      background: #0069d9;
+    }
+
+    .popup-add-to-cart-btn:active {
+      background: #005cbf;
+    }
+
+    /* Content padding for fixed bottom */
+    .popup-content-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 80px;
     }
 
     /* Cart Page - Enhanced - FIXED: Button order and sticky CTA */
-    #cart .section {
-      display: flex;
+    .cart-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: white;
+      z-index: 1000;
+      display: none;
       flex-direction: column;
-      height: calc(100vh - 60px - 34px); /* Account for header and ticker */
-      padding-bottom: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      border-radius: 0;
     }
 
-    .cart-scrollable {
-      flex: 1;
-      overflow-y: auto;
-      padding-bottom: 20px;
+    @media (min-width: 481px) {
+      .cart-modal {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 95%;
+        height: auto;
+        max-width: var(--app-max-width);
+        max-height: 90vh;
+        border-radius: 20px;
+        box-shadow: 0 0 50px rgba(0,0,0,0.2);
+      }
+    }
+
+    .cart-modal.active {
+      display: flex;
     }
 
     .cart-header {
@@ -1209,6 +1460,7 @@
 
     .faq.active {
       box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      border-color: rgba(59,130,246,.2);
     }
 
     .q {
@@ -1224,6 +1476,11 @@
       font-size: 16px;
       font-weight: 600;
       color: #1e40af;
+      transition: all 0.3s;
+    }
+
+    .q:hover {
+      background: rgba(59,130,246,.05);
     }
 
     .a {
@@ -1350,10 +1607,11 @@
       z-index: 100;
       box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
       width: 100%;
-      max-width: 414px;
+      max-width: var(--app-max-width);
+      height: var(--bottom-nav-height);
     }
 
-    @media (min-width: 415px) {
+    @media (min-width: 481px) {
       .bottom-bar {
         border-radius: 20px 20px 0 0;
       }
@@ -1372,7 +1630,7 @@
       padding: 8px 12px;
       border-radius: 12px;
       min-height: 44px;
-      min-width: 44px;
+      min-width: var(--bottom-nav-btn-width);
       justify-content: center;
     }
 
@@ -1382,7 +1640,7 @@
     }
 
     .nav-item i {
-      font-size: 20px;
+      font-size: var(--bottom-nav-icon-size);
     }
 
     .nav-badge {
@@ -1405,7 +1663,7 @@
     /* Toast */
     .toast {
       position: fixed;
-      bottom: 100px;
+      bottom: var(--toast-bottom);
       left: 50%;
       transform: translateX(-50%) translateY(100px);
       background: #34C759;
@@ -1420,7 +1678,7 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      max-width: 414px;
+      max-width: var(--app-max-width);
       width: calc(100% - 40px);
     }
 
@@ -1484,6 +1742,22 @@
       
       #catalog .categories {
         top: 130px;
+      }
+      
+      .popup-title {
+        font-size: 20px;
+      }
+      
+      .popup-features {
+        margin: 0 10px;
+      }
+      
+      .popup-feature-title {
+        font-size: 11px;
+      }
+      
+      .popup-feature-subtitle {
+        font-size: 9px;
       }
     }
 
@@ -1642,46 +1916,6 @@
       </main>
     </div>
 
-    <!-- Cart Page - Enhanced -->
-    <div class="page" id="cart">
-      <header class="header">
-        <div class="header-top">
-          <button class="back-btn" onclick="goBack()">
-            <i class="fas fa-arrow-left"></i>
-          </button>
-          <div class="logo">Your Cart</div>
-          <div></div>
-        </div>
-      </header>
-
-      <main class="section">
-        <div class="cart-header">
-          <button class="clear-cart" onclick="clearCart()" id="clearCartBtn">Clear All</button>
-        </div>
-        
-        <div class="cart-scrollable">
-          <div id="cartItems"></div>
-          <div id="cartSummary"></div>
-          <div id="emptyCart" class="empty-cart" style="display: none;">
-            <i class="fas fa-shopping-bag"></i>
-            <h3>Your cart is empty</h3>
-            <p>Add some fresh seafood to get started</p>
-            <button class="empty-cart-btn" onclick="showPage('catalog')">Browse Products</button>
-          </div>
-        </div>
-        
-        <!-- Sticky cart actions - FIXED: Button order and sticky placement -->
-        <div class="cart-actions" id="cartActions" style="display: none;">
-          <button class="continue-shopping" onclick="showPage('catalog')">
-            Continue Shopping
-          </button>
-          <button class="checkout-btn" onclick="checkout()">
-            <i class="fas fa-lock"></i> Proceed to Checkout
-          </button>
-        </div>
-      </main>
-    </div>
-
     <!-- FAQ Page -->
     <div class="page" id="faqPage">
       <header class="header">
@@ -1819,24 +2053,166 @@
       </main>
     </div>
 
-    <!-- Product Popup - FIXED: New structure with proper header and sticky footer -->
+    <!-- NEW: Updated Product Popup with new design -->
     <div class="product-popup" id="productPopup">
       <div class="popup-header">
-        <button class="popup-back-btn" onclick="closePopup()">
-          <i class="fas fa-arrow-left"></i>
-        </button>
-        <div class="popup-title" id="popupTitle"></div>
-        <button class="popup-close-btn" onclick="closePopup()">
-          <i class="fas fa-times"></i>
-        </button>
+        <button class="popup-back-btn" onclick="closePopup()">←</button>
+        <div class="popup-header-actions">
+          <button class="popup-action-btn" onclick="toggleFavorite()">♡</button>
+          <button class="popup-action-btn" onclick="shareProduct()">↗</button>
+        </div>
       </div>
+
       <div class="popup-content-wrapper">
-        <div class="popup-image" id="popupImage"></div>
-        <div class="popup-content" id="popupContent"></div>
+        <!-- Product Image Section -->
+        <div class="popup-image-section">
+          <div class="popup-image-container">
+            <img src="" alt="" class="popup-image" id="popupMainImage">
+            <button class="popup-image-nav" onclick="nextPopupImage()">›</button>
+          </div>
+          <div class="popup-image-indicators">
+            <div class="popup-indicator active"></div>
+            <div class="popup-indicator"></div>
+            <div class="popup-indicator"></div>
+          </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="popup-info">
+          <div class="popup-delivery-time">
+            <span>🕐</span>
+            <span>Next Day Delivery</span>
+          </div>
+
+          <div class="popup-rating">
+            <div class="popup-stars">★★★★☆</div>
+            <span class="popup-rating-text">(4.2/5 - 387 reviews)</span>
+          </div>
+
+          <h1 class="popup-title" id="popupProductTitle"></h1>
+          <div class="popup-weight" id="popupProductWeight"></div>
+
+          <div class="popup-price-section">
+            <span class="popup-current-price" id="popupCurrentPrice"></span>
+            <span class="popup-original-price" id="popupOriginalPrice"></span>
+            <span class="popup-discount" id="popupDiscount"></span>
+          </div>
+
+          <div class="popup-unit-price" id="popupUnitPrice"></div>
+
+          <button class="popup-details-btn" onclick="togglePopupDetails()">
+            View product details ▼
+          </button>
+
+          <!-- Features -->
+          <div class="popup-features">
+            <div class="popup-feature">
+              <div class="popup-feature-icon">🔄</div>
+              <div class="popup-feature-title">Quality</div>
+              <div class="popup-feature-subtitle">Guaranteed</div>
+            </div>
+            <div class="popup-feature">
+              <div class="popup-feature-icon">👥</div>
+              <div class="popup-feature-title">24/7</div>
+              <div class="popup-feature-subtitle">Support</div>
+            </div>
+            <div class="popup-feature">
+              <div class="popup-feature-icon">🚚</div>
+              <div class="popup-feature-title">Fast</div>
+              <div class="popup-feature-subtitle">Delivery</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Highlights Section -->
+        <div class="popup-highlights-section">
+          <div class="popup-highlights-header">
+            <h2 class="popup-highlights-title">Product Details</h2>
+            <button class="popup-expand-btn" onclick="togglePopupHighlights()">^</button>
+          </div>
+          
+          <div class="popup-highlights-content" id="popupHighlightsContent">
+            <div class="popup-highlight-item">
+              <span class="popup-highlight-label">Gross Weight</span>
+              <span class="popup-highlight-value" id="popupGrossWeight"></span>
+            </div>
+            <div class="popup-highlight-item">
+              <span class="popup-highlight-label">Net Weight</span>
+              <span class="popup-highlight-value" id="popupNetWeight"></span>
+            </div>
+            <div class="popup-highlight-item">
+              <span class="popup-highlight-label">Type</span>
+              <span class="popup-highlight-value" id="popupType"></span>
+            </div>
+            <div class="popup-highlight-item">
+              <span class="popup-highlight-label">Description</span>
+              <span class="popup-highlight-value" id="popupDescription"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quantity Selector -->
+        <div class="popup-quantity-selector">
+          <span class="popup-quantity-label">Quantity:</span>
+          <div class="popup-quantity-controls">
+            <button class="popup-qty-btn" onclick="changePopupQty(-1)">-</button>
+            <span class="popup-qty" id="popupQty">1</span>
+            <button class="popup-qty-btn" onclick="changePopupQty(1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Section -->
+      <div class="popup-bottom-section">
+        <div class="popup-price-info">
+          <div class="popup-bottom-price" id="popupBottomPrice"></div>
+          <div class="popup-taxes-info">Inclusive of all taxes</div>
+        </div>
+        <button class="popup-add-to-cart-btn" onclick="addPopupToCart()">Add to cart</button>
       </div>
     </div>
 
-    <!-- Bottom Navigation - FIXED: Now properly constrained to mobile container -->
+    <!-- Cart Page as Modal -->
+    <div class="cart-modal" id="cartModal">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" onclick="closeCart()">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="logo">Your Cart</div>
+          <div></div>
+        </div>
+      </header>
+
+      <main class="section">
+        <div class="cart-header">
+          <button class="clear-cart" onclick="clearCart()" id="clearCartBtn">Clear All</button>
+        </div>
+        
+        <div class="cart-scrollable">
+          <div id="cartItems"></div>
+          <div id="cartSummary"></div>
+          <div id="emptyCart" class="empty-cart" style="display: none;">
+            <i class="fas fa-shopping-bag"></i>
+            <h3>Your cart is empty</h3>
+            <p>Add some fresh seafood to get started</p>
+            <button class="empty-cart-btn" onclick="showPage('catalog'); closeCart();">Browse Products</button>
+          </div>
+        </div>
+        
+        <!-- Sticky cart actions - FIXED: Button order and sticky placement -->
+        <div class="cart-actions" id="cartActions" style="display: none;">
+          <button class="continue-shopping" onclick="closeCart()">
+            Continue Shopping
+          </button>
+          <button class="checkout-btn" onclick="checkout()">
+            <i class="fas fa-lock"></i> Proceed to Checkout
+          </button>
+        </div>
+      </main>
+    </div>
+
+    <!-- Bottom Navigation - FIXED: Properly constrained to mobile container -->
     <nav class="bottom-bar" id="bottomNav">
       <div class="nav-item active" onclick="showPage('home')">
         <i class="fas fa-home"></i>
@@ -1895,18 +2271,17 @@
   </script>
 
   <script>
-    /* ===== Trust Icons CONFIG ===== */
+    /* ===== App Configuration ===== */
     const TRUST_ICONS = [
       { icon: '🧊', title: 'Fresh', text: 'Daily catch' },
       { icon: '🌱', title: '100% Natural', text: 'No chemicals' },
       { icon: '💵', title: 'COD', text: 'Pay on delivery' },
     ];
 
-    /* ===== Featured Products CONFIG ===== */
-    const FEATURED_PRODUCT_IDS = [1, 11, 20, 15]; // Configurable featured product IDs
-
-    /* ===== Profile Image CONFIG ===== */
+    const FEATURED_PRODUCT_IDS = [1, 11, 20, 15];
     const PROFILE_IMAGE_URL = "https://res.cloudinary.com/dpyniai9l/image/upload/v1756914772/Coastal_Fresh_Sea_food_hyderabad_-_website_banner_shqapq.png";
+    const FREE_DELIVERY_THRESHOLD = 1500;
+    const ITEMS_PER_PAGE = 8;
 
     /* ===== Products DATA ===== */
     const products = [
@@ -1943,10 +2318,19 @@
     let cart = {};
     let currentPage = 'home';
     let currentCategory = 'All';
+    let currentSearch = '';
+    let currentPageNumber = 1;
     let carouselTimer = null;
     let currentCarouselIndex = 0;
     let currentProductQty = 1;
     let isPopupOpen = false;
+    
+    /* NEW: Variables for popup functionality */
+    let currentPopupImageIndex = 0;
+    let isPopupFavorite = false;
+    let popupHighlightsExpanded = true;
+    let popupDetailsExpanded = false;
+    let popupProduct = null;
 
     /* ===== Init ===== */
     function init() {
@@ -1979,6 +2363,9 @@
           document.querySelectorAll('.category').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           currentCategory = btn.dataset.category;
+          currentPageNumber = 1;
+          document.getElementById('catalogSearch').value = '';
+          currentSearch = '';
           renderCatalogProducts();
           
           // Track category selection
@@ -2026,28 +2413,63 @@
       container.innerHTML = featured.map(product => createProductHTML(product)).join('');
     }
 
-    function renderCatalogProducts(search = '') {
+    function renderCatalogProducts() {
       const container = document.getElementById('catalogProducts');
       if (!container) return;
       
       let filtered = products.filter(p => {
         const matchCategory = currentCategory === 'All' || p.category === currentCategory;
-        const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || 
-                           (p.desc && p.desc.toLowerCase().includes(search.toLowerCase()));
+        const matchSearch = !currentSearch || p.name.toLowerCase().includes(currentSearch.toLowerCase()) || 
+                           (p.desc && p.desc.toLowerCase().includes(currentSearch.toLowerCase()));
         return matchCategory && matchSearch;
       });
 
-      if (filtered.length === 0) {
+      // Pagination
+      const startIndex = 0;
+      const endIndex = currentPageNumber * ITEMS_PER_PAGE;
+      const paginatedProducts = filtered.slice(startIndex, endIndex);
+
+      if (paginatedProducts.length === 0) {
         container.innerHTML = '<div class="loading" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #8E8E93;">No products found</div>';
         return;
       }
 
-      container.innerHTML = filtered.map(product => createProductHTML(product)).join('');
+      container.innerHTML = paginatedProducts.map(product => createProductHTML(product)).join('');
+      
+      // Show more button if there are more products
+      if (endIndex < filtered.length) {
+        const showMoreBtn = document.createElement('button');
+        showMoreBtn.textContent = 'Show More';
+        showMoreBtn.className = 'show-more-btn';
+        showMoreBtn.style.gridColumn = '1 / -1';
+        showMoreBtn.style.margin = '20px auto';
+        showMoreBtn.style.padding = '12px 24px';
+        showMoreBtn.style.background = '#007AFF';
+        showMoreBtn.style.color = 'white';
+        showMoreBtn.style.border = 'none';
+        showMoreBtn.style.borderRadius = '8px';
+        showMoreBtn.style.cursor = 'pointer';
+        showMoreBtn.onclick = showMoreProducts;
+        
+        container.appendChild(showMoreBtn);
+        
+        // Track show more event
+        if (typeof gtag === 'function') gtag('event', 'show_more', { 
+          category: currentCategory, 
+          search_term: currentSearch,
+          items_shown: endIndex,
+          total_items: filtered.length
+        });
+      }
+    }
+
+    function showMoreProducts() {
+      currentPageNumber++;
+      renderCatalogProducts();
     }
 
     function createProductHTML(product) {
       const hasOffer = product.mrp > product.finalPrice;
-      const saveAmount = hasOffer ? product.mrp - product.finalPrice : 0;
       const isInCart = cart[product.id];
       
       return `
@@ -2068,75 +2490,67 @@
           ${product.available ? 
             (isInCart ? 
               `<div class="cart-controls">
-                <button class="qty-btn" onclick="event.stopPropagation(); updateQty(${product.id}, -1)">-</button>
-                <span class="qty">${isInCart.qty}</span>
-                <button class="qty-btn" onclick="event.stopPropagation(); updateQty(${product.id}, 1)">+</button>
+                <button class="qty-btn dec" onclick="event.stopPropagation(); updateQty(${product.id}, -1)">-</button>
+                <span class="qty num">${isInCart}</span>
+                <button class="qty-btn inc" onclick="event.stopPropagation(); updateQty(${product.id}, 1)">+</button>
               </div>` 
-              : `<button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${product.id})"><i class="fas fa-plus"></i></button>`)
+              : `<button class="add-to-cart-btn add-pill" onclick="event.stopPropagation(); addToCart(${product.id})"><i class="fas fa-plus"></i></button>`)
           : ''}
         </div>
       `;
     }
 
+    /* NEW: Updated showProductPopup function with new design */
     function showProductPopup(id) {
       const product = products.find(p => p.id === id);
       if (!product) return;
 
-      currentProductQty = 1;
+      popupProduct = product;
+      currentProductQty = cart[product.id] || 1;
       const popup = document.getElementById('productPopup');
-      const image = document.getElementById('popupImage');
-      const content = document.getElementById('popupContent');
-      const title = document.getElementById('popupTitle');
-
-      // Set the product title in the header
-      title.textContent = product.name;
-
-      image.innerHTML = `
-        <img src="${product.image}" alt="${product.name}">
-      `;
-
-      const hasOffer = product.mrp > product.finalPrice;
       
-      content.innerHTML = `
-        <h2 class="popup-name">${product.name}</h2>
-        <p class="popup-weight">${product.gross} / ${product.net}</p>
-        <div class="popup-price">
-          <span class="price">₹${product.finalPrice}</span>
-          ${hasOffer ? `<span class="old-price">₹${product.mrp}</span>` : ''}
-          ${hasOffer ? `<div class="popup-offer">${product.offer}% OFF</div>` : ''}
-        </div>
-        <p class="popup-description">${product.desc}</p>
-        
-        ${product.available ? `
-        <div class="quantity-selector">
-          <span class="quantity-label">Quantity:</span>
-          <div class="quantity-controls">
-            <button class="qty-btn" onclick="changeProductQty(-1)">-</button>
-            <span class="qty" id="productQty">${currentProductQty}</span>
-            <button class="qty-btn" onclick="changeProductQty(1)">+</button>
-          </div>
-        </div>
-        ` : `
-        <div style="margin-bottom: 24px;">
-          <p style="color: #FF3B30; font-weight: 600;">Currently out of stock</p>
-        </div>
-        `}
-        
-        <div class="popup-actions">
-          ${product.available ? `
-          <button class="popup-cta" onclick="addToCart(${product.id}, currentProductQty)">
-            <i class="fas fa-shopping-bag"></i> Add to Cart - ₹${product.finalPrice * currentProductQty}
-          </button>
-          ` : `
-          <button class="popup-cta" disabled style="background: #8E8E93;">
-            <i class="fas fa-times-circle"></i> Out of Stock
-          </button>
-          `}
-        </div>
-      `;
-
+      // Set product data in the popup
+      document.getElementById('popupProductTitle').textContent = product.name;
+      document.getElementById('popupProductWeight').textContent = product.net;
+      document.getElementById('popupCurrentPrice').textContent = `₹${product.finalPrice}`;
+      document.getElementById('popupOriginalPrice').textContent = `MRP ₹${product.mrp}`;
+      
+      // Calculate and show discount if applicable
+      const discountElem = document.getElementById('popupDiscount');
+      if (product.mrp > product.finalPrice) {
+        const discountPercent = Math.round(((product.mrp - product.finalPrice) / product.mrp) * 100);
+        discountElem.textContent = `${discountPercent}% OFF`;
+        discountElem.style.display = 'inline';
+      } else {
+        discountElem.style.display = 'none';
+      }
+      
+      // Calculate unit price
+      const netWeight = parseInt(product.net);
+      const unitPrice = netWeight ? (product.finalPrice / (netWeight / 100)).toFixed(2) : 0;
+      document.getElementById('popupUnitPrice').textContent = `₹${unitPrice}/100 g`;
+      
+      // Set product details
+      document.getElementById('popupGrossWeight').textContent = product.gross;
+      document.getElementById('popupNetWeight').textContent = product.net;
+      document.getElementById('popupType').textContent = product.category;
+      document.getElementById('popupDescription').textContent = product.desc;
+      
+      // Set product image
+      document.getElementById('popupMainImage').src = product.image;
+      document.getElementById('popupMainImage').alt = product.name;
+      
+      // Update bottom price
+      const totalPrice = product.finalPrice * currentProductQty;
+      const totalMrp = product.mrp * currentProductQty;
+      document.getElementById('popupBottomPrice').innerHTML = `₹${totalPrice} <span class="popup-bottom-mrp">MRP ₹${totalMrp}</span> ${product.mrp > product.finalPrice ? `<span class="popup-discount">${Math.round(((product.mrp - product.finalPrice) / product.mrp) * 100)}% OFF</span>` : ''}`;
+      
+      // Set quantity
+      document.getElementById('popupQty').textContent = currentProductQty;
+      
       popup.classList.add('active');
       isPopupOpen = true;
+      document.body.classList.add('popup-open');
       
       // Hide bottom navigation when product popup is open
       document.getElementById('bottomNav').style.display = 'none';
@@ -2156,50 +2570,172 @@
       }
     }
 
-    function changeProductQty(change) {
-      currentProductQty = Math.max(1, currentProductQty + change);
-      document.getElementById('productQty').textContent = currentProductQty;
+    /* NEW: Function to change quantity in popup */
+    function changePopupQty(change) {
+      const qtyElement = document.getElementById('popupQty');
+      let qty = parseInt(qtyElement.textContent);
+      qty = Math.max(1, Math.min(99, qty + change));
+      qtyElement.textContent = qty;
       
-      const productId = document.querySelector('.popup-cta').getAttribute('onclick').match(/\d+/)[0];
-      const product = products.find(p => p.id === parseInt(productId));
+      // Update bottom price with quantity
+      if (popupProduct) {
+        const totalPrice = popupProduct.finalPrice * qty;
+        const totalMrp = popupProduct.mrp * qty;
+        document.getElementById('popupBottomPrice').innerHTML = `₹${totalPrice} <span class="popup-bottom-mrp">MRP ₹${totalMrp}</span> ${popupProduct.mrp > popupProduct.finalPrice ? `<span class="popup-discount">${Math.round(((popupProduct.mrp - popupProduct.finalPrice) / popupProduct.mrp) * 100)}% OFF</span>` : ''}`;
+      }
       
-      if (product) {
-        document.querySelector('.popup-cta').innerHTML = 
-          `<i class="fas fa-shopping-bag"></i> Add to Cart - ₹${product.finalPrice * currentProductQty}`;
+      currentProductQty = qty;
+    }
+
+    /* NEW: Function to add to cart from popup */
+    function addPopupToCart() {
+      if (!popupProduct || !popupProduct.available) return;
+
+      const qty = parseInt(document.getElementById('popupQty').textContent);
+      
+      if (cart[popupProduct.id]) {
+        cart[popupProduct.id] = Math.min(99, cart[popupProduct.id] + qty);
+      } else {
+        cart[popupProduct.id] = qty;
+      }
+
+      saveCart();
+      updateCartUI();
+      showToast(`${popupProduct.name} added to cart!`);
+      closePopup();
+      
+      // Track add to cart
+      trackAddToCart(popupProduct.id, qty);
+    }
+
+    /* NEW: Function to toggle favorite in popup */
+    function toggleFavorite() {
+      isPopupFavorite = !isPopupFavorite;
+      const favoriteBtn = document.querySelector('.popup-action-btn');
+      favoriteBtn.textContent = isPopupFavorite ? '♥' : '♡';
+      favoriteBtn.style.color = isPopupFavorite ? '#e74c3c' : '#333';
+      
+      // Track favorite action
+      if (popupProduct && typeof gtag === 'function') {
+        gtag('event', isPopupFavorite ? 'add_to_wishlist' : 'remove_from_wishlist', {
+          currency: 'INR',
+          value: popupProduct.finalPrice,
+          items: [{
+            item_id: popupProduct.id,
+            item_name: popupProduct.name,
+            item_category: popupProduct.category,
+            price: popupProduct.finalPrice
+          }]
+        });
+      }
+    }
+
+    /* NEW: Function to share product from popup */
+    function shareProduct() {
+      if (!popupProduct) return;
+      
+      if (navigator.share) {
+        navigator.share({
+          title: 'Coastal Fresh - ' + popupProduct.name,
+          text: 'Check out this fresh product from Coastal Fresh!',
+          url: window.location.href + '?product=' + popupProduct.id
+        });
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        alert('Share this product: ' + window.location.href + '?product=' + popupProduct.id);
+      }
+      
+      // Track share action
+      if (typeof gtag === 'function') {
+        gtag('event', 'share', {
+          method: 'Web Share API',
+          content_type: 'product',
+          item_id: popupProduct.id,
+        });
+      }
+    }
+
+    /* NEW: Function to navigate images in popup */
+    function nextPopupImage() {
+      // For now just cycle through indicators since we only have one image
+      const indicators = document.querySelectorAll('.popup-indicator');
+      currentPopupImageIndex = (currentPopupImageIndex + 1) % indicators.length;
+      
+      indicators.forEach((indicator, index) => {
+        if (index === currentPopupImageIndex) {
+          indicator.classList.add('active');
+        } else {
+          indicator.classList.remove('active');
+        }
+      });
+    }
+
+    /* NEW: Function to toggle details in popup */
+    function togglePopupDetails() {
+      const detailsBtn = document.querySelector('.popup-details-btn');
+      const highlightsContent = document.getElementById('popupHighlightsContent');
+      
+      popupDetailsExpanded = !popupDetailsExpanded;
+      
+      if (popupDetailsExpanded) {
+        detailsBtn.innerHTML = 'Hide product details ▲';
+        highlightsContent.style.display = 'block';
+      } else {
+        detailsBtn.innerHTML = 'View product details ▼';
+        highlightsContent.style.display = 'none';
+      }
+    }
+
+    /* NEW: Function to toggle highlights in popup */
+    function togglePopupHighlights() {
+      const highlightsContent = document.getElementById('popupHighlightsContent');
+      const expandBtn = document.querySelector('.popup-expand-btn');
+      
+      popupHighlightsExpanded = !popupHighlightsExpanded;
+      
+      if (popupHighlightsExpanded) {
+        highlightsContent.style.display = 'block';
+        expandBtn.textContent = '^';
+      } else {
+        highlightsContent.style.display = 'none';
+        expandBtn.textContent = 'v';
       }
     }
 
     function closePopup() {
-      document.getElementById('productPopup').classList.remove('active');
-      isPopupOpen = false;
+  const popup = document.getElementById('productPopup');
+  if (popup) popup.classList.remove('active');
+
+  isPopupOpen = false;
+  document.body.classList.remove('popup-open');
+  popupProduct = null;
       
       // Show bottom navigation again when popup is closed
-      if (currentPage !== 'cart') {
-        document.getElementById('bottomNav').style.display = 'flex';
-      }
+  if (currentPage !== 'cart') {
+    document.getElementById('bottomNav').style.display = 'flex';
     }
+  }
 
     function addToCart(id, qty = 1) {
       const product = products.find(p => p.id === id);
       if (!product || !product.available) return;
 
       if (cart[id]) {
-        cart[id].qty += qty;
+        cart[id] = Math.min(99, cart[id] + qty);
       } else {
-        cart[id] = { ...product, qty: qty };
+        cart[id] = qty;
       }
 
+      saveCart();
       updateCartUI();
       showToast(`${product.name} added to cart!`);
-      closePopup();
       
       // Track add to cart
       trackAddToCart(id, qty);
     }
 
     function updateCartUI() {
-      const items = Object.values(cart);
-      const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+      const totalQty = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
 
       // Update all cart badges
       ['cartCount', 'cartCountCatalog', 'navBadge'].forEach(id => {
@@ -2214,45 +2750,35 @@
         }
       });
       
-      // Show/hide clear cart button
-      const clearCartBtn = document.getElementById('clearCartBtn');
-      if (clearCartBtn) {
-        clearCartBtn.style.display = totalQty > 0 ? 'block' : 'none';
-      }
-      
-      // Show/hide cart actions
-      const cartActions = document.getElementById('cartActions');
-      if (cartActions) {
-        cartActions.style.display = totalQty > 0 ? 'block' : 'none';
-      }
-      
       // Update product cards to show quantity controls
       renderFeaturedProducts();
       
       // Update catalog products if on catalog page
       if (currentPage === 'catalog') {
-        const catalogSearch = document.getElementById('catalogSearch');
-        if (catalogSearch) {
-          renderCatalogProducts(catalogSearch.value);
-        }
+        renderCatalogProducts();
       }
-      
-      // Save cart to localStorage
-      saveCart();
     }
 
     function showCart() {
-      const items = Object.values(cart);
+  const items = Object.keys(cart).map(id => {
+    const product = products.find(p => p.id === parseInt(id));
+    return { ...product, qty: cart[id] };
+    
+      });
+      
       const cartItems = document.getElementById('cartItems');
       const cartSummary = document.getElementById('cartSummary');
       const emptyCart = document.getElementById('emptyCart');
+      const cartActions = document.getElementById('cartActions');
 
       if (items.length === 0) {
         emptyCart.style.display = 'flex';
         cartItems.innerHTML = '';
         cartSummary.innerHTML = '';
+        cartActions.style.display = 'none';
       } else {
         emptyCart.style.display = 'none';
+        cartActions.style.display = 'block';
         
         // Render cart items
         cartItems.innerHTML = items.map(item => `
@@ -2284,7 +2810,7 @@
         const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
         const originalTotal = items.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
         const savings = originalTotal - subtotal;
-        const deliveryFee = subtotal >= 1500 ? 0 : 50;
+        const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
         const total = subtotal + deliveryFee;
 
         // Render summary
@@ -2297,7 +2823,7 @@
           ` : `
           <div class="delivery-note" style="background: #FFECB3; color: #7D6608;">
             <i class="fas fa-info-circle"></i>
-            <span>Add ₹${1500 - subtotal} more for free delivery</span>
+            <span>Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} more for free delivery</span>
           </div>
           `}
           <div class="cart-summary">
@@ -2323,9 +2849,11 @@
         `;
       }
 
-      showPage('cart');
+      // Show cart modal
+      document.getElementById('cartModal').classList.add('active');
+      document.body.classList.add('popup-open');
       
-      // Hide bottom navigation when cart page is open
+      // Hide bottom navigation when cart modal is open
       document.getElementById('bottomNav').style.display = 'none';
       
       // Track cart view
@@ -2344,16 +2872,29 @@
       }
     }
 
+    function closeCart() {
+      document.getElementById('cartModal').classList.remove('active');
+      document.body.classList.remove('popup-open');
+      
+      // Show bottom navigation again when cart is closed
+      document.getElementById('bottomNav').style.display = 'flex';
+    }
+
     function updateQty(id, change) {
       if (!cart[id]) return;
 
-      cart[id].qty += change;
-      if (cart[id].qty <= 0) {
+      cart[id] += change;
+      if (cart[id] <= 0) {
         delete cart[id];
       }
 
+      saveCart();
       updateCartUI();
-      showCart(); // Refresh cart display
+      
+      // If we're on the cart page, refresh it
+      if (document.getElementById('cartModal').classList.contains('active')) {
+        showCart();
+      }
       
       // Track quantity change
       trackChangeQty(id, change);
@@ -2362,6 +2903,7 @@
     function removeFromCart(id) {
       if (cart[id]) {
         delete cart[id];
+        saveCart();
         updateCartUI();
         showCart();
         
@@ -2378,6 +2920,7 @@
       if (Object.keys(cart).length > 0) {
         if (confirm('Are you sure you want to clear your cart?')) {
           cart = {};
+          saveCart();
           updateCartUI();
           showCart();
           
@@ -2390,11 +2933,15 @@
     }
 
     function checkout() {
-      const items = Object.values(cart);
+      const items = Object.keys(cart).map(id => {
+        const product = products.find(p => p.id === parseInt(id));
+        return { ...product, qty: cart[id] };
+      });
+      
       if (items.length === 0) return;
 
       const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
-      const deliveryFee = subtotal >= 1500 ? 0 : 50;
+      const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
       const total = subtotal + deliveryFee;
 
       let message = "Hi! I'd like to order:\n\n";
@@ -2413,16 +2960,16 @@
       window.open(`https://wa.me/919985125678?text=${encodeURIComponent(message)}`, '_blank');
       
       // Track begin checkout
-      if (typeof gtag === 'function') {
-        gtag('event', 'begin_checkout', {
-          currency: 'INR',
-          value: total,
-          items: items.map(item => ({
-            item_id: item.id,
-            item_name: item.name,
-            item_category: item.category,
-            price: item.finalPrice,
-            quantity: item.qty
+      if (items.length > 0 && typeof gtag === 'function') {
+      gtag('event', 'view_cart', {
+      currency: 'INR',
+      value: subtotal,
+      items: items.map(item => ({
+        item_id: item.id,
+        item_name: item.name,
+        item_category: item.category,
+        price: item.finalPrice,
+        quantity: item.qty
           }))
         });
       }
@@ -2444,15 +2991,10 @@
       } else {
         document.getElementById('bottomNav').style.display = 'flex';
       }
-      
-      // Special handling for cart page
-      if (page === 'cart') {
-        showCart();
-      }
     }
 
     function goBack() {
-      if (currentPage === 'catalog' || currentPage === 'cart' || currentPage === 'faqPage' || currentPage === 'profilePage') {
+      if (currentPage === 'catalog' || currentPage === 'faqPage' || currentPage === 'profilePage') {
         showPage('home');
       }
     }
@@ -2462,7 +3004,17 @@
     }
 
     function handleCatalogSearch(e) {
-      renderCatalogProducts(e.target.value);
+      currentSearch = e.target.value;
+      currentPageNumber = 1;
+      renderCatalogProducts();
+      
+      // Track search
+      if (typeof gtag === 'function' && currentSearch) {
+        gtag('event', 'view_search_results', {
+          search_term: currentSearch,
+          category: currentCategory
+        });
+      }
     }
 
     function showToast(text) {
@@ -2643,7 +3195,6 @@
       if (type === 'support') {
         message = 'Hi Coastal Fresh, I need assistance with my order.';
       } else if (type === 'refer') {
-        // FIXED: Prefill message for Refer & Earn
         message = 'Hey! I’ve been ordering seafood from Coastal Fresh – always fresh, neatly cleaned and delivered to my home in Hyderabad. You should try it! Use my referral for 10% off on your first order. 👉 https://coastalfresh.in';
       }
       window.open(`https://wa.me/919985125678?text=${encodeURIComponent(message)}`, '_blank');
@@ -2653,7 +3204,9 @@
       try {
         const saved = localStorage.getItem('coastalFreshCart');
         if (saved) {
-          cart = JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          // Sanitize cart data
+          cart = sanitizeCartShape(parsed);
           updateCartUI();
         }
       } catch (e) {
@@ -2669,8 +3222,29 @@
       }
     }
 
+   function sanitizeCartShape(cartData) {
+  const sanitized = {};
+
+  for (const [id, qty] of Object.entries(cartData)) {
+    // Validate product ID exists
+    const product = products.find(p => p.id === parseInt(id));
+    if (!product) continue;
+
+    // Validate and clamp quantity
+    const numericQty = parseInt(qty);
+    if (isNaN(numericQty)) continue;
+
+    const clampedQty = Math.max(0, Math.min(99, numericQty));
+    if (clampedQty > 0) {
+      sanitized[id] = clampedQty;
+    }
+  }
+
+  return sanitized;
+}
+
     function trackAddToCart(id, qty) {
-      const product = products.find(p => p.id === id);
+      const product = products.find(p => p.id === parseInt(id));
       if (!product || typeof gtag !== 'function') return;
       
       gtag('event', 'add_to_cart', {
@@ -2687,7 +3261,7 @@
     }
 
     function trackChangeQty(id, delta) {
-      const product = products.find(p => p.id === id);
+      const product = products.find(p => p.id === parseInt(id));
       if (!product || typeof gtag !== 'function') return;
       
       gtag('event', 'change_cart_quantity', {
@@ -2696,7 +3270,7 @@
         item_name: product.name,
         item_category: product.category,
         price: product.finalPrice,
-        quantity: cart[id] ? cart[id].qty : 0
+        quantity: cart[id] || 0
       });
     }
 
