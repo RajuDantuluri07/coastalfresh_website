@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fresh Fish & Prawns — Coastal Fresh | Hyderabad Delivery</title>
-  <meta name="description" content="Order premium fresh fish, prawns, crabs & authentic Andhra pickles in Hyderabad. Hygienically cleaned, packed & next-day delivery across the city." />
-
+  <title>Coastal Fresh | Buy Fresh Fish, Prawns & Seafood Online in Hyderabad</title>
 
   <!-- Preconnects -->
   <link rel="preconnect" href="https://res.cloudinary.com">
@@ -14,21 +12,14 @@
   <link rel="preconnect" href="https://cdnjs.cloudflare.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-  <!-- Google Fonts (fallback) -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-
-  <!-- Preload (remote example and local fonts) -->
-  <link rel="preload" href="https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxM.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/roboto-300.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/roboto-400.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/roboto-500.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/roboto-700.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <!-- SEO -->
-  <meta name="description" content="Order premium fresh seafood and authentic pickles in Hyderabad. Fresh fish, tiger prawns, crabs, and traditional pickles with next-day delivery. Trusted local sourcing from Coastal Andhra Pradesh." />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <link rel="canonical" href="https://www.coastalfresh.in" />
-  <meta name="theme-color" content="#1e40af" />
+  <meta name="theme-color" content="#007AFF" />
   <meta name="keywords" content="fresh fish delivery hyderabad, seafood delivery hyderabad, buy prawns online hyderabad, crab delivery hyderabad, hyderabad fish online, fresh seafood home delivery, andhra seafood hyderabad, online pickles hyderabad, prawn pickle online, fish pickle, mutton pickle, chicken pickle online" />
 
   <!-- Open Graph / Twitter -->
@@ -36,7 +27,7 @@
   <meta property="og:site_name" content="Coastal Fresh" />
   <meta property="og:locale" content="en_IN" />
   <meta property="og:title" content="Coastal Fresh | Buy Fresh Fish, Prawns, Crabs & Pickles in Hyderabad" />
-  <meta property="og:description" content="Fresh Premium seafood and authentic pickles delivered next-day across Hyderabad. Hygienic cleaning, careful packing, and responsible sourcing." />
+  <meta property="og:description" content="Order premium seafood online in Hyderabad with Coastal Fresh. Fresh fish, tiger prawns, crabs & pickles – delivered clean & hygienic with next-day delivery." />
   <meta property="og:url" content="https://www.coastalfresh.in" />
   <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1757139649/refer_eran_whats_app_ryhhmi.png" />
   <meta property="og:image:width" content="1200" />
@@ -80,7 +71,7 @@
       const utm = 'utm_source=website&utm_medium=whatsapp&utm_campaign=order_intent';
       function withUTM(url) {
         try {
-          const u = new URL(url);
+          const u = new URL(url, location.origin);
           if (u.hostname.includes('wa.me') || u.hostname.includes('api.whatsapp.com')) {
             if (u.search) { u.search += '&' + utm; } else { u.search = '?' + utm; }
           }
@@ -117,624 +108,1670 @@
 
   <link rel="icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" href="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- DOMPurify (for final safe sanitization if needed) -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js" crossorigin="anonymous"></script>
 
   <style>
-    /* ===== Roboto self-hosted @font-face + root font token ===== */
-    :root {
-      --font-sans: "Roboto", "Helvetica Neue", Arial, sans-serif;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    @font-face{
-      font-family: "Roboto";
-      font-style: normal;
-      font-weight: 300;
-      font-display: swap;
-      src: url("/fonts/roboto-300.woff2") format("woff2");
-    }
-    @font-face{
-      font-family: "Roboto";
-      font-style: normal;
-      font-weight: 400;
-      font-display: swap;
-      src: url("/fonts/roboto-400.woff2") format("woff2");
-    }
-    @font-face{
-      font-family: "Roboto";
-      font-style: normal;
-      font-weight: 500;
-      font-display: swap;
-      src: url("/fonts/roboto-500.woff2") format("woff2");
-    }
-    @font-face{
-      font-family: "Roboto";
-      font-style: normal;
-      font-weight: 700;
-      font-display: swap;
-      src: url("/fonts/roboto-700.woff2") format("woff2");
+    body {
+      font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Base using Roboto */
-    *{box-sizing:border-box;margin:0;padding:0}
-    html, body {
-      font-family: var(--font-sans);
-      font-weight: 400;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      background:var(--bg, #f7f9fc);
-      color:var(--ink, #1b2430);
-      line-height:1.6;
+    .app {
+      max-width: 414px;
+      margin: 0 auto;
+      background: white;
+      min-height: 100vh;
+      box-shadow: 0 0 50px rgba(0,0,0,0.1);
+      position: relative;
+      overflow-x: hidden;
     }
 
-    h1, h2, h3, .btn, .amount {
-      font-weight: 500;
-    }
-    h1 { font-size: 2rem; line-height: 1.15; }
-    h2 { font-size: 1.5rem; line-height: 1.2; }
-    p { font-size: 0.95rem; line-height: 1.45; }
-    .amount { font-weight: 700; letter-spacing: 0.2px; }
-
-    /* ===== Brand tokens & base ===== */
-    :root{
-      --brand:#1976ff;
-      --ink:#1b2430;
-      --sub:#6b7280;
-      --bg:#f7f9fc;
-      --line:#e9eef6;
-      --save:#16a34a;
-      --mrp:#98a1b2;
-      --radius-card:14px;
-      --radius-img:14px;
-      --desktop-bg-image:none;
-      --cta-grad: linear-gradient(135deg,#1e40af 0%,#3b82f6 100%);
+    .page {
+      display: none;
+      min-height: 100vh;
+      padding-bottom: 80px;
     }
 
-    body{background:var(--bg);color:var(--ink)}
-    a{text-decoration:none;color:inherit}
-    img{max-width:100%;display:block}
-
-    /* App wrapper (mobile viewport on desktop) */
-    #appWrapper{max-width:480px;margin:0 auto;background:#fff;min-height:100vh;box-shadow:0 0 30px rgba(0,0,0,.25);position:relative;z-index:2;overflow:hidden;padding-bottom:74px}
-    @media (min-width:769px){
-      body{background:#f5f9ff var(--desktop-bg-image) center/cover no-repeat fixed}
-      .product-popup,.cart-page{left:50%;transform:translateX(-50%);max-width:480px;width:100%}
-      body.popup-open{overflow:hidden}
+    .page.active {
+      display: block;
     }
-    /* DESKTOP: keep popup/cart inside the 480px app width */
-    @media (min-width:769px){
-      #appWrapper{ position:relative; }
-      .product-popup,
-      .cart-page{
-        left:50% !important;
-        right:auto !important;
-        transform:translateX(-50%) !important;
-        width:100% !important;
-        max-width:480px !important;
-        height:100%;
-        border-radius:16px;
-        box-shadow:0 10px 30px rgba(0,0,0,.18);
-        overflow:auto; /* allow container scroll as a fallback */
+
+    /* Desktop background */
+    @media (min-width: 415px) {
+      body {
+        background-image: url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756914772/Coastal_Fresh_Sea_food_hyderabad_-_website_banner_shqapq.png');
+        background-size: cover;
+        background-attachment: fixed;
+        background-position: center;
+        padding: 20px 0;
+      }
+      
+      .app {
+        border-radius: 20px;
+        overflow: hidden;
       }
     }
 
-    /* Header */
-    .header{background:var(--cta-grad);padding:12px 16px;color:#fff;position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center}
-    .logo{display:flex;align-items:center;gap:10px}
-    .logo-img{height:36px;width:auto;filter:drop-shadow(0 1px 1px rgba(0,0,0,.15))}
-    .logo-text{font-size:18px;font-weight:700}
-    .cart-summary{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.2);padding:8px 12px;border-radius:20px;cursor:pointer}
-    .cart-icon-header{font-size:18px}
-    .cart-count{background:#ff4757;color:#fff;border-radius:50%;width:22px;height:22px;display:none;align-items:center;justify-content:center;font-size:12px;font-weight:700}
-    .cart-amount{font-size:14px;font-weight:600;display:none}
-    .cart-summary.has-items .cart-count,.cart-summary.has-items .cart-amount{display:flex}
-    @media(max-width:768px){.logo-text{font-size:16px}.cart-amount{font-size:13px}}
-
-    /* Ticker + Carousel */
-    .ticker-container{position:sticky;top:60px;z-index:99;background:linear-gradient(90deg,#1e40af,#3b82f6);color:#fff;padding:8px 0;overflow:hidden}
-    .ticker{display:flex;white-space:nowrap;animation:ticker-scroll 30s linear infinite}
-    .ticker-item{display:flex;align-items:center;padding:0 16px;font-size:14px;font-weight:700}
-    .ticker-container:hover .ticker{animation-play-state:paused}
-    @keyframes ticker-scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-    .carousel{margin:16px;overflow:hidden;border-radius:12px;position:relative;height:150px}
-    .slides{display:flex;transition:transform .5s ease;height:100%}
-    .slide{min-width:100%;height:100%;background-size:cover;background-position:center}
-
-    /* ===== Trust icons ===== */
-    .trust-strip{display:flex;justify-content:space-between;align-items:stretch;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:16px;padding:16px 12px;gap:8px;box-shadow:0 10px 30px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.9);border:1px solid rgba(255,255,255,.3);position:relative;overflow:hidden;max-width:1200px;margin:16px 12px}
-    .trust-strip::before{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shine 3s ease-in-out infinite}
-    @keyframes shine{0%,100%{left:-100%}50%{left:100%}}
-    .trust-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:12px 6px;border-radius:12px;transition:all .3s cubic-bezier(.4,0,.2,1);cursor:pointer;background:linear-gradient(145deg,rgba(255,255,255,.1),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.1)}
-    .trust-item:hover{transform:translateY(-5px) scale(1.02);box-shadow:0 15px 35px rgba(59,130,246,.3);background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(255,255,255,.1));border-color:rgba(255,255,255,.2)}
-    .icon-container{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:12px;font-size:20px;margin-bottom:2px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;animation:pulse 4s ease-in-out infinite}
-    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
-    .trust-title{font-size:13px;font-weight:600;color:#1f2937;line-height:1.2}
-    .trust-sub{font-size:10px;color:#6b7280;line-height:1.3}
-
-    /* ===== Tabs (categories) with PNG icons ===== */
-    .container{max-width:440px;margin:0 auto;padding:12px}
-    .tabs{display:flex;gap:18px;overflow:auto hidden;padding:8px 4px 6px;position:sticky;top:0;z-index:5;background:linear-gradient(#fff,#fff);border-bottom:1px solid var(--line)}
-    .tab{flex:0 0 auto;display:flex;align-items:center;gap:8px;padding:10px 2px 12px;color:#4b5563;text-decoration:none;font-weight:700;font-size:14px;position:relative;white-space:nowrap;background:transparent;border:none;cursor:pointer}
-    .tab img.icon{width:20px;height:20px;border-radius:6px;object-fit:cover;box-shadow:0 0 0 1px #e5e7eb}
-    .tab[aria-current="page"]{color:var(--brand)}
-    .tab[aria-current="page"]::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;border-radius:3px;background:var(--brand)}
-    .section-title{font-weight:800;font-size:16px;margin:12px 4px}
-
-    /* ===== Grid (now 2-up) & Card ===== */
-    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:6px 2px 20px}
-    .card{background:#fff;border-radius:var(--radius-card);padding:8px;box-shadow:0 2px 8px rgba(10,30,70,.06)}
-    .img{position:relative;border-radius:var(--radius-img);overflow:hidden;aspect-ratio:1/1;background:#e8f0ff}
-    .img>img{width:100%;height:100%;object-fit:cover}
-    .add-pill{position:absolute;right:8px;bottom:8px;background:#fff;color:var(--brand);border:2px solid var(--brand);font-weight:800;font-size:12px;line-height:1;padding:7px 12px;border-radius:999px;box-shadow:0 4px 10px rgba(0,0,0,.08);cursor:pointer}
-    .qty{position:absolute;right:8px;bottom:8px;display:none;align-items:center;gap:10px;background:#fff;border-radius:999px;padding:4px 6px;box-shadow:0 4px 10px rgba(0,0,0,.08)}
-    .qty button{width:28px;height:28px;border-radius:999px;border:2px solid var(--brand);background:#fff;color:#brand;font-weight:900;font-size:16px;line-height:0;cursor:pointer}
-    .qty .num{min-width:16px;text-align:center;font-weight:800}
-    .price-row{display:flex;align-items:baseline;gap:6px;margin-top:6px}
-    .price-now{font-weight:900;font-size:14px}
-    .price-mrp{color:var(--mrp);text-decoration:line-through;font-size:12px}
-    .save{color:var(--save);font-size:12px;font-weight:800;margin-top:2px}
-    .meta{font-size:12px;color:var(--sub);margin-top:4px}
-    .name{margin-top:4px;font-size:12px;font-weight:700;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-    @media (max-width:360px){.name{font-size:11px}.price-now{font-size:13px}}
-
-    /* Search bar + typewriter placeholder */
-    .search-container{margin:16px;position:relative}
-    .search-input{width:100%;padding:12px 45px 12px 16px;border-radius:25px;border:1px solid #ddd;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.1);outline:none}
-    .search-icon{position:absolute;right:15px;top:50%;transform:translateY(-50%);color:#666;font-size:18px}
-
-    /* Floating Cart CTA */
-    .cart-footer{
-      position:fixed;
-      bottom:70px;
-      left:50%;
-      transform:translateX(-50%);
-      background:var(--cta-grad);
-      color:#fff;
-      padding:10px 16px;
-      border-radius:999px;
-      display:none;
-      align-items:center;
-      gap:10px;
-      z-index:96;
-      box-shadow:0 10px 24px rgba(30,64,175,.35);
-      border:1px solid rgba(255,255,255,.25);
-      cursor:pointer;
-      width:auto;
+    /* Ticker - Now above header */
+    .ticker-container {
+      position: sticky;
+      top: 0;
+      z-index: 102;
+      background: linear-gradient(90deg,#1e40af,#3b82f6);
+      color: #fff;
+      padding: 8px 0;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
-    .cart-info{display:flex;gap:8px;align-items:center}
-    .cart-icon{font-size:18px}
-    .cart-text{font-size:14px;font-weight:700}
-    #cartTotal{font-size:14px;font-weight:800;background:rgba(255,255,255,.18);padding:6px 10px;border-radius:20px}
 
-    /* Popup & Cart page */
-    .product-popup{position:fixed;top:0;left:0;width:100%;height:100%;background:#fff;z-index:1000;display:none;flex-direction:column;overflow-y:auto}
-    .popup-header{display:flex;align-items:center;padding:16px;border-bottom:1px solid #ddd;position:sticky;top:0;background:#fff;z-index:10}
-    .back-btn{font-size:24px;margin-right:12px;cursor:pointer}
-    .popup-title{font-size:18px;font-weight:600;flex:1}
-    .share-btn{font-size:20px;cursor:pointer;margin-left:12px;color:#25D366}
-    .popup-body{padding:16px;overflow-y:auto;position:relative;flex:1}
-    .popup-body img{width:80%;max-height:200px;object-fit:contain;border-radius:12px;margin:0 auto 16px;display:block}
-    .popup-sub{font-size:14px;color:#666;margin-bottom:8px}
-    .popup-price{display:flex;align-items:center;gap:8px;margin-bottom:12px}
-    .popup-price .now{font-size:20px;font-weight:700;color:#111}
-    .popup-price .old{text-decoration:line-through;color:#999;font-size:16px}
-    .popup-price .offer{background:#dcfce7;color:#16a34a;font-size:14px;padding:4px 8px;border-radius:6px;font-weight:600}
-    .delivery-info{background:#f0fdf4;padding:12px;border-radius:8px;color:#16a34a;font-size:14px;font-weight:600;display:flex;gap:8px;align-items:center;margin-bottom:16px}
-    .popup-footer{position:sticky;bottom:0;left:0;width:100%;display:flex;justify-content:space-between;padding:16px;border-top:1px solid #ddd;background:#fff;z-index:10}
-    .popup-footer button{flex:1;margin:0 6px;padding:14px;font-weight:600;border-radius:8px;cursor:pointer;font-size:16px;text-transform:uppercase}
-    .popup-footer .close-btn{background:#fff;color:#666;border:1px solid #ddd}
-    .popup-footer .add{background:#2563eb;color:#fff;border:none}
+    .ticker {
+      display: flex;
+      white-space: nowrap;
+      animation: ticker-scroll 15s linear infinite;
+    }
 
-    .cart-page{position:fixed;top:0;left:0;width:100%;height:100%;background:#f1f5f9;z-index:2000;display:none;flex-direction:column;overflow-y:auto}
-    .cart-header{display:flex;align-items:center;background:#fff;padding:16px;border-bottom:1px solid #ddd;box-shadow:0 2px 4px rgba(0,0,0,.1);position:sticky;top:0;z-index:10}
-    .cart-title{font-weight:600;font-size:18px;margin-left:12px}
-    .savings-badge{background:#dcfce7;color:#16a34a;font-size:14px;font-weight:600;padding:4px 8px;border-radius:6px;margin-left:8px;display:none}
-    .delivery-banner{background:#f0fdf4;color:#16a34a;padding:12px 16px;display:none;align-items:center;gap:8px;font-size:14px;font-weight:600}
+    .ticker-item {
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 13px;
+      font-weight: 600;
+    }
 
-    .cart-items-container{flex:1;overflow-y:auto;padding:12px}
-    .cart-items{background:#fff;border-radius:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:12px}
-    .cart-item{display:flex;align-items:center;gap:12px;border-bottom:1px solid #eee;padding:12px 0}
-    .cart-item:last-child{border-bottom:none}
-    .cart-item img{width:60px;height:60px;object-fit:contain;border-radius:8px}
-    .item-details{flex:1;min-width:0}
-    .item-name{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .item-weight{font-size:14px;color:#666}
-    .quantity-controls{display:flex;align-items:center;gap:10px;margin-top:4px}
-    .quantity-btn{width:28px;height:28px;border:1px solid #ddd;background:#fff;border-radius:6px;cursor:pointer;font-size:16px}
-    .item-price{font-weight:600;font-size:16px}
-    .item-original{font-size:14px;color:#999;text-decoration:line-through}
-    .remove-btn{color:#ff3b30;cursor:pointer;font-size:18px;padding:8px}
-    .order-summary{background:#fff;border-radius:12px;padding:16px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin:0 12px;position:sticky;bottom:0;z-index:10;display:none}
-    .summary-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
-    .total-price{font-size:20px;font-weight:700}
-    .cart-actions{display:flex;gap:12px;background:#fff;padding:16px;border-top:1px solid #ddd;box-shadow:0 -2px 4px rgba(0,0,0,.1);position:sticky;bottom:0;z-index:10}
-    .continue{flex:1;background:#fff;border:2px solid #2563eb;color:#2563eb;border-radius:8px;padding:14px;font-weight:600;font-size:16px;cursor:pointer;text-transform:uppercase}
-    .place{flex:1;background:#2563eb;color:#fff;border:none;border-radius:8px;padding:14px;font-weight:600;font-size:16px;position:relative;cursor:pointer;text-transform:uppercase;display:none}
-    .place .order-total{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#1e40af;color:#fff;padding:4px 10px;border-radius:12px;font-size:14px}
+    .ticker-item i {
+      margin-right: 8px;
+      font-size: 14px;
+    }
 
-    /* Empty cart & Toast */
-    .empty-cart{text-align:center;padding:40px 20px;color:#666}
-    .empty-cart-icon{font-size:60px;margin-bottom:16px;color:#ccc}
-    .empty-cart-text{font-size:16px;margin-bottom:20px}
-    .toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(100px);background:#16a34a;color:#fff;padding:12px 24px;border-radius:30px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:1004;opacity:0;transition:transform .3s ease,opacity .3s ease;display:flex;align-items:center;gap:10px;font-weight:700}
-    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .ticker-container:hover .ticker {
+      animation-play-state: paused;
+    }
 
-    /* Sections (brief) */
-    .section{padding:30px 16px}
-    .section h2{font-size:22px;text-align:center;margin-bottom:20px;color:#1e40af}
+    @keyframes ticker-scroll {
+      0% { transform: translateX(100%); }
+      100% { transform: translateX(-100%); }
+    }
 
-    .faq-wrap{padding:32px 16px;background:linear-gradient(135deg,#e0f2fe 0%, #f0f9ff 100%)}
-    .faq{background:#fff;border-radius:16px;margin-bottom:12px;box-shadow:0 4px 20px rgba(0,0,0,.08);border:1px solid rgba(59,130,246,.1);overflow:hidden}
-    .q{width:100%;background:none;border:none;padding:16px 20px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:12px;font-size:14px;font-weight:600;color:#1e40af}
-    .a{max-height:0;overflow:hidden;transition:max-height .4s cubic-bezier(.4,0,.2,1);background:rgba(59,130,246,.02)}
-    .faq.active .a{max-height:200px}
-    .answer-content{padding:0 20px 20px 20px;font-size:14px}
+    /* Header */
+    .header {
+      background: white;
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      position: sticky;
+      top: 34px; /* Height of ticker */
+      z-index: 101;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #007AFF;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+    }
+
+    .back-btn:active {
+      background-color: #f0f0f0;
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 700;
+      color: #007AFF;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-img {
+      height: 32px;
+      width: auto;
+    }
+
+    .cart-btn {
+      position: relative;
+      background: none;
+      border: none;
+      font-size: 22px;
+      color: #007AFF;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+    }
+
+    .cart-btn:active {
+      background-color: #f0f0f0;
+    }
+
+    .cart-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #FF3B30;
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      font-size: 11px;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 15px;
+      color: #8E8E93;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .search-container {
+      position: relative;
+    }
+
+    .search {
+      background: #F2F2F7;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 16px 12px 42px;
+      font-size: 16px;
+      width: 100%;
+      color: #1a1a1a;
+      transition: all 0.2s;
+    }
+
+    .search:focus {
+      outline: none;
+      background: #e8e8ed;
+      box-shadow: 0 0 0 2px rgba(0,122,255,0.2);
+    }
+
+    .search::placeholder {
+      color: #8E8E93;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #8E8E93;
+      font-size: 16px;
+    }
+
+    /* Section */
+    .section {
+      padding: 20px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #1a1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .view-all {
+      font-size: 14px;
+      color: #007AFF;
+      font-weight: 500;
+    }
+
+    /* Carousel */
+    .carousel {
+      margin: 0 20px 20px;
+      overflow: hidden;
+      border-radius: 16px;
+      position: relative;
+      height: 160px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .slides {
+      display: flex;
+      transition: transform .35s ease;
+      height: 100%;
+    }
+
+    .slide {
+      min-width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .carousel-dots {
+      position: absolute;
+      bottom: 12px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+      transition: all 0.3s;
+    }
+
+    .dot.active {
+      width: 16px;
+      border-radius: 8px;
+      background: white;
+    }
+
+    /* Trust Icons */
+    .trust-strip {
+      display: flex;
+      justify-content: space-between;
+      align-items: stretch;
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      padding: 16px 12px;
+      gap: 8px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.9);
+      border: 1px solid rgba(255,255,255,.3);
+      position: relative;
+      overflow: hidden;
+      margin: 0 20px 20px;
+    }
+
+    .trust-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-align: center;
+      padding: 12px 6px;
+      border-radius: 12px;
+      transition: all .3s cubic-bezier(.4,0,.2,1);
+      cursor: pointer;
+      background: linear-gradient(145deg,rgba(255,255,255,.1),rgdata:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23343a40' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z'/%3E%3C/svg%3Eba(255,255,255,.05));
+      border: 1px solid rgba(255,255,255,.1);
+    }
+
+    .trust-item:active {
+      transform: scale(0.97);
+    }
+
+    .icon-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      font-size: 20px;
+      margin-bottom: 2px;
+      background: linear-gradient(135deg,#3b82f6,#1d4ed8);
+      color: #fff;
+    }
+
+    .trust-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #1f2937;
+      line-height: 1.2;
+    }
+
+    .trust-sub {
+      font-size: 12px;
+      color: #6b7280;
+      line-height: 1.3;
+    }
+
+    /* Home Featured Products */
+    .featured-products {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    /* Categories for Catalog */
+    .categories {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      overflow-x: auto;
+      padding: 5px 0 15px;
+      scrollbar-width: none;
+    }
+
+    .categories::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category {
+      background: #F2F2F7;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #8E8E93;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .category.active {
+      background: #007AFF;
+      color: white;
+      box-shadow: 0 4px 10px rgba(0,122,255,0.3);
+    }
+
+    /* Products Grid */
+    .products {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .product {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .product:active {
+      transform: scale(0.98);
+    }
+
+    .product-image {
+      position: relative;
+      height: 150px;
+      background: #f8f8f8;
+      overflow: hidden;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+
+    .product:hover .product-image img {
+      transform: scale(1.05);
+    }
+
+    .offer-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: #FF3B30;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      z-index: 2;
+    }
+
+    .out-of-stock {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255,255,255,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: #FF3B30;
+      z-index: 1;
+    }
+
+    .product-info {
+      padding: 12px;
+    }
+
+    .product-name {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #1a1a1a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .product-weight {
+      font-size: 13px;
+      color: #8E8E93;
+      margin-bottom: 8px;
+    }
+
+    .product-price {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .price {
+      font-size: 18px;
+      font-weight: 700;
+      color: #007AFF;
+    }
+
+    .old-price {
+      font-size: 14px;
+      color: #8E8E93;
+      text-decoration: line-through;
+    }
+
+    .add-to-cart-btn {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #007AFF;
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,122,255,0.4);
+      transition: all 0.2s;
+      z-index: 2;
+    }
+
+    .add-to-cart-btn:active {
+      transform: scale(0.9);
+    }
+
+    /* Product Popup - FIXED: Full mobile screen with proper header and sticky footer */
+    .product-popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: white;
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      border-radius: 0;
+    }
+
+    @media (min-width: 415px) {
+      .product-popup {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 95%;
+        height: auto;
+        max-width: 414px;
+        max-height: 90vh;
+        border-radius: 20px;
+        box-shadow: 0 0 50px rgba(0,0,0,0.2);
+      }
+    }
+
+    .product-popup.active {
+      display: flex;
+    }
+
+    .popup-header {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+      background: white;
+      position: relative;
+      z-index: 10;
+      flex-shrink: 0;
+    }
+
+    .popup-back-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #007AFF;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+    }
+
+    .popup-title {
+      font-size: 18px;
+      font-weight: 600;
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding-right: 10px;
+    }
+
+    .popup-close-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #8E8E93;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .popup-content-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .popup-image {
+      height: 300px;
+      background: #f8f8f8;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .popup-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .popup-content {
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .popup-name {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .popup-weight {
+      color: #8E8E93;
+      margin-bottom: 16px;
+    }
+
+    .popup-price {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .popup-price .price {
+      font-size: 28px;
+    }
+
+    .popup-offer {
+      background: #34C759;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .popup-description {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #666;
+      margin-bottom: 24px;
+    }
+
+    .quantity-selector {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .quantity-label {
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .qty-btn {
+      background: #F2F2F7;
+      border: none;
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .qty-btn:active {
+      background: #E5E5EA;
+    }
+
+    .qty {
+      font-weight: 600;
+      min-width: 24px;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .popup-actions {
+      margin-top: auto;
+      padding: 20px;
+      position: sticky;
+      bottom: 0;
+      background: white;
+      border-top: 1px solid #f0f0f0;
+      flex-shrink: 0;
+    }
+
+    .popup-cta {
+      background: #007AFF;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 18px;
+      font-size: 18px;
+      font-weight: 600;
+      width: 100%;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(0,122,255,0.3);
+    }
+
+    .popup-cta:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 6px rgba(0,122,255,0.3);
+    }
+
+    /* Cart Page - Enhanced - FIXED: Button order and sticky CTA */
+    .cart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .clear-cart {
+      background: none;
+      border: none;
+      color: #FF3B30;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: background-color 0.2s;
+    }
+
+    .clear-cart:active {
+      background-color: rgba(255,59,48,0.1);
+    }
+
+    .cart-item {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      border-radius: 16px;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      margin-bottom: 12px;
+      transition: transform 0.2s;
+    }
+
+    .cart-item:active {
+      transform: scale(0.99);
+    }
+
+    .cart-item-image {
+      width: 70px;
+      height: 70px;
+      border-radius: 12px;
+      background: #f8f8f8;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .cart-item-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .cart-item-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .cart-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .cart-item-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-size: 16px;
+    }
+
+    .cart-item-weight {
+      font-size: 13px;
+      color: #8E8E93;
+    }
+
+    .cart-item-price {
+      font-weight: 700;
+      color: #007AFF;
+      font-size: 16px;
+    }
+
+    .cart-item-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .qty-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .cart-qty-btn {
+      background: #F2F2F7;
+      border: none;
+      border-radius: 8px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .cart-qty-btn:active {
+      background: #E5E5EA;
+    }
+
+    .cart-qty {
+      font-weight: 600;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .remove-item {
+      background: none;
+      border: none;
+      color: #FF3B30;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: background-color 0.2s;
+    }
+
+    .remove-item:active {
+      background-color: rgba(255,59,48,0.1);
+    }
+
+    .cart-summary {
+      background: #F2F2F7;
+      padding: 20px;
+      margin: 24px 0;
+      border-radius: 16px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 15px;
+    }
+
+    .summary-savings {
+      color: #34C759;
+    }
+
+    .summary-total {
+      font-weight: 700;
+      font-size: 18px;
+      color: #007AFF;
+      border-top: 1px solid #ddd;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+
+    .delivery-note {
+      background: #E8F5E9;
+      color: #2E7D32;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .delivery-note i {
+      font-size: 16px;
+    }
+
+    .cart-actions {
+      position: sticky;
+      bottom: 0;
+      background: white;
+      padding: 15px 20px;
+      border-top: 1px solid #f0f0f0;
+      margin: 0 -20px -20px;
+    }
+
+    .continue-shopping {
+      background: none;
+      border: 1px solid #007AFF;
+      color: #007AFF;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 16px;
+      width: 100%;
+      text-align: center;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      transition: all 0.2s;
+    }
+
+    .continue-shopping:active {
+      background: rgba(0,122,255,0.1);
+    }
+
+    .checkout-btn {
+      background: #007AFF;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 18px;
+      font-size: 18px;
+      font-weight: 600;
+      width: 100%;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 12px rgba(0,122,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .checkout-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 6px rgba(0,122,255,0.3);
+    }
+
+    .empty-cart {
+      text-align: center;
+      padding: 60px 20px;
+      color: #8E8E93;
+    }
+
+    .empty-cart i {
+      font-size: 64px;
+      margin-bottom: 16px;
+      display: block;
+      color: #E5E5EA;
+    }
+
+    .empty-cart h3 {
+      font-size: 20px;
+      margin-bottom: 8px;
+      color: #8E8E93;
+    }
+
+    .empty-cart p {
+      margin-bottom: 24px;
+    }
+
+    .empty-cart-btn {
+      background: #007AFF;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 16px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,122,255,0.3);
+    }
+
+    /* FAQ */
+    .faq-wrap {
+      padding: 30px 20px;
+      background: linear-gradient(135deg,#e0f2fe 0%, #f0f9ff 100%);
+    }
+
+    .faq {
+      background: #fff;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.08);
+      border: 1px solid rgba(59,130,246,.1);
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .faq.active {
+      box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    }
+
+    .q {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 16px 20px;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e40af;
+    }
+
+    .a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .4s cubic-bezier(.4,0,.2,1);
+      background: rgba(59,130,246,.02);
+    }
+
+    .faq.active .a {
+      max-height: 500px;
+    }
+
+    .answer-content {
+      padding: 0 20px 20px 20px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .answer-highlight {
+      background: rgba(59,130,246,.1);
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-weight: 500;
+      color: #1e40af;
+    }
+
+    /* Profile Page */
+    .profile-section {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #007AFF, #34C759);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 15px;
+      font-size: 40px;
+      color: white;
+    }
+
+    .profile-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .profile-button {
+      background: #007AFF;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+
+    .profile-button:active {
+      transform: translateY(2px);
+    }
+
+    .profile-button.support {
+      background: #25D366;
+    }
+
+    .profile-button.refer {
+      background: #5856D6;
+    }
+
+    .fisherman-image {
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
+      display: block;
+    }
 
     /* Footer */
-    footer{background:linear-gradient(135deg,#333,#555);color:#fff;text-align:center;padding:30px 16px}
-    footer .social{margin:15px 0}
-    footer .social a{color:#fff;margin:0 12px;font-size:20px;transition:.2s}
-    footer .social a:hover{color:#25d366}
-
-    .hidden{display:none !important}
-    .loading{opacity:.7;pointer-events:none}
-
-    /* Improved Show More CTA */
-    .show-more-btn{
-      appearance:none;border:none;cursor:pointer;
-      margin:4px auto 18px;display:block;padding:12px 18px;border-radius:999px;
-      background:linear-gradient(135deg,#e0e7ff,#dbeafe);
-      box-shadow:0 6px 14px rgba(37,99,235,.18);
-      font-weight:800;letter-spacing:.3px;color:#1e3a8a;
-      transition:transform .15s ease, box-shadow .15s ease, background .3s ease;
-    }
-    .show-more-btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(37,99,235,.24)}
-    .show-more-btn:active{transform:translateY(0)}
-
-    /* ===== Bottom Navigation Bar (new) ===== */
-    .bottom-nav {
-      position:fixed;
-      bottom:0;
-      left:50%;
-      transform:translateX(-50%);
-      width:100%;
-      max-width:480px;
-      height:64px;
-      background:#fff;
-      border-radius:12px 12px 0 0;
-      box-shadow:0 -8px 28px rgba(3,7,18,0.12);
-      display:flex;
-      align-items:center;
-      justify-content:space-around;
-      gap:6px;
-      z-index:110;
-      border-top:1px solid rgba(0,0,0,0.06);
-      padding:6px 8px;
-    }
-    .bottom-nav button {
-      background:transparent;
-      border:none;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:4px;
-      font-size:12px;
-      color:#263238;
-      cursor:pointer;
-      width:64px;
-      height:56px;
-      border-radius:10px;
-    }
-    .bottom-nav button .icon {
-      font-size:18px;
-      line-height:1;
-    }
-    .bottom-nav button.active { color: var(--brand); }
-    .bottom-nav .badge {
-      position:absolute;
-      top:6px;
-      right:14px;
-      background:#ff4757;
-      color:#fff;
-      font-size:11px;
-      padding:2px 6px;
-      border-radius:999px;
-      min-width:20px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      height:20px;
+    footer {
+      background: linear-gradient(135deg,#333,#555);
+      color: #fff;
+      text-align: center;
+      padding: 30px 20px;
     }
 
-    /* ensure content above bottom nav */
-    @media (max-width:480px) {
-      #appWrapper { padding-bottom:90px; }
+    footer .social {
+      margin: 15px 0;
+    }
+
+    footer .social a {
+      color: #fff;
+      margin: 0 12px;
+      font-size: 20px;
+      transition: .2s;
+    }
+
+    footer .social a:hover {
+      color: #25d366;
+    }
+
+    /* Bottom Navigation - FIXED: Properly constrained to mobile container */
+    .bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      border-top: 1px solid #f0f0f0;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-around;
+      z-index: 100;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      width: 100%;
+      max-width: 414px;
+    }
+
+    @media (min-width: 415px) {
+      .bottom-bar {
+        border-radius: 20px 20px 0 0;
+      }
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: #8E8E93;
+      font-size: 12px;
+      cursor: pointer;
+      transition: color 0.2s;
+      position: relative;
+      padding: 8px 12px;
+      border-radius: 12px;
+    }
+
+    .nav-item.active {
+      color: #007AFF;
+      background: rgba(0,122,255,0.1);
+    }
+
+    .nav-item i {
+      font-size: 20px;
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: #FF3B30;
+      color: white;
+      border-radius: 50%;
+      width: 16px;
+      height: 16px;
+      font-size: 10px;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid white;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #34C759;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 414px;
+      width: calc(100% - 40px);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Catalog page sticky elements - FIXED: Sticky search and categories */
+    #catalog .header {
+      position: sticky;
+      top: 34px; /* Below ticker */
+      z-index: 101;
+    }
+
+    #catalog .categories {
+      position: sticky;
+      top: 134px; /* Below header + ticker */
+      z-index: 100;
+      background: white;
+      padding: 5px 0 15px;
+    }
+
+    /* Responsive */
+    @media (max-width: 375px) {
+      .app, .product-popup, .bottom-bar {
+        max-width: 375px;
+      }
+      
+      .title {
+        font-size: 24px;
+      }
+      
+      .section {
+        padding: 16px;
+      }
+      
+      .carousel {
+        margin: 0 16px 16px;
+        height: 140px;
+      }
+      
+      .trust-strip {
+        margin: 0 16px 16px;
+      }
+      
+      #catalog .categories {
+        top: 130px;
+      }
     }
   </style>
 </head>
 <body>
-  <div id="appWrapper">
-    <!-- Toast -->
-    <div id="toast" class="toast">
-      <i class="fas fa-check-circle"></i>
-      <span class="toast-message"></span>
-    </div>
-
-    <!-- Header -->
-    <div class="header">
-      <div class="logo">
-        <img class="logo-img" src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png" alt="Coastal Fresh logo" width="60" height="40" loading="lazy">
-        <span class="logo-text">COASTAL FRESH</span>
-      </div>
-      <div class="cart-summary" id="headerCart" role="button" aria-label="Open cart">
-        <span class="cart-icon-header">🛒</span>
-        <span class="cart-count" id="headerCartCount">0</span>
-        <span class="cart-amount" id="headerCartAmount">₹0</span>
-      </div>
-    </div>
-
-    <!-- Ticker -->
+  <div class="app">
+    <!-- Ticker - Now above header -->
     <div class="ticker-container">
-      <div class="ticker">
-        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
-        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
-        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
-        <div class="ticker-item">🎉 Order Today – Fresh Next-Day Delivery</div>
+      <div class="ticker" aria-hidden="true">
+        <div class="ticker-item"><i class="fas fa-truck"></i> Order Now & Get Delivered on Sunday</div>
+        <div class="ticker-item"><i class="fas fa-fish"></i> From Coast to Kitchen – Super Fresh</div>
+        <div class="ticker-item"><i class="fas fa-tag"></i> Free Delivery on Orders Above ₹1500</div>
+        <div class="ticker-item"><i class="fas fa-shield-alt"></i> 100% Hygienic & Safe Packaging</div>
       </div>
     </div>
 
-    <!-- Carousel -->
-    <div class="carousel">
-      <div class="slides" id="slides">
-        <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z.png')"></div>
-        <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png')"></div>
-        <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756388255/Coastal_Fresh_Banner_3_wqpv8c.png')"></div>
+    <!-- Home Page -->
+    <div class="page active" id="home">
+      <header class="header">
+        <div class="header-top">
+          <div class="logo">
+            <img class="logo-img" src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" alt="Coastal Fresh logo" width="40" height="40" loading="eager">
+            <span>COASTAL FRESH</span>
+          </div>
+          <button class="cart-btn" onclick="showCart()">
+            <i class="fas fa-shopping-bag"></i>
+            <span class="cart-count" id="cartCount">0</span>
+          </button>
+        </div>
+        <div class="search-container">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" class="search" placeholder="Search seafood..." id="searchInput">
+        </div>
+      </header>
+
+      <!-- Carousel -->
+      <div class="carousel">
+        <div class="slides" id="slides" aria-hidden="true">
+          <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png')"></div>
+          <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z')"></div>
+          <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png')"></div>
+        </div>
+        <div class="carousel-dots" id="carouselDots"></div>
       </div>
+
+      <!-- Trust Icons -->
+      <section class="trust-strip" id="trustStrip" aria-label="Trust and features"></section>
+
+      <main class="section">
+        <h2 class="section-title">
+          Featured Products
+          <span class="view-all" onclick="showPage('catalog')">View All</span>
+        </h2>
+        <div class="featured-products" id="featuredProducts"></div>
+      </main>
     </div>
 
-    <!-- Trust Icons -->
-    <section class="trust-strip" id="trustStrip"></section>
+    <!-- Catalog Page -->
+    <div class="page" id="catalog">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="logo">All Products</div>
+          <button class="cart-btn" onclick="showCart()">
+            <i class="fas fa-shopping-bag"></i>
+            <span class="cart-count" id="cartCountCatalog">0</span>
+          </button>
+        </div>
+        <div class="search-container">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" class="search" placeholder="Search products..." id="catalogSearch">
+        </div>
+      </header>
 
-    <!-- Search -->
-    <div class="search-container">
-      <input type="text" id="searchInput" class="search-input" placeholder='Search — Prawns' aria-label="Search products">
-      <i class="fas fa-search search-icon" aria-hidden="true"></i>
+      <main class="section">
+        <div class="categories" id="categories">
+          <button class="category active" data-category="All">All</button>
+          <button class="category" data-category="Fish">Fish</button>
+          <button class="category" data-category="Prawns">Prawns</button>
+          <button class="category" data-category="Crabs">Crabs</button>
+          <button class="category" data-category="Pickles">Pickles</button>
+        </div>
+        <div class="products" id="catalogProducts"></div>
+      </main>
     </div>
 
-    <!-- Tabs (Categories) -->
-    <div class="container">
-      <nav class="tabs" id="categoryTabs" aria-label="Categories"></nav>
+    <!-- Cart Page - Enhanced -->
+    <div class="page" id="cart">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="logo">Your Cart</div>
+          <div></div>
+        </div>
+      </header>
 
-      <h2 class="section-title" id="productsTitle">Premium Seafood & Pickles</h2>
-
-      <!-- 2-up Grid -->
-      <section class="grid" id="productGrid"></section>
-      <button class="show-more-btn hidden" id="showMoreBtn" type="button">Show more products</button>
+      <main class="section">
+        <div class="cart-header">
+          <button class="clear-cart" onclick="clearCart()" id="clearCartBtn">Clear All</button>
+        </div>
+        
+        <div id="cartItems"></div>
+        <div id="cartSummary"></div>
+        <div id="emptyCart" class="empty-cart" style="display: none;">
+          <i class="fas fa-shopping-bag"></i>
+          <h3>Your cart is empty</h3>
+          <p>Add some fresh seafood to get started</p>
+          <button class="empty-cart-btn" onclick="showPage('catalog')">Browse Products</button>
+        </div>
+        
+        <!-- Sticky cart actions - FIXED: Button order and sticky placement -->
+        <div class="cart-actions" id="cartActions" style="display: none;">
+          <button class="continue-shopping" onclick="showPage('catalog')">
+            Continue Shopping
+          </button>
+          <button class="checkout-btn" onclick="checkout()">
+            <i class="fas fa-lock"></i> Proceed to Checkout
+          </button>
+        </div>
+      </main>
     </div>
 
-    <!-- FAQ -->
-    <section class="section faq-wrap" id="faq">
-      <div class="faq-header">
-        <h2>Frequently Asked Questions</h2>
-        <p class="faq-subtitle">Everything you need to know about fresh seafood delivery</p>
-      </div>
-
-      <div class="faq-list">
-        <div class="faq" data-priority="high">
-          <button class="q" onclick="toggleFAQ(this)">
-            <span class="q-icon">🕐</span>
-            <span class="q-text">How quickly will I receive my order?</span>
-            <i class="chevron">▼</i>
+    <!-- FAQ Page -->
+    <div class="page" id="faqPage">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
           </button>
-          <div class="a">
-            <div class="answer-content">
-              <p><strong>Next-day delivery available!</strong> All other orders arrive next day with real-time tracking.</p>
-              <div class="answer-highlight">⚡ Most orders delivered in under 24 hours</div>
+          <div class="logo">FAQs</div>
+          <div></div>
+        </div>
+      </header>
+
+      <main class="faq-wrap">
+        <div class="faq-header">
+          <h2 class="section-title">Frequently Asked Questions</h2>
+          <p class="subtitle">Everything you need to know about fresh seafood delivery</p>
+        </div>
+
+        <div class="faq-list">
+          <div class="faq" data-priority="high">
+            <button class="q" onclick="toggleFAQ(this)">
+              <span class="q-text">How quickly will I receive my order?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="a">
+              <div class="answer-content">
+                <p><strong>Sunday & Wednesday morning</strong> timed with the freshest catch for unbeatable taste. </p>
+                <div class="answer-highlight">⚡ Peak freshness, guaranteed</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq" data-priority="high">
+            <button class="q" onclick="toggleFAQ(this)">
+              <span class="q-text">How do you guarantee freshness during delivery?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="a">
+              <div class="answer-content">
+                <p>Premium insulated packaging with ice thermocol box maintains ideal temperature. Your seafood stays fresh, safe, and ready to cook from our coast to your kitchen.</p>
+                <div class="answer-highlight">🧊 Temperature-controlled throughout delivery</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq" data-priority="medium">
+            <button class="q" onclick="toggleFAQ(this)">
+              <span class="q-text">Where is your seafood sourced from?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="a">
+              <div class="answer-content">
+                <p>Sourced across Coastal Andhra — from trusted suppliers, our own fish & prawn farms, and local fishermen — for fresh, restaurant-quality seafood.</p>
+                <div class="answer-highlight">🐟 Fresh from coast to kitchen</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq" data-priority="medium">
+            <button class="q" onclick="toggleFAQ(this)">
+              <span class="q-text">What areas in Hyderabad do you deliver to?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="a">
+              <div class="answer-content">
+                <p>We deliver across all major areas including Gachibowli, Hitech City, Banjara Hills, Film Nagar, Jubilee Hills, Madhapur, Kondapur, and surrounding regions.</p>
+                <div class="answer-highlight">🏠 Free delivery above ₹1500</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq" data-priority="low">
+            <button class="q" onclick="toggleFAQ(this)">
+              <span class="q-text">Is your seafood cleaned and ready to cook?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="a">
+              <div class="answer-content">
+                <p>Yes! All our seafood is carefully cleaned, deveined, and neatly packed — so it's 100% ready to cook when it reaches your kitchen.</p>
+                <div class="answer-highlight">✨ Hygienically cleaned & ready to cook</div>
+              </div>
             </div>
           </div>
         </div>
-
-        <div class="faq" data-priority="high">
-          <button class="q" onclick="toggleFAQ(this)">
-            <span class="q-icon">❄️</span>
-            <span class="q-text">How do you guarantee freshness during delivery?</span>
-            <i class="chevron">▼</i>
-          </button>
-          <div class="a">
-            <div class="answer-content">
-              <p>Premium insulated packaging with ice thermocol box maintains ideal temperature. Your seafood stays fresh, safe, and ready to cook from our coast to your kitchen.</p>
-              <div class="answer-highlight">🧊 Temperature-controlled throughout delivery</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="faq" data-priority="medium">
-          <button class="q" onclick="toggleFAQ(this)">
-            <span class="q-icon">🌊</span>
-            <span class="q-text">Where is your seafood sourced from?</span>
-            <i class="chevron">▼</i>
-          </button>
-          <div class="a">
-            <div class="answer-content">
-              <p>We source from the best suppliers in Coastal Andhra, with our own fish & prawn farms plus direct ties to local fishermen for fresh wild-caught seafood.</p>
-              <div class="answer-highlight">🐟 Export-quality, locally sourced</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="faq" data-priority="medium">
-          <button class="q" onclick="toggleFAQ(this)">
-            <span class="q-icon">📍</span>
-            <span class="q-text">What areas in Hyderabad do you deliver to?</span>
-            <i class="chevron">▼</i>
-          </button>
-          <div class="a">
-            <div class="answer-content">
-              <p>We deliver across all major areas including Gachibowli, Hitech City, Banjara Hills, Film Nagar, Jubilee Hills, Madhapur, Kondapur, and surrounding regions.</p>
-              <div class="answer-highlight">🏠 Free delivery above ₹1500</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="faq" data-priority="low">
-          <button class="q" onclick="toggleFAQ(this)">
-            <span class="q-icon">🔪</span>
-            <span class="q-text">Is your seafood cleaned and ready to cook?</span>
-            <i class="chevron">▼</i>
-          </button>
-          <div class="a">
-            <div class="answer-content">
-              <p>Yes! All our seafood is carefully cleaned, deveined, and neatly packed — so it's 100% ready to cook when it reaches your kitchen.</p>
-              <div class="answer-highlight">✨ Hygienically cleaned & ready to cook</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer id="contact">
-      <h3>Stay Connected</h3>
-      <p>Coastal Fresh – Fresh Catch, Fresh Taste</p>
-      <p><i class="fas fa-phone"></i> <a href="tel:+919985125678" style="color:#fff;text-decoration:underline">+91 99851 25678</a> &nbsp; | &nbsp; <i class="fas fa-envelope"></i> <a href="mailto:info@coastalfresh.in" style="color:#fff;text-decoration:underline">info@coastalfresh.in</a></p>
-      <p><i class="fas fa-map-marker-alt"></i> Serving all areas of Hyderabad</p>
-      <div class="social">
-        <a href="https://www.facebook.com/CoastalFresh.in/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-        <a href="https://www.instagram.com/coastalfresh.in" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="https://www.youtube.com/@CoastalFresh" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-        <a href="https://t.me/coastalfreshseafoods" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
-        <a href="https://wa.me/919985125678" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-      </div>
-    </footer>
-
-    <!-- Floating Cart CTA -->
-    <div class="cart-footer" id="cartFooter" role="button" aria-label="Open cart">
-      <div class="cart-info">
-        <span class="cart-icon">🛒</span>
-        <span class="cart-text" id="cartCount">0 items</span>
-      </div>
-      <div id="cartTotal">₹0</div>
+      </main>
     </div>
 
-    <!-- Product Popup -->
+    <!-- Profile Page -->
+    <div class="page" id="profilePage">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="logo">Profile</div>
+          <div></div>
+        </div>
+      </header>
+
+      <main class="section">
+        <div class="profile-section">
+          <div class="profile-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <h2>Guest User</h2>
+          <p style="color: #8E8E93;">You are browsing as a guest</p>
+        </div>
+
+        <div class="profile-buttons">
+          <button class="profile-button" onclick="showPage('faqPage')">
+            <i class="fas fa-question-circle"></i> FAQ
+          </button>
+          <button class="profile-button support" onclick="openWhatsApp('support')">
+            <i class="fab fa-whatsapp"></i> Support
+          </button>
+          <button class="profile-button refer" onclick="openWhatsApp('refer')">
+            <i class="fas fa-share-alt"></i> Refer & Earn
+          </button>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+          <h3 class="section-title">Follow Us</h3>
+          <div class="social" style="display: flex; justify-content: center; gap: 20px; margin: 20px 0;">
+            <a href="https://www.facebook.com/CoastalFresh.in/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook fa-2x"></i></a>
+            <a href="https://www.instagram.com/coastalfresh.in" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram fa-2x"></i></a>
+            <a href="https://www.youtube.com/@CoastalFresh" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube fa-2x"></i></a>
+            <a href="https://t.me/coastalfreshseafoods" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="fab fa-telegram fa-2x"></i></a>
+            <a href="https://wa.me/919985125678" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp fa-2x"></i></a>
+          </div>
+        </div>
+
+        <div style="text-align: center;">
+          <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756914772/Coastal_Fresh_Sea_food_hyderabad_-_website_banner_shqapq.png" alt="Fisherman" class="fisherman-image" id="profileImage">
+        </div>
+      </main>
+    </div>
+
+    <!-- Product Popup - FIXED: New structure with proper header and sticky footer -->
     <div class="product-popup" id="productPopup">
       <div class="popup-header">
-        <span class="back-btn">‹</span>
-        <span class="popup-title" id="popupTitle">Product Name</span>
-        <span class="share-btn"><i class="fab fa-whatsapp"></i></span>
+        <button class="popup-back-btn" onclick="closePopup()">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <div class="popup-title" id="popupTitle"></div>
+        <button class="popup-close-btn" onclick="closePopup()">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
-      <div class="popup-body" id="popupBody"></div>
-      <div class="popup-footer">
-        <button class="close-btn" type="button">CLOSE</button>
-        <button class="add" type="button">ADD TO CART</button>
-      </div>
-    </div>
-
-    <!-- Cart Page -->
-    <div class="cart-page" id="cartPage">
-      <div class="cart-header">
-        <span class="back-btn">‹</span>
-        <span class="cart-title">Cart</span>
-        <span class="savings-badge" id="savingsBadge">Saved ₹0</span>
-      </div>
-      <div class="delivery-banner" id="deliveryBanner">✓ Free delivery auto applied on this order!</div>
-
-      <div class="cart-items-container">
-        <div class="cart-items" id="cartItems"></div>
-        <div class="empty-cart" id="emptyCart" style="display:none;">
-          <div class="empty-cart-icon">🛒</div>
-          <div class="empty-cart-text">There are no items in your cart.</div>
-        </div>
-      </div>
-      <div class="order-summary" id="orderSummary">
-        <div class="summary-row">
-          <span class="original-total" id="originalTotal">₹0</span>
-          <span class="total-price" id="finalTotal">₹0</span>
-        </div>
-        <div class="savings-text" id="savingsText"></div>
-      </div>
-      <div class="cart-actions">
-        <button class="continue" type="button">CONTINUE SHOPPING</button>
-        <button class="place" id="placeOrderBtn" type="button"><div class="order-total" id="placeTotal">₹0</div>PLACE ORDER</button>
+      <div class="popup-content-wrapper">
+        <div class="popup-image" id="popupImage"></div>
+        <div class="popup-content" id="popupContent"></div>
       </div>
     </div>
 
-    <!-- Bottom Navigation (new) -->
-    <nav class="bottom-nav" role="navigation" aria-label="Bottom navigation">
-      <button id="navHome" class="nav-btn" aria-label="Home">
-        <span class="icon"><i class="fas fa-home"></i></span>
-        <span class="label">Home</span>
-      </button>
-
-      <button id="navSearch" class="nav-btn" aria-label="Search">
-        <span class="icon"><i class="fas fa-search"></i></span>
-        <span class="label">Search</span>
-      </button>
-
-      <button id="navCart" class="nav-btn" aria-label="Cart" style="position:relative;">
-        <span class="icon"><i class="fas fa-shopping-cart"></i></span>
-        <span class="label">Cart</span>
-        <span id="navCartBadge" class="badge" style="display:none">0</span>
-      </button>
-
-      <button id="navRefer" class="nav-btn" aria-label="Refer">
-        <span class="icon"><i class="fas fa-user-friends"></i></span>
-        <span class="label">Refer</span>
-      </button>
-
-      <button id="navSupport" class="nav-btn" aria-label="Support">
-        <span class="icon"><i class="fas fa-headset"></i></span>
-        <span class="label">Support</span>
-      </button>
+    <!-- Bottom Navigation - FIXED: Now properly constrained to mobile container -->
+    <nav class="bottom-bar" id="bottomNav">
+      <div class="nav-item active" onclick="showPage('home')">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </div>
+      <div class="nav-item" onclick="showPage('catalog')">
+        <i class="fas fa-th-large"></i>
+        <span>Catalog</span>
+      </div>
+      <div class="nav-item" onclick="showCart()">
+        <i class="fas fa-shopping-bag"></i>
+        <span>Cart</span>
+        <span class="nav-badge" id="navBadge">0</span>
+      </div>
+      <div class="nav-item" onclick="showPage('faqPage')">
+        <i class="fas fa-question-circle"></i>
+        <span>FAQ</span>
+      </div>
+      <div class="nav-item" onclick="showPage('profilePage')">
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
+      </div>
     </nav>
 
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "LocalBusiness",
-      "name": "Coastal Fresh",
-      "image": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png",
-      "url": "https://www.coastalfresh.in",
-      "telephone": "+91 99851 25678",
-      "email": "info@coastalfresh.in",
-      "address": { "@type": "PostalAddress", "addressLocality": "Hyderabad", "addressRegion": "Telangana", "addressCountry": "IN" },
-      "areaServed": "Hyderabad",
-      "description": "Premium fresh seafood and authentic pickles delivery service in Hyderabad offering fish, prawns, crabs, and pickles with next-day delivery",
-      "openingHours": "Mo-Su 08:00-20:00",
-      "priceRange": "₹₹",
-      "sameAs": [
-        "https://www.facebook.com/CoastalFresh.in",
-        "https://www.instagram.com/coastalfresh.in",
-        "https://www.youtube.com/@CoastalFresh",
-        "https://t.me/coastalfreshseafoods",
-        "https://wa.me/919985125678"
-      ]
-    }
-    </script>
+    <!-- Toast -->
+    <div class="toast" id="toast">
+      <i class="fas fa-check-circle"></i>
+      <span id="toastText">Added to cart!</span>
+    </div>
   </div>
 
-  <script>
-    /* ===== Configurable desktop background ===== */
-    const desktopBackgroundImage = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1756914772/Coastal_Fresh_Sea_food_hyderabad_-_website_banner_shqapq.png';
-    document.documentElement.style.setProperty('--desktop-bg-image', `url(${desktopBackgroundImage})`);
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Coastal Fresh",
+    "image": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png",
+    "logo": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png",
+    "url": "https://www.coastalfresh.in",
+    "telephone": "+91 99851 25678",
+    "email": "info@coastalfresh.in",
+    "address": { "@type": "PostalAddress", "addressLocality": "Hyderabad", "addressRegion": "Telangana", "addressCountry": "IN" },
+    "areaServed": "Hyderabad",
+    "description": "Premium fresh seafood and authentic pickles delivery service in Hyderabad offering fish, prawns, crabs, and pickles with next-day delivery",
+    "openingHours": ["Mo-Su 08:00-20:00"],
+    "priceRange": "₹₹",
+    "sameAs": [
+      "https://www.facebook.com/CoastalFresh.in",
+      "https://www.instagram.com/coastalfresh.in",
+      "https://www.youtube.com/@CoastalFresh",
+      "https://t.me/coastalfreshseafoods",
+      "https://wa.me/919985125678"
+    ]
+  }
+  </script>
 
+  <script>
     /* ===== Trust Icons CONFIG ===== */
     const TRUST_ICONS = [
-      { icon: '🧊', title: 'Freshness Guarantee', text: 'Freshly cut after your order' },
-      { icon: '🌱', title: 'Safe & Healthy', text: 'Chemical & Antibiotics Free' },
-      { icon: '📦', title: 'Clean & Packed', text: 'Neatly cleaned & carefully packed' },
-      { icon: '💵', title: 'Cash on Delivery', text: 'Pay when you receive' }
+      { icon: '🧊', title: 'Fresh', text: 'Daily catch' },
+      { icon: '🌱', title: '100% Natural', text: 'No chemicals' },
+      { icon: '📦', title: 'Safe', text: 'Sealed pack' },
+      { icon: '💵', title: 'COD', text: 'Pay on delivery' },
     ];
 
-    /* ===== Category Tabs CONFIG (PNG icons) ===== */
-    const CATEGORIES = [
-      { key: 'All',    label: 'All',    icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/shopping_yblohc.png' },
-      { key: 'Fish',   label: 'Fish',   icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/food_yircgb.png' },
-      { key: 'Prawns', label: 'Prawns', icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005093/shrimp_1_yzblqb.png' },
-      { key: 'Crabs',  label: 'Crabs',  icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/crab_n5ukwx.png' },
-      { key: 'Pickles',label: 'Pickles',icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005242/mason-jar_a5mtg4.png' }
-    ];
+    /* ===== Featured Products CONFIG ===== */
+    const FEATURED_PRODUCT_IDS = [1, 2, 15, 27]; // Configurable featured product IDs
+
+    /* ===== Profile Image CONFIG ===== */
+    const PROFILE_IMAGE_URL = "https://res.cloudinary.com/dpyniai9l/image/upload/v1756914772/Coastal_Fresh_Sea_food_hyderabad_-_website_banner_shqapq.png";
 
     /* ===== Products DATA ===== */
     const products = [
@@ -752,711 +1789,765 @@
       { id:12, name:"Rupchand", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rupchand_Fish_woqmzz.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Affordable, mild, versatile." },
       { id:13, name:"Catla", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Catla_-_Fish_tjb5hr.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Large cuts; great for Andhra curry." },
       { id:14, name:"Korameenu (Murrel)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577555/Korameenu_dkpfiw.png", mrp:780, finalPrice:700, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Prized delicacy; firm flesh." },
-      { id:15, name:"Sea Tiger Prawns - 20C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153106/Sea-water-prawns_1_j1puyn.jpg", mrp:750, finalPrice:750, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Large, juicy; grills & biryani." },
-      { id:16, name:"Sea Tiger Prawns - 40C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153106/Sea-water-prawns_1_j1puyn.jpg", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium, sweet flavor." },
-      { id:17, name:"Sea Tiger Prawns - 60C", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153106/Sea-water-prawns_1_j1puyn.jpg", mrp:550, finalPrice:550, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Smaller size, big flavor." },
-      { id:18, name:"Chakuroyya / Godavari", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153108/godhavari-prawns_ljw31t.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Authentic Andhra taste." },
+      { id:15, name:"Sea Tiger Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153106/Sea-water-prawns_1_j1puyn.jpg", mrp:750, finalPrice:750, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Large, juicy; grills & biryani." },
+      { id:16, name:"Sea Tiger Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153106/Sea-water-prawns_1_j1puyn.jpg", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium, sweet flavor." },
+      { id:17, name:"Sea Tiger Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153106/Sea-water-prawns_1_j1puyn.jpg", mrp:550, finalPrice:550, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Smaller size, big flavor." },
+      { id:18, name:"Godavari Prawns", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153108/godhavari-prawns_ljw31t.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Authentic Andhra taste." },
       { id:19, name:"Freshwater Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153103/fresh-water-pawrns_vztj21.jpg", mrp:380, finalPrice:380, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Great for prawn fry." },
       { id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153103/fresh-water-pawrns_vztj21.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Balanced size, firm flesh." },
       { id:21, name:"Freshwater Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153103/fresh-water-pawrns_vztj21.jpg", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Premium size; grills/party." },
       { id:22, name:"Live Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:1000, finalPrice:1000, offer:0, gross:"1000g", net:"600g", available:true, category:"Crabs", desc:"Delivered live; top freshness." },
       { id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153104/egg-carb_bcbh9w.jpg", mrp:900, finalPrice:900, offer:0, gross:"1000g", net:"600g", available:true, category:"Crabs", desc:"Roe for rich, creamy flavor." },
       { id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153103/blue-carb_z6k74h.jpg", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"600g", available:true, category:"Crabs", desc:"Delicate, sweet meat." },
-      
       { id:26, name:"3 Dot Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png", mrp:500, finalPrice:500, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Unique markings; sweet taste." },
       { id:27, name:"Prawns Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1900, finalPrice:1710, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra Prawns Pickle; cold-pressed oil; no preservatives." },
       { id:28, name:"Chicken Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1500, finalPrice:1500, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Andhra-style Chicken Pickle with bold spices." }
     ];
 
     /* ===== App State ===== */
-    let cart = Object.create(null); // safer plain object
-    let popupProduct = null;
-    let itemsPerPage = 8; // 2 per row * 4 rows
-    let currentPage = 1;
+    let cart = {};
+    let currentPage = 'home';
     let currentCategory = 'All';
-    let currentSearch = '';
-    const FREE_DELIVERY_THRESHOLD = 1500;
-    let lastSavings = 0;
-    let freeUnlocked = false;
-
-    /* ===== DOM ===== */
-    const productGrid = document.getElementById('productGrid');
-    const showMoreBtn = document.getElementById('showMoreBtn');
-    const cartFooter = document.getElementById('cartFooter');
-    const cartCount = document.getElementById('cartCount');
-    const cartTotal = document.getElementById('cartTotal');
-    const toast = document.getElementById('toast');
-    const toastMessage = document.querySelector('.toast-message');
-    const headerCartCount = document.getElementById('headerCartCount');
-    const headerCartAmount = document.getElementById('headerCartAmount');
-    const headerCart = document.getElementById('headerCart');
-    const searchInput = document.getElementById('searchInput');
-    const emptyCart = document.getElementById('emptyCart');
-    const cartItems = document.getElementById('cartItems');
-    const orderSummary = document.getElementById('orderSummary');
-    const deliveryBanner = document.getElementById('deliveryBanner');
-    const savingsBadge = document.getElementById('savingsBadge');
-    const placeOrderBtn = document.getElementById('placeOrderBtn');
-    const categoryTabs = document.getElementById('categoryTabs');
-    const trustStrip = document.getElementById('trustStrip');
-
-    /* Bottom nav elements */
-    const navHome = document.getElementById('navHome');
-    const navSearch = document.getElementById('navSearch');
-    const navCart = document.getElementById('navCart');
-    const navRefer = document.getElementById('navRefer');
-    const navSupport = document.getElementById('navSupport');
-    const navCartBadge = document.getElementById('navCartBadge');
-
-    /* ===== Helpers ===== */
-    function getValidProductById(id){
-      const pid = Number(id);
-      if (!Number.isInteger(pid)) return null;
-      return products.find(p => p.id === pid) || null;
-    }
-    function sanitizeCartShape(obj){
-      const cleaned = Object.create(null);
-      try{
-        const entries = Object.entries(obj || {});
-        for (const [idStr, qtyRaw] of entries){
-          const p = getValidProductById(idStr);
-          const n = Number(qtyRaw);
-          if (!Number.isFinite(n)) continue; // strict guard
-          const qty = Math.max(0, Math.min(99, n));
-          if (p && Number.isFinite(qty) && qty > 0){
-            cleaned[p.id] = qty;
-          }
-        }
-      }catch(_){}
-      return cleaned;
-    }
+    let carouselTimer = null;
+    let currentCarouselIndex = 0;
+    let currentProductQty = 1;
+    let isPopupOpen = false;
 
     /* ===== Init ===== */
-    document.addEventListener('DOMContentLoaded', function () {
+    function init() {
       renderTrustIcons();
-      renderCategoryTabs();
-      renderProducts();
+      renderFeaturedProducts();
+      renderCatalogProducts();
+      setupEvents();
+      updateCartUI();
       initCarousel();
-      initFAQ();
-      loadCart();
       startTypewriter();
-
-      // Events
-      categoryTabs.addEventListener('click', onTabClick);
-      searchInput.addEventListener('input', onSearchInput);
-      productGrid.addEventListener('click', onProductGridClick);
-      showMoreBtn.addEventListener('click', showMore);
-      document.querySelector('.popup-header .back-btn').addEventListener('click', closePopup);
-      document.querySelector('.popup-footer .close-btn').addEventListener('click', closePopup);
-      document.querySelector('.popup-footer .add').addEventListener('click', addPopupToCart);
-      document.querySelector('.cart-header .back-btn').addEventListener('click', closeCart);
-      document.querySelector('.cart-actions .continue').addEventListener('click', closeCart);
-      document.querySelector('.cart-actions .place').addEventListener('click', placeOrder);
-      cartFooter.addEventListener('click', openCart);
-      headerCart.addEventListener('click', openCart);
-      document.querySelector('.share-btn').addEventListener('click', shareProduct);
-
-      // Bottom nav handlers
-      navHome.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('home'); });
-      navSearch.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('search'); });
-      navCart.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('cart'); });
-      navRefer.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('refer'); });
-      navSupport.addEventListener('click', (e)=>{ e.preventDefault(); handleNavClick('support'); });
-
-      // Auto-open first FAQ for engagement
-      setTimeout(() => {
-        const firstFAQ = document.querySelector('.faq[data-priority="high"]');
-        if (firstFAQ) firstFAQ.classList.add('active');
-      }, 800);
-
-      // Add limited product schema
-      generateProductSchema();
-
-      // set initial bottom nav visuals
-      updateBottomNavUI();
-    });
-
-    /* ===== Bottom-nav helpers ===== */
-    function handleNavClick(key){
-      if (typeof gtag === 'function') gtag('event','navigation_click',{ nav:key });
-      // visual active
-      document.querySelectorAll('.bottom-nav .nav-btn').forEach(b => b.classList.remove('active'));
-      if (key === 'home') {
-        navHome.classList.add('active'); window.scrollTo({top:0,behavior:'smooth'});
-      }
-      if (key === 'search') {
-        navSearch.classList.add('active'); searchInput.focus();
-      }
-      if (key === 'cart') {
-        navCart.classList.add('active'); openCart();
-      }
-      if (key === 'refer') {
-        navRefer.classList.add('active');
-        // open the refer share flow
-        const message = "Hey! I’ve been ordering seafood from Coastal Fresh – always fresh, neatly cleaned and delivered to my home in Hyderabad. You should try it 👉 https://coastalfresh.in";
-        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
-      }
-      if (key === 'support') {
-        navSupport.classList.add('active');
-        // Open WhatsApp support pre-filled or call fallback
-        const supportNumber = '+919985125678';
-        const supportMsg = encodeURIComponent('Hello Coastal Fresh, I need help with my order/support.');
-        const waLink = `https://wa.me/919985125678?text=${supportMsg}`;
-        window.open(waLink, '_blank');
+      
+      // Load cart from localStorage if available
+      loadCart();
+      
+      // Set profile image from configurable URL
+      const profileImage = document.getElementById('profileImage');
+      if (profileImage) {
+        profileImage.src = PROFILE_IMAGE_URL;
       }
     }
 
-    function updateBottomNavUI(){
-      const count = Object.values(cart).reduce((s,n)=>s+n,0);
-      if (count>0){
-        navCartBadge.style.display='inline-flex';
-        navCartBadge.textContent = String(count);
-      } else {
-        navCartBadge.style.display='none';
-      }
-    }
+    function setupEvents() {
+      // Search
+      document.getElementById('searchInput').addEventListener('input', handleHomeSearch);
+      document.getElementById('catalogSearch').addEventListener('input', handleCatalogSearch);
 
-    /* ===== Trust Icons render ===== */
-    function renderTrustIcons(){
-      trustStrip.innerHTML = TRUST_ICONS.map((t,i)=>`
-        <div class="trust-item" data-index="${i}" data-title="${t.title}">
-          <div class="icon-container" style="animation-delay:${i}s">${t.icon}</div>
-          <div class="trust-content">
-            <div class="trust-title">${t.title}</div>
-            <div class="trust-sub">${t.text}</div>
-          </div>
-        </div>
-      `).join('');
-      trustStrip.querySelectorAll('.trust-item').forEach(el=>{
-        el.addEventListener('click',()=>{
-          if (typeof gtag==='function') gtag('event','click',{ location:'trust_strip', item_title:el.dataset.title, item_index:+el.dataset.index });
+      // Categories
+      document.querySelectorAll('.category').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.category').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentCategory = btn.dataset.category;
+          renderCatalogProducts();
+          
+          // Track category selection
+          if (typeof gtag === 'function') gtag('event', 'select_category', { category: currentCategory });
         });
       });
     }
 
-    /* ===== Tabs render/handlers (changed to buttons to avoid anchor jumps) ===== */
-    function renderCategoryTabs(){
-      categoryTabs.innerHTML = CATEGORIES.map(cat => `
-        <button class="tab" type="button" data-category="${cat.key}" ${cat.key==='All'?'aria-current="page"':''}>
-          <img class="icon" src="${cat.icon}" alt="${cat.label} icon" loading="lazy" width="20" height="20"/> ${cat.label}
-        </button>
-      `).join('');
-    }
-    function onTabClick(e){
-      const btn = e.target.closest('.tab');
-      if (!btn) return;
-      // don't call preventDefault for buttons
-      const cat = btn.dataset.category;
-      filterCategory(cat);
-      if (typeof gtag==='function') gtag('event','select_category',{ category:cat });
-      categoryTabs.querySelectorAll('.tab').forEach(t=>t.removeAttribute('aria-current'));
-      btn.setAttribute('aria-current','page');
-    }
+    function renderTrustIcons() {
+      const container = document.getElementById('trustStrip');
+      if (!container) return;
+      
+      container.innerHTML = '';
+      TRUST_ICONS.forEach((t, i) => {
+        const item = document.createElement('div');
+        item.className = 'trust-item';
+        item.setAttribute('data-index', String(i));
+        item.setAttribute('data-title', t.title);
 
-    /* ===== Search & Typewriter ===== */
-    function onSearchInput(){
-      currentSearch = this.value.trim().toLowerCase();
-      currentPage = 1;
-      renderProducts();
-      if (currentSearch && typeof gtag==='function') gtag('event','view_search_results',{ search_term: currentSearch });
-    }
-    function startTypewriter(){
-      const base = 'Search — ';
-      const names = ['Rohu','Tiger Prawns','Sea Bass','Crab','Pickle'];
-      let i=0, pos=0, dir=1, pause=0;
+        const iconWrap = document.createElement('div');
+        iconWrap.className = 'icon-container';
+        iconWrap.style.animationDelay = `${i}s`;
+        iconWrap.textContent = t.icon;
 
-      function tick(){
-        if (document.activeElement === searchInput || searchInput.value){ setTimeout(tick, 700); return; }
-        const full = names[i];
-        if (pause>0){ pause--; return void setTimeout(tick, 80); }
+        const content = document.createElement('div');
+        content.className = 'trust-content';
+        const title = document.createElement('div'); title.className='trust-title'; title.textContent = t.title;
+        const sub = document.createElement('div'); sub.className='trust-sub'; sub.textContent = t.text;
 
-        const text = full.slice(0,pos);
-        searchInput.setAttribute('placeholder', base + text);
-
-        pos += dir;
-        if (pos > full.length){ pause=10; dir=-1; }
-        if (pos < 0){ dir=1; i=(i+1)%names.length; }
-
-        setTimeout(tick, 60);
-      }
-      tick();
-    }
-
-    /* ===== Products render (card spec) ===== */
-    function renderProducts(){
-      productGrid.innerHTML = '';
-      const q = currentSearch;
-      let filtered = products.filter(p=>{
-        const matchesCategory = currentCategory==='All' || p.category===currentCategory;
-        const matchesSearch = !q || p.name.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
-        return matchesCategory && matchesSearch;
+        content.appendChild(title); content.appendChild(sub);
+        item.appendChild(iconWrap); item.appendChild(content);
+        item.addEventListener('click', () => {
+          if (typeof gtag === 'function') gtag('event', 'click', { location: 'trust_strip', item_title: t.title, item_index: i });
+        });
+        container.appendChild(item);
       });
+    }
 
-      const shown = filtered.slice(0, itemsPerPage * currentPage);
-      shown.forEach(p=>{
-        const inCartQty = cart[p.id] || 0;
-        const saveAmt = Math.max(0, (p.mrp||0) - (p.finalPrice||0));
-        const hasMrp = p.mrp && p.mrp > p.finalPrice;
+    function renderFeaturedProducts() {
+      const container = document.getElementById('featuredProducts');
+      if (!container) return;
+      
+      // Show products based on featured IDs
+      const featured = products.filter(p => FEATURED_PRODUCT_IDS.includes(p.id));
+      container.innerHTML = featured.map(product => createProductHTML(product)).join('');
+    }
 
-        const card = document.createElement('article');
-        card.className = 'card';
-        card.dataset.id = p.id;
-
-        card.innerHTML = `
-          <div class="img">
-            <img src="${p.image}" alt="${p.name}" loading="lazy" />
-            <button class="add-pill" type="button" ${inCartQty>0?'style="display:none"':''}>ADD</button>
-            <div class="qty" aria-label="Quantity" style="${inCartQty>0?'display:flex':''}">
-              <button class="dec" type="button">-</button>
-              <span class="num">${inCartQty>0?inCartQty:1}</span>
-              <button class="inc" type="button">+</button>
-            </div>
-          </div>
-          <div class="price-row">
-            <span class="price-now">₹${p.finalPrice}</span>
-            ${hasMrp?`<span class="price-mrp">₹${p.mrp}</span>`:''}
-          </div>
-          ${hasMrp?`<div class="save">SAVE ₹${saveAmt}</div>`:''}
-          <div class="meta">${p.net}</div>
-          <div class="name">${p.name}</div>
-        `;
-        productGrid.appendChild(card);
+    function renderCatalogProducts(search = '') {
+      const container = document.getElementById('catalogProducts');
+      if (!container) return;
+      
+      let filtered = products.filter(p => {
+        const matchCategory = currentCategory === 'All' || p.category === currentCategory;
+        const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || 
+                           (p.desc && p.desc.toLowerCase().includes(search.toLowerCase()));
+        return matchCategory && matchSearch;
       });
-
-      // Enhanced "Show more" CTA
-      const remaining = Math.max(0, filtered.length - (itemsPerPage * currentPage));
-      if (remaining > 0) {
-        showMoreBtn.textContent = `Show ${Math.min(itemsPerPage, remaining)} more products (${remaining} left)`;
-        showMoreBtn.classList.remove('hidden');
-      } else {
-        showMoreBtn.classList.add('hidden');
-      }
 
       if (filtered.length === 0) {
-        productGrid.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #666;">
-            <i class="fas fa-search" style="font-size: 48px; margin-bottom: 16px;"></i>
-            <h3>No products found</h3>
-            <p>Try a different search or category</p>
+        container.innerHTML = '<div class="loading" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #8E8E93;">No products found</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(product => createProductHTML(product)).join('');
+    }
+
+    function createProductHTML(product) {
+      const hasOffer = product.mrp > product.finalPrice;
+      const saveAmount = hasOffer ? product.mrp - product.finalPrice : 0;
+      
+      return `
+        <div class="product" onclick="showProductPopup(${product.id})">
+          <div class="product-image">
+            ${hasOffer ? `<div class="offer-badge">${product.offer}% OFF</div>` : ''}
+            ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
+            <img src="${product.image}" alt="${product.name}" loading="lazy">
           </div>
-        `;
-        showMoreBtn.classList.add('hidden');
+          <div class="product-info">
+            <div class="product-name">${product.name}</div>
+            <div class="product-weight">${product.net}</div>
+            <div class="product-price">
+              <span class="price">₹${product.finalPrice}</span>
+              ${hasOffer ? `<span class="old-price">₹${product.mrp}</span>` : ''}
+            </div>
+          </div>
+          ${product.available ? `<button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${product.id})"><i class="fas fa-plus"></i></button>` : ''}
+        </div>
+      `;
+    }
+
+    function showProductPopup(id) {
+      const product = products.find(p => p.id === id);
+      if (!product) return;
+
+      currentProductQty = 1;
+      const popup = document.getElementById('productPopup');
+      const image = document.getElementById('popupImage');
+      const content = document.getElementById('popupContent');
+      const title = document.getElementById('popupTitle');
+
+      // Set the product title in the header
+      title.textContent = product.name;
+
+      image.innerHTML = `
+        <img src="${product.image}" alt="${product.name}">
+      `;
+
+      const hasOffer = product.mrp > product.finalPrice;
+      
+      content.innerHTML = `
+        <h2 class="popup-name">${product.name}</h2>
+        <p class="popup-weight">${product.gross} / ${product.net}</p>
+        <div class="popup-price">
+          <span class="price">₹${product.finalPrice}</span>
+          ${hasOffer ? `<span class="old-price">₹${product.mrp}</span>` : ''}
+          ${hasOffer ? `<div class="popup-offer">${product.offer}% OFF</div>` : ''}
+        </div>
+        <p class="popup-description">${product.desc}</p>
+        
+        ${product.available ? `
+        <div class="quantity-selector">
+          <span class="quantity-label">Quantity:</span>
+          <div class="quantity-controls">
+            <button class="qty-btn" onclick="changeProductQty(-1)">-</button>
+            <span class="qty" id="productQty">${currentProductQty}</span>
+            <button class="qty-btn" onclick="changeProductQty(1)">+</button>
+          </div>
+        </div>
+        ` : `
+        <div style="margin-bottom: 24px;">
+          <p style="color: #FF3B30; font-weight: 600;">Currently out of stock</p>
+        </div>
+        `}
+        
+        <div class="popup-actions">
+          ${product.available ? `
+          <button class="popup-cta" onclick="addToCart(${product.id}, currentProductQty)">
+            <i class="fas fa-shopping-bag"></i> Add to Cart - ₹${product.finalPrice * currentProductQty}
+          </button>
+          ` : `
+          <button class="popup-cta" disabled style="background: #8E8E93;">
+            <i class="fas fa-times-circle"></i> Out of Stock
+          </button>
+          `}
+        </div>
+      `;
+
+      popup.classList.add('active');
+      isPopupOpen = true;
+      
+      // Hide bottom navigation when product popup is open
+      document.getElementById('bottomNav').style.display = 'none';
+      
+      // Track product view
+      if (typeof gtag === 'function') {
+        gtag('event', 'view_item', {
+          currency: 'INR',
+          value: product.finalPrice,
+          items: [{
+            item_id: product.id,
+            item_name: product.name,
+            item_category: product.category,
+            price: product.finalPrice
+          }]
+        });
       }
     }
 
-    /* ===== Grid interactions (guarded) ===== */
-    function onProductGridClick(e){
-      // Bulletproof: if the Show More button ever moves into the grid, ignore it
-      if (e.target.closest('#showMoreBtn')) return;
-
-      const interactive = e.target.closest('.add-pill, .inc, .dec, .qty'); // treat qty as interactive too
-      const card = e.target.closest('.card');
-      if (!card) return;
-      const id = parseInt(card.dataset.id,10);
-      const p = getValidProductById(id);
-      if (!p) return;
-
-      const addBtn = card.querySelector('.add-pill');
-      const qtyBox = card.querySelector('.qty');
-      const num = qtyBox.querySelector('.num');
-
-      // Explicit controls
-      if (e.target.classList.contains('add-pill')) {
-        cart[id] = 1;
-        num.textContent = 1;
-        addBtn.style.display = 'none';
-        qtyBox.style.display = 'flex';
-        saveCart();
-        showToast('Added to cart!');
-        trackAddToCart(id, 1);
-        return;
+    function changeProductQty(change) {
+      currentProductQty = Math.max(1, currentProductQty + change);
+      document.getElementById('productQty').textContent = currentProductQty;
+      
+      const productId = document.querySelector('.popup-cta').getAttribute('onclick').match(/\d+/)[0];
+      const product = products.find(p => p.id === parseInt(productId));
+      
+      if (product) {
+        document.querySelector('.popup-cta').innerHTML = 
+          `<i class="fas fa-shopping-bag"></i> Add to Cart - ₹${product.finalPrice * currentProductQty}`;
       }
-      if (e.target.classList.contains('inc')) {
-        const next = Math.min(99, (cart[id]||1) + 1);
-        cart[id] = next;
-        num.textContent = cart[id];
-        saveCart();
-        trackChangeQty(id, +1);
-        return;
+    }
+
+    function closePopup() {
+      document.getElementById('productPopup').classList.remove('active');
+      isPopupOpen = false;
+      
+      // Show bottom navigation again when popup is closed
+      if (currentPage !== 'cart') {
+        document.getElementById('bottomNav').style.display = 'flex';
       }
-      if (e.target.classList.contains('dec')) {
-        const next = Math.max(0, (cart[id]||1) - 1);
-        if (next===0){
-          delete cart[id];
-          qtyBox.style.display='none';
-          addBtn.style.display='inline-flex';
-        } else {
-          num.textContent = next;
-          cart[id]=next;
+    }
+
+    function addToCart(id, qty = 1) {
+      const product = products.find(p => p.id === id);
+      if (!product || !product.available) return;
+
+      if (cart[id]) {
+        cart[id].qty += qty;
+      } else {
+        cart[id] = { ...product, qty: qty };
+      }
+
+      updateCartUI();
+      showToast(`${product.name} added to cart!`);
+      closePopup();
+      
+      // Track add to cart
+      trackAddToCart(id, qty);
+    }
+
+    function updateCartUI() {
+      const items = Object.values(cart);
+      const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
+      const totalAmount = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
+
+      // Update all cart badges
+      ['cartCount', 'cartCountCatalog', 'navBadge'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          if (totalQty > 0) {
+            el.style.display = 'flex';
+            el.textContent = totalQty > 9 ? '9+' : totalQty;
+          } else {
+            el.style.display = 'none';
+          }
         }
-        saveCart();
-        trackChangeQty(id, -1);
-        return;
+      });
+      
+      // Show/hide clear cart button
+      const clearCartBtn = document.getElementById('clearCartBtn');
+      if (clearCartBtn) {
+        clearCartBtn.style.display = totalQty > 0 ? 'block' : 'none';
+      }
+      
+      // Show/hide cart actions
+      const cartActions = document.getElementById('cartActions');
+      if (cartActions) {
+        cartActions.style.display = totalQty > 0 ? 'block' : 'none';
+      }
+      
+      // Save cart to localStorage
+      saveCart();
+    }
+
+    function showCart() {
+      const items = Object.values(cart);
+      const cartItems = document.getElementById('cartItems');
+      const cartSummary = document.getElementById('cartSummary');
+      const emptyCart = document.getElementById('emptyCart');
+
+      if (items.length === 0) {
+        emptyCart.style.display = 'block';
+        cartItems.innerHTML = '';
+        cartSummary.innerHTML = '';
+      } else {
+        emptyCart.style.display = 'none';
+        
+        // Render cart items
+        cartItems.innerHTML = items.map(item => `
+          <div class="cart-item" data-id="${item.id}">
+            <div class="cart-item-image">
+              <img src="${item.image}" alt="${item.name}">
+            </div>
+            <div class="cart-item-info">
+              <div class="cart-item-top">
+                <div>
+                  <div class="cart-item-name">${item.name}</div>
+                  <div class="cart-item-weight">${item.net}</div>
+                </div>
+                <div class="cart-item-price">₹${item.finalPrice * item.qty}</div>
+              </div>
+              <div class="cart-item-controls">
+                <div class="qty-controls">
+                  <button class="cart-qty-btn" onclick="updateQty(${item.id}, -1)">-</button>
+                  <span class="cart-qty">${item.qty}</span>
+                  <button class="cart-qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
+                </div>
+                <button class="remove-item" onclick="removeFromCart(${item.id})">Remove</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        // Calculate totals
+        const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
+        const originalTotal = items.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
+        const savings = originalTotal - subtotal;
+        const deliveryFee = subtotal >= 1500 ? 0 : 50;
+        const total = subtotal + deliveryFee;
+
+        // Render summary
+        cartSummary.innerHTML = `
+          ${deliveryFee === 0 ? `
+          <div class="delivery-note">
+            <i class="fas fa-check-circle"></i>
+            <span>You've qualified for free delivery!</span>
+          </div>
+          ` : `
+          <div class="delivery-note" style="background: #FFECB3; color: #7D6608;">
+            <i class="fas fa-info-circle"></i>
+            <span>Add ₹${1500 - subtotal} more for free delivery</span>
+          </div>
+          `}
+          <div class="cart-summary">
+            <div class="summary-row">
+              <span>Subtotal</span>
+              <span>₹${subtotal}</span>
+            </div>
+            ${savings > 0 ? `
+            <div class="summary-row summary-savings">
+              <span>Savings</span>
+              <span>-₹${savings}</span>
+            </div>
+            ` : ''}
+            <div class="summary-row">
+              <span>Delivery</span>
+              <span>${deliveryFee === 0 ? 'FREE' : '₹50'}</span>
+            </div>
+            <div class="summary-row summary-total">
+              <span>Total</span>
+              <span>₹${total}</span>
+            </div>
+          </div>
+        `;
       }
 
-      // Non-interactive area: open popup only
-      if (!interactive) {
-        openPopup(id);
-        if (typeof gtag==='function'){
-          gtag('event','view_item',{
-            currency:'INR',
-            value:p.finalPrice,
-            items:[{ item_id:p.id, item_name:p.name, item_category:p.category, price:p.finalPrice }]
+      showPage('cart');
+      
+      // Hide bottom navigation when cart page is open
+      document.getElementById('bottomNav').style.display = 'none';
+      
+      // Track cart view
+      if (typeof gtag === 'function') {
+        gtag('event', 'view_cart', {
+          currency: 'INR',
+          value: subtotal,
+          items: items.map(item => ({
+            item_id: item.id,
+            item_name: item.name,
+            item_category: item.category,
+            price: item.finalPrice,
+            quantity: item.qty
+          }))
+        });
+      }
+    }
+
+    function updateQty(id, change) {
+      if (!cart[id]) return;
+
+      cart[id].qty += change;
+      if (cart[id].qty <= 0) {
+        delete cart[id];
+      }
+
+      updateCartUI();
+      showCart(); // Refresh cart display
+      
+      // Track quantity change
+      trackChangeQty(id, change);
+    }
+
+    function removeFromCart(id) {
+      if (cart[id]) {
+        delete cart[id];
+        updateCartUI();
+        showCart();
+        
+        // Track removal
+        if (typeof gtag === 'function') {
+          gtag('event', 'remove_from_cart', {
+            item_id: id
           });
         }
       }
     }
 
-    function showMore(){
-      // increment page & re-render only — do NOT scroll the page (fixes reported "page goes up")
-      currentPage++;
-      renderProducts();
-      if (typeof gtag==='function') gtag('event','show_more',{ page: currentPage, page_size: itemsPerPage });
+    function clearCart() {
+      if (Object.keys(cart).length > 0) {
+        if (confirm('Are you sure you want to clear your cart?')) {
+          cart = {};
+          updateCartUI();
+          showCart();
+          
+          // Track cart cleared
+          if (typeof gtag === 'function') {
+            gtag('event', 'clear_cart');
+          }
+        }
+      }
     }
 
-    function filterCategory(cat){
-      // set category, reset pagination and search, re-render — do NOT change scroll position (fixes reported "page scrolls down")
-      currentCategory = cat;
-      currentPage = 1;
-      searchInput.value = '';
-      currentSearch = '';
-      renderProducts();
+    function checkout() {
+      const items = Object.values(cart);
+      if (items.length === 0) return;
+
+      const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
+      const deliveryFee = subtotal >= 1500 ? 0 : 50;
+      const total = subtotal + deliveryFee;
+
+      let message = "Hi! I'd like to order:\n\n";
+      items.forEach(item => {
+        message += `${item.name} x${item.qty} - ₹${item.finalPrice * item.qty}\n`;
+      });
+      
+      message += `\nSubtotal: ₹${subtotal}\n`;
+      if (deliveryFee === 0) {
+        message += "Delivery: FREE\n";
+      } else {
+        message += `Delivery: ₹${deliveryFee}\n`;
+      }
+      message += `Total: ₹${total}\n\nPlease confirm availability.`;
+
+      window.open(`https://wa.me/919985125678?text=${encodeURIComponent(message)}`, '_blank');
+      
+      // Track begin checkout
+      if (typeof gtag === 'function') {
+        gtag('event', 'begin_checkout', {
+          currency: 'INR',
+          value: total,
+          items: items.map(item => ({
+            item_id: item.id,
+            item_name: item.name,
+            item_category: item.category,
+            price: item.finalPrice,
+            quantity: item.qty
+          }))
+        });
+      }
     }
 
-    /* ===== Carousel ===== */
-    function initCarousel(){
-      let idx = 0;
+    function showPage(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(page).classList.add('active');
+      
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const navItem = document.querySelector(`.nav-item[onclick="showPage('${page}')"]`);
+      if (navItem) navItem.classList.add('active');
+      
+      currentPage = page;
+      
+      // Show/hide bottom navigation based on page
+      if (page === 'cart' || isPopupOpen) {
+        document.getElementById('bottomNav').style.display = 'none';
+      } else {
+        document.getElementById('bottomNav').style.display = 'flex';
+      }
+      
+      // Special handling for cart page
+      if (page === 'cart') {
+        showCart();
+      }
+    }
+
+    function goBack() {
+      if (currentPage === 'catalog' || currentPage === 'cart' || currentPage === 'faqPage' || currentPage === 'profilePage') {
+        showPage('home');
+      }
+    }
+
+    function handleHomeSearch(e) {
+      renderFeaturedProducts();
+    }
+
+    function handleCatalogSearch(e) {
+      renderCatalogProducts(e.target.value);
+    }
+
+    function showToast(text) {
+      const toast = document.getElementById('toast');
+      const toastText = document.getElementById('toastText');
+      if (toast && toastText) {
+        toastText.textContent = text;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      }
+    }
+
+    function initCarousel() {
       const slides = document.getElementById('slides');
+      if (!slides) return;
       const total = slides.children.length || 1;
-      setInterval(()=>{ idx = (idx+1)%total; slides.style.transform = `translateX(${-idx*100}%)`; }, 5000);
+      
+      // Create dots
+      const dotsContainer = document.getElementById('carouselDots');
+      if (dotsContainer) {
+        dotsContainer.innerHTML = '';
+        for (let i = 0; i < total; i++) {
+          const dot = document.createElement('div');
+          dot.className = `dot ${i === 0 ? 'active' : ''}`;
+          dotsContainer.appendChild(dot);
+        }
+      }
+
+      function goToSlide(index) {
+        currentCarouselIndex = index;
+        slides.style.transform = `translateX(${-index * 100}%)`;
+        
+        // Update dots
+        document.querySelectorAll('.dot').forEach((dot, i) => {
+          dot.classList.toggle('active', i === index);
+        });
+      }
+
+      function next() { 
+        goToSlide((currentCarouselIndex + 1) % total);
+      }
+
+      carouselTimer = setInterval(next, 5000);
+
+      if (slides.parentElement) {
+        slides.parentElement.addEventListener('mouseenter', () => { 
+          if (carouselTimer) clearInterval(carouselTimer); 
+        });
+        slides.parentElement.addEventListener('mouseleave', () => { 
+          if (carouselTimer) clearInterval(carouselTimer); 
+          carouselTimer = setInterval(next, 5000); 
+        });
+        
+        // Add touch events for mobile swipe
+        let startX = 0;
+        let isDragging = false;
+        
+        slides.parentElement.addEventListener('touchstart', (e) => {
+          startX = e.touches[0].clientX;
+          isDragging = true;
+          if (carouselTimer) clearInterval(carouselTimer);
+        });
+        
+        slides.parentElement.addEventListener('touchmove', (e) => {
+          if (!isDragging) return;
+          const currentX = e.touches[0].clientX;
+          const diff = startX - currentX;
+          
+          // Move slides partially with drag
+          slides.style.transform = `translateX(calc(${-currentCarouselIndex * 100}% - ${diff}px))`;
+        });
+        
+        slides.parentElement.addEventListener('touchend', (e) => {
+          if (!isDragging) return;
+          isDragging = false;
+          
+          const endX = e.changedTouches[0].clientX;
+          const diff = startX - endX;
+          
+          // If swipe was significant enough, change slide
+          if (Math.abs(diff) > 50) {
+            if (diff > 0) {
+              // Swipe left - next slide
+              goToSlide((currentCarouselIndex + 1) % total);
+            } else {
+              // Swipe right - previous slide
+              goToSlide((currentCarouselIndex - 1 + total) % total);
+            }
+            // Restart timer
+            carouselTimer = setInterval(next, 5000);
+          } else {
+            // Return to current slide
+            goToSlide(currentCarouselIndex);
+          }
+        });
+      }
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) { 
+          if (carouselTimer) clearInterval(carouselTimer); 
+        } else { 
+          if (carouselTimer) clearInterval(carouselTimer); 
+          carouselTimer = setInterval(next, 5000); 
+        }
+      });
     }
 
-    /* ===== FAQ ===== */
-    function initFAQ(){}
-    function toggleFAQ(button){
+    function startTypewriter() {
+      const base = 'Search — ';
+      const names = ['Rohu','Tiger Prawns','Sea Bass','Crab','Pickle'];
+      let i = 0, pos = 0, dir = 1, pause = 0;
+      
+      function tick() {
+        const searchInput = document.getElementById('searchInput');
+        const catalogSearch = document.getElementById('catalogSearch');
+        
+        // Apply to both search inputs for consistency
+        [searchInput, catalogSearch].forEach(input => {
+          if (!input || document.activeElement === input || input.value) {
+            return;
+          }
+          
+          const full = names[i];
+          if (pause > 0) { 
+            return;
+          }
+
+          const text = full.slice(0, pos);
+          input.setAttribute('placeholder', base + text);
+        });
+
+        if (pause > 0) { 
+          pause--; 
+          setTimeout(tick, 80); 
+          return; 
+        }
+
+        pos += dir;
+        if (pos > names[i].length) { 
+          pause = 10; 
+          dir = -1; 
+        }
+        if (pos < 0) { 
+          dir = 1; 
+          i = (i + 1) % names.length; 
+        }
+
+        setTimeout(tick, 60);
+      }
+      
+      tick();
+    }
+
+    function toggleFAQ(button) {
       const faq = button.closest('.faq');
+      if (!faq) return;
+      
       const isActive = faq.classList.contains('active');
-      document.querySelectorAll('.faq.active').forEach(item=>{ if(item!==faq) item.classList.remove('active'); });
+      document.querySelectorAll('.faq.active').forEach(item => {
+        if (item !== faq) item.classList.remove('active');
+      });
+      
       faq.classList.toggle('active', !isActive);
-      if (typeof gtag==='function') gtag('event','faq_click',{ question: button.querySelector('.q-text').textContent });
+      
+      // Rotate chevron
+      const chevron = button.querySelector('.fa-chevron-down');
+      if (chevron) {
+        chevron.style.transform = faq.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0)';
+      }
+      
+      const qTextEl = button.querySelector('.q-text');
+      const qText = qTextEl ? qTextEl.textContent : '';
+      if (typeof gtag === 'function') gtag('event', 'faq_click', { question: qText });
     }
 
-    /* ===== Cart state (validated) ===== */
-    function loadCart(){
-      try{
-        const saved = JSON.parse(localStorage.getItem('coastalFreshCart') || '{}');
-        const cleaned = sanitizeCartShape(saved);
-        // If too many items (legacy corruption), keep only known IDs
-        if (Object.keys(cleaned).length > products.length){
-          cart = Object.create(null);
-        } else {
-          cart = cleaned;
+    function openWhatsApp(type) {
+      let message = '';
+      if (type === 'support') {
+        message = 'Hi Coastal Fresh, I need assistance with my order.';
+      } else if (type === 'refer') {
+        // FIXED: Prefill message for Refer & Earn
+        message = 'Hey! I’ve been ordering seafood from Coastal Fresh – always fresh, neatly cleaned and delivered to my home in Hyderabad. You should try it! Use my referral for 10% off on your first order. 👉 https://coastalfresh.in';
+      }
+      window.open(`https://wa.me/919985125678?text=${encodeURIComponent(message)}`, '_blank');
+    }
+
+    function loadCart() {
+      try {
+        const saved = localStorage.getItem('coastalFreshCart');
+        if (saved) {
+          cart = JSON.parse(saved);
+          updateCartUI();
         }
-      }catch(_){
-        cart = Object.create(null);
-      }
-      updateCartUI();
-    }
-    function saveCart(){
-      // ensure cart is clean before storing
-      cart = sanitizeCartShape(cart);
-      localStorage.setItem('coastalFreshCart', JSON.stringify(cart));
-      updateCartUI();
-    }
-    function updateCartUI(){
-      let count=0,total=0, savings=0;
-      for (const [id, qty] of Object.entries(cart)){
-        const p = getValidProductById(id);
-        if(!p) continue;
-        count += qty;
-        total += p.finalPrice * qty;
-        savings += Math.max(0, (p.mrp || p.finalPrice) - p.finalPrice) * qty;
-      }
-      cartCount.textContent = count + ' item' + (count!==1?'s':'');
-      cartTotal.textContent = '₹' + total;
-      headerCartCount.textContent = String(count);
-      headerCartAmount.textContent = '₹' + total;
-
-      if (count>0){
-        cartFooter.style.display='flex';
-        headerCart.classList.add('has-items');
-      } else {
-        cartFooter.style.display='none';
-        headerCart.classList.remove('has-items');
-        headerCartCount.textContent = '0';
-        headerCartAmount.textContent = '₹0';
-      }
-
-      // Simple free-delivery banner (no progress bars)
-      if (total >= FREE_DELIVERY_THRESHOLD){
-        if (!freeUnlocked){
-          freeUnlocked = true;
-          deliveryBanner.style.display = 'flex';
-          showToast('Free Delivery unlocked!');
-        }
-      } else {
-        freeUnlocked = false;
-        deliveryBanner.style.display = 'none';
-      }
-
-      updateSavingsCelebration(savings);
-      updateBottomNavUI();
-    }
-
-    function updateSavingsCelebration(savings){
-      if (savings > 0 && savings !== lastSavings){
-        showToast(`You saved ₹${savings}!`);
-      }
-      lastSavings = savings;
-    }
-
-    /* ===== Popup ===== */
-    function openPopup(id){
-      const p = getValidProductById(id);
-      if (!p) return;
-      const productCard = document.querySelector(`.card[data-id="${id}"]`);
-      if (productCard) productCard.classList.add('loading');
-      setTimeout(()=>{
-        popupProduct = p;
-        document.getElementById('popupTitle').textContent = popupProduct.name;
-        document.getElementById('popupBody').innerHTML = `
-          <img src="${popupProduct.image}" alt="${popupProduct.name}" loading="lazy">
-          <div class="popup-sub">Net QTY: ${popupProduct.gross} / ${popupProduct.net}</div>
-          <div class="popup-price">
-            <span class="now">₹${popupProduct.finalPrice}</span>
-            ${popupProduct.offer > 0 ? `<span class="offer">${popupProduct.offer}% OFF</span>` : ''}
-            ${popupProduct.mrp > popupProduct.finalPrice ? `<span class="old">₹${popupProduct.mrp}</span>` : ''}
-          </div>
-          <div class="delivery-info"><i class="fas fa-truck"></i> Delivered next day morning</div>
-          <p>${popupProduct.desc}</p>
-        `;
-        document.getElementById('productPopup').style.display='flex';
-        document.body.classList.add('popup-open');
-        if (productCard) productCard.classList.remove('loading');
-      },100);
-    }
-    function closePopup(){
-      document.getElementById('productPopup').style.display='none';
-      document.body.classList.remove('popup-open');
-    }
-    function addPopupToCart(){
-      if (!popupProduct) return;
-      const id = popupProduct.id;
-      const next = Math.min(99, (cart[id]||0) + 1);
-      cart[id] = next;
-      saveCart();
-      showToast('Added to cart!');
-      trackAddToCart(id,1);
-
-      // Update UI BEFORE closing popup to avoid race on fast taps
-      const card = document.querySelector(`.card[data-id="${id}"]`);
-      if (card){
-        card.querySelector('.add-pill').style.display='none';
-        const qtyBox = card.querySelector('.qty');
-        qtyBox.style.display='flex';
-        qtyBox.querySelector('.num').textContent = cart[id];
-      }
-      closePopup();
-    }
-
-    /* ===== Cart page ===== */
-    function openCart(){
-      if (typeof gtag==='function') gtag('event','view_cart',{ currency:'INR', value:calculateCartTotal(), items:getCartItemsForAnalytics() });
-
-      const cartItemsEl = document.getElementById('cartItems');
-      const originalTotal = document.getElementById('originalTotal');
-      const finalTotal = document.getElementById('finalTotal');
-      const placeTotal = document.getElementById('placeTotal');
-
-      let orig=0,total=0,savings=0;
-      cartItemsEl.innerHTML='';
-
-      for (const [id, qty] of Object.entries(cart)){
-        const p = getValidProductById(id);
-        if (!p) continue;
-        const itemOrig = (p.mrp||p.finalPrice) * qty;
-        const itemTotal = p.finalPrice * qty;
-        orig += itemOrig; total += itemTotal; savings += (itemOrig - itemTotal);
-
-        cartItemsEl.innerHTML += `
-          <div class="cart-item">
-            <img src="${p.image}" alt="${p.name}" loading="lazy">
-            <div class="item-details">
-              <div class="item-name">${p.name}</div>
-              <div class="item-weight">${p.net}</div>
-              <div class="quantity-controls">
-                <button class="quantity-btn" data-id="${p.id}" data-action="decrease">-</button>
-                <span>${qty}</span>
-                <button class="quantity-btn" data-id="${p.id}" data-action="increase">+</button>
-              </div>
-            </div>
-            <div class="item-pricing">
-              <div class="item-price">₹${itemTotal}</div>
-              ${p.mrp>p.finalPrice?`<div class="item-original">₹${itemOrig}</div>`:''}
-            </div>
-            <i class="fas fa-trash-alt remove-btn" data-id="${p.id}"></i>
-          </div>
-        `;
-      }
-
-      originalTotal.textContent = '₹' + orig;
-      finalTotal.textContent = '₹' + total;
-      placeTotal.textContent = '₹' + total;
-      savingsBadge.textContent = 'Saved ₹' + savings;
-
-      if (Object.keys(cart).length===0){
-        emptyCart.style.display='block';
-        cartItemsEl.style.display='none';
-        orderSummary.style.display='none';
-        deliveryBanner.style.display='none';
-        savingsBadge.style.display='none';
-        placeOrderBtn.style.display='none';
-      } else {
-        emptyCart.style.display='none';
-        cartItemsEl.style.display='block';
-        orderSummary.style.display='block';
-        savingsBadge.style.display= savings>0 ? 'flex':'none';
-        placeOrderBtn.style.display='block';
-        // Banner is handled by updateCartUI
-      }
-
-      document.querySelectorAll('.quantity-btn').forEach(btn=>{
-        btn.addEventListener('click',function(){
-          const id = parseInt(this.dataset.id,10);
-          const action = this.dataset.action;
-          changeQty(id, action==='increase'?1:-1);
-        });
-      });
-      document.querySelectorAll('.remove-btn').forEach(btn=>{
-        btn.addEventListener('click',function(){
-          const id = parseInt(this.dataset.id,10);
-          removeFromCart(id);
-        });
-      });
-
-      document.getElementById('cartPage').style.display='flex';
-      document.body.classList.add('popup-open');
-    }
-    function closeCart(){
-      document.getElementById('cartPage').style.display='none';
-      document.body.classList.remove('popup-open');
-      renderProducts(); // sync qty pills
-    }
-    function calculateCartTotal(){
-      let total=0;
-      for (const [id, qty] of Object.entries(cart)){
-        const p = getValidProductById(id);
-        if (!p) continue;
-        total += p.finalPrice * qty;
-      }
-      return total;
-    }
-    function getCartItemsForAnalytics(){
-      const items=[];
-      for (const [id, qty] of Object.entries(cart)){
-        const p = getValidProductById(id);
-        if (!p) continue;
-        items.push({ item_id:p.id, item_name:p.name, item_category:p.category, price:p.finalPrice, quantity:qty });
-      }
-      return items;
-    }
-    function changeQty(id, delta){
-      if (!getValidProductById(id)) return;
-      if (cart[id]){
-        cart[id] = Math.max(0, Math.min(99, cart[id] + delta));
-        if (cart[id] === 0) delete cart[id];
-        saveCart();
-        trackChangeQty(id, delta);
-        const card = document.querySelector(`.card[data-id="${id}"]`);
-        if (card){
-          const addBtn = card.querySelector('.add-pill');
-          const qtyBox = card.querySelector('.qty');
-          const num = qtyBox.querySelector('.num');
-          const q = cart[id]||0;
-          if (q<=0){ qtyBox.style.display='none'; addBtn.style.display='inline-flex'; }
-          else { qtyBox.style.display='flex'; num.textContent = q; addBtn.style.display='none'; }
-        }
-        if (document.getElementById('cartPage').style.display==='flex') openCart();
+      } catch (e) {
+        console.error('Error loading cart from localStorage:', e);
       }
     }
-    function removeFromCart(id){
-      delete cart[id];
-      saveCart();
-      if (typeof gtag==='function'){
-        const p = getValidProductById(id);
-        if (p) gtag('event','remove_from_cart',{ currency:'INR', value:p.finalPrice, items:[{ item_id:p.id,item_name:p.name,item_category:p.category,price:p.finalPrice }] });
+
+    function saveCart() {
+      try {
+        localStorage.setItem('coastalFreshCart', JSON.stringify(cart));
+      } catch (e) {
+        console.error('Error saving cart to localStorage:', e);
       }
-      if (document.getElementById('cartPage').style.display==='flex') openCart();
     }
 
-    /* ===== Share product ===== */
-    function shareProduct(){
-      if (!popupProduct) return;
-      const utmParams = `utm_source=product_share&utm_medium=whatsapp&utm_campaign=product_referral&utm_content=product_${popupProduct.id}`;
-      const shareUrl = `https://www.coastalfresh.in?${utmParams}`;
-      const message = `Check out this ${popupProduct.name} from Coastal Fresh! ${popupProduct.desc.substring(0, 100)}... ${shareUrl}`;
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-      if (typeof gtag==='function') gtag('event','share',{ method:'WhatsApp', content_type:'product', item_id:String(popupProduct.id) });
-      window.open(whatsappUrl,'_blank');
-    }
-
-    /* ===== Place order (WhatsApp) ===== */
-    function placeOrder(){
-      if (Object.keys(cart).length===0){ showToast('Your cart is empty!'); return; }
-      if (typeof gtag==='function'){
-        gtag('event','begin_checkout',{ currency:'INR', value:calculateCartTotal(), items:getCartItemsForAnalytics() });
-        gtag('event','click',{ location:'checkout_cta', link_text:'Place Order (WhatsApp)', link_url:'https://wa.me/919985125678' });
-      }
-      let lines = ["Hi Coastal Fresh,","","I would like to order:",""];
-      let total=0,origTotal=0;
-      for (const [id, qty] of Object.entries(cart)){
-        const p = getValidProductById(id); if(!p) continue;
-        const itemTotal = p.finalPrice * qty;
-        const itemOrig = (p.mrp||p.finalPrice) * qty;
-        total += itemTotal; origTotal += itemOrig;
-        lines.push(`- ${p.name} (${p.net}) x ${qty} = ₹${itemTotal}`);
-      }
-      const savings = origTotal - total;
-      lines.push("","Total: ₹"+total);
-      if (savings>0) lines.push(`You saved: ₹${savings}`);
-      lines.push("","Please confirm availability and delivery timing.");
-      const url = `https://wa.me/919985125678?text=${encodeURIComponent(lines.join('\n'))}`;
-      window.open(url,'_blank');
-    }
-
-    /* ===== Toast ===== */
-    function showToast(message){
-      toastMessage.textContent = message;
-      toast.classList.add('show');
-      setTimeout(()=>toast.classList.remove('show'), 1800);
-    }
-
-    /* ===== Product schema (limited) ===== */
-    function generateProductSchema(){
-      const productSchemas = products.map(product => ({
-        "@context":"https://schema.org/","@type":"Product",
-        "name":product.name,"image":product.image,"description":product.desc,
-        "offers":{"@type":"Offer","url":"https://www.coastalfresh.in/","priceCurrency":"INR","price":product.finalPrice,
-          "priceValidUntil":new Date(Date.now()+30*24*60*60*1000).toISOString().split('T')[0],
-          "availability":product.available?"https://schema.org/InStock":"https://schema.org/OutOfStock","itemCondition":"https://schema.org/NewCondition"}
-      }));
-      productSchemas.slice(0,5).forEach(schema=>{
-        const s=document.createElement('script');s.type='application/ld+json';s.textContent=JSON.stringify(schema);document.head.appendChild(s);
+    function trackAddToCart(id, qty) {
+      const product = products.find(p => p.id === id);
+      if (!product || typeof gtag !== 'function') return;
+      
+      gtag('event', 'add_to_cart', {
+        currency: 'INR',
+        value: product.finalPrice * qty,
+        items: [{
+          item_id: product.id,
+          item_name: product.name,
+          item_category: product.category,
+          price: product.finalPrice,
+          quantity: qty
+        }]
       });
     }
 
-    /* ===== Analytics helpers ===== */
-    function trackAddToCart(id, qty){
-      const p = getValidProductById(id);
-      if (!p || typeof gtag!=='function') return;
-      gtag('event','add_to_cart',{ currency:'INR', value:p.finalPrice*qty, items:[{ item_id:p.id,item_name:p.name,item_category:p.category,price:p.finalPrice,quantity:qty }] });
+    function trackChangeQty(id, delta) {
+      const product = products.find(p => p.id === id);
+      if (!product || typeof gtag !== 'function') return;
+      
+      gtag('event', 'change_cart_quantity', {
+        change: delta,
+        item_id: product.id,
+        item_name: product.name,
+        item_category: product.category,
+        price: product.finalPrice,
+        quantity: cart[id] ? cart[id].qty : 0
+      });
     }
-    function trackChangeQty(id, delta){
-      const p = getValidProductById(id);
-      if (!p || typeof gtag!=='function') return;
-      gtag('event','change_cart_quantity',{ change:delta, item_id:p.id, item_name:p.name, item_category:p.category, price:p.finalPrice, quantity: cart[id]||0 });
-    }
+
+    // Initialize app when DOM is loaded
+    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
 </html>
