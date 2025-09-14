@@ -616,6 +616,47 @@
       text-decoration: line-through;
     }
 
+    /* Cart quantity controls on product card */
+    .cart-controls {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #007AFF;
+      border-radius: 20px;
+      padding: 4px;
+      z-index: 2;
+    }
+
+    .cart-controls .qty-btn {
+      background: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #007AFF;
+      transition: all 0.2s;
+    }
+
+    .cart-controls .qty-btn:active {
+      background: #f0f0f0;
+    }
+
+    .cart-controls .qty {
+      color: white;
+      font-weight: 600;
+      min-width: 20px;
+      text-align: center;
+    }
+
     .add-to-cart-btn {
       position: absolute;
       bottom: 12px;
@@ -639,7 +680,7 @@
       transform: scale(0.9);
     }
 
-    /* Product Popup - FIXED: Full mobile screen with proper header and sticky footer */
+    /* NEW: Product Popup - Updated Design */
     .product-popup {
       position: fixed;
       top: 0;
@@ -675,140 +716,303 @@
       display: flex;
     }
 
+    /* NEW: Updated popup header to match new design */
     .popup-header {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      padding: 16px;
-      border-bottom: 1px solid #f0f0f0;
+      padding: 12px 16px;
       background: white;
-      position: relative;
+      border-bottom: 1px solid #e0e0e0;
+      position: sticky;
+      top: 0;
       z-index: 10;
-      flex-shrink: 0;
     }
 
     .popup-back-btn {
-      background: none;
-      border: none;
-      font-size: 20px;
-      color: #007AFF;
+      width: 24px;
+      height: 24px;
       cursor: pointer;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 12px;
-    }
-
-    .popup-title {
+      border: none;
+      background: none;
       font-size: 18px;
-      font-weight: 600;
-      flex: 1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      padding-right: 10px;
+      color: #007AFF;
     }
 
-    .popup-close-btn {
-      background: none;
+    .popup-header-actions {
+      display: flex;
+      gap: 16px;
+    }
+
+    .popup-action-btn {
+      width: 24px;
+      height: 24px;
       border: none;
-      font-size: 20px;
-      color: #8E8E93;
+      background: none;
       cursor: pointer;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
+      font-size: 18px;
+      color: #333;
+    }
+
+    /* NEW: Product Image Section */
+    .popup-image-section {
+      position: relative;
+      background: white;
+      padding: 20px;
+    }
+
+    .popup-image-container {
+      position: relative;
+      width: 100%;
+      height: 300px;
+      background: #f8f8f8;
+      border-radius: 12px;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .popup-content-wrapper {
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
     }
 
     .popup-image {
-      height: 300px;
-      background: #f8f8f8;
-      position: relative;
-      flex-shrink: 0;
-    }
-
-    .popup-image img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      border-radius: 12px;
     }
 
-    .popup-content {
-      padding: 20px;
-      flex: 1;
+    .popup-image-nav {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .popup-image-indicators {
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 12px;
     }
 
-    .popup-name {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 6px;
+    .popup-indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ddd;
+    }
+
+    .popup-indicator.active {
+      background: #333;
+    }
+
+    /* NEW: Product Info */
+    .popup-info {
+      padding: 20px;
+      background: white;
+    }
+
+    .popup-delivery-time {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      color: #4CAF50;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .popup-rating {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .popup-stars {
+      color: #FFB000;
+      font-size: 14px;
+    }
+
+    .popup-rating-text {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .popup-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #333;
     }
 
     .popup-weight {
-      color: #8E8E93;
-      margin-bottom: 16px;
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 12px;
     }
 
-    .popup-price {
+    .popup-price-section {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 8px;
+      margin-bottom: 8px;
     }
 
-    .popup-price .price {
-      font-size: 28px;
+    .popup-current-price {
+      font-size: 20px;
+      font-weight: 700;
+      color: #333;
     }
 
-    .popup-offer {
-      background: #34C759;
-      color: white;
-      padding: 4px 12px;
-      border-radius: 12px;
+    .popup-original-price {
       font-size: 14px;
+      color: #999;
+      text-decoration: line-through;
+    }
+
+    .popup-discount {
+      background: #4CAF50;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
       font-weight: 600;
     }
 
-    .popup-description {
-      font-size: 16px;
-      line-height: 1.6;
+    .popup-unit-price {
+      font-size: 12px;
       color: #666;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
     }
 
-    .quantity-selector {
+    .popup-details-btn {
+      color: #4CAF50;
+      background: none;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 20px;
+    }
+
+    /* NEW: Features Section */
+    .popup-features {
+      display: flex;
+      justify-content: space-around;
+      padding: 20px;
+      background: #f9f9f9;
+      margin: 0 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .popup-feature {
+      text-align: center;
+      flex: 1;
+    }
+
+    .popup-feature-icon {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 8px;
+      background: #f0f0f0;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .popup-feature-title {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .popup-feature-subtitle {
+      font-size: 10px;
+      color: #666;
+    }
+
+    /* NEW: Highlights Section */
+    .popup-highlights-section {
+      padding: 20px;
+      background: white;
+    }
+
+    .popup-highlights-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .popup-highlights-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .popup-expand-btn {
+      background: none;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .popup-highlight-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .popup-highlight-item:last-child {
+      border-bottom: none;
+    }
+
+    .popup-highlight-label {
+      font-size: 14px;
+      color: #666;
+    }
+
+    .popup-highlight-value {
+      font-size: 14px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    /* NEW: Quantity selector in popup */
+    .popup-quantity-selector {
       display: flex;
       align-items: center;
       gap: 16px;
-      margin-bottom: 24px;
+      margin: 20px 0;
     }
 
-    .quantity-label {
+    .popup-quantity-label {
       font-weight: 600;
       font-size: 16px;
     }
 
-    .quantity-controls {
+    .popup-quantity-controls {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .qty-btn {
+    .popup-qty-btn {
       background: #F2F2F7;
       border: none;
       border-radius: 8px;
@@ -823,47 +1027,92 @@
       transition: all 0.2s;
     }
 
-    .qty-btn:active {
+    .popup-qty-btn:active {
       background: #E5E5EA;
     }
 
-    .qty {
+    .popup-qty {
       font-weight: 600;
       min-width: 24px;
       text-align: center;
       font-size: 18px;
     }
 
-    .popup-actions {
-      margin-top: auto;
-      padding: 20px;
-      position: sticky;
+    /* NEW: Bottom Section */
+    .popup-bottom-section {
+      position: fixed;
       bottom: 0;
+      left: 0;
+      right: 0;
       background: white;
-      border-top: 1px solid #f0f0f0;
-      flex-shrink: 0;
+      padding: 16px 20px;
+      border-top: 1px solid #e0e0e0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
-    .popup-cta {
+    .popup-price-info {
+      flex: 1;
+    }
+
+    .popup-bottom-price {
+      font-size: 18px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .popup-bottom-mrp {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .popup-taxes-info {
+      font-size: 10px;
+      color: #666;
+    }
+
+    .popup-add-to-cart-btn {
       background: #007AFF;
       color: white;
       border: none;
-      border-radius: 12px;
-      padding: 18px;
-      font-size: 18px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
       font-weight: 600;
-      width: 100%;
       cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(0,122,255,0.3);
+      transition: background-color 0.3s;
     }
 
-    .popup-cta:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 6px rgba(0,122,255,0.3);
+    .popup-add-to-cart-btn:hover {
+      background: #0069d9;
+    }
+
+    .popup-add-to-cart-btn:active {
+      background: #005cbf;
+    }
+
+    /* Content padding for fixed bottom */
+    .popup-content-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 80px;
     }
 
     /* Cart Page - Enhanced - FIXED: Button order and sticky CTA */
+    #cart .section {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 60px - 34px); /* Account for header and ticker */
+      padding-bottom: 0;
+    }
+
+    .cart-scrollable {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 20px;
+    }
+
     .cart-header {
       display: flex;
       align-items: center;
@@ -1050,7 +1299,8 @@
       background: white;
       padding: 15px 20px;
       border-top: 1px solid #f0f0f0;
-      margin: 0 -20px -20px;
+      margin: 0 -20px;
+      z-index: 10;
     }
 
     .continue-shopping {
@@ -1099,6 +1349,11 @@
       text-align: center;
       padding: 60px 20px;
       color: #8E8E93;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
     }
 
     .empty-cart i {
@@ -1148,6 +1403,7 @@
 
     .faq.active {
       box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      border-color: rgba(59,130,246,.2);
     }
 
     .q {
@@ -1163,6 +1419,11 @@
       font-size: 16px;
       font-weight: 600;
       color: #1e40af;
+      transition: all 0.3s;
+    }
+
+    .q:hover {
+      background: rgba(59,130,246,.05);
     }
 
     .a {
@@ -1310,6 +1571,9 @@
       position: relative;
       padding: 8px 12px;
       border-radius: 12px;
+      min-height: 44px;
+      min-width: 44px;
+      justify-content: center;
     }
 
     .nav-item.active {
@@ -1351,7 +1615,7 @@
       font-weight: 500;
       opacity: 0;
       transition: all 0.3s;
-      z-index: 1000;
+      z-index: 2000;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       display: flex;
       align-items: center;
@@ -1420,6 +1684,92 @@
       
       #catalog .categories {
         top: 130px;
+      }
+      
+      .popup-title {
+        font-size: 20px;
+      }
+      
+      .popup-features {
+        margin: 0 10px;
+      }
+      
+      .popup-feature-title {
+        font-size: 11px;
+      }
+      
+      .popup-feature-subtitle {
+        font-size: 9px;
+      }
+    }
+
+    @media (max-width: 320px) {
+      .app, .product-popup, .bottom-bar {
+        max-width: 320px;
+      }
+      
+      .title {
+        font-size: 22px;
+      }
+      
+      .section {
+        padding: 12px;
+      }
+      
+      .carousel {
+        margin: 0 12px 12px;
+        height: 120px;
+      }
+      
+      .trust-strip {
+        margin: 0 12px 12px;
+        padding: 12px 8px;
+      }
+      
+      .trust-item {
+        padding: 8px 4px;
+      }
+      
+      .trust-title {
+        font-size: 12px;
+      }
+      
+      .trust-sub {
+        font-size: 11px;
+      }
+      
+      .product-name {
+        font-size: 14px;
+      }
+      
+      .price {
+        font-size: 16px;
+      }
+      
+      .add-to-cart-btn, .cart-controls {
+        width: 32px;
+        height: 32px;
+      }
+      
+      .cart-controls .qty-btn {
+        width: 24px;
+        height: 24px;
+      }
+      
+      #catalog .categories {
+        top: 126px;
+      }
+      
+      .popup-name {
+        font-size: 20px;
+      }
+      
+      .popup-price .price {
+        font-size: 24px;
+      }
+      
+      .popup-description {
+        font-size: 14px;
       }
     }
   </style>
@@ -1525,13 +1875,15 @@
           <button class="clear-cart" onclick="clearCart()" id="clearCartBtn">Clear All</button>
         </div>
         
-        <div id="cartItems"></div>
-        <div id="cartSummary"></div>
-        <div id="emptyCart" class="empty-cart" style="display: none;">
-          <i class="fas fa-shopping-bag"></i>
-          <h3>Your cart is empty</h3>
-          <p>Add some fresh seafood to get started</p>
-          <button class="empty-cart-btn" onclick="showPage('catalog')">Browse Products</button>
+        <div class="cart-scrollable">
+          <div id="cartItems"></div>
+          <div id="cartSummary"></div>
+          <div id="emptyCart" class="empty-cart" style="display: none;">
+            <i class="fas fa-shopping-bag"></i>
+            <h3>Your cart is empty</h3>
+            <p>Add some fresh seafood to get started</p>
+            <button class="empty-cart-btn" onclick="showPage('catalog')">Browse Products</button>
+          </div>
         </div>
         
         <!-- Sticky cart actions - FIXED: Button order and sticky placement -->
@@ -1683,24 +2035,126 @@
       </main>
     </div>
 
-    <!-- Product Popup - FIXED: New structure with proper header and sticky footer -->
+    <!-- NEW: Updated Product Popup with new design -->
     <div class="product-popup" id="productPopup">
       <div class="popup-header">
-        <button class="popup-back-btn" onclick="closePopup()">
-          <i class="fas fa-arrow-left"></i>
-        </button>
-        <div class="popup-title" id="popupTitle"></div>
-        <button class="popup-close-btn" onclick="closePopup()">
-          <i class="fas fa-times"></i>
-        </button>
+        <button class="popup-back-btn" onclick="closePopup()">←</button>
+        <div class="popup-header-actions">
+          <button class="popup-action-btn" onclick="toggleFavorite()">♡</button>
+          <button class="popup-action-btn" onclick="shareProduct()">↗</button>
+        </div>
       </div>
+
       <div class="popup-content-wrapper">
-        <div class="popup-image" id="popupImage"></div>
-        <div class="popup-content" id="popupContent"></div>
+        <!-- Product Image Section -->
+        <div class="popup-image-section">
+          <div class="popup-image-container">
+            <img src="" alt="" class="popup-image" id="popupMainImage">
+            <button class="popup-image-nav" onclick="nextPopupImage()">›</button>
+          </div>
+          <div class="popup-image-indicators">
+            <div class="popup-indicator active"></div>
+            <div class="popup-indicator"></div>
+            <div class="popup-indicator"></div>
+          </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="popup-info">
+          <div class="popup-delivery-time">
+            <span>🕐</span>
+            <span>Next Day Delivery</span>
+          </div>
+
+          <div class="popup-rating">
+            <div class="popup-stars">★★★★☆</div>
+            <span class="popup-rating-text">(4.2/5 - 387 reviews)</span>
+          </div>
+
+          <h1 class="popup-title" id="popupProductTitle"></h1>
+          <div class="popup-weight" id="popupProductWeight"></div>
+
+          <div class="popup-price-section">
+            <span class="popup-current-price" id="popupCurrentPrice"></span>
+            <span class="popup-original-price" id="popupOriginalPrice"></span>
+            <span class="popup-discount" id="popupDiscount"></span>
+          </div>
+
+          <div class="popup-unit-price" id="popupUnitPrice"></div>
+
+          <button class="popup-details-btn" onclick="togglePopupDetails()">
+            View product details ▼
+          </button>
+
+          <!-- Features -->
+          <div class="popup-features">
+            <div class="popup-feature">
+              <div class="popup-feature-icon">🔄</div>
+              <div class="popup-feature-title">Quality</div>
+              <div class="popup-feature-subtitle">Guaranteed</div>
+            </div>
+            <div class="popup-feature">
+              <div class="popup-feature-icon">👥</div>
+              <div class="popup-feature-title">24/7</div>
+              <div class="popup-feature-subtitle">Support</div>
+            </div>
+            <div class="popup-feature">
+              <div class="popup-feature-icon">🚚</div>
+              <div class="popup-feature-title">Fast</div>
+              <div class="popup-feature-subtitle">Delivery</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Highlights Section -->
+        <div class="popup-highlights-section">
+          <div class="popup-highlights-header">
+            <h2 class="popup-highlights-title">Product Details</h2>
+            <button class="popup-expand-btn" onclick="togglePopupHighlights()">^</button>
+          </div>
+          
+          <div class="popup-highlights-content" id="popupHighlightsContent">
+            <div class="popup-highlight-item">
+              <span class="popup-highlight-label">Gross Weight</span>
+              <span class="popup-highlight-value" id="popupGrossWeight"></span>
+            </div>
+            <div class="popup-highlight-item">
+              <span class="popup-highlight-label">Net Weight</span>
+              <span class="popup-highlight-value" id="popupNetWeight"></span>
+            </div>
+            <div class="popup-highlight-item">
+              <span class="popup-highlight-label">Type</span>
+              <span class="popup-highlight-value" id="popupType"></span>
+            </div>
+            <div class="popup-highlight-item">
+              <span class="popup-highlight-label">Description</span>
+              <span class="popup-highlight-value" id="popupDescription"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quantity Selector -->
+        <div class="popup-quantity-selector">
+          <span class="popup-quantity-label">Quantity:</span>
+          <div class="popup-quantity-controls">
+            <button class="popup-qty-btn" onclick="changePopupQty(-1)">-</button>
+            <span class="popup-qty" id="popupQty">1</span>
+            <button class="popup-qty-btn" onclick="changePopupQty(1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Section -->
+      <div class="popup-bottom-section">
+        <div class="popup-price-info">
+          <div class="popup-bottom-price" id="popupBottomPrice"></div>
+          <div class="popup-taxes-info">Inclusive of all taxes</div>
+        </div>
+        <button class="popup-add-to-cart-btn" onclick="addPopupToCart()">Add to cart</button>
       </div>
     </div>
 
-    <!-- Bottom Navigation - FIXED: Now properly constrained to mobile container -->
+    <!-- Bottom Navigation - FIXED: Properly constrained to mobile container -->
     <nav class="bottom-bar" id="bottomNav">
       <div class="nav-item active" onclick="showPage('home')">
         <i class="fas fa-home"></i>
@@ -1811,6 +2265,12 @@
     let currentCarouselIndex = 0;
     let currentProductQty = 1;
     let isPopupOpen = false;
+    
+    /* NEW: Variables for popup functionality */
+    let currentPopupImageIndex = 0;
+    let isPopupFavorite = false;
+    let popupHighlightsExpanded = true;
+    let popupDetailsExpanded = false;
 
     /* ===== Init ===== */
     function init() {
@@ -1912,6 +2372,7 @@
     function createProductHTML(product) {
       const hasOffer = product.mrp > product.finalPrice;
       const saveAmount = hasOffer ? product.mrp - product.finalPrice : 0;
+      const isInCart = cart[product.id];
       
       return `
         <div class="product" onclick="showProductPopup(${product.id})">
@@ -1928,68 +2389,64 @@
               ${hasOffer ? `<span class="old-price">₹${product.mrp}</span>` : ''}
             </div>
           </div>
-          ${product.available ? `<button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${product.id})"><i class="fas fa-plus"></i></button>` : ''}
+          ${product.available ? 
+            (isInCart ? 
+              `<div class="cart-controls">
+                <button class="qty-btn" onclick="event.stopPropagation(); updateQty(${product.id}, -1)">-</button>
+                <span class="qty">${isInCart.qty}</span>
+                <button class="qty-btn" onclick="event.stopPropagation(); updateQty(${product.id}, 1)">+</button>
+              </div>` 
+              : `<button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${product.id})"><i class="fas fa-plus"></i></button>`)
+          : ''}
         </div>
       `;
     }
 
+    /* NEW: Updated showProductPopup function with new design */
     function showProductPopup(id) {
       const product = products.find(p => p.id === id);
       if (!product) return;
 
       currentProductQty = 1;
       const popup = document.getElementById('productPopup');
-      const image = document.getElementById('popupImage');
-      const content = document.getElementById('popupContent');
-      const title = document.getElementById('popupTitle');
-
-      // Set the product title in the header
-      title.textContent = product.name;
-
-      image.innerHTML = `
-        <img src="${product.image}" alt="${product.name}">
-      `;
-
-      const hasOffer = product.mrp > product.finalPrice;
       
-      content.innerHTML = `
-        <h2 class="popup-name">${product.name}</h2>
-        <p class="popup-weight">${product.gross} / ${product.net}</p>
-        <div class="popup-price">
-          <span class="price">₹${product.finalPrice}</span>
-          ${hasOffer ? `<span class="old-price">₹${product.mrp}</span>` : ''}
-          ${hasOffer ? `<div class="popup-offer">${product.offer}% OFF</div>` : ''}
-        </div>
-        <p class="popup-description">${product.desc}</p>
-        
-        ${product.available ? `
-        <div class="quantity-selector">
-          <span class="quantity-label">Quantity:</span>
-          <div class="quantity-controls">
-            <button class="qty-btn" onclick="changeProductQty(-1)">-</button>
-            <span class="qty" id="productQty">${currentProductQty}</span>
-            <button class="qty-btn" onclick="changeProductQty(1)">+</button>
-          </div>
-        </div>
-        ` : `
-        <div style="margin-bottom: 24px;">
-          <p style="color: #FF3B30; font-weight: 600;">Currently out of stock</p>
-        </div>
-        `}
-        
-        <div class="popup-actions">
-          ${product.available ? `
-          <button class="popup-cta" onclick="addToCart(${product.id}, currentProductQty)">
-            <i class="fas fa-shopping-bag"></i> Add to Cart - ₹${product.finalPrice * currentProductQty}
-          </button>
-          ` : `
-          <button class="popup-cta" disabled style="background: #8E8E93;">
-            <i class="fas fa-times-circle"></i> Out of Stock
-          </button>
-          `}
-        </div>
-      `;
-
+      // Set product data in the popup
+      document.getElementById('popupProductTitle').textContent = product.name;
+      document.getElementById('popupProductWeight').textContent = product.net;
+      document.getElementById('popupCurrentPrice').textContent = `₹${product.finalPrice}`;
+      document.getElementById('popupOriginalPrice').textContent = `MRP ₹${product.mrp}`;
+      
+      // Calculate and show discount if applicable
+      const discountElem = document.getElementById('popupDiscount');
+      if (product.mrp > product.finalPrice) {
+        const discountPercent = Math.round(((product.mrp - product.finalPrice) / product.mrp) * 100);
+        discountElem.textContent = `${discountPercent}% OFF`;
+        discountElem.style.display = 'inline';
+      } else {
+        discountElem.style.display = 'none';
+      }
+      
+      // Calculate unit price
+      const netWeight = parseInt(product.net);
+      const unitPrice = netWeight ? (product.finalPrice / (netWeight / 100)).toFixed(2) : 0;
+      document.getElementById('popupUnitPrice').textContent = `₹${unitPrice}/100 g`;
+      
+      // Set product details
+      document.getElementById('popupGrossWeight').textContent = product.gross;
+      document.getElementById('popupNetWeight').textContent = product.net;
+      document.getElementById('popupType').textContent = product.category;
+      document.getElementById('popupDescription').textContent = product.desc;
+      
+      // Set product image
+      document.getElementById('popupMainImage').src = product.image;
+      document.getElementById('popupMainImage').alt = product.name;
+      
+      // Update bottom price
+      document.getElementById('popupBottomPrice').innerHTML = `₹${product.finalPrice} <span class="popup-bottom-mrp">MRP ₹${product.mrp}</span> ${product.mrp > product.finalPrice ? `<span class="popup-discount">${Math.round(((product.mrp - product.finalPrice) / product.mrp) * 100)}% OFF</span>` : ''}`;
+      
+      // Reset quantity
+      document.getElementById('popupQty').textContent = '1';
+      
       popup.classList.add('active');
       isPopupOpen = true;
       
@@ -2011,16 +2468,143 @@
       }
     }
 
-    function changeProductQty(change) {
-      currentProductQty = Math.max(1, currentProductQty + change);
-      document.getElementById('productQty').textContent = currentProductQty;
+    /* NEW: Function to change quantity in popup */
+    function changePopupQty(change) {
+      const qtyElement = document.getElementById('popupQty');
+      let qty = parseInt(qtyElement.textContent);
+      qty = Math.max(1, qty + change);
+      qtyElement.textContent = qty;
       
-      const productId = document.querySelector('.popup-cta').getAttribute('onclick').match(/\d+/)[0];
-      const product = products.find(p => p.id === parseInt(productId));
-      
+      // Update bottom price with quantity
+      const productTitle = document.getElementById('popupProductTitle').textContent;
+      const product = products.find(p => p.name === productTitle);
       if (product) {
-        document.querySelector('.popup-cta').innerHTML = 
-          `<i class="fas fa-shopping-bag"></i> Add to Cart - ₹${product.finalPrice * currentProductQty}`;
+        const totalPrice = product.finalPrice * qty;
+        const totalMrp = product.mrp * qty;
+        document.getElementById('popupBottomPrice').innerHTML = `₹${totalPrice} <span class="popup-bottom-mrp">MRP ₹${totalMrp}</span> ${product.mrp > product.finalPrice ? `<span class="popup-discount">${Math.round(((product.mrp - product.finalPrice) / product.mrp) * 100)}% OFF</span>` : ''}`;
+      }
+      
+      currentProductQty = qty;
+    }
+
+    /* NEW: Function to add to cart from popup */
+    function addPopupToCart() {
+      const productTitle = document.getElementById('popupProductTitle').textContent;
+      const product = products.find(p => p.name === productTitle);
+      if (!product || !product.available) return;
+
+      const qty = parseInt(document.getElementById('popupQty').textContent);
+      
+      if (cart[product.id]) {
+        cart[product.id].qty += qty;
+      } else {
+        cart[product.id] = { ...product, qty: qty };
+      }
+
+      updateCartUI();
+      showToast(`${product.name} added to cart!`);
+      closePopup();
+      
+      // Track add to cart
+      trackAddToCart(product.id, qty);
+    }
+
+    /* NEW: Function to toggle favorite in popup */
+    function toggleFavorite() {
+      isPopupFavorite = !isPopupFavorite;
+      const favoriteBtn = document.querySelector('.popup-action-btn');
+      favoriteBtn.textContent = isPopupFavorite ? '♥' : '♡';
+      favoriteBtn.style.color = isPopupFavorite ? '#e74c3c' : '#333';
+      
+      // Track favorite action
+      const productTitle = document.getElementById('popupProductTitle').textContent;
+      const product = products.find(p => p.name === productTitle);
+      
+      if (product && typeof gtag === 'function') {
+        gtag('event', isPopupFavorite ? 'add_to_wishlist' : 'remove_from_wishlist', {
+          currency: 'INR',
+          value: product.finalPrice,
+          items: [{
+            item_id: product.id,
+            item_name: product.name,
+            item_category: product.category,
+            price: product.finalPrice
+          }]
+        });
+      }
+    }
+
+    /* NEW: Function to share product from popup */
+    function shareProduct() {
+      const productTitle = document.getElementById('popupProductTitle').textContent;
+      console.log('Sharing product: ' + productTitle);
+      
+      if (navigator.share) {
+        navigator.share({
+          title: 'Coastal Fresh - ' + productTitle,
+          text: 'Check out this fresh product from Coastal Fresh!',
+          url: window.location.href
+        });
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        alert('Share this product: ' + window.location.href);
+      }
+      
+      // Track share action
+      const product = products.find(p => p.name === productTitle);
+      if (product && typeof gtag === 'function') {
+        gtag('event', 'share', {
+          method: 'Web Share API',
+          content_type: 'product',
+          item_id: product.id,
+        });
+      }
+    }
+
+    /* NEW: Function to navigate images in popup */
+    function nextPopupImage() {
+      // For now just cycle through indicators since we only have one image
+      const indicators = document.querySelectorAll('.popup-indicator');
+      currentPopupImageIndex = (currentPopupImageIndex + 1) % indicators.length;
+      
+      indicators.forEach((indicator, index) => {
+        if (index === currentPopupImageIndex) {
+          indicator.classList.add('active');
+        } else {
+          indicator.classList.remove('active');
+        }
+      });
+    }
+
+    /* NEW: Function to toggle details in popup */
+    function togglePopupDetails() {
+      const detailsBtn = document.querySelector('.popup-details-btn');
+      const highlightsContent = document.getElementById('popupHighlightsContent');
+      
+      popupDetailsExpanded = !popupDetailsExpanded;
+      
+      if (popupDetailsExpanded) {
+        detailsBtn.innerHTML = 'Hide product details ▲';
+        highlightsContent.style.display = 'block';
+      } else {
+        detailsBtn.innerHTML = 'View product details ▼';
+        highlightsContent.style.display = 'none';
+      }
+    }
+
+    /* NEW: Function to toggle highlights in popup */
+    function togglePopupHighlights() {
+      const highlightsContent = document.getElementById('popupHighlightsContent');
+      const expandBtn = document.querySelector('.popup-expand-btn');
+      
+      popupHighlightsExpanded = !popupHighlightsExpanded;
+      
+      if (popupHighlightsExpanded) {
+        highlightsContent.style.display = 'block';
+        expandBtn.textContent = '^';
+      } else {
+        highlightsContent.style.display = 'none';
+        expandBtn.textContent = 'v';
       }
     }
 
@@ -2046,7 +2630,6 @@
 
       updateCartUI();
       showToast(`${product.name} added to cart!`);
-      closePopup();
       
       // Track add to cart
       trackAddToCart(id, qty);
@@ -2055,7 +2638,6 @@
     function updateCartUI() {
       const items = Object.values(cart);
       const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
-      const totalAmount = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
 
       // Update all cart badges
       ['cartCount', 'cartCountCatalog', 'navBadge'].forEach(id => {
@@ -2082,6 +2664,17 @@
         cartActions.style.display = totalQty > 0 ? 'block' : 'none';
       }
       
+      // Update product cards to show quantity controls
+      renderFeaturedProducts();
+      
+      // Update catalog products if on catalog page
+      if (currentPage === 'catalog') {
+        const catalogSearch = document.getElementById('catalogSearch');
+        if (catalogSearch) {
+          renderCatalogProducts(catalogSearch.value);
+        }
+      }
+      
       // Save cart to localStorage
       saveCart();
     }
@@ -2093,7 +2686,7 @@
       const emptyCart = document.getElementById('emptyCart');
 
       if (items.length === 0) {
-        emptyCart.style.display = 'block';
+        emptyCart.style.display = 'flex';
         cartItems.innerHTML = '';
         cartSummary.innerHTML = '';
       } else {
