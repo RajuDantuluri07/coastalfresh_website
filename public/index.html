@@ -616,6 +616,47 @@
       text-decoration: line-through;
     }
 
+    /* Cart quantity controls on product card */
+    .cart-controls {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #007AFF;
+      border-radius: 20px;
+      padding: 4px;
+      z-index: 2;
+    }
+
+    .cart-controls .qty-btn {
+      background: white;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #007AFF;
+      transition: all 0.2s;
+    }
+
+    .cart-controls .qty-btn:active {
+      background: #f0f0f0;
+    }
+
+    .cart-controls .qty {
+      color: white;
+      font-weight: 600;
+      min-width: 20px;
+      text-align: center;
+    }
+
     .add-to-cart-btn {
       position: absolute;
       bottom: 12px;
@@ -730,6 +771,7 @@
       overflow-y: auto;
       display: flex;
       flex-direction: column;
+      -webkit-overflow-scrolling: touch;
     }
 
     .popup-image {
@@ -864,6 +906,19 @@
     }
 
     /* Cart Page - Enhanced - FIXED: Button order and sticky CTA */
+    #cart .section {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 60px - 34px); /* Account for header and ticker */
+      padding-bottom: 0;
+    }
+
+    .cart-scrollable {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 20px;
+    }
+
     .cart-header {
       display: flex;
       align-items: center;
@@ -1050,7 +1105,8 @@
       background: white;
       padding: 15px 20px;
       border-top: 1px solid #f0f0f0;
-      margin: 0 -20px -20px;
+      margin: 0 -20px;
+      z-index: 10;
     }
 
     .continue-shopping {
@@ -1099,6 +1155,11 @@
       text-align: center;
       padding: 60px 20px;
       color: #8E8E93;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
     }
 
     .empty-cart i {
@@ -1310,6 +1371,9 @@
       position: relative;
       padding: 8px 12px;
       border-radius: 12px;
+      min-height: 44px;
+      min-width: 44px;
+      justify-content: center;
     }
 
     .nav-item.active {
@@ -1351,7 +1415,7 @@
       font-weight: 500;
       opacity: 0;
       transition: all 0.3s;
-      z-index: 1000;
+      z-index: 2000;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       display: flex;
       align-items: center;
@@ -1420,6 +1484,76 @@
       
       #catalog .categories {
         top: 130px;
+      }
+    }
+
+    @media (max-width: 320px) {
+      .app, .product-popup, .bottom-bar {
+        max-width: 320px;
+      }
+      
+      .title {
+        font-size: 22px;
+      }
+      
+      .section {
+        padding: 12px;
+      }
+      
+      .carousel {
+        margin: 0 12px 12px;
+        height: 120px;
+      }
+      
+      .trust-strip {
+        margin: 0 12px 12px;
+        padding: 12px 8px;
+      }
+      
+      .trust-item {
+        padding: 8px 4px;
+      }
+      
+      .trust-title {
+        font-size: 12px;
+      }
+      
+      .trust-sub {
+        font-size: 11px;
+      }
+      
+      .product-name {
+        font-size: 14px;
+      }
+      
+      .price {
+        font-size: 16px;
+      }
+      
+      .add-to-cart-btn, .cart-controls {
+        width: 32px;
+        height: 32px;
+      }
+      
+      .cart-controls .qty-btn {
+        width: 24px;
+        height: 24px;
+      }
+      
+      #catalog .categories {
+        top: 126px;
+      }
+      
+      .popup-name {
+        font-size: 20px;
+      }
+      
+      .popup-price .price {
+        font-size: 24px;
+      }
+      
+      .popup-description {
+        font-size: 14px;
       }
     }
   </style>
@@ -1525,13 +1659,15 @@
           <button class="clear-cart" onclick="clearCart()" id="clearCartBtn">Clear All</button>
         </div>
         
-        <div id="cartItems"></div>
-        <div id="cartSummary"></div>
-        <div id="emptyCart" class="empty-cart" style="display: none;">
-          <i class="fas fa-shopping-bag"></i>
-          <h3>Your cart is empty</h3>
-          <p>Add some fresh seafood to get started</p>
-          <button class="empty-cart-btn" onclick="showPage('catalog')">Browse Products</button>
+        <div class="cart-scrollable">
+          <div id="cartItems"></div>
+          <div id="cartSummary"></div>
+          <div id="emptyCart" class="empty-cart" style="display: none;">
+            <i class="fas fa-shopping-bag"></i>
+            <h3>Your cart is empty</h3>
+            <p>Add some fresh seafood to get started</p>
+            <button class="empty-cart-btn" onclick="showPage('catalog')">Browse Products</button>
+          </div>
         </div>
         
         <!-- Sticky cart actions - FIXED: Button order and sticky placement -->
@@ -1912,6 +2048,7 @@
     function createProductHTML(product) {
       const hasOffer = product.mrp > product.finalPrice;
       const saveAmount = hasOffer ? product.mrp - product.finalPrice : 0;
+      const isInCart = cart[product.id];
       
       return `
         <div class="product" onclick="showProductPopup(${product.id})">
@@ -1928,7 +2065,15 @@
               ${hasOffer ? `<span class="old-price">₹${product.mrp}</span>` : ''}
             </div>
           </div>
-          ${product.available ? `<button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${product.id})"><i class="fas fa-plus"></i></button>` : ''}
+          ${product.available ? 
+            (isInCart ? 
+              `<div class="cart-controls">
+                <button class="qty-btn" onclick="event.stopPropagation(); updateQty(${product.id}, -1)">-</button>
+                <span class="qty">${isInCart.qty}</span>
+                <button class="qty-btn" onclick="event.stopPropagation(); updateQty(${product.id}, 1)">+</button>
+              </div>` 
+              : `<button class="add-to-cart-btn" onclick="event.stopPropagation(); addToCart(${product.id})"><i class="fas fa-plus"></i></button>`)
+          : ''}
         </div>
       `;
     }
@@ -2055,7 +2200,6 @@
     function updateCartUI() {
       const items = Object.values(cart);
       const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
-      const totalAmount = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
 
       // Update all cart badges
       ['cartCount', 'cartCountCatalog', 'navBadge'].forEach(id => {
@@ -2082,6 +2226,17 @@
         cartActions.style.display = totalQty > 0 ? 'block' : 'none';
       }
       
+      // Update product cards to show quantity controls
+      renderFeaturedProducts();
+      
+      // Update catalog products if on catalog page
+      if (currentPage === 'catalog') {
+        const catalogSearch = document.getElementById('catalogSearch');
+        if (catalogSearch) {
+          renderCatalogProducts(catalogSearch.value);
+        }
+      }
+      
       // Save cart to localStorage
       saveCart();
     }
@@ -2093,7 +2248,7 @@
       const emptyCart = document.getElementById('emptyCart');
 
       if (items.length === 0) {
-        emptyCart.style.display = 'block';
+        emptyCart.style.display = 'flex';
         cartItems.innerHTML = '';
         cartSummary.innerHTML = '';
       } else {
