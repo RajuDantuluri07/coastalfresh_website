@@ -1475,46 +1475,57 @@
   box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
   border-top: 1px solid var(--border-color);
 }    .continue-shopping {
-      background: none;
-      border: 1px solid var(--primary-color);
-      color: var(--primary-color);
-      font-size: 16px;
+      /* NEW: Styles for side-by-side layout */
+      flex: 1;
+      margin-bottom: 0;
+      padding: 16px 12px;
+      /* End of New Styles */
+      background: var(--bg-white);
+      border: 1px solid var(--border-color); /* Lighter border */
+      color: var(--text-secondary); /* Greyer text for secondary action */
+      font-size: 15px; /* Slightly smaller font */
       font-weight: 500;
       cursor: pointer;
-      padding: 16px;
-      width: 100%;
       text-align: center;
       border-radius: 12px;
-      margin-bottom: 12px;
       transition: all 0.2s;
     }
 
     .continue-shopping:active {
-      background: var(--primary-light);
+      background: var(--bg-light); /* Subtle active state */
     }
 
     .checkout-btn {
-      margin: 0 20px 20px;
+      /* NEW: Styles for side-by-side layout */
+      flex: 1.5; /* Give more visual weight to the primary action */
+      margin: 0;
+      /* End of New Styles */
       background: var(--primary-color); /* Solid color for main CTA */
       color: white;
       border: none;
       border-radius: 12px;
-      font-size: 18px;
-      font-weight: 600;
-      width: calc(100% - 40px);
+      font-size: 16px; /* Larger font for primary action */
+      font-weight: 700; /* Bold for emphasis */
       cursor: pointer;
       transition: all 0.2s;
       box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3); /* Shadow to match new color */
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px;
-      gap: 12px;
+      padding: 16px 12px;
+      gap: 8px;
     }
 
     .checkout-btn:active {
       transform: translateY(2px);
       box-shadow: 0 2px 6px rgba(0,122,255,0.3);
+    }
+
+    /* NEW: Container for the two buttons */
+    .cart-actions {
+      display: flex;
+      gap: 12px;
+      padding: 12px 20px 20px;
     }
 
     .empty-cart {
@@ -2097,60 +2108,55 @@
       padding: 5px 20px 15px;
     }
     /* Cart Popup (Mini Cart) */
-    /* --- NEW: E-commerce Style Cart Popup --- */
+    /* --- NEW: Floating Cart Icon Popup --- */
     .cart-popup {
       position: fixed;
-      bottom: var(--bottom-nav-height);
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: var(--app-max-width);
-      background: var(--primary-dark);
-      color: white;
+      bottom: calc(var(--bottom-nav-height) + 20px);
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: var(--primary-color);
+      border-radius: 50%;
+      box-shadow: 0 4px 20px rgba(1, 101, 154, 0.4);
       z-index: 101;
       display: none; /* Initially hidden */
-      flex-direction: row;
       align-items: center;
-      justify-content: space-between;
-      padding: 12px 20px;
+      justify-content: center;
       cursor: pointer;
-      animation: slideUpFromBottom 0.4s ease-out;
-      border-top: 1px solid var(--primary-color);
+      animation: slideUpAndFadeIn 0.3s ease-out;
+      transition: transform 0.2s ease;
     }
 
-    .cart-popup-info {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
+    .cart-popup:active {
+      transform: scale(0.95);
     }
 
-    .cart-popup-info .item-count {
-      font-size: 14px;
-      font-weight: 400;
-      color: var(--bg-light);
-    }
-
-    .cart-popup-info .total-price {
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .cart-popup-action {
+    .cart-popup-content {
+      position: relative;
       display: flex;
       align-items: center;
-      gap: 12px;
-      font-size: 16px;
-      font-weight: 700;
-      background: var(--accent-color);
-      padding: 10px 16px;
-      border-radius: 8px;
-      transition: background-color 0.2s;
+      justify-content: center;
+      color: white;
+      font-size: 24px;
     }
 
-    .cart-popup-action:active {
-      background-color: #0aa3cf; /* Slightly darker accent */
+    .cart-popup-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--error-color);
+      color: white;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--primary-color);
     }
-    /* --- End of E-commerce Style Cart Popup --- */
+    /* --- End of Floating Cart Icon Popup --- */
 
     @keyframes slideUpCenter {
       from {
@@ -2164,15 +2170,12 @@
     }
     /* Adjust for desktop */
     @media (min-width: 481px) {
-      .cart-popup {
-        /* Revert to floating circle on desktop */
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
+      .cart-popup {        
         bottom: 20px;
         /* Keep it as a floating circle, but position it relative to the app frame */
         left: calc(50% + (var(--app-max-width) / 2) - 80px); /* (Center + Half App Width) - Button Width - Margin */
         transform: none;
+        right: auto;
       }
     }
     
@@ -2183,6 +2186,17 @@
       }
       to {
         transform: translate(-50%, 0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUpAndFadeIn {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
         opacity: 1;
       }
     }
@@ -2705,23 +2719,19 @@
       <!-- Sticky cart footer -->
       <div class="cart-footer" id="cartFooter" style="display: none;">
         <div id="cartSummary"></div>
+        <!-- NEW: Updated layout with two buttons -->
         <div class="cart-actions">
-          <button class="checkout-btn">
-            <i class="fas fa-arrow-right"></i> Proceed to Checkout
-          </button>
+          <button class="continue-shopping">Continue Shopping</button>
+          <button class="checkout-btn">Proceed to Checkout</button>
         </div>
       </div>
     </div>
 
     <!-- Cart Popup (Mini Cart) -->
     <div class="cart-popup" id="cartPopup">
-      <div class="cart-popup-info">
-        <span class="item-count" id="cartPopupItemCount">1 item</span>
-        <span class="total-price" id="cartPopupTotal">₹0</span>
-      </div>
-      <div class="cart-popup-action">
-        <span>View Cart</span>
-        <i class="fas fa-arrow-right"></i>
+      <div class="cart-popup-content">
+        <i class="fas fa-shopping-bag"></i>
+        <span class="cart-popup-count" id="cartPopupCount">0</span>
       </div>
     </div>
 
@@ -3026,6 +3036,7 @@ const TRUST_ICONS = [
       // Cart page buttons
       document.getElementById('clearCartBtn').addEventListener('click', clearCart);
       document.querySelector('.empty-cart-btn').addEventListener('click', () => { showPage('catalog'); closeCart(); });
+      document.querySelector('.cart-footer .continue-shopping').addEventListener('click', () => { showPage('catalog'); closeCart(); });
       document.querySelector('.checkout-btn').addEventListener('click', checkout);      document.getElementById('cartPopup').addEventListener('click', showCart);
 
       // Bottom Navigation
@@ -3272,7 +3283,7 @@ const TRUST_ICONS = [
       
       // Set product image
       document.getElementById('popupMainImage').src = product.image;
-      document.getElementById('popupMainImage').alt = DOMPurify.sanitize(product.name);
+      document.getElementById('popupMainImage').alt = DOMPurify.sanitize(product.name); // FIX: Dynamically set alt attribute
       
       // Hide image indicators as there's only one image
       document.getElementById('popupImageIndicators').style.display = 'none';
@@ -3505,27 +3516,18 @@ const TRUST_ICONS = [
     /* NEW: Function to update cart popup */
     function updateCartPopup() {
       const cartPopup = document.getElementById('cartPopup');
-      const itemCountEl = document.getElementById('cartPopupItemCount');
-      const totalEl = document.getElementById('cartPopupTotal');
+      const cartPopupCount = document.getElementById('cartPopupCount');
 
       const totalQty = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
       const isCartModalActive = document.getElementById('cartModal').classList.contains('active');
 
       if (totalQty > 0 && !isPopupOpen && !isCartModalActive) {
-        const subtotal = Object.keys(cart).reduce((sum, id) => {
-          const product = products.find(p => p.id === parseInt(id));
-          return sum + (product.finalPrice * cart[id]);
-        }, 0);
-
-        itemCountEl.textContent = `${totalQty} ${totalQty > 1 ? 'items' : 'item'}`;
-        totalEl.textContent = `₹${subtotal}`;
-
+        cartPopupCount.textContent = totalQty > 9 ? '9+' : totalQty;
         cartPopup.style.display = 'flex';
       } else {
         cartPopup.style.display = 'none';
       }
     }
-
     function showCart() {
       const items = Object.keys(cart).map(id => {
         const product = products.find(p => p.id === parseInt(id));
