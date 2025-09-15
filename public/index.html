@@ -517,13 +517,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      font-size: 18px;
+      width: 32px; /* Smaller icon container */
+      height: 32px;
+      border-radius: 8px; /* Slightly less rounded */
+      font-size: 14px; /* Smaller icon size */
       margin-bottom: 2px;
-      background: linear-gradient(135deg, var(--accent-color), var(--primary-color)); /* Brighter gradient */
-      color: var(--bg-white);
+      background: var(--primary-light); /* Cleaner, light background */
+      color: var(--primary-color);
+      border: 1px solid var(--border-color);
     }
 
     .trust-title {
@@ -1243,19 +1244,18 @@
     }
 
     .cart-item {
-  display: flex;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 16px;
-  background: var(--bg-white);
-  border: 1px solid var(--border-color);
-  margin-bottom: 12px;
-  align-items: center; /* Vertically align all items */
-  position: relative;
-  /* Animation properties */
-  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-  max-height: 110px; /* Explicit height for animation */
-  overflow: hidden;
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      background: var(--bg-white);
+      border-bottom: 1px solid var(--border-color);
+      position: relative;
+      /* Animation properties */
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      max-height: 150px; /* Explicit height for animation */
+      overflow: hidden;
+      border-radius: 0; /* Items are now separated by a line */
+      margin-bottom: 0;
     }
 
     .cart-item:active {
@@ -1263,9 +1263,9 @@
     }
 
     .cart-item-image {
-      width: 70px;
-      height: 70px;
-      border-radius: 12px;
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
       background: var(--bg-light);
       overflow: hidden;
       flex-shrink: 0;
@@ -1279,46 +1279,46 @@
 
     .cart-item-info {
       flex: 1;
-      display: grid;
+      display: flex;
+      flex-direction: column;
       gap: 4px;
     }
 
-    .cart-item-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-
     .cart-item-name {
-      font-weight: 500; /* Medium */
-      margin-bottom: 4px;
-      font-size: 16px;
+      font-weight: 700; /* Bold */
+      font-size: 17px; /* Larger font size */
+      color: var(--text-primary);
+      line-height: 1.3;
     }
 
     .cart-item-weight {
-      font-size: 13px;
+      font-size: 14px;
       color: var(--text-secondary);
-      font-weight: 300; /* Light */
     }
 
-    .cart-item-price {
-  font-weight: 700;
-  color: var(--text-primary);
-  font-size: 16px;
-  grid-row: 2;
-    }
-
-    .cart-item-controls {
+    .cart-item-pricing {
       display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .cart-item-current-price {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .cart-item-mrp {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-decoration: line-through;
     }
 
     .qty-controls {
       display: flex;
       align-items: center;
       gap: 10px;
-      grid-row: 3;
     }
 
     .cart-qty-btn {
@@ -1332,12 +1332,14 @@
       justify-content: center;
       cursor: pointer;
       font-size: 18px;
-      font-weight: 500; /* Medium */
+      font-weight: 400;
       transition: all 0.2s;
+      border: 1px solid var(--border-color);
     }
 
     .cart-qty-btn:active {
-      background: var(--border-color);
+      background: var(--primary-light);
+      color: var(--primary-color);
     }
 
     .cart-qty {
@@ -1346,24 +1348,32 @@
       text-align: center;
     }
 
+    .cart-item-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: auto; /* Pushes to the bottom */
+    }
+
+    .cart-item-subtotal {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
     .remove-item {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: none;
-  border: 1px solid transparent;
-  color: var(--text-secondary);
-  font-size: 16px;
-  cursor: pointer;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 4px;
     }
 
     .remove-item:active {
-      background-color: rgba(211, 47, 47, 0.1);
       color: var(--error-color);
     }
 
@@ -1379,46 +1389,78 @@
     }
 
     .cart-summary {
-  background: var(--bg-white);
-  padding: 16px 20px 12px;
-  border-radius: 0;
-  margin: 0;
+      background: var(--bg-light);
+      padding: 16px;
+      border-radius: 12px;
+      margin: 0;
     }
 
     .summary-row {
       display: flex;
       justify-content: space-between;
       margin-bottom: 10px;
-      font-size: 15px;
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    .summary-row span:last-child {
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .summary-row .fa-info-circle {
+      color: var(--text-secondary);
+      cursor: help;
+      margin-left: 4px;
     }
 
     .summary-savings {
+      color: var(--success-color);
+      font-weight: 700;
+    }
+
+    .summary-savings span:last-child {
       color: var(--success-color);
     }
 
     .summary-total {
       font-weight: 700;
-      font-size: 18px;
+      font-size: 20px; /* Larger total */
       color: var(--text-primary);
-      border-top: 1px solid var(--border-color);
-      padding-top: 10px;
-      margin-top: 6px;
+      border-top: 1px dashed var(--border-color);
+      padding-top: 12px;
+      margin-top: 8px;
     }
 
-    .delivery-note {
-      background: var(--primary-light);
-      color: var(--primary-dark);
+    .delivery-progress-container {
       padding: 12px 16px;
       border-radius: 12px;
       font-size: 14px;
       margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      background: var(--primary-light);
     }
 
-    .delivery-note i {
-      font-size: 16px;
+    .delivery-progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--primary-dark);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--primary-color);
+      border-radius: 4px;
+      transition: width 0.5s ease;
     }
 
     .cart-footer {
@@ -1467,7 +1509,7 @@
       align-items: center;
       justify-content: center;
       padding: 16px;
-      gap: 8px;
+      gap: 12px;
     }
 
     .checkout-btn:active {
@@ -1596,7 +1638,7 @@
         font-weight: 500; /* Medium */
         cursor: pointer;
         width: 80%;
-        box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3); /* Shadow to match new color */
+        box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3);
       }
 
     /* FAQ */
@@ -2590,10 +2632,11 @@
   <script>
   (function() { // IIFE to avoid polluting global scope
     /* ===== App Configuration ===== */
-    const TRUST_ICONS = [ // Replaced Emojis with Font Awesome Icons
-      { icon: 'fas fa-snowflake', title: 'Fresh', text: 'Daily catch' },
-      { icon: 'fas fa-leaf', title: '100% Natural', text: 'No chemicals' },
-      { icon: 'fas fa-money-bill-wave', title: 'COD', text: 'Pay on delivery' },
+    const TRUST_ICONS = [ // NEW: Updated and more relevant icons
+      { icon: 'fas fa-fish', title: 'Fresh Catch', text: 'Sourced daily' },
+      { icon: 'fas fa-leaf', title: 'All Natural', text: 'No chemicals' },
+      { icon: 'fas fa-box-open', title: 'Hygienic', text: 'Neatly packed' },
+      { icon: 'fas fa-truck-fast', title: 'Next-Day', text: 'Fast delivery' },
     ];
 
     const FEATURED_PRODUCT_IDS = [1, 11, 20, 15];
@@ -2715,7 +2758,7 @@
           const cartItem = cartQtyBtn.closest('.cart-item');
           const productId = cartItem.dataset.id;
           if (productId) {
-            const change = cartQtyBtn.textContent === '+' ? 1 : -1;
+            const change = cartQtyBtn.classList.contains('inc') ? 1 : -1;
             updateQty(parseInt(productId), change);
           }
         }
@@ -2806,11 +2849,11 @@
       document.querySelector('.checkout-btn').addEventListener('click', checkout);      document.getElementById('cartPopup').addEventListener('click', showCart);
 
       // Bottom Navigation
-      document.getElementById('bottomNav').addEventListener('click', (e) => {
+      document.getElementById('bottomNav').addEventListener('click', e => {
         const navItem = e.target.closest('.nav-item');
         if (!navItem) return;
         const page = navItem.dataset.page;
-        if (page === 'cart') {
+        if (page === 'cart' && Object.keys(cart).length > 0) { // Only open cart from nav if not empty
           showCart();
         } else if (page) {
           showPage(page);
@@ -2829,13 +2872,10 @@
         item.setAttribute('data-index', String(i));
         item.setAttribute('data-title', t.title);
 
-        const iconWrap = document.createElement('i');
-        // Use 'i' tag for Font Awesome and set classes
-        iconWrap.className = t.icon;
+        // FIX: Correctly create and assign classes to the icon element
+        const iconWrap = document.createElement('div');
         iconWrap.className = 'icon-container';
-        iconWrap.style.animationDelay = `${i}s`;
-        iconWrap.textContent = t.icon;
-
+        iconWrap.innerHTML = `<i class="${t.icon}"></i>`;
         const content = document.createElement('div');
         content.className = 'trust-content';
         const title = document.createElement('div'); title.className='trust-title'; title.textContent = t.title;
@@ -3310,48 +3350,54 @@
         cartFooter.style.display = 'block';
         cartListHeader.style.display = 'flex';
         
-        // Render cart items
-        cartItems.innerHTML = items.map(item => `
-          <div class="cart-item" data-id="${item.id}">
-            <div class="cart-item-image">
-              <img src="${item.image}" alt="${item.name}">
-            </div>
-            <div class="cart-item-info">
-              <div class="cart-item-name">${item.name}</div>
-              <div class="cart-item-price">₹${item.finalPrice * item.qty}</div>
-              <div class="qty-controls">
-                <button class="cart-qty-btn">-</button>
-                <span class="cart-qty">${item.qty}</span>
-                <button class="cart-qty-btn">+</button>
+        // Render cart items with new layout
+        cartItems.innerHTML = items.map(item => {
+          const hasOffer = item.mrp > item.finalPrice;
+          return `
+            <div class="cart-item" data-id="${item.id}">
+              <div class="cart-item-image">
+                <img src="${item.image}" alt="${item.name}">
               </div>
-              <div class="cart-item-weight">${item.net}</div>
-              <button class="remove-item">
-                <i class="fas fa-times"></i>
+              <div class="cart-item-info">
+                <div class="cart-item-name">${item.name}</div>
+                <div class="cart-item-weight">${item.net}</div>
+                <div class="cart-item-pricing">
+                  <span class="cart-item-current-price">₹${item.finalPrice}</span>
+                  ${hasOffer ? `<span class="cart-item-mrp">₹${item.mrp}</span>` : ''}
+                </div>
+                <div class="cart-item-footer">
+                  <div class="qty-controls">
+                    <button class="cart-qty-btn dec">-</button>
+                    <span class="cart-qty">${item.qty}</span>
+                    <button class="cart-qty-btn inc">+</button>
+                  </div>
+                  <div class="cart-item-subtotal">₹${item.finalPrice * item.qty}</div>
+                </div>
               </div>
+              <button class="remove-item"><i class="fas fa-times"></i></button>
             </div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
 
         // Calculate totals
         const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
         const originalTotal = items.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
         const savings = originalTotal - subtotal;
         const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
-        const total = subtotal + deliveryFee;
+        const total = subtotal + deliveryFee; 
 
         // Render summary
         cartSummary.innerHTML = `
-          ${deliveryFee === 0 ? `
-          <div class="delivery-note">
-            <i class="fas fa-shipping-fast"></i>
-            <span>You've qualified for free delivery!</span>
-          </div>
-          ` : `
-          <div class="delivery-note" style="background: #FFF8E1; color: #FF8F00;">
-            <i class="fas fa-info-circle"></i>
-            <span>Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} more for free delivery</span>
-          </div>
-          `}
+          ${subtotal < FREE_DELIVERY_THRESHOLD ? `
+            <div class="delivery-progress-container">
+              <div class="delivery-progress-text">
+                <span>Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} for FREE Delivery</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill" style="width: ${(subtotal / FREE_DELIVERY_THRESHOLD) * 100}%;"></div>
+              </div>
+            </div>
+          ` : ''}
           <div class="cart-summary">
             <div class="summary-row">
               <span>Subtotal</span>
@@ -3359,13 +3405,13 @@
             </div>
             ${savings > 0 ? `
             <div class="summary-row summary-savings">
-              <span>Savings</span>
+              <span>Total Savings</span>
               <span>-₹${savings}</span>
             </div>
             ` : ''}
             <div class="summary-row">
-              <span>Delivery</span>
-              <span>${deliveryFee === 0 ? 'FREE' : '₹50'}</span>
+              <span>Delivery <i class="fas fa-info-circle" title="Free delivery on orders over ₹${FREE_DELIVERY_THRESHOLD}. Standard ₹50 fee for orders below."></i></span>
+              <span>${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}</span>
             </div>
             <div class="summary-row summary-total">
               <span>Total</span>
@@ -3415,14 +3461,24 @@
       const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
       const total = subtotal + deliveryFee;
 
-      cartSummary.innerHTML = `
-        ${deliveryFee === 0 ? 
-        `<div class="delivery-note"><i class="fas fa-shipping-fast"></i><span>You've qualified for free delivery!</span></div>` : 
-        `<div class="delivery-note" style="background: #FFF8E1; color: #FF8F00;"><i class="fas fa-info-circle"></i><span>Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} more for free delivery</span></div>`}
+      cartSummary.innerHTML = ` 
+        ${subtotal < FREE_DELIVERY_THRESHOLD ? `
+          <div class="delivery-progress-container">
+            <div class="delivery-progress-text">
+              <span>Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} for FREE Delivery</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill" style="width: ${(subtotal / FREE_DELIVERY_THRESHOLD) * 100}%;"></div>
+            </div>
+          </div>
+        ` : ''}
         <div class="cart-summary">
           <div class="summary-row"><span>Subtotal</span><span>₹${subtotal}</span></div>
-          ${savings > 0 ? `<div class="summary-row summary-savings"><span>Savings</span><span>-₹${savings}</span></div>` : ''}
-          <div class="summary-row"><span>Delivery</span><span>${deliveryFee === 0 ? 'FREE' : '₹50'}</span></div>
+          ${savings > 0 ? `<div class="summary-row summary-savings"><span>Total Savings</span><span>-₹${savings}</span></div>` : ''}
+          <div class="summary-row">
+            <span>Delivery <i class="fas fa-info-circle" title="Free delivery on orders over ₹${FREE_DELIVERY_THRESHOLD}. Standard ₹50 fee for orders below."></i></span>
+            <span>${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}</span>
+          </div>
           <div class="summary-row summary-total"><span>Total</span><span>₹${total}</span></div>
         </div>
       `;
@@ -3451,15 +3507,29 @@
       if (cart[id] <= 0) {
         delete cart[id];
       }
-
       saveCart();
-      updateCartUI();
-      updateProductCardState(id);
       
       // If we're on the cart page, refresh it
       if (document.getElementById('cartModal').classList.contains('active')) {
-        showCart();
+        // More efficient update: just update the specific item and the summary
+        const itemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
+        if (itemEl) {
+          if (cart[id]) {
+            const product = products.find(p => p.id === id);
+            itemEl.querySelector('.cart-qty').textContent = cart[id];
+            itemEl.querySelector('.cart-item-subtotal').textContent = `₹${product.finalPrice * cart[id]}`;
+          } else {
+            itemEl.classList.add('removing');
+            itemEl.addEventListener('transitionend', () => itemEl.remove(), { once: true });
+          }
+        }
+        updateCartSummary();
+        updateCartBadges();
+        updateCartPopup();
+      } else {
+        updateCartUI();
       }
+      updateProductCardState(id);
       
       // Track quantity change
       trackChangeQty(id, change);
@@ -3545,8 +3615,8 @@
       message += `Total: ₹${total}\n\nPlease confirm availability.`;
 
       window.open(`https://wa.me/919985125678?text=${encodeURIComponent(message)}`, '_blank');
-      
-      // Track begin checkout
+      // Track begin checkout with updated icon
+      document.querySelector('.checkout-btn').innerHTML = `<i class="fas fa-arrow-right"></i> Proceed to Checkout`;
       if (items.length > 0 && typeof gtag === 'function') {
       gtag('event', 'begin_checkout', {
       currency: 'INR',
