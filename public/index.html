@@ -120,7 +120,7 @@
       --logo-height: 36px;
       --cart-badge-size: 22px;
       --carousel-height: 150px;
-      --carousel-transition: .5s;
+      --carousel-transition: 0.5s;
       --trust-icon-height: 44px;
       --tabs-icon-size: 20px;
       --grid-gap: 12px;
@@ -450,14 +450,14 @@
       align-items: stretch;
       background: rgba(255,255,255,.95);
       backdrop-filter: blur(20px);
-      border-radius: 16px;
-      padding: 16px 12px;
-      gap: 8px;
+      border-radius: 12px;
+      padding: 10px 12px;
+      gap: 12px;
       box-shadow: 0 10px 30px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04),inset 0 1px 0 rgba(255,255,255,.9);
       border: 1px solid rgba(255,255,255,.3);
       position: relative;
       overflow: hidden;
-      margin: 0 20px 20px;
+      margin: 0 20px 24px;
     }
 
     .trust-item {
@@ -466,7 +466,7 @@
       flex-direction: column;
       align-items: center;
       gap: 6px;
-      text-align: center;
+      text-align: center;      
       padding: 12px 6px;
       border-radius: 12px;
       transition: all .3s cubic-bezier(.4,0,.2,1);
@@ -483,24 +483,24 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: var(--trust-icon-height);
-      height: var(--trust-icon-height);
+      width: 36px;
+      height: 36px;
       border-radius: 12px;
-      font-size: 20px;
+      font-size: 18px;
       margin-bottom: 2px;
       background: linear-gradient(135deg,#3b82f6,#1d4ed8);
       color: #fff;
     }
 
     .trust-title {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500; /* Medium */
       color: #1f2937;
       line-height: 1.2;
     }
 
     .trust-sub {
-      font-size: 12px;
+      font-size: 11px;
       color: #6b7280;
       line-height: 1.3;
     }
@@ -795,13 +795,13 @@
     .popup-image-section {
       position: relative;
       background: white;
-      padding: 20px;
+      padding: 16px 20px;
     }
 
     .popup-image-container {
       position: relative;
       width: 100%;
-      height: 300px;
+      height: 240px;
       background: #f8f8f8;
       border-radius: var(--radius-img);
       overflow: hidden;
@@ -984,11 +984,13 @@
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
+      padding: 12px 0;
+      transition: background-color 0.2s;
     }
 
     .popup-highlights-title {
       font-size: 18px;
-      font-weight: 700; /* Bold */
+      font-weight: 700;
     }
 
     .popup-expand-btn {
@@ -997,10 +999,11 @@
       font-size: 18px;
       cursor: pointer;
       color: #666;
+      transition: transform 0.3s;
     }
 
     .popup-highlights-content {
-      padding-top: 16px;
+      padding-top: 0;
       display: none; /* Hidden by default */
     }
 
@@ -2321,7 +2324,7 @@
         <div class="popup-highlights-section">
           <div class="popup-highlights-header">
             <h2 class="popup-highlights-title">Product Details</h2>
-            <button class="popup-expand-btn" aria-label="Toggle Product Details">^</button>
+            <button class="popup-expand-btn" aria-label="Toggle Product Details"><i class="fas fa-chevron-up"></i></button>
           </div>
           
           <div class="popup-highlights-content" id="popupHighlightsContent">
@@ -2653,7 +2656,7 @@
       document.querySelector('.popup-back-btn').addEventListener('click', closePopup);
       document.querySelector('.popup-action-btn.favorite').addEventListener('click', toggleFavorite);
       document.querySelector('.popup-action-btn.share').addEventListener('click', shareProduct);
-      document.querySelector('.popup-expand-btn').addEventListener('click', togglePopupHighlights);
+      document.querySelector('.popup-highlights-header').addEventListener('click', togglePopupHighlights);
       document.querySelector('.popup-qty-btn.dec').addEventListener('click', () => changePopupQty(-1));
       document.querySelector('.popup-qty-btn.inc').addEventListener('click', () => changePopupQty(1));
       document.querySelector('.popup-add-to-cart-btn').addEventListener('click', addPopupToCart);
@@ -2896,6 +2899,14 @@
       document.getElementById('popupDescription').textContent = DOMPurify.sanitize(product.desc);
 
       popup.classList.add('active');
+
+      // --- FIX: Ensure product details are visible by default ---
+      popupHighlightsExpanded = true;
+      const highlightsContent = document.getElementById('popupHighlightsContent');
+      const expandBtn = document.querySelector('.popup-expand-btn i');
+      highlightsContent.style.display = 'block';
+      expandBtn.className = 'fas fa-chevron-up';
+
       isPopupOpen = true;
       document.body.classList.add('popup-open');
       
@@ -3020,16 +3031,16 @@
     /* NEW: Function to toggle highlights in popup */
     function togglePopupHighlights() {
       const highlightsContent = document.getElementById('popupHighlightsContent');
-      const expandBtn = document.querySelector('.popup-expand-btn');
+      const expandBtnIcon = document.querySelector('.popup-expand-btn i');
       
       popupHighlightsExpanded = !popupHighlightsExpanded;
       
       if (popupHighlightsExpanded) {
         highlightsContent.style.display = 'block'; // Or 'grid', 'flex', etc.
-        expandBtn.textContent = '^';
+        expandBtnIcon.className = 'fas fa-chevron-up';
       } else {
         highlightsContent.style.display = 'none';
-        expandBtn.textContent = 'v';
+        expandBtnIcon.className = 'fas fa-chevron-down';
       }
     }
 
