@@ -1448,19 +1448,6 @@
       box-shadow: 0 2px 6px rgba(0,122,255,0.3);
     }
 
-    .empty-cart-footer {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: var(--app-max-width);
-      padding: 20px;
-      background: white;
-      z-index: 1001;
-      box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-    }
-
     .empty-cart {
       text-align: center;
       padding: 40px 20px;
@@ -1518,7 +1505,7 @@
     }
 
     .empty-cart p {
-      margin-bottom: 24px;
+      margin-bottom: 32px;
       }
       
       .empty-cart-btn {
@@ -1858,28 +1845,17 @@
       animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
     }
 
-    /* Catalog page sticky elements - FIXED: Sticky search and categories */
-    #catalog .header {
-      position: sticky;
-      top: 34px; /* Below ticker */
-      z-index: 101;
-    }
-
+    /* Catalog page sticky elements */
     #catalog .categories {
-  top: 130px; /* Below header + ticker */
-}
-
-@media (max-width: 375px) {
-  #catalog .categories {
-    top: 126px;
-  }
-}
-
-@media (max-width: 320px) {
-  #catalog .categories {
-    top: 122px;
-  }
-}
+      position: sticky;
+      /* Ticker (34px) + Header (approx 92px) */
+      top: 126px; 
+      background: white;
+      z-index: 100;
+      /* Use margin to break out of section padding and padding to restore it */
+      margin: 0 -20px;
+      padding: 5px 20px 15px;
+    }
     /* Cart Popup (Mini Cart) */
     .cart-popup {
       position: fixed;
@@ -2409,15 +2385,10 @@
             </div>
             <h3>Your cart is empty</h3>
             <p>Add some fresh seafood to get started</p>
-          </div>
-          
-          <!-- Sticky footer for empty cart - MOVED OUTSIDE for proper stickiness -->
-          <div class="empty-cart-footer" id="emptyCartFooter" style="display: none;">
             <button class="empty-cart-btn">Browse Products</button>
           </div>
         </main>
       </div>
-
       <!-- Sticky cart footer -->
       <div class="cart-footer" id="cartFooter" style="display: none;">
         <div id="cartSummary"></div>
@@ -3169,7 +3140,6 @@
       const cartItems = document.getElementById('cartItems');
       const cartSummary = document.getElementById('cartSummary');
       const cartFooter = document.getElementById('cartFooter');
-      const emptyCartFooter = document.getElementById('emptyCartFooter');
       const emptyCart = document.getElementById('emptyCart');
       const cartListHeader = document.getElementById('cartListHeader');
 
@@ -3179,12 +3149,10 @@
         cartSummary.innerHTML = '';
         cartFooter.style.display = 'none';
         cartListHeader.style.display = 'none';
-        emptyCartFooter.style.display = 'block';
       } else {
         emptyCart.style.display = 'none';
         cartFooter.style.display = 'block';
         cartListHeader.style.display = 'flex';
-        emptyCartFooter.style.display = 'none';
         
         // Render cart items
         cartItems.innerHTML = items.map(item => `
@@ -3307,7 +3275,6 @@
       if (items.length === 0) {
         document.getElementById('emptyCart').style.display = 'flex';
         document.getElementById('cartFooter').style.display = 'none';
-        document.getElementById('emptyCartFooter').style.display = 'block';
       }
     }
 
@@ -3317,7 +3284,6 @@
       
       // Show bottom navigation again when cart is closed
       document.getElementById('bottomNav').style.display = 'flex';
-      
       // Show cart popup again if there are items
       updateCartPopup();
     }
