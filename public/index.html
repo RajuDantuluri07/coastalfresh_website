@@ -2283,10 +2283,7 @@
           <div class="popup-image-container">
             <img src="" alt="" class="popup-image" id="popupMainImage">
           </div>
-         <!-- FIXED CODE - only 1 indicator -->
-<div class="popup-image-indicators">
-  <div class="popup-indicator active"></div>
-</div>
+         <div class="popup-image-indicators" id="popupImageIndicators"></div>
         </div>
 
         <!-- Product Info -->
@@ -2517,6 +2514,7 @@
     /* ===== App State ===== */
     let cart = {};
     let currentPage = 'home';
+    let pageHistory = ['home'];
     let currentCategory = 'All';
     let currentSearch = '';
     let currentPageNumber = 1;
@@ -2524,6 +2522,7 @@
     let currentCarouselIndex = 0;
     let currentProductQty = 1;
     let isPopupOpen = false;
+    let searchDebounceTimer = null;
     
     /* NEW: Variables for popup functionality */
     let currentPopupImageIndex = 0;
@@ -2619,8 +2618,14 @@
 
       // --- Static Element Listeners ---
       // Header search inputs
-      document.getElementById('searchInput').addEventListener('input', handleHomeSearch);
-      document.getElementById('catalogSearch').addEventListener('input', handleCatalogSearch);
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => handleHomeSearch(e), 300);
+      });
+      document.getElementById('catalogSearch').addEventListener('input', (e) => {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => handleCatalogSearch(e), 300);
+      });
 
       // Category filter buttons
       document.getElementById('categories').addEventListener('click', (e) => {
@@ -2638,7 +2643,13 @@
 
       // Header buttons (Back, Cart) and View All
       document.querySelector('#home .view-all').addEventListener('click', () => showPage('catalog'));
-      document.querySelectorAll('.back-btn').forEach(btn => btn.addEventListener('click', goBack));
+      // Refined back button listeners to avoid conflicts
+      document.querySelector('#catalog .back-btn').addEventListener('click', goBack);
+      document.querySelector('#faqPage .back-btn').addEventListener('click', goBack);
+      document.querySelector('#profilePage .back-btn').addEventListener('click', goBack);
+      // The cart back button is handled separately
+      document.querySelector('#cartModal .back-btn').addEventListener('click', closeCart);
+
       document.querySelectorAll('.cart-btn').forEach(btn => btn.addEventListener('click', showCart));
 
       // Profile page buttons
@@ -2656,7 +2667,6 @@
       document.querySelector('.popup-add-to-cart-btn').addEventListener('click', addPopupToCart);
 
       // Cart page buttons
-      document.querySelector('#cartModal .back-btn').addEventListener('click', closeCart);
       document.getElementById('clearCartBtn').addEventListener('click', clearCart);
       document.querySelector('.empty-cart-btn').addEventListener('click', () => { showPage('catalog'); closeCart(); });
       document.querySelector('.checkout-btn').addEventListener('click', checkout);
@@ -2880,6 +2890,9 @@
       document.getElementById('popupMainImage').src = product.image;
       document.getElementById('popupMainImage').alt = DOMPurify.sanitize(product.name);
       
+      // Hide image indicators as there's only one image
+      document.getElementById('popupImageIndicators').style.display = 'none';
+      
       // Update bottom price
       const totalPrice = product.finalPrice * currentProductQty;
       const totalMrp = product.mrp * currentProductQty;
@@ -2955,7 +2968,7 @@
 
       saveCart();
       updateCartUI();
-      showToast(`${popupProduct.name} added to cart!`);
+      showToast(`${DOMPurify.sanitize(popupProduct.name)} added to cart!`);
       closePopup();
       
       // Track add to cart
@@ -3009,21 +3022,6 @@
       }
     }
 
-    /* NEW: Function to navigate images in popup */
-    function nextPopupImage() {
-      // For now just cycle through indicators since we only have one image
-      const indicators = document.querySelectorAll('.popup-indicator');
-      currentPopupImageIndex = (currentPopupImageIndex + 1) % indicators.length;
-      
-      indicators.forEach((indicator, index) => {
-        if (index === currentPopupImageIndex) {
-          indicator.classList.add('active');
-        } else {
-          indicator.classList.remove('active');
-        }
-      });
-    }
-
     /* NEW: Function to toggle highlights in popup */
     function togglePopupHighlights() {
       const highlightsContent = document.getElementById('popupHighlightsContent');
@@ -3069,7 +3067,7 @@
 
       saveCart();
       updateCartUI();
-      animateCartIcon();
+      updateProductCardState(id); // Targeted update instead of full re-render
       showToast(`${product.name} added to cart!`);
       
       // Track add to cart
@@ -3078,7 +3076,7 @@
 
     function updateCartUI() {
       updateCartBadges();
-      updateProductCardStates();
+      // updateProductCardStates(); // This is now handled by more targeted updates
       updateCartPopup();
     }
 
@@ -3100,14 +3098,20 @@
       });
     }
 
-    /* NEW: Separated product card updates */
-    function updateProductCardStates() {
-      // Update product cards to show quantity controls
-      renderFeaturedProducts();
-      // Update catalog products if on catalog page
-      if (currentPage === 'catalog') {
-        renderCatalogProducts();
-      }
+    /* REFACTORED: Targeted product card update */
+    function updateProductCardState(productId) {
+        const productCards = document.querySelectorAll(`.product[data-id="${productId}"]`);
+        if (productCards.length === 0) return;
+
+        const product = products.find(p => p.id === productId);
+        if (!product) return;
+
+        const newCardHTML = createProductHTML(product);
+        productCards.forEach(card => {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newCardHTML;
+            card.parentNode.replaceChild(tempDiv.firstElementChild, card);
+        });
     }
 
     /* NEW: Function to update cart popup */
@@ -3298,6 +3302,7 @@
 
       saveCart();
       updateCartUI();
+      updateProductCardState(id);
       
       // If we're on the cart page, refresh it
       if (document.getElementById('cartModal').classList.contains('active')) {
@@ -3329,7 +3334,8 @@
         // If not visible (e.g., from product card), just update data
         delete cart[id];
         saveCart();
-        updateCartUI();
+        updateCartUI(); // This will update badges
+        updateProductCardState(id); // This will update the card UI
       }
 
       // Track removal
@@ -3347,10 +3353,10 @@
         if (confirm('Are you sure you want to clear your cart?')) {
           cart = {};
           saveCart();
-          // Explicitly re-render all product lists to reset their state
+          // Re-render all product lists since all cards need to be updated
           renderFeaturedProducts();
           renderCatalogProducts();
-          updateCartUI(); // Update badges and popups
+          updateCartUI();
           showCart();
           
           // Track cart cleared
@@ -3408,6 +3414,12 @@
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(page).classList.add('active');
       
+      // Manage navigation history
+      if (page !== 'cart' && page !== pageHistory[pageHistory.length - 1]) {
+        // Avoid adding duplicates or popups to history
+        pageHistory.push(page);
+      }
+
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       const navItem = document.querySelector(`.nav-item[data-page='${page}']`);
       if (navItem) navItem.classList.add('active');
@@ -3426,13 +3438,16 @@
     }
 
     function goBack() {
-      if (currentPage === 'catalog' || currentPage === 'faqPage' || currentPage === 'profilePage') {
-        showPage('home');
+      if (pageHistory.length > 1) {
+        pageHistory.pop(); // Remove the current page
+        const previousPage = pageHistory[pageHistory.length - 1];
+        showPage(previousPage);
       }
     }
 
     function handleHomeSearch(e) {
-      renderFeaturedProducts(); // Re-render to apply the search filter
+      currentSearch = e.target.value;
+      renderFeaturedProducts();
     }
 
     function handleCatalogSearch(e) {
@@ -3447,15 +3462,6 @@
           category: currentCategory
         });
       }
-    }
-
-    function animateCartIcon() {
-      const icons = document.querySelectorAll('.cart-btn, .nav-item[data-page="cart"]');
-      icons.forEach(icon => {
-        icon.classList.remove('shake'); // Remove first to re-trigger
-        void icon.offsetWidth; // Trigger reflow
-        icon.classList.add('shake');
-      });
     }
 
     function showToast(text) {
@@ -3570,51 +3576,6 @@ window.addEventListener('beforeunload', () => {
     carouselTimer = null;
   }
 });
-    function startTypewriter() {
-      const base = 'Search — ';
-      const names = ['Rohu','Tiger Prawns','Sea Bass','Crab','Pickle'];
-      let i = 0, pos = 0, dir = 1, pause = 0;
-      
-      function tick() {
-        const searchInput = document.getElementById('searchInput');
-        const catalogSearch = document.getElementById('catalogSearch');
-        
-        // Apply to both search inputs for consistency
-        [searchInput, catalogSearch].forEach(input => {
-          if (!input || document.activeElement === input || input.value) {
-            return;
-          }
-          
-          const full = names[i];
-          if (pause > 0) { 
-            return;
-          }
-
-          const text = full.slice(0, pos);
-          input.setAttribute('placeholder', base + text);
-        });
-
-        if (pause > 0) { 
-          pause--; 
-          setTimeout(tick, 80); 
-          return; 
-        }
-
-        pos += dir;
-        if (pos > names[i].length) { 
-          pause = 10; 
-          dir = -1; 
-        }
-        if (pos < 0) { 
-          dir = 1; 
-          i = (i + 1) % names.length; 
-        }
-
-        setTimeout(tick, 60);
-      }
-      
-      tick();
-    }
 
     function toggleFAQ(button) {
       const faq = button.closest('.faq');
