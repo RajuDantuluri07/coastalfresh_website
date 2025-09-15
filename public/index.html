@@ -1247,11 +1247,11 @@
       background-color: rgba(211, 47, 47, 0.1);
     }
 
+    /* --- NEW: Enhanced Cart Item Card --- */
     .cart-item {
       display: flex;
-      gap: 16px;
-      padding: 16px;
-      background: var(--bg-white);
+      gap: 12px;
+      padding: 12px 0;
       border-bottom: 1px solid var(--border-color);
       position: relative;
       /* Animation properties */
@@ -1259,16 +1259,11 @@
       max-height: 150px; /* Explicit height for animation */
       overflow: hidden;
       border-radius: 0; /* Items are now separated by a line */
-      margin-bottom: 0;
-    }
-
-    .cart-item:active {
-      transform: scale(0.99);
     }
 
     .cart-item-image {
-      width: 80px;
-      height: 80px;
+      width: 72px;
+      height: 72px;
       border-radius: 8px;
       background: var(--bg-light);
       overflow: hidden;
@@ -1285,33 +1280,39 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      justify-content: space-between;
     }
 
     .cart-item-name {
-      font-weight: 700; /* Bold */
-      font-size: 17px; /* Larger font size */
+      font-weight: 500;
+      font-size: 15px;
       color: var(--text-primary);
       line-height: 1.3;
+      margin-bottom: 4px;
     }
 
     .cart-item-pricing {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-top: 4px;
     }
 
     .cart-item-current-price {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 700;
       color: var(--text-primary);
     }
 
     .cart-item-mrp {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-secondary);
       text-decoration: line-through;
+    }
+
+    .cart-item-savings {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--success-color);
     }
 
     .qty-controls {
@@ -1320,18 +1321,25 @@
       gap: 10px;
     }
 
+    .cart-item-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+
     .cart-qty-btn {
       background: var(--bg-light);
       border: none;
       border-radius: 8px;
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       font-size: 18px;
-      font-weight: 400;
+      font-weight: 500;
       transition: all 0.2s;
       border: 1px solid var(--border-color);
     }
@@ -1342,29 +1350,16 @@
     }
 
     .cart-qty {
-      font-weight: 600;
+      font-weight: 700;
       min-width: 20px;
       text-align: center;
-    }
-
-    .cart-item-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: auto; /* Pushes to the bottom */
-    }
-
-    .cart-item-subtotal-calc {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--primary-color);
-      margin-top: 8px;
+      font-size: 15px;
     }
 
     .remove-item {
       position: absolute;
       top: 16px;
-      right: 16px;
+      right: 0;
       background: none;
       border: none;
       color: var(--text-secondary);
@@ -1376,6 +1371,7 @@
     .remove-item:active {
       color: var(--error-color);
     }
+    /* --- End of Cart Item Card --- */
 
     /* Cart item removal animation */
     .cart-item.removing {
@@ -1389,7 +1385,7 @@
     }
 
     .cart-summary {
-      background: var(--bg-light);
+      background: var(--bg-white);
       padding: 16px;
       border-radius: 12px;
       margin: 0;
@@ -1413,7 +1409,7 @@
       cursor: help;
       margin-left: 4px;
     }
-
+    
     .summary-savings {
       color: var(--success-color);
       font-weight: 700;
@@ -1432,12 +1428,14 @@
       margin-top: 8px;
     }
 
+    /* --- NEW: Enhanced Delivery Progress Bar --- */
     .delivery-progress-container {
       padding: 12px 16px;
       border-radius: 12px;
       font-size: 14px;
       margin-bottom: 20px;
-      background: var(--primary-light);
+      background: #E8F5E9; /* Light Green */
+      border: 1px solid #C8E6C9; /* Lighter Green Border */
     }
 
     .delivery-progress-text {
@@ -1445,13 +1443,13 @@
       justify-content: space-between;
       font-weight: 500;
       margin-bottom: 8px;
-      color: var(--primary-dark);
+      color: #2E7D32; /* Darker Green */
     }
 
     .progress-bar {
       width: 100%;
       height: 8px;
-      background-color: var(--border-color);
+      background-color: #A5D6A7; /* Mid Green */
       border-radius: 4px;
       overflow: hidden;
     }
@@ -1459,9 +1457,11 @@
     .progress-bar-fill {
       height: 100%;
       background: var(--primary-color);
+      background: linear-gradient(90deg, #4CAF50, #81C784); /* Green Gradient */
       border-radius: 4px;
       transition: width 0.5s ease;
     }
+    /* --- End of Delivery Progress Bar --- */
 
     .cart-footer {
   position: fixed;
@@ -1474,46 +1474,36 @@
   background: var(--bg-white);
   box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
   border-top: 1px solid var(--border-color);
-}    .continue-shopping {
-      /* NEW: Styles for side-by-side layout */
-      flex: 1;
-      margin-bottom: 0;
-      padding: 16px 12px;
-      /* End of New Styles */
-      background: var(--bg-white);
-      border: 1px solid var(--border-color); /* Lighter border */
-      color: var(--text-secondary); /* Greyer text for secondary action */
-      font-size: 15px; /* Slightly smaller font */
-      font-weight: 500;
-      cursor: pointer;
-      text-align: center;
-      border-radius: 12px;
-      transition: all 0.2s;
-    }
-
-    .continue-shopping:active {
-      background: var(--bg-light); /* Subtle active state */
-    }
-
+}
+    /* --- NEW: Enhanced Checkout Button --- */
     .checkout-btn {
-      /* NEW: Styles for side-by-side layout */
-      flex: 1.5; /* Give more visual weight to the primary action */
-      margin: 0;
-      /* End of New Styles */
-      background: var(--primary-color); /* Solid color for main CTA */
+      background: var(--success-color);
       color: white;
       border: none;
       border-radius: 12px;
-      font-size: 16px; /* Larger font for primary action */
-      font-weight: 700; /* Bold for emphasis */
+      font-size: 18px;
+      font-weight: 700;
       cursor: pointer;
       transition: all 0.2s;
-      box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3); /* Shadow to match new color */
+      box-shadow: 0 4px 12px rgba(56, 142, 60, 0.4);
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 16px 12px;
       gap: 8px;
+      width: 100%;
+    }
+
+    .checkout-btn:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 6px rgba(56, 142, 60, 0.3);
+    }
+    /* --- End of Checkout Button --- */
+
+    .checkout-btn-price {
+      font-size: 16px;
+      font-weight: 500;
+      opacity: 0.8;
     }
 
     .checkout-btn:active {
@@ -1524,8 +1514,10 @@
     /* NEW: Container for the two buttons */
     .cart-actions {
       display: flex;
-      gap: 12px;
-      padding: 12px 20px 20px;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 12px;
+      gap: 8px;
     }
 
     .empty-cart {
@@ -2720,8 +2712,7 @@
       <div class="cart-footer" id="cartFooter" style="display: none;">
         <div id="cartSummary"></div>
         <!-- NEW: Updated layout with two buttons -->
-        <div class="cart-actions">
-          <button class="continue-shopping">Continue Shopping</button>
+        <div class="cart-actions" style="padding: 12px 20px 20px;">
           <button class="checkout-btn">Proceed to Checkout</button>
         </div>
       </div>
@@ -3036,9 +3027,8 @@ const TRUST_ICONS = [
       // Cart page buttons
       document.getElementById('clearCartBtn').addEventListener('click', clearCart);
       document.querySelector('.empty-cart-btn').addEventListener('click', () => { showPage('catalog'); closeCart(); });
-      document.querySelector('.cart-footer .continue-shopping').addEventListener('click', () => { showPage('catalog'); closeCart(); });
-      document.querySelector('.checkout-btn').addEventListener('click', checkout);      document.getElementById('cartPopup').addEventListener('click', showCart);
-
+      document.querySelector('.checkout-btn').addEventListener('click', checkout);
+      document.getElementById('cartPopup').addEventListener('click', showCart);
       // Bottom Navigation
       document.getElementById('bottomNav').addEventListener('click', e => {
         const navItem = e.target.closest('.nav-item');
@@ -3555,27 +3545,28 @@ const TRUST_ICONS = [
         cartItems.innerHTML = items.map(item => {
           const hasOffer = item.mrp > item.finalPrice;
           const subtotal = item.finalPrice * item.qty;
+          const totalMrp = item.mrp * item.qty;
+          const itemSavings = (item.mrp - item.finalPrice) * item.qty;
+
           return `
             <div class="cart-item" data-id="${item.id}">
               <div class="cart-item-image">
                 <img src="${item.image}" alt="${item.name}">
               </div>
               <div class="cart-item-info">
-                <div class="cart-item-name">${item.name}</div>
-                <div class="cart-item-pricing" aria-label="Unit price: ₹${item.finalPrice}">
-                  <span class="cart-item-current-price" aria-hidden="true">₹${item.finalPrice}</span>
-                  ${hasOffer ? `<span class="cart-item-mrp" aria-hidden="true">₹${item.mrp}</span>` : ''}
+                <div>
+                  <div class="cart-item-name">${item.name}</div>
+                  <div class="cart-item-pricing">
+                    <span class="cart-item-current-price">₹${subtotal}</span>
+                    ${hasOffer ? `<span class="cart-item-mrp">₹${totalMrp}</span>` : ''}
+                  </div>
+                  ${itemSavings > 0 ? `<div class="cart-item-savings">You saved ₹${itemSavings}</div>` : ''}
                 </div>
                 <div class="cart-item-footer">
-                  <div>
-                    <div class="qty-controls" role="group" aria-label="Quantity for ${item.name}">
-                      <button class="cart-qty-btn dec" aria-label="Decrease quantity">-</button>
-                      <span class="cart-qty" aria-label="Current quantity: ${item.qty}">${item.qty}</span>
-                      <button class="cart-qty-btn inc" aria-label="Increase quantity">+</button>
-                    </div>
-                    <div class="cart-item-subtotal-calc" style="visibility: ${item.qty > 1 ? 'visible' : 'hidden'}" aria-label="Subtotal: ${item.finalPrice} times ${item.qty} equals ${subtotal}">
-                      ₹${item.finalPrice} &times; ${item.qty} = ₹${subtotal}
-                    </div>
+                  <div class="qty-controls" role="group" aria-label="Quantity for ${item.name}">
+                    <button class="cart-qty-btn dec" aria-label="Decrease quantity">-</button>
+                    <span class="cart-qty" aria-label="Current quantity: ${item.qty}">${item.qty}</span>
+                    <button class="cart-qty-btn inc" aria-label="Increase quantity">+</button>
                   </div>
                 </div>
               </div>
@@ -3591,12 +3582,14 @@ const TRUST_ICONS = [
         const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
         const total = subtotal + deliveryFee; 
 
+        document.querySelector('.checkout-btn').innerHTML = `Proceed to Checkout <span class="checkout-btn-price">₹${total}</span>`;
+
         // Render summary
         cartSummary.innerHTML = `
           ${subtotal < FREE_DELIVERY_THRESHOLD ? `
             <div class="delivery-progress-container">
               <div class="delivery-progress-text">
-                <span>Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} for FREE Delivery</span>
+                <span>🎉 Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} more for FREE Delivery!</span>
               </div>
               <div class="progress-bar">
                 <div class="progress-bar-fill" style="width: ${(subtotal / FREE_DELIVERY_THRESHOLD) * 100}%;"></div>
@@ -3615,7 +3608,7 @@ const TRUST_ICONS = [
             </div>
             ` : ''}
             <div class="summary-row">
-              <span>Delivery <i class="fas fa-info-circle" title="Free delivery on orders over ₹${FREE_DELIVERY_THRESHOLD}. Standard ₹50 fee for orders below."></i></span>
+              <span>Delivery Fee <i class="fas fa-info-circle" title="Free on orders over ₹${FREE_DELIVERY_THRESHOLD}"></i></span>
               <span>${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}</span>
             </div>
             <div class="summary-row summary-total">
@@ -3666,22 +3659,24 @@ const TRUST_ICONS = [
       const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
       const total = subtotal + deliveryFee;
 
+      document.querySelector('.checkout-btn').innerHTML = `Proceed to Checkout <span class="checkout-btn-price">₹${total}</span>`;
+
       cartSummary.innerHTML = ` 
         ${subtotal < FREE_DELIVERY_THRESHOLD ? `
           <div class="delivery-progress-container">
             <div class="delivery-progress-text">
-              <span>Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} for FREE Delivery</span>
+              <span>🎉 Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} more for FREE Delivery!</span>
             </div>
             <div class="progress-bar">
               <div class="progress-bar-fill" style="width: ${(subtotal / FREE_DELIVERY_THRESHOLD) * 100}%;"></div>
             </div>
           </div>
         ` : ''}
-        <div class="cart-summary">
+        <div class="cart-summary" style="padding: 16px 20px;">
           <div class="summary-row"><span>Subtotal</span><span>₹${subtotal}</span></div>
           ${savings > 0 ? `<div class="summary-row summary-savings"><span>Total Savings</span><span>-₹${savings}</span></div>` : ''}
           <div class="summary-row">
-            <span>Delivery <i class="fas fa-info-circle" title="Free delivery on orders over ₹${FREE_DELIVERY_THRESHOLD}. Standard ₹50 fee for orders below."></i></span>
+            <span>Delivery Fee <i class="fas fa-info-circle" title="Free on orders over ₹${FREE_DELIVERY_THRESHOLD}"></i></span>
             <span>${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}</span>
           </div>
           <div class="summary-row summary-total"><span>Total</span><span>₹${total}</span></div>
@@ -3728,13 +3723,17 @@ const TRUST_ICONS = [
           if (cart[id]) {
             const product = products.find(p => p.id === id);
             const subtotal = product.finalPrice * cart[id];
+            const totalMrp = product.mrp * cart[id];
+            const itemSavings = (product.mrp - product.finalPrice) * cart[id];
             const qtyEl = itemEl.querySelector('.cart-qty');
-            const subtotalEl = itemEl.querySelector('.cart-item-subtotal-calc');
+            const priceEl = itemEl.querySelector('.cart-item-current-price');
+            const mrpEl = itemEl.querySelector('.cart-item-mrp');
+            const savingsEl = itemEl.querySelector('.cart-item-savings');
+            
             qtyEl.textContent = cart[id];
-            qtyEl.setAttribute('aria-label', `Current quantity: ${cart[id]}`);
-            subtotalEl.innerHTML = `₹${product.finalPrice} &times; ${cart[id]} = ₹${subtotal}`;
-            subtotalEl.setAttribute('aria-label', `Subtotal: ${product.finalPrice} times ${cart[id]} equals ${subtotal}`);
-            subtotalEl.style.visibility = cart[id] > 1 ? 'visible' : 'hidden';
+            priceEl.textContent = `₹${subtotal}`;
+            if (mrpEl) mrpEl.textContent = `₹${totalMrp}`;
+            if (savingsEl) savingsEl.textContent = `You saved ₹${itemSavings}`;
           } else {
             itemEl.classList.add('removing');
             itemEl.addEventListener('transitionend', () => itemEl.remove(), { once: true });
