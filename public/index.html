@@ -2523,6 +2523,7 @@
     let currentProductQty = 1;
     let isPopupOpen = false;
     let searchDebounceTimer = null;
+    let typewriterTimer = null;
     
     /* NEW: Variables for popup functionality */
     let currentPopupImageIndex = 0;
@@ -2549,6 +2550,9 @@
       if (profileImage) {
         profileImage.src = PROFILE_IMAGE_URL;
       }
+
+      // Start the typewriter after a brief delay
+      setTimeout(startTypewriter, 1000);
     }
 
     function setupEvents() {
@@ -2625,6 +2629,18 @@
       document.getElementById('catalogSearch').addEventListener('input', (e) => {
         clearTimeout(searchDebounceTimer);
         searchDebounceTimer = setTimeout(() => handleCatalogSearch(e), 300);
+      });
+
+      // Typewriter focus/blur handlers
+      [document.getElementById('searchInput'), document.getElementById('catalogSearch')].forEach(input => {
+        if (!input) return;
+        input.addEventListener('focus', () => {
+          if (typewriterTimer) clearTimeout(typewriterTimer);
+          input.setAttribute('placeholder', input.id === 'searchInput' ? 'Search seafood...' : 'Search products...');
+        });
+        input.addEventListener('blur', () => {
+          if (!input.value) startTypewriter();
+        });
       });
 
       // Category filter buttons
@@ -3577,6 +3593,53 @@ window.addEventListener('beforeunload', () => {
   }
 });
 
+    function startTypewriter() {
+      if (typewriterTimer) clearTimeout(typewriterTimer);
+
+      const base = 'Search — ';
+      const names = ['Prawns', 'Rohu', 'Sea Bass', 'Crab', 'Pickle'];
+      let i = 0, pos = 0, dir = 1, pause = 0;
+      
+      const searchInput = document.getElementById('searchInput');
+      const catalogSearch = document.getElementById('catalogSearch');
+      const inputs = [searchInput, catalogSearch].filter(Boolean);
+
+      function tick() {
+        const shouldAnimate = inputs.every(input => document.activeElement !== input && !input.value);
+        if (!shouldAnimate) return; // Stop if user is interacting
+
+        if (pause > 0) {
+          pause--;
+        } else {
+          const full = names[i];
+          const text = full.slice(0, pos);
+          inputs.forEach(input => input.setAttribute('placeholder', base + text));
+
+          pos += dir;
+          if (pos > full.length) { // Finished typing
+            pause = 15; dir = -1;
+          }
+          if (pos < 0) { // Finished deleting
+            dir = 1; i = (i + 1) % names.length; pos = 0;
+          }
+        }
+        typewriterTimer = setTimeout(tick, dir === 1 ? 120 : 80);
+      }
+      tick();
+    }
+
+    function saveCart() {
+      try {
+        localStorage.setItem('coastalFreshCart', JSON.stringify(cart));
+      } catch (e) {
+        if (e.name === 'QuotaExceededError') {
+          console.warn('Storage quota exceeded, cart may not persist.');
+        } else {
+          console.error('Error saving cart:', e);
+        }
+      }
+    }
+
     function toggleFAQ(button) {
       const faq = button.closest('.faq');
       if (!faq) return;
@@ -3625,18 +3688,6 @@ window.addEventListener('beforeunload', () => {
         }
       } catch (e) {
         console.error('Error loading cart from localStorage:', e);
-      }
-    }
-
-    function saveCart() {
-      try {
-        localStorage.setItem('coastalFreshCart', JSON.stringify(cart));
-      } catch (e) {
-        if (e.name === 'QuotaExceededError') {
-          console.warn('Storage quota exceeded, cart may not persist.');
-        } else {
-          console.error('Error saving cart:', e);
-        }
       }
     }
 
