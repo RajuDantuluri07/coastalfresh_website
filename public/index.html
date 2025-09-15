@@ -484,13 +484,12 @@
       display: flex;
       justify-content: space-between;
       align-items: stretch;
-      background: var(--bg-white);
-      backdrop-filter: blur(20px);
+      background: transparent; /* Remove background to let items define it */
       border-radius: 12px;
-      padding: 10px 12px;
-      gap: 12px;
-      box-shadow: 0 8px 20px rgba(0,0,0,.06);
-      border: 1px solid var(--border-color);
+      padding: 0; /* Remove padding from container */
+      gap: 8px; /* Adjust gap between items */
+      box-shadow: none;
+      border: none;
       position: relative;
       overflow: hidden;
       margin: 0 20px 24px;
@@ -501,9 +500,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 4px; /* Tighter gap between icon and text */
       text-align: center;      
-      padding: 12px 6px;
+      padding: 12px 8px;
+      background: var(--bg-white);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
       border-radius: 12px;
       transition: all .3s cubic-bezier(.4,0,.2,1);
       cursor: pointer;
@@ -517,18 +518,18 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 32px; /* Smaller icon container */
-      height: 32px;
-      border-radius: 8px; /* Slightly less rounded */
-      font-size: 14px; /* Smaller icon size */
-      margin-bottom: 2px;
-      background: var(--primary-light); /* Cleaner, light background */
-      color: var(--primary-color);
-      border: 1px solid var(--border-color);
+      width: 44px; /* Larger icon container */
+      height: 44px;
+      border-radius: 12px;
+      font-size: 20px; /* Larger icon */
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+      color: var(--bg-white);
+      border: none; /* Cleaner look */
     }
 
     .trust-title {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 500; /* Medium */
       color: var(--text-primary);
       line-height: 1.2;
@@ -2728,11 +2729,11 @@
   <script>
   (function() { // IIFE to avoid polluting global scope
     /* ===== App Configuration ===== */
-    const TRUST_ICONS = [ // NEW: Updated and more relevant icons
-      { icon: 'fas fa-fish', title: 'Fresh Catch'},
-      { icon: 'fas fa-leaf', title: 'Natural'},
-      { icon: 'fas fa-box-open', title: 'Hygienic'},
-      { icon: 'fas fa-truck-fast', title: 'Fast delivery'},
+    const TRUST_ICONS = [ // ENHANCED: Added back descriptive text
+      { icon: 'fas fa-fish', title: 'Fresh Catch', text: 'Sourced daily' },
+      { icon: 'fas fa-leaf', title: 'All Natural', text: 'No chemicals' },
+      { icon: 'fas fa-box-open', title: 'Hygienic', text: 'Neatly packed' },
+      { icon: 'fas fa-truck-fast', title: 'Sunday', text: 'Delivery' },
     ];
 
     const FEATURED_PRODUCT_IDS = [1, 11, 20, 15];
