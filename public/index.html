@@ -116,7 +116,7 @@
     /* CSS Variables for consistency */
     :root {
       --app-max-width: 480px;
-      --header-padding: 10px 16px;
+      --header-padding: 12px 16px;
       --logo-height: 36px;
       --cart-badge-size: 22px;
       --carousel-height: 150px;
@@ -249,8 +249,8 @@
     .header-top {
       display: flex;
       justify-content: space-between;
-      align-items: center; 
-      margin-bottom: 10px; /* Reduced space */
+      align-items: center;
+      margin-bottom: 15px;
     }
 
     .back-btn {
@@ -376,12 +376,12 @@
 
     /* Section */
     .section {
-      padding: 16px 20px; /* Reduced vertical padding */
+      padding: 20px;
     }
 
     .section-title {
       font-size: 20px;
-      font-weight: 700;
+      font-weight: 700; /* Bold */
       margin-bottom: 16px;
       color: #1a1a1a;
       display: flex;
@@ -397,7 +397,7 @@
 
     /* Carousel */
     .carousel {
-      margin: 12px 20px 0; /* Added top margin, removed bottom */
+      margin: 0 20px 20px;
       overflow: hidden;
       border-radius: 16px;
       position: relative;
@@ -456,7 +456,7 @@
       border: 1px solid rgba(255,255,255,.3);
       position: relative;
       overflow: hidden;
-      margin: 16px 20px 0; /* Added top margin, removed bottom */
+      margin: 0 20px 20px;
     }
 
     .trust-item {
@@ -502,11 +502,6 @@
       font-size: 12px;
       color: #6b7280;
       line-height: 1.3;
-    }
-
-    /* Give the featured products section its own top margin */
-    #home > .section {
-      margin-top: 24px;
     }
 
     /* Home Featured Products */
@@ -1003,7 +998,6 @@
     .popup-highlights-content {
       padding-top: 16px;
       display: none; /* Hidden by default */
-      transition: all 0.4s ease;
     }
 
     .popup-highlight-item {
@@ -1012,14 +1006,6 @@
       align-items: center;
       padding: 12px 0;
       border-bottom: 1px solid #f0f0f0;
-    }
-
-    .popup-highlights-content.grid-view {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0 16px;
-      border-bottom: 1px solid #f0f0f0;
-      padding-bottom: 16px;
     }
 
     .popup-highlight-item:last-child {
@@ -1035,13 +1021,6 @@
       font-size: 14px;
       color: #333;
       font-weight: 500;
-    }
-
-    .popup-description-item {
-      padding-top: 16px;
-      font-size: 14px;
-      line-height: 1.6;
-      color: #3c3c43;
     }
 
     /* Bottom Section */
@@ -1160,12 +1139,6 @@
   overflow: hidden;
 }
 
-.cart-modal .header {
-  position: static; /* Override sticky positioning inside the modal */
-  flex-shrink: 0; /* Prevent header from shrinking */
-  box-shadow: none;
-}
-
 .cart-modal.active {
   display: flex;
 }
@@ -1178,7 +1151,6 @@
   flex-direction: column;
   min-height: 0;
   padding-bottom: 180px; /* Space for the sticky footer */
-  position: relative; /* Needed for absolute positioning of empty cart footer */
 }
 
 @media (min-width: 481px) {
@@ -1447,7 +1419,7 @@
     }
 
     .empty-cart-footer {
-      position: absolute; /* Changed from fixed to be relative to cart-content-wrapper */
+      position: fixed;
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
@@ -1853,17 +1825,6 @@
     .shake {
       animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
     }
-
-    /* Add to Cart Fly Animation */
-    .fly-to-cart {
-      position: fixed;
-      z-index: 2000;
-      border-radius: var(--radius-img);
-      transition: all 0.8s cubic-bezier(0.55, 0, 0.85, 0.36);
-      object-fit: cover;
-      pointer-events: none;
-    }
-
 
     /* Catalog page sticky elements - FIXED: Sticky search and categories */
     #catalog .header {
@@ -2355,21 +2316,24 @@
             <button class="popup-expand-btn" aria-label="Toggle Product Details">^</button>
           </div>
           
-          <div class="popup-highlights-content grid-view" id="popupHighlightsContent">
+          <div class="popup-highlights-content" id="popupHighlightsContent">
             <div class="popup-highlight-item">
               <span class="popup-highlight-label">Gross Weight</span>
               <span class="popup-highlight-value" id="popupGrossWeight"></span>
+            </div>
+            <div class="popup-highlight-item">
+              <span class="popup-highlight-label">Net Weight</span>
+              <span class="popup-highlight-value" id="popupNetWeight"></span>
             </div>
             <div class="popup-highlight-item">
               <span class="popup-highlight-label">Type</span>
               <span class="popup-highlight-value" id="popupType"></span>
             </div>
             <div class="popup-highlight-item">
-              <span class="popup-highlight-label">Net Weight</span>
-              <span class="popup-highlight-value" id="popupNetWeight"></span>
+              <span class="popup-highlight-label">Description</span>
+              <span class="popup-highlight-value" id="popupDescription"></span>
             </div>
           </div>
-          <div class="popup-description-item" id="popupDescription"></div>
         </div>
       </div>
 
@@ -2430,6 +2394,18 @@
         <button class="empty-cart-btn">Browse Products</button>
       </div>
     </div>
+
+    <!-- Cart Popup (Mini Cart) -->
+    <div class="cart-popup" id="cartPopup">
+      <div class="cart-popup-content">
+        <div class="cart-popup-info">
+          <span class="cart-popup-items" id="cartPopupItems">0 items</span>
+          <span class="cart-popup-total">₹<span id="cartPopupTotal">0</span></span>
+        </div>
+        <button class="cart-popup-btn">View Cart</button>
+      </div>
+    </div>
+
     <!-- Bottom Navigation - FIXED: Properly constrained to mobile container -->
     <nav class="bottom-bar" id="bottomNav">
       <div class="nav-item active" data-page="home">
@@ -2536,13 +2512,10 @@
     /* ===== App State ===== */
     let cart = {};
     let currentPage = 'home';
-    let lastPage = 'home';
     let currentCategory = 'All';
     let currentSearch = '';
     let currentPageNumber = 1;
     let carouselTimer = null;
-    let typewriterTimer = null;
-    let searchDebounceTimer = null;
     let currentCarouselIndex = 0;
     let currentProductQty = 1;
     let isPopupOpen = false;
@@ -2592,7 +2565,7 @@
         if (addBtn) {
           e.stopPropagation();
           const productId = addBtn.dataset.id;
-          if (productId) addToCart(parseInt(productId), 1, addBtn);
+          if (productId) addToCart(parseInt(productId));
         }
 
         // Quantity controls on product cards
@@ -2641,15 +2614,8 @@
 
       // --- Static Element Listeners ---
       // Header search inputs
-      document.getElementById('searchInput').addEventListener('input', (e) => {
-        clearTimeout(searchDebounceTimer);
-        searchDebounceTimer = setTimeout(() => handleHomeSearch(e), 300);
-      });
-      document.getElementById('catalogSearch').addEventListener('input', (e) => {
-        clearTimeout(searchDebounceTimer);
-        searchDebounceTimer = setTimeout(() => handleCatalogSearch(e), 300);
-      });
-
+      document.getElementById('searchInput').addEventListener('input', handleHomeSearch);
+      document.getElementById('catalogSearch').addEventListener('input', handleCatalogSearch);
 
       // Category filter buttons
       document.getElementById('categories').addEventListener('click', (e) => {
@@ -2666,10 +2632,8 @@
       });
 
       // Header buttons (Back, Cart) and View All
-      document.querySelector('#home .view-all').addEventListener('click', () => showPage('catalog'));      
-      document.querySelector('#catalog .back-btn').addEventListener('click', goBack);
-      document.querySelector('#faqPage .back-btn').addEventListener('click', goBack);
-      document.querySelector('#profilePage .back-btn').addEventListener('click', goBack);
+      document.querySelector('#home .view-all').addEventListener('click', () => showPage('catalog'));
+      document.querySelectorAll('.back-btn').forEach(btn => btn.addEventListener('click', goBack));
       document.querySelectorAll('.cart-btn').forEach(btn => btn.addEventListener('click', showCart));
 
       // Profile page buttons
@@ -2697,7 +2661,6 @@
       document.getElementById('bottomNav').addEventListener('click', (e) => {
         const navItem = e.target.closest('.nav-item');
         if (!navItem) return;
-        lastPage = currentPage; // Store the current page before any action
         const page = navItem.dataset.page;
         if (page === 'cart') {
           showCart();
@@ -2748,7 +2711,7 @@
       setTimeout(() => {
         const searchQuery = document.getElementById('searchInput').value.toLowerCase();
 
-        // Show products based on featured IDs or search
+        // Show products based on featured IDs
         let featured = products.filter(p => FEATURED_PRODUCT_IDS.includes(p.id));
 
         if (searchQuery) {
@@ -2924,17 +2887,10 @@
       document.getElementById('popupType').textContent = DOMPurify.sanitize(product.category);
       document.getElementById('popupDescription').textContent = DOMPurify.sanitize(product.desc);
 
-      // Ensure details are expanded by default when popup opens
-      popupHighlightsExpanded = true;
-      document.getElementById('popupHighlightsContent').style.display = 'grid';
-      document.getElementById('popupDescription').style.display = 'block';
-      document.querySelector('.popup-expand-btn').style.transform = 'rotate(0deg)';
-
       popup.classList.add('active');
       isPopupOpen = true;
       document.body.classList.add('popup-open');
       
-
       // Hide bottom navigation and cart popup when product popup is open
       document.getElementById('bottomNav').style.display = 'none';
       document.getElementById('cartPopup').style.display = 'none';
@@ -3056,19 +3012,16 @@
     /* NEW: Function to toggle highlights in popup */
     function togglePopupHighlights() {
       const highlightsContent = document.getElementById('popupHighlightsContent');
-      const descriptionContent = document.getElementById('popupDescription');
       const expandBtn = document.querySelector('.popup-expand-btn');
       
       popupHighlightsExpanded = !popupHighlightsExpanded;
       
       if (popupHighlightsExpanded) {
-        highlightsContent.style.display = 'grid';
-        descriptionContent.style.display = 'block';
-        expandBtn.style.transform = 'rotate(0deg)';
+        highlightsContent.style.display = 'block'; // Or 'grid', 'flex', etc.
+        expandBtn.textContent = '^';
       } else {
         highlightsContent.style.display = 'none';
-        descriptionContent.style.display = 'none';
-        expandBtn.style.transform = 'rotate(180deg)';
+        expandBtn.textContent = 'v';
       }
     }
 
@@ -3083,97 +3036,41 @@
       // Show bottom navigation again when popup is closed
       if (currentPage !== 'cart') {
         document.getElementById('bottomNav').style.display = 'flex';
-      }      
+      }
+      
+      // Show cart popup again if there are items
+      updateCartPopup();
     }
 
-    function addToCart(id, qty = 1, element = null) {
+    function addToCart(id, qty = 1) {
       const product = products.find(p => p.id === id);
       if (!product || !product.available) return;
-
-      // Trigger the fly animation if an element was passed
-      if (element) {
-        animateFlyToCart(element);
-      } else {
-        // Fallback for calls without an element (e.g., from popup)
-        animateCartIcon();
-      }
 
       if (cart[id]) {
         cart[id] = Math.min(99, cart[id] + qty);
       } else {
         cart[id] = qty;
       }
-      
+
       saveCart();
       updateCartUI();
+      animateCartIcon();
       showToast(`${product.name} added to cart!`);
       
       // Track add to cart
       trackAddToCart(id, qty);
     }
 
-    function animateFlyToCart(startElement) {
-      const productCard = startElement.closest('.product');
-      if (!productCard) return;
-
-      const productImage = productCard.querySelector('.product-image img');
-      const cartIcon = document.querySelector('.bottom-bar .nav-item[data-page="cart"]');
-
-      if (!productImage || !cartIcon) return;
-
-      const startRect = productImage.getBoundingClientRect();
-      const endRect = cartIcon.getBoundingClientRect();
-
-      const clone = productImage.cloneNode(true);
-      clone.classList.add('fly-to-cart');
-
-      // Set initial position and style
-      clone.style.left = `${startRect.left}px`;
-      clone.style.top = `${startRect.top}px`;
-      clone.style.width = `${startRect.width}px`;
-      clone.style.height = `${startRect.height}px`;
-
-      document.body.appendChild(clone);
-
-      // Animate to the cart icon
-      requestAnimationFrame(() => {
-        clone.style.left = `${endRect.left + endRect.width / 2 - 15}px`; // Center on cart icon
-        clone.style.top = `${endRect.top + endRect.height / 2 - 15}px`;
-        clone.style.transform = 'scale(0.1)';
-        clone.style.borderRadius = '50%';
-      });
-
-      // Clean up after animation and pop the cart icon
-      clone.addEventListener('transitionend', () => {
-        clone.remove();
-        animateCartIcon();
-      }, { once: true });
-    }
-
     function updateCartUI() {
       updateCartBadges();
-      // Instead of re-rendering everything, we now update cards individually.
-      // This function is now primarily for the badges.
+      updateProductCardStates();
+      updateCartPopup();
     }
 
     /* NEW: Separated badge updates */
     function updateCartBadges() {
       const totalQty = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-      
-      // Update the mini cart popup
-      const cartPopup = document.getElementById('cartPopup');
-      if (totalQty > 0 && currentPage !== 'cart' && !isPopupOpen) {
-        const subtotal = Object.keys(cart).reduce((sum, id) => {
-          const product = products.find(p => p.id === parseInt(id));
-          return sum + (product.finalPrice * cart[id]);
-        }, 0);
-        document.getElementById('cartPopupItems').textContent = `${totalQty} item${totalQty > 1 ? 's' : ''} in cart`;
-        document.getElementById('cartPopupTotal').textContent = `₹${subtotal}`;
-        cartPopup.style.display = 'block';
-      } else {
-        cartPopup.style.display = 'none';
-      }
-      
+
       // Update all cart badges
       ['cartCount', 'cartCountCatalog', 'navBadge'].forEach(id => {
         const el = document.getElementById(id);
@@ -3188,22 +3085,35 @@
       });
     }
 
-    /* REFACTORED: Targeted product card update */
-    function updateProductCardState(productId) {
-        const productCards = document.querySelectorAll(`.product[data-id="${productId}"]`);
-        if (productCards.length === 0) return;
+    /* NEW: Separated product card updates */
+    function updateProductCardStates() {
+      // Update product cards to show quantity controls
+      renderFeaturedProducts();
+      // Update catalog products if on catalog page
+      if (currentPage === 'catalog') {
+        renderCatalogProducts();
+      }
+    }
 
-        const product = products.find(p => p.id === productId);
-        if (!product) return;
+    /* NEW: Function to update cart popup */
+    function updateCartPopup() {
+      const cartPopup = document.getElementById('cartPopup');
+      const cartPopupItems = document.getElementById('cartPopupItems');
+      const cartPopupTotal = document.getElementById('cartPopupTotal');
 
-        // Re-create the HTML for just this one card and replace it.
-        // This is more efficient than re-rendering the whole list.
-        const newCardHTML = createProductHTML(product);
-        productCards.forEach(card => {
-            const newCard = document.createElement('div');
-            newCard.innerHTML = newCardHTML;
-            card.parentNode.replaceChild(newCard.firstChild, card);
-        });
+      const totalQty = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+      const totalPrice = Object.keys(cart).reduce((sum, id) => {
+        const product = products.find(p => p.id === parseInt(id));
+        return sum + (product ? product.finalPrice * cart[id] : 0);
+      }, 0);
+
+      if (totalQty > 0 && !isPopupOpen) {
+        cartPopupItems.textContent = `${totalQty} item${totalQty > 1 ? 's' : ''}`;
+        cartPopupTotal.textContent = totalPrice;
+        cartPopup.style.display = 'block';
+      } else {
+        cartPopup.style.display = 'none';
+      }
     }
 
     function showCart() {
@@ -3217,20 +3127,17 @@
       const cartFooter = document.getElementById('cartFooter');
       const emptyCartFooter = document.getElementById('emptyCartFooter');
       const emptyCart = document.getElementById('emptyCart');
-      const cartHeader = document.querySelector('#cartModal .cart-header');
 
       if (items.length === 0) {
         emptyCart.style.display = 'flex';
         cartItems.innerHTML = '';
         cartSummary.innerHTML = '';
         cartFooter.style.display = 'none';
-        emptyCartFooter.style.display = 'block'; // Show the browse button footer
-        if (cartHeader) cartHeader.style.display = 'none'; // Hide "Clear All" header
+        emptyCartFooter.style.display = 'block';
       } else {
         emptyCart.style.display = 'none';
         cartFooter.style.display = 'block';
         emptyCartFooter.style.display = 'none';
-        if (cartHeader) cartHeader.style.display = 'flex'; // Show "Clear All" header
         
         // Render cart items
         cartItems.innerHTML = items.map(item => `
@@ -3302,7 +3209,8 @@
       document.body.classList.add('popup-open');
       
       // Hide bottom navigation and cart popup when cart modal is open
-      document.getElementById('bottomNav').style.display = 'none';      
+      document.getElementById('bottomNav').style.display = 'none';
+      document.getElementById('cartPopup').style.display = 'none';
       
       // Track cart view
       if (typeof gtag === 'function') {
@@ -3357,13 +3265,14 @@
     }
 
     function closeCart() {
-        const cartModal = document.getElementById('cartModal');
-        if (!cartModal.classList.contains('active')) return;
-
-        cartModal.classList.remove('active');
-        document.body.classList.remove('popup-open');
-        showPage(lastPage); // Restore the last active page
-        document.getElementById('bottomNav').style.display = 'flex';
+      document.getElementById('cartModal').classList.remove('active');
+      document.body.classList.remove('popup-open');
+      
+      // Show bottom navigation again when cart is closed
+      document.getElementById('bottomNav').style.display = 'flex';
+      
+      // Show cart popup again if there are items
+      updateCartPopup();
     }
 
     function updateQty(id, change) {
@@ -3376,7 +3285,6 @@
 
       saveCart();
       updateCartUI();
-      updateProductCardState(id); // Targeted update
       
       // If we're on the cart page, refresh it
       if (document.getElementById('cartModal').classList.contains('active')) {
@@ -3399,7 +3307,8 @@
           // This runs after the animation finishes
           delete cart[id];
           saveCart();
-          updateCartBadges();          
+          updateCartBadges();
+          updateCartPopup();
           updateCartSummary(); // Update totals without re-rendering the list
           cartItemEl.remove(); // Clean up the element from DOM
         }, { once: true });
@@ -3408,7 +3317,6 @@
         delete cart[id];
         saveCart();
         updateCartUI();
-        updateProductCardState(id); // Targeted update
       }
 
       // Track removal
@@ -3426,9 +3334,6 @@
         if (confirm('Are you sure you want to clear your cart?')) {
           cart = {};
           saveCart();
-          // Re-render all products since all cards need to be updated
-          renderFeaturedProducts();
-          renderCatalogProducts();
           updateCartUI();
           showCart();
           
@@ -3498,15 +3403,14 @@
         document.getElementById('bottomNav').style.display = 'none';
       } else {
         document.getElementById('bottomNav').style.display = 'flex';
-      }      
+      }
+      
+      // Update cart popup
+      updateCartPopup();
     }
 
     function goBack() {
-      // Use the lastPage variable to provide a more intuitive back navigation
-      if (lastPage && lastPage !== currentPage) {
-        showPage(lastPage);
-      } else {
-        // Fallback to home if there's no history or we're already on the last page
+      if (currentPage === 'catalog' || currentPage === 'faqPage' || currentPage === 'profilePage') {
         showPage('home');
       }
     }
@@ -3651,59 +3555,50 @@ window.addEventListener('beforeunload', () => {
   }
 });
     function startTypewriter() {
-      if (typewriterTimer) clearTimeout(typewriterTimer);
-
       const base = 'Search — ';
       const names = ['Rohu','Tiger Prawns','Sea Bass','Crab','Pickle'];
       let i = 0, pos = 0, dir = 1, pause = 0;
       
-      const searchInput = document.getElementById('searchInput');
-      const catalogSearch = document.getElementById('catalogSearch');
-      const inputs = [searchInput, catalogSearch].filter(Boolean);
-
       function tick() {
-        let activeInputs = inputs.filter(input => document.activeElement !== input && !input.value);
-
-        if (activeInputs.length === 0) {
-          typewriterTimer = setTimeout(tick, 200); // Check again later
-          return;
-        }
-
-        if (pause > 0) {
-          pause--;
-        } else {
+        const searchInput = document.getElementById('searchInput');
+        const catalogSearch = document.getElementById('catalogSearch');
+        
+        // Apply to both search inputs for consistency
+        [searchInput, catalogSearch].forEach(input => {
+          if (!input || document.activeElement === input || input.value) {
+            return;
+          }
+          
           const full = names[i];
-          const text = full.slice(0, pos);
-          activeInputs.forEach(input => input.setAttribute('placeholder', base + text));
+          if (pause > 0) { 
+            return;
+          }
 
-          pos += dir;
-          if (pos > full.length) {
-            pause = 10;
-            dir = -1;
-          }
-          if (pos < 0) {
-            dir = 1;
-            i = (i + 1) % names.length;
-          }
+          const text = full.slice(0, pos);
+          input.setAttribute('placeholder', base + text);
+        });
+
+        if (pause > 0) { 
+          pause--; 
+          setTimeout(tick, 80); 
+          return; 
         }
 
-        typewriterTimer = setTimeout(tick, 80);
+        pos += dir;
+        if (pos > names[i].length) { 
+          pause = 10; 
+          dir = -1; 
+        }
+        if (pos < 0) { 
+          dir = 1; 
+          i = (i + 1) % names.length; 
+        }
+
+        setTimeout(tick, 60);
       }
       
       tick();
     }
-
-    // In setupEvents(), add focus and blur listeners for the search bars
-    const searchInput = document.getElementById('searchInput');
-    const catalogSearch = document.getElementById('catalogSearch');
-    [searchInput, catalogSearch].forEach(input => {
-      if (!input) return;
-      input.addEventListener('focus', () => {
-        if (typewriterTimer) clearTimeout(typewriterTimer);
-        input.setAttribute('placeholder', input.id === 'searchInput' ? 'Search seafood...' : 'Search products...');
-      });
-      input.addEventListener('blur', () => { if (!input.value) startTypewriter(); });
-    });
 
     function toggleFAQ(button) {
       const faq = button.closest('.faq');
