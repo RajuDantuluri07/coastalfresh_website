@@ -1718,6 +1718,39 @@
       color: var(--text-secondary);
     }
 
+    /* --- NEW: Enhanced Profile Page Styles --- */
+    .profile-header-simple {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px;
+      background: var(--bg-white);
+    }
+
+    .profile-avatar-small {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: var(--primary-color);
+      border: 2px solid var(--primary-color);
+    }
+
+    .profile-user-info h2 { font-size: 18px; font-weight: 700; }
+    .profile-user-info p { font-size: 14px; color: var(--text-secondary); }
+
+    .profile-divider {
+      height: 8px;
+      background-color: var(--bg-light);
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+    /* --- End of Profile Page Styles --- */
+
     /* Profile Page */
     #profilePage .section {
       padding: 0;
@@ -2479,25 +2512,36 @@
       </header>
 
       <main>
-        <div class="profile-user-card">
-          <div class="profile-avatar">
+        <!-- NEW: Simplified Profile Header -->
+        <div class="profile-header-simple">
+          <div class="profile-avatar-small">
             <i class="fas fa-user"></i>
           </div>
-          <h2>Guest User</h2>
-          <p>You are browsing as a guest</p>
+          <div class="profile-user-info">
+            <h2>Guest User</h2>
+            <p>You are browsing as a guest</p>
+          </div>
         </div>
 
+        <div class="profile-divider"></div>
+
+        <!-- Action Group -->
         <div class="profile-actions">
           <button class="profile-button faq">
             <i class="fas fa-question-circle"></i> FAQ
           </button>
           <button class="profile-button support">
-            <i class="fas fa-headset"></i> Support
+            <i class="fas fa-headset"></i> Contact Us
           </button>
           <button class="profile-button refer">
             <i class="fas fa-share-alt"></i> Refer & Earn
           </button>
         </div>
+
+        <div class="profile-divider"></div>
+
+        <!-- NEW: Collapsible "Why Choose Us" section -->
+        <div class="faq-wrap" id="whyChooseUsSection"></div>
 
         <div class="profile-footer">
           <div class="social">
@@ -2799,6 +2843,7 @@ const TRUST_ICONS = [ // FIX: Restored descriptive text
       renderFeaturedProducts();
       renderCatalogProducts();
       setupEvents();
+      renderWhyChooseUs();
       updateCartUI();
       initCarousel();
       startTypewriter();
@@ -2967,6 +3012,17 @@ const TRUST_ICONS = [ // FIX: Restored descriptive text
           showPage(page);
         }
       });
+    }
+
+    function renderWhyChooseUs() {
+      const container = document.getElementById('whyChooseUsSection');
+      if (!container) return;
+
+      const whyChooseUsText = `<p>Fresh from the coast, delivered to your door. 100% natural, clean, and safe seafood you can trust.</p>`;
+
+      container.innerHTML = `
+        <div class="faq"><button class="q"><span class="q-text">Why Choose Coastal Fresh?</span><i class="fas fa-chevron-down"></i></button><div class="a"><div class="answer-content">${whyChooseUsText}</div></div></div>
+      `;
     }
 
     function renderTrustIcons() {
