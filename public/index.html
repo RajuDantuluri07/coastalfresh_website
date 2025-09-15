@@ -2073,10 +2073,6 @@
             <span class="cart-count" id="cartCount">0</span>
           </button>
         </div>
-        <div class="search-container">
-          <i class="fas fa-search search-icon"></i>
-          <input type="text" class="search" placeholder="Search seafood..." id="searchInput">
-        </div>
       </header>
 
       <!-- Carousel -->
@@ -2622,21 +2618,18 @@
 
       // --- Static Element Listeners ---
       // Header search inputs
-      document.getElementById('searchInput').addEventListener('input', (e) => {
-        clearTimeout(searchDebounceTimer);
-        searchDebounceTimer = setTimeout(() => handleHomeSearch(e), 300);
-      });
       document.getElementById('catalogSearch').addEventListener('input', (e) => {
         clearTimeout(searchDebounceTimer);
         searchDebounceTimer = setTimeout(() => handleCatalogSearch(e), 300);
       });
 
       // Typewriter focus/blur handlers
-      [document.getElementById('searchInput'), document.getElementById('catalogSearch')].forEach(input => {
+      const catalogSearchInput = document.getElementById('catalogSearch');
+      [catalogSearchInput].forEach(input => {
         if (!input) return;
         input.addEventListener('focus', () => {
           if (typewriterTimer) clearTimeout(typewriterTimer);
-          input.setAttribute('placeholder', input.id === 'searchInput' ? 'Search seafood...' : 'Search products...');
+          input.setAttribute('placeholder', 'Search products...');
         });
         input.addEventListener('blur', () => {
           if (!input.value) startTypewriter();
@@ -2740,17 +2733,11 @@
 
       // 2. Defer product rendering to allow the spinner to show
       setTimeout(() => {
-        const searchQuery = document.getElementById('searchInput').value.toLowerCase();
-
         // Show products based on featured IDs
         let featured = products.filter(p => FEATURED_PRODUCT_IDS.includes(p.id));
 
-        if (searchQuery) {
-          featured = featured.filter(p => p.name.toLowerCase().includes(searchQuery));
-        }
-
         container.innerHTML = featured.map(product => createProductHTML(product)).join('');
-      }, 0); // A timeout of 0 yields to the browser's render queue
+      }, 0);
     }
     
     function renderCatalogProducts() {
@@ -3461,11 +3448,6 @@
       }
     }
 
-    function handleHomeSearch(e) {
-      currentSearch = e.target.value;
-      renderFeaturedProducts();
-    }
-
     function handleCatalogSearch(e) {
       currentSearch = e.target.value;
       currentPageNumber = 1;
@@ -3601,8 +3583,7 @@ window.addEventListener('beforeunload', () => {
       let i = 0, pos = 0, dir = 1, pause = 0;
       
       const searchInput = document.getElementById('searchInput');
-      const catalogSearch = document.getElementById('catalogSearch');
-      const inputs = [searchInput, catalogSearch].filter(Boolean);
+      const inputs = [document.getElementById('catalogSearch')].filter(Boolean);
 
       function tick() {
         const shouldAnimate = inputs.every(input => document.activeElement !== input && !input.value);
