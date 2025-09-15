@@ -699,16 +699,16 @@
       position: absolute;
       bottom: 12px;
       right: 12px;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
+      width: auto;
+      height: 32px;
+      border-radius: 16px;
       background: #007AFF;
       color: white;
       border: none;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
+      padding: 0 14px;      cursor: pointer;
       box-shadow: 0 2px 8px rgba(0,122,255,0.4);
       transition: all 0.2s;
       z-index: 2;
@@ -716,6 +716,11 @@
 
     .add-to-cart-btn:active {
       transform: scale(0.9);
+    }
+
+    .add-to-cart-btn .fas {
+      font-size: 12px;
+      margin-right: 4px;
     }
 
    /* Product-popup this ENTIRE block */
@@ -774,11 +779,6 @@
       background: none;
       font-size: 18px;
       color: #007AFF;
-    }
-
-    .popup-header-actions {
-      display: flex;
-      gap: 16px;
     }
 
     .popup-action-btn {
@@ -853,6 +853,14 @@
     .popup-info {
       padding: 20px;
       background: white;
+    }
+
+    /* THUMB ZONE: Moved actions closer to center */
+    .popup-header-actions {
+      display: flex;
+      gap: 16px;
+      padding: 0 20px 12px;
+      justify-content: flex-end;
     }
 
     .popup-delivery-time {
@@ -1197,8 +1205,8 @@
 
     .cart-item {
   display: flex;
-  gap: 16px;
-  padding: 16px;
+  gap: 12px;
+  padding: 12px;
   border-radius: 16px;
   background: #f9f9f9;
   border: 1px solid #f0f0f0;
@@ -1207,7 +1215,7 @@
   position: relative;
   /* Animation properties */
   transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-  max-height: 120px; /* Explicit height for animation */
+  max-height: 110px; /* Explicit height for animation */
   overflow: hidden;
     }
 
@@ -2278,10 +2286,6 @@
     <div class="product-popup" id="productPopup">
       <div class="popup-header">
         <button class="popup-back-btn" aria-label="Close Product View">←</button>
-        <div class="popup-header-actions">
-          <button class="popup-action-btn favorite" aria-label="Add to Favorites">♡</button>
-          <button class="popup-action-btn share" aria-label="Share Product">↗</button>
-        </div>
       </div>
 
       <div class="popup-content-wrapper">
@@ -2298,6 +2302,12 @@
 
         <!-- Product Info -->
         <div class="popup-info">
+          <!-- THUMB ZONE: Actions moved here -->
+          <div class="popup-header-actions">
+            <button class="popup-action-btn favorite" aria-label="Add to Favorites">♡</button>
+            <button class="popup-action-btn share" aria-label="Share Product">↗</button>
+          </div>
+
           <div class="popup-delivery-time">
             <span>🕐</span>
             <span>Next Day Delivery</span>
@@ -2842,7 +2852,7 @@
                 <span class="qty num">${isInCart}</span>
                 <button class="qty-btn inc">+</button>
               </div>` 
-              : `<button class="add-to-cart-btn add-pill" data-id="${product.id}"><i class="fas fa-plus"></i></button>`)
+              : `<button class="add-to-cart-btn add-pill" data-id="${product.id}"><i class="fas fa-plus"></i> Add</button>`)
           : ''}
         </div>
       `;
@@ -2969,7 +2979,7 @@
     /* NEW: Function to toggle favorite in popup */
     function toggleFavorite() {
       isPopupFavorite = !isPopupFavorite;
-      const favoriteBtn = document.querySelector('.popup-action-btn');
+      const favoriteBtn = document.querySelector('.popup-action-btn.favorite');
       favoriteBtn.textContent = isPopupFavorite ? '♥' : '♡';
       favoriteBtn.style.color = isPopupFavorite ? '#e74c3c' : '#333';
       
