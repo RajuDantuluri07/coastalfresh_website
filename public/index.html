@@ -334,6 +334,7 @@
     .subtitle {
       font-size: 15px;
       color: #8E8E93;
+      font-weight: 300; /* Light */
       margin-bottom: 15px;
       text-align: center;
     }
@@ -631,6 +632,7 @@
     .product-weight {
       font-size: 13px;
       color: #8E8E93;
+      font-weight: 300; /* Light */
       margin-bottom: 8px;
     }
 
@@ -860,7 +862,7 @@
       margin-bottom: 8px;
       color: #4CAF50;
       font-size: 12px;
-      font-weight: 500;
+      font-weight: 400; /* Regular */
     }
 
     .popup-rating {
@@ -890,6 +892,7 @@
     .popup-weight {
       font-size: 16px;
       color: #666;
+      font-weight: 300; /* Light */
       margin-bottom: 12px;
     }
 
@@ -924,6 +927,7 @@
     .popup-unit-price {
       font-size: 12px;
       color: #666;
+      font-weight: 300; /* Light */
       margin-bottom: 16px;
     }
 
@@ -1015,12 +1019,13 @@
     .popup-highlight-label {
       font-size: 14px;
       color: #666;
+      font-weight: 300; /* Light */
     }
 
     .popup-highlight-value {
       font-size: 14px;
       color: #333;
-      font-weight: 500;
+      font-weight: 400; /* Regular */
     }
 
     /* Bottom Section */
@@ -1243,6 +1248,7 @@
     .cart-item-weight {
       font-size: 13px;
       color: #8E8E93;
+      font-weight: 300; /* Light */
     }
 
     .cart-item-price {
@@ -1618,7 +1624,8 @@
 
     .profile-user-card p {
       font-size: 14px;
-      opacity: 0.8;
+      font-weight: 300; /* Light */
+      opacity: 0.9;
     }
 
     .profile-actions {
@@ -1681,6 +1688,7 @@
     .profile-footer .app-version {
       font-size: 12px;
       color: #8e8e93;
+      font-weight: 300; /* Light */
     }
 
     /* Footer */
@@ -2362,7 +2370,7 @@
 
       <div class="cart-content-wrapper">
         <main class="section">
-          <div class="cart-header">
+          <div class="cart-header" id="cartListHeader">
             <button class="clear-cart" id="clearCartBtn">Clear All</button>
           </div>
           <div id="cartItems"></div>
@@ -2376,6 +2384,11 @@
             <h3>Your cart is empty</h3>
             <p>Add some fresh seafood to get started</p>
           </div>
+          
+          <!-- Sticky footer for empty cart - MOVED OUTSIDE for proper stickiness -->
+          <div class="empty-cart-footer" id="emptyCartFooter" style="display: none;">
+            <button class="empty-cart-btn">Browse Products</button>
+          </div>
         </main>
       </div>
 
@@ -2387,11 +2400,6 @@
             <i class="fas fa-lock"></i> Proceed to Checkout
           </button>
         </div>
-      </div>
-
-      <!-- Sticky footer for empty cart -->
-      <div class="empty-cart-footer" id="emptyCartFooter" style="display: none;">
-        <button class="empty-cart-btn">Browse Products</button>
       </div>
     </div>
 
@@ -3127,16 +3135,19 @@
       const cartFooter = document.getElementById('cartFooter');
       const emptyCartFooter = document.getElementById('emptyCartFooter');
       const emptyCart = document.getElementById('emptyCart');
+      const cartListHeader = document.getElementById('cartListHeader');
 
       if (items.length === 0) {
         emptyCart.style.display = 'flex';
         cartItems.innerHTML = '';
         cartSummary.innerHTML = '';
         cartFooter.style.display = 'none';
+        cartListHeader.style.display = 'none';
         emptyCartFooter.style.display = 'block';
       } else {
         emptyCart.style.display = 'none';
         cartFooter.style.display = 'block';
+        cartListHeader.style.display = 'flex';
         emptyCartFooter.style.display = 'none';
         
         // Render cart items
@@ -3334,7 +3345,10 @@
         if (confirm('Are you sure you want to clear your cart?')) {
           cart = {};
           saveCart();
-          updateCartUI();
+          // Explicitly re-render all product lists to reset their state
+          renderFeaturedProducts();
+          renderCatalogProducts();
+          updateCartUI(); // Update badges and popups
           showCart();
           
           // Track cart cleared
