@@ -2666,8 +2666,10 @@
       });
 
       // Header buttons (Back, Cart) and View All
-      document.querySelector('#home .view-all').addEventListener('click', () => showPage('catalog'));
-      document.querySelectorAll('.back-btn').forEach(btn => btn.addEventListener('click', goBack));
+      document.querySelector('#home .view-all').addEventListener('click', () => showPage('catalog'));      
+      document.querySelector('#catalog .back-btn').addEventListener('click', goBack);
+      document.querySelector('#faqPage .back-btn').addEventListener('click', goBack);
+      document.querySelector('#profilePage .back-btn').addEventListener('click', goBack);
       document.querySelectorAll('.cart-btn').forEach(btn => btn.addEventListener('click', showCart));
 
       // Profile page buttons
