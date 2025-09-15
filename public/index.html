@@ -747,7 +747,7 @@
   height: 100vh;
   background: white;
   z-index: 1000;
-  display: none;
+  display: none; /* Changed from flex to allow self-scrolling */
   flex-direction: column;
   overflow: hidden;
 }
@@ -770,7 +770,7 @@
     .product-popup.active {
       display: flex;
     }
-
+    
     /* Updated popup header to match new design */
     .popup-header {
       display: flex;
@@ -1146,13 +1146,14 @@
 
     /* Content padding for fixed bottom */
     .popup-content-wrapper {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 20px; /* Add some padding at the end of content */
-  scroll-behavior: smooth; /* Enable smooth scrolling */
-}
+      flex-shrink: 0; /* Prevent this from shrinking */
+      width: 100%;
+    }
 
-  /* Cart Modal - FIXED for mobile container */
+    .product-popup.active {
+      overflow-y: auto; /* Make the popup itself scrollable */
+    }
+    /* Cart Modal - FIXED for mobile container */
 .cart-modal {
   position: fixed;
   top: 0;
@@ -2273,7 +2274,7 @@
         <button class="popup-back-btn" aria-label="Close Product View">←</button>
       </div>
 
-      <div class="popup-content-wrapper">
+      <div class="popup-content-wrapper" id="popupContentWrapper">
         <!-- Product Image Section -->
         <div class="popup-image-section">
           <div class="popup-image-container">
@@ -2903,6 +2904,10 @@
       
       // Set quantity
       document.getElementById('popupQty').textContent = currentProductQty;
+      
+      // Ensure the popup content is scrolled to the top on open
+      const contentWrapper = document.getElementById('popupContentWrapper');
+      if (contentWrapper) contentWrapper.scrollTop = 0;
       
       // Set product details in the expandable section
       document.getElementById('popupGrossWeight').textContent = product.gross;
