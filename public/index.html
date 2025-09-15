@@ -3767,6 +3767,7 @@ const TRUST_ICONS = [
           updateCartBadges();
           updateCartPopup();
           updateCartSummary(); // Update totals without re-rendering the list
+          updateProductCardState(id); // FIX: Update product card on home/catalog page
           cartItemEl.remove(); // Clean up the element from DOM
         }, { once: true });
       } else {
