@@ -19,7 +19,7 @@
   <!-- SEO -->
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <link rel="canonical" href="https://www.coastalfresh.in" />
-  <meta name="theme-color" content="#007AFF" />
+  <meta name="theme-color" content="#01659a" />
   <meta name="keywords" content="fresh fish delivery hyderabad, seafood delivery hyderabad, buy prawns online hyderabad, crab delivery hyderabad, hyderabad fish online, fresh seafood home delivery, andhra seafood hyderabad, online pickles hyderabad, prawn pickle online, fish pickle, mutton pickle, chicken pickle online" />
 
   <!-- Open Graph / Twitter -->
@@ -2641,7 +2641,7 @@
         <div id="cartSummary"></div>
         <div class="cart-actions">
           <button class="checkout-btn">
-            <i class="fas fa-lock"></i> Proceed to Checkout
+            <i class="fas fa-arrow-right"></i> Proceed to Checkout
           </button>
         </div>
       </div>
@@ -2729,11 +2729,11 @@
   <script>
   (function() { // IIFE to avoid polluting global scope
     /* ===== App Configuration ===== */
-const TRUST_ICONS = [
-  { icon: 'fas fa-fish', title: 'Fresh Catch' },
-  { icon: 'fas fa-leaf', title: '100% Natural' },
-  { icon: 'fas fa-box', title: 'Hygienic Pack' },
-  { icon: 'fas fa-truck', title: 'Fast Delivery' },
+const TRUST_ICONS = [ // FIX: Restored descriptive text
+  { icon: 'fas fa-fish', title: 'Fresh Catch', text: 'Sourced daily' },
+  { icon: 'fas fa-leaf', title: 'All Natural', text: 'No chemicals' },
+  { icon: 'fas fa-box-open', title: 'Hygienic', text: 'Neatly packed' },
+  { icon: 'fas fa-truck-fast', title: 'Next-Day', text: 'Fast delivery' },
 ];
 
     const FEATURED_PRODUCT_IDS = [1, 11, 20, 15];
@@ -2961,7 +2961,7 @@ const TRUST_ICONS = [
         const navItem = e.target.closest('.nav-item');
         if (!navItem) return;
         const page = navItem.dataset.page;
-        if (page === 'cart' && Object.keys(cart).length > 0) { // Only open cart from nav if not empty
+        if (page === 'cart') {
           showCart();
         } else if (page) {
           showPage(page);
@@ -3162,7 +3162,7 @@ const TRUST_ICONS = [
   const product = products.find(p => p.id === numericId);
   if (!product) return;
 
-      popupProduct = product;
+      popupProduct = product; // This line seems redundant, but we'll keep it for clarity
       currentProductQty = cart[product.id] || 1;
       const popup = document.getElementById('productPopup');
       
@@ -3207,9 +3207,9 @@ const TRUST_ICONS = [
       if (contentWrapper) contentWrapper.scrollTop = 0;
       
       // Set product details in the expandable section
-      document.getElementById('popupGrossWeight').textContent = product.gross;
-      document.getElementById('popupNetWeight').textContent = product.net;
-      document.getElementById('popupType').textContent = DOMPurify.sanitize(product.category);
+      document.getElementById('popupGrossWeight').textContent = DOMPurify.sanitize(product.gross);
+      document.getElementById('popupNetWeight').textContent = DOMPurify.sanitize(product.net);
+      document.getElementById('popupType').textContent = DOMPurify.sanitize(product.category); // Already sanitized, but good practice
       document.getElementById('popupDescription').textContent = DOMPurify.sanitize(product.desc);
 
       popup.classList.add('active');
@@ -3930,8 +3930,8 @@ window.addEventListener('beforeunload', () => {
       const base = 'Search — ';
       const names = ['Prawns', 'Rohu', 'Sea Bass', 'Crab', 'Pickle'];
       let i = 0, pos = 0, dir = 1, pause = 0;
-      
-      const searchInput = document.getElementById('searchInput');
+
+      // FIX: Target the correct search input and remove reference to non-existent 'searchInput'
       const inputs = [document.getElementById('catalogSearch')].filter(Boolean);
 
       function tick() {
