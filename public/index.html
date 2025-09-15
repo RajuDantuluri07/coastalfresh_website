@@ -2536,10 +2536,13 @@
     /* ===== App State ===== */
     let cart = {};
     let currentPage = 'home';
+    let lastPage = 'home';
     let currentCategory = 'All';
     let currentSearch = '';
     let currentPageNumber = 1;
     let carouselTimer = null;
+    let typewriterTimer = null;
+    let searchDebounceTimer = null;
     let currentCarouselIndex = 0;
     let currentProductQty = 1;
     let isPopupOpen = false;
@@ -2638,8 +2641,15 @@
 
       // --- Static Element Listeners ---
       // Header search inputs
-      document.getElementById('searchInput').addEventListener('input', handleHomeSearch);
-      document.getElementById('catalogSearch').addEventListener('input', handleCatalogSearch);
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => handleHomeSearch(e), 300);
+      });
+      document.getElementById('catalogSearch').addEventListener('input', (e) => {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => handleCatalogSearch(e), 300);
+      });
+
 
       // Category filter buttons
       document.getElementById('categories').addEventListener('click', (e) => {
@@ -2685,6 +2695,7 @@
       document.getElementById('bottomNav').addEventListener('click', (e) => {
         const navItem = e.target.closest('.nav-item');
         if (!navItem) return;
+        lastPage = currentPage; // Store the current page before any action
         const page = navItem.dataset.page;
         if (page === 'cart') {
           showCart();
@@ -3139,13 +3150,28 @@
 
     function updateCartUI() {
       updateCartBadges();
-      updateProductCardStates();
+      // Instead of re-rendering everything, we now update cards individually.
+      // This function is now primarily for the badges.
     }
 
     /* NEW: Separated badge updates */
     function updateCartBadges() {
       const totalQty = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-
+      
+      // Update the mini cart popup
+      const cartPopup = document.getElementById('cartPopup');
+      if (totalQty > 0 && currentPage !== 'cart' && !isPopupOpen) {
+        const subtotal = Object.keys(cart).reduce((sum, id) => {
+          const product = products.find(p => p.id === parseInt(id));
+          return sum + (product.finalPrice * cart[id]);
+        }, 0);
+        document.getElementById('cartPopupItems').textContent = `${totalQty} item${totalQty > 1 ? 's' : ''} in cart`;
+        document.getElementById('cartPopupTotal').textContent = `₹${subtotal}`;
+        cartPopup.style.display = 'block';
+      } else {
+        cartPopup.style.display = 'none';
+      }
+      
       // Update all cart badges
       ['cartCount', 'cartCountCatalog', 'navBadge'].forEach(id => {
         const el = document.getElementById(id);
@@ -3160,14 +3186,22 @@
       });
     }
 
-    /* NEW: Separated product card updates */
-    function updateProductCardStates() {
-      // Update product cards to show quantity controls
-      renderFeaturedProducts();
-      // Update catalog products if on catalog page
-      if (currentPage === 'catalog') {
-        renderCatalogProducts();
-      }
+    /* REFACTORED: Targeted product card update */
+    function updateProductCardState(productId) {
+        const productCards = document.querySelectorAll(`.product[data-id="${productId}"]`);
+        if (productCards.length === 0) return;
+
+        const product = products.find(p => p.id === productId);
+        if (!product) return;
+
+        // Re-create the HTML for just this one card and replace it.
+        // This is more efficient than re-rendering the whole list.
+        const newCardHTML = createProductHTML(product);
+        productCards.forEach(card => {
+            const newCard = document.createElement('div');
+            newCard.innerHTML = newCardHTML;
+            card.parentNode.replaceChild(newCard.firstChild, card);
+        });
     }
 
     function showCart() {
@@ -3321,11 +3355,13 @@
     }
 
     function closeCart() {
-      document.getElementById('cartModal').classList.remove('active');
-      document.body.classList.remove('popup-open');
-      
-      // Show bottom navigation again when cart is closed
-      document.getElementById('bottomNav').style.display = 'flex';      
+        const cartModal = document.getElementById('cartModal');
+        if (!cartModal.classList.contains('active')) return;
+
+        cartModal.classList.remove('active');
+        document.body.classList.remove('popup-open');
+        showPage(lastPage); // Restore the last active page
+        document.getElementById('bottomNav').style.display = 'flex';
     }
 
     function updateQty(id, change) {
@@ -3338,6 +3374,7 @@
 
       saveCart();
       updateCartUI();
+      updateProductCardState(id); // Targeted update
       
       // If we're on the cart page, refresh it
       if (document.getElementById('cartModal').classList.contains('active')) {
@@ -3369,6 +3406,7 @@
         delete cart[id];
         saveCart();
         updateCartUI();
+        updateProductCardState(id); // Targeted update
       }
 
       // Track removal
@@ -3386,7 +3424,10 @@
         if (confirm('Are you sure you want to clear your cart?')) {
           cart = {};
           saveCart();
-          updateCartUI(); // This now correctly updates product cards everywhere
+          // Re-render all products since all cards need to be updated
+          renderFeaturedProducts();
+          renderCatalogProducts();
+          updateCartUI();
           showCart();
           
           // Track cart cleared
@@ -3459,7 +3500,11 @@
     }
 
     function goBack() {
-      if (currentPage === 'catalog' || currentPage === 'faqPage' || currentPage === 'profilePage') {
+      // Use the lastPage variable to provide a more intuitive back navigation
+      if (lastPage && lastPage !== currentPage) {
+        showPage(lastPage);
+      } else {
+        // Fallback to home if there's no history or we're already on the last page
         showPage('home');
       }
     }
@@ -3604,50 +3649,59 @@ window.addEventListener('beforeunload', () => {
   }
 });
     function startTypewriter() {
+      if (typewriterTimer) clearTimeout(typewriterTimer);
+
       const base = 'Search — ';
       const names = ['Rohu','Tiger Prawns','Sea Bass','Crab','Pickle'];
       let i = 0, pos = 0, dir = 1, pause = 0;
       
+      const searchInput = document.getElementById('searchInput');
+      const catalogSearch = document.getElementById('catalogSearch');
+      const inputs = [searchInput, catalogSearch].filter(Boolean);
+
       function tick() {
-        const searchInput = document.getElementById('searchInput');
-        const catalogSearch = document.getElementById('catalogSearch');
-        
-        // Apply to both search inputs for consistency
-        [searchInput, catalogSearch].forEach(input => {
-          if (!input || document.activeElement === input || input.value) {
-            return;
-          }
-          
+        let activeInputs = inputs.filter(input => document.activeElement !== input && !input.value);
+
+        if (activeInputs.length === 0) {
+          typewriterTimer = setTimeout(tick, 200); // Check again later
+          return;
+        }
+
+        if (pause > 0) {
+          pause--;
+        } else {
           const full = names[i];
-          if (pause > 0) { 
-            return;
-          }
-
           const text = full.slice(0, pos);
-          input.setAttribute('placeholder', base + text);
-        });
+          activeInputs.forEach(input => input.setAttribute('placeholder', base + text));
 
-        if (pause > 0) { 
-          pause--; 
-          setTimeout(tick, 80); 
-          return; 
+          pos += dir;
+          if (pos > full.length) {
+            pause = 10;
+            dir = -1;
+          }
+          if (pos < 0) {
+            dir = 1;
+            i = (i + 1) % names.length;
+          }
         }
 
-        pos += dir;
-        if (pos > names[i].length) { 
-          pause = 10; 
-          dir = -1; 
-        }
-        if (pos < 0) { 
-          dir = 1; 
-          i = (i + 1) % names.length; 
-        }
-
-        setTimeout(tick, 60);
+        typewriterTimer = setTimeout(tick, 80);
       }
       
       tick();
     }
+
+    // In setupEvents(), add focus and blur listeners for the search bars
+    const searchInput = document.getElementById('searchInput');
+    const catalogSearch = document.getElementById('catalogSearch');
+    [searchInput, catalogSearch].forEach(input => {
+      if (!input) return;
+      input.addEventListener('focus', () => {
+        if (typewriterTimer) clearTimeout(typewriterTimer);
+        input.setAttribute('placeholder', input.id === 'searchInput' ? 'Search seafood...' : 'Search products...');
+      });
+      input.addEventListener('blur', () => { if (!input.value) startTypewriter(); });
+    });
 
     function toggleFAQ(button) {
       const faq = button.closest('.faq');
