@@ -112,6 +112,9 @@
   <!-- DOMPurify (for final safe sanitization if needed) -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js" crossorigin="anonymous"></script>
 
+  <!-- NEW: Confetti for rewards -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js" crossorigin="anonymous"></script>
+
   <style>
     /* CSS Variables for consistency */
     :root {
@@ -2094,74 +2097,93 @@
       padding: 5px 20px 15px;
     }
     /* Cart Popup (Mini Cart) */
-/* --- NEW: Enhanced Floating Cart Button --- */
-.cart-popup {
-  position: fixed;
-  bottom: calc(var(--bottom-nav-height) + 20px);
-  right: 20px;
-  width: 60px;
-  height: 60px;
-  background: var(--primary-color);
-  border-radius: 50%;
-  box-shadow: 0 4px 20px rgba(1, 101, 154, 0.4); /* Shadow to match new color */
-  z-index: 99;
-  display: none; /* Initially hidden */
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  animation: slideUp 0.3s ease;
-  transition: transform 0.2s ease;
-}
+    /* --- NEW: E-commerce Style Cart Popup --- */
+    .cart-popup {
+      position: fixed;
+      bottom: var(--bottom-nav-height);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: var(--app-max-width);
+      background: var(--primary-dark);
+      color: white;
+      z-index: 101;
+      display: none; /* Initially hidden */
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      cursor: pointer;
+      animation: slideUpFromBottom 0.4s ease-out;
+      border-top: 1px solid var(--primary-color);
+    }
 
-.cart-popup:active {
-  transform: scale(0.9);
-}
+    .cart-popup-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
 
-.cart-popup-content {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 24px;
-}
+    .cart-popup-info .item-count {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--bg-light);
+    }
 
-.cart-popup-count {
-  position: absolute;
-  top: -8px;
-  right: -12px;
-  background: var(--error-color);
-  color: white;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  font-size: 12px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid var(--primary-color);
-}
-/* --- End of Enhanced Floating Cart Button --- */
-    @keyframes slideUp {
+    .cart-popup-info .total-price {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .cart-popup-action {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      background: var(--accent-color);
+      padding: 10px 16px;
+      border-radius: 8px;
+      transition: background-color 0.2s;
+    }
+
+    .cart-popup-action:active {
+      background-color: #0aa3cf; /* Slightly darker accent */
+    }
+    /* --- End of E-commerce Style Cart Popup --- */
+
+    @keyframes slideUpCenter {
       from {
         opacity: 0;
-        transform: translate(-50%, 20px);
+        transform: translate(-50%, 30px);
       }
       to {
         opacity: 1;
-        transform: translate(-50%, 0);
+        transform: translate(-50%, 0px);
       }
     }
-
     /* Adjust for desktop */
     @media (min-width: 481px) {
       .cart-popup {
+        /* Revert to floating circle on desktop */
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
         bottom: 20px;
-        left: 50%;
-        transform: translateX(calc(var(--app-max-width) / 2 - 50px));
-        width: 90%;
-        max-width: var(--app-max-width);
+        /* Keep it as a floating circle, but position it relative to the app frame */
+        left: calc(50% + (var(--app-max-width) / 2) - 80px); /* (Center + Half App Width) - Button Width - Margin */
+        transform: none;
+      }
+    }
+    
+    @keyframes slideUpFromBottom {
+      from {
+        transform: translate(-50%, 100%);
+        opacity: 0;
+      }
+      to {
+        transform: translate(-50%, 0);
+        opacity: 1;
       }
     }
 
@@ -2693,9 +2715,13 @@
 
     <!-- Cart Popup (Mini Cart) -->
     <div class="cart-popup" id="cartPopup">
-      <div class="cart-popup-content">
-        <i class="fas fa-shopping-bag"></i>
-        <span class="cart-popup-count" id="cartPopupCount">0</span>
+      <div class="cart-popup-info">
+        <span class="item-count" id="cartPopupItemCount">1 item</span>
+        <span class="total-price" id="cartPopupTotal">₹0</span>
+      </div>
+      <div class="cart-popup-action">
+        <span>View Cart</span>
+        <i class="fas fa-arrow-right"></i>
       </div>
     </div>
 
@@ -2830,6 +2856,7 @@ const TRUST_ICONS = [
     let searchDebounceTimer = null;
     let typewriterTimer = null;
     
+    let hasShownFreeDeliveryConfetti = false;
     /* NEW: Variables for popup functionality */
     let currentPopupImageIndex = 0;
     let isPopupFavorite = false;
@@ -3477,19 +3504,27 @@ const TRUST_ICONS = [
 
     /* NEW: Function to update cart popup */
     function updateCartPopup() {
-  const cartPopup = document.getElementById('cartPopup');
-  const cartPopupCount = document.getElementById('cartPopupCount');
+      const cartPopup = document.getElementById('cartPopup');
+      const itemCountEl = document.getElementById('cartPopupItemCount');
+      const totalEl = document.getElementById('cartPopupTotal');
 
-  const totalQty = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-  const isCartModalActive = document.getElementById('cartModal').classList.contains('active');
+      const totalQty = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
+      const isCartModalActive = document.getElementById('cartModal').classList.contains('active');
 
-  if (totalQty > 0 && !isPopupOpen && !isCartModalActive) {
-    cartPopupCount.textContent = totalQty;
-    cartPopup.style.display = 'flex';
-  } else {
-    cartPopup.style.display = 'none';
-  }
-}
+      if (totalQty > 0 && !isPopupOpen && !isCartModalActive) {
+        const subtotal = Object.keys(cart).reduce((sum, id) => {
+          const product = products.find(p => p.id === parseInt(id));
+          return sum + (product.finalPrice * cart[id]);
+        }, 0);
+
+        itemCountEl.textContent = `${totalQty} ${totalQty > 1 ? 'items' : 'item'}`;
+        totalEl.textContent = `₹${subtotal}`;
+
+        cartPopup.style.display = 'flex';
+      } else {
+        cartPopup.style.display = 'none';
+      }
+    }
 
     function showCart() {
       const items = Object.keys(cart).map(id => {
@@ -3650,6 +3685,12 @@ const TRUST_ICONS = [
           <div class="summary-row summary-total"><span>Total</span><span>₹${total}</span></div>
         </div>
       `;
+
+      // NEW: Confetti logic
+      if (subtotal >= FREE_DELIVERY_THRESHOLD && !hasShownFreeDeliveryConfetti) {
+        setTimeout(showFreeDeliveryConfetti, 100); // Timeout to allow DOM to render
+        hasShownFreeDeliveryConfetti = true;
+      }
 
       // Also check if cart is now empty
       if (items.length === 0) {
@@ -4012,6 +4053,18 @@ window.addEventListener('beforeunload', () => {
         typewriterTimer = setTimeout(tick, dir === 1 ? 120 : 80);
       }
       tick();
+    }
+
+    function showFreeDeliveryConfetti() {
+      if (typeof confetti !== 'function') return;
+
+      // Fire confetti from the bottom of the screen
+      confetti({
+        particleCount: 150,
+        spread: 90,
+        origin: { y: 0.9 },
+        colors: ['#01659a', '#0bade2', '#FFC107', '#FFFFFF'] // Brand colors + gold
+      });
     }
 
     function saveCart() {
