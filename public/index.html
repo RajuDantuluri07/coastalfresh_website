@@ -1291,11 +1291,6 @@
       line-height: 1.3;
     }
 
-    .cart-item-weight {
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-
     .cart-item-pricing {
       display: flex;
       align-items: center;
@@ -2633,10 +2628,10 @@
   (function() { // IIFE to avoid polluting global scope
     /* ===== App Configuration ===== */
     const TRUST_ICONS = [ // NEW: Updated and more relevant icons
-      { icon: 'fas fa-fish', title: 'Fresh Catch', text: 'Sourced daily' },
-      { icon: 'fas fa-leaf', title: 'All Natural', text: 'No chemicals' },
-      { icon: 'fas fa-box-open', title: 'Hygienic', text: 'Neatly packed' },
-      { icon: 'fas fa-truck-fast', title: 'Next-Day', text: 'Fast delivery' },
+      { icon: 'fas fa-fish', title: 'Fresh Catch'},
+      { icon: 'fas fa-leaf', title: 'Natural'},
+      { icon: 'fas fa-box-open', title: 'Hygienic'},
+      { icon: 'fas fa-truck-fast', title: 'Fast delivery'},
     ];
 
     const FEATURED_PRODUCT_IDS = [1, 11, 20, 15];
@@ -3360,7 +3355,6 @@
               </div>
               <div class="cart-item-info">
                 <div class="cart-item-name">${item.name}</div>
-                <div class="cart-item-weight">${item.net}</div>
                 <div class="cart-item-pricing">
                   <span class="cart-item-current-price">₹${item.finalPrice}</span>
                   ${hasOffer ? `<span class="cart-item-mrp">₹${item.mrp}</span>` : ''}
@@ -3371,7 +3365,7 @@
                     <span class="cart-qty">${item.qty}</span>
                     <button class="cart-qty-btn inc">+</button>
                   </div>
-                  <div class="cart-item-subtotal">₹${item.finalPrice * item.qty}</div>
+                  <div class="cart-item-subtotal" style="visibility: ${item.qty > 1 ? 'visible' : 'hidden'}">₹${item.finalPrice * item.qty}</div>
                 </div>
               </div>
               <button class="remove-item"><i class="fas fa-times"></i></button>
@@ -3516,8 +3510,10 @@
         if (itemEl) {
           if (cart[id]) {
             const product = products.find(p => p.id === id);
+            const subtotalEl = itemEl.querySelector('.cart-item-subtotal');
             itemEl.querySelector('.cart-qty').textContent = cart[id];
-            itemEl.querySelector('.cart-item-subtotal').textContent = `₹${product.finalPrice * cart[id]}`;
+            subtotalEl.textContent = `₹${product.finalPrice * cart[id]}`;
+            subtotalEl.style.visibility = cart[id] > 1 ? 'visible' : 'hidden';
           } else {
             itemEl.classList.add('removing');
             itemEl.addEventListener('transitionend', () => itemEl.remove(), { once: true });
