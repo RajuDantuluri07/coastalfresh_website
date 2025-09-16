@@ -871,7 +871,7 @@
   z-index: 1000;
   display: none; /* Changed from flex to allow self-scrolling */
   flex-direction: column;
-  overflow: hidden;
+  overflow: hidden; /* Let the content wrapper handle scrolling */
 }
 
     /* For desktop - keep it centered and constrained */
@@ -888,10 +888,6 @@
   }
 }
  
-
-    .product-popup.active {
-      display: flex;
-    }
     
     .popup-action-btn {
       width: 36px; /* Larger touch target */
@@ -915,7 +911,7 @@
     /* Product Image Section */
     .popup-image-section {
       position: relative;
-      background: var(--bg-white);
+      background: var(--bg-light);
       padding: 16px 20px;
     }
 
@@ -973,7 +969,7 @@
     /* Product Info */
     .popup-info {
       padding: 12px 20px 20px; /* Reduced top padding */
-      background: var(--bg-white);
+      background: var(--bg-white); /* White background for info */
     }
 
     /* THUMB ZONE: Moved actions closer to center */
@@ -1010,7 +1006,7 @@
     }
 
     .popup-title {
-      font-size: 22px;
+      font-size: 24px; /* Larger title */
       font-weight: 700; /* Bold */
       margin-bottom: 8px;
       color: var(--text-primary);
@@ -1025,14 +1021,15 @@
 
     .popup-price-section {
       display: flex;
-      align-items: baseline; /* Align by baseline for different font sizes */
-      gap: 12px; /* Increased gap */
-      margin-bottom: 4px; /* Reduced margin */
-      flex-wrap: wrap; /* Allow wrapping on small screens */
+      flex-direction: column; /* Stack prices vertically */
+      gap: 4px;
+      background: var(--primary-light);
+      padding: 16px;
+      border-radius: 12px;
+      margin: 16px 0;
     }
 
     .popup-current-price {
-      font-size: 28px; /* Larger price */
       font-weight: 700;
       color: var(--text-primary);
     }
@@ -1058,7 +1055,6 @@
       font-weight: 700;
       color: var(--success-color);
       width: 100%; /* Take full width to appear on a new line */
-      margin-bottom: 12px;
     }
 
     .popup-unit-price {
@@ -1066,7 +1062,6 @@
       color: var(--text-secondary);
       font-weight: 300; /* Light */
       margin-bottom: 16px;
-    }
 
     .popup-details-btn {
       color: var(--success-color);
@@ -1112,7 +1107,7 @@
     /* Highlights Section */
     .popup-highlights-section {
       padding: 16px 20px;
-      background: var(--bg-light);
+      background: var(--bg-white);
       border-top: 1px solid var(--border-color);
     }
 
@@ -1170,13 +1165,13 @@
 
     /* Bottom Section */
     .popup-bottom-section {
-  position: sticky;
+  position: absolute; /* Changed from sticky to absolute */
   bottom: 0;
   left: 0;
   transform: none;
   width: 100%;
   background: var(--bg-white);
-  padding: 12px 20px; /* Adjusted padding */
+  padding: 12px 20px 20px; /* Added bottom padding for safe area */
   border-top: 1px solid var(--border-color);
   display: flex;
   flex-direction: column; /* Stack vertically */
@@ -1260,8 +1255,11 @@
 
     /* Content padding for fixed bottom */
     .popup-content-wrapper {
-      flex-shrink: 0; /* Prevent this from shrinking */
-      width: 100%;
+      flex: 1; /* Allow it to grow and fill space */
+      overflow-y: auto; /* Make this element scrollable */
+      position: relative;
+      /* Padding for the sticky bottom bar */
+      padding-bottom: 120px;
     }
 
     /* Cart Modal - FIXED for mobile container */
@@ -2525,7 +2523,7 @@
     </div>
 
     <!-- NEW: Updated Product Popup with new design -->
-    <div class="product-popup page" id="productPopup">
+    <div class="product-popup" id="productPopup">
       <header class="header">
         <div class="header-top">
           <button class="back-btn" aria-label="Close Product View"><i class="fas fa-arrow-left"></i></button>
@@ -2561,13 +2559,13 @@
           <h1 class="popup-title" id="popupProductTitle"></h1>
           <div class="popup-weight" id="popupProductWeight"></div>
 
+          <!-- NEW: Grouped Price Block -->
           <div class="popup-price-section">
             <span class="popup-current-price" id="popupCurrentPrice"></span>
             <span class="popup-original-price" id="popupOriginalPrice"></span>
             <span class="popup-discount" id="popupDiscount"></span>
+            <div class="popup-savings" id="popupSavings"></div>
           </div>
-
-          <div class="popup-savings" id="popupSavings"></div>
           <div class="popup-unit-price" id="popupUnitPrice"></div>
         </div>
 
@@ -3288,7 +3286,7 @@ const TRUST_ICONS = [
       const contentWrapper = document.getElementById('popupContentWrapper');
       if (contentWrapper) contentWrapper.scrollTop = 0;
       
-      popup.classList.add('active');
+      popup.style.display = 'flex';
 
       // --- FIX: Ensure product details are visible by default ---
       popupHighlightsExpanded = true;
@@ -3427,7 +3425,7 @@ const TRUST_ICONS = [
 
     function closePopup() {
       const popup = document.getElementById('productPopup');
-      if (popup) popup.classList.remove('active');
+      if (popup) popup.style.display = 'none';
 
       isPopupOpen = false;
       document.body.classList.remove('popup-open');
