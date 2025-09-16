@@ -893,29 +893,6 @@
       display: flex;
     }
     
-    /* Updated popup header to match new design */
-    .popup-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: var(--header-padding);
-      background: var(--bg-white);
-      border-bottom: 1px solid var(--border-color);
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .popup-back-btn {
-      width: 24px;
-      height: 24px;
-      cursor: pointer;
-      border: none;
-      background: none;
-      font-size: 18px;
-      color: var(--primary-color);
-    }
-
     .popup-action-btn {
       width: 36px; /* Larger touch target */
       height: 36px; /* Larger touch target */
@@ -2548,14 +2525,16 @@
     </div>
 
     <!-- NEW: Updated Product Popup with new design -->
-    <div class="product-popup" id="productPopup">
-      <div class="popup-header">
-        <button class="popup-back-btn" aria-label="Close Product View"><i class="fas fa-arrow-left"></i></button>
-        <div class="popup-header-actions">
-          <button class="popup-action-btn favorite" aria-label="Add to Favorites">♡</button>
-          <button class="popup-action-btn share" aria-label="Share Product"><i class="fas fa-share-alt"></i></button>
+    <div class="product-popup page" id="productPopup">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" aria-label="Close Product View"><i class="fas fa-arrow-left"></i></button>
+          <div class="popup-header-actions" style="margin-left: auto;">
+            <button class="popup-action-btn favorite" aria-label="Add to Favorites">♡</button>
+            <button class="popup-action-btn share" aria-label="Share Product"><i class="fas fa-share-alt"></i></button>
+          </div>
         </div>
-      </div>
+      </header>
 
       <div class="popup-content-wrapper" id="popupContentWrapper">
         <!-- Product Image Section -->
@@ -2988,7 +2967,7 @@ const TRUST_ICONS = [
       document.querySelector('.profile-button.refer').addEventListener('click', () => openWhatsApp('refer'));
 
       // Product Popup buttons
-      document.querySelector('.popup-back-btn').addEventListener('click', closePopup);
+      document.querySelector('#productPopup .back-btn').addEventListener('click', closePopup);
       document.querySelector('.popup-action-btn.favorite').addEventListener('click', toggleFavorite);
       document.querySelector('.popup-action-btn.share').addEventListener('click', shareProduct);
       document.querySelector('.popup-highlights-header').addEventListener('click', togglePopupHighlights);
