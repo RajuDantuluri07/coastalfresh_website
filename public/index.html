@@ -2799,8 +2799,11 @@
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": "Coastal Fresh",
-    "image": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png",
-    "logo": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png",
+    "image": "https://res.cloudinary.com/dpyniai9l/image/upload/v1757139649/refer_eran_whats_app_ryhhmi.png",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png"
+    },
     "url": "https://www.coastalfresh.in",
     "telephone": "+91 99851 25678",
     "email": "info@coastalfresh.in",
@@ -2819,6 +2822,22 @@
   }
   </script>
 
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Coastal Fresh",
+    "url": "https://www.coastalfresh.in/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://www.coastalfresh.in/?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
   <script>
   (function() { // IIFE to avoid polluting global scope
     /* ===== App Configuration ===== */
@@ -2905,6 +2924,19 @@ const TRUST_ICONS = [
       const profileImage = document.getElementById('profileImage');
       if (profileImage) {
         profileImage.src = PROFILE_IMAGE_URL;
+      }
+
+      // NEW: Check for search query in URL to support sitelinks search box
+      const urlParams = new URLSearchParams(window.location.search);
+      const searchQuery = urlParams.get('q');
+      if (searchQuery) {
+        showPage('catalog');
+        const searchInput = document.getElementById('catalogSearch');
+        if (searchInput) {
+          searchInput.value = searchQuery;
+          // Trigger search manually
+          handleCatalogSearch({ target: searchInput });
+        }
       }
 
       // Start the typewriter after a brief delay
