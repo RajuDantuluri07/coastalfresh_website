@@ -454,9 +454,29 @@
     .slide {
       min-width: 100%;
       height: 100%;
-      background-size: cover;
-      background-position: center;
+      position: relative; /* For positioning the image and shimmer */
+      background-color: var(--bg-light); /* Fallback background */
     }
+
+    /* NEW: Add shimmer to slides before they load */
+    .slide:not(.loaded) {
+      animation: shimmer 2s infinite linear;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+    }
+
+    .slide img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .slide.loaded img { opacity: 1; }
 
     .carousel-dots {
       position: absolute;
@@ -669,7 +689,7 @@
     }
 
     .product-weight {
-      font-size: 13px;
+      font-size: 12px; /* Slightly smaller to fit "Net Weight" */
       color: var(--text-secondary);
       font-weight: 300; /* Light */
       margin-bottom: 8px;
@@ -824,13 +844,22 @@
     }
 
     .popup-action-btn {
-      width: 24px;
-      height: 24px;
+      width: 36px; /* Larger touch target */
+      height: 36px; /* Larger touch target */
       border: none;
       background: none;
       cursor: pointer;
-      font-size: 18px;
-      color: var(--text-primary);
+      font-size: 20px; /* Larger icon */
+      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background-color 0.2s;
+    }
+
+    .popup-action-btn:active {
+      background-color: var(--primary-light);
     }
 
     /* Product Image Section */
@@ -893,16 +922,14 @@
 
     /* Product Info */
     .popup-info {
-      padding: 20px;
+      padding: 12px 20px 20px; /* Reduced top padding */
       background: var(--bg-white);
     }
 
     /* THUMB ZONE: Moved actions closer to center */
     .popup-header-actions {
       display: flex;
-      gap: 16px;
-      padding: 0 20px 12px;
-      justify-content: flex-end;
+      gap: 8px; /* Tighter gap for header */
     }
 
     .popup-delivery-time {
@@ -948,13 +975,14 @@
 
     .popup-price-section {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
+      align-items: baseline; /* Align by baseline for different font sizes */
+      gap: 12px; /* Increased gap */
+      margin-bottom: 4px; /* Reduced margin */
+      flex-wrap: wrap; /* Allow wrapping on small screens */
     }
 
     .popup-current-price {
-      font-size: 20px;
+      font-size: 28px; /* Larger price */
       font-weight: 700;
       color: var(--text-primary);
     }
@@ -962,16 +990,25 @@
     .popup-original-price {
       font-size: 14px;
       color: var(--text-secondary);
-      text-decoration: line-through;
+      text-decoration: line-through; 
     }
 
     .popup-discount {
-      background: var(--success-color);
-      color: white;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 10px;
+      background: #E8F5E9; /* Light Green */
+      color: var(--success-color);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
       font-weight: 700; /* Bold */
+    }
+
+    /* NEW: Explicit savings amount */
+    .popup-savings {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--success-color);
+      width: 100%; /* Take full width to appear on a new line */
+      margin-bottom: 12px;
     }
 
     .popup-unit-price {
@@ -1088,69 +1125,66 @@
   left: 0;
   transform: none;
   width: 100%;
-  max-width: var(--app-max-width);
   background: var(--bg-white);
-  padding: 16px 20px;
+  padding: 12px 20px; /* Adjusted padding */
   border-top: 1px solid var(--border-color);
   display: flex;
+  flex-direction: column; /* Stack vertically */
   align-items: center;
   z-index: 10;
   box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-  gap: 16px;
+  gap: 12px; /* Gap between reassurance text and main actions */
 }
 
-.popup-bottom-section .popup-quantity-controls {
+/* NEW: Reassurance text in sticky footer */
+.popup-bottom-reassurance {
+  font-size: 12px;
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: var(--bg-light);
-  border-radius: 8px;
-  padding: 4px;
+  gap: 6px;
 }
 
-.popup-bottom-section .popup-qty-btn {
-  background: white;
+.popup-actions-bar {
+  display: flex;
+  width: 100%;
+  gap: 16px;
+  align-items: center;
+}
+
+.popup-quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Tighter gap */
+}
+
+.popup-qty-btn {
+  background: var(--bg-light);
   border: 1px solid var(--border-color);
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  font-size: 18px;
-  font-weight: 500;
+  width: 40px; /* Larger touch target */
+  height: 40px; /* Larger touch target */
+  border-radius: 12px; /* Softer corners */
+  font-size: 22px; /* Larger icon */
+  font-weight: 400;
   color: var(--primary-color);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.popup-bottom-section .popup-qty-btn:active {
-  background-color: #f0f0f0;
+.popup-qty-btn:active {
+  background-color: var(--primary-light);
+  transform: scale(0.95);
 }
 
-.popup-bottom-section .popup-qty {
-  font-weight: 500;
-  font-size: 16px;
-  min-width: 24px;
+.popup-qty {
+  font-weight: 700;
+  font-size: 18px;
+  min-width: 28px;
   text-align: center;
 }
-
-    .popup-price-info {
-      flex: 1;
-    }
-
-    .popup-bottom-price {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-
-    .popup-bottom-mrp {
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-
-    .popup-taxes-info {
-      font-size: 10px;
-      color: var(--text-secondary);
-    }
 
     .popup-add-to-cart-btn {
       background: var(--primary-color); /* Use main blue for consistency */
@@ -1250,15 +1284,15 @@
     /* --- NEW: Enhanced Cart Item Card --- */
     .cart-item {
       display: flex;
-      gap: 12px;
-      padding: 12px 0;
+      align-items: center; /* Vertically center all items */
+      gap: 8px; /* Adjust gap for a tighter layout */
+      padding: 16px 0;
       border-bottom: 1px solid var(--border-color);
       position: relative;
       /* Animation properties */
       transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
       max-height: 150px; /* Explicit height for animation */
       overflow: hidden;
-      border-radius: 0; /* Items are now separated by a line */
     }
 
     .cart-item-image {
@@ -1276,11 +1310,9 @@
       object-fit: cover;
     }
 
-    .cart-item-info {
+    .cart-item-details {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      margin-right: auto; /* Pushes controls to the right */
     }
 
     .cart-item-name {
@@ -1321,13 +1353,6 @@
       gap: 10px;
     }
 
-    .cart-item-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 8px;
-    }
-
     .cart-qty-btn {
       background: var(--bg-light);
       border: none;
@@ -1357,15 +1382,12 @@
     }
 
     .remove-item {
-      position: absolute;
-      top: 16px;
-      right: 0;
       background: none;
       border: none;
       color: var(--text-secondary);
-      font-size: 14px;
+      font-size: 16px; /* Slightly larger touch target */
       cursor: pointer;
-      padding: 4px;
+      padding: 8px; /* Better touch area */
     }
 
     .remove-item:active {
@@ -2390,9 +2412,9 @@
       <!-- Carousel -->
       <div class="carousel">
         <div class="slides" id="slides" aria-hidden="true">
-          <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png')"></div>
-          <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z')"></div>
-          <div class="slide" style="background-image:url('https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png')"></div>
+          <div class="slide"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" alt="Coastal Fresh Banner - Order Now"></div>
+          <div class="slide"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z" alt="Fresh Prawns Banner"></div>
+          <div class="slide"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png" alt="Homemade Pickles Banner"></div>
         </div>
         <div class="carousel-dots" id="carouselDots"></div>
       </div>
@@ -2453,11 +2475,6 @@
       </header>
 
       <main class="faq-wrap">
-        <div class="faq-header">
-          <h2 class="section-title">Frequently Asked Questions</h2>
-          <p class="subtitle">Everything you need to know about fresh seafood delivery</p>
-        </div>
-
         <div class="faq-list">
           <div class="faq" data-priority="high">
             <button class="q">
@@ -2593,14 +2610,18 @@
     <!-- NEW: Updated Product Popup with new design -->
     <div class="product-popup" id="productPopup">
       <div class="popup-header">
-        <button class="popup-back-btn" aria-label="Close Product View">←</button>
+        <button class="popup-back-btn" aria-label="Close Product View"><i class="fas fa-arrow-left"></i></button>
+        <div class="popup-header-actions">
+          <button class="popup-action-btn favorite" aria-label="Add to Favorites">♡</button>
+          <button class="popup-action-btn share" aria-label="Share Product"><i class="fas fa-share-alt"></i></button>
+        </div>
       </div>
 
       <div class="popup-content-wrapper" id="popupContentWrapper">
         <!-- Product Image Section -->
         <div class="popup-image-section">
           <div class="popup-image-container">
-            <img src="" alt="" class="popup-image" id="popupMainImage">
+            <img src="" alt="" class="popup-image" id="popupMainImage" loading="lazy">
           </div>
          <div class="popup-image-indicators" id="popupImageIndicators"></div>
         </div>
@@ -2608,11 +2629,6 @@
         <!-- Product Info -->
         <div class="popup-info">
           <!-- THUMB ZONE: Actions moved here -->
-          <div class="popup-header-actions">
-            <button class="popup-action-btn favorite" aria-label="Add to Favorites">♡</button>
-            <button class="popup-action-btn share" aria-label="Share Product">↗</button>
-          </div>
-
           <div class="popup-delivery-time">
             <span>🕐</span>
             <span>Next Day Delivery</span>
@@ -2632,6 +2648,7 @@
             <span class="popup-discount" id="popupDiscount"></span>
           </div>
 
+          <div class="popup-savings" id="popupSavings"></div>
           <div class="popup-unit-price" id="popupUnitPrice"></div>
         </div>
 
@@ -2665,12 +2682,17 @@
 
       <!-- Bottom Section -->
       <div class="popup-bottom-section">
-        <div class="popup-quantity-controls">
-          <button class="popup-qty-btn dec" aria-label="Decrease Quantity">-</button>
-          <span class="popup-qty" id="popupQty">1</span>
-          <button class="popup-qty-btn inc" aria-label="Increase Quantity">+</button>
+        <div class="popup-bottom-reassurance">
+          <i class="fas fa-shield-alt"></i><span>Hygienic, Fresh &amp; Ready to Cook</span>
         </div>
-        <button class="popup-add-to-cart-btn">Add to Cart - <span id="popupBottomPrice"></span></button>
+        <div class="popup-actions-bar">
+          <div class="popup-quantity-controls">
+            <button class="popup-qty-btn dec" aria-label="Decrease Quantity">-</button>
+            <span class="popup-qty" id="popupQty">1</span>
+            <button class="popup-qty-btn inc" aria-label="Increase Quantity">+</button>
+          </div>
+          <button class="popup-add-to-cart-btn">Add to Cart</button>
+        </div>
       </div>
     </div>
 
@@ -2871,6 +2893,7 @@ const TRUST_ICONS = [
       renderFeaturedProducts();
       renderCatalogProducts();
       setupEvents();
+      lazyLoadBanners();
       renderWhyChooseUs();
       updateCartUI();
       initCarousel();
@@ -3218,7 +3241,7 @@ const TRUST_ICONS = [
           </div>
           <div class="product-info">
             <div class="product-name">${sanitizedName}</div>
-            <div class="product-weight">${product.net}</div>
+            <div class="product-weight">${product.net} Net Weight</div>
             <div class="product-footer">
               <div class="product-price">
                 <span class="price">₹${product.finalPrice}</span>
@@ -3241,29 +3264,37 @@ const TRUST_ICONS = [
 
     /* NEW: Updated showProductPopup function with new design */
     function showProductPopup(id) {
-  const numericId = parseInt(id);
-  if (isNaN(numericId)) return;
-  const product = products.find(p => p.id === numericId);
-  if (!product) return;
+      const numericId = parseInt(id);
+      if (isNaN(numericId)) return;
+      const product = products.find(p => p.id === numericId);
+      if (!product) return;
 
-      popupProduct = product; // This line seems redundant, but we'll keep it for clarity
+      popupProduct = product;
       currentProductQty = cart[product.id] || 1;
       const popup = document.getElementById('productPopup');
       
       // Set product data in the popup
       document.getElementById('popupProductTitle').textContent = DOMPurify.sanitize(product.name);
-      document.getElementById('popupProductWeight').textContent = product.net;
+      document.getElementById('popupProductWeight').textContent = `${product.net} (Net Weight)`;
       document.getElementById('popupCurrentPrice').textContent = `₹${product.finalPrice}`;
-      document.getElementById('popupOriginalPrice').textContent = `MRP ₹${product.mrp}`;
       
       // Calculate and show discount if applicable
       const discountElem = document.getElementById('popupDiscount');
+      const savingsElem = document.getElementById('popupSavings');
+      const originalPriceElem = document.getElementById('popupOriginalPrice');
+
       if (product.mrp > product.finalPrice) {
-        const discountPercent = Math.round(((product.mrp - product.finalPrice) / product.mrp) * 100);
-        discountElem.textContent = `${discountPercent}% OFF`;
+        const savings = product.mrp - product.finalPrice;
+        discountElem.textContent = `${product.offer}% OFF`;
         discountElem.style.display = 'inline';
+        savingsElem.textContent = `You save ₹${savings * currentProductQty}`;
+        savingsElem.style.display = 'block';
+        originalPriceElem.textContent = `₹${product.mrp}`;
+        originalPriceElem.style.display = 'inline';
       } else {
         discountElem.style.display = 'none';
+        savingsElem.style.display = 'none';
+        originalPriceElem.style.display = 'none';
       }
       
       // Calculate unit price
@@ -3281,7 +3312,7 @@ const TRUST_ICONS = [
       // Update bottom price
       const totalPrice = product.finalPrice * currentProductQty;
       const totalMrp = product.mrp * currentProductQty;
-      document.getElementById('popupBottomPrice').innerHTML = `₹${totalPrice}`;
+      document.querySelector('.popup-add-to-cart-btn').innerHTML = `Add to Cart - ₹${totalPrice}`;
       
       // Set quantity
       document.getElementById('popupQty').textContent = currentProductQty;
@@ -3336,8 +3367,14 @@ const TRUST_ICONS = [
       
       // Update bottom price with quantity
       if (popupProduct) {
+        const savingsElem = document.getElementById('popupSavings');
         const totalPrice = popupProduct.finalPrice * qty;
-        document.getElementById('popupBottomPrice').textContent = `₹${totalPrice}`;
+        document.querySelector('.popup-add-to-cart-btn').textContent = `Add to Cart - ₹${totalPrice}`;
+        // NEW: Update savings amount as well
+        if (popupProduct.mrp > popupProduct.finalPrice) {
+          const savings = (popupProduct.mrp - popupProduct.finalPrice) * qty;
+          savingsElem.textContent = `You save ₹${savings}`;
+        }
       }
       
       currentProductQty = qty;
@@ -3375,7 +3412,7 @@ const TRUST_ICONS = [
       if (popupProduct && typeof gtag === 'function') {
         gtag('event', isPopupFavorite ? 'add_to_wishlist' : 'remove_from_wishlist', {
           currency: 'INR',
-          value: popupProduct.finalPrice,
+          value: popupProduct.finalPrice * currentProductQty,
           items: [{
             item_id: popupProduct.id,
             item_name: popupProduct.name,
@@ -3548,27 +3585,22 @@ const TRUST_ICONS = [
           const totalMrp = item.mrp * item.qty;
           const itemSavings = (item.mrp - item.finalPrice) * item.qty;
 
-          return `
+          return ` 
             <div class="cart-item" data-id="${item.id}">
               <div class="cart-item-image">
                 <img src="${item.image}" alt="${item.name}">
               </div>
-              <div class="cart-item-info">
-                <div>
-                  <div class="cart-item-name">${item.name}</div>
-                  <div class="cart-item-pricing">
-                    <span class="cart-item-current-price">₹${subtotal}</span>
-                    ${hasOffer ? `<span class="cart-item-mrp">₹${totalMrp}</span>` : ''}
-                  </div>
-                  ${itemSavings > 0 ? `<div class="cart-item-savings">You saved ₹${itemSavings}</div>` : ''}
+              <div class="cart-item-details">
+                <div class="cart-item-name">${item.name}</div>
+                <div class="cart-item-pricing">
+                  <span class="cart-item-current-price">₹${subtotal}</span>
+                  ${hasOffer ? `<span class="cart-item-mrp">₹${totalMrp}</span>` : ''}
                 </div>
-                <div class="cart-item-footer">
-                  <div class="qty-controls" role="group" aria-label="Quantity for ${item.name}">
-                    <button class="cart-qty-btn dec" aria-label="Decrease quantity">-</button>
-                    <span class="cart-qty" aria-label="Current quantity: ${item.qty}">${item.qty}</span>
-                    <button class="cart-qty-btn inc" aria-label="Increase quantity">+</button>
-                  </div>
-                </div>
+              </div>
+              <div class="qty-controls" role="group" aria-label="Quantity for ${item.name}">
+                <button class="cart-qty-btn dec" aria-label="Decrease quantity">-</button>
+                <span class="cart-qty" aria-label="Current quantity: ${item.qty}">${item.qty}</span>
+                <button class="cart-qty-btn inc" aria-label="Increase quantity">+</button>
               </div>
               <button class="remove-item"><i class="fas fa-times"></i></button>
             </div>
@@ -3720,15 +3752,13 @@ const TRUST_ICONS = [
         // More efficient update: just update the specific item and the summary
         const itemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
         if (itemEl) {
-          if (cart[id]) {
+          if (cart[id]) { // If item still in cart, update its values
             const product = products.find(p => p.id === id);
             const subtotal = product.finalPrice * cart[id];
             const totalMrp = product.mrp * cart[id];
-            const itemSavings = (product.mrp - product.finalPrice) * cart[id];
             const qtyEl = itemEl.querySelector('.cart-qty');
             const priceEl = itemEl.querySelector('.cart-item-current-price');
             const mrpEl = itemEl.querySelector('.cart-item-mrp');
-            const savingsEl = itemEl.querySelector('.cart-item-savings');
             
             qtyEl.textContent = cart[id];
             priceEl.textContent = `₹${subtotal}`;
@@ -4055,6 +4085,28 @@ window.addEventListener('beforeunload', () => {
         typewriterTimer = setTimeout(tick, dir === 1 ? 120 : 80);
       }
       tick();
+    }
+
+    function lazyLoadBanners() {
+      const carousel = document.querySelector('.carousel');
+      if (!carousel) return;
+
+      const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const images = carousel.querySelectorAll('img[data-src]');
+            images.forEach(img => {
+              img.src = img.dataset.src;
+              img.removeAttribute('data-src');
+              img.onload = () => {
+                img.parentElement.classList.add('loaded');
+              };
+            });
+            observer.unobserve(carousel); // Stop observing once triggered
+          }
+        });
+      }, { rootMargin: '100px' }); // Start loading when it's 100px away from viewport
+      observer.observe(carousel);
     }
 
     function showFreeDeliveryConfetti() {
