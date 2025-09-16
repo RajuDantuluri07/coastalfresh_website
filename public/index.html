@@ -112,9 +112,6 @@
   <!-- DOMPurify (for final safe sanitization if needed) -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js" crossorigin="anonymous"></script>
 
-  <!-- NEW: Confetti for rewards -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js" crossorigin="anonymous"></script>
-
   <style>
     /* CSS Variables for consistency */
     :root {
@@ -1281,102 +1278,111 @@
       background-color: rgba(211, 47, 47, 0.1);
     }
 
-    /* --- NEW: Enhanced Cart Item Card --- */
+    /* --- REFINED: Compact & Airy Cart Item Card --- */
     .cart-item {
       display: flex;
-      align-items: center; /* Vertically center all items */
-      gap: 8px; /* Adjust gap for a tighter layout */
+      align-items: flex-start; /* Align to top for better text flow */
+      gap: 12px;
       padding: 16px 0;
       border-bottom: 1px solid var(--border-color);
       position: relative;
-      /* Animation properties */
       transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-      max-height: 150px; /* Explicit height for animation */
+      max-height: 150px;
       overflow: hidden;
     }
 
     .cart-item-image {
-      width: 72px;
-      height: 72px;
-      border-radius: 8px;
+      width: 76px;
+      height: 76px;
+      border-radius: 10px;
       background: var(--bg-light);
       overflow: hidden;
       flex-shrink: 0;
     }
 
-    .cart-item-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+    .cart-item-image img { width: 100%; height: 100%; object-fit: cover; }
 
-    .cart-item-details {
+    .cart-item-info {
       flex: 1;
-      margin-right: auto; /* Pushes controls to the right */
+      padding-top: 4px; /* Align text better with image */
     }
 
     .cart-item-name {
-      font-weight: 500;
+      font-weight: 600;
       font-size: 15px;
       color: var(--text-primary);
       line-height: 1.3;
       margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cart-item-weight {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .cart-item-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 12px;
     }
 
     .cart-item-pricing {
       display: flex;
-      align-items: center;
-      gap: 8px;
+      flex-direction: column;
+      align-items: flex-end;
     }
 
     .cart-item-current-price {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 700;
       color: var(--text-primary);
     }
 
     .cart-item-mrp {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-secondary);
       text-decoration: line-through;
-    }
-
-    .cart-item-savings {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--success-color);
     }
 
     .qty-controls {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 6px;
+      background: var(--bg-light);
+      border-radius: 20px;
+      padding: 4px;
     }
 
     .cart-qty-btn {
-      background: var(--bg-light);
+      background: var(--bg-white);
       border: none;
-      border-radius: 8px;
-      width: 30px;
-      height: 30px;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       font-size: 18px;
-      font-weight: 500;
+      font-weight: 400;
+      color: var(--primary-color);
       transition: all 0.2s;
-      border: 1px solid var(--border-color);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
     }
 
     .cart-qty-btn:active {
-      background: var(--primary-light);
-      color: var(--primary-color);
+      transform: scale(0.95);
     }
 
     .cart-qty {
       font-weight: 700;
-      min-width: 20px;
+      min-width: 24px;
       text-align: center;
       font-size: 15px;
     }
@@ -1393,7 +1399,6 @@
     .remove-item:active {
       color: var(--error-color);
     }
-    /* --- End of Cart Item Card --- */
 
     /* Cart item removal animation */
     .cart-item.removing {
@@ -1526,11 +1531,6 @@
       font-size: 16px;
       font-weight: 500;
       opacity: 0.8;
-    }
-
-    .checkout-btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 2px 6px rgba(0,122,255,0.3);
     }
 
     /* NEW: Container for the two buttons */
@@ -1784,28 +1784,6 @@
       padding: 0;
     }
 
-    .profile-user-card {
-      background: linear-gradient(135deg, var(--accent-color), var(--primary-color)); /* Brighter gradient for profile */
-      color: white;
-      padding: 30px 20px;
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .profile-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 15px;
-      font-size: 32px;
-      color: white;
-      border: 2px solid white;
-    }
-
     .profile-user-card h2 {
       font-size: 20px;
       font-weight: 700; /* Bold */
@@ -1878,29 +1856,6 @@
       font-size: 12px;
       color: var(--text-secondary);
       font-weight: 300; /* Light */
-    }
-
-    /* Footer */
-    footer {
-      background: linear-gradient(135deg,#333,#555);
-      color: #fff;
-      text-align: center;
-      padding: 30px 20px;
-    }
-
-    footer .social {
-      margin: 15px 0;
-    }
-
-    footer .social a {
-      color: #fff;
-      margin: 0 12px;
-      font-size: 20px;
-      transition: .2s;
-    }
-
-    footer .social a:hover {
-      color: #25d366;
     }
 
     /* Bottom Navigation - FIXED: Properly constrained to mobile container */
@@ -1990,75 +1945,6 @@
       gap: 8px;
       max-width: var(--app-max-width);
       width: calc(100% - 40px);
-    }
-
-    /* Custom Confirmation Modal */
-    .confirm-modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 2500; /* Higher than other popups */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s;
-    }
-
-    .confirm-modal-overlay.show {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .confirm-modal {
-      background: var(--bg-white);
-      padding: 24px;
-      border-radius: 16px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-      width: 90%;
-      max-width: 340px;
-      text-align: center;
-      transform: scale(0.95);
-      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .confirm-modal-overlay.show .confirm-modal {
-      transform: scale(1);
-    }
-
-    .confirm-modal-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 8px;
-    }
-
-    .confirm-modal-text {
-      font-size: 15px;
-      color: var(--text-secondary);
-      line-height: 1.5;
-      margin-bottom: 24px;
-    }
-
-    .confirm-modal-actions {
-      display: flex;
-      flex-direction: column; /* Stack buttons vertically for better touch targets */
-      gap: 12px;
-    }
-
-    .confirm-modal-btn {
-      width: 100%;
-      padding: 14px; /* Taller buttons */
-      font-size: 16px;
-      font-weight: 700; /* Bolder text */
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
     }
 
     .confirm-modal-btn:active {
@@ -2366,18 +2252,6 @@
       
       #catalog .categories {
         top: 112px;
-      }
-      
-      .popup-name {
-        font-size: 20px;
-      }
-      
-      .popup-price .price {
-        font-size: 24px;
-      }
-      
-      .popup-description {
-        font-size: 14px;
       }
     }
   </style>
@@ -2710,9 +2584,6 @@
 
       <div class="cart-content-wrapper">
         <main class="section">
-          <div class="cart-header" id="cartListHeader">
-            <button class="clear-cart" id="clearCartBtn">Clear All</button>
-          </div>
           <div id="cartItems"></div>
           <div id="emptyCart" class="empty-cart" style="display: none;">
             <div class="empty-cart-animation">
@@ -2777,18 +2648,6 @@
     <div class="toast" id="toast">
       <i class="fas fa-check-circle"></i>
       <span id="toastText">Added to cart!</span>
-    </div>
-
-    <!-- Custom Confirmation Modal -->
-    <div class="confirm-modal-overlay" id="confirmClearCartOverlay" style="display: none;">
-      <div class="confirm-modal" id="confirmClearCartModal">
-        <h3 class="confirm-modal-title">Clear Your Cart?</h3>
-        <p class="confirm-modal-text">Are you sure you want to remove all items? This action cannot be undone.</p>
-        <div class="confirm-modal-actions">
-          <button class="confirm-modal-btn cancel" id="cancelClearCartBtn">Keep Shopping</button>
-          <button class="confirm-modal-btn confirm" id="confirmClearCartActionBtn">Yes, Clear Cart</button>
-        </div>
-      </div>
     </div>
 
   </div>
@@ -2920,12 +2779,6 @@ const TRUST_ICONS = [
       // Load cart from localStorage if available
       loadCart();
       
-      // Set profile image from configurable URL
-      const profileImage = document.getElementById('profileImage');
-      if (profileImage) {
-        profileImage.src = PROFILE_IMAGE_URL;
-      }
-
       // NEW: Check for search query in URL to support sitelinks search box
       const urlParams = new URLSearchParams(window.location.search);
       const searchQuery = urlParams.get('q');
@@ -3008,17 +2861,6 @@ const TRUST_ICONS = [
         }
       });
 
-      // Custom confirmation modal buttons
-      document.getElementById('confirmClearCartActionBtn').addEventListener('click', executeClearCart);
-      document.getElementById('cancelClearCartBtn').addEventListener('click', () => {
-        hideClearCartConfirm();
-        closeCart();
-        showPage('catalog');
-      });
-      document.getElementById('confirmClearCartOverlay').addEventListener('click', (e) => {
-        if (e.target.id === 'confirmClearCartOverlay') hideClearCartConfirm();
-      });
-
       // --- Static Element Listeners ---
       // Header search inputs
       document.getElementById('catalogSearch').addEventListener('input', (e) => {
@@ -3079,7 +2921,6 @@ const TRUST_ICONS = [
       document.querySelector('.popup-add-to-cart-btn').addEventListener('click', addPopupToCart);
 
       // Cart page buttons
-      document.getElementById('clearCartBtn').addEventListener('click', clearCart);
       document.querySelector('.empty-cart-btn').addEventListener('click', () => { showPage('catalog'); closeCart(); });
       document.querySelector('.checkout-btn').addEventListener('click', checkout);
       document.getElementById('cartPopup').addEventListener('click', showCart);
@@ -3596,18 +3437,15 @@ const TRUST_ICONS = [
       const cartSummary = document.getElementById('cartSummary');
       const cartFooter = document.getElementById('cartFooter');
       const emptyCart = document.getElementById('emptyCart');
-      const cartListHeader = document.getElementById('cartListHeader');
 
       if (items.length === 0) {
         emptyCart.style.display = 'flex';
         cartItems.innerHTML = '';
         cartSummary.innerHTML = '';
         cartFooter.style.display = 'none';
-        cartListHeader.style.display = 'none';
       } else {
         emptyCart.style.display = 'none';
         cartFooter.style.display = 'block';
-        cartListHeader.style.display = 'flex';
         
         // Render cart items with new layout
         cartItems.innerHTML = items.map(item => {
@@ -3616,24 +3454,26 @@ const TRUST_ICONS = [
           const totalMrp = item.mrp * item.qty;
           const itemSavings = (item.mrp - item.finalPrice) * item.qty;
 
-          return ` 
+          return `
             <div class="cart-item" data-id="${item.id}">
               <div class="cart-item-image">
                 <img src="${item.image}" alt="${item.name}">
               </div>
-              <div class="cart-item-details">
+              <div class="cart-item-info">
                 <div class="cart-item-name">${item.name}</div>
+                <div class="cart-item-weight">${item.net} Net Weight</div>
+              </div>
+              <div class="cart-item-actions">
                 <div class="cart-item-pricing">
                   <span class="cart-item-current-price">₹${subtotal}</span>
                   ${hasOffer ? `<span class="cart-item-mrp">₹${totalMrp}</span>` : ''}
                 </div>
+                <div class="qty-controls" role="group" aria-label="Quantity for ${item.name}">
+                  <button class="cart-qty-btn dec" aria-label="Decrease quantity">-</button>
+                  <span class="cart-qty" aria-label="Current quantity: ${item.qty}">${item.qty}</span>
+                  <button class="cart-qty-btn inc" aria-label="Increase quantity">+</button>
+                </div>
               </div>
-              <div class="qty-controls" role="group" aria-label="Quantity for ${item.name}">
-                <button class="cart-qty-btn dec" aria-label="Decrease quantity">-</button>
-                <span class="cart-qty" aria-label="Current quantity: ${item.qty}">${item.qty}</span>
-                <button class="cart-qty-btn inc" aria-label="Increase quantity">+</button>
-              </div>
-              <button class="remove-item"><i class="fas fa-times"></i></button>
             </div>
           `;
         }).join('');
@@ -3681,7 +3521,6 @@ const TRUST_ICONS = [
           </div>
         `;
 
-        checkAndShowConfetti(subtotal);
       }
 
       // Show cart modal
@@ -3747,7 +3586,6 @@ const TRUST_ICONS = [
           <div class="summary-row summary-total"><span>Total</span><span>₹${total}</span></div>
         </div>
       `;
-      checkAndShowConfetti(subtotal);
 
       // Also check if cart is now empty
       if (items.length === 0) {
@@ -3843,36 +3681,6 @@ const TRUST_ICONS = [
           items: [{ item_id: id, item_name: product ? product.name : '' }]
         });
       }
-    }
-
-    function clearCart() {
-      if (Object.keys(cart).length > 0) {
-        const modalOverlay = document.getElementById('confirmClearCartOverlay');
-        modalOverlay.style.display = 'flex';
-        setTimeout(() => modalOverlay.classList.add('show'), 10);
-      }
-    }
-
-    function executeClearCart() {
-      hideClearCartConfirm(); // Close the modal immediately for a responsive feel
-      cart = {};
-      saveCart();
-      // Re-render all product lists since all cards need to be updated
-      renderFeaturedProducts();
-      renderCatalogProducts();
-      updateCartUI();
-      showCart();
-
-      // Track cart cleared
-      if (typeof gtag === 'function') {
-        gtag('event', 'clear_cart');
-      }
-    }
-
-    function hideClearCartConfirm() {
-      const modalOverlay = document.getElementById('confirmClearCartOverlay');
-      modalOverlay.classList.remove('show');
-      setTimeout(() => { modalOverlay.style.display = 'none'; }, 300); // Match CSS transition
     }
 
     function checkout() {
@@ -4134,26 +3942,6 @@ window.addEventListener('beforeunload', () => {
         });
       }, { rootMargin: '100px' }); // Start loading when it's 100px away from viewport
       observer.observe(carousel);
-    }
-
-    function checkAndShowConfetti(subtotal) {
-      // Only run if the cart modal is active
-      if (document.getElementById('cartModal').classList.contains('active') &&
-          subtotal >= FREE_DELIVERY_THRESHOLD && !sessionStorage.getItem('hasShownConfetti')) {
-        setTimeout(showFreeDeliveryConfetti, 100); // Timeout to allow DOM to render
-        sessionStorage.setItem('hasShownConfetti', 'true');
-      }
-    }
-    function showFreeDeliveryConfetti() {
-      if (typeof confetti !== 'function') return;
-
-      // Fire confetti from the bottom of the screen
-      confetti({
-        particleCount: 150,
-        spread: 90,
-        origin: { y: 0.9 },
-        colors: ['#01659a', '#0bade2', '#FFC107', '#FFFFFF'] // Brand colors + gold
-      });
     }
 
     function saveCart() {
