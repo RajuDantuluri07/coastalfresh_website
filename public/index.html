@@ -1211,9 +1211,6 @@
       width: 100%;
     }
 
-    .product-popup.active {
-      overflow-y: auto; /* Make the popup itself scrollable */
-    }
     /* Cart Modal - FIXED for mobile container */
 .cart-modal {
   position: fixed;
@@ -1455,41 +1452,6 @@
       margin-top: 8px;
     }
 
-    /* --- NEW: Enhanced Delivery Progress Bar --- */
-    .delivery-progress-container {
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 14px;
-      margin-bottom: 20px;
-      background: #E8F5E9; /* Light Green */
-      border: 1px solid #C8E6C9; /* Lighter Green Border */
-    }
-
-    .delivery-progress-text {
-      display: flex;
-      justify-content: space-between;
-      font-weight: 500;
-      margin-bottom: 8px;
-      color: #2E7D32; /* Darker Green */
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background-color: #A5D6A7; /* Mid Green */
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      background: var(--primary-color);
-      background: linear-gradient(90deg, #4CAF50, #81C784); /* Green Gradient */
-      border-radius: 4px;
-      transition: width 0.5s ease;
-    }
-    /* --- End of Delivery Progress Bar --- */
-
     .cart-footer {
   position: fixed;
   bottom: 0;
@@ -1525,7 +1487,6 @@
       transform: translateY(1px);
       box-shadow: 0 2px 6px rgba(56, 142, 60, 0.3);
     }
-    /* --- End of Checkout Button --- */
 
     .checkout-btn-price {
       font-size: 16px;
@@ -1538,7 +1499,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 16px 12px;
+      padding: 12px 20px 20px;
       gap: 8px;
     }
 
@@ -1858,6 +1819,17 @@
       font-weight: 300; /* Light */
     }
 
+    /* --- NEW: Social Icon Styling --- */
+    .profile-footer .social a {
+      color: var(--text-secondary);
+      transition: color 0.2s ease;
+    }
+
+    .profile-footer .social a:hover,
+    .profile-footer .social a:active {
+      color: var(--primary-color);
+    }
+
     /* Bottom Navigation - FIXED: Properly constrained to mobile container */
     .bottom-bar {
       position: fixed;
@@ -1979,21 +1951,6 @@
       border-radius: 50%;
       border-top-color: #fff;
       animation: spin 1s ease-in-out infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* Add to cart shake animation */
-    @keyframes shake {
-      10%, 90% { transform: translateX(-2px); }
-      20%, 80% { transform: translateX(2px); }
-      30%, 50%, 70% { transform: translateX(-3px); }
-      40%, 60% { transform: translateX(3px); }
-    }
-    .shake {
-      animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both;
     }
 
     /* Catalog page sticky elements */
@@ -2182,18 +2139,6 @@
       
       .popup-title {
         font-size: 20px;
-      }
-      
-      .popup-features {
-        margin: 0 10px;
-      }
-      
-      .popup-feature-title {
-        font-size: 11px;
-      }
-      
-      .popup-feature-subtitle {
-        font-size: 9px;
       }
     }
 
@@ -2604,8 +2549,7 @@
       <!-- Sticky cart footer -->
       <div class="cart-footer" id="cartFooter" style="display: none;">
         <div id="cartSummary"></div>
-        <!-- NEW: Updated layout with two buttons -->
-        <div class="cart-actions" style="padding: 12px 20px 20px;">
+        <div class="cart-actions">
           <button class="checkout-btn">Proceed to Checkout</button>
         </div>
       </div>
@@ -2700,12 +2644,12 @@
   <script>
   (function() { // IIFE to avoid polluting global scope
     /* ===== App Configuration ===== */
-const TRUST_ICONS = [
-  { icon: 'fas fa-fish', title: 'Fresh Catch' },
-  { icon: 'fas fa-leaf', title: '100% Natural' },
-  { icon: 'fas fa-box', title: 'Hygienic Pack' },
-  { icon: 'fas fa-truck', title: 'Fast Delivery' },
-];
+    const TRUST_ICONS = [
+      { icon: 'fas fa-fish', title: 'Fresh Catch', text: 'Sourced Daily' },
+      { icon: 'fas fa-leaf', title: '100% Natural', text: 'No Chemicals' },
+      { icon: 'fas fa-box', title: 'Hygienic Pack', text: 'Clean & Safe' },
+      { icon: 'fas fa-truck', title: 'Fast Delivery', text: 'To Your Door' },
+    ];
 
     const FEATURED_PRODUCT_IDS = [1, 11, 20, 15];
     const PROFILE_IMAGE_URL = "https://res.cloudinary.com/dpyniai9l/image/upload/v1756914772/Coastal_Fresh_Sea_food_hyderabad_-_website_banner_shqapq.png";
@@ -2739,8 +2683,8 @@ const TRUST_ICONS = [
       { id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153104/egg-carb_bcbh9w.jpg", mrp:900, finalPrice:900, offer:0, gross:"1000g", net:"600g", available:true, category:"Crabs", desc:"Roe for rich, creamy flavor." },
       { id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153103/blue-carb_z6k74h.jpg", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"600g", available:true, category:"Crabs", desc:"Delicate, sweet meat." },
       { id:26, name:"3 Dot Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png", mrp:500, finalPrice:500, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Unique markings; sweet taste." },
-      { id:27, name:"Prawns Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1900, finalPrice:1710, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra Prawns Pickle; cold-pressed oil; no preservatives." },
-      { id:28, name:"Chicken Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1500, finalPrice:1500, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Andhra-style Chicken Pickle with bold spices." }
+      { id:27, name:"Prawns Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1900, finalPrice:1710, offer:10, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra Prawns Pickle; cold-pressed oil; no preservatives." },
+      { id:28, name:"Chicken Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757486899/Chicken_Pickle_-_Coastal_Fresh_yqj2de.png", mrp:1500, finalPrice:1500, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Andhra-style Chicken Pickle with bold spices." }
     ];
 
     /* ===== App State ===== */
@@ -2774,7 +2718,6 @@ const TRUST_ICONS = [
       renderWhyChooseUs();
       updateCartUI();
       initCarousel();
-      startTypewriter();
       
       // Load cart from localStorage if available
       loadCart();
@@ -3485,7 +3428,7 @@ const TRUST_ICONS = [
         const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
         const total = subtotal + deliveryFee; 
 
-        document.querySelector('.checkout-btn').innerHTML = `Proceed to Checkout <span class="checkout-btn-price">₹${total}</span>`;
+        document.querySelector('.checkout-btn').innerHTML = `<span>Proceed to Checkout</span> <span class="checkout-btn-price">₹${total}</span>`;
 
         // Render summary
         cartSummary.innerHTML = `
@@ -3563,7 +3506,7 @@ const TRUST_ICONS = [
       const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
       const total = subtotal + deliveryFee;
 
-      document.querySelector('.checkout-btn').innerHTML = `Proceed to Checkout <span class="checkout-btn-price">₹${total}</span>`;
+      document.querySelector('.checkout-btn').innerHTML = `<span>Proceed to Checkout</span> <span class="checkout-btn-price">₹${total}</span>`;
 
       cartSummary.innerHTML = ` 
         <div class="cart-summary">
@@ -3803,10 +3746,10 @@ const TRUST_ICONS = [
 
       function goToSlide(index) {
   if (!slides || slides.children.length === 0) return; // Add null check for slides and its children
-  currentCarouselIndex = index;
-  slides.style.transform = `translateX(${-index * 100}%)`;
-  
-  // Update dots
+        currentCarouselIndex = index;
+        slides.style.transform = `translateX(${-index * 100}%)`;
+        
+        // Update dots
   document.querySelectorAll('.dot').forEach((dot, i) => {
     dot.classList.toggle('active', i === index);
   });
