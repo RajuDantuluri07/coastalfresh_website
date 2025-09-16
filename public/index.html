@@ -2879,7 +2879,6 @@ const TRUST_ICONS = [
     let searchDebounceTimer = null;
     let typewriterTimer = null;
     
-    let hasShownFreeDeliveryConfetti = false;
     /* NEW: Variables for popup functionality */
     let currentPopupImageIndex = 0;
     let isPopupFavorite = false;
@@ -3618,17 +3617,17 @@ const TRUST_ICONS = [
 
         // Render summary
         cartSummary.innerHTML = `
-          ${subtotal < FREE_DELIVERY_THRESHOLD ? `
-            <div class="delivery-progress-container">
-              <div class="delivery-progress-text">
-                <span>🎉 Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} more for FREE Delivery!</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-bar-fill" style="width: ${(subtotal / FREE_DELIVERY_THRESHOLD) * 100}%;"></div>
-              </div>
-            </div>
-          ` : ''}
           <div class="cart-summary">
+            ${subtotal < FREE_DELIVERY_THRESHOLD ? `
+              <div class="delivery-progress-container">
+                <div class="delivery-progress-text">
+                  <span>🎉 Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} more for FREE Delivery!</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-bar-fill" style="width: ${(subtotal / FREE_DELIVERY_THRESHOLD) * 100}%;"></div>
+                </div>
+              </div>
+            ` : ''}
             <div class="summary-row">
               <span>Subtotal</span>
               <span>₹${subtotal}</span>
@@ -3649,6 +3648,8 @@ const TRUST_ICONS = [
             </div>
           </div>
         `;
+
+        checkAndShowConfetti(subtotal);
       }
 
       // Show cart modal
@@ -3694,17 +3695,17 @@ const TRUST_ICONS = [
       document.querySelector('.checkout-btn').innerHTML = `Proceed to Checkout <span class="checkout-btn-price">₹${total}</span>`;
 
       cartSummary.innerHTML = ` 
-        ${subtotal < FREE_DELIVERY_THRESHOLD ? `
-          <div class="delivery-progress-container">
-            <div class="delivery-progress-text">
-              <span>🎉 Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} more for FREE Delivery!</span>
+        <div class="cart-summary">
+          ${subtotal < FREE_DELIVERY_THRESHOLD ? `
+            <div class="delivery-progress-container">
+              <div class="delivery-progress-text">
+                <span>🎉 Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} more for FREE Delivery!</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill" style="width: ${(subtotal / FREE_DELIVERY_THRESHOLD) * 100}%;"></div>
+              </div>
             </div>
-            <div class="progress-bar">
-              <div class="progress-bar-fill" style="width: ${(subtotal / FREE_DELIVERY_THRESHOLD) * 100}%;"></div>
-            </div>
-          </div>
-        ` : ''}
-        <div class="cart-summary" style="padding: 16px 20px;">
+          ` : ''}
           <div class="summary-row"><span>Subtotal</span><span>₹${subtotal}</span></div>
           ${savings > 0 ? `<div class="summary-row summary-savings"><span>Total Savings</span><span>-₹${savings}</span></div>` : ''}
           <div class="summary-row">
@@ -3714,12 +3715,7 @@ const TRUST_ICONS = [
           <div class="summary-row summary-total"><span>Total</span><span>₹${total}</span></div>
         </div>
       `;
-
-      // NEW: Confetti logic
-      if (subtotal >= FREE_DELIVERY_THRESHOLD && !hasShownFreeDeliveryConfetti) {
-        setTimeout(showFreeDeliveryConfetti, 100); // Timeout to allow DOM to render
-        hasShownFreeDeliveryConfetti = true;
-      }
+      checkAndShowConfetti(subtotal);
 
       // Also check if cart is now empty
       if (items.length === 0) {
@@ -3763,7 +3759,6 @@ const TRUST_ICONS = [
             qtyEl.textContent = cart[id];
             priceEl.textContent = `₹${subtotal}`;
             if (mrpEl) mrpEl.textContent = `₹${totalMrp}`;
-            if (savingsEl) savingsEl.textContent = `You saved ₹${itemSavings}`;
           } else {
             itemEl.classList.add('removing');
             itemEl.addEventListener('transitionend', () => itemEl.remove(), { once: true });
@@ -4109,6 +4104,14 @@ window.addEventListener('beforeunload', () => {
       observer.observe(carousel);
     }
 
+    function checkAndShowConfetti(subtotal) {
+      // Only run if the cart modal is active
+      if (document.getElementById('cartModal').classList.contains('active') &&
+          subtotal >= FREE_DELIVERY_THRESHOLD && !sessionStorage.getItem('hasShownConfetti')) {
+        setTimeout(showFreeDeliveryConfetti, 100); // Timeout to allow DOM to render
+        sessionStorage.setItem('hasShownConfetti', 'true');
+      }
+    }
     function showFreeDeliveryConfetti() {
       if (typeof confetti !== 'function') return;
 
