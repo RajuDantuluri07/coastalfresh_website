@@ -2062,6 +2062,10 @@
       animation: spin 1s ease-in-out infinite;
     }
 
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     /* Catalog page sticky elements */
     #catalog .categories {
       position: sticky;
@@ -2312,6 +2316,12 @@
 </head>
 <body>
   <div class="app">
+    <!-- NEW: App-wide loading indicator -->
+    <div class="app-loader" id="appLoader">
+      <div class="loading-spinner"></div>
+      <p>Loading Fresh Seafood...</p>
+    </div>
+
     <!-- Ticker - Now above header -->
     <div class="ticker-container">
       <div class="ticker" aria-hidden="true">
@@ -2798,39 +2808,9 @@ const TRUST_ICONS = [
     const FREE_DELIVERY_THRESHOLD = 1500;
     const ITEMS_PER_PAGE = 8;
 
-    /* ===== Products DATA ===== */
-    const products = [
-      { id:1, name:"White Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728284/Whitt_spxhew.jpg", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy White Pomfret online in Hyderabad – premium coastal fish with mild taste and firm flesh. Perfect for fry, grill, or curry. Hygienically cleaned and delivered fresh next day." },
-      { id:2, name:"Black Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/Blac_qnztqj.jpg", mrp:850, finalPrice:750, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Black Pomfret in Hyderabad – firm texture, rich flavor, ideal for spicy curries, grills, and fries." },
-      { id:3, name:"Sea Bass", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/SeaBas_cd21dd.jpg", mrp:850, finalPrice:765, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Sea Bass – mild flavor, firm texture. Great for curries, grills, pan-seared." },
-      { id:4, name:"Yellowfin Tuna", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/YellowTun_tzidzi.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Meaty steaks, rich taste; perfect for grilling, searing, curry." },
-      { id:5, name:"Pink Perch", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/PinkPerc_r8g3me.jpg", mrp:450, finalPrice:405, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Soft flesh, mild taste, budget-friendly for fry/curry." },
-      { id:6, name:"Koyyinga", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/koyyangi_si2oss.png", mrp:500, finalPrice:450, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Andhra favorite; bold flavor, firm texture." },
-      { id:7, name:"Kanagadathalu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Kanagadathal_lvwazy.jpg", mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Versatile for curry, grills, fry." },
-      { id:8, name:"Vanjaram (Seer)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Vanjara_ikhy6c.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Boneless cuts, rich taste; king of South Indian seafood." },
-      { id:9, name:"Nettallu (Anchovies)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/Nethallu_rckaaj.png", mrp:400, finalPrice:370, offer:10, gross:"1000g", net:"800g", available:true, category:"Fish", desc:"Tiny fish, bold taste; great for fry/chutneys." },
-      { id:10, name:"Katte Parigelu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Katte_Parigelu_lnxp73.png", mrp:400, finalPrice:360, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Tasty, tender, ready-to-cook." },
-      { id:11, name:"Rohu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rohu_ctixmk.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Freshwater favorite; curries or fry." },
-      { id:12, name:"Rupchand", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rupchand_Fish_woqmzz.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Affordable, mild, versatile." },
-      { id:13, name:"Catla", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Catla_-_Fish_tjb5hr.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Large cuts; great for Andhra curry." },
-      { id:14, name:"Korameenu (Murrel)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577555/Korameenu_dkpfiw.png", mrp:780, finalPrice:700, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Prized delicacy; firm flesh." },
-      { id:15, name:"Sea Tiger Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153106/Sea-water-prawns_1_j1puyn.jpg", mrp:750, finalPrice:750, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Large, juicy; grills & biryani." },
-      { id:16, name:"Sea Tiger Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153106/Sea-water-prawns_1_j1puyn.jpg", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium, sweet flavor." },
-      { id:17, name:"Sea Tiger Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153106/Sea-water-prawns_1_j1puyn.jpg", mrp:550, finalPrice:550, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Smaller size, big flavor." },
-      { id:18, name:"Godavari Prawns", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153108/godhavari-prawns_ljw31t.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Authentic Andhra taste." },
-      { id:19, name:"Freshwater Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153103/fresh-water-pawrns_vztj21.jpg", mrp:380, finalPrice:380, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Great for prawn fry." },
-      { id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153103/fresh-water-pawrns_vztj21.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Balanced size, firm flesh." },
-      { id:21, name:"Freshwater Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153103/fresh-water-pawrns_vztj21.jpg", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Premium size; grills/party." },
-      { id:22, name:"Live Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:1000, finalPrice:1000, offer:0, gross:"1000g", net:"600g", available:true, category:"Crabs", desc:"Delivered live; top freshness." },
-      { id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153104/egg-carb_bcbh9w.jpg", mrp:900, finalPrice:900, offer:0, gross:"1000g", net:"600g", available:true, category:"Crabs", desc:"Roe for rich, creamy flavor." },
-      { id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153103/blue-carb_z6k74h.jpg", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"600g", available:true, category:"Crabs", desc:"Delicate, sweet meat." },
-      { id:26, name:"3 Dot Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png", mrp:500, finalPrice:500, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Unique markings; sweet taste." },
-      { id:27, name:"Prawns Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1900, finalPrice:1710, offer:10, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra Prawns Pickle; cold-pressed oil; no preservatives." },
-      { id:28, name:"Chicken Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757486899/Chicken_Pickle_-_Coastal_Fresh_yqj2de.png", mrp:1500, finalPrice:1500, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Andhra-style Chicken Pickle with bold spices." }
-    ];
-
     /* ===== App State ===== */
     let cart = {};
+    let products = []; // Will be populated by fetch
     let currentPage = 'home';
     let pageHistory = ['home'];
     let currentCategory = 'All';
@@ -2851,7 +2831,28 @@ const TRUST_ICONS = [
     let popupProduct = null;
 
     /* ===== Init ===== */
-    function init() {
+    async function init() {
+      const appLoader = document.getElementById('appLoader');
+      // Fetch products first and foremost
+      try {
+        const response = await fetch('./products.json');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        products = await response.json();
+      } catch (error) {
+        console.error("Could not load product data:", error);
+        if (appLoader) appLoader.classList.add('hidden');
+        document.body.innerHTML = '<div style="text-align: center; padding: 50px; font-size: 18px;">Could not load products. Please try again later.</div>';
+        return;
+      }
+
+      // Hide loader after successful fetch, but before rendering starts
+      if (appLoader) {
+        appLoader.classList.add('hidden');
+      }
+
+      // Now that `products` is populated, run the rest of the init logic
       renderTrustIcons();
       renderCustomerReviews(); // NEW: Render reviews on init
       renderFeaturedProducts();
@@ -2859,11 +2860,11 @@ const TRUST_ICONS = [
       setupEvents();
       lazyLoadBanners();
       renderWhyChooseUs();
-      updateCartUI();
       initCarousel();
       
       // Load cart from localStorage if available
       loadCart();
+      updateCartUI();
       
       // NEW: Check for search query in URL to support sitelinks search box
       const urlParams = new URLSearchParams(window.location.search);
@@ -3313,12 +3314,6 @@ const TRUST_ICONS = [
       const contentWrapper = document.getElementById('popupContentWrapper');
       if (contentWrapper) contentWrapper.scrollTop = 0;
       
-      // Set product details in the expandable section
-      document.getElementById('popupGrossWeight').textContent = DOMPurify.sanitize(product.gross);
-      document.getElementById('popupNetWeight').textContent = DOMPurify.sanitize(product.net);
-      document.getElementById('popupType').textContent = DOMPurify.sanitize(product.category); // Already sanitized, but good practice
-      document.getElementById('popupDescription').textContent = DOMPurify.sanitize(product.desc);
-
       popup.classList.add('active');
 
       // --- FIX: Ensure product details are visible by default ---
