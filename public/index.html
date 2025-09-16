@@ -561,82 +561,6 @@
       line-height: 1.3;
     }
 
-    /* --- NEW: Customer Reviews Section --- */
-    .reviews-carousel {
-      display: flex;
-      gap: 16px;
-      overflow-x: auto;
-      padding: 4px 20px 20px 20px; /* Padding to show shadow and for scrollbar */
-      margin: 0 -20px; /* Negative margin to allow full-width scroll */
-      scrollbar-width: none; /* For Firefox */
-      -ms-overflow-style: none; /* For IE/Edge */
-    }
-
-    .reviews-carousel::-webkit-scrollbar {
-      display: none; /* For Chrome, Safari, and Opera */
-    }
-
-    .review-card {
-      flex: 0 0 80%; /* Each card takes up 80% of the viewport width */
-      max-width: 300px; /* Max width on larger screens */
-      background: var(--bg-white);
-      border-radius: var(--radius-card);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      scroll-snap-align: start;
-    }
-
-    .review-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .review-avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    .review-avatar-initials {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: var(--primary-color);
-      color: var(--bg-white);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      font-weight: 500;
-    }
-
-    .review-name {
-      font-weight: 700;
-      font-size: 15px;
-    }
-
-    .review-location {
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    .review-rating .fa-star {
-      color: #FFB000; /* Gold color for stars */
-      font-size: 14px;
-    }
-
-    .review-body {
-      font-size: 14px;
-      line-height: 1.6;
-      color: var(--text-secondary);
-      font-style: italic;
-    }
-
     /* Home Featured Products */
     .featured-products {
       display: grid;
@@ -871,7 +795,7 @@
   z-index: 1000;
   display: none; /* Changed from flex to allow self-scrolling */
   flex-direction: column;
-  overflow: hidden; /* Let the content wrapper handle scrolling */
+  overflow: hidden;
 }
 
     /* For desktop - keep it centered and constrained */
@@ -888,7 +812,34 @@
   }
 }
  
+
+    .product-popup.active {
+      display: flex;
+    }
     
+    /* Updated popup header to match new design */
+    .popup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--header-padding);
+      background: var(--bg-white);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .popup-back-btn {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-size: 18px;
+      color: var(--primary-color);
+    }
+
     .popup-action-btn {
       width: 36px; /* Larger touch target */
       height: 36px; /* Larger touch target */
@@ -911,7 +862,7 @@
     /* Product Image Section */
     .popup-image-section {
       position: relative;
-      background: var(--bg-light);
+      background: var(--bg-white);
       padding: 16px 20px;
     }
 
@@ -969,7 +920,7 @@
     /* Product Info */
     .popup-info {
       padding: 12px 20px 20px; /* Reduced top padding */
-      background: var(--bg-white); /* White background for info */
+      background: var(--bg-white);
     }
 
     /* THUMB ZONE: Moved actions closer to center */
@@ -1006,7 +957,7 @@
     }
 
     .popup-title {
-      font-size: 24px; /* Larger title */
+      font-size: 22px;
       font-weight: 700; /* Bold */
       margin-bottom: 8px;
       color: var(--text-primary);
@@ -1021,15 +972,14 @@
 
     .popup-price-section {
       display: flex;
-      flex-direction: column; /* Stack prices vertically */
-      gap: 4px;
-      background: var(--primary-light);
-      padding: 16px;
-      border-radius: 12px;
-      margin: 16px 0;
+      align-items: baseline; /* Align by baseline for different font sizes */
+      gap: 12px; /* Increased gap */
+      margin-bottom: 4px; /* Reduced margin */
+      flex-wrap: wrap; /* Allow wrapping on small screens */
     }
 
     .popup-current-price {
+      font-size: 28px; /* Larger price */
       font-weight: 700;
       color: var(--text-primary);
     }
@@ -1055,6 +1005,7 @@
       font-weight: 700;
       color: var(--success-color);
       width: 100%; /* Take full width to appear on a new line */
+      margin-bottom: 12px;
     }
 
     .popup-unit-price {
@@ -1062,6 +1013,7 @@
       color: var(--text-secondary);
       font-weight: 300; /* Light */
       margin-bottom: 16px;
+    }
 
     .popup-details-btn {
       color: var(--success-color);
@@ -1107,7 +1059,7 @@
     /* Highlights Section */
     .popup-highlights-section {
       padding: 16px 20px;
-      background: var(--bg-white);
+      background: var(--bg-light);
       border-top: 1px solid var(--border-color);
     }
 
@@ -1165,13 +1117,13 @@
 
     /* Bottom Section */
     .popup-bottom-section {
-  position: absolute; /* Changed from sticky to absolute */
+  position: sticky;
   bottom: 0;
   left: 0;
   transform: none;
   width: 100%;
   background: var(--bg-white);
-  padding: 12px 20px 20px; /* Added bottom padding for safe area */
+  padding: 12px 20px; /* Adjusted padding */
   border-top: 1px solid var(--border-color);
   display: flex;
   flex-direction: column; /* Stack vertically */
@@ -1255,11 +1207,8 @@
 
     /* Content padding for fixed bottom */
     .popup-content-wrapper {
-      flex: 1; /* Allow it to grow and fill space */
-      overflow-y: auto; /* Make this element scrollable */
-      position: relative;
-      /* Padding for the sticky bottom bar */
-      padding-bottom: 120px;
+      flex-shrink: 0; /* Prevent this from shrinking */
+      width: 100%;
     }
 
     /* Cart Modal - FIXED for mobile container */
@@ -1457,39 +1406,6 @@
       padding-bottom: 0;
       margin-bottom: 0;
       border-width: 0;
-    }
-
-    /* --- NEW: Delivery Progress Bar --- */
-    .delivery-progress-container {
-      padding: 12px 16px;
-      border-radius: 12px;
-      font-size: 14px;
-      margin-bottom: 20px;
-      background: #E8F5E9; /* Light Green */
-      border: 1px solid #C8E6C9; /* Lighter Green Border */
-    }
-
-    .delivery-progress-text {
-      display: flex;
-      justify-content: space-between;
-      font-weight: 500;
-      margin-bottom: 8px;
-      color: #2E7D32; /* Darker Green */
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 8px;
-      background-color: #A5D6A7; /* Mid Green */
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #4CAF50, #81C784); /* Green Gradient */
-      border-radius: 4px;
-      transition: width 0.5s ease;
     }
 
     .cart-summary {
@@ -2037,10 +1953,6 @@
       animation: spin 1s ease-in-out infinite;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
     /* Catalog page sticky elements */
     #catalog .categories {
       position: sticky;
@@ -2336,14 +2248,6 @@
         </h2>
         <div class="featured-products" id="featuredProducts"></div>
       </main>
-
-      <!-- NEW: Customer Reviews Section -->
-      <section class="section">
-        <h2 class="section-title">What Our Customers Say</h2>
-        <div class="reviews-carousel" id="reviewsCarousel">
-          <!-- Reviews will be injected here by JS -->
-        </div>
-      </section>
     </div>
 
     <!-- Catalog Page -->
@@ -2524,15 +2428,13 @@
 
     <!-- NEW: Updated Product Popup with new design -->
     <div class="product-popup" id="productPopup">
-      <header class="header">
-        <div class="header-top">
-          <button class="back-btn" aria-label="Close Product View"><i class="fas fa-arrow-left"></i></button>
-          <div class="popup-header-actions" style="margin-left: auto;">
-            <button class="popup-action-btn favorite" aria-label="Add to Favorites">♡</button>
-            <button class="popup-action-btn share" aria-label="Share Product"><i class="fas fa-share-alt"></i></button>
-          </div>
+      <div class="popup-header">
+        <button class="popup-back-btn" aria-label="Close Product View"><i class="fas fa-arrow-left"></i></button>
+        <div class="popup-header-actions">
+          <button class="popup-action-btn favorite" aria-label="Add to Favorites">♡</button>
+          <button class="popup-action-btn share" aria-label="Share Product"><i class="fas fa-share-alt"></i></button>
         </div>
-      </header>
+      </div>
 
       <div class="popup-content-wrapper" id="popupContentWrapper">
         <!-- Product Image Section -->
@@ -2559,13 +2461,13 @@
           <h1 class="popup-title" id="popupProductTitle"></h1>
           <div class="popup-weight" id="popupProductWeight"></div>
 
-          <!-- NEW: Grouped Price Block -->
           <div class="popup-price-section">
             <span class="popup-current-price" id="popupCurrentPrice"></span>
             <span class="popup-original-price" id="popupOriginalPrice"></span>
             <span class="popup-discount" id="popupDiscount"></span>
-            <div class="popup-savings" id="popupSavings"></div>
           </div>
+
+          <div class="popup-savings" id="popupSavings"></div>
           <div class="popup-unit-price" id="popupUnitPrice"></div>
         </div>
 
@@ -2741,39 +2643,12 @@
   </script>
   <script>
   (function() { // IIFE to avoid polluting global scope
-    
     /* ===== App Configuration ===== */
-const TRUST_ICONS = [
-  { icon: 'fas fa-fish', title: 'Fresh Catch', text: 'Sourced Daily' },
-  { icon: 'fas fa-leaf', title: '100% Natural', text: 'No Chemicals' },
-  { icon: 'fas fa-box', title: 'Hygienic Pack', text: 'Clean & Safe' },
-  { icon: 'fas fa-truck', title: 'Fast Delivery', text: 'To Your Door' },
-];
-    /* ===== NEW: Customer Reviews Data ===== */
-    const CUSTOMER_REVIEWS = [
-      {
-        name: 'Ananya R.',
-        location: 'Gachibowli, Hyderabad',
-        rating: 5,
-        // NOTE: Using a more representative image. It's best to upload your own images to Cloudinary.
-        image: 'https://images.generated.photos/v2/YcI_521w5aV5s72v2J3A_h0vSw_c-sX_4DORn1k-tAc/rs:fit:256:256/czM6Ly9pY29uczgu/Z3Bob3Rvcy1wcm9k/LnBob3Rvcy92Mi8w/MDAwOTU5LmpwZw.jpg',
-        review: 'The freshest seafood I’ve had in Hyderabad! The pomfret was cleaned perfectly. Delivery was on time and packaging was top-notch. Highly recommend!'
-      },
-      {
-        name: 'Vikram G.',
-        location: 'Jubilee Hills, Hyderabad',
-        rating: 5,
-        // NOTE: Using a more representative image. It's best to upload your own images to Cloudinary.
-        image: 'https://images.generated.photos/v2/T43tLxf3k0YyQk3e2E5BwA-zCma2aQad2T1bFfQ4LgY/rs:fit:256:256/czM6Ly9pY29uczgu/Z3Bob3Rvcy1wcm9k/LnBob3Rvcy92Mi8w/MjI0NDg4LmpwZw.jpg',
-        review: 'Finally, authentic coastal taste in the city. The prawns were juicy and the pickles are just like my grandmother used to make. Will be ordering every week.'
-      },
-      {
-        name: 'Lakshmi P.',
-        location: 'Kondapur, Hyderabad',
-        rating: 4,
-        image: null, // Example of a review without a customer image
-        review: 'Good quality fish and very convenient. The net weight was accurate. Would love to see more variety in small fish, but overall a great experience.'
-      }
+    const TRUST_ICONS = [
+      { icon: 'fas fa-fish', title: 'Fresh Catch', text: 'Sourced Daily' },
+      { icon: 'fas fa-leaf', title: '100% Natural', text: 'No Chemicals' },
+      { icon: 'fas fa-box', title: 'Hygienic Pack', text: 'Clean & Safe' },
+      { icon: 'fas fa-truck', title: 'Fast Delivery', text: 'To Your Door' },
     ];
 
     const FEATURED_PRODUCT_IDS = [1, 11, 20, 15];
@@ -2781,9 +2656,39 @@ const TRUST_ICONS = [
     const FREE_DELIVERY_THRESHOLD = 1500;
     const ITEMS_PER_PAGE = 8;
 
+    /* ===== Products DATA ===== */
+    const products = [
+      { id:1, name:"White Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728284/Whitt_spxhew.jpg", mrp:950, finalPrice:855, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Buy White Pomfret online in Hyderabad – premium coastal fish with mild taste and firm flesh. Perfect for fry, grill, or curry. Hygienically cleaned and delivered fresh next day." },
+      { id:2, name:"Black Pomfret", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/Blac_qnztqj.jpg", mrp:850, finalPrice:750, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Order Black Pomfret in Hyderabad – firm texture, rich flavor, ideal for spicy curries, grills, and fries." },
+      { id:3, name:"Sea Bass", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/SeaBas_cd21dd.jpg", mrp:850, finalPrice:765, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Fresh Sea Bass – mild flavor, firm texture. Great for curries, grills, pan-seared." },
+      { id:4, name:"Yellowfin Tuna", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728283/YellowTun_tzidzi.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Meaty steaks, rich taste; perfect for grilling, searing, curry." },
+      { id:5, name:"Pink Perch", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/PinkPerc_r8g3me.jpg", mrp:450, finalPrice:405, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Soft flesh, mild taste, budget-friendly for fry/curry." },
+      { id:6, name:"Koyyinga", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/koyyangi_si2oss.png", mrp:500, finalPrice:450, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Andhra favorite; bold flavor, firm texture." },
+      { id:7, name:"Kanagadathalu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Kanagadathal_lvwazy.jpg", mrp:550, finalPrice:495, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Versatile for curry, grills, fry." },
+      { id:8, name:"Vanjaram (Seer)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756728285/Vanjara_ikhy6c.jpg", mrp:1050, finalPrice:945, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Boneless cuts, rich taste; king of South Indian seafood." },
+      { id:9, name:"Nettallu (Anchovies)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577556/Nethallu_rckaaj.png", mrp:400, finalPrice:370, offer:10, gross:"1000g", net:"800g", available:true, category:"Fish", desc:"Tiny fish, bold taste; great for fry/chutneys." },
+      { id:10, name:"Katte Parigelu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Katte_Parigelu_lnxp73.png", mrp:400, finalPrice:360, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Tasty, tender, ready-to-cook." },
+      { id:11, name:"Rohu", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rohu_ctixmk.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Freshwater favorite; curries or fry." },
+      { id:12, name:"Rupchand", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/Rupchand_Fish_woqmzz.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Affordable, mild, versatile." },
+      { id:13, name:"Catla", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577559/Catla_-_Fish_tjb5hr.png", mrp:280, finalPrice:250, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Large cuts; great for Andhra curry." },
+      { id:14, name:"Korameenu (Murrel)", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577555/Korameenu_dkpfiw.png", mrp:780, finalPrice:700, offer:10, gross:"1000g", net:"700g", available:true, category:"Fish", desc:"Prized delicacy; firm flesh." },
+      { id:15, name:"Sea Tiger Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153106/Sea-water-prawns_1_j1puyn.jpg", mrp:750, finalPrice:750, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Large, juicy; grills & biryani." },
+      { id:16, name:"Sea Tiger Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153106/Sea-water-prawns_1_j1puyn.jpg", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Medium, sweet flavor." },
+      { id:17, name:"Sea Tiger Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153106/Sea-water-prawns_1_j1puyn.jpg", mrp:550, finalPrice:550, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Smaller size, big flavor." },
+      { id:18, name:"Godavari Prawns", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153108/godhavari-prawns_ljw31t.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Authentic Andhra taste." },
+      { id:19, name:"Freshwater Prawns - S", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153103/fresh-water-pawrns_vztj21.jpg", mrp:380, finalPrice:380, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Great for prawn fry." },
+      { id:20, name:"Freshwater Prawns - M", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153103/fresh-water-pawrns_vztj21.jpg", mrp:480, finalPrice:480, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Balanced size, firm flesh." },
+      { id:21, name:"Freshwater Prawns - L", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153103/fresh-water-pawrns_vztj21.jpg", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"500g", available:true, category:"Prawns", desc:"Premium size; grills/party." },
+      { id:22, name:"Live Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577553/Crab_praskf.png", mrp:1000, finalPrice:1000, offer:0, gross:"1000g", net:"600g", available:true, category:"Crabs", desc:"Delivered live; top freshness." },
+      { id:23, name:"Egg Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153104/egg-carb_bcbh9w.jpg", mrp:900, finalPrice:900, offer:0, gross:"1000g", net:"600g", available:true, category:"Crabs", desc:"Roe for rich, creamy flavor." },
+      { id:24, name:"Blue Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757153103/blue-carb_z6k74h.jpg", mrp:650, finalPrice:650, offer:0, gross:"1000g", net:"600g", available:true, category:"Crabs", desc:"Delicate, sweet meat." },
+      { id:26, name:"3 Dot Crab", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1755577558/3_Dot_Crab_igijmt.png", mrp:500, finalPrice:500, offer:0, gross:"1000g", net:"900g", available:true, category:"Crabs", desc:"Unique markings; sweet taste." },
+      { id:27, name:"Prawns Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png", mrp:1900, finalPrice:1710, offer:10, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Authentic Andhra Prawns Pickle; cold-pressed oil; no preservatives." },
+      { id:28, name:"Chicken Pickle", image:"https://res.cloudinary.com/dpyniai9l/image/upload/v1757486899/Chicken_Pickle_-_Coastal_Fresh_yqj2de.png", mrp:1500, finalPrice:1500, offer:0, gross:"1000g", net:"1000g", available:true, category:"Pickles", desc:"Andhra-style Chicken Pickle with bold spices." }
+    ];
+
     /* ===== App State ===== */
     let cart = {};
-    let products = []; // Will be populated by fetch
     let currentPage = 'home';
     let pageHistory = ['home'];
     let currentCategory = 'All';
@@ -2804,33 +2709,18 @@ const TRUST_ICONS = [
     let popupProduct = null;
 
     /* ===== Init ===== */
-    async function init() {
-      // Fetch products first and foremost
-      try {
-        const response = await fetch('./products.json');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        products = await response.json();
-      } catch (error) {
-        console.error("Could not load product data:", error);
-        document.body.innerHTML = '<div style="text-align: center; padding: 50px; font-size: 18px;">Could not load products. Please try again later.</div>';
-        return;
-      }
-
-      // Now that `products` is populated, run the rest of the init logic
+    function init() {
       renderTrustIcons();
-      renderCustomerReviews(); // NEW: Render reviews on init
       renderFeaturedProducts();
       renderCatalogProducts();
       setupEvents();
       lazyLoadBanners();
       renderWhyChooseUs();
+      updateCartUI();
       initCarousel();
       
       // Load cart from localStorage if available
       loadCart();
-      updateCartUI();
       
       // NEW: Check for search query in URL to support sitelinks search box
       const urlParams = new URLSearchParams(window.location.search);
@@ -2965,7 +2855,7 @@ const TRUST_ICONS = [
       document.querySelector('.profile-button.refer').addEventListener('click', () => openWhatsApp('refer'));
 
       // Product Popup buttons
-      document.querySelector('#productPopup .back-btn').addEventListener('click', closePopup);
+      document.querySelector('.popup-back-btn').addEventListener('click', closePopup);
       document.querySelector('.popup-action-btn.favorite').addEventListener('click', toggleFavorite);
       document.querySelector('.popup-action-btn.share').addEventListener('click', shareProduct);
       document.querySelector('.popup-highlights-header').addEventListener('click', togglePopupHighlights);
@@ -3029,40 +2919,6 @@ const TRUST_ICONS = [
         container.appendChild(item);
       });
     }
-
-    /* ===== NEW: Render Customer Reviews ===== */
-    function renderCustomerReviews() {
-      const container = document.getElementById('reviewsCarousel');
-      if (!container) return;
-
-      container.innerHTML = CUSTOMER_REVIEWS.map(review => {
-        // If an image is not provided, create initials from the name
-        const avatar = review.image
-          ? `<img src="${review.image}" alt="${review.name}" class="review-avatar" loading="lazy">`
-          : `<div class="review-avatar-initials">${review.name.charAt(0)}</div>`;
-
-        // Create star rating
-        let stars = '';
-        for (let i = 0; i < 5; i++) {
-          stars += `<i class="fas fa-star ${i < review.rating ? '' : 'far'}"></i>`; // Use 'far' for empty stars
-        }
-
-        return `
-          <div class="review-card">
-            <div class="review-header">
-              ${avatar}
-              <div class="review-customer">
-                <div class="review-name">${DOMPurify.sanitize(review.name)}</div>
-                <div class="review-location">${DOMPurify.sanitize(review.location)}</div>
-              </div>
-            </div>
-            <div class="review-rating">${stars}</div>
-            <p class="review-body">“${DOMPurify.sanitize(review.review)}”</p>
-          </div>
-        `;
-      }).join('');
-    }
-    /* ===== End of New Function ===== */
 
     function createSkeletonProductHTML() {
       return `
@@ -3268,12 +3124,6 @@ const TRUST_ICONS = [
       // Hide image indicators as there's only one image
       document.getElementById('popupImageIndicators').style.display = 'none';
       
-      // Set product details in the expandable section
-      document.getElementById('popupGrossWeight').textContent = DOMPurify.sanitize(product.gross);
-      document.getElementById('popupNetWeight').textContent = DOMPurify.sanitize(product.net);
-      document.getElementById('popupType').textContent = DOMPurify.sanitize(product.category);
-      document.getElementById('popupDescription').textContent = DOMPurify.sanitize(product.desc);
-
       // Update bottom price
       const totalPrice = product.finalPrice * currentProductQty;
       const totalMrp = product.mrp * currentProductQty;
@@ -3286,7 +3136,13 @@ const TRUST_ICONS = [
       const contentWrapper = document.getElementById('popupContentWrapper');
       if (contentWrapper) contentWrapper.scrollTop = 0;
       
-      popup.style.display = 'flex';
+      // Set product details in the expandable section
+      document.getElementById('popupGrossWeight').textContent = DOMPurify.sanitize(product.gross);
+      document.getElementById('popupNetWeight').textContent = DOMPurify.sanitize(product.net);
+      document.getElementById('popupType').textContent = DOMPurify.sanitize(product.category); // Already sanitized, but good practice
+      document.getElementById('popupDescription').textContent = DOMPurify.sanitize(product.desc);
+
+      popup.classList.add('active');
 
       // --- FIX: Ensure product details are visible by default ---
       popupHighlightsExpanded = true;
@@ -3425,7 +3281,7 @@ const TRUST_ICONS = [
 
     function closePopup() {
       const popup = document.getElementById('productPopup');
-      if (popup) popup.style.display = 'none';
+      if (popup) popup.classList.remove('active');
 
       isPopupOpen = false;
       document.body.classList.remove('popup-open');
