@@ -2315,13 +2315,13 @@
   </style>
 </head>
 <body>
-  <div class="app">
-    <!-- NEW: App-wide loading indicator -->
-    <div class="app-loader" id="appLoader">
-      <div class="loading-spinner"></div>
-      <p>Loading Fresh Seafood...</p>
-    </div>
+  <!-- NEW: App-wide loading indicator (Moved outside .app for correct stacking) -->
+  <div class="app-loader" id="appLoader">
+    <div class="loading-spinner"></div>
+    <p>Loading Fresh Seafood...</p>
+  </div>
 
+  <div class="app">
     <!-- Ticker - Now above header -->
     <div class="ticker-container">
       <div class="ticker" aria-hidden="true">
