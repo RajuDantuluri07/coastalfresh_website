@@ -2315,12 +2315,6 @@
   </style>
 </head>
 <body>
-  <!-- NEW: App-wide loading indicator (Moved outside .app for correct stacking) -->
-  <div class="app-loader" id="appLoader">
-    <div class="loading-spinner"></div>
-    <p>Loading Fresh Seafood...</p>
-  </div>
-
   <div class="app">
     <!-- Ticker - Now above header -->
     <div class="ticker-container">
@@ -2773,29 +2767,31 @@
     
     /* ===== App Configuration ===== */
 const TRUST_ICONS = [
-  { icon: 'fas fa-fish', title: 'Fresh Catch' },
-  { icon: 'fas fa-leaf', title: '100% Natural' },
-  { icon: 'fas fa-box', title: 'Hygienic Pack' },
-  { icon: 'fas fa-truck', title: 'Fast Delivery' },
+  { icon: 'fas fa-fish', title: 'Fresh Catch', text: 'Sourced Daily' },
+  { icon: 'fas fa-leaf', title: '100% Natural', text: 'No Chemicals' },
+  { icon: 'fas fa-box', title: 'Hygienic Pack', text: 'Clean & Safe' },
+  { icon: 'fas fa-truck', title: 'Fast Delivery', text: 'To Your Door' },
 ];
     /* ===== NEW: Customer Reviews Data ===== */
     const CUSTOMER_REVIEWS = [
       {
-        name: 'Priya S.',
+        name: 'Ananya R.',
         location: 'Gachibowli, Hyderabad',
         rating: 5,
-        image: 'https://randomuser.me/api/portraits/women/44.jpg',
+        // NOTE: Using a more representative image. It's best to upload your own images to Cloudinary.
+        image: 'https://images.generated.photos/v2/YcI_521w5aV5s72v2J3A_h0vSw_c-sX_4DORn1k-tAc/rs:fit:256:256/czM6Ly9pY29uczgu/Z3Bob3Rvcy1wcm9k/LnBob3Rvcy92Mi8w/MDAwOTU5LmpwZw.jpg',
         review: 'The freshest seafood I’ve had in Hyderabad! The pomfret was cleaned perfectly. Delivery was on time and packaging was top-notch. Highly recommend!'
       },
       {
-        name: 'Amit K.',
+        name: 'Vikram G.',
         location: 'Jubilee Hills, Hyderabad',
         rating: 5,
-        image: 'https://randomuser.me/api/portraits/men/32.jpg',
+        // NOTE: Using a more representative image. It's best to upload your own images to Cloudinary.
+        image: 'https://images.generated.photos/v2/T43tLxf3k0YyQk3e2E5BwA-zCma2aQad2T1bFfQ4LgY/rs:fit:256:256/czM6Ly9pY29uczgu/Z3Bob3Rvcy1wcm9k/LnBob3Rvcy92Mi8w/MjI0NDg4LmpwZw.jpg',
         review: 'Finally, authentic coastal taste in the city. The prawns were juicy and the pickles are just like my grandmother used to make. Will be ordering every week.'
       },
       {
-        name: 'Sunita R.',
+        name: 'Lakshmi P.',
         location: 'Kondapur, Hyderabad',
         rating: 4,
         image: null, // Example of a review without a customer image
@@ -2832,7 +2828,6 @@ const TRUST_ICONS = [
 
     /* ===== Init ===== */
     async function init() {
-      const appLoader = document.getElementById('appLoader');
       // Fetch products first and foremost
       try {
         const response = await fetch('./products.json');
@@ -2842,14 +2837,8 @@ const TRUST_ICONS = [
         products = await response.json();
       } catch (error) {
         console.error("Could not load product data:", error);
-        if (appLoader) appLoader.classList.add('hidden');
         document.body.innerHTML = '<div style="text-align: center; padding: 50px; font-size: 18px;">Could not load products. Please try again later.</div>';
         return;
-      }
-
-      // Hide loader after successful fetch, but before rendering starts
-      if (appLoader) {
-        appLoader.classList.add('hidden');
       }
 
       // Now that `products` is populated, run the rest of the init logic
@@ -3302,6 +3291,12 @@ const TRUST_ICONS = [
       // Hide image indicators as there's only one image
       document.getElementById('popupImageIndicators').style.display = 'none';
       
+      // Set product details in the expandable section
+      document.getElementById('popupGrossWeight').textContent = DOMPurify.sanitize(product.gross);
+      document.getElementById('popupNetWeight').textContent = DOMPurify.sanitize(product.net);
+      document.getElementById('popupType').textContent = DOMPurify.sanitize(product.category);
+      document.getElementById('popupDescription').textContent = DOMPurify.sanitize(product.desc);
+
       // Update bottom price
       const totalPrice = product.finalPrice * currentProductQty;
       const totalMrp = product.mrp * currentProductQty;
