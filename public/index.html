@@ -575,14 +575,21 @@
       padding: 0 20px;
       margin-bottom: 12px;
       font-size: 18px;
+      justify-content: center; /* Center the shorter title */
     }
 
     .countdown-timer {
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 10px;
+      gap: 8px; /* Slightly reduced gap */
       margin-bottom: 20px;
+    }
+
+    .timer-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
     }
 
     .timer-box {
@@ -2425,8 +2432,9 @@
 
       <!-- NEW: Flash Sale Section -->
       <section class="flash-sale-section" id="flashSaleSection">
-        <h2 class="section-title">🔥 Today’s Fresh Catch – Limited Time</h2>
+        <h2 class="section-title">🔥 Today's Fresh Catch</h2>
         <div class="countdown-timer" id="countdownTimer">
+          <span class="timer-label">Ends in:</span>
           <span class="timer-box hours">00</span>
           <span class="timer-separator">:</span>
           <span class="timer-box minutes">00</span>
@@ -2836,6 +2844,7 @@
       }
     ];
 
+    const ENABLE_FLASH_SALE = true; // NEW: Set to false to hide the flash sale section
     const FLASH_SALE_PRODUCT_IDS = [2, 8, 15, 27]; // Configurable product IDs for the flash sale
     const FLASH_SALE_DURATION_HOURS = 12; // Configurable duration in hours
     const FEATURED_PRODUCT_IDS = [1, 11, 20, 15];
@@ -3132,13 +3141,22 @@
 
     /* ===== NEW: Flash Sale Functions ===== */
     function renderFlashSale() {
+      const section = document.getElementById('flashSaleSection');
+      if (!section) return;
+
+      // NEW: Check if the flash sale is enabled
+      if (!ENABLE_FLASH_SALE) {
+        section.style.display = 'none';
+        return;
+      }
+
       const container = document.getElementById('flashSaleProducts');
       if (!container) return;
 
       const flashSaleProducts = products.filter(p => FLASH_SALE_PRODUCT_IDS.includes(p.id));
       
       if (flashSaleProducts.length === 0) {
-        document.getElementById('flashSaleSection').style.display = 'none';
+        section.style.display = 'none';
         return;
       }
 
@@ -3148,6 +3166,12 @@
     function initFlashSaleTimer() {
       const countdownContainer = document.getElementById('countdownTimer');
       if (!countdownContainer) return;
+
+      // NEW: Check if the flash sale is enabled
+      if (!ENABLE_FLASH_SALE) {
+        // The section is already hidden by renderFlashSale, so we just need to not run the timer.
+        return;
+      }
 
       let saleEndTime = localStorage.getItem('flashSaleEndTime');
       // Reset timer if it's expired or doesn't exist
