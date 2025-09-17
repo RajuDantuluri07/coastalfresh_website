@@ -1048,6 +1048,29 @@
       font-weight: 300;
       margin-bottom: 12px;
     }
+    
+    /* NEW: Description with toggle */
+    .popup-description-container {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    
+    .popup-description-short {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .popup-description-toggle {
+      color: var(--primary-color);
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-block; /* To allow margin-top */
+    }
 
     .popup-price-section {
       display: flex; 
@@ -1056,43 +1079,11 @@
       margin-bottom: 4px; /* Reduced margin */
       flex-wrap: wrap; /* Allow wrapping on small screens */
     }
-
-    .popup-current-price {
-      font-size: 28px; /* Larger price */
-      font-weight: 600; /* UPDATED */
-      color: var(--text-primary);
-    }
-
-    .popup-original-price {
-      font-size: 16px; /* UPDATED */
-      color: var(--text-secondary);
-      text-decoration: line-through; 
-    }
-
-    .popup-discount {
-      background: #E8F5E9; /* Light Green */
-      color: var(--success-color);
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-    }
-
-    /* NEW: Explicit savings amount */
-    .popup-savings {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--success-color);
-      width: 100%; /* Take full width to appear on a new line */
-      margin-bottom: 12px;
-    }
-
-    .popup-unit-price {
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-weight: 300;
-      margin-bottom: 16px;
-    }
+    
+    /* NEW: Price presentation styles */
+    .popup-price-final { font-size: 24px; font-weight: 600; color: var(--text-primary); }
+    .popup-price-mrp { font-size: 16px; color: var(--text-secondary); text-decoration: line-through; }
+    .popup-price-savings { font-size: 14px; font-weight: 600; color: var(--success-color); }
 
     .popup-details-btn {
       color: var(--success-color);
@@ -1104,6 +1095,64 @@
       display: flex;
       align-items: center;
       gap: 4px;
+      margin-bottom: 20px;
+    }
+
+    /* NEW: Benefit Highlights */
+    .popup-benefits {
+      background: var(--primary-light);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 20px 0;
+      border: 1px solid var(--accent-color);
+    }
+    
+    .popup-benefits-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    .popup-benefits-list {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    
+    .popup-benefits-item {
+      font-size: 13px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .popup-benefits-item i {
+      color: var(--success-color);
+    }
+    
+    /* NEW: Product Page Reviews */
+    .popup-reviews-section {
+      padding: 20px 0;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .popup-reviews-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    
+    /* NEW: Freshness Guarantee Badge */
+    .popup-guarantee-badge {
+      background: var(--bg-light);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-secondary);
       margin-bottom: 20px;
     }
 
@@ -2581,18 +2630,11 @@
           <h1 class="popup-title" id="popupProductTitle"></h1>
           <div class="popup-weight" id="popupProductWeight"></div>
 
-          <div class="popup-price-section">
-            <span class="popup-current-price" id="popupCurrentPrice"></span>
-            <span class="popup-original-price" id="popupOriginalPrice"></span>
-            <span class="popup-discount" id="popupDiscount"></span>
-          </div>
-
-          <div class="popup-savings" id="popupSavings"></div>
-          <div class="popup-unit-price" id="popupUnitPrice"></div>
+          <div class="popup-price-section" id="popupPriceSection"></div>
+          <div class="popup-description-container" id="popupDescriptionContainer"></div>
         </div>
 
-        <!-- Highlights Section -->
-        <div class="popup-highlights-section">
+        <div class="popup-highlights-section" style="padding-top: 0;">
           <div class="popup-highlights-header">
             <h2 class="popup-highlights-title">Product Details</h2>
             <button class="popup-expand-btn" aria-label="Toggle Product Details"><i class="fas fa-chevron-up"></i></button>
@@ -2611,9 +2653,36 @@
               <span class="popup-highlight-label">Type</span>
               <span class="popup-highlight-value" id="popupType"></span>
             </div>
-            <div class="popup-highlight-item">
-              <span class="popup-highlight-label">Description</span>
-              <span class="popup-highlight-value" id="popupDescription"></span>
+          </div>
+        </div>
+
+        <!-- NEW: Benefit Highlights -->
+        <div class="popup-info">
+          <div class="popup-benefits">
+            <h3 class="popup-benefits-title">Why Coastal Fresh?</h3>
+            <ul class="popup-benefits-list">
+              <li class="popup-benefits-item"><i class="fas fa-check-circle"></i> Fresh daily catch</li>
+              <li class="popup-benefits-item"><i class="fas fa-check-circle"></i> Hygienically cleaned</li>
+              <li class="popup-benefits-item"><i class="fas fa-check-circle"></i> 100% ready-to-cook</li>
+              <li class="popup-benefits-item"><i class="fas fa-check-circle"></i> Next-day delivery</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- NEW: Customer Reviews on Product Page -->
+        <div class="popup-reviews-section popup-info">
+          <h3 class="popup-reviews-title">Customer Reviews</h3>
+          <div id="popupReviews">
+            <!-- Static reviews for demonstration -->
+            <div class="review-card" style="max-width: 100%; margin-bottom: 16px;">
+              <div class="review-header"><div class="review-avatar-initials">P</div><div class="review-customer"><div class="review-name">Priya S.</div><div class="review-location">Gachibowli</div></div></div>
+              <div class="review-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+              <p class="review-body">“The freshest seafood I’ve had in Hyderabad! The pomfret was cleaned perfectly. Highly recommend!”</p>
+            </div>
+            <div class="review-card" style="max-width: 100%;">
+              <div class="review-header"><div class="review-avatar-initials">A</div><div class="review-customer"><div class="review-name">Amit K.</div><div class="review-location">Jubilee Hills</div></div></div>
+              <div class="review-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+              <p class="review-body">“Finally, authentic coastal taste in the city. The prawns were juicy and delicious.”</p>
             </div>
           </div>
         </div>
@@ -2623,6 +2692,9 @@
       <div class="popup-bottom-section">
         <div class="popup-bottom-reassurance">
           <i class="fas fa-shield-alt"></i><span>Hygienic, Fresh &amp; Ready to Cook</span>
+        </div>
+        <div class="popup-guarantee-badge">
+          <strong>Freshness Guarantee:</strong> No preservatives & 100% refund if not satisfied.
         </div>
         <div class="popup-actions-bar">
           <div class="popup-quantity-controls">
@@ -2822,6 +2894,7 @@
     let isPopupFavorite = false;
     let popupHighlightsExpanded = true;
     let popupDetailsExpanded = false;
+    let popupDescriptionExpanded = false;
     let popupProduct = null;
 
     /* ===== Init ===== */
@@ -2940,6 +3013,12 @@
               showProductPopup(productId);
             }
           }
+        }
+        
+        // Product description toggle
+        const descToggle = target.closest('.popup-description-toggle');
+        if (descToggle) {
+          toggleProductDescription();
         }
       });
 
@@ -3260,40 +3339,41 @@
       popupProduct = product;
       currentProductQty = cart[product.id] || 1;
       const popup = document.getElementById('productPopup');
-      
+
       // Set product data in the popup
       document.getElementById('popupProductTitle').textContent = DOMPurify.sanitize(product.name);
-      document.getElementById('popupProductWeight').textContent = `${product.net} (Net Weight)`;
-      document.getElementById('popupCurrentPrice').textContent = `₹${product.finalPrice}`;
-      
-      // Calculate and show discount if applicable
-      const discountElem = document.getElementById('popupDiscount');
-      const savingsElem = document.getElementById('popupSavings');
-      const originalPriceElem = document.getElementById('popupOriginalPrice');
+      document.getElementById('popupProductWeight').textContent = `Gross: ${product.gross} (Net: approx. ${product.net} after cleaning)`;
 
+      // NEW: Better Price Presentation
+      const priceSection = document.getElementById('popupPriceSection');
       if (product.mrp > product.finalPrice && product.offer > 0) {
         const savings = product.mrp - product.finalPrice;
-        discountElem.textContent = `${product.offer}% OFF`;
-        discountElem.style.display = 'inline';
-        savingsElem.textContent = `You save ₹${savings * currentProductQty}`;
-        savingsElem.style.display = 'block';
-        originalPriceElem.textContent = `₹${product.mrp}`;
-        originalPriceElem.style.display = 'inline';
+        priceSection.innerHTML = `
+          <span class="popup-price-mrp">₹${product.mrp}</span>
+          <i class="fas fa-arrow-right" style="font-size: 14px; color: var(--text-secondary);"></i>
+          <span class="popup-price-final">₹${product.finalPrice}</span>
+          <span class="popup-price-savings">(Save ₹${savings}, ${product.offer}% OFF)</span>
+        `;
       } else {
-        discountElem.style.display = 'none';
-        savingsElem.style.display = 'none';
-        originalPriceElem.style.display = 'none';
+        priceSection.innerHTML = `<span class="popup-price-final">₹${product.finalPrice}</span>`;
       }
+
+      // NEW: Toggleable Description
+      const descContainer = document.getElementById('popupDescriptionContainer');
+      const shortDesc = product.desc.split('–')[1] || product.desc; // Try to get text after a dash
+      const fullDesc = product.desc;
       
-      // Calculate unit price
-      const netWeight = parseInt(product.net);
-      const unitPrice = netWeight ? (product.finalPrice / (netWeight / 100)).toFixed(2) : 0;
-      const unitPriceEl = document.getElementById('popupUnitPrice');
-      if (unitPrice > 0) {
-        unitPriceEl.textContent = `₹${unitPrice}/100 g`;
-        unitPriceEl.style.display = 'block';
-      } else { unitPriceEl.style.display = 'none'; }
+      popupDescriptionExpanded = false; // Reset on open
       
+      if (fullDesc.length > 120) { // Only show toggle for longer descriptions
+        descContainer.innerHTML = `
+          <div class="popup-description-short">${DOMPurify.sanitize(fullDesc)}</div>
+          <span class="popup-description-toggle">Read More</span>
+        `;
+      } else {
+        descContainer.innerHTML = `<div>${DOMPurify.sanitize(fullDesc)}</div>`;
+      }
+
       // Set product image
       document.getElementById('popupMainImage').src = product.image;
       document.getElementById('popupMainImage').alt = DOMPurify.sanitize(product.name); // FIX: Dynamically set alt attribute
@@ -3317,7 +3397,6 @@
       document.getElementById('popupGrossWeight').textContent = DOMPurify.sanitize(product.gross);
       document.getElementById('popupNetWeight').textContent = DOMPurify.sanitize(product.net);
       document.getElementById('popupType').textContent = DOMPurify.sanitize(product.category); // Already sanitized, but good practice
-      document.getElementById('popupDescription').textContent = DOMPurify.sanitize(product.desc);
 
       popup.classList.add('active');
 
@@ -3359,14 +3438,8 @@
       
       // Update bottom price with quantity
       if (popupProduct) {
-        const savingsElem = document.getElementById('popupSavings');
         const totalPrice = popupProduct.finalPrice * qty;
         document.querySelector('.popup-add-to-cart-btn').textContent = `Add to Cart - ₹${totalPrice}`;
-        // NEW: Update savings amount as well
-        if (popupProduct.mrp > popupProduct.finalPrice) {
-          const savings = (popupProduct.mrp - popupProduct.finalPrice) * qty;
-          savingsElem.textContent = `You save ₹${savings}`;
-        }
       }
       
       currentProductQty = qty;
@@ -3453,6 +3526,23 @@
       } else {
         highlightsContent.style.display = 'none';
         expandBtnIcon.className = 'fas fa-chevron-down';
+      }
+    }
+
+    /* NEW: Function to toggle product description */
+    function toggleProductDescription() {
+      const container = document.getElementById('popupDescriptionContainer');
+      const shortDiv = container.querySelector('.popup-description-short');
+      const toggle = container.querySelector('.popup-description-toggle');
+      
+      popupDescriptionExpanded = !popupDescriptionExpanded;
+      
+      if (popupDescriptionExpanded) {
+        shortDiv.style.webkitLineClamp = 'unset';
+        toggle.textContent = 'Read Less';
+      } else {
+        shortDiv.style.webkitLineClamp = '2';
+        toggle.textContent = 'Read More';
       }
     }
 
