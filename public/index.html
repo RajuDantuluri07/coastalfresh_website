@@ -597,37 +597,37 @@
     .countdown-timer {
       display: flex;
       align-items: center;
-      gap: 4px; /* Tighter gap for a compact look */
+      gap: 3px; /* Even tighter gap */
       margin-bottom: 0; /* Reset margin */
       flex-shrink: 0; /* Prevent timer from shrinking */
     }
 
     .timer-label {
-      font-size: 12px; /* Smaller label */
+      font-size: 11px; /* Even smaller label */
       font-weight: 500;
       color: var(--text-secondary);
     }
 
     .timer-box {
-      background: var(--primary-dark);
+      background: var(--error-color); /* NEW: Red for urgency */
       color: white;
-      padding: 5px 8px; /* Slightly smaller box */
-      border-radius: 6px;
-      font-size: 16px; /* Slightly smaller font */
+      padding: 4px 6px; /* Smaller padding */
+      border-radius: 4px; /* Sharper corners */
+      font-size: 14px; /* Smaller font */
       font-weight: 700;
-      min-width: 34px; /* Adjusted min-width */
+      min-width: 30px; /* Smaller width */
       text-align: center;
       line-height: 1;
     }
 
     .timer-separator {
-      font-size: 18px;
+      font-size: 14px; /* Smaller font */
       font-weight: 700;
-      color: var(--primary-dark);
+      color: var(--error-color); /* NEW: Red to match */
     }
 
     .timer-ended {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 500;
       color: var(--error-color);
     }
