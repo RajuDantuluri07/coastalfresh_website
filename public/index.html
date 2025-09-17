@@ -562,6 +562,64 @@
       line-height: 1.3;
     }
 
+    /* --- NEW: Flash Sale Section --- */
+    .flash-sale-section {
+      background: linear-gradient(175deg, var(--primary-light), var(--bg-white));
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 20px 0;
+      margin-bottom: 20px;
+    }
+
+    .flash-sale-section .section-title {
+      padding: 0 20px;
+      margin-bottom: 12px;
+      font-size: 18px;
+    }
+
+    .countdown-timer {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .timer-box {
+      background: var(--primary-dark);
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 18px;
+      font-weight: 700;
+      min-width: 40px;
+      text-align: center;
+      line-height: 1;
+    }
+
+    .timer-separator {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+
+    .timer-ended {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--error-color);
+    }
+
+    .flash-sale-products {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 4px 20px 12px;
+      scrollbar-width: none; /* Firefox */
+    }
+
+    .flash-sale-products::-webkit-scrollbar { display: none; }
+    .flash-sale-products .product { flex: 0 0 45%; max-width: 180px; }
+
     /* --- NEW: Customer Reviews Section --- */
     .reviews-carousel {
       display: flex;
@@ -2365,6 +2423,19 @@
       <!-- Trust Icons -->
       <section class="trust-strip" id="trustStrip" aria-label="Trust and features"></section>
 
+      <!-- NEW: Flash Sale Section -->
+      <section class="flash-sale-section" id="flashSaleSection">
+        <h2 class="section-title">🔥 Today’s Fresh Catch – Limited Time</h2>
+        <div class="countdown-timer" id="countdownTimer">
+          <span class="timer-box hours">00</span>
+          <span class="timer-separator">:</span>
+          <span class="timer-box minutes">00</span>
+          <span class="timer-separator">:</span>
+          <span class="timer-box seconds">00</span>
+        </div>
+        <div class="flash-sale-products" id="flashSaleProducts"></div>
+      </section>
+
       <main class="section">
         <h2 class="section-title">
           Featured Products
@@ -2765,6 +2836,8 @@
       }
     ];
 
+    const FLASH_SALE_PRODUCT_IDS = [2, 8, 15, 27]; // Configurable product IDs for the flash sale
+    const FLASH_SALE_DURATION_HOURS = 12; // Configurable duration in hours
     const FEATURED_PRODUCT_IDS = [1, 11, 20, 15];
     const PROFILE_IMAGE_URL = "https://res.cloudinary.com/dpyniai9l/image/upload/v1756914772/Coastal_Fresh_Sea_food_hyderabad_-_website_banner_shqapq.png";
     const FREE_DELIVERY_THRESHOLD = 1500;
@@ -2804,6 +2877,7 @@
         // These functions depend on product data, so they run after the fetch.
         renderFeaturedProducts();
         renderCatalogProducts();
+        renderFlashSale();
         renderProductSchema(); // NEW: Add product schema
         loadCart(); // Sanitizes cart against loaded products
 
@@ -2828,6 +2902,7 @@
       renderCustomerReviews();
       setupEvents();
       lazyLoadBanners();
+      initFlashSaleTimer();
       initCarousel();
       // Start the typewriter after a brief delay
       setTimeout(startTypewriter, 1000);
@@ -3054,6 +3129,63 @@
       }).join('');
     }
     /* ===== End of New Function ===== */
+
+    /* ===== NEW: Flash Sale Functions ===== */
+    function renderFlashSale() {
+      const container = document.getElementById('flashSaleProducts');
+      if (!container) return;
+
+      const flashSaleProducts = products.filter(p => FLASH_SALE_PRODUCT_IDS.includes(p.id));
+      
+      if (flashSaleProducts.length === 0) {
+        document.getElementById('flashSaleSection').style.display = 'none';
+        return;
+      }
+
+      container.innerHTML = flashSaleProducts.map(product => createProductHTML(product)).join('');
+    }
+
+    function initFlashSaleTimer() {
+      const countdownContainer = document.getElementById('countdownTimer');
+      if (!countdownContainer) return;
+
+      let saleEndTime = localStorage.getItem('flashSaleEndTime');
+      // Reset timer if it's expired or doesn't exist
+      if (!saleEndTime || new Date().getTime() > saleEndTime) {
+        saleEndTime = new Date().getTime() + FLASH_SALE_DURATION_HOURS * 60 * 60 * 1000;
+        localStorage.setItem('flashSaleEndTime', saleEndTime);
+      }
+
+      const hoursEl = countdownContainer.querySelector('.hours');
+      const minutesEl = countdownContainer.querySelector('.minutes');
+      const secondsEl = countdownContainer.querySelector('.seconds');
+
+      function updateTimer() {
+        const now = new Date().getTime();
+        const distance = saleEndTime - now;
+
+        if (distance < 0) {
+          countdownContainer.innerHTML = "<div class='timer-ended'>Sale Ended!</div>";
+          if(timerInterval) clearInterval(timerInterval);
+          // Hide the product scroll when the timer ends
+          const productsContainer = document.getElementById('flashSaleProducts');
+          if(productsContainer) productsContainer.style.display = 'none';
+          return;
+        }
+
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+        if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
+        if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
+        if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
+      }
+
+      const timerInterval = setInterval(updateTimer, 1000);
+      updateTimer(); // Initial call to display timer immediately
+    }
+    /* ===== End of New Functions ===== */
 
     function createSkeletonProductHTML() {
       return `
