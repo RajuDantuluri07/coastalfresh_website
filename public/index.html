@@ -1328,6 +1328,7 @@
       box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
       gap: 12px;
       flex-shrink: 0; /* Prevent footer from shrinking */
+      margin-bottom: 20px; /* NEW: Lift footer above mobile navigation */
     }
 
 /* NEW: Reassurance text in sticky footer */
@@ -1684,7 +1685,7 @@
 
     .cart-footer {
   position: fixed;
-  bottom: 0;
+  bottom: 20px; /* UPDATED: Lift footer above mobile navigation */
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
