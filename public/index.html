@@ -3161,7 +3161,6 @@
       // Product Popup buttons
       document.querySelector('.popup-back-btn').addEventListener('click', closePopup);
       document.querySelector('.popup-action-btn.favorite').addEventListener('click', toggleFavorite);
-      document.querySelector('.popup-action-btn.share').addEventListener('click', shareProduct);
       document.querySelector('.popup-qty-btn.dec').addEventListener('click', () => changePopupQty(-1));
       document.querySelector('.popup-qty-btn.inc').addEventListener('click', () => changePopupQty(1));
       document.querySelector('.popup-add-to-cart-btn').addEventListener('click', addPopupToCart);
@@ -3619,7 +3618,6 @@
       }
     }
 
-    /* NEW: Function to share product from popup - IMPLEMENTED */
     /* NEW: Function to share product from popup */
     function shareProduct() {
       if (!popupProduct) return;
@@ -3628,14 +3626,10 @@
         navigator.share({
           title: 'Coastal Fresh - ' + popupProduct.name,
           text: 'Check out this fresh product from Coastal Fresh!',
-          url: `https://www.coastalfresh.in/?product=${popupProduct.id}`
           url: window.location.href + '?product=' + popupProduct.id
         });
       } else {
         // Fallback for browsers that don't support Web Share API
-        const shareUrl = `https://www.coastalfresh.in/?product=${popupProduct.id}`;
-        navigator.clipboard.writeText(shareUrl);
-        showToast('Product link copied to clipboard!');
         alert('Share this product: ' + window.location.href + '?product=' + popupProduct.id);
       }
       
@@ -4428,7 +4422,6 @@ window.addEventListener('beforeunload', () => {
             "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
           },
           "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.2", "bestRating": "5", "ratingCount": "387" }
-          }
         };
 
         script.textContent = JSON.stringify(schema);
