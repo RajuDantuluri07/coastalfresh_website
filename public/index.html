@@ -438,6 +438,13 @@
       justify-content: space-between;
     }
     
+    /* NEW: Wrapper for section title text and icon */
+    .section-title-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
     .view-all {
       font-size: 14px;
       color: var(--primary-color);
@@ -446,7 +453,7 @@
 
     /* Carousel */
     .carousel {
-      margin: 0 20px 20px;
+      margin: 0 20px 32px; /* Increased bottom margin */
       overflow: hidden;
       border-radius: 16px;
       position: relative;
@@ -524,7 +531,7 @@
       border: none;
       position: relative;
       overflow: hidden;
-      margin: 0 20px 20px;
+      margin: 0 20px 32px; /* Increased bottom margin */
     }
 
     .trust-item {
@@ -579,7 +586,7 @@
       border-top: 1px solid var(--border-color);
       border-bottom: 1px solid var(--border-color);
       padding: 20px 0;
-      margin-bottom: 20px;
+      margin-bottom: 32px; /* Increased bottom margin */
     }
     
     /* NEW: Header to align title and timer on one line */
@@ -589,7 +596,6 @@
       align-items: center;
       padding: 0 20px;
       margin-bottom: 16px;
-      gap: 12px; /* Add space between title and timer */
     }
     
     .flash-sale-section .section-title {
@@ -603,44 +609,46 @@
       overflow: hidden;
       text-overflow: ellipsis;
       flex-shrink: 1; /* Allow title to shrink if needed */
+      gap: 10px; /* Space between icon and text */
     }
 
+    /* UPDATED: Countdown timer box */
     .countdown-timer {
       display: flex;
       align-items: center;
-      gap: 3px; /* Even tighter gap */
-      margin-bottom: 0; /* Reset margin */
-      flex-shrink: 0; /* Prevent timer from shrinking */
-    }
-
-    .timer-label {
-      font-size: 11px; /* Even smaller label */
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-
-    .timer-box {
-      background: var(--primary-color); /* UPDATED: Use brand color for consistency */
+      gap: 8px;
+      background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
       color: white;
-      padding: 4px 6px; /* Smaller padding */
-      border-radius: 4px; /* Sharper corners */
-      font-size: 14px; /* Smaller font */
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 15px;
       font-weight: 700;
-      min-width: 30px; /* Smaller width */
-      text-align: center;
       line-height: 1;
+      box-shadow: 0 4px 10px rgba(1, 101, 154, 0.25);
     }
 
-    .timer-separator {
-      font-size: 14px; /* Smaller font */
-      font-weight: 700;
-      color: var(--primary-dark); /* UPDATED: Use brand color */
+    .countdown-timer .timer-part {
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+    }
+
+    .countdown-timer .timer-unit {
+      font-size: 12px;
+      font-weight: 400;
+      opacity: 0.8;
+    }
+
+    .countdown-timer .timer-icon {
+      font-size: 16px;
+      animation: pulse 1.5s infinite ease-in-out;
     }
 
     .timer-ended {
       font-size: 14px;
       font-weight: 500;
-      color: var(--primary-dark); /* UPDATED: Use brand color */
+      color: var(--text-secondary);
+      padding: 8px 12px;
     }
 
     .flash-sale-products {
@@ -649,6 +657,11 @@
       overflow-x: auto;
       padding: 4px 20px 12px;
       scrollbar-width: none; /* Firefox */
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
     }
 
     .flash-sale-products::-webkit-scrollbar { display: none; }
@@ -2514,22 +2527,28 @@
       <!-- NEW: Flash Sale Section -->
       <section class="flash-sale-section" id="flashSaleSection">
         <div class="flash-sale-header">
-          <h2 class="section-title">🔥 Fresh Catch</h2>
-          <div class="countdown-timer" id="countdownTimer">
-            <span class="timer-label">Ends in:</span>
-            <span class="timer-box hours">00</span>
-            <span class="timer-separator">:</span>
-            <span class="timer-box minutes">00</span>
-            <span class="timer-separator">:</span>
-            <span class="timer-box seconds">00</span>
+          <h2 class="section-title">🔥 Flash Sale</h2>
+          <div class="countdown-timer" id="countdownTimer" role="timer" aria-live="polite">
+            <span class="timer-icon">⚡</span>
+            <div class="timer-part">
+              <span class="hours">00</span><span class="timer-unit">h</span>
+            </div>
+            <div class="timer-part">
+              <span class="minutes">00</span><span class="timer-unit">m</span>
+            </div>
+            <div class="timer-part">
+              <span class="seconds">00</span><span class="timer-unit">s</span>
+            </div>
           </div>
         </div>
         <div class="flash-sale-products" id="flashSaleProducts"></div>
       </section>
 
-      <main class="section">
+      <main class="section" style="padding-bottom: 32px;">
         <h2 class="section-title">
-          ✨ Featured Products
+          <div class="section-title-main">
+            ✨ Featured Products
+          </div>
           <span class="view-all" role="button">View All</span>
         </h2>
         <div class="featured-products" id="featuredProducts"></div>
