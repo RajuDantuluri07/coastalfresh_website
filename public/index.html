@@ -2340,9 +2340,9 @@
       <!-- Carousel -->
       <div class="carousel">
         <div class="slides" id="slides" aria-hidden="true">
-          <div class="slide"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" alt="Coastal Fresh Banner - Order Now"></div>
-          <div class="slide"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z" alt="Fresh Prawns Banner"></div>
-          <div class="slide"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png" alt="Homemade Pickles Banner"></div>
+          <div class="slide" data-action="showPage" data-target="catalog" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" alt="Coastal Fresh Banner - Order Now"></div>
+          <div class="slide" data-action="showProductPopup" data-target="20" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z" alt="Fresh Prawns Banner"></div>
+          <div class="slide" data-action="showProductPopup" data-target="27" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756391501/Prawns_Pickle_-_Coastal_Fresh_za2u1q.png" alt="Homemade Pickles Banner"></div>
         </div>
         <div class="carousel-dots" id="carouselDots"></div>
       </div>
@@ -2923,6 +2923,20 @@
         const showMoreBtn = target.closest('.show-more-btn');
         if (showMoreBtn) {
           showMoreProducts();
+        }
+
+        // Carousel slide click
+        const slide = target.closest('.slide[data-action]');
+        if (slide) {
+          const { action, target: slideTarget } = slide.dataset;
+          if (action === 'showPage' && typeof showPage === 'function') {
+            showPage(slideTarget);
+          } else if (action === 'showProductPopup' && typeof showProductPopup === 'function') {
+            const productId = parseInt(slideTarget, 10);
+            if (!isNaN(productId)) {
+              showProductPopup(productId);
+            }
+          }
         }
       });
 
