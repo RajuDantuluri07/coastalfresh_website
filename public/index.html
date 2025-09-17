@@ -156,6 +156,17 @@
       --toast-bottom: 150px;
       --toast-animation: 1800ms;
     }
+    
+    /* NEW: Communication Carousel styles */
+    .communication-carousel {
+      margin: 0 20px 20px;
+      overflow: hidden;
+      border-radius: 16px;
+      position: relative;
+      height: 88px; /* Mobile height */
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      background-color: #0B1A4A; /* Dark blue fallback */
+    }
 
     * {
       margin: 0;
@@ -2524,6 +2535,17 @@
         <div class="featured-products" id="featuredProducts"></div>
       </main>
 
+      <!-- NEW: Communication Banner Section -->
+      <section class="communication-carousel" id="communicationCarousel">
+        <div class="slides">
+          <div class="slide" data-action="openWhatsApp" data-target="refer" style="cursor: pointer;">
+            <img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1758117187/Coastal_Fresh_Refer_Banner_1080x320_m9vx4s.png" alt="Refer a friend and earn">
+          </div>
+          <div class="slide" data-action="openWhatsApp" data-target="refer" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1758117187/Coastal_Fresh_Refer_Banner_1080x320_m9vx4s.png" alt="Refer a friend and earn"></div>
+        </div>
+        <div class="carousel-dots"></div>
+      </section>
+
       <!-- NEW: Customer Reviews Section -->
       <section class="section">
         <h2 class="section-title">What Our Customers Say</h2>
@@ -3003,8 +3025,10 @@
       setupEvents();
       lazyLoadBanners();
       initFlashSaleTimer();
-      initCarousel();
-      // Start the typewriter after a brief delay
+      // Initialize all carousels
+      initCarousel('#slides');
+      initCarousel('#communicationCarousel .slides');
+
       setTimeout(startTypewriter, 1000);
     }
 
@@ -3083,6 +3107,9 @@
             if (!isNaN(productId)) {
               showProductPopup(productId);
             }
+          } else if (action === 'openWhatsApp' && typeof openWhatsApp === 'function') {
+            // NEW: Handle whatsapp action for banners
+            openWhatsApp(slideTarget);
           }
         }
         
@@ -4128,108 +4155,92 @@
       }
     }
 
-    function initCarousel() {
-      const slides = document.getElementById('slides');
+    function initCarousel(slidesSelector) {
+      const slides = document.querySelector(slidesSelector);
       if (!slides) return;
-      const total = slides.children.length || 1;
-      
-      // Create dots
-      const dotsContainer = document.getElementById('carouselDots');
-      if (dotsContainer) {
-        dotsContainer.innerHTML = '';
-        for (let i = 0; i < total; i++) {
-          const dot = document.createElement('div');
-          dot.className = `dot ${i === 0 ? 'active' : ''}`;
-          dotsContainer.appendChild(dot);
-        }
+
+      const carouselContainer = slides.closest('.carousel, .communication-carousel');
+      if (!carouselContainer) return;
+
+      const dotsContainer = carouselContainer.querySelector('.carousel-dots');
+      const total = slides.children.length;
+      if (total <= 1) {
+        if(dotsContainer) dotsContainer.style.display = 'none';
+        return; // Don't initialize for single-slide carousels
       }
 
+      let currentIndex = 0;
+      let timer = null;
+
+      // Create dots if container exists
+      if (dotsContainer) {
+          dotsContainer.innerHTML = Array.from({ length: total }, (_, i) => 
+              `<div class="dot ${i === 0 ? 'active' : ''}"></div>`
+          ).join('');
+      }
       const dots = dotsContainer ? dotsContainer.children : [];
 
       function goToSlide(index) {
-        if (!slides || slides.children.length === 0) return;
-        currentCarouselIndex = index;
+        currentIndex = index;
         slides.style.transform = `translateX(${-index * 100}%)`;
-        
-        // Update dots
-        Array.from(dots).forEach((dot, i) => dot.classList.toggle('active', i === index));
+        if (dotsContainer) {
+          Array.from(dots).forEach((dot, i) => dot.classList.toggle('active', i === index));
+        }
       }
 
       function next() { 
-        goToSlide((currentCarouselIndex + 1) % total);
+        goToSlide((currentIndex + 1) % total);
       }
 
-      carouselTimer = setInterval(next, 5000);
+      function startTimer() {
+        stopTimer();
+        timer = setInterval(next, 5000);
+      }
 
-      if (slides.parentElement) {
-        slides.parentElement.addEventListener('mouseenter', () => { 
-          if (carouselTimer) clearInterval(carouselTimer); 
-        });
-        slides.parentElement.addEventListener('mouseleave', () => { 
-          if (carouselTimer) clearInterval(carouselTimer); 
-          carouselTimer = setInterval(next, 5000); 
-        });
-        
-        // Add touch events for mobile swipe
-        let startX = 0;
-        let isDragging = false;
-        
-        slides.parentElement.addEventListener('touchstart', (e) => {
-          startX = e.touches[0].clientX;
-          isDragging = true;
-          if (carouselTimer) clearInterval(carouselTimer);
-        });
-        
-        slides.parentElement.addEventListener('touchmove', (e) => {
-          if (!isDragging) return;
-          const currentX = e.touches[0].clientX;
-          const diff = startX - currentX;
-          
-          // Move slides partially with drag
-          slides.style.transform = `translateX(calc(${-currentCarouselIndex * 100}% - ${diff}px))`;
-        });
-        
-        slides.parentElement.addEventListener('touchend', (e) => {
-          if (!isDragging) return;
+      function stopTimer() {
+        clearInterval(timer);
+      }
+
+      carouselContainer.addEventListener('mouseenter', stopTimer);
+      carouselContainer.addEventListener('mouseleave', startTimer);
+      
+      // Add touch events for mobile swipe
+      let startX = 0;
+      let isDragging = false;
+      
+      carouselContainer.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        isDragging = true;
+        stopTimer();
+      });
+      
+      carouselContainer.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const currentX = e.touches[0].clientX;
+        const diff = startX - currentX;
+        slides.style.transform = `translateX(calc(${-currentIndex * 100}% - ${diff}px))`;
+      });
+      
+      carouselContainer.addEventListener('touchend', (e) => {
+        if (isDragging) {
           isDragging = false;
-          
           const endX = e.changedTouches[0].clientX;
           const diff = startX - endX;
-          
-          // If swipe was significant enough, change slide
           if (Math.abs(diff) > 50) {
-            if (diff > 0) {
-              // Swipe left - next slide
-              goToSlide((currentCarouselIndex + 1) % total);
-            } else {
-              // Swipe right - previous slide
-              goToSlide((currentCarouselIndex - 1 + total) % total);
-            }
-            // Restart timer
-            carouselTimer = setInterval(next, 5000);
+            goToSlide(diff > 0 ? (currentIndex + 1) % total : (currentIndex - 1 + total) % total);
           } else {
-            // Return to current slide
-            goToSlide(currentCarouselIndex);
+            goToSlide(currentIndex);
           }
-        });
-      }
-
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) { 
-          if (carouselTimer) clearInterval(carouselTimer); 
-        } else { 
-          if (carouselTimer) clearInterval(carouselTimer); 
-          carouselTimer = setInterval(next, 5000); 
+          startTimer();
         }
       });
+
+      document.addEventListener('visibilitychange', () => {
+        document.hidden ? stopTimer() : startTimer();
+      });
+
+      startTimer();
     }
-// Add cleanup when page unloads
-window.addEventListener('beforeunload', () => {
-  if (carouselTimer) {
-    clearInterval(carouselTimer);
-    carouselTimer = null;
-  }
-});
 
     function startTypewriter() {
       if (typewriterTimer) clearTimeout(typewriterTimer);
@@ -4266,13 +4277,14 @@ window.addEventListener('beforeunload', () => {
     }
 
     function lazyLoadBanners() {
-      const carousel = document.querySelector('.carousel');
-      if (!carousel) return;
+      const carousels = document.querySelectorAll('.carousel, .communication-carousel');
+      if (carousels.length === 0) return;
 
       const observer = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            const images = carousel.querySelectorAll('img[data-src]');
+            const carouselElement = entry.target;
+            const images = carouselElement.querySelectorAll('img[data-src]');
             images.forEach(img => {
               img.src = img.dataset.src;
               img.removeAttribute('data-src');
@@ -4280,11 +4292,11 @@ window.addEventListener('beforeunload', () => {
                 img.parentElement.classList.add('loaded');
               };
             });
-            observer.unobserve(carousel); // Stop observing once triggered
+            observer.unobserve(carouselElement); // Stop observing this specific carousel
           }
         });
       }, { rootMargin: '100px' }); // Start loading when it's 100px away from viewport
-      observer.observe(carousel);
+      carousels.forEach(carousel => observer.observe(carousel));
     }
 
     function saveCart() {
