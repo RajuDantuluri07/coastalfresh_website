@@ -578,6 +578,7 @@
       align-items: center;
       padding: 0 20px;
       margin-bottom: 16px;
+      gap: 12px; /* Add space between title and timer */
     }
     
     .flash-sale-section .section-title {
@@ -586,6 +587,11 @@
       font-size: 16px; /* Slightly smaller to fit nicely */
       font-weight: 700; /* Bolder for impact */
       justify-content: flex-start; /* Align left */
+      /* NEW: Prevent wrapping and handle overflow */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 1; /* Allow title to shrink if needed */
     }
 
     .countdown-timer {
@@ -593,6 +599,7 @@
       align-items: center;
       gap: 4px; /* Tighter gap for a compact look */
       margin-bottom: 0; /* Reset margin */
+      flex-shrink: 0; /* Prevent timer from shrinking */
     }
 
     .timer-label {
