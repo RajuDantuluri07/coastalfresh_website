@@ -1098,64 +1098,6 @@
       margin-bottom: 20px;
     }
 
-    /* NEW: Benefit Highlights */
-    .popup-benefits {
-      background: var(--primary-light);
-      border-radius: 12px;
-      padding: 16px;
-      margin: 20px 0;
-      border: 1px solid var(--accent-color);
-    }
-    
-    .popup-benefits-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
-    
-    .popup-benefits-list {
-      list-style: none;
-      padding: 0;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    
-    .popup-benefits-item {
-      font-size: 13px;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .popup-benefits-item i {
-      color: var(--success-color);
-    }
-    
-    /* NEW: Product Page Reviews */
-    .popup-reviews-section {
-      padding: 20px 0;
-      border-top: 1px solid var(--border-color);
-    }
-    
-    .popup-reviews-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 16px;
-    }
-    
-    /* NEW: Freshness Guarantee Badge */
-    .popup-guarantee-badge {
-      background: var(--bg-light);
-      border-radius: 12px;
-      padding: 12px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-bottom: 20px;
-    }
-
     .popup-feature {
       text-align: center;
       flex: 1;
@@ -2633,68 +2575,12 @@
           <div class="popup-price-section" id="popupPriceSection"></div>
           <div class="popup-description-container" id="popupDescriptionContainer"></div>
         </div>
-
-        <div class="popup-highlights-section" style="padding-top: 0;">
-          <div class="popup-highlights-header">
-            <h2 class="popup-highlights-title">Product Details</h2>
-            <button class="popup-expand-btn" aria-label="Toggle Product Details"><i class="fas fa-chevron-up"></i></button>
-          </div>
-          
-          <div class="popup-highlights-content" id="popupHighlightsContent">
-            <div class="popup-highlight-item">
-              <span class="popup-highlight-label">Gross Weight</span>
-              <span class="popup-highlight-value" id="popupGrossWeight"></span>
-            </div>
-            <div class="popup-highlight-item">
-              <span class="popup-highlight-label">Net Weight</span>
-              <span class="popup-highlight-value" id="popupNetWeight"></span>
-            </div>
-            <div class="popup-highlight-item">
-              <span class="popup-highlight-label">Type</span>
-              <span class="popup-highlight-value" id="popupType"></span>
-            </div>
-          </div>
-        </div>
-
-        <!-- NEW: Benefit Highlights -->
-        <div class="popup-info">
-          <div class="popup-benefits">
-            <h3 class="popup-benefits-title">Why Coastal Fresh?</h3>
-            <ul class="popup-benefits-list">
-              <li class="popup-benefits-item"><i class="fas fa-check-circle"></i> Fresh daily catch</li>
-              <li class="popup-benefits-item"><i class="fas fa-check-circle"></i> Hygienically cleaned</li>
-              <li class="popup-benefits-item"><i class="fas fa-check-circle"></i> 100% ready-to-cook</li>
-              <li class="popup-benefits-item"><i class="fas fa-check-circle"></i> Next-day delivery</li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- NEW: Customer Reviews on Product Page -->
-        <div class="popup-reviews-section popup-info">
-          <h3 class="popup-reviews-title">Customer Reviews</h3>
-          <div id="popupReviews">
-            <!-- Static reviews for demonstration -->
-            <div class="review-card" style="max-width: 100%; margin-bottom: 16px;">
-              <div class="review-header"><div class="review-avatar-initials">P</div><div class="review-customer"><div class="review-name">Priya S.</div><div class="review-location">Gachibowli</div></div></div>
-              <div class="review-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-              <p class="review-body">“The freshest seafood I’ve had in Hyderabad! The pomfret was cleaned perfectly. Highly recommend!”</p>
-            </div>
-            <div class="review-card" style="max-width: 100%;">
-              <div class="review-header"><div class="review-avatar-initials">A</div><div class="review-customer"><div class="review-name">Amit K.</div><div class="review-location">Jubilee Hills</div></div></div>
-              <div class="review-rating"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-              <p class="review-body">“Finally, authentic coastal taste in the city. The prawns were juicy and delicious.”</p>
-            </div>
-          </div>
-        </div>
       </div>
 
       <!-- Bottom Section -->
       <div class="popup-bottom-section">
         <div class="popup-bottom-reassurance">
           <i class="fas fa-shield-alt"></i><span>Hygienic, Fresh &amp; Ready to Cook</span>
-        </div>
-        <div class="popup-guarantee-badge">
-          <strong>Freshness Guarantee:</strong> No preservatives & 100% refund if not satisfied.
         </div>
         <div class="popup-actions-bar">
           <div class="popup-quantity-controls">
@@ -2892,7 +2778,6 @@
     /* NEW: Variables for popup functionality */
     let currentPopupImageIndex = 0;
     let isPopupFavorite = false;
-    let popupHighlightsExpanded = true;
     let popupDetailsExpanded = false;
     let popupDescriptionExpanded = false;
     let popupProduct = null;
@@ -3075,8 +2960,6 @@
       // Product Popup buttons
       document.querySelector('.popup-back-btn').addEventListener('click', closePopup);
       document.querySelector('.popup-action-btn.favorite').addEventListener('click', toggleFavorite);
-      document.querySelector('.popup-action-btn.share').addEventListener('click', shareProduct);
-      document.querySelector('.popup-highlights-header').addEventListener('click', togglePopupHighlights);
       document.querySelector('.popup-qty-btn.dec').addEventListener('click', () => changePopupQty(-1));
       document.querySelector('.popup-qty-btn.inc').addEventListener('click', () => changePopupQty(1));
       document.querySelector('.popup-add-to-cart-btn').addEventListener('click', addPopupToCart);
@@ -3393,20 +3276,7 @@
       const contentWrapper = document.getElementById('popupContentWrapper');
       if (contentWrapper) contentWrapper.scrollTop = 0;
       
-      // Set product details in the expandable section
-      document.getElementById('popupGrossWeight').textContent = DOMPurify.sanitize(product.gross);
-      document.getElementById('popupNetWeight').textContent = DOMPurify.sanitize(product.net);
-      document.getElementById('popupType').textContent = DOMPurify.sanitize(product.category); // Already sanitized, but good practice
-
       popup.classList.add('active');
-
-      // --- FIX: Ensure product details are visible by default ---
-      popupHighlightsExpanded = true;
-      const highlightsContent = document.getElementById('popupHighlightsContent');
-      const expandBtn = document.querySelector('.popup-expand-btn i');
-      highlightsContent.style.display = 'block';
-      expandBtn.className = 'fas fa-chevron-up';
-
       isPopupOpen = true;
       document.body.classList.add('popup-open');
       
@@ -3510,22 +3380,6 @@
           content_type: 'product',
           item_id: popupProduct.id,
         });
-      }
-    }
-
-    /* NEW: Function to toggle highlights in popup */
-    function togglePopupHighlights() {
-      const highlightsContent = document.getElementById('popupHighlightsContent');
-      const expandBtnIcon = document.querySelector('.popup-expand-btn i');
-      
-      popupHighlightsExpanded = !popupHighlightsExpanded;
-      
-      if (popupHighlightsExpanded) {
-        highlightsContent.style.display = 'block'; // Or 'grid', 'flex', etc.
-        expandBtnIcon.className = 'fas fa-chevron-up';
-      } else {
-        highlightsContent.style.display = 'none';
-        expandBtnIcon.className = 'fas fa-chevron-down';
       }
     }
 
