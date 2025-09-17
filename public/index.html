@@ -803,7 +803,7 @@
       position: absolute;
       top: 8px;
       left: 8px;
-      background: var(--error-color);
+      background: var(--success-color); /* Changed for distinction from flash sale timer */
       color: white;
       padding: 4px 8px;
       border-radius: 8px;
@@ -2449,7 +2449,7 @@
       <!-- NEW: Flash Sale Section -->
       <section class="flash-sale-section" id="flashSaleSection">
         <div class="flash-sale-header">
-          <h2 class="section-title">🔥 Today's Fresh Catch</h2>
+          <h2 class="section-title">🔥 Fresh Catch</h2>
           <div class="countdown-timer" id="countdownTimer">
             <span class="timer-label">Ends in:</span>
             <span class="timer-box hours">00</span>
@@ -2863,9 +2863,9 @@
     ];
 
     const ENABLE_FLASH_SALE = true; // NEW: Set to false to hide the flash sale section
-    const FLASH_SALE_PRODUCT_IDS = [2, 8, 15, 27]; // Configurable product IDs for the flash sale
+    const FLASH_SALE_PRODUCT_IDS = [11, 12, 20, 22]; // Configurable product IDs for the flash sale
     const FLASH_SALE_DURATION_HOURS = 12; // Configurable duration in hours
-    const FEATURED_PRODUCT_IDS = [1, 11, 20, 15];
+    const FEATURED_PRODUCT_IDS = [17, 13, 21, 1];
     const PROFILE_IMAGE_URL = "https://res.cloudinary.com/dpyniai9l/image/upload/v1756914772/Coastal_Fresh_Sea_food_hyderabad_-_website_banner_shqapq.png";
     const FREE_DELIVERY_THRESHOLD = 1500;
     const ITEMS_PER_PAGE = 8;
