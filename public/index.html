@@ -2491,7 +2491,7 @@
       <div class="carousel">
         <div class="slides" id="slides" aria-hidden="true">
           <div class="slide" data-action="showPage" data-target="catalog" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" alt="Coastal Fresh Banner - Order Now"></div>
-          <div class="slide" data-action="showPage" data-target="profilePage" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z.png" alt="Prawns"></div>
+          <div class="slide" data-action="showProductPopup" data-target="20" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z.png" alt="Prawns"></div>
           <div class="slide" data-action="showProductPopup" data-target="27" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png" alt="Homemade Pickles Banner"></div>
         </div>
         <div class="carousel-dots" id="carouselDots"></div>
@@ -3995,6 +3995,16 @@
         // If not visible (e.g., from product card), just update data
         delete cart[id];
         saveCart();
+
+        // Track removal
+        if (typeof gtag === 'function') {
+          const product = products.find(p => p.id === parseInt(id));
+          gtag('event', 'remove_from_cart', {
+            currency: 'INR',
+            value: product ? product.finalPrice : 0, // Value is based on one item being removed
+            items: [{ item_id: id, item_name: product ? product.name : '', quantity: 1 }]
+          });
+        }
         updateCartUI(); // This will update badges
         updateProductCardState(id); // This will update the card UI
       }
@@ -4002,11 +4012,6 @@
       // Track removal
       if (typeof gtag === 'function') {
         const product = products.find(p => p.id === parseInt(id));
-        gtag('event', 'remove_from_cart', {
-          currency: 'INR',
-          value: product ? product.finalPrice * cart[id] : 0,
-          items: [{ item_id: id, item_name: product ? product.name : '' }]
-        });
       }
     }
 
