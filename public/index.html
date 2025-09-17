@@ -1328,7 +1328,8 @@
       box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
       gap: 12px;
       flex-shrink: 0; /* Prevent footer from shrinking */
-      margin-bottom: 20px; /* NEW: Lift footer above mobile navigation */
+      /* FIX: Use safe-area padding for mobile navigation */
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
     }
 
 /* NEW: Reassurance text in sticky footer */
@@ -1685,7 +1686,7 @@
 
     .cart-footer {
   position: fixed;
-  bottom: 20px; /* UPDATED: Lift footer above mobile navigation */
+  bottom: 0; /* Stick to the absolute bottom */
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
@@ -1694,6 +1695,8 @@
   background: var(--bg-white);
   box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
   border-top: 1px solid var(--border-color);
+  /* FIX: Use safe-area padding for mobile navigation */
+  padding-bottom: env(safe-area-inset-bottom);
 }
     /* --- NEW: Enhanced Checkout Button --- */
     .checkout-btn {
@@ -2101,6 +2104,8 @@
       max-width: var(--app-max-width);
       height: var(--bottom-nav-height);
     }
+    /* FIX: Add safe-area padding to the bottom navigation bar */
+    .bottom-bar { padding-bottom: env(safe-area-inset-bottom); }
 
     @media (min-width: 481px) {
       .bottom-bar {
