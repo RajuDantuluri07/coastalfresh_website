@@ -570,24 +570,33 @@
       padding: 20px 0;
       margin-bottom: 20px;
     }
-
-    .flash-sale-section .section-title {
+    
+    /* NEW: Header to align title and timer on one line */
+    .flash-sale-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       padding: 0 20px;
-      margin-bottom: 12px;
-      font-size: 18px;
-      justify-content: center; /* Center the shorter title */
+      margin-bottom: 16px;
+    }
+    
+    .flash-sale-section .section-title {
+      padding: 0; /* Reset padding */
+      margin-bottom: 0; /* Reset margin */
+      font-size: 16px; /* Slightly smaller to fit nicely */
+      font-weight: 700; /* Bolder for impact */
+      justify-content: flex-start; /* Align left */
     }
 
     .countdown-timer {
       display: flex;
-      justify-content: center;
       align-items: center;
-      gap: 8px; /* Slightly reduced gap */
-      margin-bottom: 20px;
+      gap: 4px; /* Tighter gap for a compact look */
+      margin-bottom: 0; /* Reset margin */
     }
 
     .timer-label {
-      font-size: 14px;
+      font-size: 12px; /* Smaller label */
       font-weight: 500;
       color: var(--text-secondary);
     }
@@ -595,11 +604,11 @@
     .timer-box {
       background: var(--primary-dark);
       color: white;
-      padding: 6px 10px;
+      padding: 5px 8px; /* Slightly smaller box */
       border-radius: 6px;
-      font-size: 18px;
+      font-size: 16px; /* Slightly smaller font */
       font-weight: 700;
-      min-width: 40px;
+      min-width: 34px; /* Adjusted min-width */
       text-align: center;
       line-height: 1;
     }
@@ -2432,14 +2441,16 @@
 
       <!-- NEW: Flash Sale Section -->
       <section class="flash-sale-section" id="flashSaleSection">
-        <h2 class="section-title">🔥 Today's Fresh Catch</h2>
-        <div class="countdown-timer" id="countdownTimer">
-          <span class="timer-label">Ends in:</span>
-          <span class="timer-box hours">00</span>
-          <span class="timer-separator">:</span>
-          <span class="timer-box minutes">00</span>
-          <span class="timer-separator">:</span>
-          <span class="timer-box seconds">00</span>
+        <div class="flash-sale-header">
+          <h2 class="section-title">🔥 Today's Fresh Catch</h2>
+          <div class="countdown-timer" id="countdownTimer">
+            <span class="timer-label">Ends in:</span>
+            <span class="timer-box hours">00</span>
+            <span class="timer-separator">:</span>
+            <span class="timer-box minutes">00</span>
+            <span class="timer-separator">:</span>
+            <span class="timer-box seconds">00</span>
+          </div>
         </div>
         <div class="flash-sale-products" id="flashSaleProducts"></div>
       </section>
