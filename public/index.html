@@ -4997,9 +4997,10 @@
 
       // 3. If no address, redirect to address page
       if (!userAddress) {
-        showToast('Please add or select a default delivery address.');
-        await renderAddressList();
+        // NEW: Directly show the address page and form for a smoother flow.
+        showToast('Please add a delivery address to continue.');
         showPage('addressPage');
+        showAddressForm(); // Explicitly show the form.
         closeCart(); // Close cart to show the address page clearly
         return;
       }
@@ -5563,13 +5564,14 @@
         const snapshot = await addressesRef.orderBy('updatedAt', 'desc').get();
 
         if (snapshot.empty) {
-          listContainer.innerHTML = ` 
+          listContainer.innerHTML = `
             <div class="empty-state-address">
               <i class="fas fa-map-marker-alt"></i>
               <h3>No Saved Addresses</h3>
               <p>Add an address for faster checkout.</p>
             </div>
-          `; // This part is now just for display, the form will be shown.
+          `;
+          // Don't automatically show the form here unless it's part of the checkout flow.
           showAddressForm(); // Automatically show the form if no addresses exist.
         } else {
           let addressesHTML = snapshot.docs.map(doc => {
