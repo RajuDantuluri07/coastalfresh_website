@@ -773,23 +773,39 @@
     }
 
     .category {
-      background: var(--bg-light);
-      border: none;
-      border-radius: 20px;
-      padding: 10px 18px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-secondary);
-      white-space: nowrap;
-      cursor: pointer;
-      transition: all 0.2s;
-      flex-shrink: 0;
+      background: var(--bg-light); /* UPDATED */
+      border: none; /* UPDATED */
+      border-radius: 20px; /* UPDATED */
+      padding: 8px 16px; /* UPDATED */
+      font-size: 14px; /* UPDATED */
+      font-weight: 500; /* UPDATED */
+      color: var(--text-secondary); /* UPDATED */
+      white-space: nowrap; /* UPDATED */
+      cursor: pointer; /* UPDATED */
+      transition: all 0.2s; /* UPDATED */
+      flex-shrink: 0; /* UPDATED */
+      display: flex; /* NEW */
+      align-items: center; /* NEW */
+      gap: 8px; /* NEW */
+    }
+    
+    /* NEW: Icon inside category button */
+    .category-icon {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      transition: filter 0.2s ease; /* NEW: Smooth transition for icon color */
     }
     
     .category.active {
       background: var(--accent-color); /* Use bright accent for active category */
       color: var(--bg-white);
       font-weight: 700;
+    }
+
+    /* NEW: Make icon white on active category */
+    .category.active .category-icon {
+      filter: brightness(0) invert(1);
     }
 
     /* Products Grid */
@@ -2547,11 +2563,7 @@
 
       <main class="section">
         <div class="categories" id="categories">
-          <button class="category active" data-category="All">All</button>
-          <button class="category" data-category="Fish">Fish</button>
-          <button class="category" data-category="Prawns">Prawns</button>
-          <button class="category" data-category="Crabs">Crabs</button>
-          <button class="category" data-category="Pickles">Pickles</button>
+          <!-- Categories will be injected here by JS -->
         </div>
         <div class="products" id="catalogProducts"></div>
       </main>
@@ -2946,6 +2958,15 @@
       }
     ];
 
+    /* NEW: Category Data with Icons */
+    const CATEGORIES_DATA = [
+      { key: 'All',    label: 'All',    icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/shopping_yblohc.png' },
+      { key: 'Fish',   label: 'Fish',   icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/food_yircgb.png' },
+      { key: 'Prawns', label: 'Prawns', icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005093/shrimp_1_yzblqb.png' },
+      { key: 'Crabs',  label: 'Crabs',  icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/crab_n5ukwx.png' },
+      { key: 'Pickles',label: 'Pickles',icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005242/mason-jar_a5mtg4.png' }
+    ];
+
     const ENABLE_FLASH_SALE = true; // NEW: Set to false to hide the flash sale section
     const FLASH_SALE_PRODUCT_IDS = [11, 12, 20, 22]; // Configurable product IDs for the flash sale
     const FLASH_SALE_DURATION_HOURS = 12; // Configurable duration in hours
@@ -3010,6 +3031,7 @@
 
       // These functions can run independently
       renderTrustIcons();
+      renderCategories(); // NEW: Render categories dynamically
       renderCustomerReviews();
       setupEvents();
       lazyLoadBanners();
@@ -3238,6 +3260,20 @@
         container.appendChild(item);
       });
     }
+
+    /* NEW: Render Categories with Icons */
+    function renderCategories() {
+      const container = document.getElementById('categories');
+      if (!container) return;
+
+      container.innerHTML = CATEGORIES_DATA.map((cat, index) => `
+        <button class="category ${index === 0 ? 'active' : ''}" data-category="${cat.key}">
+          <img src="${cat.icon}" alt="${cat.label}" class="category-icon" loading="lazy">
+          <span>${cat.label}</span>
+        </button>
+      `).join('');
+    }
+    /* ===== End of New Function ===== */
 
     /* ===== NEW: Render Customer Reviews ===== */
     function renderCustomerReviews() {
