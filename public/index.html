@@ -3194,7 +3194,7 @@
       document.querySelector('.popup-add-to-cart-btn').addEventListener('click', addPopupToCart);
 
       // Cart page buttons
-      document.querySelector('.empty-cart-btn').addEventListener('click', () => { showPage('catalog'); closeCart(); });
+      document.querySelector('#cartModal .empty-cart-btn').addEventListener('click', () => { showPage('catalog'); closeCart(); });
       document.querySelector('#ordersPage .empty-cart-btn').addEventListener('click', () => showPage('home'));
       document.querySelector('.checkout-btn').addEventListener('click', checkout);
       // Bottom Navigation
