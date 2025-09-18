@@ -113,6 +113,10 @@
   <!-- DOMPurify (for final safe sanitization if needed) -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js" crossorigin="anonymous"></script>
 
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
   <style>
     /* CSS Variables for consistency */
     :root {
@@ -168,6 +172,158 @@
       background-color: #0B1A4A; /* Dark blue fallback */
     }
 
+    /* --- REVAMPED: Login Modal Styles (based on new design) --- */
+    .login-modal {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: var(--app-max-width);
+      height: 100%;
+      background: var(--bg-light);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .login-modal.active {
+      display: flex;
+    }
+
+    .login-modal .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--bg-white);
+      border-radius: 16px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.06);
+      padding: 28px 22px;
+      position: relative;
+    }
+
+    .login-modal .back-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+
+    .login-modal .title {
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 6px;
+      color: #0f3642;
+    }
+
+    .login-modal .subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .login-form {
+      display: none;
+    }
+
+    .login-form.active {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .login-modal label {
+      font-size: 13px;
+      color: #475b62;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .login-modal .input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid #e6eef1;
+      background: #fbfeff;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .login-modal .input:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 6px 18px rgba(10,119,166,0.08);
+    }
+
+    .login-modal .cta {
+      padding: 13px;
+      border-radius: 12px;
+      border: none;
+      background: var(--primary-color);
+      color: #fff;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(6,102,143,0.12);
+    }
+
+    .login-modal .row {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .login-modal .row a {
+      color: var(--accent-color);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .login-modal .or {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 18px 0;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+
+    .login-modal .hr {
+      flex: 1;
+      height: 1px;
+      background: #e8f0f3;
+      border-radius: 2px;
+    }
+
+    .login-modal .socials {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .login-modal .social-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #e6eef1;
+      background: #fff;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .login-modal .google { color: #DB4437; }
+    .login-modal .facebook { color: #4267B2; }
+
+    .login-modal .social-btn .fab {
+      font-size: 18px;
+    }
     * {
       margin: 0;
       padding: 0;
@@ -2670,13 +2826,16 @@
             <i class="fas fa-user"></i>
           </div>
           <div class="profile-user-info">
-            <h2>Guest User</h2>
-            <p>You are browsing as a guest</p>
+            <h2 id="profileUserName">Guest User</h2>
+            <p id="profileUserStatus">You are browsing as a guest. <a href="#" id="profileLoginLink">Login</a></p>
           </div>
         </div>
 
         <!-- Action Group -->
         <div class="profile-actions">
+          <button class="profile-button" id="loginBtn" style="display: none;">
+            <i class="fas fa-sign-in-alt"></i> Login / Sign Up
+          </button>
           <button class="profile-button refer">
             <i class="fas fa-share-alt"></i> Refer & Earn
           </button>
@@ -2688,6 +2847,9 @@
           </button>
           <button class="profile-button support">
             <i class="fas fa-headset"></i> Contact Us
+          </button>
+          <button class="profile-button" id="logoutBtn" style="display: none; color: var(--error-color);">
+            <i class="fas fa-sign-out-alt"></i> Logout
           </button>
         </div>
 
@@ -2728,6 +2890,58 @@
           <button class="empty-cart-btn">Start Shopping</button>
         </div>
       </main>
+    </div>
+
+    <!-- Login/Signup Modal -->
+    <div class="login-modal" id="loginModal">
+      <div class="login-card">
+        <button class="back-btn" aria-label="Close Login"><i class="fas fa-times"></i></button>
+        <div class="title" id="authTitle">Get Started</div>
+        <div class="subtitle" id="authSubtitle">Sign up to order the freshest coastal seafood</div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="login-form">
+          <div>
+            <label for="loginEmail">Email Address</label>
+            <input id="loginEmail" class="input" type="email" placeholder="you@example.com" required>
+          </div>
+          <div>
+            <label for="loginPassword">Password</label>
+            <input id="loginPassword" class="input" type="password" required>
+          </div>
+          <button class="cta" type="submit">Login</button>
+          <div class="row" style="display: flex; justify-content: space-between;">
+            <a href="#" id="showSignup">Create Account</a>
+            <a href="#" id="forgotPassword">Forgot Password?</a>
+          </div>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signupForm" class="login-form active">
+          <div>
+            <label for="signupEmail">Email Address</label>
+            <input id="signupEmail" class="input" type="email" placeholder="you@example.com" required>
+          </div>
+          <div>
+            <label for="signupPassword">Create Password</label>
+            <input id="signupPassword" class="input" type="password" placeholder="At least 8 characters" required>
+          </div>
+          <button class="cta" type="submit">Sign Up</button>
+          <div class="row" style="margin-top:12px;">
+            Already have an account? <a href="#" id="showLogin">Login</a>
+          </div>
+        </form>
+
+        <div class="or">
+          <div class="hr"></div>OR<div class="hr"></div>
+        </div>
+
+        <div class="socials">
+          <button id="googleLoginBtn" type="button" class="social-btn google"><i class="fab fa-google"></i> Google</button>
+          <button id="facebookLoginBtn" type="button" class="social-btn facebook"><i class="fab fa-facebook-f"></i> Facebook</button>
+        </div>
+        <p id="authError" style="color: var(--error-color); text-align: center; margin-top: 16px; font-size: 14px;"></p>
+      </div>
     </div>
 
 
@@ -2925,6 +3139,25 @@
   }
   </script>
   <script>
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyCCeLy8PNUK480m_o-GpRWbdRB59R3UTqw", // This is safe to be public
+    authDomain: "coastal-fresh---sea-foods.firebaseapp.com",
+    projectId: "coastal-fresh---sea-foods",
+    storageBucket: "coastal-fresh---sea-foods.appspot.com",
+    messagingSenderId: "782759620106",
+    appId: "1:782759620106:web:960ec7c125faa30675f9f3",
+    measurementId: "G-GSHMPRYPW1"
+  };
+
+  // Initialize Firebase
+  try {
+    firebase.initializeApp(firebaseConfig);
+  } catch(e) {
+    console.error("Firebase initialization error", e);
+  }
+  </script>
+  <script>
   (function() { // IIFE to avoid polluting global scope
     /* ===== App Configuration ===== */
     const TRUST_ICONS = [
@@ -2991,6 +3224,7 @@
     let isPopupOpen = false;
     let searchDebounceTimer = null;
     let typewriterTimer = null;
+    let currentUser = null;
     
     /* NEW: Variables for popup functionality */
     let currentPopupImageIndex = 0;
@@ -3001,6 +3235,9 @@
 
     /* ===== Init ===== */
     async function init() {
+      // Firebase Auth Listener
+      firebase.auth().onAuthStateChanged(handleAuthStateChange);
+
       try {
         const response = await fetch('/products.json');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -3155,6 +3392,33 @@
         }
       });
 
+      // Login Modal Close Button
+      document.querySelector('#loginModal .back-btn').addEventListener('click', closeLoginModal);
+
+      // Auth Form Submissions
+      document.getElementById('loginForm').addEventListener('submit', handleEmailLogin);
+      document.getElementById('signupForm').addEventListener('submit', handleEmailSignup);
+      document.getElementById('googleLoginBtn').addEventListener('click', handleGoogleLogin);
+      document.getElementById('facebookLoginBtn').addEventListener('click', handleFacebookLogin);
+      document.getElementById('forgotPassword').addEventListener('click', handlePasswordReset);
+
+      // NEW: Login/Signup form toggling
+      document.getElementById('showLogin').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('authTitle').textContent = 'Welcome Back';
+        document.getElementById('authSubtitle').textContent = 'Login to access your account';
+        document.getElementById('signupForm').classList.remove('active');
+        document.getElementById('loginForm').classList.add('active');
+        document.getElementById('authError').textContent = '';
+      });
+      document.getElementById('showSignup').addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('authTitle').textContent = 'Get Started';
+        document.getElementById('authSubtitle').textContent = 'Sign up to order the freshest coastal seafood';
+        document.getElementById('loginForm').classList.remove('active');
+        document.getElementById('signupForm').classList.add('active');
+        document.getElementById('authError').textContent = '';
+      });
       // --- Static Element Listeners ---
       // Header search inputs
       document.getElementById('catalogSearch').addEventListener('input', (e) => {
@@ -3209,6 +3473,9 @@
       document.querySelector('.profile-button.faq').addEventListener('click', () => showPage('faqPage'));
       document.querySelector('.profile-button.support').addEventListener('click', () => openWhatsApp('support'));
       document.querySelector('.profile-button.refer').addEventListener('click', () => openWhatsApp('refer'));
+      document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+      document.getElementById('loginBtn').addEventListener('click', showLoginModal);
+      document.getElementById('profileLoginLink').addEventListener('click', showLoginModal);
 
       // Product Popup buttons
       document.querySelector('.popup-back-btn').addEventListener('click', closePopup);
@@ -3230,7 +3497,12 @@
         if (page === 'cart') {
           showCart();
         } else if (page) {
-          showPage(page);
+          if (page === 'profilePage' && !currentUser) {
+            // Allow showing profile page, but UI will prompt login
+            showPage(page);
+          } else {
+            showPage(page);
+          }
         }
       });
     }
@@ -3612,6 +3884,7 @@
       document.body.classList.add('popup-open');
       
       // Hide bottom navigation and cart popup when product popup is open
+      document.getElementById('loginModal').classList.remove('active');
       document.getElementById('bottomNav').style.display = 'none';
       
       // Track product view
@@ -3905,6 +4178,7 @@
       document.body.classList.add('popup-open');
       
       // Hide bottom navigation and cart popup when cart modal is open
+      document.getElementById('loginModal').classList.remove('active');
       document.getElementById('bottomNav').style.display = 'none';
       
       // Track cart view
@@ -3975,6 +4249,7 @@
       document.body.classList.remove('popup-open');
       
       // Show bottom navigation again when cart is closed
+      document.getElementById('loginModal').classList.remove('active');
       document.getElementById('bottomNav').style.display = 'flex';
     }
 
@@ -4131,7 +4406,7 @@
       }
 
       // Show/hide bottom navigation based on page
-      if (page === 'cart' || isPopupOpen) {
+      if (page === 'cart' || isPopupOpen || document.getElementById('loginModal').classList.contains('active')) {
         document.getElementById('bottomNav').style.display = 'none';
       } else {
         document.getElementById('bottomNav').style.display = 'flex';
@@ -4432,6 +4707,159 @@
 
   return sanitized;
 }
+
+    /* ===== NEW: Auth Functions ===== */
+    function showLoginModal(e) {
+      if (e) e.preventDefault();
+      document.getElementById('loginModal').classList.add('active');
+      document.body.classList.add('popup-open');
+      document.getElementById('bottomNav').style.display = 'none';
+      document.getElementById('authError').textContent = '';
+
+      // Reset titles to default signup view
+      document.getElementById('authTitle').textContent = 'Get Started';
+      document.getElementById('authSubtitle').textContent = 'Sign up to order the freshest coastal seafood';
+      // Reset to default signup view
+      document.getElementById('loginForm').classList.remove('active');
+      document.getElementById('signupForm').classList.add('active');
+
+
+    }
+
+    function closeLoginModal() {
+      document.getElementById('loginModal').classList.remove('active');
+      document.body.classList.remove('popup-open');
+      document.getElementById('bottomNav').style.display = 'flex';
+    }
+
+    function handleEmailSignup(e) {
+      e.preventDefault();
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      const authError = document.getElementById('authError');
+      authError.textContent = '';
+
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then(userCredential => {
+          showToast('Account created successfully!');
+          closeLoginModal();
+        })
+        .catch(error => {
+          authError.textContent = error.message;
+        });
+    }
+
+    function handleEmailLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const authError = document.getElementById('authError');
+      authError.textContent = '';
+
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(userCredential => {
+          showToast('Logged in successfully!');
+          closeLoginModal();
+        })
+        .catch(error => {
+          authError.textContent = error.message;
+        });
+    }
+
+    function handleGoogleLogin() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const authError = document.getElementById('authError');
+      authError.textContent = '';
+      firebase.auth().signInWithPopup(provider)
+        .then(result => {
+          showToast(`Welcome, ${result.user.displayName}!`);
+          closeLoginModal();
+        }).catch(error => {
+          authError.textContent = error.message;
+        });
+    }
+
+    function handleFacebookLogin() {
+      const provider = new firebase.auth.FacebookAuthProvider();
+      const authError = document.getElementById('authError');
+      authError.textContent = '';
+      firebase.auth().signInWithPopup(provider)
+        .then(result => {
+          showToast(`Welcome, ${result.user.displayName}!`);
+          closeLoginModal();
+        }).catch(error => {
+          authError.textContent = error.message;
+        });
+    }
+
+    function handlePasswordReset(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const authError = document.getElementById('authError');
+      if (!email) {
+        authError.textContent = 'Please enter your email in the login form to reset password.';
+        return;
+      }
+      firebase.auth().sendPasswordResetEmail(email)
+        .then(() => {
+          showToast('Password reset email sent!');
+        })
+        .catch(error => {
+          authError.textContent = error.message;
+        });
+    }
+
+    function handleLogout() {
+      firebase.auth().signOut().then(() => {
+        showToast('You have been logged out.');
+        showPage('home');
+      }).catch(error => {
+        console.error('Logout Error:', error);
+      });
+    }
+
+    function handleAuthStateChange(user) {
+      currentUser = user;
+      updateUIForAuthState();
+    }
+
+    function updateUIForAuthState() {
+      const userNameEl = document.getElementById('profileUserName');
+      const userStatusEl = document.getElementById('profileUserStatus');
+      const logoutBtn = document.getElementById('logoutBtn');
+      const loginBtn = document.getElementById('loginBtn');
+      const loginLink = document.getElementById('profileLoginLink');
+
+      if (currentUser) {
+        let displayName = 'Valued Customer';
+        if (currentUser.displayName) {
+          // For social logins (Google/Facebook), use the first name.
+          displayName = currentUser.displayName.split(' ')[0];
+        } else if (currentUser.email) {
+          // For email/password signups, derive a name from the email address.
+          const emailName = currentUser.email.split('@')[0];
+          // Clean up common separators like '.', '_', or '-' and take the first part.
+          const cleanedName = emailName.replace(/[\._-]/g, ' ').split(' ')[0];
+          displayName = cleanedName.charAt(0).toUpperCase() + cleanedName.slice(1);
+        }
+
+        userNameEl.textContent = displayName;
+        userStatusEl.textContent = currentUser.email;
+        logoutBtn.style.display = 'flex';
+        loginBtn.style.display = 'none';
+        if (loginLink) loginLink.style.display = 'none';
+      } else {
+        userNameEl.textContent = 'Guest User';
+        // The link is part of the HTML, so we just need to make sure it's visible
+        userStatusEl.innerHTML = 'You are browsing as a guest. <a href="#" id="profileLoginLink">Login</a>';
+        // Re-add event listener as innerHTML removes it
+        document.getElementById('profileLoginLink').addEventListener('click', showLoginModal);
+
+        logoutBtn.style.display = 'none';
+        loginBtn.style.display = 'none'; // Hide the big button as requested
+      }
+    }
+    /* ===== End of Auth Functions ===== */
 
     function trackAddToCart(id, qty) {
       const product = products.find(p => p.id === parseInt(id));
