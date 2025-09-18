@@ -2778,6 +2778,9 @@
  
         <!-- Action Group -->
         <div class="profile-actions">
+          <button class="profile-button" id="loginBtn" style="display: none;">
+            <i class="fas fa-sign-in-alt"></i> Login / Sign Up
+          </button>
           <button class="profile-button refer">
             <i class="fas fa-share-alt"></i> Refer & Earn
           </button>
@@ -3293,7 +3296,6 @@
       document.getElementById('googleLoginBtn').addEventListener('click', handleGoogleLogin);
       document.getElementById('facebookLoginBtn').addEventListener('click', handleFacebookLogin);
       document.getElementById('forgotPassword').addEventListener('click', handlePasswordReset);
-      });
 
       // NEW: Tooltip handler
       document.body.addEventListener('click', e => {
@@ -3359,6 +3361,7 @@
       document.querySelector('.profile-button.support').addEventListener('click', () => openWhatsApp('support'));
       document.querySelector('.profile-button.refer').addEventListener('click', () => openWhatsApp('refer'));
       document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+      document.getElementById('loginBtn').addEventListener('click', showLoginModal);
 
       // Product Popup buttons
       document.querySelector('.popup-back-btn').addEventListener('click', closePopup);
@@ -4699,15 +4702,18 @@
       const userNameEl = document.getElementById('profileUserName');
       const userEmailEl = document.getElementById('profileUserEmail');
       const logoutBtn = document.getElementById('logoutBtn');
+      const loginBtn = document.getElementById('loginBtn');
 
       if (currentUser) {
         userNameEl.textContent = currentUser.displayName || 'Valued Customer';
         userEmailEl.textContent = currentUser.email;
         logoutBtn.style.display = 'flex';
+        loginBtn.style.display = 'none';
       } else {
         userNameEl.textContent = 'Guest User';
         userEmailEl.textContent = 'Sign in for a better experience';
         logoutBtn.style.display = 'none';
+        loginBtn.style.display = 'flex';
       }
     }
     /* ===== End of Auth Functions ===== */
