@@ -4120,7 +4120,15 @@
       // Cart page buttons
       document.querySelector('#cartModal .empty-cart-btn').addEventListener('click', () => { showPage('catalog'); closeCart(); });
       document.querySelector('#ordersPage .empty-cart-btn').addEventListener('click', () => showPage('home'));
-      document.querySelector('.checkout-btn').addEventListener('click', () => checkout()); // Wrapped to handle async
+
+      // FIX: The checkout button is inside a container that gets re-rendered.
+      // Attach the listener to the static parent `cart-footer` to ensure it always works.
+      document.getElementById('cartFooter').addEventListener('click', (e) => {
+        if (e.target.closest('.checkout-btn')) {
+          checkout();
+        }
+      });
+
       // Bottom Navigation
       document.getElementById('bottomNav').addEventListener('click', e => {
         const navItem = e.target.closest('.nav-item');
