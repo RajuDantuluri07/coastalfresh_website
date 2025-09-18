@@ -2932,6 +2932,74 @@
         transform: translateY(1px);
         box-shadow: 0 2px 6px rgba(56, 142, 60, 0.3);
       }
+
+      /* NEW: Address List Styles */
+      #addressListContainer .address-item {
+        background: var(--bg-white);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        position: relative;
+        transition: border-color 0.2s;
+      }
+      #addressListContainer .address-item.default {
+        border-color: var(--primary-color);
+        border-width: 2px;
+        padding: 15px; /* Adjust for border */
+      }
+      #addressListContainer .address-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      #addressListContainer .address-name {
+        font-weight: 600;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      #addressListContainer .default-badge {
+        background: var(--primary-light);
+        color: var(--primary-dark);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      #addressListContainer .address-body {
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.5;
+        margin-bottom: 12px;
+      }
+      #addressListContainer .address-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        border-top: 1px solid var(--border-color);
+        padding-top: 12px;
+        margin-top: 12px;
+      }
+      /* NEW: Styles for action buttons in address list */
+      .address-action-btn {
+        background: none;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 4px;
+        transition: opacity 0.2s;
+      }
+      .address-action-btn:hover {
+        opacity: 0.7;
+      }
+      .set-default-btn { color: var(--primary-color); }
+      .edit-address-btn { color: var(--text-secondary); margin-left: auto; }
+      .delete-address-btn { color: var(--error-color); }
+
     </style>
 
     <!-- NEW: Orders Page -->
@@ -2968,34 +3036,42 @@
         </div>
       </header>
 
-      <main class="section" style="padding-top: 10px;">
-        <form id="addressForm" class="address-form">
-          <div class="form-group">
-            <label for="addressFullName">Full Name</label>
-            <input id="addressFullName" class="input" type="text" placeholder="Person receiving the order" required>
-          </div>
-          <div class="form-group">
-            <label for="addressMobile">Mobile Number</label>
-            <input id="addressMobile" class="input" type="tel" placeholder="10-digit mobile number" required pattern="\d{10}" title="Please enter a 10-digit mobile number.">
-          </div>
-          <div class="form-group">
-            <label for="addressHouse">House/Flat/Building Number</label>
-            <input id="addressHouse" class="input" type="text" placeholder="e.g., Flat 502, B-Wing" required>
-          </div>
-          <div class="form-group">
-            <label for="addressStreet">Street / Locality / Area</label>
-            <input id="addressStreet" class="input" type="text" placeholder="e.g., Kondapur" required>
-          </div>
-          <div class="form-group">
-            <label for="addressCity">City / Town</label>
-            <input id="addressCity" class="input" type="text" value="Hyderabad" required readonly>
-          </div>
-          <div class="form-group">
-            <label for="addressPincode">Pincode / ZIP Code</label>
-            <input id="addressPincode" class="input" type="text" placeholder="6-digit pincode" required pattern="\d{6}" title="Please enter a 6-digit pincode.">
-          </div>
-          <button class="cta" type="submit">Save Address</button>
-        </form>
+      <main class="section" style="padding-top: 10px; background-color: var(--bg-light); min-height: 100vh;">
+        <!-- Address List View -->
+        <div id="addressListContainer">
+          <!-- Addresses will be injected here by JS -->
+        </div>
+
+        <!-- Address Form View (initially hidden if addresses exist) -->
+        <div id="addressFormContainer" style="display: none;">
+          <form id="addressForm" class="address-form">
+            <div class="form-group">
+              <label for="addressFullName">Full Name</label>
+              <input id="addressFullName" class="input" type="text" placeholder="Person receiving the order" required>
+            </div>
+            <div class="form-group">
+              <label for="addressMobile">Mobile Number</label>
+              <input id="addressMobile" class="input" type="tel" placeholder="10-digit mobile number" required pattern="\d{10}" title="Please enter a 10-digit mobile number.">
+            </div>
+            <div class="form-group">
+              <label for="addressHouse">House/Flat/Building Number</label>
+              <input id="addressHouse" class="input" type="text" placeholder="e.g., Flat 502, B-Wing" required>
+            </div>
+            <div class="form-group">
+              <label for="addressStreet">Street / Locality / Area</label>
+              <input id="addressStreet" class="input" type="text" placeholder="e.g., Kondapur" required>
+            </div>
+            <div class="form-group">
+              <label for="addressCity">City / Town</label>
+              <input id="addressCity" class="input" type="text" value="Hyderabad" required readonly>
+            </div>
+            <div class="form-group">
+              <label for="addressPincode">Pincode / ZIP Code</label>
+              <input id="addressPincode" class="input" type="text" placeholder="6-digit pincode" required pattern="\d{6}" title="Please enter a 6-digit pincode.">
+            </div>
+            <button class="cta" type="submit">Save Address</button>
+          </form>
+        </div>
       </main>
     </div>
 
@@ -3333,6 +3409,7 @@
     let typewriterTimer = null;
     let db = null; // NEW: Firestore database instance
     let currentUser = null;
+    let editingAddressId = null; // NEW: To track which address is being edited
     
     /* NEW: Variables for popup functionality */
     let currentPopupImageIndex = 0;
@@ -3572,7 +3649,33 @@
       document.querySelector('#faqPage .back-btn').addEventListener('click', goBack);
       document.querySelector('#ordersPage .back-btn').addEventListener('click', goBack);
       document.querySelector('#profilePage .back-btn').addEventListener('click', goBack);
-      document.querySelector('#addressPage .back-btn').addEventListener('click', goBack);
+      document.querySelector('#addressPage .back-btn').addEventListener('click', () => {
+        // If we were editing, cancel the edit and show the list
+        if (editingAddressId) {
+          cancelEditAddress();
+        } else goBack();
+      });
+
+      // NEW: Event delegation for address list actions
+      document.getElementById('addressListContainer').addEventListener('click', e => {
+        const target = e.target;
+        if (target.id === 'addNewAddressBtn') {
+          showAddressForm();
+        } else {
+          const addressItem = target.closest('.address-item');
+          if (!addressItem) return;
+          const addressId = addressItem.dataset.id;
+
+          if (target.classList.contains('delete-address-btn')) {
+            deleteAddress(addressId);
+          } else if (target.classList.contains('set-default-btn')) {
+            setDefaultAddress(addressId);
+          } else if (target.classList.contains('edit-address-btn')) {
+            editAddress(addressId);
+          }
+        }
+      });
+
 
       // Address form submission
       document.getElementById('addressForm').addEventListener('submit', async (e) => {
@@ -3612,19 +3715,31 @@
         };
 
         try {
-          const userDocRef = db.collection('users').doc(currentUser.uid);
-          await userDocRef.set({
-            address: addressData
-          }, { merge: true });
+          const addressesRef = db.collection('users').doc(currentUser.uid).collection('addresses');
+          
+          if (editingAddressId) {
+            // Update existing address
+            await addressesRef.doc(editingAddressId).update(addressData);
+            showToast('Address updated successfully!');
+          } else {
+            // Add new address
+            const snapshot = await addressesRef.get();
+            // If this is the first address, make it the default
+            if (snapshot.empty) {
+              addressData.isDefault = true;
+            }
+            await addressesRef.add(addressData);
+            showToast('Address saved successfully!');
+          }
 
-          showToast('Address saved successfully!');
-          goBack();
+          await renderAddressList(); // Refresh the list view
+          showAddressList(); // Show the list
         } catch (error) {
           console.error("Error saving address: ", error);
           showToast('Failed to save address. Please try again.');
         } finally {
           submitBtn.disabled = false;
-          submitBtn.textContent = 'Save Address';
+          submitBtn.textContent = 'Save Address'; // Reset button text
         }
       });
 
@@ -3637,8 +3752,8 @@
       document.querySelector('.profile-button.orders').addEventListener('click', () => showPage('ordersPage'));
       document.querySelector('.profile-button.address').addEventListener('click', async () => {
         if (currentUser) {
-          // NEW: Populate form with saved data before showing the page
-          await populateAddressForm();
+          // NEW: Render the list of addresses
+          await renderAddressList();
           showPage('addressPage');
         } else {
           showToast('Please login to manage your address.');
@@ -4528,9 +4643,9 @@
       // 2. Fetch user's default address from Firestore
       let userAddress = null;
       try {
-        const userDoc = await db.collection('users').doc(currentUser.uid).get();
-        if (userDoc.exists && userDoc.data().address) {
-          userAddress = userDoc.data().address;
+        const addressSnapshot = await db.collection('users').doc(currentUser.uid).collection('addresses').where('isDefault', '==', true).limit(1).get();
+        if (!addressSnapshot.empty) {
+          userAddress = addressSnapshot.docs[0].data();
         }
       } catch (error) {
         console.error("Error fetching user address for checkout:", error);
@@ -4540,8 +4655,8 @@
 
       // 3. If no address, redirect to address page
       if (!userAddress) {
-        showToast('Please add a delivery address before checking out.');
-        await populateAddressForm();
+        showToast('Please add or select a default delivery address.');
+        await renderAddressList();
         showPage('addressPage');
         closeCart(); // Close cart to show the address page clearly
         return;
@@ -5072,32 +5187,154 @@
     /* ===== End of Auth Functions ===== */
 
     /* ===== NEW: Address Page Functions ===== */
-    async function populateAddressForm() {
-      if (!currentUser) return;
-
-      // Reset form to clear old data, then restore default city
+    function showAddressForm() {
+      editingAddressId = null; // Ensure we are in "add new" mode
       document.getElementById('addressForm').reset();
       document.getElementById('addressCity').value = 'Hyderabad';
+      if (currentUser.displayName) {
+        document.getElementById('addressFullName').value = currentUser.displayName;
+      }
+      document.getElementById('addressListContainer').style.display = 'none';
+      document.getElementById('addressFormContainer').style.display = 'block';
+      document.querySelector('#addressForm .cta').textContent = 'Save Address';
+    }
+
+    function showAddressList() {
+      document.getElementById('addressListContainer').style.display = 'block';
+      document.getElementById('addressFormContainer').style.display = 'none';
+    }
+
+    async function renderAddressList() {
+      if (!currentUser) return;
+
+      const listContainer = document.getElementById('addressListContainer');
+      listContainer.innerHTML = '<div class="loading" style="margin: 40px auto;"></div>'; // Show loader
 
       try {
-        const userDocRef = db.collection('users').doc(currentUser.uid);
-        const doc = await userDocRef.get();
+        const addressesRef = db.collection('users').doc(currentUser.uid).collection('addresses');
+        const snapshot = await addressesRef.orderBy('updatedAt', 'desc').get();
 
-        if (doc.exists && doc.data().address) {
-          const address = doc.data().address;
+        if (snapshot.empty) {
+          listContainer.innerHTML = `
+            <div class="empty-cart" style="padding-top: 40px;">
+              <i class="fas fa-map-marker-alt" style="font-size: 48px; color: var(--border-color); margin-bottom: 24px;"></i>
+              <h3>No Saved Addresses</h3>
+              <p>Add an address for faster checkout.</p>
+              <button id="addNewAddressBtn" class="cta" style="width: 80%;">Add New Address</button>
+            </div>
+          `;
+          showAddressForm(); // If no addresses, show the form directly
+        } else {
+          let addressesHTML = snapshot.docs.map(doc => {
+            const address = doc.data();
+            return `
+              <div class="address-item ${address.isDefault ? 'default' : ''}" data-id="${doc.id}">
+                <div class="address-header">
+                  <div class="address-name">
+                    <i class="fas fa-home" style="color: var(--primary-color);"></i>
+                    <span>${address.fullName}</span>
+                  </div>
+                  ${address.isDefault ? '<span class="default-badge">Default</span>' : ''}
+                </div>
+                <div class="address-body">
+                  ${address.house}, ${address.street}<br>
+                  ${address.city}, ${address.pincode}<br>
+                  Mobile: <strong>${address.mobile}</strong>
+                </div>
+                <div class="address-actions">
+                  ${!address.isDefault ? '<button class="address-action-btn set-default-btn">Set as Default</button>' : ''}
+                  <button class="address-action-btn edit-address-btn">Edit</button>
+                  <button class="address-action-btn delete-address-btn">Delete</button>
+                </div>
+              </div>
+            `;
+          }).join('');
+
+          addressesHTML += `<button id="addNewAddressBtn" class="cta" style="width: 100%; margin-top: 20px;">Add New Address</button>`;
+          listContainer.innerHTML = addressesHTML;
+          showAddressList(); // Show the list view
+        }
+      } catch (error) {
+        console.error("Error rendering addresses:", error);
+        listContainer.innerHTML = '<p style="color: var(--error-color); text-align: center;">Could not load addresses.</p>';
+      }
+    }
+
+    async function editAddress(addressId) {
+      if (!currentUser || !addressId) return;
+      editingAddressId = addressId; // Set the global state
+
+      try {
+        const addressRef = db.collection('users').doc(currentUser.uid).collection('addresses').doc(addressId);
+        const doc = await addressRef.get();
+
+        if (doc.exists) {
+          const address = doc.data();
+          // Populate the form
           document.getElementById('addressFullName').value = address.fullName || '';
           document.getElementById('addressMobile').value = address.mobile || '';
           document.getElementById('addressHouse').value = address.house || '';
           document.getElementById('addressStreet').value = address.street || '';
           document.getElementById('addressCity').value = address.city || 'Hyderabad';
           document.getElementById('addressPincode').value = address.pincode || '';
-        } else if (currentUser.displayName) {
-          // If no address is saved, pre-fill name from profile as a convenience
-          document.getElementById('addressFullName').value = currentUser.displayName;
+
+          // Show the form
+          document.getElementById('addressListContainer').style.display = 'none';
+          document.getElementById('addressFormContainer').style.display = 'block';
+          document.querySelector('#addressForm .cta').textContent = 'Update Address';
+        } else {
+          showToast('Address not found.');
+          editingAddressId = null; // Reset state
         }
       } catch (error) {
-        console.error("Error fetching address:", error);
+        console.error("Error fetching address for edit:", error);
         showToast('Could not load address data.');
+        editingAddressId = null; // Reset state
+      }
+    }
+
+    function cancelEditAddress() {
+      editingAddressId = null;
+      showAddressList();
+    }
+
+    async function deleteAddress(addressId) {
+      if (!currentUser || !addressId) return;
+      if (!confirm('Are you sure you want to delete this address?')) return;
+
+      try {
+        await db.collection('users').doc(currentUser.uid).collection('addresses').doc(addressId).delete();
+        showToast('Address deleted.');
+        await renderAddressList();
+      } catch (error) {
+        console.error("Error deleting address:", error);
+        showToast('Failed to delete address.');
+      }
+    }
+
+    async function setDefaultAddress(newDefaultId) {
+      if (!currentUser || !newDefaultId) return;
+
+      const addressesRef = db.collection('users').doc(currentUser.uid).collection('addresses');
+      const batch = db.batch();
+
+      try {
+        // Find the current default and unset it
+        const currentDefaultSnapshot = await addressesRef.where('isDefault', '==', true).get();
+        currentDefaultSnapshot.forEach(doc => {
+          batch.update(doc.ref, { isDefault: false });
+        });
+
+        // Set the new default
+        const newDefaultRef = addressesRef.doc(newDefaultId);
+        batch.update(newDefaultRef, { isDefault: true });
+
+        await batch.commit();
+        showToast('Default address updated.');
+        await renderAddressList();
+      } catch (error) {
+        console.error("Error setting default address:", error);
+        showToast('Failed to update default address.');
       }
     }
 
