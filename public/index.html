@@ -3723,6 +3723,7 @@
     let currentUser = null;
     let editingAddressId = null; // NEW: To track which address is being edited
     
+    let afterLoginAction = null; // NEW: To handle actions after login (like checkout)
     /* NEW: Variables for popup functionality */
     let currentPopupImageIndex = 0;
     let isPopupFavorite = false;
@@ -4976,8 +4977,8 @@
 
       // 1. Check if user is logged in
       if (!currentUser) {
-        showToast('Please log in to proceed with checkout.');
-        showLoginModal();
+        afterLoginAction = checkout; // Set checkout as the action to perform after login
+        showLoginModal(); // Directly show login modal if user is not logged in.
         return;
       }
 
@@ -5477,6 +5478,13 @@
     function handleAuthStateChange(user) {
       currentUser = user;
       updateUIForAuthState();
+
+      // NEW: If there's a pending action after login, execute it.
+      if (user && typeof afterLoginAction === 'function') {
+        // Use a small timeout to allow UI to settle before re-triggering the action
+        setTimeout(afterLoginAction, 100);
+        afterLoginAction = null; // Clear the action so it doesn't run again
+      }
     }
 
     function updateUIForAuthState() {
