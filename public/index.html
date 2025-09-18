@@ -4977,8 +4977,8 @@
 
       // 1. Check if user is logged in
       if (!currentUser) {
-        afterLoginAction = checkout; // Set checkout as the action to perform after login.
-        showLoginModal(null, true); // Directly show login modal, forcing the signup view.
+        afterLoginAction = checkout; // Set checkout as the action to perform after login
+        showLoginModal(); // Directly show login modal, which now defaults to signup.
         return;
       }
 
@@ -5366,24 +5366,18 @@
 }
 
     /* ===== NEW: Auth Functions ===== */
-    function showLoginModal(e, forceSignup = false) {
+    function showLoginModal(e) {
       if (e) e.preventDefault();
       document.getElementById('loginModal').classList.add('active');
       document.body.classList.add('popup-open');
       document.getElementById('bottomNav').style.display = 'none';
       document.getElementById('authError').textContent = '';
 
-      // If triggered from checkout for a new user, always show signup.
-      if (forceSignup) {
-        // Reset titles to default signup view
-        document.getElementById('authTitle').textContent = 'Get Started';
-        document.getElementById('authSubtitle').textContent = 'Sign up to order the freshest coastal seafood';
-        // Reset to default signup view
-        document.getElementById('loginForm').classList.remove('active');
-        document.getElementById('signupForm').classList.add('active');
-      }
-
-
+      // ALWAYS reset to the default signup view when the modal is opened.
+      document.getElementById('authTitle').textContent = 'Get Started';
+      document.getElementById('authSubtitle').textContent = 'Sign up to order the freshest coastal seafood';
+      document.getElementById('loginForm').classList.remove('active');
+      document.getElementById('signupForm').classList.add('active');
     }
 
     function closeLoginModal() {
