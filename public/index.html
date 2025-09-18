@@ -884,7 +884,7 @@
     .product-footer {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-end; /* Align price and button to the bottom */
       margin-top: 8px;
     }
 
@@ -892,12 +892,12 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 8px;
+      gap: 2px; /* Tighter gap */
     }
 
     .price {
-      font-size: 13px;
-      font-weight: 400; /* UPDATED */
+      font-size: 15px; /* More prominent */
+      font-weight: 600; /* Bolder */
       color: var(--text-primary);
     }
 
@@ -2203,6 +2203,28 @@
       width: calc(100% - 40px);
     }
 
+    /* --- NEW: Simple Tooltip --- */
+    .simple-tooltip {
+      position: fixed;
+      background: var(--text-primary);
+      color: var(--bg-white);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 2001; /* Above toast */
+      opacity: 0;
+      pointer-events: none; /* It can't be interacted with */
+      transition: opacity 0.2s ease;
+      max-width: 200px;
+      text-align: center;
+      transform: translate(-50%, -100%); /* Position above and centered */
+    }
+
+    .simple-tooltip.show {
+      opacity: 1;
+    }
+
     .confirm-modal-btn:active {
       transform: scale(0.98);
     }
@@ -2248,67 +2270,6 @@
       margin: 0 -20px;
       padding: 5px 20px 15px;
     }
-    /* Cart Popup (Mini Cart) */
-    /* --- NEW: Floating Cart Icon Popup --- */
-    .cart-popup {
-      position: fixed;
-      bottom: calc(var(--bottom-nav-height) + 20px);
-      right: 20px;
-      width: 60px;
-      height: 60px;
-      background: var(--primary-color);
-      border-radius: 50%;
-      box-shadow: 0 4px 20px rgba(1, 101, 154, 0.4);
-      z-index: 101;
-      display: none; /* Initially hidden */
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      animation: slideUpAndFadeIn 0.3s ease-out;
-      transition: transform 0.2s ease;
-    }
-
-    .cart-popup:active {
-      transform: scale(0.95);
-    }
-
-    .cart-popup-content {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 24px;
-    }
-
-    .cart-popup-count {
-      position: absolute;
-      top: -5px;
-      right: -5px;
-      background: var(--error-color);
-      color: white;
-      border-radius: 50%;
-      width: 22px;
-      height: 22px;
-      font-size: 11px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid var(--primary-color);
-    }
-    /* --- End of Floating Cart Icon Popup --- */
-
-    @keyframes slideUpCenter {
-      from {
-        opacity: 0;
-        transform: translate(-50%, 30px);
-      }
-      to {
-        opacity: 1;
-        transform: translate(-50%, 0px);
-      }
-    }
     /* Adjust for desktop */
     @media (min-width: 481px) {
       .cart-popup {        
@@ -2317,17 +2278,6 @@
         left: calc(50% + (var(--app-max-width) / 2) - 80px); /* (Center + Half App Width) - Button Width - Margin */
         transform: none;
         right: auto;
-      }
-    }
-    
-    @keyframes slideUpFromBottom {
-      from {
-        transform: translate(-50%, 100%);
-        opacity: 0;
-      }
-      to {
-        transform: translate(-50%, 0);
-        opacity: 1;
       }
     }
 
@@ -2856,15 +2806,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Cart Popup (Mini Cart) -->
-    <div class="cart-popup" id="cartPopup">
-      <div class="cart-popup-content">
-        <i class="fas fa-shopping-bag"></i>
-        <span class="cart-popup-count" id="cartPopupCount">0</span>
-      </div>
-    </div>
-
     <!-- Bottom Navigation - FIXED: Properly constrained to mobile container -->
     <nav class="bottom-bar" id="bottomNav">
       <div class="nav-item active" data-page="home">
@@ -2894,6 +2835,11 @@
     <div class="toast" id="toast">
       <i class="fas fa-check-circle"></i>
       <span id="toastText">Added to cart!</span>
+    </div>
+
+    <!-- NEW: Simple Tooltip -->
+    <div class="simple-tooltip" id="simpleTooltip">
+      <!-- Content is set by JS -->
     </div>
 
   </div>
@@ -3155,6 +3101,15 @@
         }
       });
 
+      // NEW: Tooltip handler
+      document.body.addEventListener('click', e => {
+        const infoIcon = e.target.closest('.summary-row .fa-info-circle');
+        if (infoIcon) {
+          e.preventDefault();
+          showSimpleTooltip(infoIcon);
+        }
+      });
+
       // --- Static Element Listeners ---
       // Header search inputs
       document.getElementById('catalogSearch').addEventListener('input', (e) => {
@@ -3216,7 +3171,6 @@
       // Cart page buttons
       document.querySelector('.empty-cart-btn').addEventListener('click', () => { showPage('catalog'); closeCart(); });
       document.querySelector('.checkout-btn').addEventListener('click', checkout);
-      document.getElementById('cartPopup').addEventListener('click', showCart);
       // Bottom Navigation
       document.getElementById('bottomNav').addEventListener('click', e => {
         const navItem = e.target.closest('.nav-item');
@@ -3592,7 +3546,6 @@
       
       // Hide bottom navigation and cart popup when product popup is open
       document.getElementById('bottomNav').style.display = 'none';
-      document.getElementById('cartPopup').style.display = 'none';
       
       // Track product view
       if (typeof gtag === 'function') {
@@ -3722,11 +3675,8 @@
       
       // Show bottom navigation again when popup is closed
       if (currentPage !== 'cart') {
-        document.getElementById('bottomNav').style.display = 'flex';
+        document.getElementById('bottomNav').style.display = 'flex'; 
       }
-      
-      // Show cart popup again if there are items
-      updateCartPopup();
     }
 
     function addToCart(id, qty = 1) {
@@ -3751,7 +3701,6 @@
     function updateCartUI() {
       updateCartBadges();
       // updateProductCardStates(); // This is now handled by more targeted updates
-      updateCartPopup();
     }
 
     /* NEW: Separated badge updates */
@@ -3788,21 +3737,6 @@
         });
     }
 
-    /* NEW: Function to update cart popup */
-    function updateCartPopup() {
-      const cartPopup = document.getElementById('cartPopup');
-      const cartPopupCount = document.getElementById('cartPopupCount');
-
-      const totalQty = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-      const isCartModalActive = document.getElementById('cartModal').classList.contains('active');
-
-      if (totalQty > 0 && !isPopupOpen && !isCartModalActive) {
-        cartPopupCount.textContent = totalQty > 9 ? '9+' : totalQty;
-        cartPopup.style.display = 'flex';
-      } else {
-        cartPopup.style.display = 'none';
-      }
-    }
     function showCart() {
       const items = Object.keys(cart).map(id => {
         const product = products.find(p => p.id === parseInt(id));
@@ -3905,7 +3839,6 @@
       
       // Hide bottom navigation and cart popup when cart modal is open
       document.getElementById('bottomNav').style.display = 'none';
-      document.getElementById('cartPopup').style.display = 'none';
       
       // Track cart view
       if (typeof gtag === 'function') {
@@ -3976,8 +3909,6 @@
       
       // Show bottom navigation again when cart is closed
       document.getElementById('bottomNav').style.display = 'flex';
-      // Show cart popup again if there are items
-      updateCartPopup();
     }
 
     function updateQty(id, change) {
@@ -4012,7 +3943,6 @@
         }
         updateCartSummary();
         updateCartBadges();
-        updateCartPopup();
       } else {
         updateCartUI();
       }
@@ -4035,7 +3965,6 @@
           delete cart[id];
           saveCart();
           updateCartBadges();
-          updateCartPopup();
           updateCartSummary(); // Update totals without re-rendering the list
           updateProductCardState(id); // FIX: Update product card on home/catalog page
           cartItemEl.remove(); // Clean up the element from DOM
@@ -4140,9 +4069,6 @@
       } else {
         document.getElementById('bottomNav').style.display = 'flex';
       }
-      
-      // Update cart popup
-      updateCartPopup();
     }
 
     function goBack() {
@@ -4297,6 +4223,40 @@
       }
       tick();
     }
+
+    /* ===== NEW: Tooltip Functions ===== */
+    function showSimpleTooltip(targetElement) {
+      const tooltip = document.getElementById('simpleTooltip');
+      const text = targetElement.getAttribute('title');
+      if (!tooltip || !text) return;
+
+      // Hide any other tooltips first
+      hideSimpleTooltip();
+
+      tooltip.textContent = text;
+      tooltip.classList.add('show');
+
+      const targetRect = targetElement.getBoundingClientRect();
+
+      // Position tooltip centered above the target element
+      const top = targetRect.top - 8; // 8px gap above the icon
+      const left = targetRect.left + (targetRect.width / 2);
+
+      tooltip.style.top = `${top}px`;
+      tooltip.style.left = `${left}px`;
+
+      // Set a timer to auto-hide the tooltip after a few seconds
+      setTimeout(hideSimpleTooltip, 3000);
+    }
+
+    function hideSimpleTooltip() {
+      const tooltip = document.getElementById('simpleTooltip');
+      if (tooltip) {
+        tooltip.classList.remove('show');
+      }
+    }
+    /* ===== End of New Functions ===== */
+
 
     function lazyLoadBanners() {
       const carousels = document.querySelectorAll('.carousel, .communication-carousel');
