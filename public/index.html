@@ -116,6 +116,7 @@
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
   <style>
     /* CSS Variables for consistency */
@@ -2842,6 +2843,9 @@
           <button class="profile-button orders">
             <i class="fas fa-box-open"></i> My Orders
           </button>
+          <button class="profile-button address">
+            <i class="fas fa-map-marker-alt"></i> My Address
+          </button>
           <button class="profile-button faq">
             <i class="fas fa-question-circle"></i> FAQ
           </button>
@@ -2889,6 +2893,49 @@
           <p>Your past and current orders will appear here.</p>
           <button class="empty-cart-btn">Start Shopping</button>
         </div>
+      </main>
+    </div>
+
+    <!-- NEW: Address Page -->
+    <div class="page" id="addressPage">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="logo">My Address</div>
+          <div></div>
+        </div>
+      </header>
+
+      <main class="section">
+        <form id="addressForm" class="login-form active" style="gap: 20px;">
+          <div>
+            <label for="addressFullName">Full Name</label>
+            <input id="addressFullName" class="input" type="text" placeholder="Person receiving the order" required>
+          </div>
+          <div>
+            <label for="addressMobile">Mobile Number</label>
+            <input id="addressMobile" class="input" type="tel" placeholder="For delivery coordination" required>
+          </div>
+          <div>
+            <label for="addressHouse">House/Flat/Building Number</label>
+            <input id="addressHouse" class="input" type="text" placeholder="e.g., Flat 502, B-Wing" required>
+          </div>
+          <div>
+            <label for="addressStreet">Street / Locality / Area</label>
+            <input id="addressStreet" class="input" type="text" placeholder="e.g., Kondapur" required>
+          </div>
+          <div>
+            <label for="addressCity">City / Town</label>
+            <input id="addressCity" class="input" type="text" value="Hyderabad" required>
+          </div>
+          <div>
+            <label for="addressPincode">Pincode / ZIP Code</label>
+            <input id="addressPincode" class="input" type="text" placeholder="e.g., 500084" required>
+          </div>
+          <button class="cta" type="submit">Save Address</button>
+        </form>
       </main>
     </div>
 
@@ -3224,6 +3271,7 @@
     let isPopupOpen = false;
     let searchDebounceTimer = null;
     let typewriterTimer = null;
+    let db = null; // NEW: Firestore database instance
     let currentUser = null;
     
     /* NEW: Variables for popup functionality */
@@ -3237,6 +3285,7 @@
     async function init() {
       // Firebase Auth Listener
       firebase.auth().onAuthStateChanged(handleAuthStateChange);
+      db = firebase.firestore(); // NEW: Initialize Firestore
 
       try {
         const response = await fetch('/products.json');
@@ -3463,6 +3512,47 @@
       document.querySelector('#faqPage .back-btn').addEventListener('click', goBack);
       document.querySelector('#ordersPage .back-btn').addEventListener('click', goBack);
       document.querySelector('#profilePage .back-btn').addEventListener('click', goBack);
+      document.querySelector('#addressPage .back-btn').addEventListener('click', goBack);
+
+      // Address form submission
+      document.getElementById('addressForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentUser) {
+          showToast('You must be logged in to save an address.');
+          return;
+        }
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div class="loading"></div>';
+
+        const addressData = {
+          fullName: document.getElementById('addressFullName').value,
+          mobile: document.getElementById('addressMobile').value,
+          house: document.getElementById('addressHouse').value,
+          street: document.getElementById('addressStreet').value,
+          city: document.getElementById('addressCity').value,
+          pincode: document.getElementById('addressPincode').value,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        try {
+          const userDocRef = db.collection('users').doc(currentUser.uid);
+          await userDocRef.set({
+            address: addressData
+          }, { merge: true });
+
+          showToast('Address saved successfully!');
+          goBack();
+        } catch (error) {
+          console.error("Error saving address: ", error);
+          showToast('Failed to save address. Please try again.');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Save Address';
+        }
+      });
+
       // The cart back button is handled separately
       document.querySelector('#cartModal .back-btn').addEventListener('click', closeCart);
 
@@ -3470,6 +3560,16 @@
 
       // Profile page buttons
       document.querySelector('.profile-button.orders').addEventListener('click', () => showPage('ordersPage'));
+      document.querySelector('.profile-button.address').addEventListener('click', async () => {
+        if (currentUser) {
+          // NEW: Populate form with saved data before showing the page
+          await populateAddressForm();
+          showPage('addressPage');
+        } else {
+          showToast('Please login to manage your address.');
+          showLoginModal();
+        }
+      });
       document.querySelector('.profile-button.faq').addEventListener('click', () => showPage('faqPage'));
       document.querySelector('.profile-button.support').addEventListener('click', () => openWhatsApp('support'));
       document.querySelector('.profile-button.refer').addEventListener('click', () => openWhatsApp('refer'));
@@ -4870,6 +4970,36 @@
       }
     }
     /* ===== End of Auth Functions ===== */
+
+    /* ===== NEW: Address Page Functions ===== */
+    async function populateAddressForm() {
+      if (!currentUser) return;
+
+      // Reset form to clear old data, then restore default city
+      document.getElementById('addressForm').reset();
+      document.getElementById('addressCity').value = 'Hyderabad';
+
+      try {
+        const userDocRef = db.collection('users').doc(currentUser.uid);
+        const doc = await userDocRef.get();
+
+        if (doc.exists && doc.data().address) {
+          const address = doc.data().address;
+          document.getElementById('addressFullName').value = address.fullName || '';
+          document.getElementById('addressMobile').value = address.mobile || '';
+          document.getElementById('addressHouse').value = address.house || '';
+          document.getElementById('addressStreet').value = address.street || '';
+          document.getElementById('addressCity').value = address.city || 'Hyderabad';
+          document.getElementById('addressPincode').value = address.pincode || '';
+        } else if (currentUser.displayName) {
+          // If no address is saved, pre-fill name from profile as a convenience
+          document.getElementById('addressFullName').value = currentUser.displayName;
+        }
+      } catch (error) {
+        console.error("Error fetching address:", error);
+        showToast('Could not load address data.');
+      }
+    }
 
     function trackAddToCart(id, qty) {
       const product = products.find(p => p.id === parseInt(id));
