@@ -289,7 +289,8 @@
     #catalog .header-top,
     #faqPage .header-top,
     #profilePage .header-top,
-    #cartModal .header-top {
+    #cartModal .header-top,
+    #ordersPage .header-top { /* ADDED */
       justify-content: flex-start;
     }
     /* --- End of Fix --- */
@@ -2667,6 +2668,9 @@
           <button class="profile-button refer">
             <i class="fas fa-share-alt"></i> Refer & Earn
           </button>
+          <button class="profile-button orders">
+            <i class="fas fa-box-open"></i> My Orders
+          </button>
           <button class="profile-button faq">
             <i class="fas fa-question-circle"></i> FAQ
           </button>
@@ -2691,6 +2695,29 @@
         </div>
       </main>
     </div>
+
+    <!-- NEW: Orders Page -->
+    <div class="page" id="ordersPage">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="logo">My Orders</div>
+          <div></div>
+        </div>
+      </header>
+
+      <main class="section">
+        <div class="empty-cart" style="flex-grow: 1; min-height: 60vh;">
+          <i class="fas fa-box-open" style="font-size: 64px; margin-bottom: 24px; color: var(--border-color);"></i>
+          <h3>No Orders Yet</h3>
+          <p>Your past and current orders will appear here.</p>
+          <button class="empty-cart-btn">Start Shopping</button>
+        </div>
+      </main>
+    </div>
+
 
     <!-- NEW: Updated Product Popup with new design -->
     <div class="product-popup" id="productPopup">
@@ -3145,6 +3172,7 @@
       // Refined back button listeners to avoid conflicts
       document.querySelector('#catalog .back-btn').addEventListener('click', goBack);
       document.querySelector('#faqPage .back-btn').addEventListener('click', goBack);
+      document.querySelector('#ordersPage .back-btn').addEventListener('click', goBack);
       document.querySelector('#profilePage .back-btn').addEventListener('click', goBack);
       // The cart back button is handled separately
       document.querySelector('#cartModal .back-btn').addEventListener('click', closeCart);
@@ -3152,6 +3180,7 @@
       document.querySelectorAll('.cart-btn').forEach(btn => btn.addEventListener('click', showCart));
 
       // Profile page buttons
+      document.querySelector('.profile-button.orders').addEventListener('click', () => showPage('ordersPage'));
       document.querySelector('.profile-button.faq').addEventListener('click', () => showPage('faqPage'));
       document.querySelector('.profile-button.support').addEventListener('click', () => openWhatsApp('support'));
       document.querySelector('.profile-button.refer').addEventListener('click', () => openWhatsApp('refer'));
@@ -3166,6 +3195,7 @@
 
       // Cart page buttons
       document.querySelector('.empty-cart-btn').addEventListener('click', () => { showPage('catalog'); closeCart(); });
+      document.querySelector('#ordersPage .empty-cart-btn').addEventListener('click', () => showPage('home'));
       document.querySelector('.checkout-btn').addEventListener('click', checkout);
       // Bottom Navigation
       document.getElementById('bottomNav').addEventListener('click', e => {
