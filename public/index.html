@@ -864,7 +864,7 @@
 
     .product-name {
       font-size: 13px;
-      font-weight: 400; /* UPDATED */
+      font-weight: 500; /* UPDATED */
       margin-bottom: 4px;
       color: var(--text-primary);
       display: -webkit-box;
@@ -904,6 +904,7 @@
     .old-price {
       font-size: 11px;
       color: var(--text-secondary);
+      font-weight: 500;
       text-decoration: line-through;
     }
 
@@ -3264,6 +3265,17 @@
       if (!container) return;
 
       container.innerHTML = CUSTOMER_REVIEWS.map(review => {
+        // Sanitize inputs to prevent XSS
+        const safeName = DOMPurify.sanitize(review.name);
+        const safeLocation = DOMPurify.sanitize(review.location);
+        const safeReview = DOMPurify.sanitize(review.review);
+
+        // Check for valid rating
+        const rating = (typeof review.rating === 'number' && review.rating >= 0 && review.rating <= 5)
+          ? review.rating
+          : 0;
+
+
         // If an image is not provided, create initials from the name
         const avatar = review.image
           ? `<img src="${review.image}" alt="${review.name}" class="review-avatar" loading="lazy">`
@@ -3272,7 +3284,7 @@
         // Create star rating
         let stars = '';
         for (let i = 0; i < 5; i++) {
-          stars += `<i class="fas fa-star ${i < review.rating ? '' : 'far'}"></i>`; // Use 'far' for empty stars
+          stars += `<i class="fas fa-star ${i < rating ? '' : 'far'}"></i>`; // Use 'far' for empty stars
         }
 
         return `
@@ -3280,12 +3292,12 @@
             <div class="review-header">
               ${avatar}
               <div class="review-customer">
-                <div class="review-name">${DOMPurify.sanitize(review.name)}</div>
-                <div class="review-location">${DOMPurify.sanitize(review.location)}</div>
+                <div class="review-name">${safeName}</div>
+                <div class="review-location">${safeLocation}</div>
               </div>
             </div>
             <div class="review-rating">${stars}</div>
-            <p class="review-body">“${DOMPurify.sanitize(review.review)}”</p>
+            <p class="review-body">“${safeReview}”</p>
           </div>
         `;
       }).join('');
@@ -3295,25 +3307,28 @@
     /* ===== NEW: Flash Sale Functions ===== */
     function renderFlashSale() {
       const section = document.getElementById('flashSaleSection');
-      if (!section) return;
-
-      // NEW: Check if the flash sale is enabled
       if (!ENABLE_FLASH_SALE) {
-        section.style.display = 'none';
+        if (section) section.style.display = 'none';
         return;
       }
 
       const container = document.getElementById('flashSaleProducts');
       if (!container) return;
 
+      // 1. Show skeleton loaders first
+      let skeletonHTML = '';
+      for (let i = 0; i < FLASH_SALE_PRODUCT_IDS.length; i++) {
+        skeletonHTML += createSkeletonProductHTML();
+      }
+      container.innerHTML = skeletonHTML;
+
+      // 2. Render real products once data is available
       const flashSaleProducts = products.filter(p => FLASH_SALE_PRODUCT_IDS.includes(p.id));
-      
       if (flashSaleProducts.length === 0) {
-        section.style.display = 'none';
+        if (section) section.style.display = 'none';
         return;
       }
-
-      container.innerHTML = flashSaleProducts.map(product => createProductHTML(product)).join('');
+      container.innerHTML = flashSaleProducts.map(createProductHTML).join('');
     }
 
     function initFlashSaleTimer() {
@@ -3384,20 +3399,17 @@
       const container = document.getElementById('featuredProducts');
       if (!container) return;
 
-      // 1. Show skeleton loaders first
+      // 1. Show skeleton loaders
       let skeletonHTML = '';
       for (let i = 0; i < FEATURED_PRODUCT_IDS.length; i++) {
         skeletonHTML += createSkeletonProductHTML();
       }
       container.innerHTML = skeletonHTML;
 
-      // 2. Defer product rendering to simulate network latency
-      setTimeout(() => {
-        // Show products based on featured IDs
-        let featured = products.filter(p => FEATURED_PRODUCT_IDS.includes(p.id));
-
-        container.innerHTML = featured.map(product => createProductHTML(product)).join('');
-      }, 1500); // Simulate a 1.5 second network delay
+      // 2. Render real products once data is available
+      const featured = products.filter(p => FEATURED_PRODUCT_IDS.includes(p.id));
+      // Use a timeout to ensure the shimmer animation is visible for a moment
+      setTimeout(() => container.innerHTML = featured.map(createProductHTML).join(''), 500);
     }
     
     function renderCatalogProducts() {
@@ -3412,65 +3424,56 @@
         }
         container.innerHTML = skeletonHTML;
       } else {
-        // For pagination, put the loader inside the "Show More" button.
         const showMoreBtn = container.querySelector('.show-more-btn');
         if (showMoreBtn) {
           showMoreBtn.innerHTML = '<div class="loading"></div>';
           showMoreBtn.disabled = true;
         }
       }
+      
+      // Use a timeout to ensure the shimmer animation is visible
+      setTimeout(populateCatalogProducts, 500);
+    }
 
-      // Defer rendering to let the loader appear
-      setTimeout(() => {
-        let filtered = products.filter(p => {
-          const matchCategory = currentCategory === 'All' || p.category === currentCategory;
-          const matchSearch = !currentSearch || p.name.toLowerCase().includes(currentSearch.toLowerCase()) || 
-                             (p.desc && p.desc.toLowerCase().includes(currentSearch.toLowerCase()));
-          return matchCategory && matchSearch;
-        });
+    function populateCatalogProducts() {
+      const container = document.getElementById('catalogProducts');
+      if (!container) return;
 
-        // Pagination
-        const startIndex = 0;
-        const endIndex = currentPageNumber * ITEMS_PER_PAGE;
-        const paginatedProducts = filtered.slice(startIndex, endIndex);
+      let filtered = products.filter(p => {
+        const matchCategory = currentCategory === 'All' || p.category === currentCategory;
+        const matchSearch = !currentSearch || p.name.toLowerCase().includes(currentSearch.toLowerCase()) || 
+                           (p.desc && p.desc.toLowerCase().includes(currentSearch.toLowerCase()));
+        return matchCategory && matchSearch;
+      });
 
-        // Remove the old "Show More" button before re-rendering
-        const oldShowMoreBtn = container.querySelector('.show-more-btn');
-        if (oldShowMoreBtn) {
-          oldShowMoreBtn.remove();
-        }
+      const startIndex = 0;
+      const endIndex = currentPageNumber * ITEMS_PER_PAGE;
+      const paginatedProducts = filtered.slice(startIndex, endIndex);
 
-        if (paginatedProducts.length === 0) {
-          container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #8E8E93;">No products found</div>';
-          return;
-        }
+      const oldShowMoreBtn = container.querySelector('.show-more-btn');
+      if (oldShowMoreBtn) oldShowMoreBtn.remove();
 
-        const newProductsHTML = paginatedProducts.slice((currentPageNumber - 1) * ITEMS_PER_PAGE).map(product => createProductHTML(product)).join('');
+      if (paginatedProducts.length === 0) {
+        container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #8E8E93;">No products found</div>';
+        return;
+      }
 
-        if (currentPageNumber === 1) {
-          container.innerHTML = newProductsHTML;
-        } else {
-          container.insertAdjacentHTML('beforeend', newProductsHTML);
-        }
+      const newProductsHTML = paginatedProducts.slice((currentPageNumber - 1) * ITEMS_PER_PAGE).map(createProductHTML).join('');
 
-        // Add a new "Show More" button if there are more products
-        if (endIndex < filtered.length) {
-          const showMoreBtn = document.createElement('button');
-          showMoreBtn.textContent = 'Show More';
-          showMoreBtn.className = 'show-more-btn';
-          showMoreBtn.style.gridColumn = '1 / -1';
-          showMoreBtn.style.margin = '20px auto';
-          showMoreBtn.style.padding = '12px 24px';
-          showMoreBtn.style.background = 'var(--primary-color)';
-          showMoreBtn.style.color = 'white';
-          showMoreBtn.style.border = 'none';
-          showMoreBtn.style.borderRadius = '8px';
-          showMoreBtn.style.cursor = 'pointer';
-          showMoreBtn.onclick = showMoreProducts;
-          
-          container.appendChild(showMoreBtn);
-        }
-      }, currentPageNumber === 1 ? 1500 : 500); // Longer delay for initial load, shorter for pagination
+      if (currentPageNumber === 1) {
+        container.innerHTML = newProductsHTML;
+      } else {
+        container.insertAdjacentHTML('beforeend', newProductsHTML);
+      }
+
+      if (endIndex < filtered.length) {
+        const showMoreBtn = document.createElement('button');
+        showMoreBtn.textContent = 'Show More';
+        showMoreBtn.className = 'show-more-btn';
+        showMoreBtn.style.cssText = 'grid-column: 1 / -1; margin: 20px auto; padding: 12px 24px; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer;';
+        showMoreBtn.onclick = showMoreProducts;
+        container.appendChild(showMoreBtn);
+      }
     }
 
     function showMoreProducts() {
