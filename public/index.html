@@ -2874,6 +2874,43 @@
       </main>
     </div>
 
+    <!-- NEW: Address Page Styles -->
+    <style>
+      .address-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+      .address-form .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+      .address-form label {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+      }
+      .address-form .input {
+        /* Reusing login modal input styles and ensuring consistency */
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-white);
+        font-size: 15px;
+        outline: none;
+      }
+      .address-form .input:focus {
+        border-color: var(--accent-color);
+      }
+      .address-form .input[readonly] {
+        background-color: var(--bg-light);
+        color: var(--text-secondary);
+        cursor: not-allowed;
+      }
+    </style>
+
     <!-- NEW: Orders Page -->
     <div class="page" id="ordersPage">
       <header class="header">
@@ -2908,31 +2945,31 @@
         </div>
       </header>
 
-      <main class="section">
-        <form id="addressForm" class="login-form active" style="gap: 20px;">
-          <div>
+      <main class="section" style="padding-top: 10px;">
+        <form id="addressForm" class="address-form">
+          <div class="form-group">
             <label for="addressFullName">Full Name</label>
             <input id="addressFullName" class="input" type="text" placeholder="Person receiving the order" required>
           </div>
-          <div>
+          <div class="form-group">
             <label for="addressMobile">Mobile Number</label>
-            <input id="addressMobile" class="input" type="tel" placeholder="For delivery coordination" required>
+            <input id="addressMobile" class="input" type="tel" placeholder="10-digit mobile number" required pattern="\d{10}" title="Please enter a 10-digit mobile number.">
           </div>
-          <div>
+          <div class="form-group">
             <label for="addressHouse">House/Flat/Building Number</label>
             <input id="addressHouse" class="input" type="text" placeholder="e.g., Flat 502, B-Wing" required>
           </div>
-          <div>
+          <div class="form-group">
             <label for="addressStreet">Street / Locality / Area</label>
             <input id="addressStreet" class="input" type="text" placeholder="e.g., Kondapur" required>
           </div>
-          <div>
+          <div class="form-group">
             <label for="addressCity">City / Town</label>
-            <input id="addressCity" class="input" type="text" value="Hyderabad" required>
+            <input id="addressCity" class="input" type="text" value="Hyderabad" required readonly>
           </div>
-          <div>
+          <div class="form-group">
             <label for="addressPincode">Pincode / ZIP Code</label>
-            <input id="addressPincode" class="input" type="text" placeholder="e.g., 500084" required>
+            <input id="addressPincode" class="input" type="text" placeholder="6-digit pincode" required pattern="\d{6}" title="Please enter a 6-digit pincode.">
           </div>
           <button class="cta" type="submit">Save Address</button>
         </form>
@@ -3522,17 +3559,32 @@
           return;
         }
 
+        // --- NEW: Enhanced Validation ---
+        const mobileInput = document.getElementById('addressMobile');
+        const pincodeInput = document.getElementById('addressPincode');
+
+        if (!/^\d{10}$/.test(mobileInput.value)) {
+          showToast('Please enter a valid 10-digit mobile number.');
+          mobileInput.focus();
+          return;
+        }
+        if (!/^\d{6}$/.test(pincodeInput.value)) {
+          showToast('Please enter a valid 6-digit pincode.');
+          pincodeInput.focus();
+          return;
+        }
+
         const submitBtn = e.target.querySelector('button[type="submit"]');
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<div class="loading"></div>';
 
         const addressData = {
           fullName: document.getElementById('addressFullName').value,
-          mobile: document.getElementById('addressMobile').value,
+          mobile: mobileInput.value,
           house: document.getElementById('addressHouse').value,
           street: document.getElementById('addressStreet').value,
           city: document.getElementById('addressCity').value,
-          pincode: document.getElementById('addressPincode').value,
+          pincode: pincodeInput.value,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
@@ -3588,7 +3640,7 @@
       // Cart page buttons
       document.querySelector('#cartModal .empty-cart-btn').addEventListener('click', () => { showPage('catalog'); closeCart(); });
       document.querySelector('#ordersPage .empty-cart-btn').addEventListener('click', () => showPage('home'));
-      document.querySelector('.checkout-btn').addEventListener('click', checkout);
+      document.querySelector('.checkout-btn').addEventListener('click', () => checkout()); // Wrapped to handle async
       // Bottom Navigation
       document.getElementById('bottomNav').addEventListener('click', e => {
         const navItem = e.target.closest('.nav-item');
@@ -4435,7 +4487,7 @@
       }
     }
 
-    function checkout() {
+    async function checkout() {
       const items = Object.keys(cart).map(id => {
         const product = products.find(p => p.id === parseInt(id));
         return { ...product, qty: cart[id] };
@@ -4443,36 +4495,61 @@
       
       if (items.length === 0) return;
 
+      // 1. Check if user is logged in
+      if (!currentUser) {
+        showToast('Please log in to proceed with checkout.');
+        showLoginModal();
+        return;
+      }
+
+      // 2. Fetch user's default address from Firestore
+      let userAddress = null;
+      try {
+        const userDoc = await db.collection('users').doc(currentUser.uid).get();
+        if (userDoc.exists && userDoc.data().address) {
+          userAddress = userDoc.data().address;
+        }
+      } catch (error) {
+        console.error("Error fetching user address for checkout:", error);
+        showToast("Could not verify your address. Please try again.");
+        return;
+      }
+
+      // 3. If no address, redirect to address page
+      if (!userAddress) {
+        showToast('Please add a delivery address before checking out.');
+        await populateAddressForm();
+        showPage('addressPage');
+        closeCart(); // Close cart to show the address page clearly
+        return;
+      }
+
+      // 4. Construct the WhatsApp message with cart and address
       const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
       const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
       const total = subtotal + deliveryFee;
 
-      let message = "Hi! I'd like to order:\n\n";
+      let message = "Hi! I'd like to place an order:\n\n";
       items.forEach(item => {
-  const safeName = item.name.replace(/[^\w\s-]/g, '');
-  message += `${safeName} x${item.qty} - ₹${item.finalPrice * item.qty}\n`;
-});
-      message += `\nSubtotal: ₹${subtotal}\n`;
-      if (deliveryFee === 0) {
-        message += "Delivery: FREE\n";
-      } else {
-        message += `Delivery: ₹${deliveryFee}\n`;
-      }
-      message += `Total: ₹${total}\n\nPlease confirm availability.`;
+        const safeName = item.name.replace(/[^\w\s-]/g, '');
+        message += `• ${safeName} x${item.qty} - ₹${item.finalPrice * item.qty}\n`;
+      });
+      message += `\nSubtotal: ₹${subtotal}\nDelivery: ${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}\nTotal: ₹${total}\n`;
+      message += `\n--- Delivery Address ---\nName: ${userAddress.fullName}\nMobile: ${userAddress.mobile}\nAddress: ${userAddress.house}, ${userAddress.street}, ${userAddress.city}, ${userAddress.pincode}\n`;
+      message += "\nPlease confirm availability.";
 
       window.open(`https://wa.me/919985125678?text=${encodeURIComponent(message)}`, '_blank');
-      // Track begin checkout with updated icon
-      document.querySelector('.checkout-btn').innerHTML = `<i class="fas fa-arrow-right"></i> Proceed to Checkout`;
+
       if (items.length > 0 && typeof gtag === 'function') {
-      gtag('event', 'begin_checkout', {
-      currency: 'INR',
-      value: subtotal,
-      items: items.map(item => ({
-        item_id: item.id,
-        item_name: item.name,
-        item_category: item.category,
-        price: item.finalPrice,
-        quantity: item.qty
+        gtag('event', 'begin_checkout', {
+          currency: 'INR',
+          value: subtotal,
+          items: items.map(item => ({
+            item_id: item.id,
+            item_name: item.name,
+            item_category: item.category,
+            price: item.finalPrice,
+            quantity: item.qty
           }))
         });
       }
