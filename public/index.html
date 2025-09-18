@@ -110,8 +110,8 @@
   <link rel="icon" href="/favicon.ico" />
   <link rel="apple-touch-icon" href="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png">
 
-  <!-- DOMPurify (for XSS protection) -->
-  <script defer src="https://cdn.jsdelivr.net/npm/dompurify@2.4.7/dist/purify.min.js" integrity="sha256-DRS85F23e7I2+MhK5x22809p2B59IeO99Y2d54520w8=" crossorigin="anonymous"></script>
+  <!-- DOMPurify (for final safe sanitization if needed) -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js" crossorigin="anonymous"></script>
 
   <style>
     /* CSS Variables for consistency */
@@ -2946,20 +2946,6 @@
     let currentProductQty = 1;
     let isPopupOpen = false;
     let searchDebounceTimer = null;
-    
-    // NEW: Centralized object for DOM elements to avoid repeated queries
-    const dom = {};
-
-    // NEW: Centralized object for timers and observers for better management
-    const appTimers = {
-      carousel: null,
-      flashSale: null,
-      typewriter: null,
-      searchDebounce: null,
-      toast: null,
-      tooltip: null,
-    };
-    const appObservers = { lazyLoad: null };
     let typewriterTimer = null;
     
     /* NEW: Variables for popup functionality */
@@ -2971,8 +2957,6 @@
 
     /* ===== Init ===== */
     async function init() {
-      cacheDOMElements(); // NEW: Cache elements first
-
       try {
         const response = await fetch('/products.json');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -2989,7 +2973,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const searchQuery = urlParams.get('q');
         if (searchQuery) {
-          showPage('catalog'); // This uses the cached dom object now
+          showPage('catalog');
           const searchInput = document.getElementById('catalogSearch');
           if (searchInput) {
             searchInput.value = searchQuery;
@@ -3012,70 +2996,6 @@
       initCarousel('#communicationCarousel .slides');
 
       setTimeout(startTypewriter, 1000);
-    }
-
-    // NEW: Function to cache all frequently used DOM elements
-    function cacheDOMElements() {
-      dom.app = document.querySelector('.app');
-      dom.pages = {
-        home: document.getElementById('home'),
-        catalog: document.getElementById('catalog'),
-        faq: document.getElementById('faqPage'),
-        profile: document.getElementById('profilePage'),
-      };
-      dom.bottomNav = document.getElementById('bottomNav');
-      dom.cart = {
-        modal: document.getElementById('cartModal'),
-        items: document.getElementById('cartItems'),
-        summary: document.getElementById('cartSummary'),
-        footer: document.getElementById('cartFooter'),
-        empty: document.getElementById('emptyCart'),
-        checkoutBtn: document.querySelector('.checkout-btn'),
-        emptyCartBtn: document.querySelector('.empty-cart-btn'),
-        backBtn: document.querySelector('#cartModal .back-btn'),
-      };
-      dom.badges = {
-        cart: document.getElementById('cartCount'),
-        cartCatalog: document.getElementById('cartCountCatalog'),
-        nav: document.getElementById('navBadge'),
-      };
-      dom.catalog = {
-        search: document.getElementById('catalogSearch'),
-        categories: document.getElementById('categories'),
-        products: document.getElementById('catalogProducts'),
-      };
-      dom.home = {
-        featured: document.getElementById('featuredProducts'),
-        flashSaleSection: document.getElementById('flashSaleSection'),
-        flashSaleProducts: document.getElementById('flashSaleProducts'),
-        countdownTimer: document.getElementById('countdownTimer'),
-        reviews: document.getElementById('reviewsCarousel'),
-        trustStrip: document.getElementById('trustStrip'),
-        viewAll: document.querySelector('#home .view-all'),
-      };
-      dom.popup = {
-        main: document.getElementById('productPopup'),
-        contentWrapper: document.getElementById('popupContentWrapper'),
-        mainImage: document.getElementById('popupMainImage'),
-        imageIndicators: document.getElementById('popupImageIndicators'),
-        title: document.getElementById('popupProductTitle'),
-        weight: document.getElementById('popupProductWeight'),
-        priceSection: document.getElementById('popupPriceSection'),
-        descriptionContent: document.getElementById('popupDescriptionContent'),
-        weightContent: document.getElementById('popupWeightContent'),
-        qty: document.getElementById('popupQty'),
-        addToCartBtn: document.querySelector('.popup-add-to-cart-btn'),
-        backBtn: document.querySelector('.popup-back-btn'),
-        favoriteBtn: document.querySelector('.popup-action-btn.favorite'),
-        shareBtn: document.querySelector('.popup-action-btn.share'),
-        decBtn: document.querySelector('.popup-qty-btn.dec'),
-        incBtn: document.querySelector('.popup-qty-btn.inc'),
-      };
-      dom.toast = {
-        main: document.getElementById('toast'),
-        text: document.getElementById('toastText'),
-      };
-      dom.tooltip = document.getElementById('simpleTooltip');
     }
 
     function setupEvents() {
@@ -3192,13 +3112,13 @@
 
       // --- Static Element Listeners ---
       // Header search inputs
-      dom.catalog.search.addEventListener('input', (e) => {
-        clearTimeout(appTimers.searchDebounce);
-        appTimers.searchDebounce = setTimeout(() => handleCatalogSearch(e), 300);
+      document.getElementById('catalogSearch').addEventListener('input', (e) => {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => handleCatalogSearch(e), 300);
       });
 
       // Typewriter focus/blur handlers
-      const catalogSearchInput = dom.catalog.search;
+      const catalogSearchInput = document.getElementById('catalogSearch');
       [catalogSearchInput].forEach(input => {
         if (!input) return;
         input.addEventListener('focus', () => {
@@ -3211,13 +3131,13 @@
       });
 
       // Category filter buttons
-      dom.catalog.categories.addEventListener('click', (e) => {
+      document.getElementById('categories').addEventListener('click', (e) => {
         if (e.target.matches('.category')) {
           document.querySelector('.category.active').classList.remove('active');
           e.target.classList.add('active');
           currentCategory = e.target.dataset.category;
           currentPageNumber = 1;
-          dom.catalog.search.value = '';
+          document.getElementById('catalogSearch').value = '';
           currentSearch = '';
           renderCatalogProducts();
           if (typeof gtag === 'function') gtag('event', 'select_category', { category: currentCategory });
@@ -3225,13 +3145,13 @@
       });
 
       // Header buttons (Back, Cart) and View All
-      dom.home.viewAll.addEventListener('click', () => showPage('catalog'));
+      document.querySelector('#home .view-all').addEventListener('click', () => showPage('catalog'));
       // Refined back button listeners to avoid conflicts
       document.querySelector('#catalog .back-btn').addEventListener('click', goBack);
       document.querySelector('#faqPage .back-btn').addEventListener('click', goBack);
       document.querySelector('#profilePage .back-btn').addEventListener('click', goBack);
       // The cart back button is handled separately
-      dom.cart.backBtn.addEventListener('click', closeCart);
+      document.querySelector('#cartModal .back-btn').addEventListener('click', closeCart);
 
       document.querySelectorAll('.cart-btn').forEach(btn => btn.addEventListener('click', showCart));
 
@@ -3241,16 +3161,16 @@
       document.querySelector('.profile-button.refer').addEventListener('click', () => openWhatsApp('refer'));
 
       // Product Popup buttons
-      dom.popup.backBtn.addEventListener('click', closePopup);
-      dom.popup.favoriteBtn.addEventListener('click', toggleFavorite);
-      dom.popup.shareBtn.addEventListener('click', shareProduct);
-      dom.popup.decBtn.addEventListener('click', () => changePopupQty(-1));
-      dom.popup.incBtn.addEventListener('click', () => changePopupQty(1));
-      dom.popup.addToCartBtn.addEventListener('click', addPopupToCart);
+      document.querySelector('.popup-back-btn').addEventListener('click', closePopup);
+      document.querySelector('.popup-action-btn.favorite').addEventListener('click', toggleFavorite);
+      document.querySelector('.popup-action-btn.share').addEventListener('click', shareProduct);
+      document.querySelector('.popup-qty-btn.dec').addEventListener('click', () => changePopupQty(-1));
+      document.querySelector('.popup-qty-btn.inc').addEventListener('click', () => changePopupQty(1));
+      document.querySelector('.popup-add-to-cart-btn').addEventListener('click', addPopupToCart);
 
       // Cart page buttons
-      dom.cart.emptyCartBtn.addEventListener('click', () => { showPage('catalog'); closeCart(); });
-      dom.cart.checkoutBtn.addEventListener('click', checkout);
+      document.querySelector('.empty-cart-btn').addEventListener('click', () => { showPage('catalog'); closeCart(); });
+      document.querySelector('.checkout-btn').addEventListener('click', checkout);
       // Bottom Navigation
       document.getElementById('bottomNav').addEventListener('click', e => {
         const navItem = e.target.closest('.nav-item');
@@ -3265,7 +3185,7 @@
     }
 
     function renderTrustIcons() {
-      const container = dom.home.trustStrip;
+      const container = document.getElementById('trustStrip');
       if (!container) return;
       
       container.innerHTML = '';
@@ -3295,7 +3215,7 @@
 
     /* ===== NEW: Render Customer Reviews ===== */
     function renderCustomerReviews() {
-      const container = dom.home.reviews;
+      const container = document.getElementById('reviewsCarousel');
       if (!container) return;
 
       container.innerHTML = CUSTOMER_REVIEWS.map(review => {
@@ -3340,13 +3260,13 @@
 
     /* ===== NEW: Flash Sale Functions ===== */
     function renderFlashSale() {
-      const section = dom.home.flashSaleSection;
+      const section = document.getElementById('flashSaleSection');
       if (!ENABLE_FLASH_SALE) {
         if (section) section.style.display = 'none';
         return;
       }
 
-      const container = dom.home.flashSaleProducts;
+      const container = document.getElementById('flashSaleProducts');
       if (!container) return;
 
       // 1. Show skeleton loaders first
@@ -3366,7 +3286,7 @@
     }
 
     function initFlashSaleTimer() {
-      const countdownContainer = dom.home.countdownTimer;
+      const countdownContainer = document.getElementById('countdownTimer');
       if (!countdownContainer) return;
 
       // NEW: Check if the flash sale is enabled
@@ -3392,9 +3312,9 @@
 
         if (distance < 0) {
           countdownContainer.innerHTML = "<div class='timer-ended'>Sale Ended!</div>";
-          if(appTimers.flashSale) clearInterval(appTimers.flashSale);
+          if(timerInterval) clearInterval(timerInterval);
           // Hide the product scroll when the timer ends
-          const productsContainer = dom.home.flashSaleProducts;
+          const productsContainer = document.getElementById('flashSaleProducts');
           if(productsContainer) productsContainer.style.display = 'none';
           return;
         }
@@ -3408,7 +3328,7 @@
         if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
       }
 
-      appTimers.flashSale = setInterval(updateTimer, 1000);
+      const timerInterval = setInterval(updateTimer, 1000);
       updateTimer(); // Initial call to display timer immediately
     }
     /* ===== End of New Functions ===== */
@@ -3430,7 +3350,7 @@
     }
 
     function renderFeaturedProducts() {
-      const container = dom.home.featured;
+      const container = document.getElementById('featuredProducts');
       if (!container) return;
 
       // 1. Show skeleton loaders
@@ -3447,7 +3367,7 @@
     }
     
     function renderCatalogProducts() {
-      const container = dom.catalog.products;
+      const container = document.getElementById('catalogProducts');
       if (!container) return;
       
       // If it's a fresh render (not pagination), show a full-grid loader.
@@ -3470,7 +3390,7 @@
     }
 
     function populateCatalogProducts() {
-      const container = dom.catalog.products;
+      const container = document.getElementById('catalogProducts');
       if (!container) return;
 
       let filtered = products.filter(p => {
@@ -3567,14 +3487,14 @@
 
       popupProduct = product;
       currentProductQty = cart[product.id] || 1;
-      const popup = dom.popup.main;
+      const popup = document.getElementById('productPopup');
       
       // --- Populate Basic Info ---
-      dom.popup.title.textContent = DOMPurify.sanitize(product.name);
-      dom.popup.weight.textContent = `${product.net} Net Weight`; // Simplified main weight display
+      document.getElementById('popupProductTitle').textContent = DOMPurify.sanitize(product.name);
+      document.getElementById('popupProductWeight').textContent = `${product.net} Net Weight`; // Simplified main weight display
 
       // --- Populate Price ---
-      const priceSection = dom.popup.priceSection;
+      const priceSection = document.getElementById('popupPriceSection');
       if (product.mrp > product.finalPrice) {
         const savings = product.mrp - product.finalPrice;
         const offerPercentage = product.offer > 0 ? `, ${product.offer}% OFF` : '';
@@ -3588,17 +3508,17 @@
       }
       
       // --- Populate Collapsible Details ---
-      dom.popup.descriptionContent.innerHTML = `<p>${DOMPurify.sanitize(product.desc)}</p>`;
-      dom.popup.weightContent.innerHTML = `
+      document.getElementById('popupDescriptionContent').innerHTML = `<p>${DOMPurify.sanitize(product.desc)}</p>`;
+      document.getElementById('popupWeightContent').innerHTML = `
         <p><strong>Gross Weight:</strong> ${product.gross}<br><strong>Net Weight:</strong> ${product.net}<br><small>(Net weight is after cleaning & processing. Weight loss varies by product.)</small></p>
       `;
 
       // Set product image
-      dom.popup.mainImage.src = product.image;
-      dom.popup.mainImage.alt = DOMPurify.sanitize(product.name); // FIX: Dynamically set alt attribute
+      document.getElementById('popupMainImage').src = product.image;
+      document.getElementById('popupMainImage').alt = DOMPurify.sanitize(product.name); // FIX: Dynamically set alt attribute
       
       // Hide image indicators as there's only one image
-      dom.popup.imageIndicators.style.display = 'none';
+      document.getElementById('popupImageIndicators').style.display = 'none';
       
       // --- Reset UI State ---
       // Reset accordions
@@ -3612,13 +3532,13 @@
 
       // Update bottom button text
       const totalPrice = product.finalPrice * currentProductQty;
-      dom.popup.addToCartBtn.textContent = `Add to Cart - ₹${totalPrice}`;
+      document.querySelector('.popup-add-to-cart-btn').textContent = `Add to Cart - ₹${totalPrice}`;
       
       // Set quantity
-      dom.popup.qty.textContent = currentProductQty;
+      document.getElementById('popupQty').textContent = currentProductQty;
       
       // Ensure the popup content is scrolled to the top on open
-      const contentWrapper = dom.popup.contentWrapper;
+      const contentWrapper = document.getElementById('popupContentWrapper');
       if (contentWrapper) contentWrapper.scrollTop = 0;
       
       popup.classList.add('active');
@@ -3626,7 +3546,7 @@
       document.body.classList.add('popup-open');
       
       // Hide bottom navigation and cart popup when product popup is open
-      dom.bottomNav.style.display = 'none';
+      document.getElementById('bottomNav').style.display = 'none';
       
       // Track product view
       if (typeof gtag === 'function') {
@@ -3645,7 +3565,7 @@
 
     /* NEW: Function to change quantity in popup */
     function changePopupQty(change) {
-      const qtyElement = dom.popup.qty;
+      const qtyElement = document.getElementById('popupQty');
       let qty = parseInt(qtyElement.textContent);
       qty = Math.max(1, Math.min(99, qty + change));
       qtyElement.textContent = qty;
@@ -3653,7 +3573,7 @@
       // Update bottom price with quantity
       if (popupProduct) {
         const totalPrice = popupProduct.finalPrice * qty;
-        dom.popup.addToCartBtn.textContent = `Add to Cart - ₹${totalPrice}`;
+        document.querySelector('.popup-add-to-cart-btn').textContent = `Add to Cart - ₹${totalPrice}`;
       }
       
       currentProductQty = qty;
@@ -3663,7 +3583,7 @@
     function addPopupToCart() {
       if (!popupProduct || !popupProduct.available) return;
 
-      const qty = parseInt(dom.popup.qty.textContent);
+      const qty = parseInt(document.getElementById('popupQty').textContent);
       
       if (cart[popupProduct.id]) {
         cart[popupProduct.id] = Math.min(99, cart[popupProduct.id] + qty);
@@ -3683,7 +3603,7 @@
     /* NEW: Function to toggle favorite in popup */
     function toggleFavorite() {
       isPopupFavorite = !isPopupFavorite;
-      const favoriteBtn = dom.popup.favoriteBtn;
+      const favoriteBtn = document.querySelector('.popup-action-btn.favorite');
       favoriteBtn.textContent = isPopupFavorite ? '♥' : '♡';
       favoriteBtn.style.color = isPopupFavorite ? '#e74c3c' : '#333';
       
@@ -3747,7 +3667,7 @@
     }
 
     function closePopup() {
-      const popup = dom.popup.main;
+      const popup = document.getElementById('productPopup');
       if (popup) popup.classList.remove('active');
 
       isPopupOpen = false;
@@ -3756,7 +3676,7 @@
       
       // Show bottom navigation again when popup is closed
       if (currentPage !== 'cart') {
-        dom.bottomNav.style.display = 'flex'; 
+        document.getElementById('bottomNav').style.display = 'flex'; 
       }
     }
 
@@ -3789,7 +3709,8 @@
       const totalQty = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
 
       // Update all cart badges
-      Object.values(dom.badges).forEach(el => {
+      ['cartCount', 'cartCountCatalog', 'navBadge'].forEach(id => {
+        const el = document.getElementById(id);
         if (el) {
           if (totalQty > 0) {
             el.style.display = 'flex';
@@ -3822,18 +3743,23 @@
         const product = products.find(p => p.id === parseInt(id));
         return { ...product, qty: cart[id] };
       });
+      
+      const cartItems = document.getElementById('cartItems');
+      const cartSummary = document.getElementById('cartSummary');
+      const cartFooter = document.getElementById('cartFooter');
+      const emptyCart = document.getElementById('emptyCart');
 
       if (items.length === 0) {
-        dom.cart.empty.style.display = 'flex';
-        dom.cart.items.innerHTML = '';
-        dom.cart.summary.innerHTML = '';
-        dom.cart.footer.style.display = 'none';
+        emptyCart.style.display = 'flex';
+        cartItems.innerHTML = '';
+        cartSummary.innerHTML = '';
+        cartFooter.style.display = 'none';
       } else {
-        dom.cart.empty.style.display = 'none';
-        dom.cart.footer.style.display = 'block';
+        emptyCart.style.display = 'none';
+        cartFooter.style.display = 'block';
         
         // Render cart items with new layout
-        dom.cart.items.innerHTML = items.map(item => {
+        cartItems.innerHTML = items.map(item => {
           const hasOffer = item.mrp > item.finalPrice;
           const subtotal = item.finalPrice * item.qty;
           const totalMrp = item.mrp * item.qty;
@@ -3870,10 +3796,10 @@
         const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
         const total = subtotal + deliveryFee; 
 
-        dom.cart.checkoutBtn.innerHTML = `<span>Proceed to Checkout</span> <span class="checkout-btn-price">₹${total}</span>`;
+        document.querySelector('.checkout-btn').innerHTML = `<span>Proceed to Checkout</span> <span class="checkout-btn-price">₹${total}</span>`;
 
         // Render summary
-        dom.cart.summary.innerHTML = `
+        cartSummary.innerHTML = `
           <div class="cart-summary">
             ${subtotal < FREE_DELIVERY_THRESHOLD ? `
               <div class="delivery-progress-container">
@@ -3909,11 +3835,11 @@
       }
 
       // Show cart modal
-      dom.cart.modal.classList.add('active');
+      document.getElementById('cartModal').classList.add('active');
       document.body.classList.add('popup-open');
       
       // Hide bottom navigation and cart popup when cart modal is open
-      dom.bottomNav.style.display = 'none';
+      document.getElementById('bottomNav').style.display = 'none';
       
       // Track cart view
       if (typeof gtag === 'function') {
@@ -3938,7 +3864,7 @@
         return { ...product, qty: cart[id] };
       });
 
-      const cartSummary = dom.cart.summary;
+      const cartSummary = document.getElementById('cartSummary');
       if (!cartSummary) return;
 
       const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
@@ -3947,9 +3873,9 @@
       const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
       const total = subtotal + deliveryFee;
 
-      dom.cart.checkoutBtn.innerHTML = `<span>Proceed to Checkout</span> <span class="checkout-btn-price">₹${total}</span>`;
+      document.querySelector('.checkout-btn').innerHTML = `<span>Proceed to Checkout</span> <span class="checkout-btn-price">₹${total}</span>`;
 
-      cartSummary.innerHTML = `
+      cartSummary.innerHTML = ` 
         <div class="cart-summary">
           ${subtotal < FREE_DELIVERY_THRESHOLD ? `
             <div class="delivery-progress-container">
@@ -3973,17 +3899,17 @@
 
       // Also check if cart is now empty
       if (items.length === 0) {
-        dom.cart.empty.style.display = 'flex';
-        dom.cart.footer.style.display = 'none';
+        document.getElementById('emptyCart').style.display = 'flex';
+        document.getElementById('cartFooter').style.display = 'none';
       }
     }
 
     function closeCart() {
-      dom.cart.modal.classList.remove('active');
+      document.getElementById('cartModal').classList.remove('active');
       document.body.classList.remove('popup-open');
       
       // Show bottom navigation again when cart is closed
-      dom.bottomNav.style.display = 'flex';
+      document.getElementById('bottomNav').style.display = 'flex';
     }
 
     function updateQty(id, change) {
@@ -3996,7 +3922,7 @@
       saveCart();
       
       // If we're on the cart page, refresh it
-      if (dom.cart.modal.classList.contains('active')) {
+      if (document.getElementById('cartModal').classList.contains('active')) {
         // More efficient update: just update the specific item and the summary
         const itemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
         if (itemEl) {
@@ -4095,7 +4021,7 @@
 
       window.open(`https://wa.me/919985125678?text=${encodeURIComponent(message)}`, '_blank');
       // Track begin checkout with updated icon
-      dom.cart.checkoutBtn.innerHTML = `<i class="fas fa-arrow-right"></i> Proceed to Checkout`;
+      document.querySelector('.checkout-btn').innerHTML = `<i class="fas fa-arrow-right"></i> Proceed to Checkout`;
       if (items.length > 0 && typeof gtag === 'function') {
       gtag('event', 'begin_checkout', {
       currency: 'INR',
@@ -4112,8 +4038,8 @@
     }
 
     function showPage(page) {
-      Object.values(dom.pages).forEach(p => p.classList.remove('active'));
-      dom.pages[page.replace('Page', '')].classList.add('active');
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(page).classList.add('active');
       
       // Manage navigation history
       if (page !== 'cart' && page !== pageHistory[pageHistory.length - 1]) {
@@ -4140,9 +4066,9 @@
 
       // Show/hide bottom navigation based on page
       if (page === 'cart' || isPopupOpen) {
-        dom.bottomNav.style.display = 'none';
+        document.getElementById('bottomNav').style.display = 'none';
       } else {
-        dom.bottomNav.style.display = 'flex';
+        document.getElementById('bottomNav').style.display = 'flex';
       }
     }
 
@@ -4169,12 +4095,12 @@
     }
 
     function showToast(text) {
-      const toast = dom.toast.main;
-      const toastText = dom.toast.text;
+      const toast = document.getElementById('toast');
+      const toastText = document.getElementById('toastText');
       if (toast && toastText) {
         toastText.textContent = text;
         toast.classList.add('show');
-        appTimers.toast = setTimeout(() => toast.classList.remove('show'), 2000);
+        setTimeout(() => toast.classList.remove('show'), 2000);
       }
     }
 
@@ -4216,12 +4142,12 @@
       }
 
       function startTimer() {
-        stopTimer(); // Use the new centralized timer
-        appTimers.carousel = setInterval(next, 5000);
+        stopTimer();
+        timer = setInterval(next, 5000);
       }
 
       function stopTimer() {
-        clearInterval(appTimers.carousel);
+        clearInterval(timer);
       }
 
       carouselContainer.addEventListener('mouseenter', stopTimer);
@@ -4266,14 +4192,14 @@
     }
 
     function startTypewriter() {
-      if (appTimers.typewriter) clearTimeout(appTimers.typewriter);
+      if (typewriterTimer) clearTimeout(typewriterTimer);
 
       const base = 'Search — ';
       const names = ['Prawns', 'Rohu', 'Sea Bass', 'Crab', 'Pickle'];
       let i = 0, pos = 0, dir = 1, pause = 0;
 
       // FIX: Target the correct search input and remove reference to non-existent 'searchInput'
-      const inputs = [dom.catalog.search].filter(Boolean);
+      const inputs = [document.getElementById('catalogSearch')].filter(Boolean);
 
       function tick() {
         const shouldAnimate = inputs.every(input => document.activeElement !== input && !input.value);
@@ -4294,14 +4220,14 @@
             dir = 1; i = (i + 1) % names.length; pos = 0;
           }
         }
-        appTimers.typewriter = setTimeout(tick, dir === 1 ? 120 : 80);
+        typewriterTimer = setTimeout(tick, dir === 1 ? 120 : 80);
       }
       tick();
     }
 
     /* ===== NEW: Tooltip Functions ===== */
     function showSimpleTooltip(targetElement) {
-      const tooltip = dom.tooltip;
+      const tooltip = document.getElementById('simpleTooltip');
       const text = targetElement.getAttribute('title');
       if (!tooltip || !text) return;
 
@@ -4321,11 +4247,11 @@
       tooltip.style.left = `${left}px`;
 
       // Set a timer to auto-hide the tooltip after a few seconds
-      appTimers.tooltip = setTimeout(hideSimpleTooltip, 3000);
+      setTimeout(hideSimpleTooltip, 3000);
     }
 
     function hideSimpleTooltip() {
-      const tooltip = dom.tooltip;
+      const tooltip = document.getElementById('simpleTooltip');
       if (tooltip) {
         tooltip.classList.remove('show');
       }
@@ -4337,7 +4263,7 @@
       const carousels = document.querySelectorAll('.carousel, .communication-carousel');
       if (carousels.length === 0) return;
 
-      appObservers.lazyLoad = new IntersectionObserver((entries, observer) => {
+      const observer = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             const carouselElement = entry.target;
@@ -4353,7 +4279,7 @@
           }
         });
       }, { rootMargin: '100px' }); // Start loading when it's 100px away from viewport
-      carousels.forEach(carousel => appObservers.lazyLoad.observe(carousel));
+      carousels.forEach(carousel => observer.observe(carousel));
     }
 
     function saveCart() {
