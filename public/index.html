@@ -2981,6 +2981,251 @@
       }
 
       /* NEW: Address List Styles */
+      #addressListContainer { padding-bottom: 80px; /* Space for the sticky "Add New Address" button */ }
+      #addressListContainer .address-item {
+        background: var(--bg-white);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        position: relative;
+        transition: border-color 0.2s;
+        display: flex; /* Use flexbox for main content and options menu */
+        align-items: flex-start; /* Align items to the top */
+        gap: 12px; /* Space between icon and text content */
+      }
+      #addressListContainer .address-item.default {
+        border-color: var(--primary-color);
+        border-width: 2px;
+        padding: 15px; /* Adjust for border */
+      }
+
+      .address-main-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        flex-grow: 1; /* Allow main content to take available space */
+      }
+
+      .address-pin-icon {
+        font-size: 20px;
+        color: var(--primary-color);
+        flex-shrink: 0; /* Prevent icon from shrinking */
+        margin-top: 2px; /* Align with text better */
+      }
+
+      .address-text-content {
+        flex-grow: 1;
+      }
+
+      .address-name-line {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+
+      .address-name {
+        font-weight: 600;
+        font-size: 16px;
+      }
+      #addressListContainer .default-badge {
+        background: var(--primary-light);
+        color: var(--primary-dark);
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      /* REFINED: Address body and mobile number */
+      .address-full-text {
+        font-size: 14px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+        margin-bottom: 8px;
+      }
+      .address-mobile-line {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500; /* Medium weight for mobile */
+        color: var(--text-primary);
+      }
+
+      /* 3-dot menu styles */
+      .address-options-menu {
+        position: relative;
+        flex-shrink: 0;
+        margin-top: -8px; /* Pull up slightly to align with top of card */
+        margin-right: -8px; /* Pull in slightly to align with right of card */
+      }
+
+      .address-options-btn {
+        background: none;
+        border: none;
+        font-size: 18px;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: background-color 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .address-options-btn:active {
+        background-color: var(--bg-light);
+      }
+
+      .address-dropdown-content {
+        display: none;
+        position: absolute;
+        top: 100%; /* Position below the button */
+        right: 0;
+        background-color: var(--bg-white);
+        min-width: 160px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        border-radius: 8px;
+        z-index: 10;
+        overflow: hidden; /* For rounded corners on buttons */
+      }
+
+      .address-dropdown-content.active {
+        display: block;
+      }
+
+      .address-dropdown-content .address-action-btn {
+        display: block;
+        width: 100%;
+        padding: 12px 16px;
+        text-align: left;
+        background: none;
+        border: none;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .address-dropdown-content .address-action-btn:hover {
+        background-color: var(--bg-light);
+      }
+
+      .address-dropdown-content .address-action-btn.delete-address-btn {
+        color: var(--error-color);
+      }
+
+      /* Sticky "Add New Address" Button */
+      #addNewAddressBtnFixed {
+        position: fixed;
+        bottom: calc(12px + env(safe-area-inset-bottom)); /* Adjust for bottom nav and safe area */
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 40px); /* 20px padding on each side */
+        max-width: calc(var(--app-max-width) - 40px);
+        background: var(--primary-color);
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+        padding: 16px;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        z-index: 99; /* Below modals, above other content */
+      }
+      #addNewAddressBtnFixed:active {
+        transform: translateX(-50%) translateY(1px);
+        box-shadow: 0 2px 6px rgba(1, 101, 154, 0.3);
+      }
+
+      /* Empty state for address list */
+      #addressListContainer .empty-state-address {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--text-secondary);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        min-height: 50vh; /* Ensure it takes up some space */
+      }
+      #addressListContainer .empty-state-address i {
+        font-size: 64px;
+        margin-bottom: 24px;
+        color: var(--border-color);
+      }
+      #addressListContainer .empty-state-address h3 {
+        font-size: 20px;
+        margin-bottom: 8px;
+        color: var(--text-secondary);
+      }
+      #addressListContainer .empty-state-address p {
+        margin-bottom: 32px;
+      }
+
+      /* Old address action buttons (removed) */
+      /*
+      .address-action-btn {
+        background: none;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 8px 12px;
+        transition: opacity 0.2s;
+        border-radius: 8px;
+        transition: background-color 0.2s;
+      }
+      .address-action-btn:active {
+        background-color: var(--bg-light);
+      }
+      .set-default-btn {
+        color: var(--primary-color);
+        margin-right: auto;
+      }
+      .edit-address-btn {
+        color: var(--text-primary);
+        background-color: var(--bg-light);
+        border: 1px solid var(--border-color);
+      }
+      .delete-address-btn { color: var(--error-color); }
+      */
+
+      /* Old "Add New Address" Button (removed) */
+      /*
+      #addNewAddressBtn {
+        background: var(--primary-color);
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+        padding: 16px;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+      }
+      #addNewAddressBtn:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 6px rgba(1, 101, 154, 0.3);
+      }
+      */
+
+      /* NEW: Address List Styles (old, now integrated above) */
+      /*
       #addressListContainer .address-item {
         background: var(--bg-white);
         border: 1px solid var(--border-color);
@@ -2993,16 +3238,16 @@
       #addressListContainer .address-item.default {
         border-color: var(--primary-color);
         border-width: 2px;
-        padding: 15px; /* Adjust for border */
+        padding: 15px;
       }
       #addressListContainer .address-item.default .address-header {
-        margin-bottom: 12px; /* More space when default badge is shown */
+        margin-bottom: 12px;
       }
       #addressListContainer .address-item:not(.default) .address-header {
-        margin-bottom: 4px; /* Less space when no badge */
+        margin-bottom: 4px;
       }
       #addressListContainer .address-item .address-name {
-        font-weight: 700; /* Bolder name */
+        font-weight: 700;
       }
       #addressListContainer .address-header {
         display: flex;
@@ -3025,19 +3270,18 @@
         font-size: 12px;
         font-weight: 500;
       }
-      /* REFINED: Address body and mobile number */
       #addressListContainer .address-body {
         font-size: 14px;
         color: var(--text-secondary);
         line-height: 1.5;
         margin-bottom: 16px;
-        padding-left: 32px; /* Indent address lines under the name */
+        padding-left: 32px;
       }
       #addressListContainer .address-mobile {
         display: flex;
         align-items: center;
         gap: 8px;
-        font-weight: 500; /* Medium weight for mobile */
+        font-weight: 500;
         color: var(--text-primary);
       }
       #addressListContainer .address-actions {
@@ -3048,55 +3292,7 @@
         padding-top: 12px;
         margin-top: 12px;
         justify-content: flex-end; /* Push buttons to the right */
-      }
-      /* REFINED: Styles for action buttons in address list */
-      .address-action-btn {
-        background: none;
-        border: none;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 14px;
-        padding: 8px 12px;
-        transition: opacity 0.2s;
-        border-radius: 8px;
-        transition: background-color 0.2s;
-      }
-      .address-action-btn:active {
-        background-color: var(--bg-light);
-      }
-      .set-default-btn {
-        color: var(--primary-color);
-        margin-right: auto; /* Push other buttons to the right */
-      }
-      .edit-address-btn {
-        color: var(--text-primary);
-        background-color: var(--bg-light);
-        border: 1px solid var(--border-color);
-      }
-      .delete-address-btn { color: var(--error-color); }
-
-      /* NEW: Prominent 'Add New Address' Button */
-      #addNewAddressBtn {
-        background: var(--primary-color);
-        color: white;
-        font-weight: 600;
-        font-size: 16px;
-        padding: 16px;
-        border: none;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3);
-        cursor: pointer;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        width: 100%; /* Ensure it's full-width */
-      }
-      #addNewAddressBtn:active {
-        transform: translateY(1px);
-        box-shadow: 0 2px 6px rgba(1, 101, 154, 0.3);
-      }
+      } */
     </style>
 
     <!-- NEW: Orders Page -->
@@ -3133,7 +3329,7 @@
         </div>
       </header>
 
-      <main class="section" style="padding-top: 10px; background-color: var(--bg-light); min-height: 100vh;">
+      <main class="section" style="padding-top: 10px; background-color: var(--bg-light); padding-bottom: 80px;">
         <!-- Address List View -->
         <div id="addressListContainer">
           <!-- Addresses will be injected here by JS -->
@@ -3169,6 +3365,9 @@
             <button class="cta" type="submit">Save Address</button>
           </form>
         </div>
+      </main>
+      <!-- NEW: Sticky "Add New Address" Button -->
+      <button id="addNewAddressBtnFixed" style="display: none;"><i class="fas fa-plus"></i> Add New Address</button>
       </main>
     </div>
 
@@ -3578,7 +3777,7 @@
     function setupEvents() {
       // --- Event Delegation on the Body for Dynamic/Repeated Elements ---
       document.body.addEventListener('click', (e) => {
-        const target = e.target;
+        const target = e.target; // FIX: Ensure target is defined
 
         // Product card click (but not on buttons)
         const productCard = target.closest('.product');
@@ -3766,22 +3965,44 @@
       });
 
       // NEW: Event delegation for address list actions
-      document.getElementById('addressListContainer').addEventListener('click', e => {
+      document.getElementById('addressListContainer').addEventListener('click', e => { // FIX: Use addressListContainer
         const target = e.target;
-        if (target.id === 'addNewAddressBtn') {
-          showAddressForm();
-        } else {
-          const addressItem = target.closest('.address-item');
-          if (!addressItem) return;
-          const addressId = addressItem.dataset.id;
+        // Handle 3-dot menu toggle
+        const optionsBtn = target.closest('.address-options-btn');
+        if (optionsBtn) {
+          const dropdown = optionsBtn.nextElementSibling;
+          // Close other open dropdowns
+          document.querySelectorAll('.address-dropdown-content.active').forEach(openDropdown => {
+            if (openDropdown !== dropdown) {
+              openDropdown.classList.remove('active');
+            }
+          });
+          dropdown.classList.toggle('active');
+          e.stopPropagation(); // Prevent document click from closing immediately
+          return;
+        }
 
-          if (target.classList.contains('delete-address-btn')) {
+        const actionBtn = target.closest('.address-action-btn');
+        if (actionBtn) {
+          const addressId = actionBtn.dataset.id;
+          if (actionBtn.classList.contains('delete-address-btn')) {
             deleteAddress(addressId);
-          } else if (target.classList.contains('set-default-btn')) {
+          } else if (actionBtn.classList.contains('set-default-btn')) {
             setDefaultAddress(addressId);
-          } else if (target.classList.contains('edit-address-btn')) {
+          } else if (actionBtn.classList.contains('edit-address-btn')) {
             editAddress(addressId);
           }
+          // Close dropdown after action
+          actionBtn.closest('.address-dropdown-content').classList.remove('active');
+          return;
+        }
+      });
+      // Close dropdowns if clicking anywhere else on the document
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.address-options-menu')) {
+          document.querySelectorAll('.address-dropdown-content.active').forEach(openDropdown => {
+            openDropdown.classList.remove('active');
+          });
         }
       });
 
@@ -3855,6 +4076,9 @@
           submitBtn.textContent = 'Save Address'; // Reset button text
         }
       });
+
+      // NEW: Listener for the fixed "Add New Address" button
+      document.getElementById('addNewAddressBtnFixed').addEventListener('click', showAddressForm);
 
       // The cart back button is handled separately
       document.querySelector('#cartModal .back-btn').addEventListener('click', closeCart);
@@ -5321,52 +5545,57 @@
       if (!currentUser) return;
 
       const listContainer = document.getElementById('addressListContainer');
+      const addNewAddressBtnFixed = document.getElementById('addNewAddressBtnFixed');
       listContainer.innerHTML = '<div class="loading" style="margin: 40px auto;"></div>'; // Show loader
+      addNewAddressBtnFixed.style.display = 'none'; // Hide fixed button by default
 
       try {
         const addressesRef = db.collection('users').doc(currentUser.uid).collection('addresses');
         const snapshot = await addressesRef.orderBy('updatedAt', 'desc').get();
 
         if (snapshot.empty) {
-          listContainer.innerHTML = `
-            <div class="empty-cart" style="padding-top: 40px;">
-              <i class="fas fa-map-marker-alt" style="font-size: 48px; color: var(--border-color); margin-bottom: 24px;"></i>
+          listContainer.innerHTML = ` 
+            <div class="empty-state-address">
+              <i class="fas fa-map-marker-alt"></i>
               <h3>No Saved Addresses</h3>
               <p>Add an address for faster checkout.</p>
-              <button id="addNewAddressBtn"><i class="fas fa-plus"></i> Add New Address</button>
             </div>
           `;
-          showAddressForm(); // If no addresses, show the form directly
+          addNewAddressBtnFixed.style.display = 'flex'; // Show fixed button
+          showAddressList(); // Ensure list view is active, not form
         } else {
           let addressesHTML = snapshot.docs.map(doc => {
             const address = doc.data();
             return `
               <div class="address-item ${address.isDefault ? 'default' : ''}" data-id="${doc.id}" role="listitem">
-                <div class="address-header">
-                  <div class="address-name">
-                    <i class="fas fa-home" style="color: var(--primary-color);"></i>
-                    <span>${address.fullName}</span>
+                <div class="address-main-content">
+                  <i class="fas fa-map-marker-alt address-pin-icon"></i>
+                  <div class="address-text-content">
+                    <div class="address-name-line">
+                      <span class="address-name">${DOMPurify.sanitize(address.fullName)}</span>
+                      ${address.isDefault ? '<span class="default-badge" aria-label="Default Address">Default</span>' : ''}
+                    </div>
+                    <p class="address-full-text">${DOMPurify.sanitize(address.house)}, ${DOMPurify.sanitize(address.street)}<br>${DOMPurify.sanitize(address.city)}, ${DOMPurify.sanitize(address.pincode)}</p>
+                    <div class="address-mobile-line">
+                      <i class="fas fa-mobile-alt"></i>
+                      <span>${DOMPurify.sanitize(address.mobile)}</span>
+                    </div>
                   </div>
-                  ${address.isDefault ? '<span class="default-badge" aria-label="Default Address">Default</span>' : ''}
                 </div>
-                <div class="address-body">
-                  <p>${address.house}, ${address.street}<br>${address.city}, ${address.pincode}</p>
-                  <div class="address-mobile">
-                    <i class="fas fa-mobile-alt"></i>
-                    <span>${address.mobile}</span>
+                <div class="address-options-menu">
+                  <button class="address-options-btn" aria-label="Address options"><i class="fas fa-ellipsis-v"></i></button>
+                  <div class="address-dropdown-content">
+                    <button class="address-action-btn edit-address-btn" data-id="${doc.id}" aria-label="Edit Address">Edit</button>
+                    <button class="address-action-btn delete-address-btn" data-id="${doc.id}" aria-label="Delete Address">Delete</button>
+                    ${!address.isDefault ? `<button class="address-action-btn set-default-btn" data-id="${doc.id}" aria-label="Set as Default">Set as Default</button>` : ''}
                   </div>
-                </div>
-                <div class="address-actions">
-                  ${!address.isDefault ? '<button class="address-action-btn set-default-btn" aria-label="Set as Default">Set as Default</button>' : '<div style="margin-right: auto;"></div>' /* Spacer */}
-                  <button class="address-action-btn edit-address-btn" aria-label="Edit Address">Edit</button>
-                  <button class="address-action-btn delete-address-btn" aria-label="Delete Address">Delete</button>
                 </div>
               </div>
             `;
           }).join('');
 
-          addressesHTML += `<button id="addNewAddressBtn" style="margin-top: 20px;"><i class="fas fa-plus"></i> Add New Address</button>`;
           listContainer.innerHTML = addressesHTML;
+          addNewAddressBtnFixed.style.display = 'flex'; // Show fixed button
           showAddressList(); // Show the list view
         }
       } catch (error) {
