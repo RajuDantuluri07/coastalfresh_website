@@ -2960,9 +2960,9 @@
 
     /* NEW: Category Data with Icons */
     const CATEGORIES_DATA = [
-      { key: 'All',    label: 'All',    icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/shopping_yblohc.png' },
-      { key: 'Fish',   label: 'Fish',   icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/food_yircgb.png' },
+      { key: 'All',    label: 'All',    icon: null },
       { key: 'Prawns', label: 'Prawns', icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005093/shrimp_1_yzblqb.png' },
+      { key: 'Fish',   label: 'Fish',   icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/food_yircgb.png' },
       { key: 'Crabs',  label: 'Crabs',  icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/crab_n5ukwx.png' },
       { key: 'Pickles',label: 'Pickles',icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005242/mason-jar_a5mtg4.png' }
     ];
@@ -3177,10 +3177,13 @@
 
       // Category filter buttons
       document.getElementById('categories').addEventListener('click', (e) => {
-        if (e.target.matches('.category')) {
+        const categoryButton = e.target.closest('.category');
+        if (categoryButton) {
+          if (categoryButton.classList.contains('active')) return; // Do nothing if already active
+
           document.querySelector('.category.active').classList.remove('active');
-          e.target.classList.add('active');
-          currentCategory = e.target.dataset.category;
+          categoryButton.classList.add('active');
+          currentCategory = categoryButton.dataset.category;
           currentPageNumber = 1;
           document.getElementById('catalogSearch').value = '';
           currentSearch = '';
@@ -3268,7 +3271,7 @@
 
       container.innerHTML = CATEGORIES_DATA.map((cat, index) => `
         <button class="category ${index === 0 ? 'active' : ''}" data-category="${cat.key}">
-          <img src="${cat.icon}" alt="${cat.label}" class="category-icon" loading="lazy">
+          ${cat.icon ? `<img src="${cat.icon}" alt="${cat.label}" class="category-icon" loading="lazy">` : ''}
           <span>${cat.label}</span>
         </button>
       `).join('');
@@ -3449,7 +3452,7 @@
       }
       
       // Use a timeout to ensure the shimmer animation is visible
-      setTimeout(populateCatalogProducts, 500);
+      setTimeout(populateCatalogProducts, 100); // REDUCED: Faster UI update
     }
 
     function populateCatalogProducts() {
