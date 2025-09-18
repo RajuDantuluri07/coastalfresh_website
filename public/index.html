@@ -4985,6 +4985,7 @@
 
       // 1. Check if user is logged in
       if (!currentUser) {
+        showToast('Please sign up or log in to place your order.');
         afterLoginAction = checkout; // Set checkout as the action to perform after login
         showLoginModal(); // Directly show login modal, which now defaults to signup.
         return;
