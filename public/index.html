@@ -5564,9 +5564,8 @@
               <h3>No Saved Addresses</h3>
               <p>Add an address for faster checkout.</p>
             </div>
-          `;
-          addNewAddressBtnFixed.style.display = 'flex'; // Show fixed button
-          showAddressList(); // Ensure list view is active, not form
+          `; // This part is now just for display, the form will be shown.
+          showAddressForm(); // Automatically show the form if no addresses exist.
         } else {
           let addressesHTML = snapshot.docs.map(doc => {
             const address = doc.data();
