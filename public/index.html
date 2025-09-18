@@ -113,6 +113,10 @@
   <!-- DOMPurify (for final safe sanitization if needed) -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js" crossorigin="anonymous"></script>
 
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
   <style>
     /* CSS Variables for consistency */
     :root {
@@ -168,6 +172,103 @@
       background-color: #0B1A4A; /* Dark blue fallback */
     }
 
+    /* --- NEW: Login Modal Styles --- */
+    .login-modal {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: var(--app-max-width);
+      height: 100%;
+      background: var(--bg-white);
+      z-index: 1000;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .login-modal.active {
+      display: flex;
+    }
+
+    .login-content {
+      padding: 20px;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    .login-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 24px;
+    }
+
+    .login-tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      background: none;
+      border: none;
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .login-tab.active {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+
+    .login-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--primary-color);
+    }
+
+    .login-form {
+      display: none;
+    }
+
+    .login-form.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(1, 101, 154, 0.2);
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 8px;
+      border: none;
+      background: var(--primary-color);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
     * {
       margin: 0;
       padding: 0;
@@ -2670,11 +2771,11 @@
             <i class="fas fa-user"></i>
           </div>
           <div class="profile-user-info">
-            <h2>Guest User</h2>
-            <p>You are browsing as a guest</p>
+            <h2 id="profileUserName">Guest User</h2>
+            <p id="profileUserEmail">Sign in for a better experience</p>
           </div>
         </div>
-
+ 
         <!-- Action Group -->
         <div class="profile-actions">
           <button class="profile-button refer">
@@ -2688,6 +2789,9 @@
           </button>
           <button class="profile-button support">
             <i class="fas fa-headset"></i> Contact Us
+          </button>
+          <button class="profile-button" id="logoutBtn" style="display: none; color: var(--error-color);">
+            <i class="fas fa-sign-out-alt"></i> Logout
           </button>
         </div>
 
@@ -2925,6 +3029,24 @@
   }
   </script>
   <script>
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyCCeLy8PNUK480m_o-GpRWbdRB59R3UTqw", // This is safe to be public
+    authDomain: "coastal-fresh---sea-foods.firebaseapp.com",
+    projectId: "coastal-fresh---sea-foods",
+    storageBucket: "coastal-fresh---sea-foods.appspot.com",
+    messagingSenderId: "782759620106",
+    appId: "1:782759620106:web:960ec7c125faa30675f9f3",
+    measurementId: "G-GSHMPRYPW1" // Using the one already in your code
+  };
+
+  // Initialize Firebase
+  try {
+    firebase.initializeApp(firebaseConfig);
+  } catch(e) {
+    console.error("Firebase initialization error", e);
+  }
+
   (function() { // IIFE to avoid polluting global scope
     /* ===== App Configuration ===== */
     const TRUST_ICONS = [
@@ -2986,6 +3108,7 @@
     let currentSearch = '';
     let currentPageNumber = 1;
     let carouselTimer = null;
+    let currentUser = null;
     let currentCarouselIndex = 0;
     let currentProductQty = 1;
     let isPopupOpen = false;
@@ -3001,6 +3124,9 @@
 
     /* ===== Init ===== */
     async function init() {
+      // Firebase Auth Listener
+      firebase.auth().onAuthStateChanged(handleAuthStateChange);
+
       try {
         const response = await fetch('/products.json');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -3144,6 +3270,29 @@
             if (icon) icon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
           }
         }
+
+        // Login modal tab switching
+        const loginTab = target.closest('.login-tab');
+        if (loginTab) {
+          const formId = loginTab.dataset.form;
+          document.querySelector('.login-tab.active').classList.remove('active');
+          loginTab.classList.add('active');
+
+          document.querySelector('.login-form.active').classList.remove('active');
+          document.getElementById(formId).classList.add('active');
+          document.getElementById('authError').textContent = ''; // Clear errors on tab switch
+        }
+      });
+
+      // Login Modal Close Button
+      document.querySelector('#loginModal .back-btn').addEventListener('click', closeLoginModal);
+
+      // Auth Form Submissions
+      document.getElementById('loginForm').addEventListener('submit', handleEmailLogin);
+      document.getElementById('signupForm').addEventListener('submit', handleEmailSignup);
+      document.getElementById('googleLoginBtn').addEventListener('click', handleGoogleLogin);
+      document.getElementById('facebookLoginBtn').addEventListener('click', handleFacebookLogin);
+      document.getElementById('forgotPassword').addEventListener('click', handlePasswordReset);
       });
 
       // NEW: Tooltip handler
@@ -3209,6 +3358,7 @@
       document.querySelector('.profile-button.faq').addEventListener('click', () => showPage('faqPage'));
       document.querySelector('.profile-button.support').addEventListener('click', () => openWhatsApp('support'));
       document.querySelector('.profile-button.refer').addEventListener('click', () => openWhatsApp('refer'));
+      document.getElementById('logoutBtn').addEventListener('click', handleLogout);
 
       // Product Popup buttons
       document.querySelector('.popup-back-btn').addEventListener('click', closePopup);
@@ -3230,7 +3380,11 @@
         if (page === 'cart') {
           showCart();
         } else if (page) {
-          showPage(page);
+          if (page === 'profilePage' && !currentUser) {
+            showLoginModal();
+          } else {
+            showPage(page);
+          }
         }
       });
     }
@@ -3612,6 +3766,7 @@
       document.body.classList.add('popup-open');
       
       // Hide bottom navigation and cart popup when product popup is open
+      document.getElementById('loginModal').classList.remove('active');
       document.getElementById('bottomNav').style.display = 'none';
       
       // Track product view
@@ -3905,6 +4060,7 @@
       document.body.classList.add('popup-open');
       
       // Hide bottom navigation and cart popup when cart modal is open
+      document.getElementById('loginModal').classList.remove('active');
       document.getElementById('bottomNav').style.display = 'none';
       
       // Track cart view
@@ -3975,6 +4131,7 @@
       document.body.classList.remove('popup-open');
       
       // Show bottom navigation again when cart is closed
+      document.getElementById('loginModal').classList.remove('active');
       document.getElementById('bottomNav').style.display = 'flex';
     }
 
@@ -4131,7 +4288,7 @@
       }
 
       // Show/hide bottom navigation based on page
-      if (page === 'cart' || isPopupOpen) {
+      if (page === 'cart' || isPopupOpen || document.getElementById('loginModal').classList.contains('active')) {
         document.getElementById('bottomNav').style.display = 'none';
       } else {
         document.getElementById('bottomNav').style.display = 'flex';
@@ -4432,6 +4589,128 @@
 
   return sanitized;
 }
+
+    /* ===== NEW: Auth Functions ===== */
+    function showLoginModal() {
+      document.getElementById('loginModal').classList.add('active');
+      document.body.classList.add('popup-open');
+      document.getElementById('bottomNav').style.display = 'none';
+      document.getElementById('authError').textContent = '';
+    }
+
+    function closeLoginModal() {
+      document.getElementById('loginModal').classList.remove('active');
+      document.body.classList.remove('popup-open');
+      document.getElementById('bottomNav').style.display = 'flex';
+    }
+
+    function handleEmailSignup(e) {
+      e.preventDefault();
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      const authError = document.getElementById('authError');
+      authError.textContent = '';
+
+      firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then(userCredential => {
+          showToast('Account created successfully!');
+          closeLoginModal();
+        })
+        .catch(error => {
+          authError.textContent = error.message;
+        });
+    }
+
+    function handleEmailLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const authError = document.getElementById('authError');
+      authError.textContent = '';
+
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(userCredential => {
+          showToast('Logged in successfully!');
+          closeLoginModal();
+        })
+        .catch(error => {
+          authError.textContent = error.message;
+        });
+    }
+
+    function handleGoogleLogin() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      const authError = document.getElementById('authError');
+      authError.textContent = '';
+      firebase.auth().signInWithPopup(provider)
+        .then(result => {
+          showToast(`Welcome, ${result.user.displayName}!`);
+          closeLoginModal();
+        }).catch(error => {
+          authError.textContent = error.message;
+        });
+    }
+
+    function handleFacebookLogin() {
+      const provider = new firebase.auth.FacebookAuthProvider();
+      const authError = document.getElementById('authError');
+      authError.textContent = '';
+      firebase.auth().signInWithPopup(provider)
+        .then(result => {
+          showToast(`Welcome, ${result.user.displayName}!`);
+          closeLoginModal();
+        }).catch(error => {
+          authError.textContent = error.message;
+        });
+    }
+
+    function handlePasswordReset(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const authError = document.getElementById('authError');
+      if (!email) {
+        authError.textContent = 'Please enter your email in the login form to reset password.';
+        return;
+      }
+      firebase.auth().sendPasswordResetEmail(email)
+        .then(() => {
+          showToast('Password reset email sent!');
+        })
+        .catch(error => {
+          authError.textContent = error.message;
+        });
+    }
+
+    function handleLogout() {
+      firebase.auth().signOut().then(() => {
+        showToast('You have been logged out.');
+        showPage('home');
+      }).catch(error => {
+        console.error('Logout Error:', error);
+      });
+    }
+
+    function handleAuthStateChange(user) {
+      currentUser = user;
+      updateUIForAuthState();
+    }
+
+    function updateUIForAuthState() {
+      const userNameEl = document.getElementById('profileUserName');
+      const userEmailEl = document.getElementById('profileUserEmail');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      if (currentUser) {
+        userNameEl.textContent = currentUser.displayName || 'Valued Customer';
+        userEmailEl.textContent = currentUser.email;
+        logoutBtn.style.display = 'flex';
+      } else {
+        userNameEl.textContent = 'Guest User';
+        userEmailEl.textContent = 'Sign in for a better experience';
+        logoutBtn.style.display = 'none';
+      }
+    }
+    /* ===== End of Auth Functions ===== */
 
     function trackAddToCart(id, qty) {
       const product = products.find(p => p.id === parseInt(id));
