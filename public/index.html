@@ -2904,21 +2904,21 @@
         name: 'Priya S.',
         location: 'Gachibowli, Hyderabad',
         rating: 5,
-        image: 'https://randomuser.me/api/portraits/women/44.jpg',
+        image: null,
         review: 'The freshest seafood I’ve had in Hyderabad! The pomfret was cleaned perfectly. Delivery was on time and packaging was top-notch. Highly recommend!'
       },
       {
         name: 'Amit K.',
         location: 'Jubilee Hills, Hyderabad',
         rating: 5,
-        image: 'https://randomuser.me/api/portraits/men/32.jpg',
+        image: null,
         review: 'Finally, authentic coastal taste in the city. The prawns were juicy and the pickles are just like my grandmother used to make. Will be ordering every week.'
       },
       {
         name: 'Sunita R.',
         location: 'Kondapur, Hyderabad',
         rating: 4,
-        image: null, // Example of a review without a customer image
+        image: null,
         review: 'Good quality fish and very convenient. The net weight was accurate. Would love to see more variety in small fish, but overall a great experience.'
       }
     ];
@@ -3220,7 +3220,8 @@
 
       container.innerHTML = CUSTOMER_REVIEWS.map(review => {
         // Sanitize inputs to prevent XSS
-        const safeName = DOMPurify.sanitize(review.name);
+        const firstName = review.name.split(' ')[0];
+        const safeName = DOMPurify.sanitize(firstName);
         const safeLocation = DOMPurify.sanitize(review.location);
         const safeReview = DOMPurify.sanitize(review.review);
 
