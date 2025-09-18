@@ -1516,17 +1516,21 @@
 
     /* Bottom Section */
     .popup-bottom-section {
+      position: fixed; /* STICKY FOOTER: Make it fixed */
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
       width: 100%;
+      max-width: var(--app-max-width);
       background: var(--bg-white);
       padding: 12px 20px;
       border-top: 1px solid var(--border-color);
       display: flex;
       flex-direction: column;
       align-items: center;
-      z-index: 5; /* Lower z-index than header */
+      z-index: 1001; /* STICKY FOOTER: Ensure it's on top */
       box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
       gap: 12px;
-      flex-shrink: 0; /* Prevent footer from shrinking */
       /* FIX: Use safe-area padding for mobile navigation */
       padding-bottom: calc(12px + env(safe-area-inset-bottom));
     }
@@ -1609,6 +1613,8 @@
       overflow-y: auto; /* Enable vertical scrolling for the main content */
       -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
       width: 100%;
+      /* STICKY FOOTER: Add padding to prevent content from being hidden by the fixed footer */
+      padding-bottom: 120px;
     }
 
     /* Cart Modal - FIXED for mobile container */
@@ -4985,9 +4991,12 @@
 
       // 1. Check if user is logged in
       if (!currentUser) {
+        // FIX: Close the cart modal before showing the login modal for a cleaner transition.
+        // We don't use the generic closeCart() function here to avoid side effects.
+        document.getElementById('cartModal').classList.remove('active');
         showToast('Please sign up or log in to place your order.');
-        afterLoginAction = checkout; // Set checkout as the action to perform after login
-        showLoginModal(); // Directly show login modal, which now defaults to signup.
+        afterLoginAction = checkout; // Set the action to perform after a successful login.
+        showLoginModal(); // Now, show the login modal.
         return;
       }
 
