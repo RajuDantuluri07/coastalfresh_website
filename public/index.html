@@ -4575,7 +4575,7 @@
       isPopupFavorite = !isPopupFavorite;
       const favoriteBtn = document.querySelector('.popup-action-btn.favorite');
       favoriteBtn.textContent = isPopupFavorite ? '♥' : '♡';
-      favoriteBtn.style.color = isPopupFavorite ? '#e74c3c' : '#333';
+      favoriteBtn.style.color = isPopupFavorite ? 'var(--error-color)' : 'var(--text-primary)';
       
       // Track favorite action
       if (popupProduct && typeof gtag === 'function') {
