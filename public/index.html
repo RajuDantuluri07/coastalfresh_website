@@ -3075,6 +3075,28 @@
       }
       .delete-address-btn { color: var(--error-color); }
 
+      /* NEW: Prominent 'Add New Address' Button */
+      #addNewAddressBtn {
+        background: var(--primary-color);
+        color: white;
+        font-weight: 600;
+        font-size: 16px;
+        padding: 16px;
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%; /* Ensure it's full-width */
+      }
+      #addNewAddressBtn:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 6px rgba(1, 101, 154, 0.3);
+      }
     </style>
 
     <!-- NEW: Orders Page -->
@@ -5311,7 +5333,7 @@
               <i class="fas fa-map-marker-alt" style="font-size: 48px; color: var(--border-color); margin-bottom: 24px;"></i>
               <h3>No Saved Addresses</h3>
               <p>Add an address for faster checkout.</p>
-              <button id="addNewAddressBtn" class="cta" style="width: 80%;">Add New Address</button>
+              <button id="addNewAddressBtn"><i class="fas fa-plus"></i> Add New Address</button>
             </div>
           `;
           showAddressForm(); // If no addresses, show the form directly
@@ -5343,7 +5365,7 @@
             `;
           }).join('');
 
-          addressesHTML += `<button id="addNewAddressBtn" class="cta" style="width: 100%; margin-top: 20px;">Add New Address</button>`;
+          addressesHTML += `<button id="addNewAddressBtn" style="margin-top: 20px;"><i class="fas fa-plus"></i> Add New Address</button>`;
           listContainer.innerHTML = addressesHTML;
           showAddressList(); // Show the list view
         }
