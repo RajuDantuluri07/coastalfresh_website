@@ -2985,8 +2985,8 @@
       #addressListContainer .address-item {
         background: var(--bg-white);
         border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 16px;
+        border-radius: 14px; /* Slightly larger radius for a softer look */
+        padding: 14px; /* Reduced padding to make card more compact */
         margin-bottom: 16px;
         position: relative;
         transition: border-color 0.2s;
@@ -2997,7 +2997,7 @@
       #addressListContainer .address-item.default {
         border-color: var(--primary-color);
         border-width: 2px;
-        padding: 15px; /* Adjust for border */
+        padding: 13px; /* Adjust for border */
       }
 
       .address-main-content {
@@ -3144,6 +3144,11 @@
       #addNewAddressBtnFixed:active {
         transform: translateX(-50%) translateY(1px);
         box-shadow: 0 2px 6px rgba(1, 101, 154, 0.3);
+      }
+
+      /* NEW: Ensure address page has a consistent background */
+      #addressPage {
+        background-color: var(--bg-light);
       }
 
       /* Empty state for address list */
@@ -3329,7 +3334,7 @@
         </div>
       </header>
 
-      <main class="section" style="padding-top: 10px; background-color: var(--bg-light); padding-bottom: 80px;">
+      <main class="section" style="padding-top: 10px; padding-bottom: 80px;">
         <!-- Address List View -->
         <div id="addressListContainer">
           <!-- Addresses will be injected here by JS -->
@@ -3368,7 +3373,6 @@
       </main>
       <!-- NEW: Sticky "Add New Address" Button -->
       <button id="addNewAddressBtnFixed" style="display: none;"><i class="fas fa-plus"></i> Add New Address</button>
-      </main>
     </div>
 
     <!-- Login/Signup Modal -->
