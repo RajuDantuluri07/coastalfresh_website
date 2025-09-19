@@ -2543,63 +2543,6 @@
       }
     }
 
-    /* --- NEW: Notification Soft Prompt Banner --- */
-    .notification-prompt-banner {
-      position: fixed;
-      bottom: -200px; /* Start off-screen */
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 24px);
-      max-width: calc(var(--app-max-width) - 24px);
-      background: var(--bg-white);
-      border-radius: 16px;
-      box-shadow: 0 8px 28px rgba(0,0,0,0.15);
-      z-index: 1100; /* Above most elements */
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px;
-      gap: 12px;
-      transition: bottom 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      /* Adjust for bottom nav bar */
-      margin-bottom: calc(var(--bottom-nav-height) + 12px);
-    }
-
-    .notification-prompt-banner.show {
-      bottom: 0;
-    }
-
-    .notification-prompt-content {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex: 1;
-    }
-
-    .notification-prompt-icon {
-      font-size: 24px;
-      background: var(--primary-light);
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-    }
-
-    .notification-prompt-text { display: flex; flex-direction: column; }
-    .notification-prompt-text strong { font-size: 15px; font-weight: 600; color: var(--text-primary); }
-    .notification-prompt-text span { font-size: 13px; color: var(--text-secondary); }
-    .notification-prompt-actions { display: flex; gap: 8px; }
-
-    .notification-prompt-btn { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .notification-prompt-btn.later { background: var(--bg-light); color: var(--text-secondary); }
-    .notification-prompt-btn.allow { background: var(--primary-color); color: var(--bg-white); }
-
-    @media (max-width: 375px) {
-      .notification-prompt-banner { flex-direction: column; align-items: flex-start; }
-    }
-
     /* --- NEW: Skeleton Loader with Shimmer --- */
     .skeleton-card {
       background: var(--bg-white);
@@ -3681,20 +3624,6 @@
       </div>
     </div>
 
-    <!-- NEW: Notification Soft Prompt Banner -->
-    <div class="notification-prompt-banner" id="notificationPromptBanner">
-      <div class="notification-prompt-content">
-        <div class="notification-prompt-icon">🔔</div>
-        <div class="notification-prompt-text">
-          <strong>Get updates from Coastal Fresh!</strong>
-          <span>We'll notify you about fresh stock & exclusive offers.</span>
-        </div>
-      </div>
-      <div class="notification-prompt-actions">
-        <button class="notification-prompt-btn later" id="softPromptLater">Later</button>
-        <button class="notification-prompt-btn allow" id="softPromptAllow">Allow</button>
-      </div>
-    </div>
   </div>
 
   <!-- Structured Data -->
@@ -3883,10 +3812,6 @@
       initCarousel('#slides');
       initCarousel('#communicationCarousel .slides');
 
-      setTimeout(startTypewriter, 1000);
-
-      // NEW: Prompt for notifications 2 seconds after the page loads.
-      setTimeout(promptForNotifications, 2000);
     }
 
     /* ===== NEW: OneSignal Initialization ===== */
@@ -3917,23 +3842,6 @@
           }
         });
       });
-    }
-
-    /* ===== NEW: Notification Prompting ===== */
-    function promptForNotifications() {
-      const banner = document.getElementById('notificationPromptBanner');
-      // Don't show the soft prompt if:
-      // 1. The banner doesn't exist.
-      // 2. We've already shown it (and they clicked "Later").
-      // 3. The browser permission is anything other than 'default' (meaning they've already allowed or blocked it).
-      if (!banner || localStorage.getItem('notificationPrompted') || OneSignal.Notifications.permission !== 'default') {
-        return;
-      }
-      // Show the banner.
-      banner.classList.add('show');
-
-      // Mark that we've shown the prompt so we don't show it again in this session.
-      localStorage.setItem('notificationPrompted', 'true');
     }
 
     function setupEvents() {
@@ -4036,21 +3944,6 @@
             content.style.padding = isOpen ? '0 0 16px 0' : '0';
             if (icon) icon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
           }
-        }
-      });
-
-      // --- NEW: Soft Prompt Banner Listeners ---
-      document.getElementById('softPromptLater').addEventListener('click', () => {
-        document.getElementById('notificationPromptBanner').classList.remove('show');
-        // Optional: You could set a cookie to not ask again for a week.
-      });
-
-      document.getElementById('softPromptAllow').addEventListener('click', async () => {
-        document.getElementById('notificationPromptBanner').classList.remove('show');
-        // Now, trigger the actual browser prompt.
-        await OneSignal.Notifications.requestPermission();
-        if (typeof gtag === 'function') {
-          gtag('event', 'notification_soft_prompt_allow');
         }
       });
 
