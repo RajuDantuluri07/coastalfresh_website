@@ -5748,9 +5748,15 @@
     }
 
     // NEW: A helper function to wait for the OneSignal SDK to be ready.
+    // REWRITTEN for robustness.
     function whenOneSignalIsInitialized() {
       return new Promise(resolve => {
-        if (isOneSignalInitialized) resolve();
+        if (isOneSignalInitialized) {
+          resolve();
+        } else {
+          // If the SDK isn't ready, push a resolver to the queue.
+          OneSignalDeferred.push(() => resolve());
+        }
       });
     }
 
