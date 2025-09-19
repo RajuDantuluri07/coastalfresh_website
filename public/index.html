@@ -4336,6 +4336,22 @@
       `;
     }
 
+    /* ===== NEW: Image Optimization Function ===== */
+    function getOptimizedImageUrl(url, width, height) {
+      if (!url || !url.includes('res.cloudinary.com')) {
+        return url; // Return original URL if it's not from Cloudinary
+      }
+      // Transformations:
+      // f_auto: Automatically select the best format (e.g., WebP, AVIF)
+      // q_auto: Automatically adjust quality to balance file size and visual fidelity
+      // c_fill: Crop to fill the specified dimensions without distortion
+      // w_{width}: Target width
+      // h_{height}: Target height
+      const transformations = `f_auto,q_auto,c_fill,w_${width},h_${height}`;
+      
+      return url.replace('/image/upload/', `/image/upload/${transformations}/`);
+    }
+
     function renderFeaturedProducts() {
       const container = document.getElementById('featuredProducts');
       if (!container) return;
@@ -4434,13 +4450,14 @@
     function createProductHTML(product) {
       const hasOffer = product.mrp > product.finalPrice;
       const isInCart = cart[product.id];
+      const optimizedImage = getOptimizedImageUrl(product.image, 300, 300); // Optimized for grid view
       const sanitizedName = DOMPurify.sanitize(product.name);
       return `
         <div class="product" data-id="${product.id}">
           <div class="product-image">
             ${hasOffer ? `<div class="offer-badge">${product.offer}% OFF</div>` : ''}
             ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
-            <img src="${product.image}" alt="${sanitizedName}" loading="lazy">
+            <img src="${optimizedImage}" alt="${sanitizedName}" loading="lazy">
           </div>
           <div class="product-info">
             <div class="product-name">${sanitizedName}</div>
@@ -4750,13 +4767,14 @@
         cartItems.innerHTML = items.map(item => {
           const hasOffer = item.mrp > item.finalPrice;
           const subtotal = item.finalPrice * item.qty;
-          const totalMrp = item.mrp * item.qty;
+          const totalMrp = (item.mrp || item.finalPrice) * item.qty;
+          const optimizedCartImage = getOptimizedImageUrl(item.image, 152, 152); // 76px * 2 for retina
           const itemSavings = (item.mrp - item.finalPrice) * item.qty;
 
           return `
             <div class="cart-item" data-id="${item.id}">
               <div class="cart-item-image">
-                <img src="${item.image}" alt="${item.name}">
+                <img src="${optimizedCartImage}" alt="${item.name}">
               </div>
               <div class="cart-item-info">
                 <div class="cart-item-name">${item.name}</div>
@@ -5340,8 +5358,14 @@
           if (entry.isIntersecting) {
             const carouselElement = entry.target;
             const images = carouselElement.querySelectorAll('img[data-src]');
+            const isCommBanner = carouselElement.classList.contains('communication-carousel');
+            const bannerHeight = isCommBanner ? 132 : 300; // 66px * 2 for retina vs 150px * 2
+
             images.forEach(img => {
-              img.src = img.dataset.src;
+              // NEW: Get optimized banner images
+              const originalSrc = img.dataset.src;
+              const optimizedSrc = getOptimizedImageUrl(originalSrc, 960, bannerHeight);
+              img.src = optimizedSrc;
               img.removeAttribute('data-src');
               img.onload = () => {
                 img.parentElement.classList.add('loaded');
