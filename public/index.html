@@ -129,11 +129,17 @@
       // NEW: Listen for subscription changes to update the UI
       OneSignal.on('subscriptionChange', function (isSubscribed) {
         console.log("OneSignal subscription state changed:", isSubscribed);
-        updateSubscriptionButtonUI();
+        updateNotificationToggleUI();
+      });
+
+      // NEW: Listen for browser permission changes for more robust UI updates
+      OneSignal.on('notificationPermissionChange', function(permissionChange) {
+        console.log("OneSignal permission state changed to:", permissionChange.to);
+        updateNotificationToggleUI();
       });
 
       // NEW: Run an initial check to set the button state correctly on load
-      updateSubscriptionButtonUI();
+      updateNotificationToggleUI();
     });
   </script>
 
@@ -2918,9 +2924,14 @@
           <button class="profile-button refer">
             <i class="fas fa-share-alt"></i> Refer & Earn
           </button>
-          <button class="profile-button" id="subscribeNotificationsBtn">
-            <i class="fas fa-bell"></i> Get Updates
-          </button>
+          <div class="profile-button notification-toggle-container">
+            <i class="fas fa-bell"></i>
+            <span>Push Notifications</span>
+            <label class="switch">
+              <input type="checkbox" id="notificationToggle">
+              <span class="slider round"></span>
+            </label>
+          </div>
           <button class="profile-button orders">
             <i class="fas fa-box-open"></i> My Orders
           </button>
@@ -4000,7 +4011,7 @@
       document.querySelector('#faqPage .back-btn').addEventListener('click', goBack);
       document.querySelector('#ordersPage .back-btn').addEventListener('click', goBack);
       document.querySelector('#profilePage .back-btn').addEventListener('click', goBack);
-      document.getElementById('subscribeNotificationsBtn').addEventListener('click', promptForPushNotifications);
+      document.getElementById('notificationToggle').addEventListener('change', handleNotificationToggle);
       document.querySelector('#addressPage .back-btn').addEventListener('click', () => {
         // If we were editing, cancel the edit and show the list
         if (editingAddressId) {
@@ -5309,41 +5320,57 @@
     /* ===== End of New Functions ===== */
 
     /* ===== NEW: Push Notification Functions ===== */
-    function updateSubscriptionButtonUI() {
-      // This function ensures the "Get Updates" button reflects the current subscription status.
+    function updateNotificationToggleUI() {
+      // This function ensures the notification toggle reflects the current subscription status.
       if (typeof window.OneSignal === 'undefined') return;
 
-      const subscribeBtn = document.getElementById('subscribeNotificationsBtn');
-      if (!subscribeBtn) return;
+      const toggle = document.getElementById('notificationToggle');
+      if (!toggle) return;
 
-      window.OneSignal.isPushNotificationsEnabled(function(isEnabled) {
+      // isPushNotificationsEnabled checks for browser-level permission (Allow/Block)
+      OneSignal.isPushNotificationsEnabled(function(isEnabled) {
         if (isEnabled) {
-          subscribeBtn.innerHTML = '<i class="fas fa-check-circle"></i> Subscribed';
-          subscribeBtn.disabled = true;
-          subscribeBtn.classList.add('subscribed');
+          // If permission is granted, we then check if the user is opted-in on OneSignal's side.
+          // This allows users to opt-out using the toggle without revoking browser permissions.
+          OneSignal.getSubscription(function(isSubscribed) {
+            toggle.checked = isSubscribed;
+          });
         } else {
-          subscribeBtn.innerHTML = '<i class="fas fa-bell"></i> Get Updates';
-          subscribeBtn.disabled = false;
-          subscribeBtn.classList.remove('subscribed');
+          // If browser permission is not granted (or is blocked), the toggle should be off.
+          toggle.checked = false;
         }
       });
     }
 
-    function promptForPushNotifications() {
-      // Check if OneSignal is loaded and ready
+    function handleNotificationToggle(e) {
+      const toggle = e.target;
+      const isChecked = toggle.checked;
+
       if (typeof window.OneSignal === 'undefined') {
         showToast('Notification service is not available yet.');
+        toggle.checked = !isChecked; // Revert the visual change
         return;
       }
 
-      window.OneSignal.isPushNotificationsEnabled(function(isEnabled) {
-        if (isEnabled) {
-          showToast("You're already subscribed to notifications!");
-        } else {
-          // This will show the slide prompt you configured in OneSignal.
-          window.OneSignal.showSlidedownPrompt();
-        }
-      });
+      if (isChecked) {
+        // User wants to subscribe. First, check the permission state.
+        OneSignal.getNotificationPermission(permission => {
+          if (permission === 'denied') {
+            // Permission is blocked. We can't do anything.
+            showToast('Notifications are blocked. Please enable them in your browser settings.');
+            toggle.checked = false; // Immediately revert the toggle.
+          } else {
+            // Permission is 'default' or 'granted'. Let OneSignal handle it.
+            // This will show the prompt if 'default', or just subscribe if 'granted'.
+            OneSignal.registerForPushNotifications();
+          }
+        });
+      } else {
+        // User wants to unsubscribe (opt-out).
+        // This updates their status on OneSignal's servers without revoking browser permission.
+        window.OneSignal.setSubscription(false);
+        showToast('You have been unsubscribed from notifications.');
+      }
     }
 
     // function initPushNotifications() {
