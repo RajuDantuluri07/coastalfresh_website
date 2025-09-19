@@ -18,7 +18,7 @@
       },
       // Do not cache critical files that change often, ensuring users always get the latest version.
       {
-        "source": "@(index.html|firebase-messaging-sw.js|sitemap.xml|robots.txt|products.json)",
+        "source": "@(index.html|OneSignalSDK.sw.js|sitemap.xml|robots.txt|products.json)",
         "headers": [
           {
             "key": "Cache-Control",
