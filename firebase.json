@@ -6,18 +6,28 @@
     "public": "public",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "headers": [
+      // Cache static assets (fonts, images) for 1 year. 'immutable' tells the browser it will never change.
       {
-        "source": "/sitemap.xml",
-        "headers": [{ "key": "Content-Type", "value": "application/xml; charset=utf-8" }]
+        "source": "**/*.@(jpg|jpeg|gif|png|svg|webp|ico|woff|woff2|ttf|eot)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
       },
+      // Do not cache critical files that change often, ensuring users always get the latest version.
       {
-        "source": "/robots.txt",
-        "headers": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }]
+        "source": "@(index.html|firebase-messaging-sw.js|sitemap.xml|robots.txt|products.json)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
       }
     ],
     "rewrites": [
-      { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
-      { "source": "/robots.txt", "destination": "/robots.txt" },
       { "source": "**", "destination": "/index.html" }
     ]
   }

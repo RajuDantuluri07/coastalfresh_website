@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Buy Fresh Fish & Seafood Online in Hyderabad - Prawns, Crabs & More | Coastal Fresh</title>
+  <title>Coastal Fresh India: Buy Fresh Fish & Seafood Online in Hyderabad</title>
 
   <!-- Preconnects -->
   <link rel="preconnect" href="https://res.cloudinary.com">
@@ -18,24 +18,24 @@
 
   <!-- SEO -->
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-  <meta name="description" content="The best place to buy fresh fish and seafood online in Hyderabad! Coastal Fresh offers a wide variety of hygienically cleaned fish, prawns, crabs, and authentic Andhra pickles with next-day delivery. Order now for the freshest catch." />
+  <meta name="description" content="The best place to buy fresh fish and seafood online in Hyderabad, India! Coastal Fresh offers a wide variety of hygienically cleaned fish, prawns, crabs, and authentic Andhra pickles with next-day delivery. Order now for the freshest catch." />
   <link rel="canonical" href="https://www.coastalfresh.in" />
   <meta name="theme-color" content="#01659a" />
   <meta name="keywords" content="buy fresh fish online hyderabad, seafood delivery hyderabad, online fish delivery, prawns online hyderabad, buy crabs online, coastal fresh hyderabad, andhra pickles online, pomfret online, seer fish hyderabad" />
 
   <!-- Open Graph / Twitter -->
   <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Coastal Fresh" />
+  <meta property="og:site_name" content="Coastal Fresh India" />
   <meta property="og:locale" content="en_IN" />
-  <meta property="og:title" content="Buy Fresh Fish & Seafood Online in Hyderabad - Prawns, Crabs & More | Coastal Fresh" />
-  <meta property="og:description" content="Order fresh fish, prawns, and crabs online in Hyderabad. Coastal Fresh delivers premium, hygienically cleaned seafood and authentic pickles right to your door. Experience the taste of the coast!" />
+  <meta property="og:title" content="Coastal Fresh India: Buy Fresh Fish & Seafood Online in Hyderabad" />
+  <meta property="og:description" content="Order fresh fish, prawns, and crabs online in Hyderabad, India. Coastal Fresh delivers premium, hygienically cleaned seafood and authentic pickles right to your door. Experience the taste of the coast!" />
   <meta property="og:url" content="https://www.coastalfresh.in" />
   <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Buy Fresh Fish & Seafood Online in Hyderabad - Prawns, Crabs & More | Coastal Fresh" />
-  <meta name="twitter:description" content="Order fresh fish, prawns, and crabs online in Hyderabad. We offer next-day delivery of premium, hygienically cleaned seafood and authentic pickles." />
+  <meta name="twitter:title" content="Coastal Fresh India: Buy Fresh Fish & Seafood Online in Hyderabad" />
+  <meta name="twitter:description" content="Order fresh fish, prawns, and crabs online in Hyderabad, India. We offer next-day delivery of premium, hygienically cleaned seafood and authentic pickles." />
   <meta name="twitter:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" />
 
   <!-- Analytics: GA4 (clean params) + Hotjar + WhatsApp tracking -->
@@ -254,6 +254,19 @@
       outline: none;
     }
 
+    /* NEW: Class to hide content visually but keep it for SEO/screen readers */
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
     .login-modal .input:focus {
       border-color: var(--accent-color);
       box-shadow: 0 6px 18px rgba(10,119,166,0.08);
@@ -469,6 +482,13 @@
 
     .back-btn:active {
       background-color: var(--primary-light);
+    }
+
+    /* NEW: Ensure h1 used as logo has correct styling */
+    h1.logo {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
     }
 
     .logo {
@@ -2679,8 +2699,8 @@
     <div class="page active" id="home">
       <header class="header">
         <div class="header-top">
-          <div class="logo">
-            <img class="logo-img" src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" alt="Coastal Fresh logo" width="40" height="40" loading="eager">
+          <div class="logo" aria-label="Coastal Fresh India Home">
+            <img class="logo-img" src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" alt="Coastal Fresh India Logo" width="40" height="40" loading="eager">
             <span>COASTAL FRESH</span>
           </div>
           <button class="cart-btn" aria-label="Open Cart">
@@ -2690,12 +2710,22 @@
         </div>
       </header>
 
+      <!-- NEW: H1 Section for Homepage SEO -->
+      <section class="section" style="padding-top: 20px; padding-bottom: 0; text-align: center;">
+        <!-- The H1 for SEO - visually hidden but accessible to crawlers -->
+        <h1 class="visually-hidden">Fresh Seafood Delivery in Hyderabad: Order Fish, Prawns & Crabs Online</h1>
+        
+        <!-- The visible heading for users - designed to look good on all screens -->
+        <h2 class="title" style="font-size: 16px; margin-bottom: 4px;">Freshness, Delivered</h2>
+        <p class="subtitle" style="margin-bottom: 8px;">From the Coast to Your Kitchen</p>
+      </section>
+
       <!-- Carousel -->
       <div class="carousel">
         <div class="slides" id="slides" aria-hidden="true">
-          <div class="slide" data-action="showPage" data-target="catalog" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" alt="Coastal Fresh Banner - Order Now"></div>
-          <div class="slide" data-action="showProductPopup" data-target="20" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z.png" alt="Prawns"></div>
-          <div class="slide" data-action="showProductPopup" data-target="27" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png" alt="Homemade Pickles Banner"></div>
+          <div class="slide" data-action="showPage" data-target="catalog" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" alt="Order fresh seafood online in Hyderabad from Coastal Fresh India"></div>
+          <div class="slide" data-action="showProductPopup" data-target="20" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756722096/Prawns_-_Banner_cyzx5z.png" alt="Freshwater Prawns for sale in Hyderabad"></div>
+          <div class="slide" data-action="showProductPopup" data-target="27" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1756722094/Pickle_-_Banner_2_kkh04c.png" alt="Authentic Andhra Prawns Pickle for sale online"></div>
         </div>
         <div class="carousel-dots" id="carouselDots"></div>
       </div>
@@ -2737,9 +2767,9 @@
       <section class="communication-carousel" id="communicationCarousel">
         <div class="slides">
           <div class="slide" data-action="openWhatsApp" data-target="refer" style="cursor: pointer;">
-            <img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1758117187/Coastal_Fresh_Refer_Banner_1080x320_m9vx4s.png" alt="Refer a friend and earn">
+            <img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1758117187/Coastal_Fresh_Refer_Banner_1080x320_m9vx4s.png" alt="Refer a friend and earn rewards at Coastal Fresh India">
           </div>
-          <div class="slide" data-action="openWhatsApp" data-target="refer" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1758117187/Coastal_Fresh_Refer_Banner_1080x320_m9vx4s.png" alt="Refer a friend and earn"></div>
+          <div class="slide" data-action="openWhatsApp" data-target="refer" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1758117187/Coastal_Fresh_Refer_Banner_1080x320_m9vx4s.png" alt="Refer a friend and earn rewards at Coastal Fresh India"></div>
         </div>
         <div class="carousel-dots"></div>
       </section>
@@ -2760,7 +2790,7 @@
           <button class="back-btn" aria-label="Go Back">
             <i class="fas fa-arrow-left"></i>
           </button>
-          <div class="logo">All Products</div>
+          <h1 class="logo">All Products</h1>
           <button class="cart-btn" aria-label="Open Cart">
             <i class="fas fa-shopping-bag"></i>
             <span class="cart-count" id="cartCountCatalog">0</span>
@@ -2787,7 +2817,7 @@
           <button class="back-btn" aria-label="Go Back">
             <i class="fas fa-arrow-left"></i>
           </button>
-          <div class="logo">FAQs</div>
+          <h1 class="logo">FAQs</h1>
           <div></div>
         </div>
       </header>
@@ -2869,7 +2899,7 @@
           <button class="back-btn" aria-label="Go Back">
             <i class="fas fa-arrow-left"></i>
           </button>
-          <div class="logo">Profile</div>
+          <h1 class="logo">Profile</h1>
           <div></div>
         </div>
       </header>
@@ -3314,7 +3344,7 @@
           <button class="back-btn" aria-label="Go Back">
             <i class="fas fa-arrow-left"></i>
           </button>
-          <div class="logo">My Orders</div>
+          <h1 class="logo">My Orders</h1>
           <div></div>
         </div>
       </header>
@@ -3336,7 +3366,7 @@
           <button class="back-btn" aria-label="Go Back">
             <i class="fas fa-arrow-left"></i>
           </button>
-          <div class="logo">My Address</div>
+          <h1 class="logo">My Address</h1>
           <div></div>
         </div>
       </header>
@@ -3517,7 +3547,7 @@
           <button class="back-btn" aria-label="Close Cart">
             <i class="fas fa-arrow-left"></i>
           </button>
-          <div class="logo">Your Cart</div>
+          <h1 class="logo">Your Cart</h1>
           <div></div>
         </div>
       </header>
@@ -3600,26 +3630,23 @@
   {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    "name": "Coastal Fresh",
+    "name": "Coastal Fresh India",
+    "url": "https://coastalfresh.in",
+    "logo": "https://res.cloudinary.com/dpyniai9l/image/upload/v1758244909/Coastal_Fresh_India_Logo_uqd6bk.png",
     "image": "https://res.cloudinary.com/dpyniai9l/image/upload/v1757139649/refer_eran_whats_app_ryhhmi.png",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png"
+    "description": "Fresh seafood delivery in Hyderabad & India. Order fish, prawns, crabs & more online.",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Panchavati Colony Manikonda",
+      "addressLocality": "Hyderabad",
+      "addressRegion": "Telangana",
+      "postalCode": "500089",
+      "addressCountry": "IN"
     },
-    "url": "https://www.coastalfresh.in",
-    "telephone": "+91 99851 25678",
-    "email": "info@coastalfresh.in",
-    "address": { "@type": "PostalAddress", "addressLocality": "Hyderabad", "addressRegion": "Telangana", "addressCountry": "IN" },
-    "areaServed": "Hyderabad",
-    "description": "Premium fresh seafood and authentic pickles delivery service in Hyderabad offering fish, prawns, crabs, and pickles with next-day delivery",
-    "openingHours": ["Mo-Su 08:00-20:00"],
-    "priceRange": "₹₹",
+    "telephone": "+91-9985125678",
     "sameAs": [
       "https://www.facebook.com/CoastalFresh.in",
-      "https://www.instagram.com/coastalfresh.in",
-      "https://www.youtube.com/@CoastalFresh",
-      "https://t.me/coastalfreshseafoods",
-      "https://wa.me/919985125678"
+      "https://www.instagram.com/coastalfresh.in"
     ]
   }
   </script>
@@ -4336,6 +4363,36 @@
       `;
     }
 
+    /* ===== NEW: SEO Functions ===== */
+    function updateSEOTags({ title, description, canonicalPath, imageUrl }) {
+      const defaultTitle = 'Coastal Fresh India: Buy Fresh Fish & Seafood Online in Hyderabad';
+      const defaultDesc = 'The best place to buy fresh fish and seafood online in Hyderabad, India! Coastal Fresh offers a wide variety of hygienically cleaned fish, prawns, crabs, and authentic Andhra pickles with next-day delivery. Order now for the freshest catch.';
+      const defaultImage = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png';
+      const baseUrl = 'https://www.coastalfresh.in';
+
+      const finalTitle = title || defaultTitle;
+      const finalDesc = description || defaultDesc;
+      const finalCanonical = baseUrl + (canonicalPath || '/');
+      const finalImage = imageUrl || defaultImage;
+
+      document.title = finalTitle;
+
+      const descTag = document.querySelector('meta[name="description"]');
+      if (descTag) descTag.setAttribute('content', finalDesc);
+
+      const canonicalTag = document.querySelector('link[rel="canonical"]');
+      if (canonicalTag) canonicalTag.setAttribute('href', finalCanonical);
+
+      // Also update Open Graph (OG) tags for social sharing
+      document.querySelector('meta[property="og:title"]').setAttribute('content', finalTitle);
+      document.querySelector('meta[property="og:description"]').setAttribute('content', finalDesc);
+      document.querySelector('meta[property="og:url"]').setAttribute('content', finalCanonical);
+      document.querySelector('meta[property="og:image"]').setAttribute('content', finalImage);
+      document.querySelector('meta[name="twitter:title"]').setAttribute('content', finalTitle);
+      document.querySelector('meta[name="twitter:description"]').setAttribute('content', finalDesc);
+      document.querySelector('meta[name="twitter:image"]').setAttribute('content', finalImage);
+    }
+
     /* ===== NEW: Image Optimization Function ===== */
     function getOptimizedImageUrl(url, width, height) {
       if (!url || !url.includes('res.cloudinary.com')) {
@@ -4457,7 +4514,7 @@
           <div class="product-image">
             ${hasOffer ? `<div class="offer-badge">${product.offer}% OFF</div>` : ''}
             ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
-            <img src="${optimizedImage}" alt="${sanitizedName}" loading="lazy">
+            <img src="${optimizedImage}" alt="Fresh ${sanitizedName} delivery in Hyderabad by Coastal Fresh India" loading="lazy">
           </div>
           <div class="product-info">
             <div class="product-name">${sanitizedName}</div>
@@ -4492,6 +4549,13 @@
       popupProduct = product;
       currentProductQty = cart[product.id] || 1;
       const popup = document.getElementById('productPopup');
+
+      // --- NEW: Update SEO Tags for this product ---
+      const productUrl = `/?product=${product.id}`;
+      const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
+      const productDesc = product.desc;
+      const optimizedProductImage = getOptimizedImageUrl(product.image, 1200, 630);
+      updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
       
       // --- Populate Basic Info ---
       document.getElementById('popupProductTitle').textContent = DOMPurify.sanitize(product.name);
@@ -4518,8 +4582,9 @@
       `;
 
       // Set product image
-      document.getElementById('popupMainImage').src = product.image;
-      document.getElementById('popupMainImage').alt = DOMPurify.sanitize(product.name); // FIX: Dynamically set alt attribute
+      const optimizedPopupImage = getOptimizedImageUrl(product.image, 600, 600);
+      document.getElementById('popupMainImage').src = optimizedPopupImage;
+      document.getElementById('popupMainImage').alt = `High-quality ${DOMPurify.sanitize(product.name)} from Coastal Fresh India`;
       
       // Hide image indicators as there's only one image
       document.getElementById('popupImageIndicators').style.display = 'none';
@@ -4671,6 +4736,17 @@
       }
     }
 
+    function goBack() {
+      if (pageHistory.length > 1) {
+        pageHistory.pop(); // Remove the current page
+        const previousPage = pageHistory[pageHistory.length - 1];
+        showPage(previousPage);
+      } else {
+        // If history is empty, default to home and reset SEO tags
+        showPage('home');
+      }
+    }
+
     function closePopup() {
       const popup = document.getElementById('productPopup');
       if (popup) popup.classList.remove('active');
@@ -4681,6 +4757,9 @@
       
       // Show bottom navigation again when popup is closed
       if (currentPage !== 'cart') {
+        // NEW: Revert SEO tags to the underlying page (e.g., catalog or home)
+        const underlyingPage = pageHistory[pageHistory.length - 1] || 'home';
+        showPage(underlyingPage, true); // Pass a flag to prevent history push
         document.getElementById('bottomNav').style.display = 'flex'; 
       }
     }
@@ -4774,7 +4853,7 @@
           return `
             <div class="cart-item" data-id="${item.id}">
               <div class="cart-item-image">
-                <img src="${optimizedCartImage}" alt="${item.name}">
+                <img src="${optimizedCartImage}" alt="${item.name} in cart">
               </div>
               <div class="cart-item-info">
                 <div class="cart-item-name">${item.name}</div>
@@ -5075,21 +5154,38 @@
       }
     }
 
-    function showPage(page) {
+    function showPage(page, fromHistory = false) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       document.getElementById(page).classList.add('active');
       
       // Manage navigation history
-      if (page !== 'cart' && page !== pageHistory[pageHistory.length - 1]) {
+      if (!fromHistory && page !== 'cart' && page !== pageHistory[pageHistory.length - 1]) {
         // Avoid adding duplicates or popups to history
         pageHistory.push(page);
       }
+
+      // --- NEW: Update SEO tags for the current page ---
+      let pageTitle, pageDesc, pagePath;
+      if (page === 'catalog') {
+        pageTitle = 'All Products - Fish, Prawns, Crabs & More | Coastal Fresh India';
+        pageDesc = 'Browse our entire collection of fresh seafood, including Pomfret, Prawns, Crabs, and authentic Andhra pickles. Order online for next-day delivery in Hyderabad.';
+        pagePath = '/catalog'; // Conceptual path for SEO
+      } else if (page === 'faqPage') {
+        pageTitle = 'Frequently Asked Questions | Coastal Fresh India';
+        pageDesc = 'Find answers to common questions about our delivery, sourcing, freshness, and payment for fresh seafood in Hyderabad.';
+        pagePath = '/faq'; // Conceptual path for SEO
+      } else {
+        // Default to home page SEO
+        pageTitle = null; pageDesc = null; pagePath = '/';
+      }
+      updateSEOTags({ title: pageTitle, description: pageDesc, canonicalPath: pagePath });
 
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       const navItem = document.querySelector(`.nav-item[data-page='${page}']`);
       if (navItem) navItem.classList.add('active');
       
       currentPage = page;
+      window.scrollTo(0, 0); // Scroll to top on page change
       
       // NEW: Show/hide ticker and adjust header based on the current page
       const ticker = document.querySelector('.ticker-container');
@@ -5107,14 +5203,6 @@
         document.getElementById('bottomNav').style.display = 'none';
       } else {
         document.getElementById('bottomNav').style.display = 'flex';
-      }
-    }
-
-    function goBack() {
-      if (pageHistory.length > 1) {
-        pageHistory.pop(); // Remove the current page
-        const previousPage = pageHistory[pageHistory.length - 1];
-        showPage(previousPage);
       }
     }
 
