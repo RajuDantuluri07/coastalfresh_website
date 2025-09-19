@@ -2327,20 +2327,21 @@
       background: var(--bg-white);
       border-top: 1px solid var(--border-color);
       padding: 12px 20px;
+      /* FIX: Use calc() to add safe-area padding to the bottom */
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
       display: flex;
       justify-content: space-around;
       z-index: 100;
       box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
       width: 100%;
       max-width: var(--app-max-width);
-      height: var(--bottom-nav-height);
+      /* FIX: Use min-height to prevent content from being cut off */
+      min-height: var(--bottom-nav-height);
     }
-    /* FIX: Add safe-area padding to the bottom navigation bar */
-    .bottom-bar { padding-bottom: env(safe-area-inset-bottom); }
 
     @media (min-width: 481px) {
       .bottom-bar {
-        border-radius: 20px 20px 0 0;
+        border-radius: 0 0 20px 20px;
       }
     }
 
