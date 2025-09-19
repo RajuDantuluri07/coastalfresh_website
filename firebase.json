@@ -3,20 +3,30 @@
     "public": "public",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "headers": [
+      // Cache static assets for one year.
+      // This includes images, fonts, and any other assets with these extensions.
       {
-        "source": "/sitemap.xml",
-        "headers": [{ "key": "Content-Type", "value": "application/xml; charset=utf-8" }]
+        "source": "**/*.@(jpg|jpeg|gif|png|svg|webp|ico|woff|woff2|ttf|eot)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=31536000, immutable"
+          }
+        ]
       },
+      // Do not cache the main HTML file or service worker to ensure users always get the latest version.
       {
-        "source": "/robots.txt",
-        "headers": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }]
+        "source": "@(index.html|firebase-messaging-sw.js)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
       }
     ],
     "rewrites": [
-      { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
-      { "source": "/robots.txt", "destination": "/robots.txt" },
       { "source": "**", "destination": "/index.html" }
     ]
   }
 }
-
