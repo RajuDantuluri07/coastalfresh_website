@@ -346,6 +346,8 @@
       padding: 0;
       box-sizing: border-box;
     }
+    /* FIX: Ensure body and html fill the viewport to prevent white gaps on mobile */
+    html { height: 100%; }
 
     body {
       font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Roboto', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
@@ -354,6 +356,7 @@
       font-weight: 400; /* Default to Regular */
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
+      height: 100%;
     }
 
     /* App wrapper with max-width constraint */
@@ -361,7 +364,8 @@
       max-width: var(--app-max-width);
       margin: 0 auto;
       background: var(--bg-white);
-      min-height: 100vh;
+      /* FIX: Use 100% instead of 100vh to avoid mobile browser viewport issues */
+      min-height: 100%;
       box-shadow: 0 0 50px rgba(0,0,0,0.1);
       position: relative;
       overflow-x: hidden;
@@ -2351,7 +2355,8 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      color: var(--text-secondary);
+      /* FIX: Increase contrast for inactive labels for better accessibility */
+      color: var(--text-primary);
       font-size: 12px;
       cursor: pointer;
       transition: color 0.2s;
