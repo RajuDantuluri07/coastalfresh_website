@@ -125,6 +125,15 @@
           enable: false,
         },
       });
+
+      // NEW: Listen for subscription changes to update the UI
+      OneSignal.on('subscriptionChange', function (isSubscribed) {
+        console.log("OneSignal subscription state changed:", isSubscribed);
+        updateSubscriptionButtonUI();
+      });
+
+      // NEW: Run an initial check to set the button state correctly on load
+      updateSubscriptionButtonUI();
     });
   </script>
 
@@ -5300,6 +5309,26 @@
     /* ===== End of New Functions ===== */
 
     /* ===== NEW: Push Notification Functions ===== */
+    function updateSubscriptionButtonUI() {
+      // This function ensures the "Get Updates" button reflects the current subscription status.
+      if (typeof window.OneSignal === 'undefined') return;
+
+      const subscribeBtn = document.getElementById('subscribeNotificationsBtn');
+      if (!subscribeBtn) return;
+
+      window.OneSignal.isPushNotificationsEnabled(function(isEnabled) {
+        if (isEnabled) {
+          subscribeBtn.innerHTML = '<i class="fas fa-check-circle"></i> Subscribed';
+          subscribeBtn.disabled = true;
+          subscribeBtn.classList.add('subscribed');
+        } else {
+          subscribeBtn.innerHTML = '<i class="fas fa-bell"></i> Get Updates';
+          subscribeBtn.disabled = false;
+          subscribeBtn.classList.remove('subscribed');
+        }
+      });
+    }
+
     function promptForPushNotifications() {
       // Check if OneSignal is loaded and ready
       if (typeof window.OneSignal === 'undefined') {
