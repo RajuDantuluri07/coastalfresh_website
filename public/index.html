@@ -113,28 +113,11 @@
   <!-- DOMPurify (for final safe sanitization if needed) -->
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js" crossorigin="anonymous"></script>
 
-  <!-- OneSignal SDK -->
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    OneSignalDeferred.push(async function(OneSignal) {
-      await OneSignal.init({
-        appId: "a9354890-a399-48f1-82e3-4af9620d9b82",
-        safari_web_id: "web.onesignal.auto.641afdf7-f4bf-4e2a-9c3a-de381580c8ca", // Your Safari Web ID
-        notifyButton: {
-          enable: true, // Let OneSignal handle the notification prompt
-        },
-        // Tell OneSignal the name of your custom service worker file
-        serviceWorkerPath: "firebase-messaging-sw.js"
-      });
-    });
-  </script>
-
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-  <!-- <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js"></script> -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js"></script>
 
   <style>
     /* CSS Variables for consistency */
@@ -3750,13 +3733,12 @@
     let afterLoginAction = null; // NEW: To handle actions after login (like checkout)
     /* NEW: Variables for popup functionality */
     let currentPopupImageIndex = 0;
-
     let isPopupFavorite = false;
     let popupDetailsExpanded = false;
     let popupDescriptionExpanded = false;
 
     // NEW: Push Notification state
-    // let fcmToken = null; // No longer needed for OneSignal
+    let fcmToken = null;
     let popupProduct = null;
 
     /* ===== Init ===== */
@@ -3799,7 +3781,7 @@
       renderCustomerReviews();
       setupEvents();
       lazyLoadBanners();
-      // initPushNotifications(); // No longer needed, OneSignal initializes itself
+      initPushNotifications(); // NEW: Initialize push notifications
       initFlashSaleTimer();
       // Initialize all carousels
       initCarousel('#slides');
@@ -3989,7 +3971,7 @@
       // Refined back button listeners to avoid conflicts
       document.querySelector('#catalog .back-btn').addEventListener('click', goBack);
       document.querySelector('#faqPage .back-btn').addEventListener('click', goBack);
-      document.querySelector('#notificationsPage .back-btn').addEventListener('click', goBack);
+      document.querySelector('#ordersPage .back-btn').addEventListener('click', goBack);
       document.querySelector('#profilePage .back-btn').addEventListener('click', goBack);
       document.querySelector('#addressPage .back-btn').addEventListener('click', () => {
         // If we were editing, cancel the edit and show the list
@@ -5299,55 +5281,55 @@
     /* ===== End of New Functions ===== */
 
     /* ===== NEW: Push Notification Functions ===== */
-    // function initPushNotifications() {
-    //   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    //     console.warn('Push messaging is not supported');
-    //     return;
-    //   }
+    function initPushNotifications() {
+      if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+        console.warn('Push messaging is not supported');
+        return;
+      }
 
-    //   const messaging = firebase.messaging();
+      const messaging = firebase.messaging();
 
-    //   // Handle incoming messages when the app is in the foreground
-    //   messaging.onMessage((payload) => {
-    //     console.log('Message received. ', payload);
-    //     // Show a custom toast notification
-    //     showToast(payload.notification.title + ': ' + payload.notification.body);
-    //   });
+      // Handle incoming messages when the app is in the foreground
+      messaging.onMessage((payload) => {
+        console.log('Message received. ', payload);
+        // Show a custom toast notification
+        showToast(payload.notification.title + ': ' + payload.notification.body);
+      });
 
-    //   // Request permission and get token
-    //   Notification.requestPermission().then((permission) => {
-    //     if (permission === 'granted') {
-    //       console.log('Notification permission granted.');
-    //       // Get the token
-    //       messaging.getToken({ vapidKey: 'BBVKpOXnP5lq1tVGX0lAhnnsIzt9uET8jzdE98ocBBnO3-vlS7IDLRInG2iJ3COVkK5ycZ-toAE68kZdDpUuH_g' })
-    //         .then((currentToken) => {
-    //           if (currentToken) {
-    //             fcmToken = currentToken;
-    //             console.log('FCM Token:', currentToken);
-    //             // If a user is logged in, save their token
-    //             if (currentUser) {
-    //               saveFcmToken(currentToken);
-    //             }
-    //           } else {
-    //             console.log('No registration token available. Request permission to generate one.');
-    //           }
-    //         }).catch((err) => {
-    //           console.log('An error occurred while retrieving token. ', err);
-    //         });
-    //     } else {
-    //       console.log('Unable to get permission to notify.');
-    //     }
-    //   });
-    // }
+      // Request permission and get token
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          console.log('Notification permission granted.');
+          // Get the token
+          messaging.getToken({ vapidKey: 'BBVKpOXnP5lq1tVGX0lAhnnsIzt9uET8jzdE98ocBBnO3-vlS7IDLRInG2iJ3COVkK5ycZ-toAE68kZdDpUuH_g' })
+            .then((currentToken) => {
+              if (currentToken) {
+                fcmToken = currentToken;
+                console.log('FCM Token:', currentToken);
+                // If a user is logged in, save their token
+                if (currentUser) {
+                  saveFcmToken(currentToken);
+                }
+              } else {
+                console.log('No registration token available. Request permission to generate one.');
+              }
+            }).catch((err) => {
+              console.log('An error occurred while retrieving token. ', err);
+            });
+        } else {
+          console.log('Unable to get permission to notify.');
+        }
+      });
+    }
 
-    // function saveFcmToken(token) {
-    //   if (!currentUser || !token) return;
-    //   db.collection('users').doc(currentUser.uid).set({ fcmToken: token }, { merge: true })
-    //     .then(() => {
-    //       console.log('FCM token saved for user.');
-    //     })
-    //     .catch(err => console.error('Error saving FCM token:', err));
-    // }
+    function saveFcmToken(token) {
+      if (!currentUser || !token) return;
+      db.collection('users').doc(currentUser.uid).set({ fcmToken: token }, { merge: true })
+        .then(() => {
+          console.log('FCM token saved for user.');
+        })
+        .catch(err => console.error('Error saving FCM token:', err));
+    }
 
 
     function lazyLoadBanners() {
@@ -5576,10 +5558,10 @@
         afterLoginAction = null; // Clear the action so it doesn't run again
       }
 
-      // // NEW: If user logs in and we have a token, save it.
-      // if (user && fcmToken) {
-      //   saveFcmToken(fcmToken);
-      // }
+      // NEW: If user logs in and we have a token, save it.
+      if (user && fcmToken) {
+        saveFcmToken(fcmToken);
+      }
     }
 
     function updateUIForAuthState() {
