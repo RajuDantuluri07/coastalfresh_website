@@ -3830,6 +3830,13 @@
           allowLocalhostAsSecureOrigin: true, // Good for local testing
         });
 
+        // NEW: If a user is already logged in when OneSignal initializes,
+        // identify them to OneSignal immediately.
+        if (currentUser && currentUser.uid) {
+          await OneSignal.login(currentUser.uid);
+          console.log('OneSignal user identified on init:', currentUser.uid);
+        }
+
         // Log subscription changes for debugging
         OneSignal.Notifications.addEventListener('permissionChange', (permission) => {
           console.log("OneSignal push permission state is now:", permission); // Keep for debugging
