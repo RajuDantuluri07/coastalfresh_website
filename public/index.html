@@ -122,7 +122,7 @@
         appId: "a9354890-a399-48f1-82e3-4af9620d9b82",
         safari_web_id: "web.onesignal.auto.641afdf7-f4bf-4e2a-9c3a-de381580c8ca",
         notifyButton: {
-          enable: true,
+          enable: false,
         },
       });
     });
@@ -2909,6 +2909,9 @@
           <button class="profile-button refer">
             <i class="fas fa-share-alt"></i> Refer & Earn
           </button>
+          <button class="profile-button" id="subscribeNotificationsBtn">
+            <i class="fas fa-bell"></i> Get Updates
+          </button>
           <button class="profile-button orders">
             <i class="fas fa-box-open"></i> My Orders
           </button>
@@ -3988,6 +3991,7 @@
       document.querySelector('#faqPage .back-btn').addEventListener('click', goBack);
       document.querySelector('#ordersPage .back-btn').addEventListener('click', goBack);
       document.querySelector('#profilePage .back-btn').addEventListener('click', goBack);
+      document.getElementById('subscribeNotificationsBtn').addEventListener('click', promptForPushNotifications);
       document.querySelector('#addressPage .back-btn').addEventListener('click', () => {
         // If we were editing, cancel the edit and show the list
         if (editingAddressId) {
@@ -5296,6 +5300,23 @@
     /* ===== End of New Functions ===== */
 
     /* ===== NEW: Push Notification Functions ===== */
+    function promptForPushNotifications() {
+      // Check if OneSignal is loaded and ready
+      if (typeof window.OneSignal === 'undefined') {
+        showToast('Notification service is not available yet.');
+        return;
+      }
+
+      window.OneSignal.isPushNotificationsEnabled(function(isEnabled) {
+        if (isEnabled) {
+          showToast("You're already subscribed to notifications!");
+        } else {
+          // This will show the slide prompt you configured in OneSignal.
+          window.OneSignal.showSlidedownPrompt();
+        }
+      });
+    }
+
     // function initPushNotifications() {
     //   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     //     console.warn('Push messaging is not supported');
