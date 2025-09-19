@@ -3772,20 +3772,27 @@
       firebase.auth().onAuthStateChanged(handleAuthStateChange);
       db = firebase.firestore(); // NEW: Initialize Firestore
 
+      // --- NEW: Show skeletons immediately for better perceived performance ---
+      showInitialSkeletons();
+
       try {
         const response = await fetch('/products.json');
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         products = await response.json();
 
-        // These functions depend on product data, so they run after the fetch.
+        // --- Populate content now that data is available ---
         renderFeaturedProducts();
         renderCatalogProducts();
         renderFlashSale();
         renderProductSchema(); // NEW: Add product schema
-      loadCart();
+        loadCart();
 
         // Check for search query in URL
         const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('product');
+        if (productId) {
+          showProductPopup(productId);
+        }
         const searchQuery = urlParams.get('q');
         if (searchQuery) {
           showPage('catalog');
@@ -3797,7 +3804,7 @@
         }
       } catch (error) {
         console.error("Could not load product data:", error);
-        // You could show an error message to the user here
+        // You could show an error message to the user here.
       }
 
       // These functions can run independently
@@ -4441,17 +4448,8 @@
       const container = document.getElementById('featuredProducts');
       if (!container) return;
 
-      // 1. Show skeleton loaders
-      let skeletonHTML = '';
-      for (let i = 0; i < FEATURED_PRODUCT_IDS.length; i++) {
-        skeletonHTML += createSkeletonProductHTML();
-      }
-      container.innerHTML = skeletonHTML;
-
-      // 2. Render real products once data is available
       const featured = products.filter(p => FEATURED_PRODUCT_IDS.includes(p.id));
-      // Use a timeout to ensure the shimmer animation is visible for a moment
-      setTimeout(() => container.innerHTML = featured.map(createProductHTML).join(''), 500);
+      container.innerHTML = featured.map(createProductHTML).join('');
     }
     
     function renderCatalogProducts() {
@@ -4473,8 +4471,7 @@
         }
       }
       
-      // Use a timeout to ensure the shimmer animation is visible
-      setTimeout(populateCatalogProducts, 100); // REDUCED: Faster UI update
+      populateCatalogProducts();
     }
 
     function populateCatalogProducts() {
@@ -5322,6 +5319,28 @@
         typewriterTimer = setTimeout(tick, dir === 1 ? 120 : 80);
       }
       tick();
+    }
+
+    /* ===== NEW: Skeleton Rendering Functions ===== */
+    function showInitialSkeletons() {
+      const featuredContainer = document.getElementById('featuredProducts');
+      if (featuredContainer) {
+        let skeletonHTML = '';
+        for (let i = 0; i < FEATURED_PRODUCT_IDS.length; i++) {
+          skeletonHTML += createSkeletonProductHTML();
+        }
+        featuredContainer.innerHTML = skeletonHTML;
+      }
+
+      const catalogContainer = document.getElementById('catalogProducts');
+      if (catalogContainer) {
+        let skeletonHTML = '';
+        for (let i = 0; i < ITEMS_PER_PAGE; i++) {
+          skeletonHTML += createSkeletonProductHTML();
+        }
+        catalogContainer.innerHTML = skeletonHTML;
+      }
+      // Note: Flash sale skeletons are handled within its own render function.
     }
 
     /* ===== NEW: Tooltip Functions ===== */
