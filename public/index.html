@@ -1064,6 +1064,7 @@
       color: var(--text-primary);
       display: -webkit-box;
       -webkit-line-clamp: 2;
+      line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1367,6 +1368,7 @@
     .popup-description-short {
       display: -webkit-box;
       -webkit-line-clamp: 2;
+      line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1739,6 +1741,7 @@
       margin-bottom: 4px;
       display: -webkit-box;
       -webkit-line-clamp: 2;
+      line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -2519,15 +2522,6 @@
       padding: 5px 20px 15px;
     }
     /* Adjust for desktop */
-    @media (min-width: 481px) {
-      .cart-popup {        
-        bottom: 20px;
-        /* Keep it as a floating circle, but position it relative to the app frame */
-        left: calc(50% + (var(--app-max-width) / 2) - 80px); /* (Center + Half App Width) - Button Width - Margin */
-        transform: none;
-        right: auto;
-      }
-    }
 
     @keyframes slideUpAndFadeIn {
       from {
@@ -3333,7 +3327,6 @@
         padding-top: 12px;
         margin-top: 12px;
         justify-content: flex-end; /* Push buttons to the right */
-      } */
     </style>
 
     <!-- NEW: Orders Page -->
@@ -3732,7 +3725,6 @@
     const FLASH_SALE_PRODUCT_IDS = [11, 12, 20, 22]; // Configurable product IDs for the flash sale
     const FLASH_SALE_DURATION_HOURS = 12; // Configurable duration in hours
     const FEATURED_PRODUCT_IDS = [17, 13, 21, 1];
-    const PROFILE_IMAGE_URL = "https://res.cloudinary.com/dpyniai9l/image/upload/v1756914772/Coastal_Fresh_Sea_food_hyderabad_-_website_banner_shqapq.png";
     const FREE_DELIVERY_THRESHOLD = 1500;
     const ITEMS_PER_PAGE = 8;
 
@@ -3933,7 +3925,6 @@
       document.getElementById('loginForm').addEventListener('submit', handleEmailLogin);
       document.getElementById('signupForm').addEventListener('submit', handleEmailSignup);
       document.getElementById('googleLoginBtn').addEventListener('click', handleGoogleLogin);
-      document.getElementById('facebookLoginBtn').addEventListener('click', handleFacebookLogin);
       document.getElementById('forgotPassword').addEventListener('click', handlePasswordReset);
 
       // NEW: Login/Signup form toggling
@@ -4829,7 +4820,6 @@
       
       const cartItems = document.getElementById('cartItems');
       const cartSummary = document.getElementById('cartSummary');
-      const cartFooter = document.getElementById('cartFooter');
       const emptyCart = document.getElementById('emptyCart');
 
       if (items.length === 0) {
@@ -4837,7 +4827,7 @@
         cartItems.innerHTML = '';
         cartSummary.innerHTML = '';
         cartFooter.style.display = 'none';
-      } else {
+      } else { // REFACTOR: Simplified cart rendering
         emptyCart.style.display = 'none';
         cartFooter.style.display = 'block';
         
@@ -4873,49 +4863,8 @@
           `;
         }).join('');
 
-        // Calculate totals
-        const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
-        const originalTotal = items.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
-        const savings = originalTotal - subtotal;
-        const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
-        const total = subtotal + deliveryFee; 
-
-        document.querySelector('.checkout-btn').innerHTML = `<span>Proceed to Checkout</span> <span class="checkout-btn-price">₹${total}</span>`;
-
-        // Render summary
-        cartSummary.innerHTML = `
-          <div class="cart-summary">
-            ${subtotal < FREE_DELIVERY_THRESHOLD ? `
-              <div class="delivery-progress-container">
-                <div class="delivery-progress-text">
-                  <span>🎉 Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} more for FREE Delivery!</span>
-                </div>
-                <div class="progress-bar">
-                  <div class="progress-bar-fill" style="width: ${(subtotal / FREE_DELIVERY_THRESHOLD) * 100}%;"></div>
-                </div>
-              </div>
-            ` : ''}
-            <div class="summary-row">
-              <span>Subtotal</span>
-              <span>₹${subtotal}</span>
-            </div>
-            ${savings > 0 ? `
-            <div class="summary-row summary-savings">
-              <span>Total Savings</span>
-              <span>-₹${savings}</span>
-            </div>
-            ` : ''}
-            <div class="summary-row">
-              <span>Delivery Fee <i class="fas fa-info-circle" title="Free on orders over ₹${FREE_DELIVERY_THRESHOLD}"></i></span>
-              <span>${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}</span>
-            </div>
-            <div class="summary-row summary-total">
-              <span>Total</span>
-              <span>₹${total}</span>
-            </div>
-          </div>
-        `;
-
+        // REFACTOR: Call centralized summary update function
+        updateCartSummary();
       }
 
       // Show cart modal
@@ -4928,6 +4877,7 @@
       
       // Track cart view
       if (typeof gtag === 'function') {
+        const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
         gtag('event', 'view_cart', {
           currency: 'INR',
           value: subtotal,
@@ -5040,39 +4990,24 @@
     }
 
     function removeFromCart(id) {
-      if (!cart[id]) return;
+      const numericId = parseInt(id);
+      if (!cart[numericId]) return;
 
-      const cartItemEl = document.querySelector(`#cartModal .cart-item[data-id="${id}"]`);
+      const product = products.find(p => p.id === numericId);
+      const qtyToRemove = cart[numericId]; // Get quantity before deleting
+      delete cart[numericId];
+      saveCart();
 
-      // Animate removal if the element is visible in the cart
+      // Animate removal if the cart is open
+      const cartItemEl = document.querySelector(`#cartModal .cart-item[data-id="${numericId}"]`);
       if (cartItemEl) {
         cartItemEl.classList.add('removing');
-        cartItemEl.addEventListener('transitionend', () => {
-          // This runs after the animation finishes
-          delete cart[id];
-          saveCart();
-          updateCartBadges();
-          updateCartSummary(); // Update totals without re-rendering the list
-          updateProductCardState(id); // FIX: Update product card on home/catalog page
-          cartItemEl.remove(); // Clean up the element from DOM
-        }, { once: true });
-      } else {
-        // If not visible (e.g., from product card), just update data
-        delete cart[id];
-        saveCart();
-
-        // Track removal
-        if (typeof gtag === 'function') {
-          const product = products.find(p => p.id === parseInt(id));
-          gtag('event', 'remove_from_cart', {
-            currency: 'INR',
-            value: product ? product.finalPrice : 0, // Value is based on one item being removed
-            items: [{ item_id: id, item_name: product ? product.name : '', quantity: 1 }]
-          });
-        }
-        updateCartUI(); // This will update badges
-        updateProductCardState(id); // This will update the card UI
+        cartItemEl.addEventListener('transitionend', () => cartItemEl.remove(), { once: true });
       }
+
+      updateCartUI();
+      updateCartSummary();
+      updateProductCardState(numericId);
 
       // Track removal
       if (typeof gtag === 'function') {
@@ -5081,6 +5016,7 @@
     }
 
     async function checkout() {
+      const cartFooter = document.getElementById('cartFooter');
       const items = Object.keys(cart).map(id => {
         const product = products.find(p => p.id === parseInt(id));
         return { ...product, qty: cart[id] };
@@ -5607,19 +5543,6 @@
 
     function handleGoogleLogin() {
       const provider = new firebase.auth.GoogleAuthProvider();
-      const authError = document.getElementById('authError');
-      authError.textContent = '';
-      firebase.auth().signInWithPopup(provider)
-        .then(result => {
-          showToast(`Welcome, ${result.user.displayName}!`);
-          closeLoginModal();
-        }).catch(error => {
-          authError.textContent = error.message;
-        });
-    }
-
-    function handleFacebookLogin() {
-      const provider = new firebase.auth.FacebookAuthProvider();
       const authError = document.getElementById('authError');
       authError.textContent = '';
       firebase.auth().signInWithPopup(provider)
