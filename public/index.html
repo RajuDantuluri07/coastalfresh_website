@@ -120,9 +120,9 @@
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
         appId: "a9354890-a399-48f1-82e3-4af9620d9b82",
-        safari_web_id: "web.onesignal.auto.641afdf7-f4bf-4e2a-9c3a-de381580c8ca",
+        safari_web_id: "web.onesignal.auto.641afdf7-f4bf-4e2a-9c3a-de381580c8ca", // Your Safari Web ID
         notifyButton: {
-          enable: true,
+          enable: false, // Disable the default notification bell
         },
         // Tell OneSignal the name of your custom service worker file
         serviceWorkerPath: "firebase-messaging-sw.js"
@@ -2730,6 +2730,11 @@
       input:checked + .slider:before {
         transform: translateX(22px);
       }
+      /* NEW: Accessibility focus style */
+      .toggle-switch input:focus-visible + .slider {
+        outline: 2px solid var(--accent-color);
+        outline-offset: 2px;
+      }
     </style>
 
 </head>
@@ -3017,7 +3022,7 @@
         <div class="notification-setting">
           <div class="notification-setting-info">
             <h3>Push Notifications</h3>
-            <p id="notificationStatusSubtitle">Manage your notification settings.</p>
+            <p id="notificationStatusSubtitle" aria-live="polite">Manage your notification settings.</p>
           </div>
           <label class="toggle-switch" id="notificationToggleWrapper"></label>
         </div>
@@ -5715,85 +5720,88 @@
     }
     /* ===== End of Auth Functions ===== */
 
-    /* ===== NEW: Notification Page Functions ===== */
+    /* ===== REFACTORED: Notification Page Functions for Reliability & A11y ===== */
     async function initNotificationsPage() {
       const toggleWrapper = document.getElementById('notificationToggleWrapper');
-      const subtitle = document.getElementById('notificationStatusSubtitle');
-      
-      // Clear previous toggle to avoid duplicate event listeners
+      // Create the toggle elements once and attach listeners
       toggleWrapper.innerHTML = `
-        <input type="checkbox" id="notificationToggle">
+        <input type="checkbox" id="notificationToggle" aria-labelledby="notificationStatusSubtitle">
         <span class="slider"></span>
       `;
       const toggle = document.getElementById('notificationToggle');
+      toggle.addEventListener('change', handleNotificationToggle);
 
+      // Set initial state and listen for future changes
+      updateNotificationToggleState();
+      OneSignal.User.pushSubscription.addEventListener('change', updateNotificationToggleState);
+    }
+
+    function updateNotificationToggleState() {
+      const toggle = document.getElementById('notificationToggle');
+      const subtitle = document.getElementById('notificationStatusSubtitle');
+      if (!toggle || !subtitle) return;
+
+      const isSubscribed = OneSignal.User.pushSubscription.optedIn;
       const permission = OneSignal.Notifications.getPermission();
-      const isSubscribed = await OneSignal.User.getPushSubscriptionId();
 
       if (permission === 'denied') {
         toggle.checked = false;
         toggle.disabled = true;
-        subtitle.textContent = "You have blocked notifications in your browser.";
-      } else if (permission === 'granted' && isSubscribed) {
+        subtitle.textContent = "You have blocked notifications. Please enable them in your browser settings.";
+      } else if (isSubscribed) {
         toggle.checked = true;
         toggle.disabled = false;
-        subtitle.textContent = "You will receive Offers & Promotions.";
-      } else { // default or granted but not subscribed
+        subtitle.textContent = "You will receive Offers & Promotions through push notifications.";
+      } else {
         toggle.checked = false;
         toggle.disabled = false;
-        subtitle.textContent = "You will NOT receive Offers & Promotions.";
+        subtitle.textContent = "You will NOT receive Offers & Promotions through push notifications.";
       }
-
-      toggle.addEventListener('change', handleNotificationToggle);
     }
 
     async function handleNotificationToggle(e) {
       const isEnabled = e.target.checked;
-      const subtitle = document.getElementById('notificationStatusSubtitle');
+      const toggle = e.target;
 
       if (!currentUser) {
-        e.target.checked = false; // Revert toggle
+        toggle.checked = false; // Revert toggle
         showToast("Please log in to manage notifications.");
         showLoginModal();
         return;
       }
 
+      // Prevent user from changing the toggle while processing
+      toggle.disabled = true;
+
       if (isEnabled) {
         // --- Enabling Notifications ---
         try {
-          await OneSignal.Notifications.requestPermission();
-          const permission = OneSignal.Notifications.getPermission();
+          // This will prompt the user if permission is 'default'
+          // and will opt-in the user if permission is 'granted'.
+          await OneSignal.User.pushSubscription.optIn();
           
-          if (permission === 'granted') {
-            // The SDK automatically subscribes. We just update our state.
-            subtitle.textContent = "You will receive Offers & Promotions.";
-            const subscriptionId = await OneSignal.User.getPushSubscriptionId();
-            if (subscriptionId) {
-              await db.collection('users').doc(currentUser.uid).set({ 
-                notificationsEnabled: true,
-                oneSignalId: subscriptionId 
-              }, { merge: true });
-            }
-          } else {
-            // User denied permission at the prompt
-            e.target.checked = false;
-            e.target.disabled = true;
-            subtitle.textContent = "You have blocked notifications in your browser.";
+          // After opt-in, save the state to Firestore
+          const subscriptionId = OneSignal.User.pushSubscription.id;
+          if (subscriptionId) {
+            await db.collection('users').doc(currentUser.uid).set({ 
+              notificationsEnabled: true,
+              oneSignalId: subscriptionId 
+            }, { merge: true });
           }
         } catch (error) {
           console.error("Error requesting notification permission:", error);
-          e.target.checked = false; // Revert on error
         }
       } else {
         // --- Disabling Notifications ---
-        await OneSignal.Notifications.disablePush();
-        subtitle.textContent = "You will NOT receive Offers & Promotions.";
+        await OneSignal.User.pushSubscription.optOut();
         await db.collection('users').doc(currentUser.uid).set({ 
           notificationsEnabled: false 
         }, { merge: true });
       }
+      // The 'change' event listener on the subscription will automatically re-enable the toggle
+      // and update the UI, so we don't need to do it manually here.
     }
-    /* ===== End of Notification Functions ===== */
+    /* ===== End of Refactored Notification Functions ===== */
 
     /* ===== NEW: Address Page Functions ===== */
     function showAddressForm() {
