@@ -384,12 +384,13 @@
         background-size: cover;
         background-attachment: fixed;
         background-position: center;
-        padding: 20px 0;
       }
       
       .app {
         border-radius: 20px;
         overflow: hidden;
+        /* FIX: Move padding from body to .app to avoid affecting fixed elements */
+        margin: 20px auto;
       }
     }
 
