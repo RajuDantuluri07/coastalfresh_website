@@ -5795,33 +5795,39 @@
       // Prevent user from changing the toggle while processing
       toggle.disabled = true;
 
-      if (isEnabled) {
-        // --- Enabling Notifications ---
-        try {
+      try {
+        if (isEnabled) {
+          // --- Enabling Notifications ---
           // This will prompt the user if permission is 'default'
           // and will opt-in the user if permission is 'granted'.
           await OneSignal.User.pushSubscription.optIn();
           
-          // After opt-in, save the state to Firestore
-          const subscriptionId = OneSignal.User.pushSubscription.id;
-          if (subscriptionId) {
-            await db.collection('users').doc(currentUser.uid).set({
-              notificationsEnabled: true,
-              oneSignalId: subscriptionId 
-            }, { merge: true });
+          // The 'change' listener will handle the DB update and UI state.
+          // We can add the DB update here as a fallback.
+          if (OneSignal.User.pushSubscription.optedIn) {
+            const subscriptionId = OneSignal.User.pushSubscription.id;
+            if (subscriptionId) {
+              await db.collection('users').doc(currentUser.uid).set({
+                notificationsEnabled: true,
+                oneSignalId: subscriptionId 
+              }, { merge: true });
+            }
           }
-        } catch (error) {
-          console.error("Error requesting notification permission:", error);
+        } else {
+          // --- Disabling Notifications ---
+          await OneSignal.User.pushSubscription.optOut();
+          await db.collection('users').doc(currentUser.uid).set({
+            notificationsEnabled: false 
+          }, { merge: true });
         }
-      } else {
-        // --- Disabling Notifications ---
-        await OneSignal.User.pushSubscription.optOut();
-        await db.collection('users').doc(currentUser.uid).set({
-          notificationsEnabled: false 
-        }, { merge: true });
+      } catch (error) {
+        console.error("Error handling notification toggle:", error);
+        showToast("Could not change notification settings.");
+      } finally {
+        // IMPORTANT: Always re-enable the toggle after the operation.
+        // The `updateNotificationToggleState` listener will correctly set its final state.
+        toggle.disabled = false;
       }
-      // The 'change' event listener on the subscription will automatically re-enable the toggle
-      // and update the UI, so we don't need to do it manually here.
     }
     /* ===== End of Rewritten Notification Functions ===== */
 
