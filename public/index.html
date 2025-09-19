@@ -114,8 +114,9 @@
   <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js" crossorigin="anonymous"></script>
 
   <!-- Firebase SDKs -->
-  <!-- OneSignal SDK -->
-  <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+  <!-- OneSignal v16 SDK -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
@@ -3809,23 +3810,18 @@
 
     /* ===== NEW: OneSignal Initialization ===== */
     function initOneSignal() {
-      window.OneSignal = window.OneSignal || [];
-      OneSignal.push(function() {
-        OneSignal.init({
-          appId: "YOUR_ONESIGNAL_APP_ID", // <-- IMPORTANT: REPLACE THIS
-          safari_web_id: "YOUR_SAFARI_WEB_ID", // Optional, for Safari support
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "e2939260-7605-4b71-8042-2e822e89ca67",
           allowLocalhostAsSecureOrigin: true, // Good for local testing
-          autoResubscribe: true,
-          notifyButton: {
-            enable: false, // We don't need the default bell icon
-          },
         });
 
         // Log subscription changes for debugging
-        OneSignal.on('subscriptionChange', function (isSubscribed) {
-          console.log("OneSignal subscription state is now:", isSubscribed);
+        OneSignal.Notifications.addEventListener('permissionChange', (permission) => {
+          console.log("OneSignal push permission state is now:", permission);
           if (typeof gtag === 'function') {
-              gtag('event', 'push_subscription_change', { 'is_subscribed': isSubscribed });
+              gtag('event', 'push_permission_change', { 'permission_state': permission });
           }
         });
       });
@@ -5489,11 +5485,19 @@
 
       firebase.auth().createUserWithEmailAndPassword(email, password)
         .then(userCredential => {
+          // This is a new user, so prompt for notifications.
+          promptForNotifications();
           showToast('Account created successfully!');
           closeLoginModal();
         })
         .catch(error => {
           authError.textContent = error.message;
+          // Also track signup failure
+          if (typeof gtag === 'function') {
+            gtag('event', 'sign_up_failure', {
+              method: 'Email',
+            });
+          }
         });
     }
 
@@ -5520,10 +5524,15 @@
       authError.textContent = '';
       firebase.auth().signInWithPopup(provider)
         .then(result => {
+          // If this is the first time the user is signing in with Google
+          if (result.additionalUserInfo && result.additionalUserInfo.isNewUser) {
+            promptForNotifications();
+          }
           showToast(`Welcome, ${result.user.displayName}!`);
           closeLoginModal();
         }).catch(error => {
           authError.textContent = error.message;
+          if (typeof gtag === 'function') gtag('event', 'login_failure', { method: 'Google' });
         });
     }
 
@@ -5927,9 +5936,9 @@
 
       if (user) { // User is logged in
         // Associate this device with the user's ID in OneSignal
-        OneSignal.push(() => {
-          OneSignal.setExternalUserId(user.uid);
-          console.log('OneSignal external user ID set:', user.uid);
+        window.OneSignalDeferred.push(async function(OneSignal) {
+          await OneSignal.login(user.uid);
+          console.log('OneSignal user logged in with ID:', user.uid);
         });
 
         // If there was a pending action (like checkout), execute it now.
@@ -5939,9 +5948,9 @@
         }
       } else { // User is logged out
         // Disassociate the device from the user ID
-        OneSignal.push(() => {
-          OneSignal.removeExternalUserId();
-          console.log('OneSignal external user ID removed.');
+        window.OneSignalDeferred.push(async function(OneSignal) {
+          await OneSignal.logout();
+          console.log('OneSignal user logged out.');
         });
       }
     }
