@@ -147,8 +147,6 @@ try {
     initCarousel('#communicationCarousel .slides');
     // Finally, initialize the timer
     initFlashSaleTimer();
-    // Now lazy load the banners after other initializations are complete
-    lazyLoadBanners();
 
   }
 
@@ -1733,38 +1731,6 @@ try {
     }
   }
   /* ===== End of New Functions ===== */
-
-
-  function lazyLoadBanners() {
-    // FIX: Observe individual slides instead of the whole carousel to ensure all images load.
-    const slides = document.querySelectorAll('.slide img[data-src]');
-    if (slides.length === 0) return;
-
-    const observer = new IntersectionObserver((entries, observer) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const img = entry.target;
-          const isCommBanner = img.closest('.communication-carousel');
-          const bannerHeight = isCommBanner ? 132 : 300; // 66px * 2 for retina vs 150px * 2
-
-          // Get optimized banner images
-          const originalSrc = img.dataset.src;
-          const optimizedSrc = getOptimizedImageUrl(originalSrc, 960, bannerHeight);
-          img.src = optimizedSrc;
-          img.removeAttribute('data-src');
-          img.onload = () => {
-            img.parentElement.classList.add('loaded');
-          };
-          // FIX: Add this check in case the image is already cached by the browser
-          if (img.complete) {
-              img.parentElement.classList.add('loaded');
-          }
-          observer.unobserve(img); // Stop observing this specific image
-        }
-      });
-    }, { rootMargin: '100px' }); // Start loading when it's 100px away from viewport
-    slides.forEach(slide => observer.observe(slide));
-  }
 
   function saveCart() {
     try {
