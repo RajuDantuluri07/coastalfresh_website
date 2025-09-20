@@ -116,7 +116,6 @@
   <!-- Firebase SDKs -->
   <!-- OneSignal v16 SDK -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script src="/js/onesignal-setup.js" defer></script>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -3818,14 +3817,52 @@
       // These functions can run independently
       renderTrustIcons();
       renderCategories(); // NEW: Render categories dynamically
-      renderCustomerReviews();      setupEvents();
-      initOneSignal(currentUser); // Initialize OneSignal
+      renderCustomerReviews();
+      setupEvents();
+      initOneSignal(); // NEW: Initialize OneSignal
       lazyLoadBanners();
       initFlashSaleTimer();
       // Initialize all carousels
       initCarousel('#slides');
       initCarousel('#communicationCarousel .slides');
 
+    }
+
+    /* ===== NEW: OneSignal Initialization ===== */
+    function initOneSignal() {
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "e2939260-7605-4b71-8042-2e822e89ca67",
+          allowLocalhostAsSecureOrigin: true, // Good for local testing
+        });
+
+        // NEW: If a user is already logged in when OneSignal initializes,
+        // identify them to OneSignal immediately.
+        if (currentUser && currentUser.uid) {
+          await OneSignal.login(currentUser.uid);
+          console.log('OneSignal user identified on init:', currentUser.uid);
+        }
+
+        // Log subscription changes for debugging
+        OneSignal.Notifications.addEventListener('permissionChange', (permission) => {
+          console.log("OneSignal push permission state is now:", permission); // Keep for debugging
+
+          // NEW: When a user grants permission, tag them to receive a welcome notification.
+          if (permission === 'granted') {
+            // This tag will be used by an Automated Message in your OneSignal dashboard.
+            OneSignal.User.addTag("just_subscribed", "true");
+            console.log("User tagged for welcome notification.");
+            if (typeof gtag === 'function') {
+              gtag('event', 'push_subscription_success');
+            }
+          }
+
+          if (typeof gtag === 'function') {
+              gtag('event', 'push_permission_change', { 'permission_state': permission });
+          }
+        });
+      });
     }
 
     function setupEvents() {
