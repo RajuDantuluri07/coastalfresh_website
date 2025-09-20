@@ -2254,6 +2254,58 @@
     .value-item h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
     .value-item p { font-size: 13px; color: var(--text-secondary); }
 
+    /* NEW: Refer a Friend Page Styles */
+    .refer-content {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .refer-icon {
+      font-size: 48px;
+      color: var(--accent-color);
+      background: var(--primary-light);
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      box-shadow: 0 4px 12px rgba(11, 173, 226, 0.2);
+    }
+    .refer-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 12px;
+    }
+    .refer-subtitle {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .refer-code-box {
+      background: var(--bg-light);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+    .refer-code-box p { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
+    .refer-link-container { display: flex; align-items: center; background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; }
+    .refer-link { flex-grow: 1; text-align: left; font-weight: 500; color: var(--primary-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .copy-link-btn { background: none; border: none; font-size: 18px; color: var(--text-secondary); cursor: pointer; padding: 4px; }
+    .share-buttons { display: flex; flex-direction: column; gap: 12px; }
+    .share-btn {
+      padding: 16px; border-radius: 12px; border: none; font-size: 16px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s;
+    }
+    .share-btn.whatsapp {
+      background: #25D366; color: white; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    }
+    .share-btn:active {
+      transform: scale(0.98);
+    }
+
 
     /* Profile Page */
     #profilePage .section {
@@ -2812,10 +2864,9 @@
       <!-- NEW: Communication Banner Section -->
       <section class="communication-carousel" id="communicationCarousel">
         <div class="slides">
-          <div class="slide" data-action="openWhatsApp" data-target="refer" style="cursor: pointer;">
+          <div class="slide" data-action="showPage" data-target="referPage" style="cursor: pointer;">
             <img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1758117187/Coastal_Fresh_Refer_Banner_1080x320_m9vx4s.png" alt="Refer a friend and earn rewards at Coastal Fresh India">
           </div>
-          <div class="slide" data-action="openWhatsApp" data-target="refer" style="cursor: pointer;"><img data-src="https://res.cloudinary.com/dpyniai9l/image/upload/v1758117187/Coastal_Fresh_Refer_Banner_1080x320_m9vx4s.png" alt="Refer a friend and earn rewards at Coastal Fresh India"></div>
         </div>
         <div class="carousel-dots"></div>
       </section>
@@ -2987,6 +3038,43 @@
               <h4>Customer Trust</h4>
               <p>Transparent and reliable service.</p>
             </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- NEW: Refer a Friend Page -->
+    <div class="page" id="referPage">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="logo">Refer & Earn</h1>
+          <div></div>
+        </div>
+      </header>
+
+      <main class="section" style="padding-top: 20px;">
+        <div class="refer-content">
+          <div class="refer-icon">
+            <i class="fas fa-gift"></i>
+          </div>
+          <h2 class="refer-title">Share the Freshness, Get Rewards!</h2>
+          <p class="refer-subtitle">
+            Give your friends <strong>10% OFF</strong> their first order, and you'll get a <strong>10% discount coupon</strong> for your next purchase once they order. It's a win-win!
+          </p>
+          <div class="refer-code-box">
+            <p>Your unique referral link:</p>
+            <div class="refer-link-container">
+              <span id="referralLink" class="refer-link">https://coastalfresh.in?ref=GUEST123</span>
+              <button id="copyReferralBtn" class="copy-link-btn" aria-label="Copy referral link">
+                <i class="far fa-copy"></i>
+              </button>
+            </div>
+          </div>
+          <div class="share-buttons">
+            <button id="shareOnWhatsAppBtn" class="share-btn whatsapp"><i class="fab fa-whatsapp"></i> Share on WhatsApp</button>
           </div>
         </div>
       </main>
@@ -4286,13 +4374,18 @@
       document.querySelector('.profile-button.faq').addEventListener('click', () => showPage('faqPage'));
       document.querySelector('.profile-button.about').addEventListener('click', () => showPage('aboutPage'));
       document.querySelector('.profile-button.support').addEventListener('click', () => openWhatsApp('support'));
-      document.querySelector('.profile-button.refer').addEventListener('click', () => openWhatsApp('refer'));
+      document.querySelector('.profile-button.refer').addEventListener('click', () => showPage('referPage'));
       document.getElementById('logoutBtn').addEventListener('click', handleLogout);
       document.getElementById('loginBtn').addEventListener('click', showLoginModal);
       document.getElementById('profileLoginLink').addEventListener('click', showLoginModal);
 
       // Product Popup buttons
       document.querySelector('#aboutPage .back-btn').addEventListener('click', goBack);
+
+      // NEW: Refer a Friend page buttons
+      document.querySelector('#referPage .back-btn').addEventListener('click', goBack);
+      document.getElementById('copyReferralBtn').addEventListener('click', copyReferralLink);
+      document.getElementById('shareOnWhatsAppBtn').addEventListener('click', () => openWhatsApp('refer'));
 
       // Product Popup buttons
       document.querySelector('.popup-back-btn').addEventListener('click', closePopup);
@@ -5562,6 +5655,19 @@
       }
     }
 
+    /* ===== NEW: Refer a Friend Functions ===== */
+    function copyReferralLink() {
+      const referralLink = document.getElementById('referralLink').textContent;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(referralLink).then(() => {
+          showToast('Referral link copied!');
+        }, (err) => {
+          console.error('Could not copy text: ', err);
+          showToast('Failed to copy link.');
+        });
+      }
+    }
+
     function openWhatsApp(type) {
       let message = '';
       let url = 'https://wa.me/919985125678'; // Default to business number for support
@@ -5569,7 +5675,8 @@
       if (type === 'support') {
         message = 'Hi Coastal Fresh, I need assistance with my order.';
       } else if (type === 'refer') {
-        message = 'Hey! I’ve been ordering seafood from Coastal Fresh – always fresh, neatly cleaned and delivered to my home in Hyderabad. You should try it! Use my referral for 10% off on your first order. 👉 https://coastalfresh.in';
+        const referralLink = document.getElementById('referralLink').textContent;
+        message = `Hey! I’ve been ordering seafood from Coastal Fresh – always fresh, neatly cleaned and delivered to my home in Hyderabad. You should try it! Use my referral link for 10% off on your first order. 👉 ${referralLink}`;
         url = 'https://wa.me/'; // Use generic URL to allow sharing with any contact
       }
       window.open(`${url}?text=${encodeURIComponent(message)}`, '_blank');
@@ -5797,6 +5904,13 @@
           avatarEl.innerHTML = `<i class="fas fa-user"></i>`;
         }
 
+        // NEW: Update referral link with user ID
+        const referralLinkEl = document.getElementById('referralLink');
+        if (referralLinkEl) {
+          const refCode = btoa(currentUser.uid).substring(0, 8).replace(/[/+=]/g, '');
+          referralLinkEl.textContent = `https://coastalfresh.in?ref=${refCode}`;
+        }
+
         // --- Update Name ---
         let displayName = 'Valued Customer';
         if (currentUser.displayName) {
@@ -5819,6 +5933,12 @@
         // --- Reset to Guest State ---
         avatarEl.innerHTML = `<i class="fas fa-user"></i>`; // Reset avatar
         userNameEl.textContent = 'Guest User';
+
+        // Reset referral link to a generic one
+        const referralLinkEl = document.getElementById('referralLink');
+        if (referralLinkEl) {
+          referralLinkEl.textContent = `https://coastalfresh.in?ref=GUEST123`;
+        }
         userStatusEl.innerHTML = 'You are browsing as a guest. <a href="#" id="profileLoginLink">Login</a>';
         // Re-add event listener as innerHTML removes it
         document.getElementById('profileLoginLink').addEventListener('click', showLoginModal);
