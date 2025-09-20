@@ -1842,6 +1842,14 @@ return sanitized;
 
     firebase.auth().createUserWithEmailAndPassword(email, password)
       .then(userCredential => {
+        // NEW: Create a user document in Firestore upon signup
+        const user = userCredential.user;
+        db.collection('users').doc(user.uid).set({
+          email: user.email,
+          displayName: user.displayName || null,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
         // NEW: Track successful sign-up event in GA4
         if (typeof gtag === 'function') {
           gtag('event', 'sign_up', {
@@ -1891,6 +1899,17 @@ return sanitized;
     authError.textContent = '';
     firebase.auth().signInWithPopup(provider)
       .then(result => {
+        // NEW: If this is a new user, create their document in Firestore
+        const user = result.user;
+        const isNewUser = result.additionalUserInfo.isNewUser;
+        if (isNewUser) {
+          db.collection('users').doc(user.uid).set({
+            email: user.email,
+            displayName: user.displayName,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+
         // NEW: Track sign_up or login events for Google Auth
         if (typeof gtag === 'function') {
           // Check if this is a new user or a returning one
