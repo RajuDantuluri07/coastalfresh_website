@@ -5528,6 +5528,12 @@
 
       firebase.auth().createUserWithEmailAndPassword(email, password)
         .then(userCredential => {
+          // NEW: Track successful sign-up event in GA4
+          if (typeof gtag === 'function') {
+            gtag('event', 'sign_up', {
+              method: 'Email'
+            });
+          }
           showToast('Account created successfully!');
           closeLoginModal();
         })
@@ -5551,6 +5557,12 @@
 
       firebase.auth().signInWithEmailAndPassword(email, password)
         .then(userCredential => {
+          // NEW: Track successful login event in GA4
+          if (typeof gtag === 'function') {
+            gtag('event', 'login', {
+              method: 'Email'
+            });
+          }
           showToast('Logged in successfully!');
           closeLoginModal();
         })
@@ -5565,6 +5577,20 @@
       authError.textContent = '';
       firebase.auth().signInWithPopup(provider)
         .then(result => {
+          // NEW: Track sign_up or login events for Google Auth
+          if (typeof gtag === 'function') {
+            // Check if this is a new user or a returning one
+            if (result.additionalUserInfo && result.additionalUserInfo.isNewUser) {
+              gtag('event', 'sign_up', {
+                method: 'Google'
+              });
+            } else {
+              gtag('event', 'login', {
+                method: 'Google'
+              });
+            }
+          }
+
           // If this is the first time the user is signing in with Google
           showToast(`Welcome, ${result.user.displayName}!`);
           closeLoginModal();
@@ -5607,10 +5633,22 @@
 
       if (user) { // User is logged in
         // Associate this device with the user's ID in OneSignal
-        window.OneSignalDeferred.push(async function(OneSignal) {
-          await OneSignal.login(user.uid);
-          console.log('OneSignal user logged in with ID:', user.uid);
-        });
+        if (window.OneSignalDeferred) {
+          window.OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.login(user.uid);
+            console.log('OneSignal user logged in with ID:', user.uid);
+          });
+        }
+
+        // NEW: Identify user in GA4 and Hotjar for unified session tracking
+        if (typeof gtag === 'function') {
+          gtag('config', 'G-GSHMPRYPW1', { 'user_id': user.uid });
+          console.log('GA4 user identified with ID:', user.uid);
+        }
+        if (window.hj) {
+          hj('identify', user.uid, { email: user.email });
+          console.log('Hotjar user identified with ID:', user.uid);
+        }
 
         // If there was a pending action (like checkout), execute it now.
         if (typeof afterLoginAction === 'function') {
@@ -5619,10 +5657,17 @@
         }
       } else { // User is logged out
         // Disassociate the device from the user ID
-        window.OneSignalDeferred.push(async function(OneSignal) {
-          await OneSignal.logout();
-          console.log('OneSignal user logged out.');
-        });
+        if (window.OneSignalDeferred) {
+          window.OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.logout();
+            console.log('OneSignal user logged out.');
+          });
+        }
+        // NEW: Forget user on logout in Hotjar
+        if (window.hj) {
+          hj('identify', null, {});
+          console.log('Hotjar user session anonymized.');
+        }
       }
     }
 
