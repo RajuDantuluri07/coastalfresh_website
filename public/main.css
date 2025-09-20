@@ -2083,6 +2083,24 @@ padding-bottom: env(safe-area-inset-bottom);
   margin: 0 -20px; /* Extend divider to screen edges */
 }
 
+/* NEW: About Us Accordion Styles */
+.about-details-section {
+  margin-bottom: 24px;
+  text-align: left;
+}
+.about-details-section .detail-item {
+  border-top: 1px solid var(--border-color);
+}
+.about-details-section .detail-item:last-child {
+  border-bottom: 1px solid var(--border-color);
+}
+.about-details-section .about-text {
+  margin-bottom: 0; /* Remove bottom margin inside accordion */
+}
+.about-details-section .about-text + .about-text {
+  margin-top: 16px; /* Add margin between paragraphs */
+}
+
 /* NEW: About Us Page Styles */
 .about-us-content {
   text-align: center;
@@ -2097,7 +2115,7 @@ padding-bottom: env(safe-area-inset-bottom);
   font-size: 22px;
   font-weight: 700;
   color: var(--primary-dark);
-  margin-bottom: 12px;
+  margin-bottom: 24px; /* Increased margin */
 }
 .about-subtitle {
   font-size: 18px;
