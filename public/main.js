@@ -2020,8 +2020,17 @@ return sanitized;
       // NEW: Update referral link with user ID
       const referralLinkEl = document.getElementById('referralLink');
       if (referralLinkEl) {
-        const refCode = btoa(currentUser.uid).substring(0, 8).replace(/[/+=]/g, '');
-        referralLinkEl.textContent = `https://coastalfresh.in?ref=${refCode}`;
+        // IMPROVEMENT: Use a simple hash function for a more unique and numeric-looking code
+        const simpleHash = (str) => {
+          let hash = 0;
+          for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = (hash << 5) - hash + char;
+            hash |= 0; // Convert to 32bit integer
+          }
+          return Math.abs(hash);
+        };
+        referralLinkEl.textContent = `https://coastalfresh.in?ref=${simpleHash(currentUser.uid)}`;
       }
 
       // --- Update Name ---
