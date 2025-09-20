@@ -836,7 +836,7 @@ z-index: 2;                 /* sits above input content */
   padding-bottom: 24px;
 }
 
-/* REVERTED: Featured products now use horizontal scroll like flash sale */
+/* REVERTED: Featured products now use horizontal scroll like flash sale - FIX */
 .featured-products {
   display: flex;
   gap: var(--grid-gap);
@@ -845,8 +845,6 @@ z-index: 2;                 /* sits above input content */
   margin: 0 -20px; /* Use negative margin to break out of parent padding */
   scrollbar-width: none; /* Firefox */
 }
-
-.featured-products::-webkit-scrollbar { display: none; }
 
 .featured-products .product { flex: 0 0 45%; max-width: 180px; }
 
