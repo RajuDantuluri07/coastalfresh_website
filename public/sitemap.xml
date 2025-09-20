@@ -2,97 +2,97 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Homepage: Highest priority -->
   <url>
-    <loc>https://coastalfresh.in/</loc>
-    <lastmod>2024-05-22</lastmod>
+    <loc>https://coastalfresh.in</loc>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <!-- Main Product Catalog: High priority, as it's the main shopping page -->
   <url>
     <loc>https://coastalfresh.in/catalog</loc>
-    <lastmod>2024-05-22</lastmod>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <!-- About Us Page: Important for brand trust -->
   <url>
     <loc>https://coastalfresh.in/about</loc>
-    <lastmod>2024-05-22</lastmod>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <!-- FAQ Page: Helpful for users and can rank for question-based searches -->
   <url>
     <loc>https://coastalfresh.in/faq</loc>
-    <lastmod>2024-05-22</lastmod>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <!-- Refer & Earn Page: Good for marketing and engagement -->
   <url>
     <loc>https://coastalfresh.in/refer</loc>
-    <lastmod>2024-05-22</lastmod>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <!-- Product Pages -->
   <url>
     <loc>https://coastalfresh.in/product/white-pomfret-1</loc>
-    <lastmod>2024-05-22</lastmod>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://coastalfresh.in/product/black-pomfret-2</loc>
-    <lastmod>2024-05-22</lastmod>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://coastalfresh.in/product/sea-bass-3</loc>
-    <lastmod>2024-05-22</lastmod>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://coastalfresh.in/product/yellowfin-tuna-4</loc>
-    <lastmod>2024-05-22</lastmod>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://coastalfresh.in/product/pink-perch-5</loc>
-    <lastmod>2024-05-22</lastmod>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://coastalfresh.in/product/koyyinga-6</loc>
-    <lastmod>2024-05-22</lastmod>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://coastalfresh.in/product/kanagadathalu-7</loc>
-    <lastmod>2024-05-22</lastmod>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://coastalfresh.in/product/vanjaram-seer-8</loc>
-    <lastmod>2024-05-22</lastmod>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://coastalfresh.in/product/prawns-pickle-27</loc>
-    <lastmod>2024-05-22</lastmod>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://coastalfresh.in/product/chicken-pickle-28</loc>
-    <lastmod>2024-05-22</lastmod>
+    <lastmod>2025-09-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
