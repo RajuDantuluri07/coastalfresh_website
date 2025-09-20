@@ -2210,6 +2210,51 @@
       margin: 0 -20px; /* Extend divider to screen edges */
     }
 
+    /* NEW: About Us Page Styles */
+    .about-us-content {
+      text-align: center;
+      padding-bottom: 20px;
+    }
+    .about-logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 16px;
+    }
+    .about-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 12px;
+    }
+    .about-subtitle {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+    .about-text {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      text-align: left;
+      margin-bottom: 16px;
+    }
+    .about-values {
+      display: flex;
+      gap: 16px;
+      margin-top: 24px;
+      justify-content: space-around;
+    }
+    .value-item {
+      flex: 1;
+      max-width: 120px;
+    }
+    .value-item i { font-size: 24px; color: var(--accent-color); margin-bottom: 8px; }
+    .value-item h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .value-item p { font-size: 13px; color: var(--text-secondary); }
+
+
     /* Profile Page */
     #profilePage .section {
       padding: 0;
@@ -2900,6 +2945,53 @@
       </main>
     </div>
 
+    <!-- NEW: About Us Page -->
+    <div class="page" id="aboutPage">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="logo">About Us</h1>
+          <div></div>
+        </div>
+      </header>
+
+      <main class="section" style="padding-top: 20px;">
+        <div class="about-us-content">
+          <img src="https://res.cloudinary.com/dpyniai9l/image/upload/c_pad,w_150,h_150/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" alt="Coastal Fresh India Logo" class="about-logo">
+          <h2 class="about-title">From Our Shores to Your Door</h2>
+          <p class="about-text">
+            Coastal Fresh was born from a simple idea: everyone deserves to experience the true taste of the coast, no matter where they live. Founded by a team of seafood lovers with deep roots in the coastal regions of Andhra, we were tired of the compromises city-dwellers had to make—settling for frozen, old, or improperly handled seafood.
+          </p>
+          <p class="about-text">
+            We decided to change that. By building a direct-to-consumer supply chain, we connect directly with trusted fishermen and our own farms along the coast. This allows us to source the freshest catch, process it hygienically within hours, and deliver it to your kitchen in Hyderabad the very next day.
+          </p>
+          <h3 class="about-subtitle">Our Mission</h3>
+          <p class="about-text">
+            Our mission is to redefine the seafood experience in Hyderabad by delivering unparalleled freshness, quality, and convenience. We are committed to sustainable sourcing, meticulous hygiene, and preserving the authentic flavors of coastal cuisine.
+          </p>
+          <div class="about-values">
+            <div class="value-item">
+              <i class="fas fa-fish"></i>
+              <h4>Peak Freshness</h4>
+              <p>Sourced daily and delivered overnight.</p>
+            </div>
+            <div class="value-item">
+              <i class="fas fa-shield-alt"></i>
+              <h4>Unmatched Quality</h4>
+              <p>Hygienically cleaned and packed.</p>
+            </div>
+            <div class="value-item">
+              <i class="fas fa-handshake"></i>
+              <h4>Customer Trust</h4>
+              <p>Transparent and reliable service.</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
     <!-- Profile Page -->
     <div class="page" id="profilePage">
       <header class="header">
@@ -2940,6 +3032,9 @@
           </button>
           <button class="profile-button faq">
             <i class="fas fa-question-circle"></i> FAQ
+          </button>
+          <button class="profile-button about">
+            <i class="fas fa-info-circle"></i> About Us
           </button>
           <button class="profile-button support">
             <i class="fas fa-headset"></i> Contact Us
@@ -4189,11 +4284,15 @@
         }
       });
       document.querySelector('.profile-button.faq').addEventListener('click', () => showPage('faqPage'));
+      document.querySelector('.profile-button.about').addEventListener('click', () => showPage('aboutPage'));
       document.querySelector('.profile-button.support').addEventListener('click', () => openWhatsApp('support'));
       document.querySelector('.profile-button.refer').addEventListener('click', () => openWhatsApp('refer'));
       document.getElementById('logoutBtn').addEventListener('click', handleLogout);
       document.getElementById('loginBtn').addEventListener('click', showLoginModal);
       document.getElementById('profileLoginLink').addEventListener('click', showLoginModal);
+
+      // Product Popup buttons
+      document.querySelector('#aboutPage .back-btn').addEventListener('click', goBack);
 
       // Product Popup buttons
       document.querySelector('.popup-back-btn').addEventListener('click', closePopup);
