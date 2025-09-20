@@ -654,7 +654,7 @@ try {
       return;
     }
 
-    let saleEndTime = localStorage.getItem('flashSaleEndTime');
+    let saleEndTime = Number(localStorage.getItem('flashSaleEndTime')); // FIX: Convert stored string to a number
     // Reset timer if it's expired or doesn't exist
     if (!saleEndTime || new Date().getTime() > saleEndTime) {
       saleEndTime = new Date().getTime() + FLASH_SALE_DURATION_HOURS * 60 * 60 * 1000;
