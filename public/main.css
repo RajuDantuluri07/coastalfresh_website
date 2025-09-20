@@ -43,12 +43,12 @@
 
 /* NEW: Communication Carousel styles */
 .communication-carousel {
-  margin: 0 20px 20px;
+  margin: 0; /* Removed margin as it's now inside a .section */
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 16px; /* Bolder radius for card style */
   position: relative;
   height: 66px; /* Mobile height */
-  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1); /* Enhanced shadow */
   background-color: #0B1A4A; /* Dark blue fallback */
 }
 
@@ -901,12 +901,20 @@ z-index: 2;                 /* sits above input content */
 }
 
 /* Products Grid */
+/* REVISED: Changed from grid to horizontal scroll to match flash sale section */
 .products {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
   gap: var(--grid-gap);
+  overflow-x: auto;
+  padding: 4px 20px 12px;
+  margin: 0 -20px; /* Use negative margin to break out of parent padding */
+  scrollbar-width: none; /* Firefox */
 }
 
+.products::-webkit-scrollbar {
+  display: none;
+}
+.products .product { flex: 0 0 45%; max-width: 180px; }
 .product {
   background: var(--bg-white);
   border-radius: var(--radius-card);

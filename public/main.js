@@ -212,12 +212,6 @@ try {
         toggleFAQ(faqToggle);
       }
 
-      // Show More button in catalog
-      const showMoreBtn = target.closest('.show-more-btn');
-      if (showMoreBtn) {
-        showMoreProducts();
-      }
-
       // Carousel slide click
       const slide = target.closest('.slide[data-action]');
       if (slide) {
@@ -482,6 +476,7 @@ try {
     document.querySelector('.profile-button.about').addEventListener('click', () => showPage('aboutPage'));
     document.querySelector('.profile-button.support').addEventListener('click', () => openWhatsApp('support'));
     document.querySelector('.profile-button.refer').addEventListener('click', () => showPage('referPage'));
+    document.getElementById('aboutPageCtaBtn').addEventListener('click', () => showPage('catalog')); // NEW: About Us CTA
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
 
     // Product Popup buttons
@@ -752,48 +747,15 @@ try {
       return matchCategory && matchSearch;
     });
 
-    const startIndex = 0;
-    const endIndex = currentPageNumber * ITEMS_PER_PAGE;
-    const paginatedProducts = filtered.slice(startIndex, endIndex);
-
-    const oldShowMoreBtn = container.querySelector('.show-more-btn');
-    if (oldShowMoreBtn) oldShowMoreBtn.remove();
-
-    if (paginatedProducts.length === 0) {
-      container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #8E8E93;">No products found</div>';
+    if (filtered.length === 0) {
+      // FIX: The style `grid-column` is no longer applicable. A simple div is fine.
+      container.innerHTML = '<div style="width: 100%; text-align: center; padding: 40px 20px; color: #8E8E93;">No products found</div>';
       return;
     }
 
-    const newProductsHTML = paginatedProducts.slice((currentPageNumber - 1) * ITEMS_PER_PAGE).map(createProductHTML).join('');
-
-    if (currentPageNumber === 1) {
-      container.innerHTML = newProductsHTML;
-    } else {
-      container.insertAdjacentHTML('beforeend', newProductsHTML);
-    }
-
-    if (endIndex < filtered.length) {
-      const showMoreBtn = document.createElement('button');
-      showMoreBtn.textContent = 'Show More';
-      showMoreBtn.className = 'show-more-btn';
-      showMoreBtn.style.cssText = 'grid-column: 1 / -1; margin: 20px auto; padding: 12px 24px; background: var(--primary-color); color: white; border: none; border-radius: 8px; cursor: pointer;';
-      showMoreBtn.onclick = showMoreProducts;
-      container.appendChild(showMoreBtn);
-    }
-  }
-
-  function showMoreProducts() {
-    currentPageNumber++;
-    renderCatalogProducts();
-    
-    // Track show more event
-    if (typeof gtag === 'function') {
-      gtag('event', 'show_more', { 
-        category: currentCategory, 
-        search_term: currentSearch,
-        page: currentPageNumber
-      });
-    }
+    // NEW: Render all filtered products at once for the horizontal scroll layout.
+    // Pagination and "Show More" are no longer needed.
+    container.innerHTML = filtered.map(createProductHTML).join('');
   }
 
   function createProductHTML(product) {
