@@ -74,6 +74,7 @@ try {
   let pageHistory = ['home'];
   let currentCategory = 'All';
   let currentSearch = '';
+  let flashSaleTimerInterval = null; // NEW: Global reference to the timer
   let currentPageNumber = 1;
   let carouselTimer = null;
   let previouslyFocusedElement = null; // NEW: For accessibility
@@ -326,18 +327,19 @@ try {
       }
     });
 
-    // Header buttons (Back, Cart) and View All
+    // Header buttons and View All
     document.querySelector('#home .view-all').addEventListener('click', () => showPage('catalog'));
-    // Refined back button listeners to avoid conflicts
-    document.querySelector('#catalog .back-btn').addEventListener('click', goBack);
-    document.querySelector('#faqPage .back-btn').addEventListener('click', goBack);
-    document.querySelector('#ordersPage .back-btn').addEventListener('click', goBack);
-    document.querySelector('#profilePage .back-btn').addEventListener('click', goBack);
-    document.querySelector('#addressPage .back-btn').addEventListener('click', () => {
-      // If we were editing, cancel the edit and show the list
-      if (editingAddressId) {
-        cancelEditAddress();
-      } else goBack();
+
+    // IMPROVEMENT: Consolidate all back button listeners into one loop
+    document.querySelectorAll('.page .back-btn').forEach(btn => {
+      const pageId = btn.closest('.page').id;
+      if (pageId === 'addressPage') {
+        // Special handler for address page to cancel edits
+        btn.addEventListener('click', () => editingAddressId ? cancelEditAddress() : goBack());
+      } else if (pageId !== 'loginModal' && pageId !== 'productPopup' && pageId !== 'cartModal') {
+        // Generic handler for all other page back buttons
+        btn.addEventListener('click', goBack);
+      }
     });
 
     // NEW: Event delegation for address list actions
@@ -478,8 +480,6 @@ try {
     document.querySelector('.profile-button.support').addEventListener('click', () => openWhatsApp('support'));
     document.querySelector('.profile-button.refer').addEventListener('click', () => showPage('referPage'));
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-    document.getElementById('loginBtn').addEventListener('click', showLoginModal);
-    document.getElementById('profileLoginLink').addEventListener('click', showLoginModal);
 
     // Product Popup buttons
     document.querySelector('#aboutPage .back-btn').addEventListener('click', goBack);
@@ -653,6 +653,9 @@ try {
       return;
     }
 
+    // FIX: Clear any existing timer before starting a new one to prevent duplicates.
+    if (flashSaleTimerInterval) clearInterval(flashSaleTimerInterval);
+
     let saleEndTime = Number(localStorage.getItem('flashSaleEndTime')); // FIX: Convert stored string to a number
     // Reset timer if it's expired or doesn't exist
     if (!saleEndTime || new Date().getTime() > saleEndTime) {
@@ -670,7 +673,7 @@ try {
 
       if (distance < 0) {
         countdownContainer.innerHTML = "<div class='timer-ended'>Sale Ended!</div>";
-        if(timerInterval) clearInterval(timerInterval);
+        if(flashSaleTimerInterval) clearInterval(flashSaleTimerInterval);
         // Hide the product scroll when the timer ends
         const productsContainer = document.getElementById('flashSaleProducts');
         if(productsContainer) productsContainer.style.display = 'none';
@@ -686,7 +689,7 @@ try {
       if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
     }
 
-    const timerInterval = setInterval(updateTimer, 1000);
+    flashSaleTimerInterval = setInterval(updateTimer, 1000);
     updateTimer(); // Initial call to display timer immediately
   }
   /* ===== End of New Functions ===== */
@@ -1832,16 +1835,24 @@ return sanitized;
 }
 
   /* ===== NEW: Auth Functions ===== */
-  function showLoginModal(e) {
-    if (e) e.preventDefault();
+  function showLoginModal(e, view = 'signup') {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
     const loginModal = document.getElementById('loginModal');
-    openModal(loginModal, loginModal.querySelector('#signupEmail'));
 
-    // ALWAYS reset to the default signup view when the modal is opened.
-    document.getElementById('authTitle').textContent = 'Get Started';
-    document.getElementById('authSubtitle').textContent = 'Sign up to order the freshest coastal seafood';
-    document.getElementById('loginForm').classList.remove('active');
-    document.getElementById('signupForm').classList.add('active');
+    if (view === 'login') {
+      document.getElementById('authTitle').textContent = 'Welcome Back';
+      document.getElementById('authSubtitle').textContent = 'Login to access your account';
+      document.getElementById('signupForm').classList.remove('active');
+      document.getElementById('loginForm').classList.add('active');
+      openModal(loginModal, loginModal.querySelector('#loginEmail'));
+    } else { // 'signup'
+      document.getElementById('authTitle').textContent = 'Get Started';
+      document.getElementById('authSubtitle').textContent = 'Sign up to order the freshest coastal seafood';
+      document.getElementById('loginForm').classList.remove('active');
+      document.getElementById('signupForm').classList.add('active');
+      openModal(loginModal, loginModal.querySelector('#signupEmail'));
+    }
+    document.getElementById('authError').textContent = '';
   }
 
   function closeLoginModal() {
@@ -2061,9 +2072,23 @@ return sanitized;
       if (referralLinkEl) {
         referralLinkEl.textContent = `https://coastalfresh.in?ref=GUEST123`;
       }
-      userStatusEl.innerHTML = 'You are browsing as a guest. <a href="#" id="profileLoginLink">Login</a>';
-      // Re-add event listener as innerHTML removes it
-      document.getElementById('profileLoginLink').addEventListener('click', showLoginModal);
+
+      let isFirstTime = false;
+      try {
+        // A user is "first time" if the firstVisit key is not set.
+        isFirstTime = !localStorage.getItem('firstVisit');
+      } catch (_) {
+        // If localStorage fails, default to not being first time.
+        isFirstTime = false;
+      }
+
+      if (isFirstTime) {
+        userStatusEl.innerHTML = 'You are browsing as a guest. <a href="#" id="profileLoginLink">Sign Up</a>';
+        document.getElementById('profileLoginLink').addEventListener('click', (e) => showLoginModal(e, 'signup'));
+      } else {
+        userStatusEl.innerHTML = 'You are browsing as a guest. <a href="#" id="profileLoginLink">Login</a>';
+        document.getElementById('profileLoginLink').addEventListener('click', (e) => showLoginModal(e, 'login'));
+      }
 
       logoutBtn.style.display = 'none';
       loginBtn.style.display = 'none';
