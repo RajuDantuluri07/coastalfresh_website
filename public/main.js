@@ -142,11 +142,12 @@ try {
     renderCustomerReviews();
     setupEvents();
     initOneSignal(currentUser); // NEW: Initialize OneSignal from external file
-    initFlashSaleTimer();
     // Initialize all carousels first to ensure all slides (including duplicates) are in the DOM
     initCarousel('#slides');
     initCarousel('#communicationCarousel .slides');
-    // Now lazy load the banners
+    // Finally, initialize the timer
+    initFlashSaleTimer();
+    // Now lazy load the banners after other initializations are complete
     lazyLoadBanners();
 
   }
