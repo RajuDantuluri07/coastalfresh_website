@@ -977,7 +977,7 @@ z-index: 2;                 /* sits above input content */
   color: var(--text-primary);
 }
 
-old-price {
+.old-price {
   font-size: 11px;
   color: var(--text-secondary);
   font-weight: 500;
