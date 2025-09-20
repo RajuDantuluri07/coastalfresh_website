@@ -748,8 +748,8 @@ try {
     });
 
     if (filtered.length === 0) {
-      // FIX: The style `grid-column` is no longer applicable. A simple div is fine.
-      container.innerHTML = '<div style="width: 100%; text-align: center; padding: 40px 20px; color: #8E8E93;">No products found</div>';
+      // Make the "No products" message span the full width of the grid.
+      container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #8E8E93;">No products found</div>';
       return;
     }
 

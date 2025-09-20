@@ -900,20 +900,15 @@ z-index: 2;                 /* sits above input content */
 }
 
 /* Products Grid */
-/* REVISED: Changed from grid to horizontal scroll to match flash sale section */
 .products {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--grid-gap);
-  overflow-x: auto;
-  padding: 4px 20px 12px;
-  margin: 0 -20px; /* Use negative margin to break out of parent padding */
-  scrollbar-width: none; /* Firefox */
 }
 
 .products::-webkit-scrollbar {
   display: none;
 }
-.products .product { flex: 0 0 45%; max-width: 180px; }
 .product {
   background: var(--bg-white);
   border-radius: var(--radius-card);
