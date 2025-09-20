@@ -652,6 +652,7 @@ z-index: 2;                 /* sits above input content */
   background-color: rgba(255, 255, 255, 0.5);
   padding: 6px 8px;
   border-radius: 8px;
+  flex-shrink: 0; /* FIX: Prevent the timer from shrinking on small screens */
 }
 
 .timer-block {
