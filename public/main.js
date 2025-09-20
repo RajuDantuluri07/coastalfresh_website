@@ -114,6 +114,7 @@ try {
       renderFeaturedProducts();
       renderCatalogProducts();
       renderFlashSale();
+      initFlashSaleTimer(); // NEW: Call the timer function
       renderProductSchema(); // NEW: Add product schema
       loadCart();
 
@@ -642,7 +643,8 @@ try {
       if (section) section.style.display = 'none';
       return;
     }
-    container.innerHTML = flashSaleProducts.map(createProductHTML).join('');
+    // NEW: Pass a flag to indicate this is a flash sale item
+    container.innerHTML = flashSaleProducts.map(p => createProductHTML(p, { isFlashSale: true })).join('');
   }
 
   /* ===== End of New Functions ===== */
@@ -1707,6 +1709,49 @@ try {
     }
   }
   /* ===== End of New Functions ===== */
+
+  /* ===== NEW: Flash Sale Timer Logic ===== */
+  function initFlashSaleTimer() {
+    if (!ENABLE_FLASH_SALE) return;
+
+    const timerContainer = document.getElementById('flashSaleTimer');
+    if (!timerContainer) return;
+
+    let endTime = localStorage.getItem('flashSaleEndTime');
+
+    // If no end time is stored or it's in the past, create a new one
+    if (!endTime || new Date().getTime() > endTime) {
+      endTime = new Date().getTime() + FLASH_SALE_DURATION_HOURS * 60 * 60 * 1000;
+      localStorage.setItem('flashSaleEndTime', endTime);
+    }
+
+    const hoursEl = document.getElementById('timer-h');
+    const minutesEl = document.getElementById('timer-m');
+    const secondsEl = document.getElementById('timer-s');
+
+    function updateTimer() {
+      const now = new Date().getTime();
+      const distance = endTime - now;
+
+      if (distance < 0) {
+        clearInterval(flashSaleTimerInterval);
+        timerContainer.innerHTML = '<div class="timer-ended">Sale Ended!</div>';
+        return;
+      }
+
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      hoursEl.textContent = String(hours).padStart(2, '0');
+      minutesEl.textContent = String(minutes).padStart(2, '0');
+      secondsEl.textContent = String(seconds).padStart(2, '0');
+    }
+
+    if (flashSaleTimerInterval) clearInterval(flashSaleTimerInterval);
+    updateTimer();
+    flashSaleTimerInterval = setInterval(updateTimer, 1000);
+  }
 
   function saveCart() {
     try {

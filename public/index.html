@@ -171,11 +171,20 @@
       <section class="flash-sale-section" id="flashSaleSection">
         <div class="flash-sale-header">
           <h2 class="section-title">🔥 Flash Sale</h2>
+          <!-- NEW: Countdown Timer -->
+          <div class="flash-sale-timer" id="flashSaleTimer">
+            <div class="timer-block"><span class="timer-num" id="timer-h">00</span><span class="timer-label">hrs</span></div>
+            <div class="timer-block"><span class="timer-num" id="timer-m">00</span><span class="timer-label">min</span></div>
+            <div class="timer-block"><span class="timer-num" id="timer-s">00</span><span class="timer-label">sec</span></div>
+          </div>
         </div>
         <div class="flash-sale-products" id="flashSaleProducts"></div>
       </section>
 
-      <main class="section" style="padding-bottom: 32px;">
+      <!-- NEW: Section Divider -->
+      <div class="section-divider"></div>
+
+      <main class="section featured-section">
         <h2 class="section-title">
           <div class="section-title-main">
             ✨ Featured Products
@@ -195,8 +204,11 @@
         <div class="carousel-dots"></div>
       </section>
 
+      <!-- NEW: Section Divider -->
+      <div class="section-divider"></div>
+
       <!-- NEW: Customer Reviews Section -->
-      <section class="section">
+      <section class="section reviews-section">
         <h2 class="section-title">What Our Customers Say</h2>
         <div class="reviews-carousel" id="reviewsCarousel">
           <!-- Reviews will be injected here by JS -->
@@ -336,47 +348,39 @@
         <div class="about-us-content">
           <img src="https://res.cloudinary.com/dpyniai9l/image/upload/c_pad,w_150,h_150/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" alt="Coastal Fresh India Logo" class="about-logo">
           <h2 class="about-title">From Our Shores to Your Door</h2>
-
-          <!-- REVISED: Accordion for story and mission -->
-          <div class="about-details-section">
-            <div class="detail-item active">
-              <button class="detail-header">
-                <span>Our Story</span>
-                <i class="fas fa-chevron-down" style="transform: rotate(180deg);"></i>
-              </button>
-              <div class="detail-content" style="max-height: 500px; padding: 0px 0px 16px;">
-                <p class="about-text">Coastal Fresh was born from a simple idea: everyone deserves to experience the true taste of the coast, no matter where they live. Founded by a team of seafood lovers with deep roots in the coastal regions of Andhra, we were tired of the compromises city-dwellers had to make—settling for frozen, old, or improperly handled seafood.</p>
-                <p class="about-text">We decided to change that. By building a direct-to-consumer supply chain, we connect directly with trusted fishermen and our own farms along the coast. This allows us to source the freshest catch, process it hygienically within hours, and deliver it to your kitchen in Hyderabad the very next day.</p>
-              </div>
-            </div>
-            <div class="detail-item">
-              <button class="detail-header">
-                <span>Our Mission</span>
-                <i class="fas fa-chevron-down"></i>
-              </button>
-              <div class="detail-content">
-                <p class="about-text">Our mission is to redefine the seafood experience in Hyderabad by delivering unparalleled freshness, quality, and convenience. We are committed to sustainable sourcing, meticulous hygiene, and preserving the authentic flavors of coastal cuisine.</p>
-              </div>
-            </div>
-          </div>
-
+ 
+          <h3 class="about-subtitle">Our Story</h3>
+          <p class="about-text">Fresh seafood, straight from the coast to your kitchen. We started Coastal Fresh to end the compromise with frozen or mishandled seafood. By working directly with fishermen and our own coastal farms, we bring you the <strong>day’s catch</strong> — processed within hours and delivered to Hyderabad the <strong>very next day</strong>.</p>
+ 
+          <h3 class="about-subtitle">Our Mission</h3>
+          <p class="about-text">To make seafood in Hyderabad as fresh as it is by the shore. We promise unmatched <strong>freshness</strong>, hygienic handling, and <strong>convenience</strong> at your doorstep.</p>
+ 
           <h3 class="about-subtitle">Our Core Values</h3>
           <div class="about-values">
             <div class="value-item">
               <i class="fas fa-fish"></i>
               <h4>Peak Freshness</h4>
-              <p>Sourced daily and delivered overnight.</p>
+              <p>Sourced daily. Delivered overnight.</p>
             </div>
             <div class="value-item">
               <i class="fas fa-shield-alt"></i>
               <h4>Unmatched Quality</h4>
-              <p>Hygienically cleaned and packed.</p>
+              <p>Hygienically cleaned &amp; packed.</p>
             </div>
             <div class="value-item">
               <i class="fas fa-handshake"></i>
               <h4>Customer Trust</h4>
-              <p>Transparent and reliable service.</p>
+              <p>Transparent &amp; reliable service.</p>
             </div>
+          </div>
+ 
+          <!-- NEW: Call to Action -->
+          <div class="about-cta-container">
+            <p>Order today and taste the coast tomorrow!</p>
+            <button class="about-cta-btn" onclick="showPage('catalog')">
+              Explore Today's Fresh Catch
+              <i class="fas fa-arrow-right"></i>
+            </button>
           </div>
         </div>
       </main>

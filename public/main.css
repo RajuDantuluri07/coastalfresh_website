@@ -632,8 +632,8 @@ z-index: 2;                 /* sits above input content */
   background: linear-gradient(175deg, var(--primary-light), var(--bg-white));
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
-  padding: 20px 0;
-  margin-bottom: 32px; /* Increased bottom margin */
+  padding: 20px 0 24px;
+  margin-bottom: 0; /* Divider will handle spacing */
 }
 
 /* NEW: Header to align title and timer on one line */
@@ -643,6 +643,45 @@ z-index: 2;                 /* sits above input content */
   align-items: center;
   padding: 0 20px;
   margin-bottom: 16px;
+}
+
+/* NEW: Countdown Timer Styles */
+.flash-sale-timer {
+  display: flex;
+  gap: 6px;
+  background-color: rgba(255, 255, 255, 0.5);
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.timer-block {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.timer-num {
+  background: var(--primary-dark);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  min-width: 24px;
+  text-align: center;
+  animation: tick 1s infinite; /* Subtle tick animation */
+}
+
+.timer-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--primary-dark);
+}
+
+.timer-ended {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--error-color);
 }
 
 .flash-sale-section .section-title {
@@ -675,7 +714,42 @@ z-index: 2;                 /* sits above input content */
 .flash-sale-products::-webkit-scrollbar { display: none; }
 .flash-sale-products .product { flex: 0 0 45%; max-width: 180px; }
 
+/* --- NEW: Flash Sale Product Card Overrides --- */
+.flash-sale-item .product-image {
+  background: #f7f9fa; /* Lighter background for contain */
+}
+
+.flash-sale-item .product-image img {
+  object-fit: contain; /* Use contain to show full image */
+  padding: 8px; /* Add some padding around the image */
+}
+
+/* Bigger, more vibrant offer badge for flash sale */
+.flash-sale-item .offer-badge {
+  background: var(--success-color);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 16px;
+}
+
+/* Flash sale specific pricing */
+.flash-sale-item .product-price .price {
+  color: var(--success-color);
+  font-weight: 700;
+}
+
+.flash-sale-item .product-price .old-price {
+  color: var(--error-color);
+}
+
 /* --- NEW: Customer Reviews Section --- */
+.reviews-section {
+  background: var(--bg-light); /* Subtle grey background */
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
 .reviews-carousel {
   display: flex;
   gap: 16px;
@@ -695,12 +769,18 @@ z-index: 2;                 /* sits above input content */
   max-width: 300px; /* Max width on larger screens */
   background: var(--bg-white);
   border-radius: var(--radius-card);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.08); /* Enhanced shadow */
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   scroll-snap-align: start;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.review-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.1);
 }
 
 .review-header {
@@ -752,18 +832,20 @@ z-index: 2;                 /* sits above input content */
 }
 
 /* Home Featured Products */
-.featured-products {
-  display: flex;
-  gap: var(--grid-gap);
-  overflow-x: auto;
-  padding: 4px 20px 12px;
-  margin: 0 -20px; /* Use negative margin to break out of parent padding */
-  scrollbar-width: none; /* Firefox */
+.featured-section {
+  padding-bottom: 24px;
 }
 
-.featured-products::-webkit-scrollbar { display: none; }
-
-.featured-products .product { flex: 0 0 45%; max-width: 180px; }
+/* NEW: Change featured products to a grid instead of horizontal scroll */
+.featured-products {
+  display: grid; /* CHANGED from flex */
+  grid-template-columns: repeat(2, 1fr); /* NEW */
+  gap: var(--grid-gap);
+  /* REMOVED horizontal scroll properties */
+  overflow-x: initial;
+  padding: 0;
+  margin: 0;
+}
 
 /* Categories for Catalog */
 .categories {
@@ -826,10 +908,15 @@ z-index: 2;                 /* sits above input content */
   background: var(--bg-white);
   border-radius: var(--radius-card);
   overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.07); /* Enhanced shadow */
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+}
+
+.product:hover { /* NEW: Add hover effect for all product cards */
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
 
 .product:active {
@@ -850,7 +937,7 @@ z-index: 2;                 /* sits above input content */
   transition: transform 0.3s;
 }
 
-.product:hover .product-image img {
+.product:hover .product-image img:not(.flash-sale-item .product-image img) { /* Prevent double-zoom on flash sale */
   transform: scale(1.05);
 }
 
@@ -920,13 +1007,15 @@ z-index: 2;                 /* sits above input content */
   gap: 2px; /* Tighter gap */
 }
 
-.price {
+/* Default product pricing */
+.product:not(.flash-sale-item) .product-price .price {
   font-size: 15px; /* More prominent */
   font-weight: 600; /* Bolder */
   color: var(--text-primary);
 }
 
-.old-price {
+/* Default old price */
+.product:not(.flash-sale-item) .product-price .old-price {
   font-size: 11px;
   color: var(--text-secondary);
   font-weight: 500;
@@ -2069,8 +2158,8 @@ padding-bottom: env(safe-area-inset-bottom);
 .about-subtitle {
   font-size: 18px;
   font-weight: 600;
-  color: var(--primary-color);
-  margin-top: 24px;
+  color: var(--primary-dark);
+  margin-top: 32px; /* Increased top margin for more whitespace */
   margin-bottom: 12px;
 }
 .about-text {
@@ -2093,7 +2182,29 @@ padding-bottom: env(safe-area-inset-bottom);
 .value-item i { font-size: 24px; color: var(--accent-color); margin-bottom: 8px; }
 .value-item h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
 .value-item p { font-size: 13px; color: var(--text-secondary); }
-
+/* NEW: About Us CTA Button */
+.about-cta-container {
+  margin-top: 40px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}
+.about-cta-container p {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+.about-cta-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 16px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3);
+}
 /* NEW: Refer a Friend Page Styles */
 .refer-content {
   text-align: center;
@@ -2791,6 +2902,14 @@ body.popup-open .bottom-bar {
   color: var(--error-color);
 }
 
+/* NEW: Section Divider Style */
+.section-divider {
+  height: 12px;
+  background-color: var(--bg-light);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
 
 /* Responsive */
 @media (max-width: 375px) {
@@ -2889,4 +3008,8 @@ body.popup-open .bottom-bar {
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+@keyframes tick {
+  50% { transform: scale(1.05); }
 }
