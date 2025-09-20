@@ -146,8 +146,6 @@ try {
     // Initialize all carousels first to ensure all slides (including duplicates) are in the DOM
     initCarousel('#slides');
     initCarousel('#communicationCarousel .slides');
-    // Finally, initialize the timer
-    initFlashSaleTimer();
 
   }
 
@@ -643,58 +641,6 @@ try {
     container.innerHTML = flashSaleProducts.map(createProductHTML).join('');
   }
 
-  function initFlashSaleTimer() {
-    const countdownContainer = document.getElementById('countdownTimer');
-    if (!countdownContainer) return;
-
-    // NEW: Check if the flash sale is enabled
-    if (!ENABLE_FLASH_SALE) {
-      // The section is already hidden by renderFlashSale, so we just need to not run the timer.
-      return;
-    }
-
-    // FIX: Clear any existing timer before starting a new one to prevent duplicates.
-    if (flashSaleTimerInterval) clearInterval(flashSaleTimerInterval);
-
-    // --- REVISED: Calculate end time to be the next 12 AM in India (IST) ---
-    // Get the current date in the user's local timezone
-    const localNow = new Date();
-    // Create a date object for tomorrow at midnight in the user's local timezone
-    const localTomorrowMidnight = new Date(localNow.getFullYear(), localNow.getMonth(), localNow.getDate() + 1);
-    // Get the user's timezone offset in milliseconds
-    const userTimezoneOffset = localTomorrowMidnight.getTimezoneOffset() * 60 * 1000;
-    // Calculate the target end time: tomorrow at midnight IST (UTC+5:30)
-    const saleEndTime = localTomorrowMidnight.getTime() + userTimezoneOffset - (5.5 * 60 * 60 * 1000);
-
-    const hoursEl = countdownContainer.querySelector('.hours');
-    const minutesEl = countdownContainer.querySelector('.minutes');
-    const secondsEl = countdownContainer.querySelector('.seconds');
-
-    function updateTimer() {
-      const now = new Date().getTime();
-      const distance = saleEndTime - now;
-
-      if (distance < 0) {
-        countdownContainer.innerHTML = "<div class='timer-ended'>Sale Ended!</div>";
-        if(flashSaleTimerInterval) clearInterval(flashSaleTimerInterval);
-        // Hide the product scroll when the timer ends
-        const productsContainer = document.getElementById('flashSaleProducts');
-        if(productsContainer) productsContainer.style.display = 'none';
-        return;
-      }
-
-      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-      if (hoursEl) hoursEl.textContent = String(hours).padStart(2, '0');
-      if (minutesEl) minutesEl.textContent = String(minutes).padStart(2, '0');
-      if (secondsEl) secondsEl.textContent = String(seconds).padStart(2, '0');
-    }
-
-    flashSaleTimerInterval = setInterval(updateTimer, 1000);
-    updateTimer(); // Initial call to display timer immediately
-  }
   /* ===== End of New Functions ===== */
 
   function createSkeletonProductHTML() {

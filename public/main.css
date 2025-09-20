@@ -659,45 +659,6 @@ z-index: 2;                 /* sits above input content */
   gap: 10px; /* Space between icon and text */
 }
 
-/* UPDATED: Countdown timer box */
-.countdown-timer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: linear-gradient(90deg, var(--accent-color), var(--primary-color));
-  color: white;
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1;
-  box-shadow: 0 4px 10px rgba(1, 101, 154, 0.25);
-}
-
-.countdown-timer .timer-part {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
-}
-
-.countdown-timer .timer-unit {
-  font-size: 12px;
-  font-weight: 400;
-  opacity: 0.8;
-}
-
-.countdown-timer .timer-icon {
-  font-size: 16px;
-  animation: pulse 1.5s infinite ease-in-out;
-}
-
-.timer-ended {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  padding: 8px 12px;
-}
-
 .flash-sale-products {
   display: flex;
   gap: 12px;
