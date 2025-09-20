@@ -657,15 +657,14 @@ try {
     if (flashSaleTimerInterval) clearInterval(flashSaleTimerInterval);
 
     // --- REVISED: Calculate end time to be the next 12 AM in India (IST) ---
-    const now = new Date();
-    // Get current UTC time and add IST offset (UTC+5:30)
-    const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
-
-    // Create a date for the next day's midnight in UTC, based on IST's current date
-    const nextMidnightIST = new Date(Date.UTC(istTime.getUTCFullYear(), istTime.getUTCMonth(), istTime.getUTCDate() + 1, 0, 0, 0));
-
-    // Convert the target UTC time back to a local timestamp for the countdown
-    const saleEndTime = nextMidnightIST.getTime() - (5.5 * 60 * 60 * 1000);
+    // Get the current date in the user's local timezone
+    const localNow = new Date();
+    // Create a date object for tomorrow at midnight in the user's local timezone
+    const localTomorrowMidnight = new Date(localNow.getFullYear(), localNow.getMonth(), localNow.getDate() + 1);
+    // Get the user's timezone offset in milliseconds
+    const userTimezoneOffset = localTomorrowMidnight.getTimezoneOffset() * 60 * 1000;
+    // Calculate the target end time: tomorrow at midnight IST (UTC+5:30)
+    const saleEndTime = localTomorrowMidnight.getTime() + userTimezoneOffset - (5.5 * 60 * 60 * 1000);
 
     const hoursEl = countdownContainer.querySelector('.hours');
     const minutesEl = countdownContainer.querySelector('.minutes');
