@@ -1016,9 +1016,9 @@
 
     .product-image {
       position: relative;
-      height: 130px;
       background: var(--bg-light);
       overflow: hidden;
+      aspect-ratio: 1 / 1; /* NEW: Reserve space to prevent layout shift */
     }
 
     .product-image img {
@@ -2557,7 +2557,7 @@
     }
 
     .skeleton-image {
-      height: 150px;
+      aspect-ratio: 1 / 1; /* NEW: Match product image aspect ratio for smooth loading */
     }
 
     .skeleton-info {
@@ -4554,7 +4554,7 @@
           <div class="product-image">
             ${hasOffer ? `<div class="offer-badge">${product.offer}% OFF</div>` : ''}
             ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
-            <img src="${optimizedImage}" alt="Fresh ${sanitizedName} delivery in Hyderabad by Coastal Fresh India" loading="lazy">
+            <img src="${optimizedImage}" alt="Fresh ${sanitizedName} delivery in Hyderabad by Coastal Fresh India" loading="lazy" width="300" height="300">
           </div>
           <div class="product-info">
             <div class="product-name">${sanitizedName}</div>
