@@ -656,12 +656,16 @@ try {
     // FIX: Clear any existing timer before starting a new one to prevent duplicates.
     if (flashSaleTimerInterval) clearInterval(flashSaleTimerInterval);
 
-    let saleEndTime = Number(localStorage.getItem('flashSaleEndTime')); // FIX: Convert stored string to a number
-    // Reset timer if it's expired or doesn't exist
-    if (!saleEndTime || new Date().getTime() > saleEndTime) {
-      saleEndTime = new Date().getTime() + FLASH_SALE_DURATION_HOURS * 60 * 60 * 1000;
-      localStorage.setItem('flashSaleEndTime', saleEndTime);
-    }
+    // --- REVISED: Calculate end time to be the next 12 AM in India (IST) ---
+    const now = new Date();
+    // Get current UTC time and add IST offset (UTC+5:30)
+    const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+
+    // Create a date for the next day's midnight in UTC, based on IST's current date
+    const nextMidnightIST = new Date(Date.UTC(istTime.getUTCFullYear(), istTime.getUTCMonth(), istTime.getUTCDate() + 1, 0, 0, 0));
+
+    // Convert the target UTC time back to a local timestamp for the countdown
+    const saleEndTime = nextMidnightIST.getTime() - (5.5 * 60 * 60 * 1000);
 
     const hoursEl = countdownContainer.querySelector('.hours');
     const minutesEl = countdownContainer.querySelector('.minutes');
