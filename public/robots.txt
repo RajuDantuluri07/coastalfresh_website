@@ -1,6 +1,12 @@
 User-agent: *
 Allow: /
-Disallow: *?utm_*
-Disallow: *&utm_*
+
+# Disallow tracking and marketing parameters to prevent duplicate content
+Disallow: /*?utm_
+Disallow: /*&utm_
+Disallow: /*?ref=
+
+# Disallow internal search result pages
+Disallow: /*?q=
 
 Sitemap: https://coastalfresh.in/sitemap.xml

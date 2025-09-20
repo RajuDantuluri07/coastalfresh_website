@@ -118,11 +118,15 @@ try {
       loadCart();
 
       // Check for search query in URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const productId = urlParams.get('product');
-      if (productId) {
+      const path = window.location.pathname;
+      const productMatch = path.match(/^\/product\/(.+)-(\d+)$/);
+      const urlParams = new URLSearchParams(window.location.search); // Keep for other params like 'q'
+
+      if (productMatch) {
+        const productId = parseInt(productMatch[2], 10);
         showProductPopup(productId);
       }
+
       const searchQuery = urlParams.get('q');
       if (searchQuery) {
         showPage('catalog');
@@ -825,6 +829,13 @@ try {
     `;
   }
 
+  /* ===== NEW: SEO-Friendly URL Slug Generator ===== */
+  function generateProductSlug(product) {
+    if (!product || !product.name) return '';
+    const namePart = product.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
+    return `${namePart}-${product.id}`;
+  }
+
   /* NEW: Updated showProductPopup function with new design */
   function showProductPopup(id) {
     const numericId = parseInt(id);
@@ -837,7 +848,8 @@ try {
     const popup = document.getElementById('productPopup');
 
     // --- NEW: Update SEO Tags for this product ---
-    const productUrl = `/?product=${product.id}`;
+    const productSlug = generateProductSlug(product);
+    const productUrl = `/product/${productSlug}`;
     const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
     const productDesc = product.desc;
     const optimizedProductImage = getOptimizedImageUrl(product.image, 1200, 630);
@@ -903,6 +915,9 @@ try {
     
     isPopupOpen = true;
     openModal(popup, popup.querySelector('.popup-back-btn'));
+
+    // NEW: Update the browser URL without reloading the page
+    history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
 
     // Track product view
     if (typeof gtag === 'function') {
@@ -984,8 +999,8 @@ try {
   /* NEW: Function to share product from popup */
   function shareProduct() {
     if (!popupProduct) return;
-
-    const productUrl = `${window.location.origin}/?product=${popupProduct.id}`;
+    const productSlug = generateProductSlug(popupProduct);
+    const productUrl = `${window.location.origin}/product/${productSlug}`;
     
     if (navigator.share) {
       navigator.share({
@@ -1044,7 +1059,16 @@ try {
     isPopupOpen = false;
     popupProduct = null;
     
+    // NEW: Revert the URL to the underlying page's URL
     const underlyingPage = pageHistory[pageHistory.length - 1] || 'home';
+    let pageInfo = { path: '/', title: 'Coastal Fresh India' };
+    if (underlyingPage === 'catalog') {
+      pageInfo = { path: '/catalog', title: 'All Products | Coastal Fresh India' };
+    } else if (underlyingPage === 'faqPage') {
+      pageInfo = { path: '/faq', title: 'FAQs | Coastal Fresh India' };
+    } // Add other pages as needed
+    history.pushState({ page: underlyingPage }, pageInfo.title, pageInfo.path);
+
     showPage(underlyingPage, true); // Revert SEO tags without pushing to history
   }
 
@@ -2263,13 +2287,13 @@ return sanitized;
         "@context": "https://schema.org/",
         "@type": "Product",
         "name": product.name,
-        "image": product.image,
+        "image": getOptimizedImageUrl(product.image, 1200, 630),
         "description": product.desc,
         "sku": `CF-${product.id}`,
         "brand": { "@type": "Brand", "name": "Coastal Fresh" },
         "offers": {
           "@type": "Offer",
-          "url": `https://www.coastalfresh.in/?product=${product.id}`,
+          "url": `https://www.coastalfresh.in/product/${generateProductSlug(product)}`,
           "priceCurrency": "INR",
           "price": product.finalPrice,
           "priceValidUntil": new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0],
