@@ -3968,6 +3968,13 @@
         }
       });
 
+      // Typewriter focus/blur handlers
+      const catalogSearchInput = document.getElementById('catalogSearch');
+      catalogSearchInput.addEventListener('focus', stopTypewriter);
+      catalogSearchInput.addEventListener('blur', () => {
+        if (!catalogSearchInput.value) startTypewriter();
+      });
+
       // NEW: Keyboard accessibility for carousel slides and other role="button" elements
       document.body.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -4015,19 +4022,6 @@
       document.getElementById('catalogSearch').addEventListener('input', (e) => {
         clearTimeout(searchDebounceTimer);
         searchDebounceTimer = setTimeout(() => handleCatalogSearch(e), 300);
-      });
-
-      // Typewriter focus/blur handlers
-      const catalogSearchInput = document.getElementById('catalogSearch');
-      [catalogSearchInput].forEach(input => {
-        if (!input) return;
-        input.addEventListener('focus', () => {
-          if (typewriterTimer) clearTimeout(typewriterTimer);
-          input.setAttribute('placeholder', 'Search products...');
-        });
-        input.addEventListener('blur', () => {
-          if (!input.value) startTypewriter();
-        });
       });
 
       // Category filter buttons
@@ -5155,6 +5149,14 @@
         pageTitle = 'Frequently Asked Questions | Coastal Fresh India';
         pageDesc = 'Find answers to common questions about our delivery, sourcing, freshness, and payment for fresh seafood in Hyderabad.';
         pagePath = '/faq'; // Conceptual path for SEO
+      } else if (page === 'referPage') {
+        pageTitle = 'Refer a Friend & Earn Rewards | Coastal Fresh India';
+        pageDesc = 'Share Coastal Fresh with your friends! They get 10% off their first order, and you get a 10% discount on your next purchase. Start sharing and earning today.';
+        pagePath = '/refer'; // Conceptual path for SEO
+      } else if (page === 'profilePage' || page === 'addressPage' || page === 'ordersPage') {
+        pageTitle = 'Your Account | Coastal Fresh India';
+        pageDesc = 'Manage your orders, addresses, and profile settings at Coastal Fresh India.';
+        pagePath = '/profile'; // Conceptual path for SEO
       } else {
         // Default to home page SEO
         pageTitle = null; pageDesc = null; pagePath = '/';
@@ -5178,6 +5180,14 @@
         if (ticker) ticker.style.display = 'none';
         headers.forEach(h => h.style.top = '0px');
       }
+
+      // NEW: Manage typewriter animation based on page
+      if (page === 'catalog') {
+        startTypewriter();
+      } else {
+        stopTypewriter();
+      }
+
     }
 
     function handleCatalogSearch(e) {
@@ -5323,6 +5333,13 @@
         typewriterTimer = setTimeout(tick, dir === 1 ? 120 : 80);
       }
       tick();
+    }
+
+    /* NEW: Function to stop the typewriter animation */
+    function stopTypewriter() {
+      if (typewriterTimer) clearTimeout(typewriterTimer);
+      const input = document.getElementById('catalogSearch');
+      if (input) input.setAttribute('placeholder', 'Search products...');
     }
 
     /* ===== NEW: Skeleton Rendering Functions ===== */
