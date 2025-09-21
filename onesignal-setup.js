@@ -3,7 +3,7 @@
   It is loaded by index.html to configure push notifications for the website.
 */
 
-function initOneSignal(currentUser) {
+function initOneSignal() {
   // Ensure the OneSignal SDK is ready
   window.OneSignalDeferred = window.OneSignalDeferred || [];
 
@@ -12,15 +12,11 @@ function initOneSignal(currentUser) {
     await OneSignal.init({
       appId: "e2939260-7605-4b71-8042-2e822e89ca67",
       allowLocalhostAsSecureOrigin: true, // Useful for local development
+      // This tells OneSignal to wait for an explicit login call
+      // before associating the user. It's the correct approach
+      // when you manage user login/logout in your app.
+      requiresUserPrivacyConsent: false,
     });
-
-    // If a user is already logged in when OneSignal initializes,
-    // identify them to OneSignal immediately. This handles cases where
-    // auth state is resolved before OneSignal is ready.
-    if (currentUser && currentUser.uid) {
-      await OneSignal.login(currentUser.uid);
-      console.log('OneSignal user identified on init:', currentUser.uid);
-    }
 
     // Add a listener for notification permission changes
     OneSignal.Notifications.addEventListener('permissionChange', (permission) => {
