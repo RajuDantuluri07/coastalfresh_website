@@ -25,30 +25,44 @@ self.addEventListener('install', event => {
 });
 
 // Cache and return requests
-self.addEventListener('fetch', (event) => {
-  // For requests to Firebase or other APIs, always use the network.
-  if (event.request.url.includes('firestore.googleapis.com')) {
-    return; // Let the browser handle it.
+self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+
+  // Ignore non-GET requests and requests to third-party services that shouldn't be cached.
+  if (
+    event.request.method !== 'GET' ||
+    url.hostname.includes('firestore.googleapis.com') ||
+    url.hostname.includes('google-analytics.com') ||
+    url.hostname.includes('googletagmanager.com') ||
+    url.hostname.includes('hotjar.com') ||
+    url.hostname.includes('onesignal.com')
+  ) {
+    // Let the browser handle these requests without interception.
+    return;
   }
-  
-  // For other GET requests, use a "Cache first, then Network" strategy.
-  if (event.request.method === 'GET') {
-    event.respondWith(async function() {
+
+  // For all other GET requests, use a "Cache first, then Network" strategy.
+  event.respondWith(
+    (async () => {
       const cache = await caches.open(CACHE_NAME);
       const cachedResponse = await cache.match(event.request);
-      
-      // If we have a cached response, return it.
+
       if (cachedResponse) {
         return cachedResponse;
       }
-      
-      // Otherwise, fetch from the network, cache it, and return it.
-      const fetchResponse = await fetch(event.request);
-      cache.put(event.request, fetchResponse.clone());
-      return fetchResponse;
-    }
-    ());
-  }
+
+      // Not in cache, fetch from network.
+      const networkResponse = await fetch(event.request);
+
+      // IMPORTANT: Check for a valid response before caching to avoid caching errors.
+      if (networkResponse && networkResponse.status === 200) {
+        const responseToCache = networkResponse.clone();
+        cache.put(event.request, responseToCache);
+      }
+
+      return networkResponse;
+    })()
+  );
 });
 
 // Update a service worker and clean up old caches
