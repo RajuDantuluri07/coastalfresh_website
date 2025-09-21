@@ -916,6 +916,9 @@ z-index: 2;                 /* sits above input content */
   box-shadow: 0 6px 20px rgba(0,0,0,0.07); /* Enhanced shadow */
   cursor: pointer;
   transition: all 0.3s ease;
+  /* NEW: Ensure cards have a consistent layout */
+  display: flex;
+  flex-direction: column;
   position: relative;
 }
 
@@ -976,6 +979,8 @@ z-index: 2;                 /* sits above input content */
 
 .product-info {
   padding: 10px;
+  /* NEW: Allow this section to grow and push the footer down */
+  flex-grow: 1;
 }
 
 .product-name {

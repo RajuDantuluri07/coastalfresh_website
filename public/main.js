@@ -475,10 +475,10 @@ try {
     document.querySelector('.profile-button.faq').addEventListener('click', () => showPage('faqPage'));
     document.querySelector('.profile-button.about').addEventListener('click', () => showPage('aboutPage'));
     document.querySelector('.profile-button.support').addEventListener('click', () => openWhatsApp('support'));
-    document.querySelector('.profile-button.refer').addEventListener('click', () => showPage('referPage'));
+    document.getElementById('referBtn').addEventListener('click', () => showPage('referPage'));
     document.getElementById('aboutPageCtaBtn').addEventListener('click', () => showPage('catalog')); // NEW: About Us CTA
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-    document.getElementById('profileLoginBtn').addEventListener('click', (e) => showLoginModal(e, 'signup'));
+    document.getElementById('guestProfileCta').addEventListener('click', (e) => showLoginModal(e, 'signup'));
 
     // Product Popup buttons
     document.querySelector('#aboutPage .back-btn').addEventListener('click', goBack);
@@ -2017,7 +2017,8 @@ return sanitized;
     const userNameEl = document.getElementById('profileUserName');
     const userStatusEl = document.getElementById('profileUserStatus');
     const logoutBtn = document.getElementById('logoutBtn');
-    const guestCtaContainer = document.getElementById('guestProfileCta');
+    const guestCtaBtn = document.getElementById('guestProfileCta');
+    const referBtn = document.getElementById('referBtn');
     const avatarEl = document.querySelector('.profile-avatar-small');
 
     if (currentUser) {
@@ -2060,7 +2061,8 @@ return sanitized;
       userNameEl.textContent = displayName;
       userStatusEl.textContent = currentUser.email;
       logoutBtn.style.display = 'flex';
-      if (guestCtaContainer) guestCtaContainer.style.display = 'none';
+      if (guestCtaBtn) guestCtaBtn.style.display = 'none';
+      if (referBtn) referBtn.style.display = 'flex';
     } else {
       // --- Reset to Guest State ---
       avatarEl.innerHTML = `<i class="fas fa-user"></i>`; // Reset avatar
@@ -2074,7 +2076,8 @@ return sanitized;
       }
 
       logoutBtn.style.display = 'none';
-      if (guestCtaContainer) guestCtaContainer.style.display = 'flex';
+      if (guestCtaBtn) guestCtaBtn.style.display = 'flex';
+      if (referBtn) referBtn.style.display = 'none';
     }
   }
   /* ===== End of Auth Functions ===== */
