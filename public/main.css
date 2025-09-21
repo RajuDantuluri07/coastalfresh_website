@@ -1145,14 +1145,9 @@ overflow: hidden;
   flex-shrink: 0; /* Prevent header from shrinking */
 }
 
-.popup-back-btn {
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-  border: none;
-  background: none;
-  font-size: 18px;
-  color: var(--primary-color);
+.popup-header-actions {
+  display: flex;
+  gap: 8px; /* Space between favorite and share icons */
 }
 
 .popup-action-btn {
