@@ -830,10 +830,11 @@ try {
     container.innerHTML = filtered.map(createProductHTML).join('');
   }
 
-  function createProductHTML(product) {
+  function createProductHTML(product, options = {}) {
     const hasOffer = product.mrp > product.finalPrice;
     const isInCart = cart[product.id];
     const optimizedImage = getOptimizedImageUrl(product.image, 300, 300); // Optimized for grid view
+    const isFlashSale = options.isFlashSale || false;
     const sanitizedName = DOMPurify.sanitize(product.name);
     return `
       <div class="product" data-id="${product.id}">
