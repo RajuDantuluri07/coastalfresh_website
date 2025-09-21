@@ -97,6 +97,16 @@ try {
 
   let popupProduct = null;
 
+  /* ===== NEW: Analytics Helper ===== */
+  function trackEvent(eventName, eventParams = {}) {
+    if (typeof gtag === 'function') {
+      gtag('event', eventName, eventParams);
+    } else {
+      // Fallback for local development or if gtag fails to load
+      console.log(`Analytics Event (gtag not found): ${eventName}`, eventParams);
+    }
+  }
+
   /* ===== Init ===== */
   async function init() {
     // Firebase Auth Listener
@@ -172,6 +182,11 @@ try {
       deferredInstallPrompt = e;
       // Show the custom install banner.
       document.getElementById('installPrompt').classList.add('show');
+      // NEW: Also show the install button on the profile page
+      const profileInstallBtn = document.getElementById('profileInstallBtn');
+      if (profileInstallBtn) {
+        profileInstallBtn.style.display = 'flex';
+      }
     });
 
   }
@@ -342,7 +357,7 @@ try {
         document.getElementById('catalogSearch').value = '';
         currentSearch = '';
         renderCatalogProducts();
-        if (typeof gtag === 'function') gtag('event', 'select_category', { category: currentCategory });
+        trackEvent('select_category', { category: currentCategory });
       }
     });
 
@@ -498,6 +513,7 @@ try {
     document.querySelector('.profile-button.about').addEventListener('click', () => showPage('aboutPage'));
     document.querySelector('.profile-button.support').addEventListener('click', () => openWhatsApp('support'));
     document.getElementById('referBtn').addEventListener('click', () => showPage('referPage'));
+    document.getElementById('profileInstallBtn').addEventListener('click', triggerInstallPrompt); // NEW
     document.getElementById('aboutPageCtaBtn').addEventListener('click', () => showPage('catalog')); // NEW: About Us CTA
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
     document.getElementById('guestProfileCta').addEventListener('click', (e) => showLoginModal(e, 'signup'));
@@ -575,7 +591,7 @@ try {
       content.appendChild(title); content.appendChild(sub);
       item.appendChild(iconWrap); item.appendChild(content);
       item.addEventListener('click', () => {
-        if (typeof gtag === 'function') gtag('event', 'click', { location: 'trust_strip', item_title: t.title, item_index: i });
+        trackEvent('click', { location: 'trust_strip', item_title: t.title, item_index: i });
       });
       container.appendChild(item);
     });
@@ -912,18 +928,16 @@ try {
     history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
 
     // Track product view
-    if (typeof gtag === 'function') {
-      gtag('event', 'view_item', {
-        currency: 'INR',
-        value: product.finalPrice,
-        items: [{
-          item_id: product.id,
-          item_name: product.name,
-          item_category: product.category,
-          price: product.finalPrice
-        }]
-      });
-    }
+    trackEvent('view_item', {
+      currency: 'INR',
+      value: product.finalPrice,
+      items: [{
+        item_id: product.id,
+        item_name: product.name,
+        item_category: product.category,
+        price: product.finalPrice
+      }]
+    });
   }
 
   /* NEW: Function to change quantity in popup */
@@ -974,8 +988,8 @@ try {
     favoriteBtn.style.color = isPopupFavorite ? 'var(--error-color)' : 'var(--primary-color)';
 
     // Track favorite action
-    if (popupProduct && typeof gtag === 'function') {
-      gtag('event', isPopupFavorite ? 'add_to_wishlist' : 'remove_from_wishlist', {
+    if (popupProduct) {
+      trackEvent(isPopupFavorite ? 'add_to_wishlist' : 'remove_from_wishlist', {
         currency: 'INR',
         value: popupProduct.finalPrice * currentProductQty,
         items: [{
@@ -1043,13 +1057,11 @@ try {
     }
 
     // Track share action
-    if (typeof gtag === 'function') {
-      gtag('event', 'share', {
-        method: 'Web Share API', // or 'whatsapp_fallback'
-        content_type: 'referral',
-        item_id: 'referral_link',
-      });
-    }
+    trackEvent('share', {
+      method: 'Web Share API', // or 'whatsapp_fallback'
+      content_type: 'referral',
+      item_id: 'referral_link',
+    });
   }
 
   /* NEW: Function to toggle product description */
@@ -1219,20 +1231,18 @@ try {
     openModal(cartModal, cartModal.querySelector('.back-btn'));
     
     // Track cart view
-    if (typeof gtag === 'function') {
-      const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
-      gtag('event', 'view_cart', {
-        currency: 'INR',
-        value: subtotal,
-        items: items.map(item => ({
-          item_id: item.id,
-          item_name: item.name,
-          item_category: item.category,
-          price: item.finalPrice,
-          quantity: item.qty
-        }))
-      });
-    }
+    const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
+    trackEvent('view_cart', {
+      currency: 'INR',
+      value: subtotal,
+      items: items.map(item => ({
+        item_id: item.id,
+        item_name: item.name,
+        item_category: item.category,
+        price: item.finalPrice,
+        quantity: item.qty
+      }))
+    });
   }
 
   /* NEW: Function to only update the summary in the cart */
@@ -1349,9 +1359,6 @@ try {
     updateProductCardState(numericId);
 
     // Track removal
-    if (typeof gtag === 'function') {
-      const product = products.find(p => p.id === parseInt(id));
-    }
   }
 
   async function checkout() {
@@ -1413,8 +1420,8 @@ try {
 
     window.open(`https://wa.me/919985125678?text=${encodeURIComponent(message)}`, '_blank');
 
-    if (items.length > 0 && typeof gtag === 'function') {
-      gtag('event', 'begin_checkout', {
+    if (items.length > 0) {
+      trackEvent('begin_checkout', {
         currency: 'INR',
         value: subtotal,
         items: items.map(item => ({
@@ -1495,8 +1502,8 @@ try {
     renderCatalogProducts();
     
     // Track search
-    if (typeof gtag === 'function' && currentSearch) {
-      gtag('event', 'view_search_results', {
+    if (currentSearch) {
+      trackEvent('view_search_results', {
         search_term: currentSearch,
         category: currentCategory
       });
@@ -1812,7 +1819,7 @@ try {
     if (faq.classList.contains('active')) {
       const qTextEl = button.querySelector('.q-text');
       const qText = qTextEl ? qTextEl.textContent : '';
-      if (typeof gtag === 'function') gtag('event', 'faq_click', { question: qText });
+      trackEvent('faq_click', { question: qText });
     }
   }
 
@@ -1923,22 +1930,14 @@ return sanitized;
         });
 
         // NEW: Track successful sign-up event in GA4
-        if (typeof gtag === 'function') {
-          gtag('event', 'sign_up', {
-            method: 'Email'
-          });
-        }
+        trackEvent('sign_up', { method: 'Email' });
         showToast('Account created successfully!');
         closeLoginModal();
       })
       .catch(error => {
         authError.textContent = error.message;
         // Also track signup failure
-        if (typeof gtag === 'function') {
-          gtag('event', 'sign_up_failure', {
-            method: 'Email',
-          });
-        }
+        trackEvent('sign_up_failure', { method: 'Email' });
       });
   }
 
@@ -1952,11 +1951,7 @@ return sanitized;
     firebase.auth().signInWithEmailAndPassword(email, password)
       .then(userCredential => {
         // NEW: Track successful login event in GA4
-        if (typeof gtag === 'function') {
-          gtag('event', 'login', {
-            method: 'Email'
-          });
-        }
+        trackEvent('login', { method: 'Email' });
         showToast('Logged in successfully!');
         closeLoginModal();
       })
@@ -1983,17 +1978,11 @@ return sanitized;
         }
 
         // NEW: Track sign_up or login events for Google Auth
-        if (typeof gtag === 'function') {
-          // Check if this is a new user or a returning one
-          if (result.additionalUserInfo && result.additionalUserInfo.isNewUser) {
-            gtag('event', 'sign_up', {
-              method: 'Google'
-            });
-          } else {
-            gtag('event', 'login', {
-              method: 'Google'
-            });
-          }
+        // Check if this is a new user or a returning one
+        if (result.additionalUserInfo && result.additionalUserInfo.isNewUser) {
+          trackEvent('sign_up', { method: 'Google' });
+        } else {
+          trackEvent('login', { method: 'Google' });
         }
 
         // If this is the first time the user is signing in with Google
@@ -2001,7 +1990,7 @@ return sanitized;
         closeLoginModal();
       }).catch(error => {
         authError.textContent = error.message;
-        if (typeof gtag === 'function') gtag('event', 'login_failure', { method: 'Google' });
+        trackEvent('login_failure', { method: 'Google' });
       });
   }
 
@@ -2325,9 +2314,8 @@ return sanitized;
 
   function trackAddToCart(id, qty) {
     const product = products.find(p => p.id === parseInt(id));
-    if (!product || typeof gtag !== 'function') return;
-    
-    gtag('event', 'add_to_cart', {
+    if (!product) return;
+    trackEvent('add_to_cart', {
       currency: 'INR',
       value: product.finalPrice * qty,
       items: [{
@@ -2342,9 +2330,8 @@ return sanitized;
 
   function trackChangeQty(id, delta) {
     const product = products.find(p => p.id === parseInt(id));
-    if (!product || typeof gtag !== 'function') return;
-    
-    gtag('event', 'change_cart_quantity', {
+    if (!product) return;
+    trackEvent('change_cart_quantity', {
       change: delta,
       item_id: product.id,
       item_name: product.name,
@@ -2444,29 +2431,38 @@ return sanitized;
     if (previouslyFocusedElement) previouslyFocusedElement.focus();
   }
 
-  /* ===== NEW: PWA Install Prompt Functions ===== */
+  /* ===== REFACTORED: PWA Install Prompt Functions ===== */
+  async function triggerInstallPrompt() {
+    if (!deferredInstallPrompt) return;
+
+    // Show the native install prompt
+    deferredInstallPrompt.prompt();
+
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredInstallPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+
+    // Track the outcome
+    trackEvent('pwa_install_outcome', { 'outcome': outcome });
+
+    // We've used the prompt, and can't use it again, so clear it
+    deferredInstallPrompt = null;
+
+    // Hide all custom install prompts
+    document.getElementById('installPrompt').classList.remove('show');
+    const profileInstallBtn = document.getElementById('profileInstallBtn');
+    if (profileInstallBtn) {
+      profileInstallBtn.style.display = 'none';
+    }
+  }
+
   function setupInstallPromptEvents() {
     const installBtn = document.getElementById('installBtn');
     const dismissBtn = document.getElementById('installDismissBtn');
     const installPrompt = document.getElementById('installPrompt');
 
     if (installBtn) {
-      installBtn.addEventListener('click', async () => {
-        if (!deferredInstallPrompt) return;
-
-        // Show the native install prompt
-        deferredInstallPrompt.prompt();
-
-        // Wait for the user to respond to the prompt
-        const { outcome } = await deferredInstallPrompt.userChoice;
-        console.log(`User response to the install prompt: ${outcome}`);
-
-        // We've used the prompt, and can't use it again, so clear it
-        deferredInstallPrompt = null;
-
-        // Hide the custom banner
-        installPrompt.classList.remove('show');
-      });
+      installBtn.addEventListener('click', triggerInstallPrompt);
     }
 
     if (dismissBtn) {

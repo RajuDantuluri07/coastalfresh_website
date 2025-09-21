@@ -1238,17 +1238,21 @@ overflow: hidden;
   background: var(--bg-white);
 }
 
-/* THUMB ZONE: Moved actions closer to center */
-.popup-header-actions {
+/* NEW: Grouped meta info below price */
+.popup-meta-info {
   display: flex;
-  gap: 8px; /* Tighter gap for header */
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--bg-light);
+  border-radius: 12px;
 }
 
 .popup-delivery-time {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 8px;
   color: var(--success-color);
   font-size: 12px;
   font-weight: 400;
@@ -1258,7 +1262,6 @@ overflow: hidden;
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 12px;
 }
 
 .popup-stars {
@@ -1274,7 +1277,7 @@ overflow: hidden;
 .popup-title {
   font-size: 20px; /* H1 Title */
   font-weight: 700; /* UPDATED */
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   color: var(--text-primary);
 }
 
@@ -1282,7 +1285,7 @@ overflow: hidden;
   font-size: 12px; /* Caption */
   color: var(--text-secondary);
   font-weight: 400; /* Regular */
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 /* NEW: Description with toggle */
@@ -1312,7 +1315,7 @@ overflow: hidden;
 .popup-price-section {
   display: flex; 
   align-items: baseline; /* Align by baseline for different font sizes */
-  gap: 12px; /* Increased gap */
+  gap: 8px;
   margin-bottom: 4px; /* Reduced margin */
   flex-wrap: wrap; /* Allow wrapping on small screens */
 }
@@ -1363,10 +1366,21 @@ overflow: hidden;
   color: var(--text-secondary);
 }
 
-/* --- NEW: Product Details Accordion --- */
+/* NEW: Reassurance banner styles */
+.popup-reassurance-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* --- Product Details Accordion --- */
 .popup-details-section {
   padding: 0 20px;
-  margin-top: 16px;
   background: var(--bg-white);
 }
 
@@ -1474,31 +1488,18 @@ overflow: hidden;
   width: 100%;
   max-width: var(--app-max-width);
   background: var(--bg-white);
-  padding: 12px 20px;
+  padding: 8px 20px; /* Reduced padding */
   border-top: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   z-index: 1001; /* STICKY FOOTER: Ensure it's on top */
   box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-  gap: 12px;
   /* FIX: Use safe-area padding for mobile navigation */
-  padding-bottom: calc(12px + env(safe-area-inset-bottom));
-}
-
-/* NEW: Reassurance text in sticky footer */
-.popup-bottom-reassurance {
-font-size: 12px;
-color: var(--text-secondary);
-display: flex;
-align-items: center;
-gap: 6px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
 }
 
 .popup-actions-bar {
 display: flex;
 width: 100%;
-gap: 12px; /* Tighter gap for better thumb reach */
+gap: 16px;
 align-items: center;
 }
 
@@ -2369,6 +2370,16 @@ padding-bottom: env(safe-area-inset-bottom);
 
 .profile-button.refer i {
   color: var(--bg-white); /* Match icon color to text */
+}
+
+.profile-button.install-app {
+  background: var(--success-color);
+  color: var(--bg-white);
+  font-weight: 600;
+}
+
+.profile-button.install-app i {
+  color: var(--bg-white);
 }
 
 .social-bar {

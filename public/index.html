@@ -452,6 +452,9 @@
           <button class="profile-button refer" id="referBtn">
             <i class="fas fa-share-alt"></i> Refer & Earn
           </button>
+          <button class="profile-button install-app" id="profileInstallBtn" style="display: none;">
+            <i class="fas fa-download"></i> Install App
+          </button>
           <button class="profile-button orders">
             <i class="fas fa-box-open"></i> My Orders
           </button>
@@ -638,26 +641,32 @@
 
         <!-- Product Info -->
         <div class="popup-info">
-          <!-- THUMB ZONE: Actions moved here -->
-          <div class="popup-delivery-time">
-            <span>🕐</span>
-            <span>Next Day Delivery</span>
-          </div>
-
-          <div class="popup-rating" id="popupRatingContainer" role="img" aria-label="4.2 out of 5 stars">
-            <div class="popup-stars">★★★★☆</div>
-            <span class="popup-rating-text">(4.2/5 - 387 reviews)</span>
-          </div>
-
           <h1 class="popup-title" id="popupProductTitle"></h1>
           <div class="popup-weight" id="popupProductWeight"></div>
 
           <div class="popup-price-section" id="popupPriceSection">
             <!-- Price will be injected here -->
           </div>
+
+          <!-- NEW: Grouped meta info -->
+          <div class="popup-meta-info">
+            <div class="popup-delivery-time">
+              <span>🕐</span>
+              <span>Next Day Delivery</span>
+            </div>
+            <div class="popup-rating" id="popupRatingContainer" role="img" aria-label="4.2 out of 5 stars">
+              <div class="popup-stars">★★★★☆</div>
+              <span class="popup-rating-text">(4.2/5 - 387 reviews)</span>
+            </div>
+          </div>
         </div>
 
-        <!-- NEW: Collapsible Details Section -->
+        <!-- NEW: Reassurance banner moved into scrollable content -->
+        <div class="popup-reassurance-banner">
+          <i class="fas fa-shield-alt"></i><span>Hygienic, Fresh &amp; Ready to Cook</span>
+        </div>
+
+        <!-- Collapsible Details Section -->
         <div class="popup-details-section">
           <div class="detail-item" id="descriptionDetailItem">
             <button class="detail-header">
@@ -678,9 +687,6 @@
 
       <!-- Bottom Section -->
       <div class="popup-bottom-section">
-        <div class="popup-bottom-reassurance">
-          <i class="fas fa-shield-alt"></i><span>Hygienic, Fresh &amp; Ready to Cook</span>
-        </div>
         <div class="popup-actions-bar">
           <div class="popup-quantity-controls">
             <button class="popup-qty-btn dec" aria-label="Decrease Quantity">-</button>
