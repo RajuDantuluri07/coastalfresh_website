@@ -5,7 +5,6 @@ const urlsToCache = [
   '/main.css',
   '/main.js',
   '/products.json',
-  '/onesignal-setup.js',
   '/favicon.ico',
   'https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
@@ -34,8 +33,7 @@ self.addEventListener('fetch', event => {
     url.hostname.includes('firestore.googleapis.com') ||
     url.hostname.includes('google-analytics.com') ||
     url.hostname.includes('googletagmanager.com') ||
-    url.hostname.includes('hotjar.com') ||
-    url.hostname.includes('onesignal.com')
+    url.hostname.includes('hotjar.com')
   ) {
     // Let the browser handle these requests without interception.
     return;

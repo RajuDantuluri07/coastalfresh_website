@@ -158,7 +158,6 @@ try {
     renderCategories(); // NEW: Render categories dynamically
     renderCustomerReviews();
     setupEvents();
-    initOneSignal(currentUser); // NEW: Initialize OneSignal from external file
     // Initialize all carousels first to ensure all slides (including duplicates) are in the DOM
     initCarousel('#slides');
     initCarousel('#communicationCarousel .slides');
@@ -2081,14 +2080,6 @@ return sanitized;
     updateUIForAuthState();
 
     if (user) { // User is logged in
-      // Associate this device with the user's ID in OneSignal
-      if (window.OneSignalDeferred) {
-        window.OneSignalDeferred.push(async function(OneSignal) {
-          await OneSignal.login(user.uid);
-          console.log('OneSignal user logged in with ID:', user.uid);
-        });
-      }
-
       // NEW: Identify user in GA4 and Hotjar for unified session tracking
       if (typeof gtag === 'function') {
         gtag('config', 'G-GSHMPRYPW1', { 'user_id': user.uid });
@@ -2105,13 +2096,6 @@ return sanitized;
         afterLoginAction = null; // Clear the action so it doesn't run again
       }
     } else { // User is logged out
-      // Disassociate the device from the user ID
-      if (window.OneSignalDeferred) {
-        window.OneSignalDeferred.push(async function(OneSignal) {
-          await OneSignal.logout();
-          console.log('OneSignal user logged out.');
-        });
-      }
       // NEW: Forget user on logout in Hotjar
       if (window.hj) {
         hj('identify', null, {});
