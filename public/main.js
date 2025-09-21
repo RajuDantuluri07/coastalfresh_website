@@ -964,8 +964,21 @@ try {
 
   /* NEW: Function to share product from popup */
   async function shareProduct() {
-    // Get the referral link. It's updated when the user logs in.
-    const referralLink = document.getElementById('referralLink').textContent;
+    // FIX: Generate the referral link directly here instead of reading from a hidden page element.
+    let referralLink = 'https://coastalfresh.in?ref=GUEST123'; // Default for guests
+    if (currentUser && currentUser.uid) {
+      // Use the same hashing logic as the profile page to create the user's unique code.
+      const simpleHash = (str) => {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+          const char = str.charCodeAt(i);
+          hash = (hash << 5) - hash + char;
+          hash |= 0; // Convert to 32bit integer
+        }
+        return Math.abs(hash);
+      };
+      referralLink = `https://coastalfresh.in?ref=${simpleHash(currentUser.uid)}`;
+    }
     const referralMessage = `Hey! I’ve been ordering seafood from Coastal Fresh – always fresh, neatly cleaned and delivered to my home in Hyderabad. You should try it! Use my referral link for 10% off on your first order. 👉 ${referralLink}`;
     const shareTitle = 'Get 10% Off at Coastal Fresh!';
     const imageUrl = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757139649/refer_eran_whats_app_ryhhmi.png';
