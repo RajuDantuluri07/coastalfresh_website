@@ -2515,6 +2515,7 @@ return sanitized;
     try {
       const ordersSnapshot = await db.collection('orders')
         .where('userId', '==', currentUser.uid)
+        .orderBy('createdAt', 'desc')
         .get();
 
       if (ordersSnapshot.empty) {
