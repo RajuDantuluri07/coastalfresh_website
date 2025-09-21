@@ -24,6 +24,8 @@ messaging.onBackgroundMessage(function (payload) {
   const notificationOptions = {
     body: payload.notification?.body || payload.data?.body || "You have a new message.",
     icon: payload.notification?.icon || payload.data?.icon || "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png",
+    // NEW: Add a badge for a better native experience on Android
+    badge: "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png",
     // Add data to the notification to handle clicks
     data: {
       url: payload.data?.url || '/' // Default to homepage if no URL is provided

@@ -167,6 +167,8 @@ try {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js').then(registration => {
           console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          // Initialize messaging for all visitors after SW is ready
+          initFirebaseMessaging();
         }, err => {
           console.log('ServiceWorker registration failed: ', err);
         });
@@ -2134,9 +2136,6 @@ return sanitized;
         hj('identify', user.uid, { email: user.email });
         console.log('Hotjar user identified with ID:', user.uid);
       }
-
-      // NEW: Initialize Firebase Messaging for logged-in users
-      initFirebaseMessaging();
 
       // If there was a pending action (like checkout), execute it now.
       if (typeof afterLoginAction === 'function') {
