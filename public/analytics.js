@@ -48,6 +48,28 @@
     },
 
     /**
+     * Tracks when a user starts the checkout process (e.g., redirects to WhatsApp).
+     * This can be marked as a conversion event in Google Analytics.
+     * @param {string} orderId - The transaction ID for this checkout instance.
+     * @param {number} total - The total value of the cart.
+     * @param {Array<object>} items - The items in the cart.
+     */
+    trackBeginCheckout: function(orderId, total, items) {
+      _track('begin_checkout', {
+        transaction_id: orderId,
+        value: total,
+        currency: 'INR',
+        items: items.map(item => ({
+          item_id: item.id,
+          item_name: item.name,
+          item_category: item.category,
+          price: item.finalPrice,
+          quantity: item.qty
+        })),
+      });
+    },
+
+    /**
      * Tracks when an item is added to the cart.
      * @param {object} product - The product object being added.
      * @param {number} qty - The quantity being added.

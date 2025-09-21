@@ -1525,25 +1525,26 @@ try {
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };
 
-    // --- NEW: Redirect directly to WhatsApp as per user request ---
-    // 1. Open WhatsApp with the pre-filled message.
-    window.open(`https://wa.me/919985125678?text=${encodeURIComponent(message)}`, '_blank');
+    // --- RE-ENABLING ORIGINAL CHECKOUT FLOW TO SAVE ORDER HISTORY ---
+    try {
+      // 1. Save the order to Firestore.
+      await db.collection('orders').add(orderData);
 
-    // 2. Track the purchase event for analytics.
-    Analytics.trackPurchase(orderId, total, items);
+      // 2. Clear the cart and show the success modal.
+      cart = {};
+      saveCart();
+      updateCartUI();
+      closeCart();
+      showOrderSuccessModal(orderId, message);
 
-    // 3. Clear the cart, update UI, and show a confirmation toast.
-    cart = {};
-    saveCart();
-    updateCartUI();
-    closeCart();
-    showToast('Order details sent to WhatsApp!');
+      // 3. Track the 'purchase' event, which is the correct conversion event.
+      Analytics.trackPurchase(orderId, total, items);
 
-    // --- ORIGINAL FLOW (Commented out for now) ---
-    /*
-    await db.collection('orders').add(orderData);
-    showOrderSuccessModal(orderId, message);
-    */
+    } catch (error) {
+      console.error("Error saving order to Firestore:", error);
+      showToast("Could not place your order. Please try again.");
+      Analytics.trackEvent('purchase_failure', { error_message: error.message });
+    }
   }
 
   /* ===== NEW: Order Success Modal Functions ===== */
@@ -2514,7 +2515,6 @@ return sanitized;
     try {
       const ordersSnapshot = await db.collection('orders')
         .where('userId', '==', currentUser.uid)
-        .orderBy('createdAt', 'desc')
         .get();
 
       if (ordersSnapshot.empty) {
