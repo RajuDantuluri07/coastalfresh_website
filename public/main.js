@@ -1432,11 +1432,31 @@ try {
 
   async function checkout() {
     const cartFooter = document.getElementById('cartFooter');
-    const items = Object.keys(cart).map(id => {
+    const rawItems = Object.keys(cart).map(id => {
       const product = products.find(p => p.id === parseInt(id));
+      if (!product) {
+        console.warn(`Product ID ${id} from cart not found in products data. It will be removed.`);
+        return null; // Mark for removal
+      }
       return { ...product, qty: cart[id] };
     });
     
+    // Filter out null (invalid) items
+    const items = rawItems.filter(Boolean);
+
+    // If the number of items changed, it means some were invalid.
+    if (items.length !== rawItems.length) {
+      // The cart contained invalid items. We'll clean the cart, save it, and inform the user.
+      cart = items.reduce((acc, item) => {
+        acc[item.id] = item.qty;
+        return acc;
+      }, {});
+      saveCart();
+      updateCartUI(); // This will also update the cart modal if it's open
+      showToast("Some items were removed as they are no longer available. Please review your cart.");
+      return; // Stop the checkout process.
+    }
+
     if (items.length === 0) return;
 
     // 1. Check if user is logged in
