@@ -181,8 +181,9 @@ try {
       e.preventDefault();
       // Stash the event so it can be triggered later.
       deferredInstallPrompt = e;
-      // Show the custom install banner.
-      document.getElementById('installPrompt').classList.add('show');
+      // Show the custom install banner with accessibility improvements.
+      showInstallPrompt();
+
       // NEW: Also show the install button on the profile page
       const profileInstallBtn = document.getElementById('profileInstallBtn');
       if (profileInstallBtn) {
@@ -596,6 +597,8 @@ try {
         popupStickyCta.classList.toggle('keyboard-open', isKeyboardOpen);
       });
     }
+
+    setupInstallPromptEvents();
 
   }
   /* ===== End of New Functions ===== */
@@ -2517,9 +2520,50 @@ return sanitized;
     if (previouslyFocusedElement) previouslyFocusedElement.focus();
   }
 
+  /* ===== NEW: PWA Install Prompt Accessibility Functions ===== */
+  function showInstallPrompt() {
+    const installPrompt = document.getElementById('installPrompt');
+    if (!installPrompt) return;
+
+    previouslyFocusedElement = document.activeElement;
+    installPrompt.classList.add('show');
+
+    // NEW: Track when the custom prompt is shown to the user.
+    trackEvent('pwa_prompt_shown');
+
+    const installBtn = document.getElementById('installBtn');
+    if (installBtn) {
+      setTimeout(() => installBtn.focus(), 100); // Move focus into the prompt
+    }
+
+    // Trap focus within the prompt
+    installPrompt.addEventListener('keydown', trapFocusInInstallPrompt);
+  }
+
+  function hideInstallPrompt() {
+    const installPrompt = document.getElementById('installPrompt');
+    if (!installPrompt) return;
+
+    installPrompt.classList.remove('show');
+    installPrompt.removeEventListener('keydown', trapFocusInInstallPrompt);
+
+    if (previouslyFocusedElement) {
+      previouslyFocusedElement.focus(); // Return focus to where it was
+    }
+
+    // Hide the profile page button as well
+    const profileInstallBtn = document.getElementById('profileInstallBtn');
+    if (profileInstallBtn) {
+      profileInstallBtn.style.display = 'none';
+    }
+  }
+
   /* ===== REFACTORED: PWA Install Prompt Functions ===== */
   async function triggerInstallPrompt() {
     if (!deferredInstallPrompt) return;
+
+    // NEW: Track the click on the custom "Install" button.
+    trackEvent('pwa_install_clicked');
 
     // Show the native install prompt
     deferredInstallPrompt.prompt();
@@ -2535,26 +2579,38 @@ return sanitized;
     deferredInstallPrompt = null;
 
     // Hide all custom install prompts
-    document.getElementById('installPrompt').classList.remove('show');
-    const profileInstallBtn = document.getElementById('profileInstallBtn');
-    if (profileInstallBtn) {
-      profileInstallBtn.style.display = 'none';
+    hideInstallPrompt();
+  }
+
+  function trapFocusInInstallPrompt(e) {
+    if (e.key !== 'Tab') return;
+
+    const installBtn = document.getElementById('installBtn');
+    const dismissBtn = document.getElementById('installDismissBtn');
+
+    if (e.shiftKey) { // Shift + Tab
+      if (document.activeElement === installBtn) {
+        dismissBtn.focus();
+        e.preventDefault();
+      }
+    } else { // Tab
+      if (document.activeElement === dismissBtn) {
+        installBtn.focus();
+        e.preventDefault();
+      }
     }
   }
 
   function setupInstallPromptEvents() {
     const installBtn = document.getElementById('installBtn');
     const dismissBtn = document.getElementById('installDismissBtn');
-    const installPrompt = document.getElementById('installPrompt');
 
     if (installBtn) {
       installBtn.addEventListener('click', triggerInstallPrompt);
     }
 
     if (dismissBtn) {
-      dismissBtn.addEventListener('click', () => {
-        installPrompt.classList.remove('show');
-      });
+      dismissBtn.addEventListener('click', hideInstallPrompt);
     }
   }
   // Initialize app when DOM is loaded

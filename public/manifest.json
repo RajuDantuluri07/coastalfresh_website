@@ -2,19 +2,19 @@
   "name": "Coastal Fresh India",
   "short_name": "Coastal Fresh",
   "description": "Buy fresh fish, prawns, crabs, and pickles online in Hyderabad. Next-day delivery of premium, hygienically cleaned seafood.",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
-  "background_color": "#e6f0f5",
-  "theme_color": "#01659a",
+  "background_color": "#ffffff",
+  "theme_color": "#0b6b78",
   "icons": [
     {
-      "src": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png",
+      "src": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png",
+      "src": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
