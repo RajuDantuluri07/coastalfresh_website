@@ -1560,6 +1560,50 @@ overflow: hidden;
   filter: brightness(1.1);
 }
 
+/* --- NEW: Quantity Selector for Sticky CTA --- */
+.popup-cta-qty-selector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.popup-cta-qty-selector .qty-btn {
+  background: var(--bg-white);
+  border: none;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--primary-color);
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.popup-cta-qty-selector .qty-btn:active {
+  transform: scale(0.95);
+  background-color: var(--primary-light);
+}
+
+.popup-cta-qty-selector .qty {
+  font-weight: 700;
+  font-size: 16px;
+  min-width: 24px;
+  text-align: center;
+  color: var(--text-primary);
+}
+.popup-cta-add-btn {
+  margin-left: auto; /* Push the add button to the right */
+}
+
 /* Cart Modal - FIXED for mobile container */
 .cart-modal {
 position: fixed;

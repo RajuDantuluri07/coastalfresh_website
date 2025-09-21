@@ -541,7 +541,13 @@ try {
       const addBtn = e.target.closest('.popup-cta-add-btn');
       const qtyBtn = e.target.closest('.qty-btn');
       if (addBtn) addPopupToCart();
-      if (qtyBtn) changePopupQty(qtyBtn.classList.contains('inc') ? 1 : -1);
+      if (qtyBtn) {
+        const isInCart = cart[popupProduct?.id] > 0;
+        const change = qtyBtn.classList.contains('inc') ? 1 : -1;
+        // If item is in cart, update the cart directly. Otherwise, update the popup's temp quantity.
+        if (isInCart) updateQty(popupProduct.id, change);
+        else changePopupQty(change);
+      }
     });
 
     // Cart page buttons
@@ -996,25 +1002,28 @@ try {
     const ctaContainer = document.getElementById('popupStickyCta');
     if (!popupProduct || !ctaContainer) return;
 
-    const isInCart = cart[popupProduct.id] > 0;
-    const price = popupProduct.finalPrice * (isInCart ? cart[popupProduct.id] : currentProductQty);
+    const qtyInCart = cart[popupProduct.id] || 0;
+    const isInCart = qtyInCart > 0;
 
     if (isInCart) {
-      // Show quantity controls if item is in cart
+      // Item is in cart: Show only the quantity controls, which will now directly modify the cart.
       ctaContainer.innerHTML = `
         <div class="popup-sticky-cta-inner">
-          <div class="popup-cta-price">₹${price}</div>
           <div class="cart-controls" data-id="${popupProduct.id}" style="margin-left: auto;">
             <button class="qty-btn dec">-</button>
-            <span class="qty">${cart[popupProduct.id]}</span>
+            <span class="qty">${qtyInCart}</span>
             <button class="qty-btn inc">+</button>
           </div>
         </div>`;
     } else {
-      // Show "Add to Cart" button
+      // Item not in cart: Show the new quantity selector and the "Add to Cart" button.
       ctaContainer.innerHTML = `
         <div class="popup-sticky-cta-inner">
-          <div class="popup-cta-price">₹${price}</div>
+          <div class="popup-cta-qty-selector">
+            <button class="qty-btn dec" aria-label="Decrease quantity">-</button>
+            <span class="qty" aria-label="Current quantity">${currentProductQty}</span>
+            <button class="qty-btn inc" aria-label="Increase quantity">+</button>
+          </div>
           <button class="popup-cta-add-btn">Add to Cart</button>
         </div>`;
     }
