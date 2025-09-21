@@ -963,28 +963,52 @@ try {
   }
 
   /* NEW: Function to share product from popup */
-  function shareProduct() {
-    if (!popupProduct) return;
-    const productSlug = generateProductSlug(popupProduct);
-    const productUrl = `${window.location.origin}/product/${productSlug}`;
-    
+  async function shareProduct() {
+    // Get the referral link. It's updated when the user logs in.
+    const referralLink = document.getElementById('referralLink').textContent;
+    const referralMessage = `Hey! I’ve been ordering seafood from Coastal Fresh – always fresh, neatly cleaned and delivered to my home in Hyderabad. You should try it! Use my referral link for 10% off on your first order. 👉 ${referralLink}`;
+    const shareTitle = 'Get 10% Off at Coastal Fresh!';
+    const imageUrl = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757139649/refer_eran_whats_app_ryhhmi.png';
+
     if (navigator.share) {
-      navigator.share({
-        title: 'Coastal Fresh - ' + popupProduct.name,
-        text: 'Check out this fresh product from Coastal Fresh!',
-        url: productUrl
-      });
+      try {
+        // Try to fetch the image and share it with the text
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const file = new File([blob], 'coastal-fresh-referral.png', { type: blob.type });
+
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: shareTitle,
+            text: referralMessage,
+          });
+        } else {
+          // Fallback to sharing text if files are not supported
+          await navigator.share({
+            title: shareTitle,
+            text: referralMessage,
+          });
+        }
+      } catch (error) {
+        console.error('Error sharing with image, falling back to text only:', error);
+        // Fallback to sharing just text if image fetch or share fails
+        await navigator.share({
+          title: shareTitle,
+          text: referralMessage,
+        }).catch(e => console.error("Final share attempt failed", e));
+      }
     } else {
-      // Fallback for browsers that don't support Web Share API
-      alert('Share this product: ' + productUrl);
+      // Fallback for browsers that don't support Web Share API at all (e.g., desktop)
+      window.open(`https://wa.me/?text=${encodeURIComponent(referralMessage)}`, '_blank');
     }
-    
+
     // Track share action
     if (typeof gtag === 'function') {
       gtag('event', 'share', {
-        method: 'Web Share API',
-        content_type: 'product',
-        item_id: popupProduct.id,
+        method: 'Web Share API', // or 'whatsapp_fallback'
+        content_type: 'referral',
+        item_id: 'referral_link',
       });
     }
   }
@@ -2118,9 +2142,14 @@ return sanitized;
             <i class="fas fa-map-marker-alt"></i>
             <h3>No Saved Addresses</h3>
             <p>Add an address for faster checkout.</p>
+            <button class="empty-cart-btn" id="addFirstAddressBtn">+ Add New Address</button>
           </div>
         `;
-        // Don't automatically show the form here unless it's part of the checkout flow.
+        // Add an event listener to the newly created button
+        const addBtn = listContainer.querySelector('#addFirstAddressBtn');
+        if (addBtn) {
+          addBtn.addEventListener('click', showAddressForm);
+        }
       } else {
         let addressesHTML = snapshot.docs.map(doc => {
           const address = doc.data();
