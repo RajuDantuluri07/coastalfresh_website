@@ -934,13 +934,14 @@ z-index: 2;                 /* sits above input content */
 .product-image {
   position: relative;
   background: var(--bg-light);
-  overflow: hidden; /* FIX: Remove fixed aspect ratio to eliminate extra space */
+  overflow: hidden;
+  aspect-ratio: 1 / 1; /* FIX: Force a square container for all images */
 }
 
 .product-image img {
   width: 100%;
-  height: auto; /* FIX: Let height adjust to maintain aspect ratio */
-  display: block; /* FIX: Remove any bottom space from the image element itself */
+  height: 100%; /* FIX: Make image fill the container height */
+  object-fit: cover; /* FIX: Ensure the server-cropped image fills the container perfectly. */
   transition: transform 0.3s;
 }
 

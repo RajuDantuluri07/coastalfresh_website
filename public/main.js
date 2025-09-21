@@ -702,8 +702,8 @@ try {
     // c_fill: Crop to fill the specified dimensions without distortion
     // w_{width}: Target width
     // h_{height}: Target height
-    // c_pad: Resize to fit and pad the rest. b_rgb:ECEFF1 sets the padding color to match the site's light background.
-    const transformations = `f_auto,q_auto,c_pad,w_${width},h_${height},b_rgb:ECEFF1`;
+    // FIX: Use c_fill to crop the image to a square, removing the padded background.
+    const transformations = `f_auto,q_auto,c_fill,w_${width},h_${height}`;
     
     return url.replace('/image/upload/', `/image/upload/${transformations}/`);
   }
