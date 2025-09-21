@@ -488,7 +488,7 @@ z-index: 2;                 /* sits above input content */
 }
 
 .section-title {
-  font-size: 16px; /* UPDATED: Consistent with flash sale title */
+  font-size: 20px; /* UPDATED: H1 Title */
   font-weight: 700; /* UPDATED: Consistent with flash sale title */
   margin-bottom: 16px;
   color: var(--text-primary);
@@ -686,9 +686,9 @@ z-index: 2;                 /* sits above input content */
 }
 
 .flash-sale-section .section-title {
-  padding: 0; /* Reset padding */
+  padding: 0; /* Reset padding */ /* This is an H1 */
   margin-bottom: 0; /* Reset margin */
-  font-size: 16px; /* Slightly smaller to fit nicely */
+  font-size: 20px; /* H1 Title */
   font-weight: 700; /* Bolder for impact */
   justify-content: flex-start; /* Align left */
   /* NEW: Prevent wrapping and handle overflow */
@@ -984,7 +984,7 @@ z-index: 2;                 /* sits above input content */
 }
 
 .product-name {
-  font-size: 13px;
+  font-size: 16px; /* H2 Product Name */
   font-weight: 500; /* UPDATED */
   margin-bottom: 4px;
   color: var(--text-primary);
@@ -997,9 +997,9 @@ z-index: 2;                 /* sits above input content */
 }
 
 .product-weight {
-  font-size: 11px;
+  font-size: 12px; /* Caption */
   color: var(--text-secondary);
-  font-weight: 300;
+  font-weight: 400; /* Regular */
   margin-bottom: 6px;
 }
 
@@ -1272,16 +1272,16 @@ overflow: hidden;
 }
 
 .popup-title {
-  font-size: 22px;
-  font-weight: 600; /* UPDATED */
+  font-size: 20px; /* H1 Title */
+  font-weight: 700; /* UPDATED */
   margin-bottom: 8px;
   color: var(--text-primary);
 }
 
 .popup-weight {
-  font-size: 14px; /* UPDATED */
+  font-size: 12px; /* Caption */
   color: var(--text-secondary);
-  font-weight: 300;
+  font-weight: 400; /* Regular */
   margin-bottom: 12px;
 }
 
@@ -1859,10 +1859,10 @@ padding-bottom: env(safe-area-inset-bottom);
 .checkout-btn {
   background: var(--success-color);
   color: white;
-  border: none;
+  border: none; /* Button / CTA */
   border-radius: 12px;
-  font-size: 16px; /* UPDATED */
-  font-weight: 700;
+  font-size: 15px; /* UPDATED */
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: 0 4px 12px rgba(56, 142, 60, 0.4);
@@ -1880,7 +1880,7 @@ padding-bottom: env(safe-area-inset-bottom);
 }
 
 .checkout-btn-price {
-  font-size: 14px; /* UPDATED */
+  font-size: 14px; /* UPDATED */ /* This is a caption on a button */
   font-weight: 500;
   opacity: 0.8;
 }
@@ -2010,7 +2010,7 @@ padding-bottom: env(safe-area-inset-bottom);
     color: white;
     border: none;
     border-radius: 12px;
-    padding: 16px 24px;
+    padding: 16px 24px; /* Button / CTA */
     font-size: 15px; /* UPDATED */
     font-weight: 500; /* Medium */
     cursor: pointer;
@@ -2117,10 +2117,10 @@ padding-bottom: env(safe-area-inset-bottom);
   justify-content: center;
   font-size: 20px;
   color: var(--primary-color);
-  border: 2px solid var(--primary-color);
+  border: 2px solid var(--primary-color); /* H2 Product Name style */
 }
 
-.profile-user-info h2 { font-size: 16px; font-weight: 600; }
+.profile-user-info h2 { font-size: 16px; font-weight: 500; }
 .profile-user-info p { font-size: 13px; color: var(--text-secondary); }
 
 .profile-divider {
@@ -2224,13 +2224,13 @@ padding-bottom: env(safe-area-inset-bottom);
   box-shadow: 0 4px 12px rgba(11, 173, 226, 0.2);
 }
 .refer-title {
-  font-size: 22px;
+  font-size: 20px; /* H1 Title */
   font-weight: 700;
   color: var(--primary-dark);
   margin-bottom: 12px;
 }
 .refer-subtitle {
-  font-size: 15px;
+  font-size: 14px; /* Body Text */
   color: var(--text-secondary);
   line-height: 1.6;
   margin-bottom: 24px;
