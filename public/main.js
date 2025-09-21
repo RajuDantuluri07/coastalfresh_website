@@ -2074,6 +2074,51 @@ return sanitized;
     });
   }
 
+  async function initFirebaseMessaging() {
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !firebase.messaging.isSupported()) {
+      console.log('Firebase Messaging is not supported in this browser.');
+      return;
+    }
+
+    const messaging = firebase.messaging();
+
+    try {
+      // Wait for the service worker to be ready.
+      const registration = await navigator.serviceWorker.ready;
+
+      // Request permission to receive notifications.
+      await messaging.requestPermission();
+      console.log('Notification permission granted.');
+
+      // Get the token, telling Firebase to use our registered service worker.
+      const token = await messaging.getToken({ serviceWorkerRegistration: registration });
+
+      if (token) {
+        console.log('FCM Token:', token);
+        // Store the token in Firestore against the current user.
+        if (currentUser) {
+          await db.collection('users').doc(currentUser.uid).collection('fcmTokens').doc(token).set({
+            token: token,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        }
+      } else {
+        console.log('No registration token available. Request permission to generate one.');
+      }
+    } catch (err) {
+      console.error('Unable to initialize Firebase Messaging.', err);
+    }
+
+    // Handle incoming messages when the app has focus.
+    messaging.onMessage(payload => {
+      console.log('Message received. ', payload);
+      // Use a more descriptive toast for foreground messages
+      if (payload.notification) {
+        showToast(`${payload.notification.title}: ${payload.notification.body}`);
+      }
+    });
+  }
+
   function handleAuthStateChange(user) {
     const isNewLogin = !currentUser && user; // Check if this is a transition from logged-out to logged-in
     currentUser = user;
@@ -2089,6 +2134,9 @@ return sanitized;
         hj('identify', user.uid, { email: user.email });
         console.log('Hotjar user identified with ID:', user.uid);
       }
+
+      // NEW: Initialize Firebase Messaging for logged-in users
+      initFirebaseMessaging();
 
       // If there was a pending action (like checkout), execute it now.
       if (typeof afterLoginAction === 'function') {
