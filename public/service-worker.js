@@ -25,30 +25,30 @@ self.addEventListener('install', event => {
 });
 
 // Cache and return requests
-self.addEventListener('fetch', event => {
-  // Let the browser do its default thing for non-GET requests.
-  if (event.request.method !== 'GET') {
-    return;
+self.addEventListener('fetch', (event) => {
+  // For requests to Firebase or other APIs, always use the network.
+  if (event.request.url.includes('firestore.googleapis.com')) {
+    return; // Let the browser handle it.
   }
-
-  // Handle the request ourselves.
-  event.respondWith(async function() {
-    // Try to get the response from a cache.
-    const cache = await caches.open(CACHE_NAME);
-    const cachedResponse = await cache.match(event.request);
-
-    if (cachedResponse) {
-      // If we found a match in the cache, return it.
-      return cachedResponse;
+  
+  // For other GET requests, use a "Cache first, then Network" strategy.
+  if (event.request.method === 'GET') {
+    event.respondWith(async function() {
+      const cache = await caches.open(CACHE_NAME);
+      const cachedResponse = await cache.match(event.request);
+      
+      // If we have a cached response, return it.
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      
+      // Otherwise, fetch from the network, cache it, and return it.
+      const fetchResponse = await fetch(event.request);
+      cache.put(event.request, fetchResponse.clone());
+      return fetchResponse;
     }
-
-    // If we didn't find a match in the cache, use the network.
-    const fetchResponse = await fetch(event.request);
-    // Save the new response in the cache.
-    cache.put(event.request, fetchResponse.clone());
-    // And return it.
-    return fetchResponse;
-  }());
+    ());
+  }
 });
 
 // Update a service worker and clean up old caches
