@@ -941,7 +941,7 @@ z-index: 2;                 /* sits above input content */
 .product-image img {
   width: 100%;
   height: 100%;
-  object-fit: contain; /* UPDATED: Show the whole image without cropping */
+  object-fit: cover; /* FIX: Fill the container and crop, which works with padded images */
   transition: transform 0.3s;
 }
 
@@ -2339,31 +2339,24 @@ padding-bottom: env(safe-area-inset-bottom);
   font-weight: 300;
 }
 
-/* --- NEW: Profile Login CTA --- */
-.profile-login-cta {
-  /* This container is now inside .profile-actions */
-  padding: 20px 16px; /* Added vertical spacing and matched horizontal padding */
-  border-bottom: 1px solid var(--border-color); /* Separator line */
-  display: flex;
-  justify-content: center;
-}
-
-.profile-login-cta .cta-button {
-  width: 100%;
-  /* max-width: 300px; /* Removed to make button full-width inside card */
+/* --- FIX: Style the Login/Signup CTA button --- */
+.profile-button.login-cta {
   background: var(--primary-color);
   color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 14px 20px;
-  font-size: 16px;
-  font-weight: 700; /* bold */
-  cursor: pointer;
+  font-weight: 700;
+  justify-content: center; /* Center the text */
   box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3);
-  transition: all 0.2s;
+  border-radius: 0; /* Override default button radius if any */
 }
-.profile-login-cta .cta-button:active {
-  transform: scale(0.98);
+
+/* Remove the arrow from the CTA button */
+.profile-button.login-cta::after {
+  content: none;
+}
+
+/* Adjust active state for the CTA */
+.profile-button.login-cta:active {
+  background-color: var(--primary-dark); /* Darken on click */
 }
 
 /* --- NEW: Refined Profile Page Styles --- */
