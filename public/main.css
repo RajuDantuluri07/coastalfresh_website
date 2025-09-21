@@ -2582,6 +2582,75 @@ body.popup-open .bottom-bar {
   transform: translateX(-50%) translateY(0);
 }
 
+/* --- NEW: Custom Install Prompt --- */
+.install-prompt {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-height) + 10px); /* Above bottom nav */
+  left: 50%;
+  transform: translateX(-50%) translateY(150%); /* Initially hidden below */
+  width: calc(100% - 24px);
+  max-width: calc(var(--app-max-width) - 24px);
+  background: var(--primary-dark);
+  color: var(--bg-white);
+  border-radius: 14px;
+  padding: 12px 16px;
+  display: none; /* Hidden by default, JS will show it */
+  align-items: center;
+  justify-content: space-between;
+  z-index: 999; /* Above content, below modals */
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.install-prompt.show {
+  display: flex;
+  transform: translateX(-50%) translateY(0);
+}
+
+.install-prompt-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.install-prompt-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.install-prompt-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.install-prompt-text strong { font-weight: 600; font-size: 15px; }
+.install-prompt-text span { font-size: 13px; opacity: 0.9; }
+
+.install-prompt-actions { display: flex; align-items: center; gap: 8px; }
+
+.install-btn {
+  background: var(--accent-color);
+  color: var(--bg-white);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.install-dismiss-btn {
+  background: none;
+  border: none;
+  color: var(--bg-white);
+  font-size: 24px;
+  opacity: 0.7;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
 /* Loading animation */
 .loading {
   display: inline-block;

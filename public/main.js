@@ -86,6 +86,7 @@ try {
   let db = null; // NEW: Firestore database instance
   let currentUser = null;
   let editingAddressId = null; // NEW: To track which address is being edited
+  let deferredInstallPrompt = null; // NEW: For PWA installation prompt
   
   let afterLoginAction = null; // NEW: To handle actions after login (like checkout)
   /* NEW: Variables for popup functionality */
@@ -162,6 +163,16 @@ try {
         });
       });
     }
+
+    // NEW: Listen for the PWA install prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      deferredInstallPrompt = e;
+      // Show the custom install banner.
+      document.getElementById('installPrompt').classList.add('show');
+    });
 
   }
 
@@ -536,6 +547,10 @@ try {
       }
     });
   }
+  /* ===== End of New Functions ===== */
+
+
+
 
   function renderTrustIcons() {
     const container = document.getElementById('trustStrip');
@@ -2427,6 +2442,38 @@ return sanitized;
     modalElement.classList.remove('active');
     document.body.classList.remove('popup-open');
     if (previouslyFocusedElement) previouslyFocusedElement.focus();
+  }
+
+  /* ===== NEW: PWA Install Prompt Functions ===== */
+  function setupInstallPromptEvents() {
+    const installBtn = document.getElementById('installBtn');
+    const dismissBtn = document.getElementById('installDismissBtn');
+    const installPrompt = document.getElementById('installPrompt');
+
+    if (installBtn) {
+      installBtn.addEventListener('click', async () => {
+        if (!deferredInstallPrompt) return;
+
+        // Show the native install prompt
+        deferredInstallPrompt.prompt();
+
+        // Wait for the user to respond to the prompt
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        console.log(`User response to the install prompt: ${outcome}`);
+
+        // We've used the prompt, and can't use it again, so clear it
+        deferredInstallPrompt = null;
+
+        // Hide the custom banner
+        installPrompt.classList.remove('show');
+      });
+    }
+
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', () => {
+        installPrompt.classList.remove('show');
+      });
+    }
   }
   // Initialize app when DOM is loaded
   document.addEventListener('DOMContentLoaded', init);
