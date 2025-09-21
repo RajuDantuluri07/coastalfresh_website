@@ -442,7 +442,7 @@ try {
         }
 
         await renderAddressList(); // Refresh the list view
-        showAddressList(); // Show the list
+        goBack(); // Go back to the previous page (likely the profile page or checkout)
       } catch (error) {
         console.error("Error saving address: ", error);
         showToast('Failed to save address. Please try again.');
@@ -2121,7 +2121,6 @@ return sanitized;
           </div>
         `;
         // Don't automatically show the form here unless it's part of the checkout flow.
-        showAddressForm(); // Automatically show the form if no addresses exist.
       } else {
         let addressesHTML = snapshot.docs.map(doc => {
           const address = doc.data();
