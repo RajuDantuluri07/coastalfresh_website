@@ -478,6 +478,7 @@ try {
     document.querySelector('.profile-button.refer').addEventListener('click', () => showPage('referPage'));
     document.getElementById('aboutPageCtaBtn').addEventListener('click', () => showPage('catalog')); // NEW: About Us CTA
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    document.getElementById('profileLoginBtn').addEventListener('click', (e) => showLoginModal(e, 'signup'));
 
     // Product Popup buttons
     document.querySelector('#aboutPage .back-btn').addEventListener('click', goBack);
@@ -2016,8 +2017,7 @@ return sanitized;
     const userNameEl = document.getElementById('profileUserName');
     const userStatusEl = document.getElementById('profileUserStatus');
     const logoutBtn = document.getElementById('logoutBtn');
-    const loginBtn = document.getElementById('loginBtn');
-    const loginLink = document.getElementById('profileLoginLink');
+    const guestCtaContainer = document.getElementById('guestProfileCta');
     const avatarEl = document.querySelector('.profile-avatar-small');
 
     if (currentUser) {
@@ -2060,12 +2060,12 @@ return sanitized;
       userNameEl.textContent = displayName;
       userStatusEl.textContent = currentUser.email;
       logoutBtn.style.display = 'flex';
-      loginBtn.style.display = 'none';
-      if (loginLink) loginLink.style.display = 'none';
+      if (guestCtaContainer) guestCtaContainer.style.display = 'none';
     } else {
       // --- Reset to Guest State ---
       avatarEl.innerHTML = `<i class="fas fa-user"></i>`; // Reset avatar
       userNameEl.textContent = 'Guest User';
+      userStatusEl.textContent = 'You are browsing as a guest.';
 
       // Reset referral link to a generic one
       const referralLinkEl = document.getElementById('referralLink');
@@ -2073,25 +2073,8 @@ return sanitized;
         referralLinkEl.textContent = `https://coastalfresh.in?ref=GUEST123`;
       }
 
-      let isFirstTime = false;
-      try {
-        // A user is "first time" if the firstVisit key is not set.
-        isFirstTime = !localStorage.getItem('firstVisit');
-      } catch (_) {
-        // If localStorage fails, default to not being first time.
-        isFirstTime = false;
-      }
-
-      if (isFirstTime) {
-        userStatusEl.innerHTML = 'You are browsing as a guest. <a href="#" id="profileLoginLink">Sign Up</a>';
-        document.getElementById('profileLoginLink').addEventListener('click', (e) => showLoginModal(e, 'signup'));
-      } else {
-        userStatusEl.innerHTML = 'You are browsing as a guest. <a href="#" id="profileLoginLink">Login</a>';
-        document.getElementById('profileLoginLink').addEventListener('click', (e) => showLoginModal(e, 'login'));
-      }
-
       logoutBtn.style.display = 'none';
-      loginBtn.style.display = 'none';
+      if (guestCtaContainer) guestCtaContainer.style.display = 'flex';
     }
   }
   /* ===== End of Auth Functions ===== */

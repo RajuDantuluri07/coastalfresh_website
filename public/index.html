@@ -203,7 +203,7 @@
       </section>
 
       <!-- NEW: Combined Refer Banner & Tagline Section -->
-      <section class="section" style="padding-top: 24px; padding-bottom: 20px; text-align: center;">
+      <section class="section" style="padding-top: 32px; padding-bottom: 24px; text-align: center;">
         <div class="communication-carousel" id="communicationCarousel">
           <div class="slides">
             <div class="slide" data-action="showPage" data-target="referPage" style="cursor: pointer;">
@@ -212,7 +212,7 @@
           </div>
           <div class="carousel-dots"></div>
         </div>
-        <div style="margin-top: 16px;">
+        <div style="margin-top: 24px;">
           <h2 class="title" style="font-size: 16px; margin-bottom: 4px;">Freshness, Delivered</h2>
           <p class="subtitle" style="margin-bottom: 8px;">From the Coast to Your Kitchen</p>
         </div>
@@ -437,15 +437,17 @@
           </div>
           <div class="profile-user-info">
             <h2 id="profileUserName">Guest User</h2>
-            <p id="profileUserStatus">You are browsing as a guest. <a href="#" id="profileLoginLink">Login</a></p>
+            <p id="profileUserStatus">You are browsing as a guest.</p>
           </div>
         </div>
 
         <!-- Action Group -->
         <div class="profile-actions">
-          <button class="profile-button" id="loginBtn" style="display: none;">
-            <i class="fas fa-sign-in-alt"></i> Login / Sign Up
-          </button>
+          <!-- NEW: Login CTA for Guest Users (Moved inside the actions card) -->
+          <div class="profile-login-cta" id="guestProfileCta">
+            <button class="cta-button" id="profileLoginBtn">Login / Sign Up</button>
+          </div>
+
           <button class="profile-button refer">
             <i class="fas fa-share-alt"></i> Refer & Earn
           </button>

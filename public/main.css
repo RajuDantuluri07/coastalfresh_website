@@ -2334,15 +2334,43 @@ padding-bottom: env(safe-area-inset-bottom);
   font-weight: 300;
 }
 
+/* --- NEW: Profile Login CTA --- */
+.profile-login-cta {
+  /* This container is now inside .profile-actions */
+  padding: 20px 16px; /* Added vertical spacing and matched horizontal padding */
+  border-bottom: 1px solid var(--border-color); /* Separator line */
+  display: flex;
+  justify-content: center;
+}
+
+.profile-login-cta .cta-button {
+  width: 100%;
+  /* max-width: 300px; /* Removed to make button full-width inside card */
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-size: 16px;
+  font-weight: 700; /* bold */
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3);
+  transition: all 0.2s;
+}
+.profile-login-cta .cta-button:active {
+  transform: scale(0.98);
+}
+
 /* --- NEW: Refined Profile Page Styles --- */
 .profile-button.refer {
-  background: var(--primary-light);
-  color: var(--primary-dark);
+  /* NEW: Make the Refer button a prominent CTA */
+  background: var(--accent-color);
+  color: var(--bg-white);
   font-weight: 600;
 }
 
 .profile-button.refer i {
-  color: var(--accent-color);
+  color: var(--bg-white); /* Match icon color to text */
 }
 
 .social-bar {
