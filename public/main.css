@@ -1108,7 +1108,7 @@ left: 50%;
 transform: translateX(-50%);
 width: 100%;
 max-width: var(--app-max-width);
-height: 100vh;
+height: 100%; /* FIX: Use 100% instead of 100vh to respect mobile browser UI */
 background: var(--bg-white);
 z-index: 1000;
 display: none; /* Changed from flex to allow self-scrolling */
