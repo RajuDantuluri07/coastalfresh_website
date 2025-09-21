@@ -782,6 +782,20 @@
       </div>
     </div>
 
+    <!-- NEW: Order Success Modal -->
+    <div class="confirm-modal-overlay" id="orderSuccessModal">
+      <div class="confirm-modal-card" style="text-align: center;">
+        <div style="font-size: 48px; color: var(--success-color); margin-bottom: 16px;">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h3>Order Placed Successfully!</h3>
+        <p id="orderSuccessMessage" style="margin-bottom: 24px;">Your order has been received. You can track its status in "My Orders".</p>
+        <div class="confirm-modal-actions" style="flex-direction: column;">
+          <button class="confirm-modal-btn confirm" id="trackOrderBtn">Track on WhatsApp</button>
+          <button class="confirm-modal-btn cancel" id="continueShoppingBtn">Continue Shopping</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Structured Data -->
@@ -828,6 +842,7 @@
   </script>
 
   <!-- External JS -->
+  <script src="/analytics.js" defer></script>
   <script src="/main.js" defer></script>
 </body>
 </html>

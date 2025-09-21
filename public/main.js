@@ -98,16 +98,6 @@ try {
 
   let popupProduct = null;
 
-  /* ===== NEW: Analytics Helper ===== */
-  function trackEvent(eventName, eventParams = {}) {
-    if (typeof gtag === 'function') {
-      gtag('event', eventName, eventParams);
-    } else {
-      // Fallback for local development or if gtag fails to load
-      console.log(`Analytics Event (gtag not found): ${eventName}`, eventParams);
-    }
-  }
-
   /* ===== Init ===== */
   async function init() {
     // Firebase Auth Listener
@@ -282,7 +272,7 @@ try {
         if (detailItem) {
           // NEW: Special handling for combined product info section
           if (detailItem.id === 'productInfoDetailItem') {
-            trackEvent('view_item_details', {
+            Analytics.trackEvent('view_item_details', {
               item_id: popupProduct?.id,
               item_name: popupProduct?.name
             });
@@ -367,7 +357,7 @@ try {
         document.getElementById('catalogSearch').value = '';
         currentSearch = '';
         renderCatalogProducts();
-        trackEvent('select_category', { category: currentCategory });
+        Analytics.trackEvent('select_category', { category: currentCategory });
       }
     });
 
@@ -431,6 +421,10 @@ try {
     // NEW: Confirmation modal buttons
     document.getElementById('cancelDeleteBtn').addEventListener('click', () => document.getElementById('confirmDeleteModal').classList.remove('active'));
     document.getElementById('confirmDeleteBtn').addEventListener('click', executeDeleteAddress);
+
+    // NEW: Order Success modal buttons
+    document.getElementById('continueShoppingBtn').addEventListener('click', closeOrderSuccessModal);
+    document.getElementById('trackOrderBtn').addEventListener('click', handleTrackOrder);
 
 
     // Address form submission
@@ -603,7 +597,7 @@ try {
       const ctaHeight = popupStickyCta.offsetHeight;
       popupContentWrapper.style.paddingBottom = `${ctaHeight + 10}px`;
     });
-    resizeObserver.observe(popupStickyCta);
+    if (popupStickyCta) resizeObserver.observe(popupStickyCta);
 
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', () => {
@@ -643,7 +637,7 @@ try {
       content.appendChild(title); content.appendChild(sub);
       item.appendChild(iconWrap); item.appendChild(content);
       item.addEventListener('click', () => {
-        trackEvent('click', { location: 'trust_strip', item_title: t.title, item_index: i });
+        Analytics.trackEvent('click', { location: 'trust_strip', item_title: t.title, item_index: i });
       });
       container.appendChild(item);
     });
@@ -976,7 +970,7 @@ try {
     history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
 
     // Track product view
-    trackEvent('view_item', {
+    Analytics.trackEvent('view_item', {
       currency: 'INR',
       value: product.finalPrice,
       items: [{
@@ -1012,7 +1006,7 @@ try {
     closePopup();
     
     // Track add to cart
-    trackAddToCart(popupProduct.id, qty);
+    Analytics.trackAddToCart(popupProduct, qty);
   }
 
   /* NEW: Function to update the sticky CTA in the product popup */
@@ -1059,7 +1053,7 @@ try {
 
     // Track favorite action
     if (popupProduct) {
-      trackEvent(isPopupFavorite ? 'add_to_wishlist' : 'remove_from_wishlist', {
+      Analytics.trackEvent(isPopupFavorite ? 'add_to_wishlist' : 'remove_from_wishlist', {
         currency: 'INR',
         value: popupProduct.finalPrice * currentProductQty,
         items: [{
@@ -1127,7 +1121,7 @@ try {
     }
 
     // Track share action
-    trackEvent('share', {
+    Analytics.trackEvent('share', {
       method: 'Web Share API', // or 'whatsapp_fallback'
       content_type: 'referral',
       item_id: 'referral_link',
@@ -1201,7 +1195,8 @@ try {
     showToast(`${product.name} added to cart!`);
     
     // Track add to cart
-    trackAddToCart(id, qty);
+    const addedProduct = products.find(p => p.id === parseInt(id));
+    if (addedProduct) Analytics.trackAddToCart(addedProduct, qty);
   }
 
   function updateCartUI() {
@@ -1304,7 +1299,7 @@ try {
     
     // Track cart view
     const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
-    trackEvent('view_cart', {
+    Analytics.trackEvent('view_cart', {
       currency: 'INR',
       value: subtotal,
       items: items.map(item => ({
@@ -1408,7 +1403,8 @@ try {
     updateProductCardState(id);
     
     // Track quantity change
-    trackChangeQty(id, change);
+    const product = products.find(p => p.id === parseInt(id));
+    if (product) Analytics.trackChangeQty(product, change, cart[id]);
   }
 
   function removeFromCart(id) {
@@ -1512,36 +1508,47 @@ try {
     try {
       await db.collection('orders').add(orderData);
 
-      // 7. Open WhatsApp and track event
-      window.open(`https://wa.me/919985125678?text=${encodeURIComponent(message)}`, '_blank');
-
-      // Track the purchase event
-      trackEvent('purchase', {
-        transaction_id: orderId,
-        value: total,
-        currency: 'INR',
-        items: items.map(item => ({
-          item_id: item.id,
-          item_name: item.name,
-          item_category: item.category,
-          price: item.finalPrice,
-          quantity: item.qty
-        })),
-      });
-
-      // 8. Clear the cart after successful order
+      // 7. Clear the cart and show success modal
       cart = {};
       saveCart();
       updateCartUI();
       closeCart();
-      showToast('Order placed successfully! Check "My Orders" for details.');
+      showOrderSuccessModal(orderId, message);
+
+      // 8. Track the purchase event
+      Analytics.trackPurchase(orderId, total, items);
 
     } catch (error) {
       console.error("Error saving order to Firestore:", error);
       showToast("Could not place your order. Please try again.");
       // Optionally, track the failure
-      trackEvent('purchase_failure', { error_message: error.message });
+      Analytics.trackEvent('purchase_failure', { error_message: error.message });
     }
+  }
+
+  /* ===== NEW: Order Success Modal Functions ===== */
+  function showOrderSuccessModal(orderId, whatsappMessage) {
+    const modal = document.getElementById('orderSuccessModal');
+    const messageEl = document.getElementById('orderSuccessMessage');
+    const trackBtn = document.getElementById('trackOrderBtn');
+
+    messageEl.innerHTML = `Your Order ID is <strong>${orderId}</strong>. You can track its status in "My Orders".`;
+    trackBtn.dataset.message = whatsappMessage; // Store message for the button
+
+    openModal(modal, document.getElementById('trackOrderBtn'));
+  }
+
+  function closeOrderSuccessModal() {
+    closeModal(document.getElementById('orderSuccessModal'));
+    showPage('home'); // Navigate to home after closing
+  }
+
+  function handleTrackOrder(e) {
+    const message = e.currentTarget.dataset.message;
+    if (message) {
+      window.open(`https://wa.me/919985125678?text=${encodeURIComponent(message)}`, '_blank');
+    }
+    closeOrderSuccessModal();
   }
 
   function showPage(page, fromHistory = false) {
@@ -1620,7 +1627,7 @@ try {
     
     // Track search
     if (currentSearch) {
-      trackEvent('view_search_results', {
+      Analytics.trackEvent('view_search_results', {
         search_term: currentSearch,
         category: currentCategory
       });
@@ -1936,7 +1943,7 @@ try {
     if (faq.classList.contains('active')) {
       const qTextEl = button.querySelector('.q-text');
       const qText = qTextEl ? qTextEl.textContent : '';
-      trackEvent('faq_click', { question: qText });
+      Analytics.trackEvent('faq_click', { question: qText });
     }
   }
 
@@ -2047,7 +2054,7 @@ return sanitized;
         });
 
         // NEW: Track successful sign-up event in GA4
-        trackEvent('sign_up', { method: 'Email' });
+        Analytics.trackEvent('sign_up', { method: 'Email' });
         if (afterLoginAction) {
           showToast('Success! Taking you to checkout...');
         } else {
@@ -2058,7 +2065,7 @@ return sanitized;
       .catch(error => {
         authError.textContent = error.message;
         // Also track signup failure
-        trackEvent('sign_up_failure', { method: 'Email' });
+        Analytics.trackEvent('sign_up_failure', { method: 'Email' });
       });
   }
 
@@ -2072,7 +2079,7 @@ return sanitized;
     firebase.auth().signInWithEmailAndPassword(email, password)
       .then(userCredential => {
         // NEW: Track successful login event in GA4
-        trackEvent('login', { method: 'Email' });
+        Analytics.trackEvent('login', { method: 'Email' });
         if (afterLoginAction) {
           showToast('Success! Taking you to checkout...');
         } else {
@@ -2105,9 +2112,9 @@ return sanitized;
         // NEW: Track sign_up or login events for Google Auth
         // Check if this is a new user or a returning one
         if (result.additionalUserInfo && result.additionalUserInfo.isNewUser) {
-          trackEvent('sign_up', { method: 'Google' });
+          Analytics.trackEvent('sign_up', { method: 'Google' });
         } else {
-          trackEvent('login', { method: 'Google' });
+          Analytics.trackEvent('login', { method: 'Google' });
         }
 
         // If this is the first time the user is signing in with Google
@@ -2119,7 +2126,7 @@ return sanitized;
         closeLoginModal();
       }).catch(error => {
         authError.textContent = error.message;
-        trackEvent('login_failure', { method: 'Google' });
+        Analytics.trackEvent('login_failure', { method: 'Google' });
       });
   }
 
@@ -2201,14 +2208,7 @@ return sanitized;
 
     if (user) { // User is logged in
       // NEW: Identify user in GA4 and Hotjar for unified session tracking
-      if (typeof gtag === 'function') {
-        gtag('config', 'G-GSHMPRYPW1', { 'user_id': user.uid });
-        console.log('GA4 user identified with ID:', user.uid);
-      }
-      if (window.hj) {
-        hj('identify', user.uid, { email: user.email });
-        console.log('Hotjar user identified with ID:', user.uid);
-      }
+      Analytics.identifyUser(user);
 
       // If there was a pending action (like checkout), execute it now.
       if (typeof afterLoginAction === 'function') {
@@ -2546,35 +2546,6 @@ return sanitized;
   }
 
 
-  function trackAddToCart(id, qty) {
-    const product = products.find(p => p.id === parseInt(id));
-    if (!product) return;
-    trackEvent('add_to_cart', {
-      currency: 'INR',
-      value: product.finalPrice * qty,
-      items: [{
-        item_id: product.id,
-        item_name: product.name,
-        item_category: product.category,
-        price: product.finalPrice,
-        quantity: qty
-      }]
-    });
-  }
-
-  function trackChangeQty(id, delta) {
-    const product = products.find(p => p.id === parseInt(id));
-    if (!product) return;
-    trackEvent('change_cart_quantity', {
-      change: delta,
-      item_id: product.id,
-      item_name: product.name,
-      item_category: product.category,
-      price: product.finalPrice,
-      quantity: cart[id] || 0
-    });
-  }
-
   function renderProductSchema() {
     if (!products || products.length === 0) return;
 
@@ -2674,7 +2645,7 @@ return sanitized;
     installPrompt.classList.add('show');
 
     // NEW: Track when the custom prompt is shown to the user.
-    trackEvent('pwa_prompt_shown');
+    Analytics.trackEvent('pwa_prompt_shown');
 
     const installBtn = document.getElementById('installBtn');
     if (installBtn) {
@@ -2708,7 +2679,7 @@ return sanitized;
     if (!deferredInstallPrompt) return;
 
     // NEW: Track the click on the custom "Install" button.
-    trackEvent('pwa_install_clicked');
+    Analytics.trackEvent('pwa_install_clicked');
 
     // Show the native install prompt
     deferredInstallPrompt.prompt();
@@ -2718,7 +2689,7 @@ return sanitized;
     console.log(`User response to the install prompt: ${outcome}`);
 
     // Track the outcome
-    trackEvent('pwa_install_outcome', { 'outcome': outcome });
+    Analytics.trackEvent('pwa_install_outcome', { 'outcome': outcome });
 
     // We've used the prompt, and can't use it again, so clear it
     deferredInstallPrompt = null;
