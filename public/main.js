@@ -277,6 +277,13 @@ try {
       if (detailHeader) {
         const detailItem = detailHeader.closest('.detail-item');
         if (detailItem) {
+          // NEW: Special handling for combined product info section
+          if (detailItem.id === 'productInfoDetailItem') {
+            trackEvent('view_item_details', {
+              item_id: popupProduct?.id,
+              item_name: popupProduct?.name
+            });
+          }
           const content = detailItem.querySelector('.detail-content');
           const icon = detailHeader.querySelector('i');
           const isOpen = detailItem.classList.toggle('active');
@@ -515,10 +522,6 @@ try {
     document.getElementById('referBtn').addEventListener('click', () => showPage('referPage'));
     document.getElementById('profileInstallBtn').addEventListener('click', triggerInstallPrompt); // NEW
     document.getElementById('aboutPageCtaBtn').addEventListener('click', () => showPage('catalog')); // NEW: About Us CTA
-    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
-    document.getElementById('guestProfileCta').addEventListener('click', (e) => showLoginModal(e, 'signup'));
-
-    // Product Popup buttons
     document.querySelector('#aboutPage .back-btn').addEventListener('click', goBack);
 
     // NEW: Refer a Friend page buttons
@@ -527,12 +530,19 @@ try {
     document.getElementById('shareOnWhatsAppBtn').addEventListener('click', () => openWhatsApp('refer'));
 
     // Product Popup buttons
+    document.getElementById('logoutBtn').addEventListener('click', handleLogout);
+    document.getElementById('guestProfileCta').addEventListener('click', (e) => showLoginModal(e, 'signup'));
     document.querySelector('.popup-back-btn').addEventListener('click', closePopup);
     document.querySelector('.popup-action-btn.favorite').addEventListener('click', toggleFavorite);
     document.querySelector('.popup-action-btn.share').addEventListener('click', shareProduct);
-    document.querySelector('.popup-qty-btn.dec').addEventListener('click', () => changePopupQty(-1));
-    document.querySelector('.popup-qty-btn.inc').addEventListener('click', () => changePopupQty(1));
-    document.querySelector('.popup-add-to-cart-btn').addEventListener('click', addPopupToCart);
+
+    // NEW: Event delegation for the dynamic sticky CTA
+    document.getElementById('popupStickyCta').addEventListener('click', (e) => {
+      const addBtn = e.target.closest('.popup-cta-add-btn');
+      const qtyBtn = e.target.closest('.qty-btn');
+      if (addBtn) addPopupToCart();
+      if (qtyBtn) changePopupQty(qtyBtn.classList.contains('inc') ? 1 : -1);
+    });
 
     // Cart page buttons
     document.querySelector('#cartModal .empty-cart-btn').addEventListener('click', () => { showPage('catalog'); closeCart(); });
@@ -562,6 +572,24 @@ try {
         }
       }
     });
+
+    // --- NEW: Dynamic Padding & Keyboard Handling for Product Popup ---
+    const popupStickyCta = document.getElementById('popupStickyCta');
+    const popupContentWrapper = document.getElementById('popupContentWrapper');
+
+    const resizeObserver = new ResizeObserver(() => {
+      const ctaHeight = popupStickyCta.offsetHeight;
+      popupContentWrapper.style.paddingBottom = `${ctaHeight + 10}px`;
+    });
+    resizeObserver.observe(popupStickyCta);
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        const isKeyboardOpen = window.visualViewport.height < window.innerHeight * 0.7;
+        popupStickyCta.classList.toggle('keyboard-open', isKeyboardOpen);
+      });
+    }
+
   }
   /* ===== End of New Functions ===== */
 
@@ -885,11 +913,11 @@ try {
       priceSection.innerHTML = `<span class="popup-price-final">₹${product.finalPrice}</span>`;
     }
     
-    // --- Populate Collapsible Details ---
-    document.getElementById('popupDescriptionContent').innerHTML = `<p>${DOMPurify.sanitize(product.desc)}</p>`;
-    document.getElementById('popupWeightContent').innerHTML = `
-      <p><strong>Gross Weight:</strong> ${product.gross}<br><strong>Net Weight:</strong> ${product.net}<br><small>(Net weight is after cleaning & processing. Weight loss varies by product.)</small></p>
-    `;
+    // --- NEW: Populate Combined Details Section ---
+    const productInfoContent = document.getElementById('productInfoContent');
+    productInfoContent.innerHTML = `
+      <p>${DOMPurify.sanitize(product.desc)}</p>
+      <p style="margin-top: 16px;"><strong>Gross Wt:</strong> ${product.gross} | <strong>Net Wt:</strong> ${product.net}<br><small>Net weight is after cleaning. Weight loss varies by product.</small></p>`;
 
     // Set product image
     const optimizedPopupImage = getOptimizedImageUrl(product.image, 600, 600);
@@ -909,12 +937,8 @@ try {
       if (icon) icon.style.transform = 'rotate(0deg)';
     });
 
-    // Update bottom button text
-    const totalPrice = product.finalPrice * currentProductQty;
-    document.querySelector('.popup-add-to-cart-btn').textContent = `Add to Cart - ₹${totalPrice}`;
-    
-    // Set quantity
-    document.getElementById('popupQty').textContent = currentProductQty;
+    // --- NEW: Update the new sticky CTA ---
+    updatePopupCta();
     
     // Ensure the popup content is scrolled to the top on open
     const contentWrapper = document.getElementById('popupContentWrapper');
@@ -941,25 +965,15 @@ try {
 
   /* NEW: Function to change quantity in popup */
   function changePopupQty(change) {
-    const qtyElement = document.getElementById('popupQty');
-    let qty = parseInt(qtyElement.textContent);
-    qty = Math.max(1, Math.min(99, qty + change));
-    qtyElement.textContent = qty;
-    
-    // Update bottom price with quantity
-    if (popupProduct) {
-      const totalPrice = popupProduct.finalPrice * qty;
-      document.querySelector('.popup-add-to-cart-btn').textContent = `Add to Cart - ₹${totalPrice}`;
-    }
-    
-    currentProductQty = qty;
+    currentProductQty = Math.max(1, Math.min(99, currentProductQty + change));
+    updatePopupCta();
   }
 
   /* NEW: Function to add to cart from popup */
   function addPopupToCart() {
     if (!popupProduct || !popupProduct.available) return;
 
-    const qty = parseInt(document.getElementById('popupQty').textContent);
+    const qty = currentProductQty;
     
     if (cart[popupProduct.id]) {
       cart[popupProduct.id] = Math.min(99, cart[popupProduct.id] + qty);
@@ -974,6 +988,35 @@ try {
     
     // Track add to cart
     trackAddToCart(popupProduct.id, qty);
+  }
+
+  /* NEW: Function to update the sticky CTA in the product popup */
+  function updatePopupCta() {
+    const ctaContainer = document.getElementById('popupStickyCta');
+    if (!popupProduct || !ctaContainer) return;
+
+    const isInCart = cart[popupProduct.id] > 0;
+    const price = popupProduct.finalPrice * (isInCart ? cart[popupProduct.id] : currentProductQty);
+
+    if (isInCart) {
+      // Show quantity controls if item is in cart
+      ctaContainer.innerHTML = `
+        <div class="popup-sticky-cta-inner">
+          <div class="popup-cta-price">₹${price}</div>
+          <div class="cart-controls" data-id="${popupProduct.id}" style="margin-left: auto;">
+            <button class="qty-btn dec">-</button>
+            <span class="qty">${cart[popupProduct.id]}</span>
+            <button class="qty-btn inc">+</button>
+          </div>
+        </div>`;
+    } else {
+      // Show "Add to Cart" button
+      ctaContainer.innerHTML = `
+        <div class="popup-sticky-cta-inner">
+          <div class="popup-cta-price">₹${price}</div>
+          <button class="popup-cta-add-btn">Add to Cart</button>
+        </div>`;
+    }
   }
 
   /* NEW: Function to toggle favorite in popup */
@@ -1097,6 +1140,7 @@ try {
     
     closeModal(popup);
     isPopupOpen = false;
+    updateProductCardState(popupProduct.id); // Update card state on close
     popupProduct = null;
     
     // NEW: Revert the URL to the underlying page's URL
@@ -1124,6 +1168,7 @@ try {
 
     saveCart();
     updateCartUI();
+    updatePopupCta(); // NEW: Update popup CTA if it's open
     updateProductCardState(id); // Targeted update instead of full re-render
     showToast(`${product.name} added to cart!`);
     
@@ -1309,6 +1354,7 @@ try {
     if (document.getElementById('cartModal').classList.contains('active')) {
       // More efficient update: just update the specific item and the summary
       const itemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
+      updatePopupCta(); // NEW: Update popup CTA if it's open
       if (itemEl) {
         if (cart[id]) { // If item still in cart, update its values
           const product = products.find(p => p.id === id);

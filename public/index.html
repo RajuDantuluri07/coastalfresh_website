@@ -670,34 +670,19 @@
 
         <!-- Collapsible Details Section -->
         <div class="popup-details-section">
-          <div class="detail-item" id="descriptionDetailItem">
+          <div class="detail-item" id="productInfoDetailItem">
             <button class="detail-header">
-              <span>Product Description</span>
+              <span>Product Details</span>
               <i class="fas fa-chevron-down"></i>
             </button>
-            <div class="detail-content" id="popupDescriptionContent"></div>
-          </div>
-          <div class="detail-item" id="weightDetailItem">
-            <button class="detail-header">
-              <span>Weight & Servings</span>
-              <i class="fas fa-chevron-down"></i>
-            </button>
-            <div class="detail-content" id="popupWeightContent"></div>
+            <div class="detail-content" id="productInfoContent">
+              <!-- Description and Weight content will be injected here by JS -->
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- Bottom Section -->
-      <div class="popup-bottom-section">
-        <div class="popup-actions-bar">
-          <div class="popup-quantity-controls">
-            <button class="popup-qty-btn dec" aria-label="Decrease Quantity">-</button>
-            <span class="popup-qty" id="popupQty">1</span>
-            <button class="popup-qty-btn inc" aria-label="Increase Quantity">+</button>
-          </div>
-          <button class="popup-add-to-cart-btn">Add to Cart</button>
-        </div>
-      </div>
+      <!-- NEW: Sticky CTA will be placed here, outside the scrollable wrapper -->
+      <div class="popup-sticky-cta" id="popupStickyCta"></div>
     </div>
 
     <!-- Cart Page as Modal -->
