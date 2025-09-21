@@ -152,14 +152,6 @@ try {
     initCarousel('#slides');
     initCarousel('#communicationCarousel .slides');
 
-    // NEW: Hide the splash screen after a short delay
-    setTimeout(() => {
-      const splashScreen = document.getElementById('splashScreen');
-      if (splashScreen) {
-        splashScreen.classList.add('hidden');
-      }
-    }, 1500); // 1.5-second delay for a smooth experience
-
     // NEW: Register Service Worker for PWA capabilities
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
