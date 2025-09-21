@@ -875,12 +875,11 @@ try {
     // --- Populate Price ---
     const priceSection = document.getElementById('popupPriceSection');
     if (product.mrp > product.finalPrice) {
-      const savings = product.mrp - product.finalPrice;
-      const offerPercentage = product.offer > 0 ? `, ${product.offer}% OFF` : '';
+      const savings = product.mrp - product.finalPrice
       priceSection.innerHTML = `
-        <span class="popup-price-mrp">₹${product.mrp}</span>
         <span class="popup-price-final">₹${product.finalPrice}</span>
-        <span class="popup-price-savings">(Save ₹${savings}${offerPercentage})</span>
+        <span class="popup-price-mrp">₹${product.mrp}</span>
+        <span class="popup-price-savings-badge">SAVE ₹${savings}</span>
       `;
     } else {
       priceSection.innerHTML = `<span class="popup-price-final">₹${product.finalPrice}</span>`;
