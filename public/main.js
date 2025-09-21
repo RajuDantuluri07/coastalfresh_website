@@ -88,6 +88,7 @@ try {
   let editingAddressId = null; // NEW: To track which address is being edited
   let deferredInstallPrompt = null; // NEW: For PWA installation prompt
   
+  let afterAddressAction = null; // NEW: To handle actions after adding an address
   let afterLoginAction = null; // NEW: To handle actions after login (like checkout)
   /* NEW: Variables for popup functionality */
   let currentPopupImageIndex = 0;
@@ -436,6 +437,10 @@ try {
     document.getElementById('addressForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!currentUser) {
+        // If somehow a guest reaches here, clear any pending action and prompt login
+        if (afterAddressAction) {
+          afterAddressAction = null;
+        }
         showToast('You must be logged in to save an address.');
         return;
       }
@@ -486,12 +491,21 @@ try {
           await addressesRef.add(addressData);
           showToast('Address saved successfully!');
         }
-
-        await renderAddressList(); // Refresh the list view
-        goBack(); // Go back to the previous page (likely the profile page or checkout)
+        
+        // NEW: Check for a pending action (like checkout)
+        if (typeof afterAddressAction === 'function') {
+          showToast('Address saved! Completing your order...');
+          const action = afterAddressAction;
+          afterAddressAction = null; // Clear the action
+          action(); // Re-run the checkout process
+        } else {
+          await renderAddressList(); // Refresh the list view
+          goBack(); // Default behavior: go back to the previous page
+        }
       } catch (error) {
         console.error("Error saving address: ", error);
         showToast('Failed to save address. Please try again.');
+        if (afterAddressAction) afterAddressAction = null; // Clear action on error
       } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Save Address'; // Reset button text
@@ -505,7 +519,7 @@ try {
     document.querySelector('#cartModal .back-btn').addEventListener('click', closeCart);
 
     document.querySelectorAll('.cart-btn').forEach(btn => btn.addEventListener('click', showCart));
-
+    
     // Profile page buttons
     document.querySelector('.profile-button.orders').addEventListener('click', () => showPage('ordersPage'));
     document.querySelector('.profile-button.address').addEventListener('click', async () => {
@@ -1436,7 +1450,7 @@ try {
       document.getElementById('cartModal').classList.remove('active');
       showToast('Please sign up or log in to place your order.');
       afterLoginAction = checkout; // Set the action to perform after a successful login.
-      showLoginModal(); // Now, show the login modal.
+      showLoginModal(null, 'signup'); // Explicitly show the signup view.
       return;
     }
 
@@ -1456,6 +1470,8 @@ try {
     // 3. If no address, redirect to address page
     if (!userAddress) {
       // NEW: Directly show the address page and form for a smoother flow.
+      // Set the action to perform after adding an address.
+      afterAddressAction = checkout;
       showToast('Please add a delivery address to continue.');
       showPage('addressPage');
       showAddressForm(); // Explicitly show the form.
@@ -1463,34 +1479,68 @@ try {
       return;
     }
 
-    // 4. Construct the WhatsApp message with cart and address
+    // 4. Generate a unique Order ID (e.g., timestamp + random part)
+    const orderId = `CF-${Date.now()}${Math.floor(Math.random() * 100)}`;
+
+    // 5. Construct the WhatsApp message and Order Data
     const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
     const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
     const total = subtotal + deliveryFee;
 
-    let message = "Hi! I'd like to place an order:\n\n";
+    let message = `Hi! I'd like to place an order (ID: ${orderId}):\n\n`;
     items.forEach(item => {
       const safeName = item.name.replace(/[^\w\s-]/g, '');
       message += `• ${safeName} x${item.qty} - ₹${item.finalPrice * item.qty}\n`;
     });
     message += `\nSubtotal: ₹${subtotal}\nDelivery: ${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}\nTotal: ₹${total}\n`;
-    message += `\n--- Delivery Address ---\nName: ${userAddress.fullName}\nMobile: ${userAddress.mobile}\nAddress: ${userAddress.house}, ${userAddress.street}, ${userAddress.city}, ${userAddress.pincode}\n`;
+    message += `\n--- Delivery Address ---\nName: ${userAddress.fullName}\nMobile: ${userAddress.mobile}\nAddress: ${userAddress.house}, ${userAddress.street}, ${userAddress.city}, ${userAddress.pincode}\n\n`;
     message += "\nPlease confirm availability.";
 
-    window.open(`https://wa.me/919985125678?text=${encodeURIComponent(message)}`, '_blank');
+    // 6. Save the order to Firestore
+    const orderData = {
+      orderId: orderId,
+      userId: currentUser.uid,
+      items: items.map(item => ({ id: item.id, name: item.name, qty: item.qty, price: item.finalPrice, image: item.image })),
+      subtotal: subtotal,
+      deliveryFee: deliveryFee,
+      total: total,
+      address: userAddress,
+      status: 'Pending', // Initial status
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
 
-    if (items.length > 0) {
-      trackEvent('begin_checkout', {
+    try {
+      await db.collection('orders').add(orderData);
+
+      // 7. Open WhatsApp and track event
+      window.open(`https://wa.me/919985125678?text=${encodeURIComponent(message)}`, '_blank');
+
+      // Track the purchase event
+      trackEvent('purchase', {
+        transaction_id: orderId,
+        value: total,
         currency: 'INR',
-        value: subtotal,
         items: items.map(item => ({
           item_id: item.id,
           item_name: item.name,
           item_category: item.category,
           price: item.finalPrice,
           quantity: item.qty
-        }))
+        })),
       });
+
+      // 8. Clear the cart after successful order
+      cart = {};
+      saveCart();
+      updateCartUI();
+      closeCart();
+      showToast('Order placed successfully! Check "My Orders" for details.');
+
+    } catch (error) {
+      console.error("Error saving order to Firestore:", error);
+      showToast("Could not place your order. Please try again.");
+      // Optionally, track the failure
+      trackEvent('purchase_failure', { error_message: error.message });
     }
   }
 
@@ -1507,6 +1557,11 @@ try {
     // --- NEW: Update SEO tags for the current page ---
     let pageTitle, pageDesc, pagePath;
     if (page === 'catalog') {
+      // NEW: Clear any pending address action if user navigates away
+      if (afterAddressAction) {
+        afterAddressAction = null;
+        console.log('Cleared pending address action due to navigation.');
+      }
       pageTitle = 'All Products - Fish, Prawns, Crabs & More | Coastal Fresh India';
       pageDesc = 'Browse our entire collection of fresh seafood, including Pomfret, Prawns, Crabs, and authentic Andhra pickles. Order online for next-day delivery in Hyderabad.';
       pagePath = '/catalog'; // Conceptual path for SEO
@@ -1518,6 +1573,9 @@ try {
       pageTitle = 'Refer a Friend & Earn Rewards | Coastal Fresh India';
       pageDesc = 'Share Coastal Fresh with your friends! They get 10% off their first order, and you get a 10% discount on your next purchase. Start sharing and earning today.';
       pagePath = '/refer'; // Conceptual path for SEO
+    } else if (page === 'ordersPage') {
+      // NEW: Render orders when the page is shown
+      renderOrdersPage();
     } else if (page === 'profilePage' || page === 'addressPage' || page === 'ordersPage') {
       pageTitle = 'Your Account | Coastal Fresh India';
       pageDesc = 'Manage your orders, addresses, and profile settings at Coastal Fresh India.';
@@ -1990,7 +2048,11 @@ return sanitized;
 
         // NEW: Track successful sign-up event in GA4
         trackEvent('sign_up', { method: 'Email' });
-        showToast('Account created successfully!');
+        if (afterLoginAction) {
+          showToast('Success! Taking you to checkout...');
+        } else {
+          showToast('Account created successfully!');
+        }
         closeLoginModal();
       })
       .catch(error => {
@@ -2011,7 +2073,11 @@ return sanitized;
       .then(userCredential => {
         // NEW: Track successful login event in GA4
         trackEvent('login', { method: 'Email' });
-        showToast('Logged in successfully!');
+        if (afterLoginAction) {
+          showToast('Success! Taking you to checkout...');
+        } else {
+          showToast('Logged in successfully!');
+        }
         closeLoginModal();
       })
       .catch(error => {
@@ -2045,7 +2111,11 @@ return sanitized;
         }
 
         // If this is the first time the user is signing in with Google
-        showToast(`Welcome, ${result.user.displayName}!`);
+        if (afterLoginAction) {
+          showToast('Success! Taking you to checkout...');
+        } else {
+          showToast(`Welcome, ${result.user.displayName}!`);
+        }
         closeLoginModal();
       }).catch(error => {
         authError.textContent = error.message;
@@ -2400,6 +2470,81 @@ return sanitized;
       showToast('Failed to update default address.');
     }
   }
+
+  /* ===== NEW: Orders Page Functions ===== */
+  async function renderOrdersPage() {
+    const ordersPage = document.getElementById('ordersPage');
+    const mainContent = ordersPage.querySelector('main');
+
+    if (!currentUser) {
+      mainContent.innerHTML = `
+        <div class="empty-cart" style="flex-grow: 1; min-height: 60vh;">
+          <i class="fas fa-user-lock" style="font-size: 64px; margin-bottom: 24px; color: var(--border-color);"></i>
+          <h3>Login to View Orders</h3>
+          <p>Please log in to see your order history.</p>
+          <button class="empty-cart-btn" id="loginFromOrdersBtn">Login / Sign Up</button>
+        </div>
+      `;
+      document.getElementById('loginFromOrdersBtn').addEventListener('click', () => showLoginModal(null, 'signup'));
+      return;
+    }
+
+    mainContent.innerHTML = '<div class="loading" style="margin: 40px auto;"></div>';
+
+    try {
+      const ordersSnapshot = await db.collection('orders')
+        .where('userId', '==', currentUser.uid)
+        .orderBy('createdAt', 'desc')
+        .get();
+
+      if (ordersSnapshot.empty) {
+        mainContent.innerHTML = `
+          <div class="empty-cart" style="flex-grow: 1; min-height: 60vh;">
+            <i class="fas fa-box-open" style="font-size: 64px; margin-bottom: 24px; color: var(--border-color);"></i>
+            <h3>No Orders Yet</h3>
+            <p>Your past and current orders will appear here.</p>
+            <button class="empty-cart-btn" id="shopFromOrdersBtn">Start Shopping</button>
+          </div>
+        `;
+        document.getElementById('shopFromOrdersBtn').addEventListener('click', () => showPage('home'));
+      } else {
+        const ordersHTML = ordersSnapshot.docs.map(doc => {
+          const order = doc.data();
+          const orderDate = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
+          const statusClass = order.status.toLowerCase();
+
+          return `
+            <div class="order-card">
+              <div class="order-header">
+                <div>
+                  <div class="order-id">Order #${order.orderId}</div>
+                  <div class="order-date">Placed on: ${orderDate}</div>
+                </div>
+                <div class="order-status ${statusClass}">${order.status}</div>
+              </div>
+              <div class="order-body">
+                ${order.items.slice(0, 4).map(item => `
+                  <div class="order-item-img-container">
+                    <img src="${getOptimizedImageUrl(item.image, 100, 100)}" alt="${item.name}" loading="lazy">
+                  </div>
+                `).join('')}
+                ${order.items.length > 4 ? `<div class="order-item-more">+${order.items.length - 4}</div>` : ''}
+              </div>
+              <div class="order-footer">
+                <span class="order-total">Total: ₹${order.total}</span>
+                <button class="order-details-btn" data-order-id="${doc.id}">View Details</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        mainContent.innerHTML = `<div class="order-list">${ordersHTML}</div>`;
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      mainContent.innerHTML = '<p style="color: var(--error-color); text-align: center;">Could not load your orders.</p>';
+    }
+  }
+
 
   function trackAddToCart(id, qty) {
     const product = products.find(p => p.id === parseInt(id));
