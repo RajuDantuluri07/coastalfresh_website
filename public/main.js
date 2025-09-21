@@ -701,7 +701,8 @@ try {
     // c_fill: Crop to fill the specified dimensions without distortion
     // w_{width}: Target width
     // h_{height}: Target height
-    const transformations = `f_auto,q_auto,c_fill,w_${width},h_${height}`;
+    // c_pad: Resize to fit and pad the rest. b_rgb:ECEFF1 sets the padding color to match the site's light background.
+    const transformations = `f_auto,q_auto,c_pad,w_${width},h_${height},b_rgb:ECEFF1`;
     
     return url.replace('/image/upload/', `/image/upload/${transformations}/`);
   }
