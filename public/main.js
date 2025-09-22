@@ -1338,7 +1338,7 @@ try {
             </div>
             <div class="cart-item-info">
               <div class="cart-item-name">${item.name}</div>
-              <div class="cart-item-weight">${item.net} Net Weight</div>
+              <div class="cart-item-weight">${item.net} net</div>
               <div class="cart-item-pricing">
                 <span class="cart-item-current-price">₹${item.finalPrice}</span>
                 ${hasOffer ? `<span class="cart-item-mrp">₹${item.mrp}</span>` : ''}
@@ -1512,6 +1512,14 @@ try {
     const deliveryFee = (subtotal - couponDiscount) >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
     const total = subtotal - couponDiscount + deliveryFee;
 
+    // NEW: Create a formatted string for the delivery fee display
+    let deliveryFeeDisplay;
+    if (deliveryFee === 0) {
+      deliveryFeeDisplay = `<span><del style="opacity: 0.6; margin-right: 4px;">₹100</del> FREE</span>`;
+    } else {
+      deliveryFeeDisplay = `<span><del style="opacity: 0.6; margin-right: 4px;">₹100</del> ₹${deliveryFee}</span>`;
+    }
+
     const checkoutBtn = document.querySelector('.checkout-btn');
     if (checkoutBtn) {
       // NEW: Update button text to "Pay ₹XXX • Place Order"
@@ -1528,8 +1536,8 @@ try {
           <div class="summary-row"><span>Item Total</span><span>₹${subtotal}</span></div>
           ${couponDiscount > 0 ? `<div class="summary-row summary-discount"><span>Discount</span><span>- ₹${Math.round(couponDiscount)}</span></div>` : ''}
           <div class="summary-row">
-            <span>Delivery Fee <i class="fas fa-info-circle" title="Free on orders over ₹${FREE_DELIVERY_THRESHOLD}"></i></span>
-            <span>${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}</span>
+            <span>Delivery Fee <i class="fas fa-info-circle" title="Free delivery only in Manikonda"></i></span>
+            ${deliveryFeeDisplay}
           </div>
           <div class="summary-divider"></div>
           <div class="summary-row summary-total"><span>To Pay</span><span>₹${Math.round(total)}</span></div>
