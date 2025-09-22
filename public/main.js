@@ -543,6 +543,19 @@ try {
     document.getElementById('shareOnWhatsAppBtn').addEventListener('click', () => openWhatsApp('refer'));
 
     // Product Popup buttons
+    document.getElementById('ordersPage').addEventListener('click', e => {
+      const tab = e.target.closest('.order-filter-tab');
+      if (tab && !tab.classList.contains('active')) {
+        currentOrderFilter = tab.dataset.status;
+        renderOrdersPage(true); // Re-render with new filter
+      }
+      const detailsBtn = e.target.closest('.order-card');
+      if (detailsBtn) {
+        const orderId = detailsBtn.dataset.orderId;
+        const order = orders.find(o => o.id === orderId);
+        if (order) openOrderDetailsDrawer(order);
+      }
+    });
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
     document.getElementById('guestProfileCta').addEventListener('click', (e) => showLoginModal(e, 'signup'));
     document.querySelector('.popup-back-btn').addEventListener('click', closePopup);
@@ -565,7 +578,7 @@ try {
 
     // Cart page buttons
     document.querySelector('#cartModal .empty-cart-btn').addEventListener('click', () => { showPage('catalog'); closeCart(); });
-    document.querySelector('#ordersPage .empty-cart-btn').addEventListener('click', () => showPage('home'));
+    document.getElementById('shopFromOrdersBtn').addEventListener('click', () => showPage('home'));
 
     // FIX: The checkout button is inside a container that gets re-rendered.
     // Attach the listener to the static parent `cart-footer` to ensure it always works.
@@ -2464,6 +2477,7 @@ return sanitized;
       if (typeof afterLoginAction === 'function') {
         setTimeout(afterLoginAction, 100);
         afterLoginAction = null; // Clear the action so it doesn't run again
+        ordersInitialized = false; // NEW: Force re-fetch of orders for the new user
       }
     } else { // User is logged out
       // NEW: Forget user on logout in Hotjar
@@ -2471,6 +2485,7 @@ return sanitized;
         hj('identify', null, {});
         console.log('Hotjar user session anonymized.');
       }
+      ordersInitialized = false; // NEW: Reset on logout
     }
   }
 
