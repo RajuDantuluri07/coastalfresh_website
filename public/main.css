@@ -1631,7 +1631,8 @@ overflow-y: auto;
 display: flex;
 flex-direction: column;
 min-height: 0;
-padding-bottom:   FIX:em
+padding-bottom: 0; /* FIX: Remove padding as footer now contains all bottom elements */
+}
 
 /* NEW: Make cart title bolder and bigger */
 #cartModal .header .logo {
@@ -1650,10 +1651,9 @@ padding-bottom:   FIX:em
   z-index: 1; /* Ensure it sits above other cart content */
 }
 
-.delivery-progress-sticky {
-  /* Re-using the existing card style but without the gradient background */
-  border: 1px solid #c8e6c9;
-  border-radius: 10px;
+.delivery-progress-sticky { /* Re-using the existing card style but without the gradient background */
+  border: 1px solid #c8e6c9; /* Light green border */
+  border-radius: 10px; /* Rounded corners */
   padding: 6px 10px;
   text-align: center;
   background: var(--bg-white);
@@ -1675,8 +1675,9 @@ padding-bottom:   FIX:em
 /* --- NEW: Coupon Section Styles --- */
 #cartCouponSection {
   padding: 0; /* FIX: Remove padding, handled by parent footer */
-  background: transp
-oupon-apply-form {
+  background: transparent; /* FIX: Inherit background from footer */
+}
+.coupon-apply-form {
   display: flex;
   gap: 8px;
 }
@@ -1750,15 +1751,6 @@ oupon-apply-form {
   padding: 0; /* FIX: Remove padding, handled by parent footer */
   background: transparent; /* FIX: Inherit background from footer */
 }
-
-@media (min-ius: 20px 20px 0 0;
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-}
-  }
-
-.cart-modal.active {
-    display: flex;
-  }
 
 .cart-header {
   display: flex;
@@ -1935,8 +1927,8 @@ oupon-apply-form {
 }
 
 .price-summary-title { /* This is an H3 */
-  font-size:;
-  margin-bottom: 12px; /* REFINED: Reduced margin */
+  font-size: 18px; /* H2 Product Name */
+  margin-bottom: 16px;
 }
 
 .delivery-progress-text {
@@ -2035,10 +2027,11 @@ background: var(--bg-white);
 box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
 border-top: 1px solid var(--border-color);
 display: flex;
-flex-direct gap */
+flex-direction: column; /* FIX: Corrected property */
+gap: 10px; /* REFINED: Adjusted gap */
 /* Add safe area padding here */ /* FIX: Make the entire footer background light grey */
 padding: 10px 16px; /* REFINED: Adjusted padding */
-padding-bottom: calc(10px + env(safe-area-inset-bottom));
+padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted padding */
 }
 /* --- NEW: Enhanced Checkout Button --- */
 .checkout-btn {
