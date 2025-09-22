@@ -87,6 +87,7 @@ try {
   let currentUser = null;
   let editingAddressId = null; // NEW: To track which address is being edited
   let deferredInstallPrompt = null; // NEW: For PWA installation prompt
+  let installPromptUsed = false; // Tracks whether the native prompt has been shown/used
   
   let afterAddressAction = null; // NEW: To handle actions after adding an address
   let afterLoginAction = null; // NEW: To handle actions after login (like checkout)
@@ -910,6 +911,31 @@ try {
     const optimizedProductImage = getOptimizedImageUrl(product.image, 1200, 630);
     updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
 
+    // --- NEW: Inject breadcrumb structured data for product pages (replace any previous product breadcrumb) ---
+    try {
+      // Remove any existing breadcrumb script we previously added
+      const existing = document.getElementById('product-breadcrumb-jsonld');
+      if (existing) existing.remove();
+
+      const breadcrumb = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" },
+          { "@type": "ListItem", "position": 2, "name": "All Products", "item": "https://www.coastalfresh.in/catalog" },
+          { "@type": "ListItem", "position": 3, "name": product.name, "item": `https://www.coastalfresh.in${productUrl}` }
+        ]
+      };
+
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.id = 'product-breadcrumb-jsonld';
+      script.textContent = JSON.stringify(breadcrumb);
+      document.head.appendChild(script);
+    } catch (e) {
+      console.warn('Could not inject breadcrumb JSON-LD', e);
+    }
+
     // --- NEW: Update dynamic ARIA labels ---
     const ratingContainer = document.getElementById('popupRatingContainer');
     if (ratingContainer) ratingContainer.setAttribute('aria-label', '4.2 out of 5 stars'); // Example, make dynamic if you have real ratings
@@ -1244,9 +1270,10 @@ try {
       return { ...product, qty: cart[id] };
     });
     
-    const cartItems = document.getElementById('cartItems');
-    const cartSummary = document.getElementById('cartSummary');
-    const emptyCart = document.getElementById('emptyCart');
+  const cartItems = document.getElementById('cartItems');
+  const cartSummary = document.getElementById('cartSummary');
+  const emptyCart = document.getElementById('emptyCart');
+  const cartFooter = document.getElementById('cartFooter');
 
     if (items.length === 0) {
       emptyCart.style.display = 'flex';
@@ -2192,8 +2219,13 @@ return sanitized;
       // Wait for the service worker to be ready.
       const registration = await navigator.serviceWorker.ready;
 
-      // Request permission to receive notifications.
-      await messaging.requestPermission();
+      // Request permission to receive notifications using modern API.
+      // messaging.requestPermission() is deprecated; use Notification.requestPermission().
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        console.log('Notification permission not granted.');
+        return;
+      }
       console.log('Notification permission granted.');
 
       // Get the token, telling Firebase to use our registered service worker.
@@ -2564,16 +2596,8 @@ return sanitized;
         mainContent.innerHTML = `<div class="order-list">${ordersHTML}</div>`;
       }
     } catch (error) {
-      console.error("Error fetching orders:", error.code, error.message);
-      let errorMessage = 'Could not load your orders. Please try again later.';
-      if (error.code === 'failed-precondition') {
-        // This is the typical error code for a missing index.
-        errorMessage = 'There was a problem fetching your order history. Please contact support.';
-      } else if (error.code === 'permission-denied') {
-        // NEW: Handle the specific error you are seeing now.
-        errorMessage = 'You do not have permission to view these orders. Please log in again or contact support.';
-      }
-      mainContent.innerHTML = `<p style="color: var(--error-color); text-align: center; padding: 20px;">${errorMessage}</p>`;
+      console.error("Error fetching orders:", error);
+      mainContent.innerHTML = '<p style="color: var(--error-color); text-align: center;">Could not load your orders.</p>';
     }
   }
 
@@ -2701,7 +2725,8 @@ return sanitized;
 
     // Hide the profile page button as well
     const profileInstallBtn = document.getElementById('profileInstallBtn');
-    if (profileInstallBtn) {
+    // Only hide the profile install button if the native prompt has been used
+    if (profileInstallBtn && installPromptUsed) {
       profileInstallBtn.style.display = 'none';
     }
   }
@@ -2718,6 +2743,8 @@ return sanitized;
 
     // Wait for the user to respond to the prompt
     const { outcome } = await deferredInstallPrompt.userChoice;
+    // Mark that we invoked the native prompt (so the profile install button can be hidden if appropriate)
+    installPromptUsed = true;
     console.log(`User response to the install prompt: ${outcome}`);
 
     // Track the outcome
