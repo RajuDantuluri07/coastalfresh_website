@@ -722,12 +722,12 @@
     </div>
 
     <!-- NEW: Custom Install Prompt -->
-    <div class="install-prompt" id="installPrompt">
+    <div class="install-prompt" id="installPrompt" role="dialog" aria-modal="true" aria-labelledby="installPromptTitle" aria-describedby="installPromptDesc">
       <div class="install-prompt-content">
-        <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" alt="Coastal Fresh Logo" class="install-prompt-logo">
+        <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png" alt="Coastal Fresh Logo" class="install-prompt-logo">
         <div class="install-prompt-text">
-          <strong>Install Coastal Fresh</strong>
-          <span>For a faster, app-like experience.</span>
+          <strong id="installPromptTitle">Install Coastal Fresh</strong>
+          <span id="installPromptDesc">For a faster, app-like experience.</span>
         </div>
       </div>
       <div class="install-prompt-actions">
@@ -780,6 +780,20 @@
       </div>
     </div>
 
+    <!-- NEW: Order Success Modal -->
+    <div class="confirm-modal-overlay" id="orderSuccessModal">
+      <div class="confirm-modal-card" style="text-align: center;">
+        <div style="font-size: 48px; color: var(--success-color); margin-bottom: 16px;">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h3>Order Placed Successfully!</h3>
+        <p id="orderSuccessMessage" style="margin-bottom: 24px;">Your order has been received. You can track its status in "My Orders".</p>
+        <div class="confirm-modal-actions" style="flex-direction: column;">
+          <button class="confirm-modal-btn confirm" id="trackOrderBtn">Track on WhatsApp</button>
+          <button class="confirm-modal-btn cancel" id="continueShoppingBtn">Continue Shopping</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Structured Data -->
@@ -826,6 +840,7 @@
   </script>
 
   <!-- External JS -->
+  <script src="/analytics.js" defer></script>
   <script src="/main.js" defer></script>
 </body>
 </html>
