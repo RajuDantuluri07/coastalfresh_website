@@ -1640,6 +1640,25 @@ padding-bottom: 120px; /* REFINED: Further compressed space for the new, slimmer
   font-weight: 700;
 }
 
+/* --- NEW: Sticky Progress Bar Container --- */
+#cartStickyHeaderAddon {
+  position: sticky;
+  top: 53px; /* Height of the sticky cart header */
+  z-index: 10;
+  background: var(--bg-light);
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.delivery-progress-sticky {
+  /* Re-using the existing card style but without the gradient background */
+  border: 1px solid #c8e6c9;
+  border-radius: 10px;
+  padding: 6px 10px;
+  text-align: center;
+  background: var(--bg-white);
+}
+
 /* --- REFINED: Cart Section Layout --- */
 .cart-section {
   padding: 8px 16px; /* REFINED: Further reduced padding */
@@ -1926,15 +1945,6 @@ padding-bottom: 120px; /* REFINED: Further compressed space for the new, slimmer
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 12px; /* REFINED: Reduced margin */
-}
-
-/* --- NEW: Redesigned Delivery Progress Bar --- */
-.delivery-progress-card {
-  background: linear-gradient(90deg, #e8f5e9, #e0f2f1); /* Light green to cyan */
-  border: 1px solid #c8e6c9; /* Lighter border */
-  border-radius: 10px;
-  padding: 6px 10px; /* REFINED: Slimmer padding */
-  text-align: center;
 }
 
 .delivery-progress-text {

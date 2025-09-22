@@ -1302,6 +1302,7 @@ try {
   }
 
   function showCart() {
+    couponError = null; // FIX: Reset any previous coupon errors when opening the cart.
     const items = Object.keys(cart).map(id => {
       const product = products.find(p => p.id === parseInt(id));
       return { ...product, qty: cart[id] };
@@ -1454,6 +1455,35 @@ try {
     Analytics.trackEvent('remove_coupon', { coupon: removedCode });
   }
 
+  /**
+   * NEW: Renders the sticky free delivery progress bar at the top of the cart.
+   * @param {number} subtotal - The cart's subtotal before discounts.
+   * @param {number} couponDiscount - The calculated discount from any applied coupon.
+   */
+  function renderDeliveryProgress(subtotal, couponDiscount) {
+    const container = document.getElementById('cartStickyHeaderAddon');
+    if (!container) return;
+
+    const amountAfterDiscount = subtotal - couponDiscount;
+    const amountNeeded = FREE_DELIVERY_THRESHOLD - amountAfterDiscount;
+
+    if (amountNeeded > 0 && subtotal > 0) {
+      const progressPercent = (amountAfterDiscount / FREE_DELIVERY_THRESHOLD) * 100;
+      container.innerHTML = `
+        <div class="delivery-progress-sticky">
+          <div class="delivery-progress-text">
+            Add ₹${Math.round(amountNeeded)} more for FREE Delivery 🚚
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar-fill" style="width: ${Math.min(100, progressPercent)}%;"></div>
+          </div>
+        </div>
+      `;
+    } else {
+      container.innerHTML = ''; // Clear the progress bar if not needed
+    }
+  }
+
   /* REFACTORED: Function to update the summary in the cart with the new design */
   function updateCartSummary() {
     const items = Object.keys(cart).map(id => {
@@ -1488,19 +1518,11 @@ try {
       checkoutBtn.innerHTML = `Place Order – Pay ₹${Math.round(total)}`;
     }
 
+    // NEW: Render the sticky progress bar separately.
+    renderDeliveryProgress(subtotal, couponDiscount);
+
     billDetailsContainer.innerHTML = `
       <div class="section cart-section" style="padding-top:0;">
-        ${(subtotal - couponDiscount) < FREE_DELIVERY_THRESHOLD && subtotal > 0 ? `
-          <div class="delivery-progress-card">
-            <div class="delivery-progress-text">
-              Add ₹${Math.round(FREE_DELIVERY_THRESHOLD - (subtotal - couponDiscount))} more for FREE Delivery 🚚
-            </div>
-            <div class="progress-bar">
-              <div class="progress-bar-fill" style="width: ${(subtotal / FREE_DELIVERY_THRESHOLD) * 100}%;"></div>
-            </div>
-          </div>
-        ` : ''}
-
         <div class="price-summary-card">
           <h3 class="price-summary-title">Bill Details</h3>
           <div class="summary-row"><span>Item Total</span><span>₹${subtotal}</span></div>
