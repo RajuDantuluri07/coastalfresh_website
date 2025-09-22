@@ -1383,7 +1383,7 @@ try {
         ${subtotal < FREE_DELIVERY_THRESHOLD && subtotal > 0 ? `
           <div class="delivery-progress-card">
             <div class="delivery-progress-text">
-              Add items worth ₹${FREE_DELIVERY_THRESHOLD - subtotal} more to get FREE Delivery 🚚
+              ₹${FREE_DELIVERY_THRESHOLD - subtotal} more for FREE Delivery 🚚
             </div>
             <div class="progress-bar">
               <div class="progress-bar-fill" style="width: ${(subtotal / FREE_DELIVERY_THRESHOLD) * 100}%;"></div>

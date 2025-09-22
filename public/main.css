@@ -1832,30 +1832,30 @@ padding-bottom: 180px; /* Space for the sticky footer */
 /* --- NEW: Redesigned Delivery Progress Bar --- */
 .delivery-progress-card {
   background: linear-gradient(90deg, #e8f5e9, #e0f2f1); /* Light green to cyan */
-  border: 1px solid #a5d6a7;
+  border: 1px solid #c8e6c9; /* Lighter border */
   border-radius: 10px;
-  padding: 12px;
+  padding: 8px 12px; /* REFINED: Reduced padding */
   text-align: center;
 }
 
 .delivery-progress-text {
-  font-size: 14px;
+  font-size: 13px; /* REFINED: Smaller text */
   font-weight: 500;
   color: #2e7d32;
-  margin-bottom: 8px;
+  margin-bottom: 6px; /* REFINED: Reduced margin */
 }
 
 .progress-bar {
-  height: 8px;
+  height: 6px; /* REFINED: Slimmer bar */
   background-color: rgba(0,0,0,0.1); /* Grey track */
-  border-radius: 4px;
+  border-radius: 3px; /* REFINED: Rounded edges */
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
   background: linear-gradient(90deg, #66bb6a, #26a69a); /* Green to teal fill */
-  border-radius: 4px;
+  border-radius: 3px; /* REFINED: Rounded edges */
   transition: width 0.5s ease-in-out;
 }
 
@@ -1926,10 +1926,10 @@ box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
 border-top: 1px solid var(--border-color);
 display: flex;
 flex-direction: column;
-gap: 12px;
+gap: 10px; /* REFINED: Reduced gap */
 /* Add safe area padding here */
-padding: 12px 20px;
-padding-bottom: calc(12px + env(safe-area-inset-bottom));
+padding: 10px 20px; /* REFINED: Reduced padding */
+padding-bottom: calc(10px + env(safe-area-inset-bottom));
 }
 /* --- NEW: Enhanced Checkout Button --- */
 .checkout-btn {
@@ -1945,7 +1945,7 @@ padding-bottom: calc(12px + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
   justify-content: center; /* Center the "Pay • Place Order" text */
-  padding: 16px; /* Make button taller */
+  padding: 14px; /* REFINED: Reduced padding for a slimmer button */
   width: 100%;
 }
 
@@ -1961,7 +1961,7 @@ padding-bottom: calc(12px + env(safe-area-inset-bottom));
 
 .payment-choices {
   display: flex;
-  gap: 12px;
+  gap: 10px; /* REFINED: Reduced gap */
 }
 
 .payment-btn {
@@ -1970,23 +1970,16 @@ padding-bottom: calc(12px + env(safe-area-inset-bottom));
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 12px 8px;
+  padding: 10px 8px; /* REFINED: Reduced padding for a slimmer button */
   border: 2px solid var(--border-color);
   border-radius: 12px;
   background: var(--bg-white);
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 13px;
+  font-size: 14px; /* REFINED: Slightly larger for clarity with icon */
   font-weight: 500;
   color: var(--text-secondary);
 }
-
-.payment-btn i {
-  font-size: 20px;
-  color: var(--text-secondary);
-  transition: color 0.2s ease;
-}
-
 .payment-btn.active {
   border-color: var(--primary-color);
   background-color: var(--primary-light);
