@@ -103,11 +103,6 @@ try {
   let afterLoginAction = null; // NEW: To handle actions after login (like checkout)
   /* NEW: Variables for popup functionality */
   let currentPopupImageIndex = 0;
-  let ordersInitialized = false; // To track if orders have been fetched for the current user
-  let currentOrderFilter = 'All';
-  let currentOrderSearch = '';
-  let orders = []; // To cache fetched orders
-  let orderSearchDebounceTimer = null;
   let isPopupFavorite = false;
   let popupDetailsExpanded = false;
   let popupDescriptionExpanded = false;
@@ -548,19 +543,6 @@ try {
     document.getElementById('shareOnWhatsAppBtn').addEventListener('click', () => openWhatsApp('refer'));
 
     // Product Popup buttons
-    document.getElementById('ordersPage').addEventListener('click', e => {
-      const tab = e.target.closest('.order-filter-tab');
-      if (tab && !tab.classList.contains('active')) {
-        currentOrderFilter = tab.dataset.status;
-        renderOrdersPage(true); // Re-render with new filter
-      }
-      const detailsBtn = e.target.closest('.order-card');
-      if (detailsBtn) {
-        const orderId = detailsBtn.dataset.orderId;
-        const order = orders.find(o => o.id === orderId);
-        if (order) openOrderDetailsDrawer(order);
-      }
-    });
     document.getElementById('logoutBtn').addEventListener('click', handleLogout);
     document.getElementById('guestProfileCta').addEventListener('click', (e) => showLoginModal(e, 'signup'));
     document.querySelector('.popup-back-btn').addEventListener('click', closePopup);
@@ -583,7 +565,7 @@ try {
 
     // Cart page buttons
     document.querySelector('#cartModal .empty-cart-btn').addEventListener('click', () => { showPage('catalog'); closeCart(); });
-    document.getElementById('shopFromOrdersBtn').addEventListener('click', () => showPage('home'));
+    document.querySelector('#ordersPage .empty-cart-btn').addEventListener('click', () => showPage('home'));
 
     // FIX: The checkout button is inside a container that gets re-rendered.
     // Attach the listener to the static parent `cart-footer` to ensure it always works.
@@ -1845,8 +1827,6 @@ try {
       pagePath = '/refer'; // Conceptual path for SEO
     } else if (page === 'ordersPage') {
       // NEW: Render orders when the page is shown
-      pageTitle = 'My Orders | Coastal Fresh India';
-      pagePath = '/orders';
       renderOrdersPage();
     } else if (page === 'profilePage' || page === 'addressPage' || page === 'ordersPage') {
       pageTitle = 'Your Account | Coastal Fresh India';
@@ -2484,7 +2464,6 @@ return sanitized;
       if (typeof afterLoginAction === 'function') {
         setTimeout(afterLoginAction, 100);
         afterLoginAction = null; // Clear the action so it doesn't run again
-        ordersInitialized = false; // NEW: Force re-fetch of orders for the new user
       }
     } else { // User is logged out
       // NEW: Forget user on logout in Hotjar
@@ -2492,7 +2471,6 @@ return sanitized;
         hj('identify', null, {});
         console.log('Hotjar user session anonymized.');
       }
-      ordersInitialized = false; // NEW: Reset on logout
     }
   }
 
@@ -2744,198 +2722,77 @@ return sanitized;
   }
 
   /* ===== NEW: Orders Page Functions ===== */
-  async function renderOrdersPage(isFilterOrSearch = false) {
-    const mainContent = document.getElementById('ordersMainContent');
-    const emptyState = document.getElementById('ordersEmptyState');
-    const loginBtn = document.getElementById('loginFromOrdersBtn');
-  
+  async function renderOrdersPage() {
+    const ordersPage = document.getElementById('ordersPage');
+    const mainContent = ordersPage.querySelector('main');
+
     if (!currentUser) {
-      mainContent.innerHTML = ''; // Clear any previous list
-      emptyState.style.display = 'flex';
-      emptyState.querySelector('h3').textContent = 'Login to View Orders';
-      emptyState.querySelector('p').textContent = 'Please log in to see your order history.';
-      emptyState.querySelector('i').className = 'fas fa-user-lock';
-      if (loginBtn) loginBtn.style.display = 'block';
-      if (!loginBtn) { // If it was removed, recreate it
-        emptyState.querySelector('.empty-cart-btn').id = 'loginFromOrdersBtn';
-        emptyState.querySelector('#loginFromOrdersBtn').addEventListener('click', () => showLoginModal(null, 'signup'));
-      }
-      ordersInitialized = false; // Reset if user logs out and comes back
-      orders = []; // Clear cached orders on logout
+      mainContent.innerHTML = `
+        <div class="empty-cart" style="flex-grow: 1; min-height: 60vh;">
+          <i class="fas fa-user-lock" style="font-size: 64px; margin-bottom: 24px; color: var(--border-color);"></i>
+          <h3>Login to View Orders</h3>
+          <p>Please log in to see your order history.</p>
+          <button class="empty-cart-btn" id="loginFromOrdersBtn">Login / Sign Up</button>
+        </div>
+      `;
+      document.getElementById('loginFromOrdersBtn').addEventListener('click', () => showLoginModal(null, 'signup'));
       return;
     }
-  
-    // Render filter tabs
-    const statuses = ['All', 'Pending', 'Accepted', 'Out for Delivery', 'Completed', 'Cancelled'];
-    const tabsContainer = document.getElementById('orderFilterTabs');
-    tabsContainer.innerHTML = statuses.map(s => `
-      <button role="tab" class="order-filter-tab ${currentOrderFilter === s ? 'active' : ''}" data-status="${s}">
-        ${s.replace('-', ' ')}
-      </button>
-    `).join('');
-  
-    // Fetch orders only if not cached or not just filtering
-    if (!ordersInitialized || (!isFilterOrSearch && orders.length === 0)) {
-      mainContent.innerHTML = `<div class="loading" style="margin: 40px auto;"></div>`;
-      emptyState.style.display = 'none';
-      try {
-        const ordersSnapshot = await db.collection('orders')
-          .where('userId', '==', currentUser.uid)
-          .orderBy('createdAt', 'desc')
-          .limit(50) // Implement pagination
-          .get();
-        orders = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        ordersInitialized = true; // Mark as fetched for this session
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-        mainContent.innerHTML = '<p style="color: var(--error-color); text-align: center;">Could not load your orders. Please try again.</p>';
-        return;
-      }
-    }
-  
-    // First, check if the user has any orders at all. This handles new users correctly.
-    if (orders.length === 0) {
-      mainContent.innerHTML = ''; // Clear loading indicator
-      emptyState.style.display = 'flex';
-      emptyState.querySelector('h3').textContent = 'No Orders Yet';
-      emptyState.querySelector('p').textContent = 'Your past and current orders will appear here.';
-      emptyState.querySelector('i').className = 'fas fa-receipt';
-      const emptyBtn = emptyState.querySelector('.empty-cart-btn');
-      emptyBtn.id = 'shopFromOrdersBtn';
-      emptyBtn.textContent = 'Start Shopping';
-      emptyBtn.style.display = 'block'; // Ensure button is visible
-      emptyBtn.onclick = () => showPage('home');
-      return; // Stop here, no need to filter
-    }
 
-    // Filter orders based on current tab
-    const filteredOrders = orders.filter(order => {
-      const matchesFilter = currentOrderFilter === 'All' || order.status === currentOrderFilter;
-      // Add search logic here if needed
-      return matchesFilter;
-    });
-  
-    if (filteredOrders.length === 0 && orders.length > 0) {
-      mainContent.innerHTML = '';
-      emptyState.style.display = 'flex';
-      emptyState.querySelector('h3').textContent = 'No Orders Found';
-      emptyState.querySelector('p').textContent = 'There are no orders matching your filter.';
-      emptyState.querySelector('i').className = 'fas fa-search-minus'; // A more appropriate icon
-      // Hide the button when filters result in no matches
-      emptyState.querySelector('.empty-cart-btn').style.display = 'none';
-    } else {
-      emptyState.style.display = 'none';
-      const ordersHTML = filteredOrders.map(order => {
-        const orderDate = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
-        const statusClass = order.status.toLowerCase().replace(' ', '-');
-        const itemCount = order.items.reduce((sum, item) => sum + item.qty, 0);
-  
-        return `
-          <div class="order-card" data-order-id="${order.id}" role="button" tabindex="0">
-            <div class="order-header">
-              <div>
-                <div class="order-id">#${order.orderId.slice(-6)}</div>
-                <div class="order-date">Placed on: ${orderDate}</div>
-              </div>
-              <div class="order-status ${statusClass}">${order.status}</div>
-            </div>
-            <div class="order-body">
-              ${order.items.slice(0, 3).map((item, index) => `
-                <div class="order-item-thumb">
-                  <img src="${getOptimizedImageUrl(item.image, 112, 112)}" alt="${item.name}" loading="lazy">
-                  ${(index === 2 && order.items.length > 3) ? `<div class="order-item-thumb-more">+${order.items.length - 3}</div>` : ''}
-                </div>
-              `).join('')}
-            </div>
-            <div class="order-footer">
-              <span class="order-meta">${order.paymentMethod.toUpperCase()} &bull; ${itemCount} item${itemCount > 1 ? 's' : ''}</span>
-              <div class="order-total-section">
-                <span class="order-total">₹${order.status === 'Cancelled' ? 0 : order.total}</span>
-                <span class="order-details-btn">View Details &rarr;</span>
-              </div>
-            </div>
+    mainContent.innerHTML = '<div class="loading" style="margin: 40px auto;"></div>';
+
+    try {
+      const ordersSnapshot = await db.collection('orders')
+        .where('userId', '==', currentUser.uid)
+        .orderBy('createdAt', 'desc')
+        .get();
+
+      if (ordersSnapshot.empty) {
+        mainContent.innerHTML = `
+          <div class="empty-cart" style="flex-grow: 1; min-height: 60vh;">
+            <i class="fas fa-box-open" style="font-size: 64px; margin-bottom: 24px; color: var(--border-color);"></i>
+            <h3>No Orders Yet</h3>
+            <p>Your past and current orders will appear here.</p>
+            <button class="empty-cart-btn" id="shopFromOrdersBtn">Start Shopping</button>
           </div>
         `;
-      }).join('');
-      mainContent.innerHTML = `<div class="order-list">${ordersHTML}</div>`;
+        document.getElementById('shopFromOrdersBtn').addEventListener('click', () => showPage('home'));
+      } else {
+        const ordersHTML = ordersSnapshot.docs.map(doc => {
+          const order = doc.data();
+          const orderDate = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
+          const statusClass = order.status.toLowerCase();
+
+          return `
+            <div class="order-card">
+              <div class="order-header">
+                <div>
+                  <div class="order-id">Order #${order.orderId}</div>
+                  <div class="order-date">Placed on: ${orderDate}</div>
+                </div>
+                <div class="order-status ${statusClass}">${order.status}</div>
+              </div>
+              <div class="order-body">
+                ${order.items.slice(0, 4).map(item => `
+                  <div class="order-item-img-container">
+                    <img src="${getOptimizedImageUrl(item.image, 100, 100)}" alt="${item.name}" loading="lazy">
+                  </div>
+                `).join('')}
+                ${order.items.length > 4 ? `<div class="order-item-more">+${order.items.length - 4}</div>` : ''}
+              </div>
+              <div class="order-footer">
+                <span class="order-total">Total: ₹${order.total}</span>
+                <button class="order-details-btn" data-order-id="${doc.id}">View Details</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+        mainContent.innerHTML = `<div class="order-list">${ordersHTML}</div>`;
+      }
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      mainContent.innerHTML = '<p style="color: var(--error-color); text-align: center;">Could not load your orders.</p>';
     }
-  }
-
-  function openOrderDetailsDrawer(order) {
-    const drawerOverlay = document.getElementById('orderDetailsDrawerOverlay');
-    const drawer = document.getElementById('orderDetailsDrawer');
-    if (!drawerOverlay || !drawer) return;
-
-    // Populate data
-    document.getElementById('drawerOrderId').textContent = `#${order.orderId}`;
-    document.getElementById('drawerOrderDate').textContent = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
-    document.getElementById('drawerPaymentMethod').textContent = order.paymentMethod.toUpperCase();
-    document.getElementById('drawerGrandTotal').textContent = `₹${order.status === 'Cancelled' ? 0 : order.total}`;
-
-    document.getElementById('drawerItemsList').innerHTML = order.items.map(item => `
-      <div class="drawer-item">
-        <img src="${getOptimizedImageUrl(item.image, 96, 96)}" alt="${item.name}" class="drawer-item-thumb">
-        <div class="drawer-item-info">
-          <div class="drawer-item-name">${item.name}</div>
-          <div class="drawer-item-qty">Qty: ${item.qty}</div>
-        </div>
-        <div class="drawer-item-price">₹${item.price * item.qty}</div>
-      </div>
-    `).join('');
-
-    document.getElementById('drawerFooter').innerHTML = `
-      <button class="drawer-action-btn" id="drawerCopyIdBtn">Copy ID</button>
-      <button class="drawer-action-btn" id="drawerSupportBtn">Contact Support</button>
-      <button class="drawer-action-btn primary" id="drawerReorderBtn">Reorder</button>
-    `;
-
-    // Add event listeners
-    document.getElementById('drawerCopyIdBtn').onclick = () => {
-      navigator.clipboard.writeText(order.orderId).then(() => showToast('Order ID copied!'));
-    };
-    document.getElementById('drawerSupportBtn').onclick = () => openWhatsApp('support');
-    document.getElementById('drawerReorderBtn').onclick = () => {
-      order.items.forEach(item => addToCart(item.id, item.qty));
-      showToast(`${order.items.length} items added to your cart!`);
-      closeOrderDetailsDrawer();
-      showCart();
-    };
-
-    // Show drawer
-    drawerOverlay.style.display = 'flex';
-    setTimeout(() => drawerOverlay.classList.add('active'), 10);
-
-    // Focus trapping and close listeners
-    const closeBtn = drawer.querySelector('.drawer-close-btn');
-    previouslyFocusedElement = document.activeElement;
-    setTimeout(() => closeBtn.focus(), 300);
-
-    const closeDrawerHandler = () => closeOrderDetailsDrawer();
-    closeBtn.onclick = closeDrawerHandler;
-    drawerOverlay.onclick = (e) => { if (e.target === drawerOverlay) closeDrawerHandler(); };
-    const escHandler = (e) => { if (e.key === 'Escape') closeDrawerHandler(); };
-    document.addEventListener('keydown', escHandler);
-
-    // Store cleanup function
-    drawer.cleanup = () => {
-      document.removeEventListener('keydown', escHandler);
-    };
-  }
-
-  function closeOrderDetailsDrawer() {
-    const drawerOverlay = document.getElementById('orderDetailsDrawerOverlay');
-    const drawer = document.getElementById('orderDetailsDrawer');
-    if (!drawerOverlay || !drawer) return;
-
-    if (typeof drawer.cleanup === 'function') {
-      drawer.cleanup();
-    }
-
-    drawerOverlay.classList.remove('active');
-    setTimeout(() => {
-      drawerOverlay.style.display = 'none';
-      if (previouslyFocusedElement) previouslyFocusedElement.focus();
-    }, 300);
   }
 
 
