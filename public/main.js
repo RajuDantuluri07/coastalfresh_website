@@ -2810,6 +2810,83 @@ return sanitized;
     }
   }
 
+  function openOrderDetailsDrawer(order) {
+    const drawerOverlay = document.getElementById('orderDetailsDrawerOverlay');
+    const drawer = document.getElementById('orderDetailsDrawer');
+    if (!drawerOverlay || !drawer) return;
+
+    // Populate data
+    document.getElementById('drawerOrderId').textContent = `#${order.orderId}`;
+    document.getElementById('drawerOrderDate').textContent = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
+    document.getElementById('drawerPaymentMethod').textContent = order.paymentMethod.toUpperCase();
+    document.getElementById('drawerGrandTotal').textContent = `₹${order.status === 'Cancelled' ? 0 : order.total}`;
+
+    document.getElementById('drawerItemsList').innerHTML = order.items.map(item => `
+      <div class="drawer-item">
+        <img src="${getOptimizedImageUrl(item.image, 96, 96)}" alt="${item.name}" class="drawer-item-thumb">
+        <div class="drawer-item-info">
+          <div class="drawer-item-name">${item.name}</div>
+          <div class="drawer-item-qty">Qty: ${item.qty}</div>
+        </div>
+        <div class="drawer-item-price">₹${item.price * item.qty}</div>
+      </div>
+    `).join('');
+
+    document.getElementById('drawerFooter').innerHTML = `
+      <button class="drawer-action-btn" id="drawerCopyIdBtn">Copy ID</button>
+      <button class="drawer-action-btn" id="drawerSupportBtn">Contact Support</button>
+      <button class="drawer-action-btn primary" id="drawerReorderBtn">Reorder</button>
+    `;
+
+    // Add event listeners
+    document.getElementById('drawerCopyIdBtn').onclick = () => {
+      navigator.clipboard.writeText(order.orderId).then(() => showToast('Order ID copied!'));
+    };
+    document.getElementById('drawerSupportBtn').onclick = () => openWhatsApp('support');
+    document.getElementById('drawerReorderBtn').onclick = () => {
+      order.items.forEach(item => addToCart(item.id, item.qty));
+      showToast(`${order.items.length} items added to your cart!`);
+      closeOrderDetailsDrawer();
+      showCart();
+    };
+
+    // Show drawer
+    drawerOverlay.style.display = 'flex';
+    setTimeout(() => drawerOverlay.classList.add('active'), 10);
+
+    // Focus trapping and close listeners
+    const closeBtn = drawer.querySelector('.drawer-close-btn');
+    previouslyFocusedElement = document.activeElement;
+    setTimeout(() => closeBtn.focus(), 300);
+
+    const closeDrawerHandler = () => closeOrderDetailsDrawer();
+    closeBtn.onclick = closeDrawerHandler;
+    drawerOverlay.onclick = (e) => { if (e.target === drawerOverlay) closeDrawerHandler(); };
+    const escHandler = (e) => { if (e.key === 'Escape') closeDrawerHandler(); };
+    document.addEventListener('keydown', escHandler);
+
+    // Store cleanup function
+    drawer.cleanup = () => {
+      document.removeEventListener('keydown', escHandler);
+    };
+  }
+
+  function closeOrderDetailsDrawer() {
+    const drawerOverlay = document.getElementById('orderDetailsDrawerOverlay');
+    const drawer = document.getElementById('orderDetailsDrawer');
+    if (!drawerOverlay || !drawer) return;
+
+    if (typeof drawer.cleanup === 'function') {
+      drawer.cleanup();
+    }
+
+    drawerOverlay.classList.remove('active');
+    setTimeout(() => {
+      drawerOverlay.style.display = 'none';
+      if (previouslyFocusedElement) previouslyFocusedElement.focus();
+    }, 300);
+  }
+
 
   function renderProductSchema() {
     if (!products || products.length === 0) return;
