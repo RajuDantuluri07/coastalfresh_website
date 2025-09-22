@@ -696,6 +696,8 @@
       </header>
 
       <div class="cart-content-wrapper">
+        <!-- NEW: Bill Details section will be injected here by JS -->
+        <div id="cartBillDetails"></div>
         <main class="section">
           <div id="cartItems"></div>
           <div id="emptyCart" class="empty-cart" style="display: none;">
@@ -716,24 +718,21 @@
       </div>
       <!-- Sticky cart footer -->
       <div class="cart-footer" id="cartFooter" style="display: none;">
-        <div id="cartSummary"></div>
-        <!-- NEW: Payment Options -->
+        <!-- REDESIGNED: Payment Options -->
         <div class="payment-options" id="paymentOptions">
-          <h3 class="payment-title">Payment Method</h3>
           <div class="payment-choices">
             <button class="payment-btn active" data-method="cod">
-              <i class="fas fa-money-bill-wave"></i>
-              <span>Cash on Delivery</span>
+              <i class="fas fa-wallet"></i>
+              <span>Pay on Delivery</span>
             </button>
             <button class="payment-btn" data-method="online">
               <i class="fas fa-credit-card"></i>
-              <span>Online Payment</span>
+              <span>Pay Online</span>
             </button>
           </div>
         </div>
-        <div class="cart-actions">
-          <button class="checkout-btn">Place Order</button>
-        </div>
+        <!-- REDESIGNED: The checkout button is now the primary element in the footer -->
+        <button class="checkout-btn">Place Order</button>
       </div>
     </div>
 

@@ -1364,8 +1364,8 @@ try {
       return { ...product, qty: cart[id] };
     });
 
-    const cartSummary = document.getElementById('cartSummary');
-    if (!cartSummary) return;
+    const billDetailsContainer = document.getElementById('cartBillDetails');
+    if (!billDetailsContainer) return;
 
     const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
     const originalTotal = items.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
@@ -1375,37 +1375,42 @@ try {
 
     const checkoutBtn = document.querySelector('.checkout-btn');
     if (checkoutBtn) {
-      // The button text is now "Place Order"
-      checkoutBtn.innerHTML = `<span>Place Order</span> <span class="checkout-btn-price">₹${total}</span>`;
+      // NEW: Update button text to "Pay ₹XXX • Place Order"
+      checkoutBtn.innerHTML = `Pay ₹${total} &nbsp;&bull;&nbsp; Place Order`;
     }
 
-
-    cartSummary.innerHTML = ` 
-      <div class="cart-summary">
-        ${subtotal < FREE_DELIVERY_THRESHOLD ? `
-          <div class="delivery-progress-container">
+    // NEW: Render the entire bill details section
+    billDetailsContainer.innerHTML = `
+      <div class="section" style="padding-bottom: 0;">
+        ${subtotal < FREE_DELIVERY_THRESHOLD && subtotal > 0 ? `
+          <div class="delivery-progress-card">
             <div class="delivery-progress-text">
-              <span>🎉 Add ₹${FREE_DELIVERY_THRESHOLD - subtotal} more for FREE Delivery!</span>
+              Add items worth ₹${FREE_DELIVERY_THRESHOLD - subtotal} more to get FREE Delivery 🚚
             </div>
             <div class="progress-bar">
               <div class="progress-bar-fill" style="width: ${(subtotal / FREE_DELIVERY_THRESHOLD) * 100}%;"></div>
             </div>
           </div>
         ` : ''}
-        <div class="summary-row"><span>Subtotal</span><span>₹${subtotal}</span></div>
-        ${savings > 0 ? `<div class="summary-row summary-savings"><span>Total Savings</span><span>-₹${savings}</span></div>` : ''}
-        <div class="summary-row">
-          <span>Delivery Fee <i class="fas fa-info-circle" title="Free on orders over ₹${FREE_DELIVERY_THRESHOLD}"></i></span>
-          <span>${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}</span>
+
+        <div class="price-summary-card">
+          <h3 class="price-summary-title">Bill Details</h3>
+          <div class="summary-row"><span>Item Total</span><span>₹${subtotal}</span></div>
+          <div class="summary-row">
+            <span>Delivery Fee <i class="fas fa-info-circle" title="Free on orders over ₹${FREE_DELIVERY_THRESHOLD}"></i></span>
+            <span>${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-row summary-total"><span>To Pay</span><span>₹${total}</span></div>
+          ${savings > 0 ? `<div class="total-savings-banner">You saved ₹${savings} on this order 🎉</div>` : ''}
         </div>
-        <div class="summary-row summary-total"><span>Total</span><span>₹${total}</span></div>
       </div>
     `;
 
     // Also check if cart is now empty
     if (items.length === 0) {
       document.getElementById('emptyCart').style.display = 'flex';
-      document.getElementById('cartFooter').style.display = 'none';
+      if (document.getElementById('cartFooter')) document.getElementById('cartFooter').style.display = 'none';
     }
   }
 
