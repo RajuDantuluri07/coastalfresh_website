@@ -1827,8 +1827,6 @@ try {
       pagePath = '/refer'; // Conceptual path for SEO
     } else if (page === 'ordersPage') {
       // NEW: Render orders when the page is shown
-      pageTitle = 'My Orders | Coastal Fresh India';
-      pagePath = '/orders';
       renderOrdersPage();
     } else if (page === 'profilePage' || page === 'addressPage' || page === 'ordersPage') {
       pageTitle = 'Your Account | Coastal Fresh India';
@@ -2738,7 +2736,6 @@ return sanitized;
         </div>
       `;
       document.getElementById('loginFromOrdersBtn').addEventListener('click', () => showLoginModal(null, 'signup'));
-      ordersInitialized = false; // Reset if user logs out and comes back
       return;
     }
 
