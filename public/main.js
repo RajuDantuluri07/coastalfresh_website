@@ -1530,18 +1530,17 @@ try {
       couponDiscount = Math.min(couponDiscount, subtotal); // Discount can't be more than subtotal
     }
 
-    const deliveryFee = (subtotal - couponDiscount) >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
+    const deliveryFee = (subtotal - couponDiscount) >= FREE_DELIVERY_THRESHOLD ? 0 : 100;
     const total = subtotal - couponDiscount + deliveryFee;
     // --- FIX: Calculate total savings including delivery fee discount ---
-    const deliverySavings = 100 - deliveryFee; // Original fee is 100
-    const totalSavings = productSavings + deliverySavings;
+    const totalSavings = productSavings + (deliveryFee === 0 ? 100 : 0);
 
     // --- FIX: Create a clearer, more accurate display string for the delivery fee ---
     let deliveryFeeDisplay;
     if (deliveryFee === 0) {
       deliveryFeeDisplay = `<span><del style="opacity: 0.6; margin-right: 4px;">₹100</del> FREE</span>`;
     } else {
-      deliveryFeeDisplay = `<span>₹${deliveryFee} <del style="opacity: 0.6; margin-left: 4px;">₹100</del></span>`;
+      deliveryFeeDisplay = `<span>₹${deliveryFee}</span>`;
     }
 
     const checkoutBtn = document.querySelector('.checkout-btn');
@@ -1712,8 +1711,8 @@ try {
     // 5. Construct the WhatsApp message and Order Data
     const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
     const couponDiscount = appliedCoupon ? (appliedCoupon.type === 'percent' ? (subtotal * appliedCoupon.value) / 100 : appliedCoupon.value) : 0;
-    const finalSubtotal = subtotal - couponDiscount;
-    const deliveryFee = finalSubtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
+    const finalSubtotal = subtotal - couponDiscount; // This is the subtotal after coupon
+    const deliveryFee = finalSubtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 100;
     const total = finalSubtotal + deliveryFee;
 
     let message = `Hi! I'd like to place an order (ID: ${orderId}):\n\n`;
