@@ -1308,15 +1308,19 @@ try {
     });
     
   const cartItems = document.getElementById('cartItems');
-  const cartSummary = document.getElementById('cartSummary');
   const emptyCart = document.getElementById('emptyCart');
   const cartFooter = document.getElementById('cartFooter');
+  // NEW: Get references to the sections that need to be cleared.
+  const billDetailsContainer = document.getElementById('cartBillDetails');
+  const couponSectionContainer = document.getElementById('cartCouponSection');
 
     if (items.length === 0) {
       emptyCart.style.display = 'flex';
       cartItems.innerHTML = '';
-      cartSummary.innerHTML = '';
       cartFooter.style.display = 'none';
+      // FIX: Clear the bill and coupon sections when the cart is empty.
+      if (billDetailsContainer) billDetailsContainer.innerHTML = '';
+      if (couponSectionContainer) couponSectionContainer.innerHTML = '';
     } else { // REFACTOR: Simplified cart rendering
       emptyCart.style.display = 'none';
       cartFooter.style.display = 'block';
@@ -1421,6 +1425,11 @@ try {
     }
 
     const coupon = COUPONS[code];
+    // FIX: The 'items' variable was not in scope. It needs to be calculated here.
+    const items = Object.keys(cart).map(id => {
+      const product = products.find(p => p.id === parseInt(id));
+      return { ...product, qty: cart[id] };
+    });
     const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
 
     if (!coupon || (coupon.minOrder && subtotal < coupon.minOrder)) {
