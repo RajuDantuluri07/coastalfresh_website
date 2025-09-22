@@ -229,22 +229,14 @@ try {
       }
 
       // Quantity controls in the cart
-      const cartQtyBtn = target.closest('.cart-item .qty-controls .cart-qty-btn');
+      const cartQtyBtn = target.closest('.cart-item-card .qty-controls .cart-qty-btn');
       if (cartQtyBtn) {
-        const cartItem = cartQtyBtn.closest('.cart-item-card'); // REVAMP: Use new class
-        const productId = cartItem.dataset.id;
+        // The button itself has the data-id, which is more direct.
+        const productId = cartQtyBtn.dataset.id;
         if (productId) {
           const change = cartQtyBtn.classList.contains('inc') ? 1 : -1; // REVAMP: Use new classes
           updateQty(parseInt(productId), change);
         }
-      }
-
-      // Remove from cart button
-      const removeBtn = target.closest('.remove-item');
-      if (removeBtn) {
-        const cartItem = removeBtn.closest('.cart-item-card'); // REVAMP: Use new class
-        const productId = cartItem.dataset.id;
-        if (productId) removeFromCart(parseInt(productId));
       }
 
       // FAQ toggle
@@ -1350,15 +1342,10 @@ try {
                 ${hasOffer ? `<span class="cart-item-mrp">₹${item.mrp}</span>` : ''}
               </div>
             </div>
-            <div>
-              <div class="cart-item-qty qty-controls">
-                <button class="qty-btn cart-qty-btn dec" data-id="${item.id}" aria-label="decrease quantity">−</button>
-                <div class="count cart-qty" aria-live="polite">${item.qty}</div>
-                <button class="qty-btn cart-qty-btn inc" data-id="${item.id}" aria-label="increase quantity">+</button>
-              </div>
-              <div style="text-align:right;margin-top:6px">
-                <button class="remove-item" data-id="${item.id}" style="background:transparent;border:0;color:var(--text-secondary)">Remove</button>
-              </div>
+            <div class="cart-item-qty qty-controls">
+              <button class="qty-btn cart-qty-btn dec" data-id="${item.id}" aria-label="decrease quantity">−</button>
+              <div class="count cart-qty" aria-live="polite">${item.qty}</div>
+              <button class="qty-btn cart-qty-btn inc" data-id="${item.id}" aria-label="increase quantity">+</button>
             </div>
           </article>
         `;
@@ -1602,9 +1589,29 @@ try {
   function updateQty(id, change) {
     if (!cart[id]) return;
 
+    const product = products.find(p => p.id === parseInt(id));
+    const originalQty = cart[id];
+
     cart[id] += change;
     if (cart[id] <= 0) {
       delete cart[id];
+      // Track remove from cart event
+      if (product) {
+        Analytics.trackEvent('remove_from_cart', {
+          currency: 'INR',
+          value: product.finalPrice * originalQty,
+          items: [{
+            item_id: product.id,
+            item_name: product.name,
+            item_category: product.category,
+            price: product.finalPrice,
+            quantity: originalQty
+          }]
+        });
+      }
+    } else {
+      // Track quantity change only if not removed
+      if (product) Analytics.trackChangeQty(product, change, cart[id]);
     }
     saveCart();
     
@@ -1630,33 +1637,6 @@ try {
       updateCartUI();
     }
     updateProductCardState(id);
-    
-    // Track quantity change
-    const product = products.find(p => p.id === parseInt(id));
-    if (product) Analytics.trackChangeQty(product, change, cart[id]);
-  }
-
-  function removeFromCart(id) {
-    const numericId = parseInt(id);
-    if (!cart[numericId]) return;
-
-    const product = products.find(p => p.id === numericId);
-    const qtyToRemove = cart[numericId]; // Get quantity before deleting
-    delete cart[numericId];
-    saveCart();
-
-    // Animate removal if the cart is open
-    const cartItemEl = document.querySelector(`#cartModal .cart-item-card[data-id="${numericId}"]`);
-    if (cartItemEl) {
-      cartItemEl.classList.add('removing');
-      // After animation, re-render the whole cart to handle empty state correctly
-      cartItemEl.addEventListener('transitionend', () => showCart(), { once: true });
-    }
-
-    updateCartBadges();
-    updateProductCardState(numericId);
-
-    // Track removal
   }
 
   async function checkout() {
