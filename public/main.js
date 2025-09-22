@@ -2564,8 +2564,14 @@ return sanitized;
         mainContent.innerHTML = `<div class="order-list">${ordersHTML}</div>`;
       }
     } catch (error) {
-      console.error("Error fetching orders:", error);
-      mainContent.innerHTML = '<p style="color: var(--error-color); text-align: center;">Could not load your orders.</p>';
+      console.error("Error fetching orders:", error.message);
+      // NEW: Provide a more helpful error message, especially for index issues.
+      let errorMessage = 'Could not load your orders. Please try again later.';
+      if (error.code === 'failed-precondition') {
+        // This is the typical error code for a missing index.
+        errorMessage = 'There was a problem fetching your order history. Please contact support.';
+      }
+      mainContent.innerHTML = `<p style="color: var(--error-color); text-align: center; padding: 20px;">${errorMessage}</p>`;
     }
   }
 
