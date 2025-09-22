@@ -103,6 +103,7 @@ try {
   let afterLoginAction = null; // NEW: To handle actions after login (like checkout)
   /* NEW: Variables for popup functionality */
   let currentPopupImageIndex = 0;
+  let ordersInitialized = false; // To track if orders have been fetched for the current user
   let currentOrderFilter = 'All';
   let currentOrderSearch = '';
   let orders = []; // To cache fetched orders
@@ -2483,6 +2484,7 @@ return sanitized;
       if (typeof afterLoginAction === 'function') {
         setTimeout(afterLoginAction, 100);
         afterLoginAction = null; // Clear the action so it doesn't run again
+        ordersInitialized = false; // NEW: Force re-fetch of orders for the new user
       }
     } else { // User is logged out
       // NEW: Forget user on logout in Hotjar
@@ -2490,6 +2492,7 @@ return sanitized;
         hj('identify', null, {});
         console.log('Hotjar user session anonymized.');
       }
+      ordersInitialized = false; // NEW: Reset on logout
     }
   }
 
@@ -2757,6 +2760,7 @@ return sanitized;
         emptyState.querySelector('.empty-cart-btn').id = 'loginFromOrdersBtn';
         emptyState.querySelector('#loginFromOrdersBtn').addEventListener('click', () => showLoginModal(null, 'signup'));
       }
+      ordersInitialized = false; // Reset if user logs out and comes back
       orders = []; // Clear cached orders on logout
       return;
     }
@@ -2771,8 +2775,8 @@ return sanitized;
     `).join('');
   
     // Fetch orders only if not cached or not just filtering
-    if (orders.length === 0 && !isFilterOrSearch) {
-      mainContent.innerHTML = '<div class="loading" style="margin: 40px auto;"></div>';
+    if (!ordersInitialized || (!isFilterOrSearch && orders.length === 0)) {
+      mainContent.innerHTML = `<div class="loading" style="margin: 40px auto;"></div>`;
       emptyState.style.display = 'none';
       try {
         const ordersSnapshot = await db.collection('orders')
@@ -2781,6 +2785,7 @@ return sanitized;
           .limit(50) // Implement pagination
           .get();
         orders = ordersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        ordersInitialized = true; // Mark as fetched for this session
       } catch (error) {
         console.error("Error fetching orders:", error);
         mainContent.innerHTML = '<p style="color: var(--error-color); text-align: center;">Could not load your orders. Please try again.</p>';
@@ -2788,6 +2793,21 @@ return sanitized;
       }
     }
   
+    // First, check if the user has any orders at all. This handles new users correctly.
+    if (orders.length === 0) {
+      mainContent.innerHTML = ''; // Clear loading indicator
+      emptyState.style.display = 'flex';
+      emptyState.querySelector('h3').textContent = 'No Orders Yet';
+      emptyState.querySelector('p').textContent = 'Your past and current orders will appear here.';
+      emptyState.querySelector('i').className = 'fas fa-receipt';
+      const emptyBtn = emptyState.querySelector('.empty-cart-btn');
+      emptyBtn.id = 'shopFromOrdersBtn';
+      emptyBtn.textContent = 'Start Shopping';
+      emptyBtn.style.display = 'block'; // Ensure button is visible
+      emptyBtn.onclick = () => showPage('home');
+      return; // Stop here, no need to filter
+    }
+
     // Filter orders based on current tab
     const filteredOrders = orders.filter(order => {
       const matchesFilter = currentOrderFilter === 'All' || order.status === currentOrderFilter;
@@ -2795,12 +2815,14 @@ return sanitized;
       return matchesFilter;
     });
   
-    if (filteredOrders.length === 0) {
+    if (filteredOrders.length === 0 && orders.length > 0) {
       mainContent.innerHTML = '';
       emptyState.style.display = 'flex';
       emptyState.querySelector('h3').textContent = 'No Orders Found';
       emptyState.querySelector('p').textContent = 'There are no orders matching your filter.';
-      emptyState.querySelector('i').className = 'fas fa-receipt';
+      emptyState.querySelector('i').className = 'fas fa-search-minus'; // A more appropriate icon
+      // Hide the button when filters result in no matches
+      emptyState.querySelector('.empty-cart-btn').style.display = 'none';
     } else {
       emptyState.style.display = 'none';
       const ordersHTML = filteredOrders.map(order => {
