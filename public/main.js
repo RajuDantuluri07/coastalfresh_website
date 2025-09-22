@@ -1357,7 +1357,7 @@ try {
     });
   }
 
-  /* NEW: Function to only update the summary in the cart */
+  /* REFACTORED: Function to update the summary in the cart with the new design */
   function updateCartSummary() {
     const items = Object.keys(cart).map(id => {
       const product = products.find(p => p.id === parseInt(id));
@@ -1379,9 +1379,7 @@ try {
       checkoutBtn.innerHTML = `Pay ₹${total} &nbsp;&bull;&nbsp; Place Order`;
     }
 
-    // NEW: Render the entire bill details section
     billDetailsContainer.innerHTML = `
-      <div class="section" style="padding-bottom: 0;">
         ${subtotal < FREE_DELIVERY_THRESHOLD && subtotal > 0 ? `
           <div class="delivery-progress-card">
             <div class="delivery-progress-text">
@@ -1404,7 +1402,6 @@ try {
           <div class="summary-row summary-total"><span>To Pay</span><span>₹${total}</span></div>
           ${savings > 0 ? `<div class="total-savings-banner">You saved ₹${savings} on this order 🎉</div>` : ''}
         </div>
-      </div>
     `;
 
     // Also check if cart is now empty

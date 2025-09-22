@@ -688,10 +688,10 @@
       <header class="header">
         <div class="header-top">
           <button class="back-btn" aria-label="Close Cart">
-            <i class="fas fa-arrow-left"></i>
+            <i class="fas fa-times"></i>
           </button>
           <h1 class="logo">Your Cart</h1>
-          <div></div>
+          <div style="width: 36px;"></div> <!-- Spacer to balance title -->
         </div>
       </header>
 
@@ -718,21 +718,21 @@
       </div>
       <!-- Sticky cart footer -->
       <div class="cart-footer" id="cartFooter" style="display: none;">
-        <!-- REDESIGNED: Payment Options -->
+        <!-- NEW: Redesigned Payment Options -->
         <div class="payment-options" id="paymentOptions">
           <div class="payment-choices">
             <button class="payment-btn active" data-method="cod">
-              <i class="fas fa-wallet"></i>
-              <span>Pay on Delivery</span>
+              <i class="fas fa-money-bill-wave"></i>
+              <span>Cash on Delivery</span>
             </button>
             <button class="payment-btn" data-method="online">
               <i class="fas fa-credit-card"></i>
-              <span>Pay Online</span>
+              <span>UPI / Cards / Wallets</span>
             </button>
           </div>
         </div>
-        <!-- REDESIGNED: The checkout button is now the primary element in the footer -->
-        <button class="checkout-btn">Place Order</button>
+        <!-- NEW: The checkout button is now the primary element in the footer -->
+        <button class="checkout-btn">Place Order</button> <!-- Text will be updated by JS -->
       </div>
     </div>
 
