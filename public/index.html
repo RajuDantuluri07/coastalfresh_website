@@ -696,9 +696,8 @@
       </header>
 
       <div class="cart-content-wrapper">
-        <!-- NEW: Bill Details section will be injected here by JS -->
-        <div id="cartBillDetails"></div>
-        <main class="section">
+        <!-- REORDERED: Products are now at the top -->
+        <main class="section" id="cartItemsSection">
           <div id="cartItems"></div>
           <div id="emptyCart" class="empty-cart" style="display: none;">
             <div class="empty-cart-animation">
@@ -715,6 +714,9 @@
             <button class="empty-cart-btn">Browse Products</button>
           </div>
         </main>
+        <!-- REORDERED: Coupon and Bill details are now at the bottom -->
+        <div id="cartCouponSection"></div>
+        <div id="cartBillDetails"></div>
       </div>
       <!-- Sticky cart footer -->
       <div class="cart-footer" id="cartFooter" style="display: none;">

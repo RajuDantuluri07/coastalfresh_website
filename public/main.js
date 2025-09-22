@@ -63,6 +63,13 @@ try {
   const FLASH_SALE_DURATION_HOURS = 12; // Configurable duration in hours
   const FEATURED_PRODUCT_IDS = [17, 13, 21, 1];
   const FREE_DELIVERY_THRESHOLD = 1500;
+  /* NEW: Coupon Configuration */
+  const COUPONS = {
+    'FRESH10': { type: 'percent', value: 10, description: '10% off your order' },
+    'SAVE50': { type: 'fixed', value: 50, description: 'Flat ₹50 off' },
+    'NEWUSER': { type: 'percent', value: 15, minOrder: 500, description: '15% off on orders above ₹500' }
+  };
+
   const ITEMS_PER_PAGE = 8;
 
   /* ===== Products DATA ===== */
@@ -86,6 +93,8 @@ try {
   let db = null; // NEW: Firestore database instance
   let currentUser = null;
   let editingAddressId = null; // NEW: To track which address is being edited
+  let appliedCoupon = null; // NEW: To store applied coupon details
+  let couponError = null; // NEW: To store coupon validation errors
   let selectedPaymentMethod = 'cod'; // NEW: Default payment method
   let deferredInstallPrompt = null; // NEW: For PWA installation prompt
   let installPromptUsed = false; // Tracks whether the native prompt has been shown/used
@@ -571,6 +580,16 @@ try {
     document.getElementById('cartFooter').addEventListener('click', (e) => {
       if (e.target.closest('.checkout-btn')) {
         checkout();
+      }
+    });
+
+    // NEW: Event listener for coupon section
+    document.getElementById('cartCouponSection').addEventListener('click', e => {
+      if (e.target.id === 'applyCouponBtn') {
+        applyCoupon();
+      }
+      if (e.target.id === 'removeCouponBtn') {
+        removeCoupon();
       }
     });
 
@@ -1336,6 +1355,7 @@ try {
 
       // REFACTOR: Call centralized summary update function
       updateCartSummary();
+    renderCouponSection(); // NEW: Render the coupon section
     }
 
     // Show cart modal
@@ -1357,6 +1377,77 @@ try {
     });
   }
 
+  /* ===== NEW: Coupon Management Functions ===== */
+  function renderCouponSection() {
+    const container = document.getElementById('cartCouponSection');
+    if (!container) return;
+
+    if (appliedCoupon) {
+      container.innerHTML = `
+        <div class="coupon-applied-card">
+          <div class="coupon-applied-info">
+            <i class="fas fa-check-circle"></i>
+            <div>
+              <strong>'${appliedCoupon.code}' applied</strong>
+              <small>${COUPONS[appliedCoupon.code].description}</small>
+            </div>
+          </div>
+          <button id="removeCouponBtn" class="coupon-remove-btn" aria-label="Remove Coupon">&times;</button>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="coupon-apply-form">
+          <div class="coupon-input-wrapper">
+            <i class="fas fa-tag"></i>
+            <input type="text" id="couponInput" placeholder="Enter coupon code" autocapitalize="characters">
+          </div>
+          <button id="applyCouponBtn">Apply</button>
+        </div>
+        ${couponError ? `<p class="coupon-error">${couponError}</p>` : ''}
+      `;
+    }
+  }
+
+  function applyCoupon() {
+    const input = document.getElementById('couponInput');
+    const code = input.value.trim().toUpperCase();
+    couponError = null; // Reset error
+
+    if (!code) {
+      couponError = 'Please enter a coupon code.';
+      renderCouponSection();
+      return;
+    }
+
+    const coupon = COUPONS[code];
+    const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
+
+    if (!coupon || (coupon.minOrder && subtotal < coupon.minOrder)) {
+      couponError = coupon ? `This coupon is valid on orders above ₹${coupon.minOrder}.` : 'Invalid coupon code.';
+      showToast(coupon ? `Minimum order of ₹${coupon.minOrder} required.` : 'Invalid coupon code.');
+      renderCouponSection();
+      input.value = code; // Keep the typed code
+      return;
+    }
+
+    appliedCoupon = { code, ...coupon };
+    showToast(`Coupon '${code}' applied successfully!`);
+    renderCouponSection();
+    updateCartSummary();
+    Analytics.trackEvent('apply_coupon', { coupon: code });
+  }
+
+  function removeCoupon() {
+    const removedCode = appliedCoupon.code;
+    appliedCoupon = null;
+    couponError = null;
+    showToast('Coupon removed.');
+    renderCouponSection();
+    updateCartSummary();
+    Analytics.trackEvent('remove_coupon', { coupon: removedCode });
+  }
+
   /* REFACTORED: Function to update the summary in the cart with the new design */
   function updateCartSummary() {
     const items = Object.keys(cart).map(id => {
@@ -1370,8 +1461,20 @@ try {
     const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
     const originalTotal = items.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
     const savings = originalTotal - subtotal;
-    const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
-    const total = subtotal + deliveryFee;
+
+    // NEW: Calculate coupon discount
+    let couponDiscount = 0;
+    if (appliedCoupon) {
+      if (appliedCoupon.type === 'percent') {
+        couponDiscount = (subtotal * appliedCoupon.value) / 100;
+      } else if (appliedCoupon.type === 'fixed') {
+        couponDiscount = appliedCoupon.value;
+      }
+      couponDiscount = Math.min(couponDiscount, subtotal); // Discount can't be more than subtotal
+    }
+
+    const deliveryFee = (subtotal - couponDiscount) >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
+    const total = subtotal - couponDiscount + deliveryFee;
 
     const checkoutBtn = document.querySelector('.checkout-btn');
     if (checkoutBtn) {
@@ -1394,12 +1497,13 @@ try {
         <div class="price-summary-card">
           <h3 class="price-summary-title">Bill Details</h3>
           <div class="summary-row"><span>Item Total</span><span>₹${subtotal}</span></div>
+          ${couponDiscount > 0 ? `<div class="summary-row summary-discount"><span>Discount</span><span>- ₹${Math.round(couponDiscount)}</span></div>` : ''}
           <div class="summary-row">
             <span>Delivery Fee <i class="fas fa-info-circle" title="Free on orders over ₹${FREE_DELIVERY_THRESHOLD}"></i></span>
             <span>${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}</span>
           </div>
           <div class="summary-divider"></div>
-          <div class="summary-row summary-total"><span>To Pay</span><span>₹${total}</span></div>
+          <div class="summary-row summary-total"><span>To Pay</span><span>₹${Math.round(total)}</span></div>
           ${savings > 0 ? `<div class="total-savings-banner">You saved ₹${savings} on this order 🎉</div>` : ''}
         </div>
     `;
@@ -1558,8 +1662,10 @@ try {
 
     // 5. Construct the WhatsApp message and Order Data
     const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
-    const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
-    const total = subtotal + deliveryFee;
+    const couponDiscount = appliedCoupon ? (appliedCoupon.type === 'percent' ? (subtotal * appliedCoupon.value) / 100 : appliedCoupon.value) : 0;
+    const finalSubtotal = subtotal - couponDiscount;
+    const deliveryFee = finalSubtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
+    const total = finalSubtotal + deliveryFee;
 
     let message = `Hi! I'd like to place an order (ID: ${orderId}):\n\n`;
     items.forEach(item => {
@@ -1577,9 +1683,10 @@ try {
       orderId: orderId,
       userId: currentUser.uid,
       items: items.map(item => ({ id: item.id, name: item.name, qty: item.qty, price: item.finalPrice, image: item.image })),
-      subtotal: subtotal,
+      subtotal: Math.round(subtotal),
+      coupon: appliedCoupon ? { code: appliedCoupon.code, discount: Math.round(couponDiscount) } : null, // NEW
       deliveryFee: deliveryFee,
-      total: total,
+      total: Math.round(total),
       address: userAddress,
       paymentMethod: selectedPaymentMethod, // NEW
       status: 'Pending', // Initial status

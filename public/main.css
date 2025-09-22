@@ -1631,7 +1631,7 @@ overflow-y: auto;
 display: flex;
 flex-direction: column;
 min-height: 0;
-padding-bottom: 180px; /* Space for the sticky footer */
+padding-bottom: 240px; /* Space for the sticky footer + coupon */
 }
 
 /* NEW: Make cart title bolder and bigger */
@@ -1639,6 +1639,87 @@ padding-bottom: 180px; /* Space for the sticky footer */
   font-size: 20px;
   font-weight: 700;
 }
+
+/* NEW: Adjust padding for reordered cart layout */
+#cartItemsSection {
+  padding-top: 16px;
+  padding-bottom: 0;
+}
+
+/* --- NEW: Coupon Section Styles --- */
+#cartCouponSection {
+  padding: 16px 20px 0;
+  background: var(--bg-light);
+}
+
+.coupon-apply-form {
+  display: flex;
+  gap: 8px;
+}
+
+.coupon-input-wrapper {
+  flex-grow: 1;
+  position: relative;
+}
+
+.coupon-input-wrapper .fa-tag {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+#couponInput {
+  width: 100%;
+  height: 44px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0 12px 0 40px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--bg-white);
+  text-transform: uppercase;
+}
+
+#couponInput::placeholder {
+  text-transform: none;
+}
+
+#applyCouponBtn {
+  height: 44px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 10px;
+  background: var(--primary-light);
+  color: var(--primary-color);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.coupon-error {
+  color: var(--error-color);
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.coupon-applied-card {
+  background: #e8f5e9; /* Light green */
+  border: 1px solid var(--success-color);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.coupon-applied-info { display: flex; align-items: center; gap: 12px; color: var(--success-color); }
+.coupon-applied-info .fa-check-circle { font-size: 20px; }
+.coupon-applied-info div { display: flex; flex-direction: column; }
+.coupon-applied-info strong { font-size: 14px; font-weight: 700; }
+.coupon-applied-info small { font-size: 12px; }
+.coupon-remove-btn { background: none; border: none; font-size: 24px; color: var(--success-color); cursor: pointer; opacity: 0.7; }
 
 /* NEW: Container for bill details */
 .cart-bill-details {
@@ -1873,6 +1954,15 @@ padding-bottom: 180px; /* Space for the sticky footer */
   font-family: 'Roboto', sans-serif; /* For better number rendering */
 }
 
+.summary-row.summary-discount {
+  color: var(--success-color);
+  font-weight: 500;
+}
+
+.summary-row.summary-discount span:last-child {
+  color: var(--success-color);
+}
+
 .summary-row .fa-info-circle {
   color: var(--text-secondary);
   cursor: help;
@@ -1969,14 +2059,14 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 8px; /* REFINED: Reduced padding for a slimmer button */
+  gap: 6px; /* REFINED: Smaller gap */
+  padding: 8px; /* REFINED: Reduced padding for a smaller button */
   border: 2px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 10px; /* REFINED: Smaller radius */
   background: var(--bg-white);
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 14px; /* REFINED: Slightly larger for clarity with icon */
+  font-size: 13px; /* REFINED: Smaller font size */
   font-weight: 500;
   color: var(--text-secondary);
 }
