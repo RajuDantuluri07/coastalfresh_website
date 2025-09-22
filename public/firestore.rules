@@ -2,42 +2,20 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // === USER DOCUMENT RULE ===
-    // This rule applies ONLY to the document at /users/{userId}
-    match /users/{userId} {
-      // Allow any authenticated user to read the main profile document.
-      // This is required for the admin panel to check the 'role' field.
-      allow read: if request.auth != null;
-      // Only the user themselves can create or update their own profile document.
+    // Users can read and write their own profile data and subcollections.
+    match /users/{userId}/{document=**} {
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // === USER SUBCOLLECTION RULE ===
-    // This rule applies to documents in subcollections like 'addresses' or 'fcmTokens'.
-    match /users/{userId}/{subcollection}/{docId} {
-        // Only the owner of the profile can read or write to their own subcollections.
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // === MERGED RULES FOR THE 'orders' COLLECTION (CUSTOMER + ADMIN) ===
+    // Rules for the 'orders' collection.
     match /orders/{orderId} {
-      // Helper function to check if the requester is an admin.
-      // This improves readability and reduces repeated 'get' calls.
-      function isAdmin() {
-        return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-      }
-
       // CREATE: A user can create an order for themselves.
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
 
-      // READ (and LIST): Allow if the user is the owner of the document OR if the user is an admin.
-      // This single rule covers both single-document gets and collection queries.
-      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      // READ: A user can read their own orders.
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
 
-      // UPDATE: Only admins can update an order.
-      allow update: if isAdmin();
-
-      // DELETE: Disallow deleting orders from the client to maintain data integrity.
+      // UPDATE & DELETE: Disallow for data integrity.
       allow delete: if false;
     }
   }

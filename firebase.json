@@ -11,12 +11,6 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-      // NEW: Add a rule to explicitly ignore the /admin path from being rewritten.
-      // This must come BEFORE the general SPA rule.
-      {
-        "source": "/admin/**",
-        "destination": "/admin/index.html"
-      },
       {
         "source": "**",
         "destination": "/index.html"
