@@ -1632,7 +1632,7 @@ display: flex;
 flex-direction: column;
 min-height: 0;
 padding-bottom: 0; /* FIX: Remove padding as footer now contains all bottom elements */
-}
+} 
 
 /* NEW: Make cart title bolder and bigger */
 #cartModal .header .logo {
@@ -1640,23 +1640,20 @@ padding-bottom: 0; /* FIX: Remove padding as footer now contains all bottom elem
   font-weight: 700;
 }
 
-/* --- NEW: Sticky Progress Bar Container --- */
-#cartStickyHeaderAddon {
-  background: var(--bg-light);
-  padding: 8px 16px;
-  border-bottom: 1px solid var(--border-color);
-  /* FIX: Make the progress bar sticky to prevent it from being hidden by the header */
-  position: sticky;
-  top: 0;
-  z-index: 1; /* Ensure it sits above other cart content */
-}
-
-.delivery-progress-sticky { /* Re-using the existing card style but without the gradient background */
-  border: 1px solid #c8e6c9; /* Light green border */
+/* --- REFINED: Slimmer Delivery Progress Bar --- */
+.delivery-progress-sticky {
   border-radius: 10px; /* Rounded corners */
-  padding: 6px 10px;
+  padding: 8px 12px; /* Slimmer padding */
   text-align: center;
   background: var(--bg-white);
+  border: 1px solid var(--border-color);
+}
+
+.delivery-progress-text {
+  font-size: 13px; /* Smaller text */
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px; /* Space between text and bar */
 }
 
 /* --- REFINED: Cart Section Layout --- */
@@ -1673,11 +1670,6 @@ padding-bottom: 0; /* FIX: Remove padding as footer now contains all bottom elem
 }
 
 /* --- NEW: Coupon Section Styles --- */
-#cartCouponSection {
-  padding: 0; /* FIX: Remove padding, handled by parent footer */
-  background: transparent; /* FIX: Inherit background from footer */
-  margin-bottom: 6px; /* NEW: Add space below the coupon section */
-}
 .coupon-apply-form {
   display: flex;
   gap: 8px;
@@ -1927,25 +1919,12 @@ padding-bottom: 0; /* FIX: Remove padding as footer now contains all bottom elem
   box-shadow: 0 4px 16px rgba(0,0,0,0.05);
 }
 
-.price-summary-title { /* This is an H3 */
-  font-size: 18px; /* H2 Product Name */
-  margin-bottom: 16px;
-}
-
-.delivery-progress-text {
-  font-size: 12px; /* REFINED: Smaller text */
-  font-weight: 500;
-  color: var(--text-secondary); /* REFINED: Less bold color */
-  margin-bottom: 4px; /* REFINED: Reduced margin */
-}
-
 .progress-bar {
-  height: 8px; /* REFINED: Slimmer bar per request */
+  height: 6px; /* Slimmer bar */
   background-color: rgba(0,0,0,0.1); /* Grey track */
   border-radius: 4px; /* REFINED: Rounded edges */
   overflow: hidden;
 }
-
 .progress-bar-fill {
   height: 100%;
   background: var(--success-color); /* REFINED: Solid green fill */
@@ -2029,7 +2008,7 @@ box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
 border-top: 1px solid var(--border-color);
 display: flex;
 flex-direction: column; /* FIX: Corrected property */
-gap: 10px; /* REFINED: Adjusted gap */
+gap: 12px; /* FIX: Add vertical spacing between footer elements */
 /* Add safe area padding here */ /* FIX: Make the entire footer background light grey */
 padding: 10px 16px; /* REFINED: Adjusted padding */
 padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted padding */
@@ -2074,13 +2053,13 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px; /* REFINED: Slimmer button */
+  padding: 10px 8px; /* REFINED: Slimmer button */
   border: none;
   border-radius: 0;
   background: var(--bg-white);
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 12px; /* REFINED: Smaller font size */
+  font-size: 13px; /* REFINED: Slightly larger for clarity */
   font-weight: 500;
   color: var(--text-secondary);
 }

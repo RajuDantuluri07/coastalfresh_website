@@ -695,10 +695,7 @@
         </div>
       </header>
 
-      <div class="cart-content-wrapper">
-        <!-- NEW: Sticky container for the delivery progress bar -->
-        <div id="cartStickyHeaderAddon"></div>
-
+      <div class="cart-content-wrapper" id="cartContentWrapper">
         <!-- REFINED: Products are now at the top, inside a card -->
         <main class="section cart-section" id="cartItemsSection">
           <div id="cartItems"></div>
@@ -720,9 +717,8 @@
       </div>
       <!-- Sticky cart footer -->
       <div class="cart-footer" id="cartFooter" style="display: none;">
-        <!-- MOVED: Coupon and Bill details are now part of the sticky footer -->
+        <div id="deliveryProgressContainer"></div>
         <div id="cartBillDetails"></div>
-        <div id="cartCouponSection"></div>
         <!-- REFINED: Payment options and Place Order button -->
         <div class="payment-options" id="paymentOptions">
           <div class="payment-choices">

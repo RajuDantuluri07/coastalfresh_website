@@ -650,7 +650,6 @@ try {
     const cartFooterEl = document.getElementById('cartFooter');
     const cartContentWrapperEl = document.querySelector('.cart-content-wrapper');
     const cartResizeObserver = new ResizeObserver(() => {
-      // Measure the footer's height and apply it as padding to the scrollable content
       const footerHeight = cartFooterEl.offsetHeight;
       cartContentWrapperEl.style.paddingBottom = `${footerHeight}px`;
     });
@@ -1473,24 +1472,31 @@ try {
    * @param {number} couponDiscount - The calculated discount from any applied coupon.
    */
   function renderDeliveryProgress(subtotal, couponDiscount) {
-    const container = document.getElementById('cartStickyHeaderAddon');
+    const container = document.getElementById('deliveryProgressContainer');
     if (!container) return;
-
+ 
     const amountAfterDiscount = subtotal - couponDiscount;
     const amountNeeded = FREE_DELIVERY_THRESHOLD - amountAfterDiscount;
-
-    if (amountNeeded > 0 && subtotal > 0) {
-      const progressPercent = (amountAfterDiscount / FREE_DELIVERY_THRESHOLD) * 100;
-      container.innerHTML = `
-        <div class="delivery-progress-sticky">
-          <div class="delivery-progress-text">
-            Add ₹${Math.round(amountNeeded)} more for FREE Delivery 🚚
-          </div>
-          <div class="progress-bar">
-            <div class="progress-bar-fill" style="width: ${Math.min(100, progressPercent)}%;"></div>
-          </div>
-        </div>
-      `;
+ 
+    // NEW: Show the bar as long as there's something in the cart
+    if (subtotal > 0) {
+      if (amountNeeded > 0) {
+        // State: In-progress
+        const progressPercent = (amountAfterDiscount / FREE_DELIVERY_THRESHOLD) * 100;
+        container.innerHTML = `
+          <div class="delivery-progress-sticky in-progress">
+            <div class="delivery-progress-text">
+              Add <strong>₹${Math.round(amountNeeded)}</strong> more for FREE Delivery!
+            </div>
+            <div class="progress-bar"><div class="progress-bar-fill" style="width: ${Math.min(100, progressPercent)}%;"></div></div>
+          </div>`;
+      } else {
+        // State: Achieved
+        container.innerHTML = `
+          <div class="delivery-progress-sticky achieved">
+            <div class="delivery-progress-text"><i class="fas fa-check-circle"></i> Yay! You've unlocked FREE Delivery!</div>
+          </div>`;
+      }
     } else {
       container.innerHTML = ''; // Clear the progress bar if not needed
     }
@@ -1550,15 +1556,15 @@ try {
     // --- FIX: Create a clearer, more accurate display string for the delivery fee ---
     let deliveryFeeDisplay;
     if (deliveryFee === 0) {
-      deliveryFeeDisplay = `<span><del style="opacity: 0.6; margin-right: 4px;">₹100</del> <span style="color: var(--success-color); font-weight: 600;">FREE</span></span>`;
+      deliveryFeeDisplay = `<span><del style="opacity: 0.6; margin-right: 4px;">₹100</del> FREE</span>`;
     } else {
-      deliveryFeeDisplay = `<span>₹${deliveryFee}</span>`; // This remains correct, showing the fee when charged.
+      deliveryFeeDisplay = `<span>₹${deliveryFee}</span>`;
     }
 
     const checkoutBtn = document.querySelector('.checkout-btn');
     if (checkoutBtn) {
       // NEW: Update button text to "Pay ₹XXX • Place Order"
-      checkoutBtn.innerHTML = `Pay ₹${Math.round(total)} • Place Order`;
+      checkoutBtn.innerHTML = `Place Order – Pay ₹${Math.round(total)}`;
     }
 
     // NEW: Render the sticky progress bar separately.
