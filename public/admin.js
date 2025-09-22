@@ -43,7 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (error) {
                 console.error("Error verifying admin role:", error);
-                authGate.innerHTML = `<p style="color:red;">Error verifying your credentials.</p>`;
+                // NEW: Provide a more specific error message for network or permission issues.
+                let errorMessage = "Error verifying your credentials.";
+                if (error.code === 'unavailable' || error.code === 'permission-denied') {
+                    errorMessage = "Could not connect to the database to verify your admin status. Please check your connection and try again.";
+                }
+                authGate.innerHTML = `<p style="color:red;">${errorMessage}</p>`;
             }
         } else {
             // No user is signed in
