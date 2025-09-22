@@ -1328,25 +1328,22 @@ try {
       // Render cart items with new layout
       cartItems.innerHTML = items.map(item => {
         const hasOffer = item.mrp > item.finalPrice;
-        const subtotal = item.finalPrice * item.qty;
-        const totalMrp = (item.mrp || item.finalPrice) * item.qty;
-        const optimizedCartImage = getOptimizedImageUrl(item.image, 152, 152); // 76px * 2 for retina
-        const itemSavings = (item.mrp - item.finalPrice) * item.qty;
+        const optimizedCartImage = getOptimizedImageUrl(item.image, 120, 120); // 60px * 2 for retina
 
         return `
-          <div class="cart-item" data-id="${item.id}">
+          <div class="cart-item refined" data-id="${item.id}">
             <div class="cart-item-image">
               <img src="${optimizedCartImage}" alt="${item.name} in cart">
             </div>
             <div class="cart-item-info">
               <div class="cart-item-name">${item.name}</div>
               <div class="cart-item-weight">${item.net} Net Weight</div>
+              <div class="cart-item-pricing">
+                <span class="cart-item-current-price">₹${item.finalPrice}</span>
+                ${hasOffer ? `<span class="cart-item-mrp">₹${item.mrp}</span>` : ''}
+              </div>
             </div>
             <div class="cart-item-actions">
-              <div class="cart-item-pricing">
-                <span class="cart-item-current-price">₹${subtotal}</span>
-                ${hasOffer ? `<span class="cart-item-mrp">₹${totalMrp}</span>` : ''}
-              </div>
               <div class="qty-controls" role="group" aria-label="Quantity for ${item.name}">
                 <button class="cart-qty-btn dec" aria-label="Decrease quantity">-</button>
                 <span class="cart-qty" aria-label="Current quantity: ${item.qty}">${item.qty}</span>
@@ -1433,7 +1430,7 @@ try {
     const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
 
     if (!coupon || (coupon.minOrder && subtotal < coupon.minOrder)) {
-      couponError = coupon ? `This coupon is valid on orders above ₹${coupon.minOrder}.` : 'Invalid coupon code.';
+      couponError = coupon ? `This coupon is valid on orders above ₹${coupon.minOrder}.` : 'Promo code is invalid. Please try another code.';
       showToast(coupon ? `Minimum order of ₹${coupon.minOrder} required.` : 'Invalid coupon code.');
       renderCouponSection();
       input.value = code; // Keep the typed code
@@ -1488,7 +1485,7 @@ try {
     const checkoutBtn = document.querySelector('.checkout-btn');
     if (checkoutBtn) {
       // NEW: Update button text to "Pay ₹XXX • Place Order"
-      checkoutBtn.innerHTML = `Place Order - Pay ₹${Math.round(total)}`;
+      checkoutBtn.innerHTML = `Place Order – Pay ₹${Math.round(total)}`;
     }
 
     billDetailsContainer.innerHTML = `
@@ -1547,16 +1544,9 @@ try {
       updatePopupCta(); // NEW: Update popup CTA if it's open
       if (itemEl) {
         if (cart[id]) { // If item still in cart, update its values
-          const product = products.find(p => p.id === id);
-          const subtotal = product.finalPrice * cart[id];
-          const totalMrp = product.mrp * cart[id];
           const qtyEl = itemEl.querySelector('.cart-qty');
-          const priceEl = itemEl.querySelector('.cart-item-current-price');
-          const mrpEl = itemEl.querySelector('.cart-item-mrp');
           
           qtyEl.textContent = cart[id];
-          priceEl.textContent = `₹${subtotal}`;
-          if (mrpEl) mrpEl.textContent = `₹${totalMrp}`;
         } else {
           itemEl.classList.add('removing');
           itemEl.addEventListener('transitionend', () => itemEl.remove(), { once: true });

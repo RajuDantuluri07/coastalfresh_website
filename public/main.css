@@ -1631,7 +1631,7 @@ overflow-y: auto;
 display: flex;
 flex-direction: column;
 min-height: 0;
-padding-bottom: 150px; /* REFINED: Space for the new, slimmer sticky footer */
+padding-bottom: 120px; /* REFINED: Further compressed space for the new, slimmer sticky footer */
 }
 
 /* NEW: Make cart title bolder and bigger */
@@ -1642,7 +1642,7 @@ padding-bottom: 150px; /* REFINED: Space for the new, slimmer sticky footer */
 
 /* --- REFINED: Cart Section Layout --- */
 .cart-section {
-  padding: 12px 16px; /* REFINED: Reduced padding */
+  padding: 8px 16px; /* REFINED: Further reduced padding */
 }
 
 #cartItemsSection { /* The section containing product items */
@@ -1731,7 +1731,7 @@ padding-bottom: 150px; /* REFINED: Space for the new, slimmer sticky footer */
 
 /* NEW: Container for bill details */
 .cart-bill-details {
-  padding: 0 16px 12px; /* REFINED: Reduced padding */
+  padding: 0 16px 8px; /* REFINED: Further reduced padding */
   background: var(--bg-light); /* Keep background consistent */
 }
 
@@ -1770,11 +1770,11 @@ padding-bottom: 150px; /* REFINED: Space for the new, slimmer sticky footer */
 }
 
 /* --- REFINED: Compact & Airy Cart Item Card --- */
-.cart-item {
+.cart-item.refined {
   display: flex;
   align-items: flex-start; /* Align to top for better text flow */
   gap: 12px;
-  padding: 16px 0;
+  padding: 12px 0; /* REFINED: Reduced padding */
   border-bottom: 1px solid var(--border-color);
   position: relative;
   transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
@@ -1782,11 +1782,11 @@ padding-bottom: 150px; /* REFINED: Space for the new, slimmer sticky footer */
   overflow: hidden;
 }
 
-.cart-item:last-child {
+.cart-item.refined:last-child {
   border-bottom: none;
   padding-bottom: 0;
 }
-.cart-item:first-child {
+.cart-item.refined:first-child {
   padding-top: 0;
 }
 
@@ -1803,7 +1803,8 @@ padding-bottom: 150px; /* REFINED: Space for the new, slimmer sticky footer */
 
 .cart-item-info {
   flex: 1;
-  padding-top: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .cart-item-name {
@@ -1811,7 +1812,6 @@ padding-bottom: 150px; /* REFINED: Space for the new, slimmer sticky footer */
   font-size: 14px;
   color: var(--text-primary);
   line-height: 1.3;
-  margin-bottom: 4px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -1823,20 +1823,21 @@ padding-bottom: 150px; /* REFINED: Space for the new, slimmer sticky footer */
 .cart-item-weight {
   font-size: 12px; /* REFINED: Smaller text */
   color: var(--text-secondary);
+  margin-bottom: 4px;
 }
 
 .cart-item-actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   margin-left: auto; /* Push to the right */
 }
 
 .cart-item-pricing {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: auto; /* Push price to the bottom of the info box */
 }
 
 .cart-item-current-price {
@@ -1952,7 +1953,7 @@ padding-bottom: 150px; /* REFINED: Space for the new, slimmer sticky footer */
 
 .progress-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #66bb6a, #26a69a); /* Green to teal fill */
+  background: var(--success-color); /* REFINED: Solid green fill */
   border-radius: 2px; /* REFINED: Rounded edges */
   transition: width 0.5s ease-in-out;
 }
@@ -1960,7 +1961,7 @@ padding-bottom: 150px; /* REFINED: Space for the new, slimmer sticky footer */
 .summary-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 10px; /* REFINED: Tighter spacing */
   font-size: 13px; /* REFINED: Smaller font */
   color: var(--text-secondary);
 }
@@ -2004,7 +2005,7 @@ padding-bottom: 150px; /* REFINED: Space for the new, slimmer sticky footer */
 .summary-total {
   font-weight: 700;
   font-size: 16px; /* REFINED: Slightly smaller but still prominent */
-  color: var(--success-color); /* REFINED: Green for final price */
+  color: var(--text-primary); /* REFINED: Dark text for final price */
   margin-bottom: 0;
 }
 
@@ -2033,10 +2034,10 @@ box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
 border-top: 1px solid var(--border-color);
 display: flex;
 flex-direction: column;
-gap: 8px; /* REFINED: Reduced gap */
+gap: 10px; /* REFINED: Adjusted gap */
 /* Add safe area padding here */
-padding: 8px 16px; /* REFINED: Reduced padding */
-padding-bottom: calc(8px + env(safe-area-inset-bottom));
+padding: 10px 16px; /* REFINED: Adjusted padding */
+padding-bottom: calc(10px + env(safe-area-inset-bottom));
 }
 /* --- NEW: Enhanced Checkout Button --- */
 .checkout-btn {
@@ -2052,7 +2053,7 @@ padding-bottom: calc(8px + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
   justify-content: center; /* Center the "Pay • Place Order" text */
-  padding: 12px; /* REFINED: Slimmer button */
+  padding: 14px; /* REFINED: Slightly taller for primary CTA */
   width: 100%;
 }
 
@@ -2061,14 +2062,16 @@ padding-bottom: calc(8px + env(safe-area-inset-bottom));
   box-shadow: 0 2px 6px rgba(56, 142, 60, 0.3);
 }
 
-/* --- NEW: Redesigned Payment Options --- */
+/* --- REFINED: Payment Options as Segmented Control --- */
 .payment-options {
   width: 100%;
 }
 
 .payment-choices {
   display: flex;
-  gap: 8px; /* REFINED: Reduced gap */
+  border: 1.5px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .payment-btn {
@@ -2076,10 +2079,10 @@ padding-bottom: calc(8px + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 6px; /* REFINED: Slimmer button */
-  border: 2px solid var(--border-color);
-  border-radius: 10px; /* REFINED: Smaller radius */
+  gap: 6px;
+  padding: 8px; /* REFINED: Slimmer button */
+  border: none;
+  border-radius: 0;
   background: var(--bg-white);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -2087,8 +2090,11 @@ padding-bottom: calc(8px + env(safe-area-inset-bottom));
   font-weight: 500;
   color: var(--text-secondary);
 }
+.payment-btn:not(:last-child) {
+  border-right: 1.5px solid var(--border-color);
+}
 .payment-btn.active {
-  border-color: var(--primary-color);
+  border-color: transparent;
   background-color: var(--primary-light);
   color: var(--primary-dark);
   font-weight: 600;
