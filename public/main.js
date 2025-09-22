@@ -2564,12 +2564,14 @@ return sanitized;
         mainContent.innerHTML = `<div class="order-list">${ordersHTML}</div>`;
       }
     } catch (error) {
-      console.error("Error fetching orders:", error.message);
-      // NEW: Provide a more helpful error message, especially for index issues.
+      console.error("Error fetching orders:", error.code, error.message);
       let errorMessage = 'Could not load your orders. Please try again later.';
       if (error.code === 'failed-precondition') {
         // This is the typical error code for a missing index.
         errorMessage = 'There was a problem fetching your order history. Please contact support.';
+      } else if (error.code === 'permission-denied') {
+        // NEW: Handle the specific error you are seeing now.
+        errorMessage = 'You do not have permission to view these orders. Please log in again or contact support.';
       }
       mainContent.innerHTML = `<p style="color: var(--error-color); text-align: center; padding: 20px;">${errorMessage}</p>`;
     }
