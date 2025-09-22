@@ -86,6 +86,7 @@ try {
   let db = null; // NEW: Firestore database instance
   let currentUser = null;
   let editingAddressId = null; // NEW: To track which address is being edited
+  let selectedPaymentMethod = 'cod'; // NEW: Default payment method
   let deferredInstallPrompt = null; // NEW: For PWA installation prompt
   let installPromptUsed = false; // Tracks whether the native prompt has been shown/used
   
@@ -570,6 +571,23 @@ try {
     document.getElementById('cartFooter').addEventListener('click', (e) => {
       if (e.target.closest('.checkout-btn')) {
         checkout();
+      }
+    });
+
+    // NEW: Event listener for payment options
+    document.getElementById('paymentOptions').addEventListener('click', e => {
+      const paymentBtn = e.target.closest('.payment-btn');
+      if (paymentBtn && !paymentBtn.classList.contains('active')) {
+        document.querySelector('.payment-btn.active').classList.remove('active');
+        paymentBtn.classList.add('active');
+        selectedPaymentMethod = paymentBtn.dataset.method;
+
+        Analytics.trackEvent('select_payment_method', { method: selectedPaymentMethod });
+
+        // If online payment is selected, show a toast as it's not implemented
+        if (selectedPaymentMethod === 'online') {
+          showToast('Online payment is coming soon!');
+        }
       }
     });
 
@@ -1355,7 +1373,12 @@ try {
     const deliveryFee = subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
     const total = subtotal + deliveryFee;
 
-    document.querySelector('.checkout-btn').innerHTML = `<span>Proceed to Checkout</span> <span class="checkout-btn-price">₹${total}</span>`;
+    const checkoutBtn = document.querySelector('.checkout-btn');
+    if (checkoutBtn) {
+      // The button text is now "Place Order"
+      checkoutBtn.innerHTML = `<span>Place Order</span> <span class="checkout-btn-price">₹${total}</span>`;
+    }
+
 
     cartSummary.innerHTML = ` 
       <div class="cart-summary">
@@ -1486,6 +1509,12 @@ try {
 
     if (items.length === 0) return;
 
+    // NEW: Handle online payment selection
+    if (selectedPaymentMethod === 'online') {
+      showToast('Online payment is coming soon! Please select Cash on Delivery.');
+      return;
+    }
+
     // 1. Check if user is logged in
     if (!currentUser) {
       // FIX: Close the cart modal before showing the login modal for a cleaner transition.
@@ -1536,6 +1565,8 @@ try {
       message += `• ${safeName} x${item.qty} - ₹${item.finalPrice * item.qty}\n`;
     });
     message += `\nSubtotal: ₹${subtotal}\nDelivery: ${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}\nTotal: ₹${total}\n`;
+    // NEW: Add payment method to message
+    message += `\nPayment Method: ${selectedPaymentMethod.toUpperCase()}\n`;
     message += `\n--- Delivery Address ---\nName: ${userAddress.fullName}\nMobile: ${userAddress.mobile}\nAddress: ${userAddress.house}, ${userAddress.street}, ${userAddress.city}, ${userAddress.pincode}\n\n`;
     message += "\nPlease confirm availability.";
 
@@ -1548,6 +1579,7 @@ try {
       deliveryFee: deliveryFee,
       total: total,
       address: userAddress,
+      paymentMethod: selectedPaymentMethod, // NEW
       status: 'Pending', // Initial status
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     };

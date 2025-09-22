@@ -717,8 +717,22 @@
       <!-- Sticky cart footer -->
       <div class="cart-footer" id="cartFooter" style="display: none;">
         <div id="cartSummary"></div>
+        <!-- NEW: Payment Options -->
+        <div class="payment-options" id="paymentOptions">
+          <h3 class="payment-title">Payment Method</h3>
+          <div class="payment-choices">
+            <button class="payment-btn active" data-method="cod">
+              <i class="fas fa-money-bill-wave"></i>
+              <span>Cash on Delivery</span>
+            </button>
+            <button class="payment-btn" data-method="online">
+              <i class="fas fa-credit-card"></i>
+              <span>Online Payment</span>
+            </button>
+          </div>
+        </div>
         <div class="cart-actions">
-          <button class="checkout-btn">Proceed to Checkout</button>
+          <button class="checkout-btn">Place Order</button>
         </div>
       </div>
     </div>
