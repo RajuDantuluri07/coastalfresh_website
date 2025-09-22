@@ -1517,7 +1517,7 @@ try {
     if (deliveryFee === 0) {
       deliveryFeeDisplay = `<span><del style="opacity: 0.6; margin-right: 4px;">₹100</del> FREE</span>`;
     } else {
-      deliveryFeeDisplay = `<span><del style="opacity: 0.6; margin-right: 4px;">₹100</del> ₹${deliveryFee}</span>`;
+      deliveryFeeDisplay = `<span><del style="opacity: 0.6;">₹100</del></span>`;
     }
 
     const checkoutBtn = document.querySelector('.checkout-btn');
