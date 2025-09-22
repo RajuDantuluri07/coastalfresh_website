@@ -231,10 +231,10 @@ try {
       // Quantity controls in the cart
       const cartQtyBtn = target.closest('.cart-item .qty-controls .cart-qty-btn');
       if (cartQtyBtn) {
-        const cartItem = cartQtyBtn.closest('.cart-item');
+        const cartItem = cartQtyBtn.closest('.cart-item-card'); // REVAMP: Use new class
         const productId = cartItem.dataset.id;
         if (productId) {
-          const change = cartQtyBtn.classList.contains('inc') ? 1 : -1;
+          const change = cartQtyBtn.classList.contains('inc') ? 1 : -1; // REVAMP: Use new classes
           updateQty(parseInt(productId), change);
         }
       }
@@ -242,7 +242,7 @@ try {
       // Remove from cart button
       const removeBtn = target.closest('.remove-item');
       if (removeBtn) {
-        const cartItem = removeBtn.closest('.cart-item');
+        const cartItem = removeBtn.closest('.cart-item-card'); // REVAMP: Use new class
         const productId = cartItem.dataset.id;
         if (productId) removeFromCart(parseInt(productId));
       }
@@ -595,7 +595,7 @@ try {
 
     // NEW: Event listener for payment options
     document.getElementById('paymentOptions').addEventListener('click', e => {
-      const paymentBtn = e.target.closest('.payment-btn');
+      const paymentBtn = e.target.closest('.cart-pay-item');
       if (paymentBtn && !paymentBtn.classList.contains('active')) {
         document.querySelector('.payment-btn.active').classList.remove('active');
         paymentBtn.classList.add('active');
@@ -1319,50 +1319,48 @@ try {
       return { ...product, qty: cart[id] };
     });
     
-  const cartItems = document.getElementById('cartItems');
-  const emptyCart = document.getElementById('emptyCart');
-  const cartFooter = document.getElementById('cartFooter');
-  // NEW: Get references to the sections that need to be cleared.
-  const billDetailsContainer = document.getElementById('cartBillDetails');
-  const couponSectionContainer = document.getElementById('cartCouponSection');
+  const cartItemsEl = document.getElementById('cartItems');
+  const emptyCartEl = document.getElementById('emptyCart');
+  const cartFooterEl = document.getElementById('cartFooter');
+  const cartSummaryContainerEl = document.getElementById('cartSummaryContainer');
 
     if (items.length === 0) {
-      emptyCart.style.display = 'flex';
-      cartItems.innerHTML = '';
-      cartFooter.style.display = 'none';
-      // FIX: Clear the bill and coupon sections when the cart is empty.
-      if (billDetailsContainer) billDetailsContainer.innerHTML = '';
-      if (couponSectionContainer) couponSectionContainer.innerHTML = '';
+      emptyCartEl.style.display = 'flex';
+      cartItemsEl.innerHTML = '';
+      if (cartFooterEl) cartFooterEl.style.display = 'none';
+      if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'none';
     } else { // REFACTOR: Simplified cart rendering
-      emptyCart.style.display = 'none';
-      cartFooter.style.display = 'block';
+      emptyCartEl.style.display = 'none';
+      if (cartFooterEl) cartFooterEl.style.display = 'flex';
+      if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'block';
       
       // Render cart items with new layout
-      cartItems.innerHTML = items.map(item => {
+      cartItemsEl.innerHTML = items.map(item => {
         const hasOffer = item.mrp > item.finalPrice;
-        const optimizedCartImage = getOptimizedImageUrl(item.image, 120, 120); // 60px * 2 for retina
+        const optimizedCartImage = getOptimizedImageUrl(item.image, 128, 128); // 64px * 2 for retina
 
         return `
-          <div class="cart-item refined" data-id="${item.id}">
-            <div class="cart-item-image">
-              <img src="${optimizedCartImage}" alt="${item.name} in cart">
-            </div>
-            <div class="cart-item-info">
+          <article class="cart-item-card" data-id="${item.id}">
+            <img src="${optimizedCartImage}" alt="${item.name}" class="cart-item-thumb">
+            <div class="cart-item-meta">
               <div class="cart-item-name">${item.name}</div>
-              <div class="cart-item-weight">${item.net} net</div>
-              <div class="cart-item-pricing">
-                <span class="cart-item-current-price">₹${item.finalPrice}</span>
+              <div class="cart-item-sub">${item.net} net</div>
+              <div class="cart-item-price">
+                ₹${item.finalPrice}
                 ${hasOffer ? `<span class="cart-item-mrp">₹${item.mrp}</span>` : ''}
               </div>
             </div>
-            <div class="cart-item-actions">
-              <div class="qty-controls" role="group" aria-label="Quantity for ${item.name}">
-                <button class="cart-qty-btn dec" aria-label="Decrease quantity">-</button>
-                <span class="cart-qty" aria-label="Current quantity: ${item.qty}">${item.qty}</span>
-                <button class="cart-qty-btn inc" aria-label="Increase quantity">+</button>
+            <div>
+              <div class="cart-item-qty qty-controls">
+                <button class="qty-btn cart-qty-btn dec" data-id="${item.id}" aria-label="decrease quantity">−</button>
+                <div class="count cart-qty" aria-live="polite">${item.qty}</div>
+                <button class="qty-btn cart-qty-btn inc" data-id="${item.id}" aria-label="increase quantity">+</button>
+              </div>
+              <div style="text-align:right;margin-top:6px">
+                <button class="remove-item" data-id="${item.id}" style="background:transparent;border:0;color:var(--text-secondary)">Remove</button>
               </div>
             </div>
-          </div>
+          </article>
         `;
       }).join('');
 
@@ -1395,41 +1393,44 @@ try {
     const container = document.getElementById('cartCouponSection');
     if (!container) return;
 
+    // REVAMP: New coupon section structure
     if (appliedCoupon) {
       container.innerHTML = `
-        <div class="coupon-applied-card">
-          <div class="coupon-applied-info">
+        <div class="cart-coupon-applied-card">
+          <div class="cart-coupon-applied-info">
             <i class="fas fa-check-circle"></i>
             <div>
               <strong>'${appliedCoupon.code}' applied</strong>
               <small>${COUPONS[appliedCoupon.code].description}</small>
             </div>
           </div>
-          <button id="removeCouponBtn" class="coupon-remove-btn" aria-label="Remove Coupon">&times;</button>
+          <button id="removeCouponBtn" class="cart-coupon-remove-btn" aria-label="Remove Coupon">&times;</button>
         </div>
       `;
     } else {
       container.innerHTML = `
-        <div class="coupon-apply-form">
-          <div class="coupon-input-wrapper">
-            <i class="fas fa-tag"></i>
-            <input type="text" id="couponInput" placeholder="Enter coupon code" autocapitalize="characters">
+        <div class="cart-coupon-wrap">
+          <div class="cart-coupon">
+            <span style="margin-right:8px;opacity:0.7">🏷️</span>
+            <input id="couponInput" placeholder="Enter coupon code" aria-label="coupon code" autocapitalize="characters">
           </div>
-          <button id="applyCouponBtn">Apply</button>
+          <button class="cart-coupon-apply-btn" id="applyCouponBtn">Apply</button>
         </div>
-        ${couponError ? `<p class="coupon-error">${couponError}</p>` : ''}
+        ${couponError ? `<p class="cart-coupon-error">${couponError}</p>` : ''}
       `;
     }
   }
 
   function applyCoupon() {
     const input = document.getElementById('couponInput');
+    if (!input) return;
     const code = input.value.trim().toUpperCase();
     couponError = null; // Reset error
 
     if (!code) {
       couponError = 'Please enter a coupon code.';
-      renderCouponSection();
+      // REVAMP: Don't re-render the whole section, just update the summary which will call renderCouponSection
+      updateCartSummary();
       return;
     }
 
@@ -1444,7 +1445,7 @@ try {
     if (!coupon || (coupon.minOrder && subtotal < coupon.minOrder)) {
       couponError = coupon ? `This coupon is valid on orders above ₹${coupon.minOrder}.` : 'Promo code is invalid. Please try another code.';
       showToast(coupon ? `Minimum order of ₹${coupon.minOrder} required.` : 'Invalid coupon code.');
-      renderCouponSection();
+      updateCartSummary();
       input.value = code; // Keep the typed code
       return;
     }
@@ -1461,7 +1462,6 @@ try {
     appliedCoupon = null;
     couponError = null;
     showToast('Coupon removed.');
-    renderCouponSection();
     updateCartSummary();
     Analytics.trackEvent('remove_coupon', { coupon: removedCode });
   }
@@ -1471,61 +1471,36 @@ try {
    * @param {number} subtotal - The cart's subtotal before discounts.
    * @param {number} couponDiscount - The calculated discount from any applied coupon.
    */
-  function renderDeliveryProgress(subtotal, couponDiscount) {
-    const container = document.getElementById('deliveryProgressContainer');
-    if (!container) return;
- 
-    const amountAfterDiscount = subtotal - couponDiscount;
-    const amountNeeded = FREE_DELIVERY_THRESHOLD - amountAfterDiscount;
- 
-    // NEW: Show the bar as long as there's something in the cart
-    if (subtotal > 0) {
-      if (amountNeeded > 0) {
-        // State: In-progress
-        const progressPercent = (amountAfterDiscount / FREE_DELIVERY_THRESHOLD) * 100;
-        container.innerHTML = `
-          <div class="delivery-progress-sticky in-progress">
-            <div class="delivery-progress-text">
-              Add <strong>₹${Math.round(amountNeeded)}</strong> more for FREE Delivery!
-            </div>
-            <div class="progress-bar"><div class="progress-bar-fill" style="width: ${Math.min(100, progressPercent)}%;"></div></div>
-          </div>`;
-      } else {
-        // State: Achieved
-        container.innerHTML = `
-          <div class="delivery-progress-sticky achieved">
-            <div class="delivery-progress-text"><i class="fas fa-check-circle"></i> Yay! You've unlocked FREE Delivery!</div>
-          </div>`;
-      }
-    } else {
-      container.innerHTML = ''; // Clear the progress bar if not needed
-    }
-  }
-
   /* REFACTORED: Function to update the summary in the cart with the new design */
   function updateCartSummary() {
     const items = Object.keys(cart).map(id => {
       const product = products.find(p => p.id === parseInt(id));
       return { ...product, qty: cart[id] };
     });
-
-    const billDetailsContainer = document.getElementById('cartBillDetails');
-    if (!billDetailsContainer) return;
+    
+    // REVAMP: Get all new DOM elements for the cart summary
+    const itemTotalEl = document.getElementById('cartItemTotal');
+    const deliveryFeeEl = document.getElementById('cartDeliveryFee');
+    const toPayEl = document.getElementById('cartToPay');
+    const placeOrderBtn = document.getElementById('cartPlaceOrderBtn');
+    const savedMsgEl = document.getElementById('cartSavedMsg');
+    const discountRowEl = document.getElementById('cartDiscountRow');
+    const discountEl = document.getElementById('cartDiscount');
+    const progressTextEl = document.getElementById('cartProgressText');
+    const progressBarEl = document.getElementById('cartProgressBar');
+    const paymentOptionsEl = document.getElementById('paymentOptions');
 
     // --- FIX: Handle empty cart state at the beginning ---
     if (items.length === 0) {
       const emptyCartEl = document.getElementById('emptyCart');
       const cartFooterEl = document.getElementById('cartFooter');
       const couponSectionEl = document.getElementById('cartCouponSection');
-      const deliveryProgressEl = document.getElementById('cartStickyHeaderAddon');
+      const cartSummaryContainerEl = document.getElementById('cartSummaryContainer');
 
       if (emptyCartEl) emptyCartEl.style.display = 'flex';
       if (cartFooterEl) cartFooterEl.style.display = 'none';
-      
-      // Clear dynamic content
-      billDetailsContainer.innerHTML = '';
+      if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'none';
       if (couponSectionEl) couponSectionEl.innerHTML = '';
-      if (deliveryProgressEl) deliveryProgressEl.innerHTML = '';
 
       // Reset coupon state
       appliedCoupon = null;
@@ -1550,41 +1525,72 @@ try {
 
     const deliveryFee = (subtotal - couponDiscount) >= FREE_DELIVERY_THRESHOLD ? 0 : 100;
     const total = subtotal - couponDiscount + deliveryFee;
-    // --- FIX: Calculate total savings including delivery fee discount ---
-    const totalSavings = productSavings + (deliveryFee === 0 ? 100 : 0);
+    const totalSavings = productSavings + couponDiscount + (deliveryFee === 0 ? 100 : 0);
 
-    // --- FIX: Create a clearer, more accurate display string for the delivery fee ---
-    let deliveryFeeDisplay;
-    if (deliveryFee === 0) {
-      deliveryFeeDisplay = `<span><del style="opacity: 0.6; margin-right: 4px;">₹100</del> FREE</span>`;
-    } else {
-      deliveryFeeDisplay = `<span>₹${deliveryFee}</span>`;
+    // Update bill details
+    if(itemTotalEl) itemTotalEl.textContent = `₹${subtotal}`;
+    if(deliveryFeeEl) deliveryFeeEl.textContent = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
+    if(toPayEl) toPayEl.textContent = `₹${Math.round(total)}`;
+    if(placeOrderBtn) placeOrderBtn.textContent = `Place Order – Pay ₹${Math.round(total)}`;
+
+    // Update discount row
+    if (discountRowEl && discountEl) {
+      if (couponDiscount > 0) {
+        discountRowEl.style.display = 'flex';
+        discountEl.textContent = `- ₹${Math.round(couponDiscount)}`;
+      } else {
+        discountRowEl.style.display = 'none';
+      }
     }
 
-    const checkoutBtn = document.querySelector('.checkout-btn');
-    if (checkoutBtn) {
-      // NEW: Update button text to "Pay ₹XXX • Place Order"
-      checkoutBtn.innerHTML = `Place Order – Pay ₹${Math.round(total)}`;
+    // Update savings message
+    if (savedMsgEl) {
+      if (totalSavings > 0) {
+        savedMsgEl.style.display = 'block';
+        savedMsgEl.textContent = `You saved ₹${Math.round(totalSavings)} on this order 🎉`;
+      } else {
+        savedMsgEl.style.display = 'none';
+      }
     }
 
-    // NEW: Render the sticky progress bar separately.
-    renderDeliveryProgress(subtotal, couponDiscount);
+    // Update progress bar
+    const amountNeeded = FREE_DELIVERY_THRESHOLD - (subtotal - couponDiscount);
+    if (progressTextEl && progressBarEl) {
+      if (amountNeeded > 0) {
+        const progressPercent = ((subtotal - couponDiscount) / FREE_DELIVERY_THRESHOLD) * 100;
+        progressTextEl.innerHTML = `Add <strong>₹${Math.round(amountNeeded)}</strong> more for FREE Delivery!`;
+        progressBarEl.style.width = `${Math.min(100, progressPercent)}%`;
+      } else {
+        progressTextEl.innerHTML = `🎉 Yay! You've unlocked FREE Delivery!`;
+        progressBarEl.style.width = '100%';
+      }
+    }
 
-    billDetailsContainer.innerHTML = `
-      <div class="section cart-section" style="padding-top:0;">
-        <div class="price-summary-card">
-          <h3 class="price-summary-title">Bill Details</h3>
-          <div class="summary-row"><span>Item Total</span><span>₹${subtotal}</span></div>
-          ${couponDiscount > 0 ? `<div class="summary-row summary-discount"><span>Discount</span><span>- ₹${Math.round(couponDiscount)}</span></div>` : ''}
-          <div class="summary-row">
-            <span>Delivery Fee <i class="fas fa-info-circle" title="Free delivery only in Manikonda"></i></span>
-            ${deliveryFeeDisplay}
-          </div>
-          <div class="summary-divider"></div>
-          <div class="summary-row summary-total"><span>To Pay</span><span>₹${Math.round(total)}</span></div>
-          ${totalSavings > 0 ? `<div class="total-savings-banner">You saved ₹${Math.round(totalSavings)} on this order 🎉</div>` : ''}
+    // Update coupon and payment sections
+    renderCouponSection();
+    renderPaymentOptions();
+  }
+
+  // NEW: Function to render payment options
+  function renderPaymentOptions() {
+    const container = document.getElementById('paymentOptions');
+    if (!container) return;
+
+    container.innerHTML = `
+      <label class="cart-pay-item payment-btn ${selectedPaymentMethod === 'cod' ? 'active' : ''}" data-method="cod">
+        <input type="radio" name="pay" value="cod" ${selectedPaymentMethod === 'cod' ? 'checked' : ''}>
+        <div>
+          <div class="cart-pay-label">💵 Cash on Delivery</div>
+          <div class="cart-pay-sub">Pay with cash at delivery</div>
         </div>
-      </div>
+      </label>
+      <label class="cart-pay-item payment-btn ${selectedPaymentMethod === 'online' ? 'active' : ''}" data-method="online">
+        <input type="radio" name="pay" value="online" ${selectedPaymentMethod === 'online' ? 'checked' : ''}>
+        <div>
+          <div class="cart-pay-label">💳 UPI / Card</div>
+          <div class="cart-pay-sub">Fast, secure online payment (Coming Soon)</div>
+        </div>
+      </label>
     `;
   }
 
@@ -1605,7 +1611,7 @@ try {
     // If we're on the cart page, refresh it
     if (document.getElementById('cartModal').classList.contains('active')) {
       // More efficient update: just update the specific item and the summary
-      const itemEl = document.querySelector(`.cart-item[data-id="${id}"]`);
+      const itemEl = document.querySelector(`.cart-item-card[data-id="${id}"]`);
       updatePopupCta(); // NEW: Update popup CTA if it's open
       if (itemEl) {
         if (cart[id]) { // If item still in cart, update its values
@@ -1614,7 +1620,8 @@ try {
           qtyEl.textContent = cart[id];
         } else {
           itemEl.classList.add('removing');
-          itemEl.addEventListener('transitionend', () => itemEl.remove(), { once: true });
+          // After animation, re-render the whole cart to handle empty state correctly
+          itemEl.addEventListener('transitionend', () => showCart(), { once: true });
         }
       }
       updateCartSummary();
@@ -1639,14 +1646,14 @@ try {
     saveCart();
 
     // Animate removal if the cart is open
-    const cartItemEl = document.querySelector(`#cartModal .cart-item[data-id="${numericId}"]`);
+    const cartItemEl = document.querySelector(`#cartModal .cart-item-card[data-id="${numericId}"]`);
     if (cartItemEl) {
       cartItemEl.classList.add('removing');
-      cartItemEl.addEventListener('transitionend', () => cartItemEl.remove(), { once: true });
+      // After animation, re-render the whole cart to handle empty state correctly
+      cartItemEl.addEventListener('transitionend', () => showCart(), { once: true });
     }
 
-    updateCartUI();
-    updateCartSummary();
+    updateCartBadges();
     updateProductCardState(numericId);
 
     // Track removal

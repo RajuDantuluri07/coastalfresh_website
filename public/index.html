@@ -684,57 +684,67 @@
     </div>
 
     <!-- Cart Page as Modal -->
-    <div class="cart-modal" id="cartModal">
+    <div class="cart-modal" id="cartModal" style="--accent: #137a3a; --accent-600: #167a3b;">
       <header class="header">
         <div class="header-top">
           <button class="back-btn" aria-label="Close Cart">
             <i class="fas fa-times"></i>
           </button>
           <h1 class="logo">Your Cart</h1>
-          <div style="width: 36px;"></div> <!-- Spacer to balance title -->
+          <div style="width: 36px;"></div>
         </div>
       </header>
-
+    
       <div class="cart-content-wrapper" id="cartContentWrapper">
-        <!-- REFINED: Products are now at the top, inside a card -->
-        <main class="section cart-section" id="cartItemsSection">
-          <div id="cartItems"></div>
-          <div id="emptyCart" class="empty-cart" style="display: none;">
-            <div class="empty-cart-animation">
-              <div class="water">
-                <div class="wave"></div>
-                <div class="wave"></div>
-                <div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div>
-              </div>
-              <div class="jumping-fish">🐟</div>
-              <div class="jumping-prawn">🦐</div>
+        <!-- Product list -->
+        <section class="cart-products" id="cartItems"></section>
+    
+        <!-- Empty Cart State -->
+        <div id="emptyCart" class="empty-cart" style="display: none; padding: 20px;">
+          <div class="empty-cart-animation">
+            <div class="water">
+              <div class="wave"></div><div class="wave"></div>
+              <div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div>
             </div>
-            <h3>Your cart is empty</h3>
-            <p>Add some fresh seafood to get started</p>
-            <button class="empty-cart-btn">Browse Products</button>
+            <div class="jumping-fish">🐟</div><div class="jumping-prawn">🦐</div>
           </div>
-        </main>
-      </div>
-      <!-- Sticky cart footer -->
-      <div class="cart-footer" id="cartFooter" style="display: none;">
-        <div id="deliveryProgressContainer"></div>
-        <div id="cartBillDetails"></div>
-        <div id="cartCouponSection"></div>
-        <!-- REFINED: Payment options and Place Order button -->
-        <div class="payment-options" id="paymentOptions">
-          <div class="payment-choices">
-            <!-- NEW: Radio-style payment options -->
-            <div class="payment-choice-item payment-btn active" data-method="cod" role="radio" aria-checked="true" tabindex="0">
-              <span class="radio-icon"></span>
-              <span class="radio-label">💵 Cash on Delivery</span>
-            </div>
-            <div class="payment-choice-item payment-btn" data-method="online" role="radio" aria-checked="false" tabindex="0">
-              <span class="radio-icon"></span>
-              <span class="radio-label">💳 UPI / Card</span>
-            </div>
-          </div>
+          <h3>Your cart is empty</h3>
+          <p>Add some fresh seafood to get started</p>
+          <button class="empty-cart-btn">Browse Products</button>
         </div>
-        <button class="checkout-btn">Place Order</button> <!-- Text will be updated by JS -->
+    
+        <div id="cartSummaryContainer" style="display: none; padding: 0 16px;">
+          <!-- Progress bar -->
+          <div class="cart-progress-wrap">
+            <div class="cart-progress-card">
+              <div class="cart-progress-text" id="cartProgressText"></div>
+              <div class="cart-bar" aria-hidden="true"><div class="cart-bar-inner" id="cartProgressBar"></div></div>
+            </div>
+          </div>
+    
+          <!-- Bill details -->
+          <section class="cart-bill" aria-labelledby="billHeading">
+            <h2 id="billHeading" class="section-title" style="font-size: 18px; margin-bottom: 8px;">Bill Details</h2>
+            <div class="cart-bill-row"><div>Item Total</div><div id="cartItemTotal">₹0</div></div>
+            <div class="cart-bill-row" id="cartDiscountRow" style="display: none;"><div>Discount</div><div id="cartDiscount" style="color: var(--success-color);">₹0</div></div>
+            <div class="cart-bill-row"><div>Delivery Fee</div><div id="cartDeliveryFee">₹0</div></div>
+            <div class="cart-bill-row total"><div>To Pay</div><div id="cartToPay">₹0</div></div>
+            <div class="cart-saved center" id="cartSavedMsg" style="display:none"></div>
+          </section>
+    
+          <!-- Coupon -->
+          <div id="cartCouponSection"></div>
+    
+          <!-- Payment options -->
+          <div class="cart-payments" id="paymentOptions" role="radiogroup" aria-label="Payment methods"></div>
+        </div>
+    
+        <!-- bottom CTA is sticky so keep some space at the end of content -->
+        <div style="height:86px"></div>
+      </div>
+    
+      <div class="cart-sticky-ctawrap" id="cartFooter" style="display: none;">
+        <button class="cart-cta checkout-btn" id="cartPlaceOrderBtn">Place Order</button>
       </div>
     </div>
 
