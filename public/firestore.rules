@@ -2,10 +2,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // === CUSTOMER-FACING RULES ===
-    // Allow users to manage their own profile, addresses, and tokens.
+    // === USER PROFILE RULES ===
     match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Any authenticated user can read profile data (needed for admin role checks).
+      allow read: if request.auth != null;
+      // Only the user themselves can write to their own profile.
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
 
     // === MERGED RULES FOR THE 'orders' COLLECTION (CUSTOMER + ADMIN) ===
