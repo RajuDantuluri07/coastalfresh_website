@@ -1550,15 +1550,15 @@ try {
     // --- FIX: Create a clearer, more accurate display string for the delivery fee ---
     let deliveryFeeDisplay;
     if (deliveryFee === 0) {
-      deliveryFeeDisplay = `<span><del style="opacity: 0.6; margin-right: 4px;">₹100</del> FREE</span>`;
+      deliveryFeeDisplay = `<span><del style="opacity: 0.6; margin-right: 4px;">₹100</del> <span style="color: var(--success-color); font-weight: 600;">FREE</span></span>`;
     } else {
-      deliveryFeeDisplay = `<span>₹${deliveryFee}</span>`;
+      deliveryFeeDisplay = `<span>₹${deliveryFee}</span>`; // This remains correct, showing the fee when charged.
     }
 
     const checkoutBtn = document.querySelector('.checkout-btn');
     if (checkoutBtn) {
       // NEW: Update button text to "Pay ₹XXX • Place Order"
-      checkoutBtn.innerHTML = `Place Order – Pay ₹${Math.round(total)}`;
+      checkoutBtn.innerHTML = `Pay ₹${Math.round(total)} • Place Order`;
     }
 
     // NEW: Render the sticky progress bar separately.
