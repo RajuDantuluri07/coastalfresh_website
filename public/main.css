@@ -1676,6 +1676,7 @@ padding-bottom: 0; /* FIX: Remove padding as footer now contains all bottom elem
 #cartCouponSection {
   padding: 0; /* FIX: Remove padding, handled by parent footer */
   background: transparent; /* FIX: Inherit background from footer */
+  margin-bottom: 6px; /* NEW: Add space below the coupon section */
 }
 .coupon-apply-form {
   display: flex;
@@ -1922,7 +1923,7 @@ padding-bottom: 0; /* FIX: Remove padding as footer now contains all bottom elem
   background: var(--bg-white);
   border-radius: 16px;
   padding: 16px; /* FIX: Restore consistent padding */
-  margin-top: 16px;
+  margin-top: 0; /* FIX: Remove top margin as it's now the first item */
   box-shadow: 0 4px 16px rgba(0,0,0,0.05);
 }
 
