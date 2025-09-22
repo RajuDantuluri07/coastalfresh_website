@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // === CUSTOMER-FACING RULES ===
+    // Allow users to manage their own profile, addresses, and tokens.
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // === MERGED RULES FOR THE 'orders' COLLECTION (CUSTOMER + ADMIN) ===
+    match /orders/{orderId} {
+      // Helper function to check if the requester is an admin.
+      // This improves readability and reduces repeated 'get' calls.
+      function isAdmin() {
+        return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      }
+
+      // CREATE: A user can create an order for themselves.
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+
+      // READ (and LIST): Allow if the user is the owner of the document OR if the user is an admin.
+      // This single rule covers both single-document gets and collection queries.
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+
+      // UPDATE: Only admins can update an order.
+      allow update: if isAdmin();
+
+      // DELETE: Disallow deleting orders from the client to maintain data integrity.
+      allow delete: if false;
+    }
+  }
+}
