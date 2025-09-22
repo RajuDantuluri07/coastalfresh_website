@@ -1632,7 +1632,7 @@ display: flex;
 flex-direction: column;
 min-height: 0;
 padding-bottom: 0; /* FIX: Remove padding as footer now contains all bottom elements */
-} 
+}
 
 /* NEW: Make cart title bolder and bigger */
 #cartModal .header .logo {
@@ -1640,20 +1640,23 @@ padding-bottom: 0; /* FIX: Remove padding as footer now contains all bottom elem
   font-weight: 700;
 }
 
-/* --- REFINED: Slimmer Delivery Progress Bar --- */
-.delivery-progress-sticky {
-  border-radius: 10px; /* Rounded corners */
-  padding: 8px 12px; /* Slimmer padding */
-  text-align: center;
-  background: var(--bg-white);
-  border: 1px solid var(--border-color);
+/* --- NEW: Sticky Progress Bar Container --- */
+#cartStickyHeaderAddon {
+  background: var(--bg-light);
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-color);
+  /* FIX: Make the progress bar sticky to prevent it from being hidden by the header */
+  position: sticky;
+  top: 0;
+  z-index: 1; /* Ensure it sits above other cart content */
 }
 
-.delivery-progress-text {
-  font-size: 13px; /* Smaller text */
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: 6px; /* Space between text and bar */
+.delivery-progress-sticky { /* Re-using the existing card style but without the gradient background */
+  border: 1px solid #c8e6c9; /* Light green border */
+  border-radius: 10px; /* Rounded corners */
+  padding: 6px 10px;
+  text-align: center;
+  background: var(--bg-white);
 }
 
 /* --- REFINED: Cart Section Layout --- */
@@ -1919,12 +1922,25 @@ padding-bottom: 0; /* FIX: Remove padding as footer now contains all bottom elem
   box-shadow: 0 4px 16px rgba(0,0,0,0.05);
 }
 
+.price-summary-title { /* This is an H3 */
+  font-size: 18px; /* H2 Product Name */
+  margin-bottom: 16px;
+}
+
+.delivery-progress-text {
+  font-size: 12px; /* REFINED: Smaller text */
+  font-weight: 500;
+  color: var(--text-secondary); /* REFINED: Less bold color */
+  margin-bottom: 4px; /* REFINED: Reduced margin */
+}
+
 .progress-bar {
-  height: 6px; /* Slimmer bar */
+  height: 8px; /* REFINED: Slimmer bar per request */
   background-color: rgba(0,0,0,0.1); /* Grey track */
   border-radius: 4px; /* REFINED: Rounded edges */
   overflow: hidden;
 }
+
 .progress-bar-fill {
   height: 100%;
   background: var(--success-color); /* REFINED: Solid green fill */
@@ -2053,13 +2069,13 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px 8px; /* REFINED: Slimmer button */
+  padding: 8px; /* REFINED: Slimmer button */
   border: none;
   border-radius: 0;
   background: var(--bg-white);
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 13px; /* REFINED: Slightly larger for clarity */
+  font-size: 12px; /* REFINED: Smaller font size */
   font-weight: 500;
   color: var(--text-secondary);
 }
