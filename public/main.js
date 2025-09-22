@@ -1494,6 +1494,27 @@ try {
     const billDetailsContainer = document.getElementById('cartBillDetails');
     if (!billDetailsContainer) return;
 
+    // --- FIX: Handle empty cart state at the beginning ---
+    if (items.length === 0) {
+      const emptyCartEl = document.getElementById('emptyCart');
+      const cartFooterEl = document.getElementById('cartFooter');
+      const couponSectionEl = document.getElementById('cartCouponSection');
+      const deliveryProgressEl = document.getElementById('cartStickyHeaderAddon');
+
+      if (emptyCartEl) emptyCartEl.style.display = 'flex';
+      if (cartFooterEl) cartFooterEl.style.display = 'none';
+      
+      // Clear dynamic content
+      billDetailsContainer.innerHTML = '';
+      if (couponSectionEl) couponSectionEl.innerHTML = '';
+      if (deliveryProgressEl) deliveryProgressEl.innerHTML = '';
+
+      // Reset coupon state
+      appliedCoupon = null;
+      couponError = null;
+      return; // Stop further execution
+    }
+
     const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
     const originalTotal = items.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
     const savings = originalTotal - subtotal;
@@ -1545,12 +1566,6 @@ try {
         </div>
       </div>
     `;
-
-    // Also check if cart is now empty
-    if (items.length === 0) {
-      document.getElementById('emptyCart').style.display = 'flex';
-      if (document.getElementById('cartFooter')) document.getElementById('cartFooter').style.display = 'none';
-    }
   }
 
   function closeCart() {
