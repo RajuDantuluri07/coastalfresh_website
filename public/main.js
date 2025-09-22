@@ -644,6 +644,18 @@ try {
       });
     }
 
+    // --- FIX: Dynamic Padding for Cart Footer ---
+    // This ensures the scrollable cart content has enough space at the bottom
+    // and isn't hidden by the sticky footer.
+    const cartFooterEl = document.getElementById('cartFooter');
+    const cartContentWrapperEl = document.querySelector('.cart-content-wrapper');
+    const cartResizeObserver = new ResizeObserver(() => {
+      // Measure the footer's height and apply it as padding to the scrollable content
+      const footerHeight = cartFooterEl.offsetHeight;
+      cartContentWrapperEl.style.paddingBottom = `${footerHeight}px`;
+    });
+    if (cartFooterEl && cartContentWrapperEl) cartResizeObserver.observe(cartFooterEl);
+
     setupInstallPromptEvents();
 
   }
