@@ -2892,56 +2892,6 @@ body.popup-open .bottom-bar {
   border-bottom: 1px solid var(--border-color);
 }
 
-/* --- NEW: Orders Page Styles --- */
-.order-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.order-card {
-  background: var(--bg-white);
-  border-radius: 14px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-  border: 1px solid var(--border-color);
-  overflow: hidden;
-}
-
-.order-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 12px 16px;
-  background: var(--bg-light);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.order-id {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.order-date {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.order-status {
-  font-size: 12px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 12px;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.order-status.pending { background-color: #FFF3E0; color: #EF6C00; }
-.order-status.confirmed { background-color: #E3F2FD; color: #1E88E5; }
-.order-status.shipped { background-color: #E8EAF6; color: #3949AB; }
-.order-status.delivered { background-color: #E8F5E9; color: #388E3C; }
-.order-status.cancelled { background-color: #FFEBEE; color: #D32F2F; }
-
 .order-body {
   display: flex;
   align-items: center;
@@ -2976,7 +2926,6 @@ body.popup-open .bottom-bar {
   font-weight: 600;
   color: var(--text-secondary);
 }
-
 .order-footer {
   display: flex;
   justify-content: space-between;
