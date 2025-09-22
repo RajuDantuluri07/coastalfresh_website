@@ -1694,9 +1694,9 @@ padding-bottom: 0; /* FIX: Remove padding as footer now contains all bottom elem
 
 #couponInput {
   width: 100%;
-  height: 40px; /* REFINED: Slimmer input */
+  height: 44px; /* REFINED: Slimmer input */
   border: 1px solid var(--border-color);
-  border-radius: 20px; /* REFINED: Rounded pill shape */
+  border-radius: 10px; /* REFINED: Standard radius */
   padding: 0 16px 0 40px;
   font-size: 14px;
   font-weight: 500;
@@ -1709,10 +1709,10 @@ padding-bottom: 0; /* FIX: Remove padding as footer now contains all bottom elem
 }
 
 #applyCouponBtn {
-  height: 40px; /* REFINED: Slimmer button */
+  height: 44px; /* REFINED: Slimmer button */
   padding: 0 20px;
   border: none;
-  border-radius: 20px; /* REFINED: Rounded pill shape */
+  border-radius: 10px; /* REFINED: Standard radius */
   background: var(--primary-light);
   color: var(--primary-color);
   font-weight: 700;
@@ -2024,7 +2024,7 @@ box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
 border-top: 1px solid var(--border-color);
 display: flex;
 flex-direction: column; /* FIX: Corrected property */
-gap: 12px; /* FIX: Add vertical spacing between footer elements */
+gap: 16px; /* FIX: Increase vertical spacing between footer elements */
 /* Add safe area padding here */ /* FIX: Make the entire footer background light grey */
 padding: 10px 16px; /* REFINED: Adjusted padding */
 padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted padding */
@@ -2052,45 +2052,53 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
 }
 
 /* --- REFINED: Payment Options as Segmented Control --- */
-.payment-options {
-  width: 100%;
-}
-
 .payment-choices {
   display: flex;
-  border: 1.5px solid var(--border-color);
+  flex-direction: column; /* NEW: Stack options vertically */
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   overflow: hidden;
+  background: var(--bg-white);
 }
 
-.payment-btn {
-  flex: 1;
+.payment-choice-item {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  padding: 8px; /* REFINED: Slimmer button */
+  padding: 14px 16px; /* NEW: Taller, more spacious rows */
   border: none;
   border-radius: 0;
   background: var(--bg-white);
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 12px; /* REFINED: Smaller font size */
+  font-size: 14px; /* NEW: Larger font size */
   font-weight: 500;
   color: var(--text-secondary);
 }
-.payment-btn:not(:last-child) {
-  border-right: 1.5px solid var(--border-color);
+.payment-choice-item:not(:last-child) {
+  border-bottom: 1px solid var(--border-color); /* NEW: Divider between options */
 }
-.payment-btn.active {
-  border-color: transparent;
+.payment-choice-item.active {
   background-color: var(--primary-light);
   color: var(--primary-dark);
   font-weight: 600;
 }
 
-.payment-btn.active i {
-  color: var(--primary-color);
+/* NEW: Radio button icon styles */
+.radio-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.payment-choice-item.active .radio-icon {
+  border-color: var(--primary-color);
+  background-color: var(--primary-color);
+  box-shadow: inset 0 0 0 2px var(--bg-white); /* Creates the inner circle effect */
 }
 
 .empty-cart {

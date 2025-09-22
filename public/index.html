@@ -723,10 +723,15 @@
         <!-- REFINED: Payment options and Place Order button -->
         <div class="payment-options" id="paymentOptions">
           <div class="payment-choices">
-            <button class="payment-btn active" data-method="cod"> <span>💵 COD</span> </button>
-            <button class="payment-btn" data-method="online">
-              <span>💳 UPI / Card</span>
-            </button>
+            <!-- NEW: Radio-style payment options -->
+            <div class="payment-choice-item payment-btn active" data-method="cod" role="radio" aria-checked="true" tabindex="0">
+              <span class="radio-icon"></span>
+              <span class="radio-label">💵 Cash on Delivery</span>
+            </div>
+            <div class="payment-choice-item payment-btn" data-method="online" role="radio" aria-checked="false" tabindex="0">
+              <span class="radio-icon"></span>
+              <span class="radio-label">💳 UPI / Card</span>
+            </div>
           </div>
         </div>
         <button class="checkout-btn">Place Order</button> <!-- Text will be updated by JS -->
