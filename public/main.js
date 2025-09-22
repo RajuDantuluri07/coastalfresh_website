@@ -1517,7 +1517,7 @@ try {
 
     const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
     const originalTotal = items.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
-    const savings = originalTotal - subtotal;
+    const productSavings = originalTotal - subtotal;
 
     // NEW: Calculate coupon discount
     let couponDiscount = 0;
@@ -1532,13 +1532,16 @@ try {
 
     const deliveryFee = (subtotal - couponDiscount) >= FREE_DELIVERY_THRESHOLD ? 0 : 50;
     const total = subtotal - couponDiscount + deliveryFee;
+    // --- FIX: Calculate total savings including delivery fee discount ---
+    const deliverySavings = 100 - deliveryFee; // Original fee is 100
+    const totalSavings = productSavings + deliverySavings;
 
-    // NEW: Create a formatted string for the delivery fee display
+    // --- FIX: Create a clearer, more accurate display string for the delivery fee ---
     let deliveryFeeDisplay;
     if (deliveryFee === 0) {
       deliveryFeeDisplay = `<span><del style="opacity: 0.6; margin-right: 4px;">₹100</del> FREE</span>`;
     } else {
-      deliveryFeeDisplay = `<span><del style="opacity: 0.6;">₹100</del></span>`;
+      deliveryFeeDisplay = `<span>₹${deliveryFee} <del style="opacity: 0.6; margin-left: 4px;">₹100</del></span>`;
     }
 
     const checkoutBtn = document.querySelector('.checkout-btn');
@@ -1562,7 +1565,7 @@ try {
           </div>
           <div class="summary-divider"></div>
           <div class="summary-row summary-total"><span>To Pay</span><span>₹${Math.round(total)}</span></div>
-          ${savings > 0 ? `<div class="total-savings-banner">You saved ₹${savings} on this order 🎉</div>` : ''}
+          ${totalSavings > 0 ? `<div class="total-savings-banner">You saved ₹${Math.round(totalSavings)} on this order 🎉</div>` : ''}
         </div>
       </div>
     `;
