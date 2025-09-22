@@ -1642,9 +1642,6 @@ padding-bottom: 120px; /* REFINED: Further compressed space for the new, slimmer
 
 /* --- NEW: Sticky Progress Bar Container --- */
 #cartStickyHeaderAddon {
-  position: sticky;
-  top: 53px; /* Height of the sticky cart header */
-  z-index: 10;
   background: var(--bg-light);
   padding: 8px 16px;
   border-bottom: 1px solid var(--border-color);
@@ -1955,16 +1952,16 @@ padding-bottom: 120px; /* REFINED: Further compressed space for the new, slimmer
 }
 
 .progress-bar {
-  height: 4px; /* REFINED: Even slimmer bar */
+  height: 8px; /* REFINED: Slimmer bar per request */
   background-color: rgba(0,0,0,0.1); /* Grey track */
-  border-radius: 2px; /* REFINED: Rounded edges */
+  border-radius: 4px; /* REFINED: Rounded edges */
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
   background: var(--success-color); /* REFINED: Solid green fill */
-  border-radius: 2px; /* REFINED: Rounded edges */
+  border-radius: 4px; /* REFINED: Rounded edges */
   transition: width 0.5s ease-in-out;
 }
 
