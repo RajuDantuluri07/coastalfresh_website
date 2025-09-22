@@ -696,8 +696,8 @@
       </header>
 
       <div class="cart-content-wrapper">
-        <!-- REORDERED: Products are now at the top -->
-        <main class="section" id="cartItemsSection">
+        <!-- REFINED: Products are now at the top, inside a card -->
+        <main class="section cart-section" id="cartItemsSection">
           <div id="cartItems"></div>
           <div id="emptyCart" class="empty-cart" style="display: none;">
             <div class="empty-cart-animation">
@@ -714,13 +714,13 @@
             <button class="empty-cart-btn">Browse Products</button>
           </div>
         </main>
-        <!-- REORDERED: Coupon and Bill details are now at the bottom -->
+        <!-- REFINED: Coupon and Bill details are now at the bottom, inside cards -->
         <div id="cartCouponSection"></div>
         <div id="cartBillDetails"></div>
       </div>
       <!-- Sticky cart footer -->
       <div class="cart-footer" id="cartFooter" style="display: none;">
-        <!-- NEW: Redesigned Payment Options -->
+        <!-- REFINED: Payment options and Place Order button -->
         <div class="payment-options" id="paymentOptions">
           <div class="payment-choices">
             <button class="payment-btn active" data-method="cod">
@@ -731,7 +731,6 @@
             </button>
           </div>
         </div>
-        <!-- NEW: The checkout button is now the primary element in the footer -->
         <button class="checkout-btn">Place Order</button> <!-- Text will be updated by JS -->
       </div>
     </div>

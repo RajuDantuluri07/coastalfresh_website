@@ -1479,14 +1479,15 @@ try {
     const checkoutBtn = document.querySelector('.checkout-btn');
     if (checkoutBtn) {
       // NEW: Update button text to "Pay ₹XXX • Place Order"
-      checkoutBtn.innerHTML = `Pay ₹${total} &nbsp;&bull;&nbsp; Place Order`;
+      checkoutBtn.innerHTML = `Place Order - Pay ₹${Math.round(total)}`;
     }
 
     billDetailsContainer.innerHTML = `
-        ${subtotal < FREE_DELIVERY_THRESHOLD && subtotal > 0 ? `
+      <div class="section cart-section" style="padding-top:0;">
+        ${(subtotal - couponDiscount) < FREE_DELIVERY_THRESHOLD && subtotal > 0 ? `
           <div class="delivery-progress-card">
             <div class="delivery-progress-text">
-              ₹${FREE_DELIVERY_THRESHOLD - subtotal} more for FREE Delivery 🚚
+              Add ₹${Math.round(FREE_DELIVERY_THRESHOLD - (subtotal - couponDiscount))} more for FREE Delivery 🚚
             </div>
             <div class="progress-bar">
               <div class="progress-bar-fill" style="width: ${(subtotal / FREE_DELIVERY_THRESHOLD) * 100}%;"></div>
@@ -1506,6 +1507,7 @@ try {
           <div class="summary-row summary-total"><span>To Pay</span><span>₹${Math.round(total)}</span></div>
           ${savings > 0 ? `<div class="total-savings-banner">You saved ₹${savings} on this order 🎉</div>` : ''}
         </div>
+      </div>
     `;
 
     // Also check if cart is now empty

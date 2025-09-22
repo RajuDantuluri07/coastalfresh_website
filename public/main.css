@@ -1631,7 +1631,7 @@ overflow-y: auto;
 display: flex;
 flex-direction: column;
 min-height: 0;
-padding-bottom: 240px; /* Space for the sticky footer + coupon */
+padding-bottom: 150px; /* REFINED: Space for the new, slimmer sticky footer */
 }
 
 /* NEW: Make cart title bolder and bigger */
@@ -1640,15 +1640,23 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
   font-weight: 700;
 }
 
-/* NEW: Adjust padding for reordered cart layout */
-#cartItemsSection {
-  padding-top: 16px;
-  padding-bottom: 0;
+/* --- REFINED: Cart Section Layout --- */
+.cart-section {
+  padding: 12px 16px; /* REFINED: Reduced padding */
+}
+
+#cartItemsSection { /* The section containing product items */
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: var(--bg-white); /* Give it a card background */
+  margin: 0 16px;
+  border-radius: var(--radius-card);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
 }
 
 /* --- NEW: Coupon Section Styles --- */
 #cartCouponSection {
-  padding: 16px 20px 0;
+  padding: 12px 16px 0; /* REFINED: Reduced padding */
   background: var(--bg-light);
 }
 
@@ -1673,10 +1681,10 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
 
 #couponInput {
   width: 100%;
-  height: 44px;
+  height: 40px; /* REFINED: Slimmer input */
   border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 0 12px 0 40px;
+  border-radius: 20px; /* REFINED: Rounded pill shape */
+  padding: 0 16px 0 40px;
   font-size: 14px;
   font-weight: 500;
   background: var(--bg-white);
@@ -1688,10 +1696,10 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
 }
 
 #applyCouponBtn {
-  height: 44px;
+  height: 40px; /* REFINED: Slimmer button */
   padding: 0 20px;
   border: none;
-  border-radius: 10px;
+  border-radius: 20px; /* REFINED: Rounded pill shape */
   background: var(--primary-light);
   color: var(--primary-color);
   font-weight: 700;
@@ -1723,8 +1731,8 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
 
 /* NEW: Container for bill details */
 .cart-bill-details {
-  padding: 16px 20px;
-  background: var(--bg-light);
+  padding: 0 16px 12px; /* REFINED: Reduced padding */
+  background: var(--bg-light); /* Keep background consistent */
 }
 
 @media (min-width: 481px) {
@@ -1774,10 +1782,18 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
   overflow: hidden;
 }
 
+.cart-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.cart-item:first-child {
+  padding-top: 0;
+}
+
 .cart-item-image {
-  width: 76px;
-  height: 76px;
-  border-radius: 10px;
+  width: 60px; /* REFINED: Smaller image */
+  height: 60px; /* REFINED: Smaller image */
+  border-radius: 8px;
   background: var(--bg-light);
   overflow: hidden;
   flex-shrink: 0;
@@ -1787,12 +1803,12 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
 
 .cart-item-info {
   flex: 1;
-  padding-top: 4px; /* Align text better with image */
+  padding-top: 0;
 }
 
 .cart-item-name {
-  font-weight: 500; /* UPDATED */
-  font-size: 15px;
+  font-weight: 600; /* REFINED: Bolder title */
+  font-size: 14px;
   color: var(--text-primary);
   line-height: 1.3;
   margin-bottom: 4px;
@@ -1805,26 +1821,27 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
 }
 
 .cart-item-weight {
-  font-size: 13px;
+  font-size: 12px; /* REFINED: Smaller text */
   color: var(--text-secondary);
 }
 
 .cart-item-actions {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 12px;
+  align-items: center;
+  gap: 16px;
+  margin-left: auto; /* Push to the right */
 }
 
 .cart-item-pricing {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  gap: 2px;
 }
 
 .cart-item-current-price {
-  font-size: 15px;
-  font-weight: 500; /* UPDATED */
+  font-size: 14px;
+  font-weight: 600; /* REFINED: Bolder price */
   color: var(--text-primary);
 }
 
@@ -1837,7 +1854,7 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
 .qty-controls {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: var(--bg-light);
   border-radius: 20px;
   padding: 4px;
@@ -1847,8 +1864,8 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
   background: var(--bg-white);
   border: none;
   border-radius: 50%;
-  width: 28px;
-  height: 28px;
+  width: 26px; /* REFINED: Smaller buttons */
+  height: 26px; /* REFINED: Smaller buttons */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1899,7 +1916,7 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
 .price-summary-card {
   background: var(--bg-white);
   border-radius: 16px;
-  padding: 16px;
+  padding: 12px 16px; /* REFINED: Reduced padding */
   margin-top: 16px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.05);
 }
@@ -1907,7 +1924,7 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
 .price-summary-title { /* This is an H3 */
   font-size: 16px;
   font-weight: 600;
-  margin-bottom: 16px;
+  margin-bottom: 12px; /* REFINED: Reduced margin */
 }
 
 /* --- NEW: Redesigned Delivery Progress Bar --- */
@@ -1915,28 +1932,28 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
   background: linear-gradient(90deg, #e8f5e9, #e0f2f1); /* Light green to cyan */
   border: 1px solid #c8e6c9; /* Lighter border */
   border-radius: 10px;
-  padding: 8px 12px; /* REFINED: Reduced padding */
+  padding: 6px 10px; /* REFINED: Slimmer padding */
   text-align: center;
 }
 
 .delivery-progress-text {
-  font-size: 13px; /* REFINED: Smaller text */
+  font-size: 12px; /* REFINED: Smaller text */
   font-weight: 500;
-  color: #2e7d32;
-  margin-bottom: 6px; /* REFINED: Reduced margin */
+  color: var(--text-secondary); /* REFINED: Less bold color */
+  margin-bottom: 4px; /* REFINED: Reduced margin */
 }
 
 .progress-bar {
-  height: 6px; /* REFINED: Slimmer bar */
+  height: 4px; /* REFINED: Even slimmer bar */
   background-color: rgba(0,0,0,0.1); /* Grey track */
-  border-radius: 3px; /* REFINED: Rounded edges */
+  border-radius: 2px; /* REFINED: Rounded edges */
   overflow: hidden;
 }
 
 .progress-bar-fill {
   height: 100%;
   background: linear-gradient(90deg, #66bb6a, #26a69a); /* Green to teal fill */
-  border-radius: 3px; /* REFINED: Rounded edges */
+  border-radius: 2px; /* REFINED: Rounded edges */
   transition: width 0.5s ease-in-out;
 }
 
@@ -1944,7 +1961,7 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
   display: flex;
   justify-content: space-between;
   margin-bottom: 12px;
-  font-size: 14px;
+  font-size: 13px; /* REFINED: Smaller font */
   color: var(--text-secondary);
 }
 
@@ -1986,8 +2003,8 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
 
 .summary-total {
   font-weight: 700;
-  font-size: 18px;
-  color: var(--text-primary);
+  font-size: 16px; /* REFINED: Slightly smaller but still prominent */
+  color: var(--success-color); /* REFINED: Green for final price */
   margin-bottom: 0;
 }
 
@@ -1996,7 +2013,7 @@ padding-bottom: 240px; /* Space for the sticky footer + coupon */
   background-color: #e8f5e9; /* Light green background */
   color: #2e7d32;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px; /* REFINED: Smaller font */
   text-align: center;
   padding: 10px;
   border-radius: 8px;
@@ -2016,10 +2033,10 @@ box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
 border-top: 1px solid var(--border-color);
 display: flex;
 flex-direction: column;
-gap: 10px; /* REFINED: Reduced gap */
+gap: 8px; /* REFINED: Reduced gap */
 /* Add safe area padding here */
-padding: 10px 20px; /* REFINED: Reduced padding */
-padding-bottom: calc(10px + env(safe-area-inset-bottom));
+padding: 8px 16px; /* REFINED: Reduced padding */
+padding-bottom: calc(8px + env(safe-area-inset-bottom));
 }
 /* --- NEW: Enhanced Checkout Button --- */
 .checkout-btn {
@@ -2035,7 +2052,7 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
   justify-content: center; /* Center the "Pay • Place Order" text */
-  padding: 14px; /* REFINED: Reduced padding for a slimmer button */
+  padding: 12px; /* REFINED: Slimmer button */
   width: 100%;
 }
 
@@ -2051,7 +2068,7 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom));
 
 .payment-choices {
   display: flex;
-  gap: 10px; /* REFINED: Reduced gap */
+  gap: 8px; /* REFINED: Reduced gap */
 }
 
 .payment-btn {
@@ -2059,14 +2076,14 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px; /* REFINED: Smaller gap */
-  padding: 8px; /* REFINED: Reduced padding for a smaller button */
+  gap: 8px;
+  padding: 6px; /* REFINED: Slimmer button */
   border: 2px solid var(--border-color);
   border-radius: 10px; /* REFINED: Smaller radius */
   background: var(--bg-white);
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 13px; /* REFINED: Smaller font size */
+  font-size: 12px; /* REFINED: Smaller font size */
   font-weight: 500;
   color: var(--text-secondary);
 }
