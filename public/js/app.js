@@ -1,16 +1,6 @@
 import { UI } from './ui.js';
 import { Handlers } from './handlers.js';
-
-// Your web app's Firebase configuration
-export const firebaseConfig = {
-  apiKey: "AIzaSyCCeLy8PNUK480m_o-GpRWbdRB59R3UTqw", // This is safe to be public
-  authDomain: "coastal-fresh---sea-foods.firebaseapp.com",
-  projectId: "coastal-fresh---sea-foods",
-  storageBucket: "coastal-fresh---sea-foods.appspot.com",
-  messagingSenderId: "782759620106",
-  appId: "1:782759620106:web:960ec7c125faa30675f9f3",
-  measurementId: "G-GSHMPRYPW1"
-};
+import { firebaseConfig } from './firebase-config.js';
 
 // App Configuration
 export const config = {
