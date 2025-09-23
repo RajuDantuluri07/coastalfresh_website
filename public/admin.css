@@ -279,12 +279,10 @@ body {
 
 /* Stats Grid */
 .stats-grid {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 1.5rem;
     margin-bottom: 2rem;
-    overflow-x: auto;
-    padding-bottom: 1rem; /* Space for scrollbar */
-    scrollbar-width: thin;
 }
 
 .stat-card {
@@ -294,7 +292,6 @@ body {
     box-shadow: var(--shadow);
     position: relative;
     overflow: hidden;
-    flex: 0 0 250px; /* Prevent shrinking, set a base width */
 }
 
 .stat-card::before {
@@ -384,6 +381,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .section-title {
@@ -625,6 +624,11 @@ body {
     }
     .content-area {
         padding: 1rem;
+    }
+
+    .header-right {
+        gap: 0.5rem;
+        flex-wrap: wrap;
     }
 
     .main-header {
