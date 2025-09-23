@@ -1,5 +1,5 @@
-import { UI } from './js/ui.js';
-import { Handlers } from './js/handlers.js';
+import { UI } from './ui.js';
+import { Handlers } from './handlers.js';
 
 // Your web app's Firebase configuration
 export const firebaseConfig = {
