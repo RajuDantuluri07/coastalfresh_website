@@ -356,15 +356,17 @@ export const Handlers = {
         // Product Popup buttons
         document.getElementById('ordersPage').addEventListener('click', e => {
             const tab = e.target.closest('.order-filter-tab');
-            if (tab && !tab.classList.contains('active')) {
-                currentOrderFilter = tab.dataset.status;
-                UI.renderOrdersPage(true);
-            }
+            // The logic for filtering orders is now self-contained within renderOrdersPage,
+            // so this part of the handler is no longer needed.
+            // We keep the listener for opening the details drawer.
+
             const detailsBtn = e.target.closest('.order-card');
             if (detailsBtn) {
                 const orderId = detailsBtn.dataset.orderId;
-                const order = orders.find(o => o.id === orderId);
-                if (order) UI.openOrderDetailsDrawer(order);
+                // Fetch the specific order from Firestore to open the details drawer
+                state.db.collection('orders').doc(orderId).get().then(doc => {
+                    if (doc.exists) UI.openOrderDetailsDrawer(doc.data());
+                });
             }
         });
         document.getElementById('logoutBtn').addEventListener('click', Handlers.handleLogout);
