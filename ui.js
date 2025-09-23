@@ -211,39 +211,50 @@ export const UI = {
     },
 
     createProductHTML: (product, options = {}) => {
-        const hasOffer = product.mrp > product.finalPrice;
-        const isInCart = state.cart[product.id];
-        const optimizedImage = UI.getOptimizedImageUrl(product.image, 300, 300);
-        const isFlashSale = options.isFlashSale || false;
-        const sanitizedName = DOMPurify.sanitize(product.name);
-        return `
-      <div class="product" data-id="${product.id}">
-        <div class="product-image">
-          ${hasOffer ? `<div class="offer-badge">${product.offer}% OFF</div>` : ''}
-          ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
-          <img src="${optimizedImage}" alt="Fresh ${sanitizedName} delivery in Hyderabad by Coastal Fresh India" loading="lazy" width="300" height="300">
-        </div>
-        <div class="product-info">
-          <div class="product-name">${sanitizedName}</div>
-          <div class="product-weight">${product.net} Net Weight</div>
-          <div class="product-footer">
-            <div class="product-price">
-              <span class="price">₹${product.finalPrice}</span>
-              ${hasOffer ? `<span class="old-price">₹${product.mrp}</span>` : ''}
+        try {
+            // Defensive check for the most critical product properties.
+            if (!product || typeof product.id === 'undefined' || !product.name) {
+                console.warn('Skipping render for invalid product data:', product);
+                return ''; // Return an empty string to not break the .join('')
+            }
+
+            const hasOffer = product.mrp > product.finalPrice;
+            const isInCart = state.cart[product.id];
+            const optimizedImage = UI.getOptimizedImageUrl(product.image, 300, 300);
+            const sanitizedName = DOMPurify.sanitize(product.name);
+            return `
+          <div class="product" data-id="${product.id}">
+            <div class="product-image">
+              ${hasOffer ? `<div class="offer-badge">${product.offer}% OFF</div>` : ''}
+              ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
+              <img src="${optimizedImage}" alt="Fresh ${sanitizedName} delivery in Hyderabad by Coastal Fresh India" loading="lazy" width="300" height="300">
             </div>
-            ${product.available ?
-                (isInCart ?
-                    `<div class="cart-controls" data-id="${product.id}">
-                  <button class="qty-btn dec">-</button>
-                  <span class="qty">${isInCart}</span>
-                  <button class="qty-btn inc">+</button>
-                </div>`
-                    : `<button class="add-to-cart-btn add-pill" data-id="${product.id}"><i class="fas fa-plus"></i> Add</button>`)
-                : ''}
+            <div class="product-info">
+              <div class="product-name">${sanitizedName}</div>
+              <div class="product-weight">${product.net} Net Weight</div>
+              <div class="product-footer">
+                <div class="product-price">
+                  <span class="price">₹${product.finalPrice}</span>
+                  ${hasOffer ? `<span class="old-price">₹${product.mrp}</span>` : ''}
+                </div>
+                ${product.available ?
+                    (isInCart ?
+                        `<div class="cart-controls" data-id="${product.id}">
+                      <button class="qty-btn dec">-</button>
+                      <span class="qty">${isInCart}</span>
+                      <button class="qty-btn inc">+</button>
+                    </div>`
+                        : `<button class="add-to-cart-btn add-pill" data-id="${product.id}"><i class="fas fa-plus"></i> Add</button>`)
+                    : ''}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    `;
+        `;
+        } catch (error) {
+            console.error(`Error rendering product card for product ID ${product?.id}:`, error);
+            // Return an empty string so the rest of the products can render.
+            return '';
+        }
     },
 
     generateProductSlug: (product) => {

@@ -78,6 +78,35 @@ export const state = {
     popupProduct: null,
 };
 
+// --- NEW: Global Error Handling ---
+
+// Catches synchronous errors and unhandled exceptions in event listeners.
+window.addEventListener('error', function(event) {
+  console.error('Unhandled global error:', event.error);
+  // Show a user-friendly message without crashing the app.
+  if (UI && typeof UI.showToast === 'function') {
+    UI.showToast('Oops! An unexpected error occurred.');
+  }
+  // Log the exception to your analytics for tracking.
+  if (window.Analytics && typeof window.Analytics.trackEvent === 'function') {
+    Analytics.trackEvent('exception', {
+      description: event.error.message,
+      fatal: false
+    });
+  }
+});
+
+// Catches unhandled promise rejections (e.g., from async functions).
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('Unhandled promise rejection:', event.reason);
+    if (UI && typeof UI.showToast === 'function') {
+        UI.showToast('A network or server error occurred.');
+    }
+    if (window.Analytics && typeof window.Analytics.trackEvent === 'function') {
+        Analytics.trackEvent('exception', { description: `Promise Rejection: ${event.reason.message || event.reason}`, fatal: false });
+    }
+});
+
 // Initialize Firebase
 try {
   firebase.initializeApp(firebaseConfig);
@@ -86,78 +115,84 @@ try {
 }
 
 async function init() {
-    // Pass dependencies to modules
-    UI.init(state, config, Handlers);
-    Handlers.init(state, config, UI);
+  try {
+      // Pass dependencies to modules
+      UI.init(state, config, Handlers);
+      Handlers.init(state, config, UI);
 
-    // Firebase Auth Listener
-    firebase.auth().onAuthStateChanged(Handlers.handleAuthStateChange);
-    state.db = firebase.firestore();
+      // Firebase Auth Listener
+      firebase.auth().onAuthStateChanged(Handlers.handleAuthStateChange);
+      state.db = firebase.firestore();
 
-    UI.showInitialSkeletons();
+      UI.showInitialSkeletons();
 
-    try {
-        const response = await fetch('/products.json');
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        state.products = await response.json();
+      try {
+          const response = await fetch('/products.json');
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          state.products = await response.json();
 
-        UI.renderFeaturedProducts();
-        UI.renderCatalogProducts();
-        UI.renderFlashSale();
-        UI.initFlashSaleTimer();
-        UI.renderProductSchema();
-        Handlers.loadCart();
+          UI.renderFeaturedProducts();
+          UI.renderCatalogProducts();
+          UI.renderFlashSale();
+          UI.initFlashSaleTimer();
+          UI.renderProductSchema();
+          Handlers.loadCart();
 
-        const path = window.location.pathname;
-        const productMatch = path.match(/^\/product\/(.+)-(\d+)$/);
-        const urlParams = new URLSearchParams(window.location.search);
+          const path = window.location.pathname;
+          const productMatch = path.match(/^\/product\/(.+)-(\d+)$/);
+          const urlParams = new URLSearchParams(window.location.search);
 
-        if (productMatch) {
-            const productId = parseInt(productMatch[2], 10);
-            UI.showProductPopup(productId);
-        }
+          if (productMatch) {
+              const productId = parseInt(productMatch[2], 10);
+              UI.showProductPopup(productId);
+          }
 
-        const searchQuery = urlParams.get('q');
-        if (searchQuery) {
-            UI.showPage('catalog');
-            const searchInput = document.getElementById('catalogSearch');
-            if (searchInput) {
-                searchInput.value = searchQuery;
-                Handlers.handleCatalogSearch({ target: searchInput });
-            }
-        }
-    } catch (error) {
-        console.error("Could not load product data:", error);
-    }
+          const searchQuery = urlParams.get('q');
+          if (searchQuery) {
+              UI.showPage('catalog');
+              const searchInput = document.getElementById('catalogSearch');
+              if (searchInput) {
+                  searchInput.value = searchQuery;
+                  Handlers.handleCatalogSearch({ target: searchInput });
+              }
+          }
+      } catch (error) {
+          console.error("Could not load product data:", error);
+          UI.showToast('Could not load products. Please check your connection.');
+      }
 
-    UI.renderTrustIcons();
-    UI.renderCategories();
-    UI.renderCustomerReviews();
-    Handlers.setupEvents();
-    UI.initCarousel('#slides');
-    UI.initCarousel('#communicationCarousel .slides');
+      UI.renderTrustIcons();
+      UI.renderCategories();
+      UI.renderCustomerReviews();
+      Handlers.setupEvents();
+      UI.initCarousel('#slides');
+      UI.initCarousel('#communicationCarousel .slides');
 
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/service-worker.js').then(registration => {
-                console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                Handlers.initFirebaseMessaging();
-            }, err => {
-                console.log('ServiceWorker registration failed: ', err);
-            });
-        });
-    }
+      if ('serviceWorker' in navigator) {
+          window.addEventListener('load', () => {
+              navigator.serviceWorker.register('/service-worker.js').then(registration => {
+                  console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                  Handlers.initFirebaseMessaging();
+              }, err => {
+                  console.log('ServiceWorker registration failed: ', err);
+              });
+          });
+      }
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        state.deferredInstallPrompt = e;
-        UI.showInstallPrompt();
+      window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          state.deferredInstallPrompt = e;
+          UI.showInstallPrompt();
 
-        const profileInstallBtn = document.getElementById('profileInstallBtn');
-        if (profileInstallBtn) {
-            profileInstallBtn.style.display = 'flex';
-        }
-    });
+          const profileInstallBtn = document.getElementById('profileInstallBtn');
+          if (profileInstallBtn) {
+              profileInstallBtn.style.display = 'flex';
+          }
+      });
+  } catch (e) {
+      console.error("A critical error occurred during app initialization:", e);
+      document.body.innerHTML = `<div style="padding: 40px; text-align: center; font-family: sans-serif; color: #333;"><h1>Application Error</h1><p>A critical error occurred and the app cannot start. Please try refreshing the page.</p><p style="color: #888; font-size: 12px; margin-top: 20px;">Error: ${e.message}</p></div>`;
+  }
 }
 
 document.addEventListener('DOMContentLoaded', init);
