@@ -29,7 +29,7 @@ export const UI = {
             content.appendChild(title); content.appendChild(sub);
             item.appendChild(iconWrap); item.appendChild(content);
             item.addEventListener('click', () => {
-                Analytics.trackEvent('click', { location: 'trust_strip', item_title: t.title, item_index: i });
+                window.Analytics.trackEvent('click', { location: 'trust_strip', item_title: t.title, item_index: i });
             });
             container.appendChild(item);
         });
@@ -350,7 +350,7 @@ export const UI = {
 
         history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
 
-        Analytics.trackEvent('view_item', {
+        window.Analytics.trackEvent('view_item', {
             currency: 'INR',
             value: product.finalPrice,
             items: [{
@@ -517,7 +517,7 @@ export const UI = {
         UI.openModal(cartModal, cartModal.querySelector('.back-btn'));
 
         const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
-        Analytics.trackEvent('view_cart', {
+        window.Analytics.trackEvent('view_cart', {
             currency: 'INR',
             value: subtotal,
             items: items.map(item => ({
@@ -1033,7 +1033,7 @@ export const UI = {
         if (faq.classList.contains('active')) {
             const qTextEl = button.querySelector('.q-text');
             const qText = qTextEl ? qTextEl.textContent : '';
-            Analytics.trackEvent('faq_click', { question: qText });
+            window.Analytics.trackEvent('faq_click', { question: qText });
         }
     },
 
@@ -1383,7 +1383,7 @@ export const UI = {
         state.previouslyFocusedElement = document.activeElement;
         installPrompt.classList.add('show');
 
-        Analytics.trackEvent('pwa_prompt_shown');
+        window.Analytics.trackEvent('pwa_prompt_shown');
 
         const installBtn = document.getElementById('installBtn');
         if (installBtn) {

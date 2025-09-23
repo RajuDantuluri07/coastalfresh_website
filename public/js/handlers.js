@@ -98,7 +98,7 @@ export const Handlers = {
                 const detailItem = detailHeader.closest('.detail-item');
                 if (detailItem) {
                     if (detailItem.id === 'productInfoDetailItem') {
-                        Analytics.trackEvent('view_item_details', {
+                        window.Analytics.trackEvent('view_item_details', {
                             item_id: state.popupProduct?.id,
                             item_name: state.popupProduct?.name
                         });
@@ -183,7 +183,7 @@ export const Handlers = {
                 document.getElementById('catalogSearch').value = '';
                 state.currentSearch = '';
                 UI.renderCatalogProducts();
-                Analytics.trackEvent('select_category', { category: state.currentCategory });
+                window.Analytics.trackEvent('select_category', { category: state.currentCategory });
             }
         });
 
@@ -417,7 +417,7 @@ export const Handlers = {
                 paymentBtn.classList.add('active');
                 state.selectedPaymentMethod = paymentBtn.dataset.method;
 
-                Analytics.trackEvent('select_payment_method', { method: state.selectedPaymentMethod });
+                window.Analytics.trackEvent('select_payment_method', { method: state.selectedPaymentMethod });
 
                 if (state.selectedPaymentMethod === 'online') {
                     UI.showToast('Online payment is coming soon!');
@@ -491,7 +491,7 @@ export const Handlers = {
         UI.showToast(`${DOMPurify.sanitize(state.popupProduct.name)} added to cart!`);
         UI.closePopup();
 
-        Analytics.trackAddToCart(state.popupProduct, qty);
+        window.Analytics.trackAddToCart(state.popupProduct, qty);
     },
 
     toggleFavorite: () => {
@@ -503,7 +503,7 @@ export const Handlers = {
         favoriteBtn.style.color = state.isPopupFavorite ? 'var(--error-color)' : 'var(--primary-color)';
 
         if (state.popupProduct) {
-            Analytics.trackEvent(state.isPopupFavorite ? 'add_to_wishlist' : 'remove_from_wishlist', {
+            window.Analytics.trackEvent(state.isPopupFavorite ? 'add_to_wishlist' : 'remove_from_wishlist', {
                 currency: 'INR',
                 value: state.popupProduct.finalPrice * state.currentProductQty,
                 items: [{
@@ -554,7 +554,7 @@ export const Handlers = {
             window.open(`https://wa.me/?text=${encodeURIComponent(referralMessage)}`, '_blank');
         }
 
-        Analytics.trackEvent('share', {
+        window.Analytics.trackEvent('share', {
             method: 'Web Share API',
             content_type: 'referral',
             item_id: 'referral_link',
@@ -588,7 +588,7 @@ export const Handlers = {
         UI.showToast(`${product.name} added to cart!`);
 
         const addedProduct = state.products.find(p => p.id === parseInt(id));
-        if (addedProduct) Analytics.trackAddToCart(addedProduct, qty);
+        if (addedProduct) window.Analytics.trackAddToCart(addedProduct, qty);
     },
 
     updateQty: (id, change) => {
@@ -601,7 +601,7 @@ export const Handlers = {
         if (state.cart[id] <= 0) {
             delete state.cart[id];
             if (product) {
-                Analytics.trackEvent('remove_from_cart', {
+                window.Analytics.trackEvent('remove_from_cart', {
                     currency: 'INR',
                     value: product.finalPrice * originalQty,
                     items: [{
@@ -614,7 +614,7 @@ export const Handlers = {
                 });
             }
         } else {
-            if (product) Analytics.trackChangeQty(product, change, state.cart[id]);
+            if (product) window.Analytics.trackChangeQty(product, change, state.cart[id]);
         }
         Handlers.saveCart();
 
@@ -738,12 +738,12 @@ export const Handlers = {
                 UI.closeCart();
                 UI.showOrderSuccessModal(orderId, message);
 
-                Analytics.trackPurchase(orderId, total, items);
+                window.Analytics.trackPurchase(orderId, total, items);
             })
             .catch((error) => {
                 console.error("Error saving order to Firestore:", error);
                 UI.showToast("Could not place your order. Please try again.");
-                Analytics.trackEvent('purchase_failure', {
+                window.Analytics.trackEvent('purchase_failure', {
                     error_message: error.message
                 });
             });
@@ -763,7 +763,7 @@ export const Handlers = {
         UI.renderCatalogProducts();
 
         if (state.currentSearch) {
-            Analytics.trackEvent('view_search_results', {
+            window.Analytics.trackEvent('view_search_results', {
                 search_term: state.currentSearch,
                 category: state.currentCategory
             });
@@ -857,7 +857,7 @@ export const Handlers = {
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                Analytics.trackEvent('sign_up', { method: 'Email' });
+                window.Analytics.trackEvent('sign_up', { method: 'Email' });
                 if (state.afterLoginAction) {
                     UI.showToast('Success! Taking you to checkout...');
                 } else {
@@ -867,7 +867,7 @@ export const Handlers = {
             })
             .catch(error => {
                 authError.textContent = error.message;
-                Analytics.trackEvent('sign_up_failure', { method: 'Email' });
+                window.Analytics.trackEvent('sign_up_failure', { method: 'Email' });
             });
     },
 
@@ -880,7 +880,7 @@ export const Handlers = {
 
         firebase.auth().signInWithEmailAndPassword(email, password)
             .then(userCredential => {
-                Analytics.trackEvent('login', { method: 'Email' });
+                window.Analytics.trackEvent('login', { method: 'Email' });
                 if (state.afterLoginAction) {
                     UI.showToast('Success! Taking you to checkout...');
                 } else {
@@ -910,9 +910,9 @@ export const Handlers = {
                 }
 
                 if (result.additionalUserInfo && result.additionalUserInfo.isNewUser) {
-                    Analytics.trackEvent('sign_up', { method: 'Google' });
+                    window.Analytics.trackEvent('sign_up', { method: 'Google' });
                 } else {
-                    Analytics.trackEvent('login', { method: 'Google' });
+                    window.Analytics.trackEvent('login', { method: 'Google' });
                 }
 
                 if (state.afterLoginAction) {
@@ -923,7 +923,7 @@ export const Handlers = {
                 UI.closeLoginModal();
             }).catch(error => {
                 authError.textContent = error.message;
-                Analytics.trackEvent('login_failure', { method: 'Google' });
+                window.Analytics.trackEvent('login_failure', { method: 'Google' });
             });
     },
 
@@ -1001,7 +1001,7 @@ export const Handlers = {
         Handlers.updateUIForAuthState();
 
         if (user) {
-            Analytics.identifyUser(user);
+            window.Analytics.identifyUser(user);
 
             if (typeof state.afterLoginAction === 'function') {
                 setTimeout(state.afterLoginAction, 100);
@@ -1184,7 +1184,7 @@ export const Handlers = {
         UI.showToast(`Coupon '${code}' applied successfully!`);
         UI.renderCouponSection();
         UI.updateCartSummary();
-        Analytics.trackEvent('apply_coupon', { coupon: code });
+        window.Analytics.trackEvent('apply_coupon', { coupon: code });
     },
 
     removeCoupon: () => {
@@ -1193,13 +1193,13 @@ export const Handlers = {
         state.couponError = null;
         UI.showToast('Coupon removed.');
         UI.updateCartSummary();
-        Analytics.trackEvent('remove_coupon', { coupon: removedCode });
+        window.Analytics.trackEvent('remove_coupon', { coupon: removedCode });
     },
 
     triggerInstallPrompt: async () => {
         if (!state.deferredInstallPrompt) return;
 
-        Analytics.trackEvent('pwa_install_clicked');
+        window.Analytics.trackEvent('pwa_install_clicked');
 
         state.deferredInstallPrompt.prompt();
 
@@ -1207,7 +1207,7 @@ export const Handlers = {
         state.installPromptUsed = true;
         console.log(`User response to the install prompt: ${outcome}`);
 
-        Analytics.trackEvent('pwa_install_outcome', { 'outcome': outcome });
+        window.Analytics.trackEvent('pwa_install_outcome', { 'outcome': outcome });
 
         state.deferredInstallPrompt = null;
 
