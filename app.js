@@ -1,0 +1,163 @@
+import { UI } from './ui.js';
+import { Handlers } from './handlers.js';
+
+// Your web app's Firebase configuration
+export const firebaseConfig = {
+  apiKey: "AIzaSyCCeLy8PNUK480m_o-GpRWbdRB59R3UTqw", // This is safe to be public
+  authDomain: "coastal-fresh---sea-foods.firebaseapp.com",
+  projectId: "coastal-fresh---sea-foods",
+  storageBucket: "coastal-fresh---sea-foods.appspot.com",
+  messagingSenderId: "782759620106",
+  appId: "1:782759620106:web:960ec7c125faa30675f9f3",
+  measurementId: "G-GSHMPRYPW1"
+};
+
+// App Configuration
+export const config = {
+    TRUST_ICONS: [
+        { icon: 'fas fa-shield-alt', title: 'Hygienic', text: 'Clean & Safe' },
+        { icon: 'fas fa-snowflake', title: 'Temp Control', text: 'Ice Packed' },
+        { icon: 'fas fa-fish', title: '100% Fresh', text: 'Sourced Daily' },
+    ],
+    CUSTOMER_REVIEWS: [
+        { name: 'Priya S.', location: 'Gachibowli, Hyderabad', rating: 5, image: null, review: 'The freshest seafood I’ve had in Hyderabad! The pomfret was cleaned perfectly. Delivery was on time and packaging was top-notch. Highly recommend!' },
+        { name: 'Amit K.', location: 'Jubilee Hills, Hyderabad', rating: 5, image: null, review: 'Finally, authentic coastal taste in the city. The prawns were juicy and the pickles are just like my grandmother used to make. Will be ordering every week.' },
+        { name: 'Sunita R.', location: 'Kondapur, Hyderabad', rating: 4, image: null, review: 'Good quality fish and very convenient. The net weight was accurate. Would love to see more variety in small fish, but overall a great experience.' }
+    ],
+    CATEGORIES_DATA: [
+        { key: 'All',    label: 'All',    icon: null },
+        { key: 'Prawns', label: 'Prawns', icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005093/shrimp_1_yzblqb.png' },
+        { key: 'Fish',   label: 'Fish',   icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/food_yircgb.png' },
+        { key: 'Crabs',  label: 'Crabs',  icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/crab_n5ukwx.png' },
+        { key: 'Pickles',label: 'Pickles',icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005242/mason-jar_a5mtg4.png' }
+    ],
+    ENABLE_FLASH_SALE: true,
+    FLASH_SALE_PRODUCT_IDS: [11, 12, 20, 22],
+    FLASH_SALE_DURATION_HOURS: 12,
+    FEATURED_PRODUCT_IDS: [17, 13, 21, 1],
+    FREE_DELIVERY_THRESHOLD: 1500,
+    COUPONS: {
+        'FRESH10': { type: 'percent', value: 10, description: '10% off your order' },
+        'SAVE50': { type: 'fixed', value: 50, description: 'Flat ₹50 off' },
+        'NEWUSER': { type: 'percent', value: 15, minOrder: 500, description: '15% off on orders above ₹500' }
+    },
+    ITEMS_PER_PAGE: 8,
+};
+
+// App State
+export const state = {
+    products: [],
+    cart: {},
+    currentPage: 'home',
+    pageHistory: ['home'],
+    currentCategory: 'All',
+    currentSearch: '',
+    flashSaleTimerInterval: null,
+    currentPageNumber: 1,
+    carouselTimer: null,
+    previouslyFocusedElement: null,
+    currentCarouselIndex: 0,
+    currentProductQty: 1,
+    isPopupOpen: false,
+    searchDebounceTimer: null,
+    typewriterTimer: null,
+    db: null,
+    currentUser: null,
+    editingAddressId: null,
+    appliedCoupon: null,
+    couponError: null,
+    selectedPaymentMethod: 'cod',
+    deferredInstallPrompt: null,
+    installPromptUsed: false,
+    afterAddressAction: null,
+    afterLoginAction: null,
+    currentPopupImageIndex: 0,
+    isPopupFavorite: false,
+    popupDetailsExpanded: false,
+    popupDescriptionExpanded: false,
+    popupProduct: null,
+};
+
+// Initialize Firebase
+try {
+  firebase.initializeApp(firebaseConfig);
+} catch(e) {
+  console.error("Firebase initialization error", e);
+}
+
+async function init() {
+    // Pass dependencies to modules
+    UI.init(state, config, Handlers);
+    Handlers.init(state, config, UI);
+
+    // Firebase Auth Listener
+    firebase.auth().onAuthStateChanged(Handlers.handleAuthStateChange);
+    state.db = firebase.firestore();
+
+    UI.showInitialSkeletons();
+
+    try {
+        const response = await fetch('/products.json');
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        state.products = await response.json();
+
+        UI.renderFeaturedProducts();
+        UI.renderCatalogProducts();
+        UI.renderFlashSale();
+        UI.initFlashSaleTimer();
+        UI.renderProductSchema();
+        Handlers.loadCart();
+
+        const path = window.location.pathname;
+        const productMatch = path.match(/^\/product\/(.+)-(\d+)$/);
+        const urlParams = new URLSearchParams(window.location.search);
+
+        if (productMatch) {
+            const productId = parseInt(productMatch[2], 10);
+            UI.showProductPopup(productId);
+        }
+
+        const searchQuery = urlParams.get('q');
+        if (searchQuery) {
+            UI.showPage('catalog');
+            const searchInput = document.getElementById('catalogSearch');
+            if (searchInput) {
+                searchInput.value = searchQuery;
+                Handlers.handleCatalogSearch({ target: searchInput });
+            }
+        }
+    } catch (error) {
+        console.error("Could not load product data:", error);
+    }
+
+    UI.renderTrustIcons();
+    UI.renderCategories();
+    UI.renderCustomerReviews();
+    Handlers.setupEvents();
+    UI.initCarousel('#slides');
+    UI.initCarousel('#communicationCarousel .slides');
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js').then(registration => {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                Handlers.initFirebaseMessaging();
+            }, err => {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        state.deferredInstallPrompt = e;
+        UI.showInstallPrompt();
+
+        const profileInstallBtn = document.getElementById('profileInstallBtn');
+        if (profileInstallBtn) {
+            profileInstallBtn.style.display = 'flex';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', init);
