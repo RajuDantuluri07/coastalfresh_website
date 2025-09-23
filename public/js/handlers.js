@@ -521,36 +521,25 @@ export const Handlers = {
         if (state.currentUser && state.currentUser.uid) {
             referralLink = `https://coastalfresh.in?ref=${_simpleHash(state.currentUser.uid)}`;
         }
-        const referralMessage = `Hey! I’ve been ordering seafood from Coastal Fresh – always fresh, neatly cleaned and delivered to my home in Hyderabad. You should try it! Use my referral link for 10% off on your first order. 👉 ${referralLink}`;
+        // The text message is the most important part, as it contains the referral link.
+        const referralMessage = `Hey! I’ve been ordering from Coastal Fresh – always fresh and delivered to my home in Hyderabad. You should try it! Use my link for 10% off on your first order. 👉 ${referralLink}`;
         const shareTitle = 'Get 10% Off at Coastal Fresh!';
-        const imageUrl = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757139649/refer_eran_whats_app_ryhhmi.png';
 
         if (navigator.share) {
             try {
-                const response = await fetch(imageUrl);
-                const blob = await response.blob();
-                const file = new File([blob], 'coastal-fresh-referral.png', { type: blob.type });
-
-                if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: shareTitle,
-                        text: referralMessage,
-                    });
-                } else {
-                    await navigator.share({
-                        title: shareTitle,
-                        text: referralMessage,
-                    });
-                }
-            } catch (error) {
-                console.error('Error sharing with image, falling back to text only:', error);
+                // We prioritize sharing the text to ensure the referral link is always sent.
+                // Some apps, like WhatsApp, ignore text when an image file is included.
                 await navigator.share({
                     title: shareTitle,
                     text: referralMessage,
-                }).catch(e => console.error("Final share attempt failed", e));
+                    url: referralLink // Providing the URL separately helps some apps create a better preview.
+                });
+            } catch (error) {
+                // This error is thrown if the user cancels the share dialog, which is normal behavior.
+                console.log('Share was cancelled or failed', error);
             }
         } else {
+            // Fallback for desktop browsers or those that don't support the Web Share API.
             window.open(`https://wa.me/?text=${encodeURIComponent(referralMessage)}`, '_blank');
         }
 

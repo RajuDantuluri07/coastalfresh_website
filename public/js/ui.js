@@ -1181,31 +1181,51 @@ export const UI = {
         `;
                 document.getElementById('shopFromOrdersBtn').addEventListener('click', () => UI.showPage('home'));
             } else {
+                // NEW: Status mapping for better UX
+                const statusMap = {
+                    'Pending': { text: 'Order Confirmed', icon: 'fas fa-check-circle', class: 'confirmed' },
+                    'Accepted': { text: 'Being Prepared', icon: 'fas fa-utensils', class: 'preparing' },
+                    'Out for Delivery': { text: 'Out for Delivery', icon: 'fas fa-truck', class: 'delivery' },
+                    'Completed': { text: 'Delivered', icon: 'fas fa-box-open', class: 'completed' },
+                    'Cancelled': { text: 'Cancelled', icon: 'fas fa-times-circle', class: 'cancelled' }
+                };
+
                 const ordersHTML = ordersSnapshot.docs.map(doc => {
                     const order = doc.data();
                     const orderDate = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
-                    const statusClass = order.status.toLowerCase();
+                    const displayStatus = statusMap[order.status] || { text: order.status, icon: 'fas fa-question-circle', class: 'pending' };
+                    const shortOrderId = order.orderId.length > 10 ? `...${order.orderId.slice(-6)}` : order.orderId;
+
+                    let itemsSummary = '<div class="order-item-summary">No items found in this order.</div>';
+                    if (order.items && order.items.length > 0) {
+                        const firstItem = order.items[0];
+                        const remainingItems = order.items.length - 1;
+                        itemsSummary = `
+                            <div class="order-item-summary">
+                                <img src="${UI.getOptimizedImageUrl(firstItem.image, 100, 100)}" alt="${firstItem.name}" loading="lazy">
+                                <div>
+                                    <div class="item-name">${firstItem.name}</div>
+                                    ${remainingItems > 0 ? `<div class="more-items">+ ${remainingItems} more item(s)</div>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }
 
                     return `
-            <div class="order-card">
+            <div class="order-card" data-order-id="${doc.id}">
               <div class="order-header">
                 <div>
-                  <div class="order-id">Order #${order.orderId}</div>
-                  <div class="order-date">Placed on: ${orderDate}</div>
+                  <div class="order-id">Order ID: ${shortOrderId}</div>
+                  <div class="order-date">${orderDate}</div>
                 </div>
-                <div class="order-status ${statusClass}">${order.status}</div>
+                <div class="order-total">₹${order.total}</div>
               </div>
               <div class="order-body">
-                ${order.items.slice(0, 4).map(item => `
-                  <div class="order-item-img-container">
-                    <img src="${UI.getOptimizedImageUrl(item.image, 100, 100)}" alt="${item.name}" loading="lazy">
-                  </div>
-                `).join('')}
-                ${order.items.length > 4 ? `<div class="order-item-more">+${order.items.length - 4}</div>` : ''}
+                ${itemsSummary}
               </div>
               <div class="order-footer">
-                <span class="order-total">Total: ₹${order.total}</span>
-                <button class="order-details-btn" data-order-id="${doc.id}">View Details</button>
+                <div class="order-status ${displayStatus.class}"><i class="${displayStatus.icon}"></i><span>${displayStatus.text}</span></div>
+                <button class="order-details-btn" data-order-id="${doc.id}">View Details <i class="fas fa-chevron-right"></i></button>
               </div>
             </div>
           `;
