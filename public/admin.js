@@ -19,11 +19,9 @@ const dailyRevenueEl = document.getElementById('daily-revenue');
 const pendingOrdersEl = document.getElementById('pending-orders');
 const totalOrdersEl = document.getElementById('total-orders');
 const totalCustomersEl = document.getElementById('total-customers');
+const completedOrdersEl = document.getElementById('completed-orders');
 const ordersContainerEl = document.getElementById('orders-container');
 const statusFilterEl = document.getElementById('status-filter');
-const menuToggle = document.getElementById('menu-toggle');
-const sidebar = document.getElementById('sidebar');
-const mainContent = document.getElementById('main-content');
 
 let allOrders = []; // Cache for all orders to allow client-side filtering
 
@@ -101,14 +99,6 @@ statusFilterEl.addEventListener('change', () => {
 });
 
 /**
- * Toggle sidebar for mobile view.
- */
-menuToggle.addEventListener('click', () => {
-    sidebar.classList.toggle('visible');
-    mainContent.classList.toggle('expanded', !sidebar.classList.contains('visible'));
-});
-
-/**
  * Initializes the dashboard by fetching and rendering data.
  */
 function initDashboard() {
@@ -136,6 +126,8 @@ function fetchAndRenderOrders() {
         totalOrdersEl.textContent = allOrders.length;
         const pendingCount = allOrders.filter(o => o.status === 'Pending' || o.status === 'Accepted').length;
         pendingOrdersEl.textContent = pendingCount;
+        const completedCount = allOrders.filter(o => o.status === 'Completed').length;
+        completedOrdersEl.textContent = completedCount;
 
     }, error => {
         console.error("Error fetching orders: ", error);

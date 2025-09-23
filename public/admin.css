@@ -192,10 +192,6 @@ body {
     transition: margin-left 0.3s ease;
 }
 
-.main-content.expanded {
-    margin-left: 0;
-}
-
 /* Header */
 .main-header {
     background: white;
@@ -213,21 +209,6 @@ body {
     display: flex;
     align-items: center;
     gap: 1rem;
-}
-
-.menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    font-size: 1.25rem;
-    color: var(--gray-600);
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 6px;
-}
-
-.menu-toggle:hover {
-    background: var(--gray-100);
 }
 
 .page-title {
@@ -298,10 +279,12 @@ body {
 
 /* Stats Grid */
 .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    display: flex;
     gap: 1.5rem;
     margin-bottom: 2rem;
+    overflow-x: auto;
+    padding-bottom: 1rem; /* Space for scrollbar */
+    scrollbar-width: thin;
 }
 
 .stat-card {
@@ -311,6 +294,7 @@ body {
     box-shadow: var(--shadow);
     position: relative;
     overflow: hidden;
+    flex: 0 0 250px; /* Prevent shrinking, set a base width */
 }
 
 .stat-card::before {
@@ -327,6 +311,7 @@ body {
 .stat-card.orders::before { background: var(--primary); }
 .stat-card.pending::before { background: var(--warning); }
 .stat-card.customers::before { background: var(--info); }
+.stat-card.completed::before { background: var(--success); }
 
 .stat-header {
     display: flex;
@@ -371,6 +356,11 @@ body {
 .stat-card.customers .stat-icon {
     background: rgb(59 130 246 / 0.1);
     color: var(--info);
+}
+
+.stat-card.completed .stat-icon {
+    background: rgb(34 197 94 / 0.1);
+    color: var(--success);
 }
 
 .stat-value {
@@ -625,27 +615,14 @@ body {
         transform: translateX(-100%);
     }
 
-    .sidebar.visible {
-        transform: translateX(0);
-    }
-
     .main-content {
         margin-left: 0;
-    }
-
-    .menu-toggle {
-        display: block;
     }
 
     .order-body {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
     .content-area {
         padding: 1rem;
     }
