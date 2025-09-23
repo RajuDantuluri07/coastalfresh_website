@@ -2,9 +2,6 @@
 // <script src="/admin.js" type="module"></script>
 import { firebaseConfig } from './js/firebase-config.js';
 
-// IMPORTANT: Replace this with the actual UID of your admin user from the Firebase Authentication console.
-const ADMIN_UID = "pel0OXjpAva5fe9367PgIHsRaak1";
-
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -16,28 +13,45 @@ const dashboardView = document.getElementById('dashboard-view');
 const loginForm = document.getElementById('login-form');
 const loginError = document.getElementById('login-error');
 const adminEmailEl = document.getElementById('admin-email');
+const adminAvatarEl = document.getElementById('admin-avatar');
 const logoutBtn = document.getElementById('logout-btn');
 const dailyRevenueEl = document.getElementById('daily-revenue');
 const pendingOrdersEl = document.getElementById('pending-orders');
-const orderListEl = document.getElementById('order-list');
+const totalOrdersEl = document.getElementById('total-orders');
+const totalCustomersEl = document.getElementById('total-customers');
+const ordersContainerEl = document.getElementById('orders-container');
+const statusFilterEl = document.getElementById('status-filter');
+const menuToggle = document.getElementById('menu-toggle');
+const sidebar = document.getElementById('sidebar');
+const mainContent = document.getElementById('main-content');
+
+let allOrders = []; // Cache for all orders to allow client-side filtering
+
+// List of authorized admin User IDs.
+const ADMIN_UIDS = [
+    "p4uS2H3JFXNvmhkQWftUH721a2n2",
+    "pel0OXjpAva5fe9367PgIHsRaak1"
+];
 
 /**
  * Handles the authentication state change.
  * Shows the dashboard for an admin user, otherwise shows the login page.
  */
 auth.onAuthStateChanged(user => {
-    if (user && user.uid === ADMIN_UID) {
+    if (user && ADMIN_UIDS.includes(user.uid)) {
         // User is an admin
         loginView.style.display = 'none';
-        dashboardView.style.display = 'block';
+        dashboardView.style.display = 'flex';
         adminEmailEl.textContent = user.email;
+        adminAvatarEl.textContent = user.email ? user.email.charAt(0).toUpperCase() : 'A';
         initDashboard();
     } else {
         // User is not an admin or not logged in
         loginView.style.display = 'flex';
         dashboardView.style.display = 'none';
         if (user) {
-            // If a non-admin user is logged in, sign them out.
+            // If a non-admin user is logged in, show an error and sign them out.
+            loginError.textContent = 'You do not have permission to access this page.';
             auth.signOut();
         }
     }
@@ -67,10 +81,9 @@ logoutBtn.addEventListener('click', () => {
 });
 
 /**
- * NEW: Use event delegation to handle status changes.
- * This is more efficient and robust than inline onchange attributes.
+ * Event delegation for status changes.
  */
-orderListEl.addEventListener('change', (e) => {
+ordersContainerEl.addEventListener('change', (e) => {
     if (e.target.matches('.status-select')) {
         const orderId = e.target.dataset.orderId;
         const newStatus = e.target.value;
@@ -81,11 +94,27 @@ orderListEl.addEventListener('change', (e) => {
 });
 
 /**
+ * Filter orders when the status dropdown changes.
+ */
+statusFilterEl.addEventListener('change', () => {
+    renderFilteredOrders();
+});
+
+/**
+ * Toggle sidebar for mobile view.
+ */
+menuToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('visible');
+    mainContent.classList.toggle('expanded', !sidebar.classList.contains('visible'));
+});
+
+/**
  * Initializes the dashboard by fetching and rendering data.
  */
 function initDashboard() {
     fetchAndRenderOrders();
     fetchAndRenderSummary();
+    fetchCustomerCount();
 }
 
 /**
@@ -93,26 +122,35 @@ function initDashboard() {
  */
 function fetchAndRenderOrders() {
     db.collection('orders').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
+        ordersContainerEl.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
         if (snapshot.empty) {
-            orderListEl.innerHTML = '<p>No orders found.</p>';
+            ordersContainerEl.innerHTML = '<p style="text-align: center; padding: 2rem;">No orders found.</p>';
+            allOrders = [];
             return;
         }
 
-        let pendingCount = 0;
-        const orderHTML = snapshot.docs.map(doc => {
-            const order = { id: doc.id, ...doc.data() };
-            if (order.status === 'Pending' || order.status === 'Accepted') {
-                pendingCount++;
-            }
-            return createOrderCardHTML(order);
-        }).join('');
+        allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderFilteredOrders();
 
-        orderListEl.innerHTML = orderHTML;
+        // Update summary stats that depend on all orders
+        totalOrdersEl.textContent = allOrders.length;
+        const pendingCount = allOrders.filter(o => o.status === 'Pending' || o.status === 'Accepted').length;
         pendingOrdersEl.textContent = pendingCount;
+
     }, error => {
         console.error("Error fetching orders: ", error);
-        orderListEl.innerHTML = '<p class="error-message">Could not load orders.</p>';
+        ordersContainerEl.innerHTML = '<p class="error-message" style="text-align: center; padding: 2rem; color: var(--danger);">Could not load orders.</p>';
     });
+}
+
+/**
+ * Renders orders based on the current filter.
+ */
+function renderFilteredOrders() {
+    const filter = statusFilterEl.value;
+    const filteredOrders = filter === 'all' ? allOrders : allOrders.filter(order => order.status === filter);
+    const orderHTML = filteredOrders.map(createOrderCardHTML).join('');
+    ordersContainerEl.innerHTML = orderHTML || '<p style="text-align: center; padding: 2rem;">No orders match this filter.</p>';
 }
 
 /**
@@ -138,6 +176,18 @@ function fetchAndRenderSummary() {
 }
 
 /**
+ * Fetches the total number of customers (users).
+ */
+function fetchCustomerCount() {
+    db.collection('users').onSnapshot(snapshot => {
+        totalCustomersEl.textContent = snapshot.size;
+    }, error => {
+        console.error("Error fetching customer count: ", error);
+        totalCustomersEl.textContent = 'N/A';
+    });
+}
+
+/**
  * Creates the HTML for a single order card.
  * @param {object} order - The order data.
  * @returns {string} The HTML string for the order card.
@@ -145,31 +195,43 @@ function fetchAndRenderSummary() {
 function createOrderCardHTML(order) {
     const orderDate = order.createdAt?.toDate().toLocaleString('en-IN') || 'N/A';
     const statusOptions = ['Pending', 'Accepted', 'Out for Delivery', 'Completed', 'Cancelled'];
+    const statusBadgeClass = order.status.replace(/\s+/g, '-');
 
     return `
-        <div class="order-card-admin" data-id="${order.id}" data-status="${order.status}">
-            <header>
-                <h3>Order ID: ${order.orderId}</h3>
-                <span class="order-total">₹${order.total}</span>
-            </header>
+        <div class="order-card" data-id="${order.id}" data-status="${order.status}">
+            <div class="order-header">
+                <span class="order-id">#${order.orderId}</span>
+                <span class="status-badge ${statusBadgeClass}">${order.status}</span>
+                <span class="order-total">₹${order.total.toFixed(2)}</span>
+            </div>
             <div class="order-body">
-                <div class="customer-details">
-                    <p><strong>Customer:</strong> ${order.address.fullName}</p>
-                    <p><strong>Contact:</strong> ${order.address.mobile}</p>
-                    <p><strong>Address:</strong> ${order.address.house}, ${order.address.street}, ${order.address.pincode}</p>
-                    <p><strong>Date:</strong> ${orderDate}</p>
+                <div class="order-section">
+                    <h4>Customer Details</h4>
+                    <div class="customer-info">
+                        <p><strong>Name:</strong> ${order.address.fullName}</p>
+                        <p><strong>Phone:</strong> ${order.address.mobile}</p>
+                        <p><strong>Address:</strong> ${order.address.house}, ${order.address.street}, ${order.address.pincode}</p>
+                        <p class="order-date"><strong>Ordered:</strong> ${orderDate}</p>
+                    </div>
                 </div>
-                <div class="order-items">
-                    <strong>Items:</strong>
-                    <ul>
-                        ${order.items.map(item => `<li>${item.name} (x${item.qty})</li>`).join('')}
+                <div class="order-section">
+                    <h4>Order Items</h4>
+                    <ul class="order-items">
+                        ${order.items.map(item => `
+                            <li>
+                                <span class="item-name">${item.name}</span>
+                                <span class="item-qty">×${item.qty}</span>
+                            </li>
+                        `).join('')}
                     </ul>
                 </div>
-                <div class="order-actions">
-                    <label for="status-${order.id}"><strong>Status:</strong></label>
-                    <select class="status-select" id="status-${order.id}" data-order-id="${order.id}">
-                        ${statusOptions.map(status => `<option value="${status}" ${order.status === status ? 'selected' : ''}>${status}</option>`).join('')}
-                    </select>
+                <div class="order-section">
+                    <h4>Order Management</h4>
+                    <div class="status-selector">
+                        <select class="status-select" data-order-id="${order.id}">
+                            ${statusOptions.map(status => `<option value="${status}" ${order.status === status ? 'selected' : ''}>${status}</option>`).join('')}
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -182,10 +244,10 @@ function createOrderCardHTML(order) {
  * @param {string} newStatus - The new status to set.
  */
 function updateOrderStatus(orderId, newStatus) {
-    // The check for orderId and newStatus is now handled by the event listener.
     db.collection('orders').doc(orderId).update({ status: newStatus })
         .then(() => {
             console.log(`Order ${orderId} updated to ${newStatus}`);
+            // The onSnapshot listener will automatically re-render the card with the new status.
         })
         .catch(error => {
             console.error("Error updating order status: ", error);

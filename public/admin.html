@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coastal Fresh - Admin Panel</title>
-    <link rel="stylesheet" href="/admin.css">
     <link rel="icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="/admin.css">
 </head>
 <body>
     <div id="admin-app">
@@ -31,32 +32,117 @@
             </div>
         </div>
 
-        <!-- Dashboard View -->
-        <div id="dashboard-view" class="view" style="display: none;">
-            <header class="admin-header">
-                <h1>Coastal Fresh Dashboard</h1>
-                <div class="header-info">
-                    <span id="admin-email"></span>
-                    <button id="logout-btn">Logout</button>
+        <!-- NEW Dashboard View -->
+        <div id="dashboard-view" class="dashboard" style="display: none;">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h2>🐟 Coastal Fresh</h2>
+                    <p>Admin Dashboard</p>
                 </div>
-            </header>
-            <main class="admin-main">
-                <section class="summary-section">
-                    <div class="summary-card">
-                        <h2>Today's Revenue</h2>
-                        <p id="daily-revenue">₹0</p>
+                <nav class="sidebar-nav">
+                    <a href="#" class="nav-item active" data-page="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </a>
+                    <a href="#" class="nav-item" data-page="orders">
+                        <i class="fas fa-shopping-bag"></i>
+                        Orders
+                    </a>
+                    <a href="#" class="nav-item" data-page="customers">
+                        <i class="fas fa-users"></i>
+                        Customers
+                    </a>
+                </nav>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content" id="main-content">
+                <header class="main-header">
+                    <div class="header-left">
+                        <button class="menu-toggle" id="menu-toggle">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h1 class="page-title">Dashboard</h1>
                     </div>
-                    <div class="summary-card">
-                        <h2>Pending Orders</h2>
-                        <p id="pending-orders">0</p>
+                    <div class="header-right">
+                        <div class="admin-info">
+                            <div class="admin-avatar" id="admin-avatar">A</div>
+                            <div class="admin-details">
+                                <span id="admin-email">admin@coastalfresh.com</span>
+                            </div>
+                        </div>
+                        <button class="logout-btn" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </button>
                     </div>
-                </section>
-                <section class="orders-section">
-                    <h2>Manage Orders</h2>
-                    <div id="order-list">
-                        <!-- Orders will be injected here -->
+                </header>
+
+                <div class="content-area">
+                    <!-- Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card revenue">
+                            <div class="stat-header">
+                                <span class="stat-title">Today's Revenue</span>
+                                <div class="stat-icon">
+                                    <i class="fas fa-rupee-sign"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="daily-revenue">₹0.00</div>
+                        </div>
+
+                        <div class="stat-card orders">
+                            <div class="stat-header">
+                                <span class="stat-title">Total Orders</span>
+                                <div class="stat-icon">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="total-orders">0</div>
+                        </div>
+
+                        <div class="stat-card pending">
+                            <div class="stat-header">
+                                <span class="stat-title">Pending Orders</span>
+                                <div class="stat-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="pending-orders">0</div>
+                        </div>
+
+                        <div class="stat-card customers">
+                            <div class="stat-header">
+                                <span class="stat-title">Total Customers</span>
+                                <div class="stat-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                            </div>
+                            <div class="stat-value" id="total-customers">0</div>
+                        </div>
                     </div>
-                </section>
+
+                    <!-- Orders Section -->
+                    <div class="orders-section">
+                        <div class="section-header">
+                            <h2 class="section-title">Recent Orders</h2>
+                            <div class="filters">
+                                <select class="filter-select" id="status-filter">
+                                    <option value="all">All Status</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Accepted">Accepted</option>
+                                    <option value="Out for Delivery">Out for Delivery</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="orders-container" id="orders-container">
+                            <!-- Orders will be injected here by JS -->
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
