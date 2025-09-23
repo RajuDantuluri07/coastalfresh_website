@@ -27,7 +27,8 @@ let allOrders = []; // Cache for all orders to allow client-side filtering
 
 // List of authorized admin User IDs.
 const ADMIN_UIDS = [
-    "REPLACE_WITH_YOUR_NEW_ADMIN_UID" // Add one or more admin UIDs here
+    "p4uS2H3JFXNvmhkQWftUH721a2n2",
+    "pel0OXjpAva5fe9367PgIHsRaak1"
 ];
 
 /**

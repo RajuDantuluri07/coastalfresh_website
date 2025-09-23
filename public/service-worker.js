@@ -2,16 +2,15 @@
 importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js');
 
-// Initialize Firebase directly in the service worker.
-// Using importScripts for an ES module like firebase-config.js is not supported.
+// Initialize the Firebase app in the service worker by passing in the messagingSenderId.
 firebase.initializeApp({
-  apiKey: "AIzaSyD_INEpAhoJwFqkZeRUloRs8RMasPloGs8",
-  authDomain: "coastalfresh-v2.firebaseapp.com",
-  projectId: "coastalfresh-v2",
-  storageBucket: "coastalfresh-v2.firebasestorage.app",
-  messagingSenderId: "722327841326",
-  appId: "1:722327841326:web:0a9769a78f8a4bb03bcdbf",
-  measurementId: "G-H2QSJ4NSS5"
+  apiKey: "AIzaSyCCeLy8PNUK480m_o-GpRWbdRB59R3UTqw",
+  authDomain: "coastal-fresh---sea-foods.firebaseapp.com",
+  projectId: "coastal-fresh---sea-foods",
+  storageBucket: "coastal-fresh---sea-foods.appspot.com",
+  messagingSenderId: "782759620106",
+  appId: "1:782759620106:web:960ec7c125faa30675f9f3",
+  measurementId: "G-GSHMPRYPW1",
 });
 
 // Retrieve an instance of Firebase Messaging so that it can handle background messages.

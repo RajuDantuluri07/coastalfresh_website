@@ -1,13 +1,10 @@
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-
-// IMPORTANT: Paste the configuration from your Firebase project settings here.
+// This file centralizes the Firebase configuration for the entire application.
 export const firebaseConfig = {
-  apiKey: "AIzaSyD_INEpAhoJwFqkZeRUloRs8RMasPloGs8",
-  authDomain: "coastalfresh-v2.firebaseapp.com",
-  projectId: "coastalfresh-v2",
-  storageBucket: "coastalfresh-v2.firebasestorage.app",
-  messagingSenderId: "722327841326",
-  appId: "1:722327841326:web:0a9769a78f8a4bb03bcdbf",
-  measurementId: "G-H2QSJ4NSS5"
+    apiKey: "AIzaSyCCeLy8PNUK480m_o-GpRWbdRB59R3UTqw",
+    authDomain: "coastal-fresh---sea-foods.firebaseapp.com",
+    projectId: "coastal-fresh---sea-foods",
+    storageBucket: "coastal-fresh---sea-foods.appspot.com",
+    messagingSenderId: "782759620106",
+    appId: "1:782759620106:web:960ec7c125faa30675f9f3",
+    measurementId: "G-GSHMPRYPW1"
 };

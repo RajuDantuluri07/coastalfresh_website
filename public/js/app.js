@@ -99,9 +99,7 @@ window.addEventListener('unhandledrejection', function(event) {
 
 // Initialize Firebase
 try {
-  // Initialize the main app instance
   firebase.initializeApp(firebaseConfig);
-  // Note: Analytics is initialized in index.html via gtag.js
 } catch(e) {
   console.error("Firebase initialization error", e);
 }
