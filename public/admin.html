@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coastal Fresh - Admin Panel</title>
+    <link rel="stylesheet" href="/admin.css">
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+    <div id="admin-app">
+        <!-- Login View -->
+        <div id="login-view" class="view">
+            <div class="login-container">
+                <h1>Admin Panel</h1>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit">Login</button>
+                    <p id="login-error" class="error-message"></p>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="view" style="display: none;">
+            <header class="admin-header">
+                <h1>Coastal Fresh Dashboard</h1>
+                <div class="header-info">
+                    <span id="admin-email"></span>
+                    <button id="logout-btn">Logout</button>
+                </div>
+            </header>
+            <main class="admin-main">
+                <section class="summary-section">
+                    <div class="summary-card">
+                        <h2>Today's Revenue</h2>
+                        <p id="daily-revenue">₹0</p>
+                    </div>
+                    <div class="summary-card">
+                        <h2>Pending Orders</h2>
+                        <p id="pending-orders">0</p>
+                    </div>
+                </section>
+                <section class="orders-section">
+                    <h2>Manage Orders</h2>
+                    <div id="order-list">
+                        <!-- Orders will be injected here -->
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+    <!-- Admin Script -->
+    <script src="/admin.js" type="module"></script>
+</body>
+</html>

@@ -1,21 +1,32 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Users can read and write their own profile data and subcollections.
-    match /users/{userId}/{document=**} {
-      allow write: if request.auth != null && request.auth.uid == userId;
+    
+    // Helper function to check if the signed-in user is the admin.
+    function isAdmin() {
+      // This UID should match the one in your admin.js file.
+      // You can find this in the Firebase Console under Authentication -> Users.
+      return request.auth.uid == "pel0OXjpAva5fe9367PgIHsRaak1";
     }
 
-    // Rules for the 'orders' collection.
+    // This single rule allows a user to read and write to their own
+    // user document and all subcollections (like 'addresses' and 'fcmTokens').
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Rules for the 'orders' collection
     match /orders/{orderId} {
-      // CREATE: A user can create an order for themselves.
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      // Any authenticated user can create an order for themselves.
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
 
-      // READ: A user can read their own orders.
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      // A user can read their own order, OR an admin can read any order.
+      allow read: if request.auth != null && (request.auth.uid == resource.data.userId || isAdmin());
 
-      // UPDATE & DELETE: Disallow for data integrity.
+      // Only an admin can update an order (e.g., to change the status).
+      allow update: if isAdmin();
+
+      // No one can delete orders from the app for record-keeping.
       allow delete: if false;
     }
   }

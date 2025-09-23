@@ -1,0 +1,249 @@
+:root {
+    --admin-primary: #01659a;
+    --admin-dark: #00486d;
+    --admin-light: #e6f0f5;
+    --admin-bg: #f4f7f9;
+    --admin-text: #263238;
+    --admin-text-secondary: #546E7A;
+    --admin-white: #ffffff;
+    --admin-border: #CFD8DC;
+    --status-pending: #EF6C00;
+    --status-accepted: #1E88E5;
+    --status-delivery: #3949AB;
+    --status-completed: #388E3C;
+    --status-cancelled: #D32F2F;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--admin-bg);
+    color: var(--admin-text);
+    margin: 0;
+}
+
+#admin-app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Login View */
+#login-view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+.login-container {
+    background: var(--admin-white);
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-container h1 {
+    margin-bottom: 24px;
+    color: var(--admin-dark);
+}
+
+#login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--admin-border);
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+#login-form button {
+    padding: 14px;
+    background: var(--admin-primary);
+    color: var(--admin-white);
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#login-form button:hover {
+    background: var(--admin-dark);
+}
+
+.error-message {
+    color: var(--status-cancelled);
+    margin-top: 12px;
+    font-size: 14px;
+    height: 1em;
+}
+
+/* Dashboard View */
+.admin-header {
+    background: var(--admin-white);
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.admin-header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: var(--admin-primary);
+}
+
+.header-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+#logout-btn {
+    background: none;
+    border: 1px solid var(--admin-border);
+    color: var(--admin-text-secondary);
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.admin-main {
+    padding: 32px;
+    flex-grow: 1;
+}
+
+.summary-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.summary-card {
+    background: var(--admin-white);
+    padding: 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.summary-card h2 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    color: var(--admin-text-secondary);
+    font-weight: 500;
+}
+
+.summary-card p {
+    margin: 0;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--admin-dark);
+}
+
+.orders-section h2 {
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--admin-border);
+    padding-bottom: 8px;
+}
+
+#order-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.order-card-admin {
+    background: var(--admin-white);
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-left: 5px solid var(--admin-primary);
+}
+
+.order-card-admin header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: var(--admin-light);
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.order-card-admin h3 {
+    margin: 0;
+    font-size: 14px;
+    color: var(--admin-text-secondary);
+}
+
+.order-card-admin .order-total {
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.order-card-admin .order-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 24px;
+    padding: 16px;
+}
+
+.customer-details, .order-items, .order-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.customer-details p, .order-items p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.customer-details strong, .order-items strong {
+    color: var(--admin-dark);
+}
+
+.order-items ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.order-actions label {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.order-actions select {
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid var(--admin-border);
+    font-size: 16px;
+}
+
+.order-card-admin[data-status="Pending"] { border-left-color: var(--status-pending); }
+.order-card-admin[data-status="Accepted"] { border-left-color: var(--status-accepted); }
+.order-card-admin[data-status="Out for Delivery"] { border-left-color: var(--status-delivery); }
+.order-card-admin[data-status="Completed"] { border-left-color: var(--status-completed); }
+.order-card-admin[data-status="Cancelled"] { border-left-color: var(--status-cancelled); }
