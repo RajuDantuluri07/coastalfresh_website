@@ -2,15 +2,15 @@
 importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js');
 
-// Initialize the Firebase app in the service worker by passing in the messagingSenderId.
+// IMPORTANT: Paste the configuration from your Firebase project settings here.
 firebase.initializeApp({
-  apiKey: "YOUR_NEW_API_KEY",
-  authDomain: "your-new-project-id.firebaseapp.com",
-  projectId: "your-new-project-id",
-  storageBucket: "your-new-project-id.appspot.com",
-  messagingSenderId: "YOUR_NEW_MESSAGING_SENDER_ID",
-  appId: "YOUR_NEW_APP_ID",
-  measurementId: "YOUR_NEW_MEASUREMENT_ID",
+  apiKey: "AIzaSyD_INEpAhoJwFqkZeRUloRs8RMasPloGs8",
+  authDomain: "coastalfresh-v2.firebaseapp.com",
+  projectId: "coastalfresh-v2",
+  storageBucket: "coastalfresh-v2.firebasestorage.app",
+  messagingSenderId: "722327841326",
+  appId: "1:722327841326:web:0a9769a78f8a4bb03bcdbf",
+  measurementId: "G-H2QSJ4NSS5"
 });
 
 // Retrieve an instance of Firebase Messaging so that it can handle background messages.

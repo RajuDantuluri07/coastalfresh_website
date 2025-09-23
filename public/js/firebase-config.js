@@ -1,10 +1,13 @@
 // This file centralizes the Firebase configuration for the entire application.
+
+// IMPORTANT: Paste the entire firebaseConfig object from your
+// Firebase project settings here.
 export const firebaseConfig = {
-    apiKey: "YOUR_NEW_API_KEY",
-    authDomain: "your-new-project-id.firebaseapp.com",
-    projectId: "your-new-project-id",
-    storageBucket: "your-new-project-id.appspot.com",
-    messagingSenderId: "YOUR_NEW_MESSAGING_SENDER_ID",
-    appId: "YOUR_NEW_APP_ID",
-    measurementId: "YOUR_NEW_MEASUREMENT_ID"
+    apiKey: "PASTE_YOUR_REAL_API_KEY_HERE",
+    authDomain: "PASTE_YOUR_REAL_AUTH_DOMAIN_HERE",
+    projectId: "PASTE_YOUR_REAL_PROJECT_ID_HERE",
+    storageBucket: "PASTE_YOUR_REAL_STORAGE_BUCKET_HERE",
+    messagingSenderId: "PASTE_YOUR_REAL_SENDER_ID_HERE",
+    appId: "PASTE_YOUR_REAL_APP_ID_HERE",
+    measurementId: "PASTE_YOUR_REAL_MEASUREMENT_ID_HERE"
 };
