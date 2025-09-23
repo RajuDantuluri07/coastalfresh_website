@@ -961,38 +961,39 @@ export const Handlers = {
 
         const messaging = firebase.messaging();
 
-        try {
-            const registration = await navigator.serviceWorker.ready;
-            const permission = await Notification.requestPermission();
-            if (permission !== 'granted') {
-                console.log('Notification permission not granted.');
-                return;
-            }
-            console.log('Notification permission granted.');
-
-            const token = await messaging.getToken({ serviceWorkerRegistration: registration });
-
-            if (token) {
-                console.log('FCM Token:', token);
-                if (state.currentUser) {
-                    await state.db.collection('users').doc(state.currentUser.uid).collection('fcmTokens').doc(token).set({
-                        token: token,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-            } else {
-                console.log('No registration token available. Request permission to generate one.');
-            }
-        } catch (err) {
-            console.error('Unable to initialize Firebase Messaging.', err);
-        }
-
         messaging.onMessage(payload => {
             console.log('Message received. ', payload);
             if (payload.notification) {
                 UI.showToast(`${payload.notification.title}: ${payload.notification.body}`);
             }
         });
+
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            const permission = await Notification.requestPermission();
+            if (permission !== 'granted') {
+                console.log('Notification permission not granted. User will not receive push notifications.');
+                return;
+            }
+
+            const token = await messaging.getToken({ serviceWorkerRegistration: registration });
+
+            if (token && state.currentUser) {
+                // Save the token to Firestore for the current user.
+                // This is a "fire and forget" operation; we don't need to wait for it.
+                // If it fails, it will be caught by the global unhandledrejection handler.
+                state.db.collection('users').doc(state.currentUser.uid).collection('fcmTokens').doc(token).set({
+                    token: token,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }).then(() => {
+                    console.log('FCM token saved for user.');
+                });
+            }
+        } catch (err) {
+            // This catch block is crucial. It handles errors from `getToken()` if permissions are denied
+            // or if the environment doesn't support it (e.g., incognito mode), preventing the unhandled rejection.
+            console.warn('Could not get FCM token:', err.message);
+        }
     },
 
     handleAuthStateChange: (user) => {
