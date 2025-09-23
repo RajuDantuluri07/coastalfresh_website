@@ -1,5 +1,7 @@
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+// IMPORTANT: Paste the configuration from your Firebase project settings here.
 export const firebaseConfig = {
   apiKey: "AIzaSyD_INEpAhoJwFqkZeRUloRs8RMasPloGs8",
   authDomain: "coastalfresh-v2.firebaseapp.com",
