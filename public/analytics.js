@@ -113,7 +113,7 @@
      */
     identifyUser: function(user) {
       if (typeof gtag === 'function' && user && user.uid) {
-        gtag('config', 'YOUR_NEW_MEASUREMENT_ID', { 'user_id': user.uid });
+        gtag('config', 'G-H2QSJ4NSS5', { 'user_id': user.uid });
         console.log('GA4 user identified with ID:', user.uid);
       }
       if (window.hj && user && user.uid) {

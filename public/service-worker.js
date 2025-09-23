@@ -1,17 +1,10 @@
 // Scripts for firebase and firebase messaging
 importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js');
-
-// IMPORTANT: Paste the configuration from your Firebase project settings here.
-firebase.initializeApp({
-  apiKey: "AIzaSyD_INEpAhoJwFqkZeRUloRs8RMasPloGs8",
-  authDomain: "coastalfresh-v2.firebaseapp.com",
-  projectId: "coastalfresh-v2",
-  storageBucket: "coastalfresh-v2.firebasestorage.app",
-  messagingSenderId: "722327841326",
-  appId: "1:722327841326:web:0a9769a78f8a4bb03bcdbf",
-  measurementId: "G-H2QSJ4NSS5"
-});
+// NEW: Import configuration from the same source as the main app.
+// This avoids duplicating credentials and simplifies future maintenance.
+importScripts('/js/firebase-config.js');
+firebase.initializeApp(firebaseConfig);
 
 // Retrieve an instance of Firebase Messaging so that it can handle background messages.
 const messaging = firebase.messaging();
