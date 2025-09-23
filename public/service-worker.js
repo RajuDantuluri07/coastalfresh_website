@@ -4,13 +4,13 @@ importScripts('https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-comp
 
 // Initialize the Firebase app in the service worker by passing in the messagingSenderId.
 firebase.initializeApp({
-  apiKey: "AIzaSyCCeLy8PNUK480m_o-GpRWbdRB59R3UTqw",
-  authDomain: "coastal-fresh---sea-foods.firebaseapp.com",
-  projectId: "coastal-fresh---sea-foods",
-  storageBucket: "coastal-fresh---sea-foods.appspot.com",
-  messagingSenderId: "782759620106",
-  appId: "1:782759620106:web:960ec7c125faa30675f9f3",
-  measurementId: "G-GSHMPRYPW1",
+  apiKey: "YOUR_NEW_API_KEY",
+  authDomain: "your-new-project-id.firebaseapp.com",
+  projectId: "your-new-project-id",
+  storageBucket: "your-new-project-id.appspot.com",
+  messagingSenderId: "YOUR_NEW_MESSAGING_SENDER_ID",
+  appId: "YOUR_NEW_APP_ID",
+  measurementId: "YOUR_NEW_MEASUREMENT_ID",
 });
 
 // Retrieve an instance of Firebase Messaging so that it can handle background messages.
