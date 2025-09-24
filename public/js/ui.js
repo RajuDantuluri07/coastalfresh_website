@@ -1,10 +1,12 @@
-let state, config, Handlers;
+let state, config, Handlers, DOMPurify, history;
 
 export const UI = {
-    init: (appState, appConfig, appHandlers) => {
+    init: (appState, appConfig, appHandlers, purifier, historyObj) => {
         state = appState;
         config = appConfig;
         Handlers = appHandlers;
+        DOMPurify = purifier;
+        history = historyObj;
     },
 
     renderTrustIcons: () => {

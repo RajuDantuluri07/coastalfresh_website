@@ -1,4 +1,4 @@
-let state, config, UI;
+let state, config, UI, DOMPurify, firebase;
 
 /**
  * Creates a simple, non-cryptographic hash from a string.
@@ -15,10 +15,12 @@ function _simpleHash(str) {
 }
 
 export const Handlers = {
-    init: (appState, appConfig, uiModule) => {
+    init: (appState, appConfig, uiModule, purifier, fb) => {
         state = appState;
         config = appConfig;
         UI = uiModule;
+        DOMPurify = purifier;
+        firebase = fb;
     },
 
     /**

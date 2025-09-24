@@ -130,8 +130,8 @@ try {
 async function init() {
   try {
       // Pass dependencies to modules
-      UI.init(state, config, Handlers);
-      Handlers.init(state, config, UI);
+      UI.init(state, config, Handlers, window.DOMPurify, window.history);
+      Handlers.init(state, config, UI, window.DOMPurify, window.firebase);
 
       // Firebase Auth Listener
       firebase.auth().onAuthStateChanged(Handlers.handleAuthStateChange);
