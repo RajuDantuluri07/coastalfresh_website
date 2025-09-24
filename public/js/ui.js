@@ -1213,19 +1213,13 @@ export const UI = {
 
         document.getElementById('drawerOrderId').textContent = `#${order.orderId}`;
         document.getElementById('drawerOrderDate').textContent = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
-        document.getElementById('drawerPaymentMethod').textContent = order.paymentMethod.toUpperCase();
-        document.getElementById('drawerGrandTotal').textContent = `₹${order.status === 'Cancelled' ? 0 : order.total}`;
+        document.getElementById('drawerPaymentMethod').textContent = order.paymentMethod === 'cod' ? 'Cash on Delivery' : order.paymentMethod.toUpperCase();
 
-        document.getElementById('drawerItemsList').innerHTML = order.items.map(item => `
-      <div class="drawer-item">
-        <img src="${UI.getOptimizedImageUrl(item.image, 96, 96)}" alt="${item.name}" class="drawer-item-thumb">
-        <div class="drawer-item-info">
-          <div class="drawer-item-name">${item.name}</div>
-          <div class="drawer-item-qty">Qty: ${item.qty}</div>
-        </div>
-        <div class="drawer-item-price">₹${item.price * item.qty}</div>
-      </div>
-    `).join('');
+        // Render all sections
+        UI.renderDrawerStatus(order.status);
+        UI.renderDrawerItems(order.items);
+        UI.renderDrawerBillSummary(order);
+        UI.renderDrawerAddress(order.address);
 
         document.getElementById('drawerFooter').innerHTML = `
       <button class="drawer-action-btn" id="drawerCopyIdBtn">Copy ID</button>
@@ -1236,13 +1230,8 @@ export const UI = {
         document.getElementById('drawerCopyIdBtn').onclick = () => {
             navigator.clipboard.writeText(order.orderId).then(() => UI.showToast('Order ID copied!'));
         };
-        document.getElementById('drawerSupportBtn').onclick = () => Handlers.openWhatsApp('support');
-        document.getElementById('drawerReorderBtn').onclick = () => {
-            order.items.forEach(item => Handlers.addToCart(item.id, item.qty));
-            UI.showToast(`${order.items.length} items added to your cart!`);
-            UI.closeOrderDetailsDrawer();
-            UI.showCart();
-        };
+        document.getElementById('drawerSupportBtn').onclick = () => Handlers.openWhatsApp('support', order.orderId);
+        document.getElementById('drawerReorderBtn').onclick = () => Handlers.addMultipleToCart(order.items);
 
         drawerOverlay.style.display = 'flex';
         setTimeout(() => drawerOverlay.classList.add('active'), 10);
@@ -1260,6 +1249,102 @@ export const UI = {
         drawer.cleanup = () => {
             document.removeEventListener('keydown', escHandler);
         };
+    },
+
+    renderDrawerStatus: (currentStatus) => {
+        const timelineContainer = document.getElementById('drawerStatusTimeline');
+        const statuses = ['Pending', 'Accepted', 'Out for Delivery', 'Completed'];
+        const statusMap = {
+            'Pending': { text: 'Order Placed', icon: 'fa-check' },
+            'Accepted': { text: 'Preparing', icon: 'fa-utensils' },
+            'Out for Delivery': { text: 'In Transit', icon: 'fa-truck-fast' },
+            'Completed': { text: 'Delivered', icon: 'fa-house-chimney-user' },
+            'Cancelled': { text: 'Cancelled', icon: 'fa-xmark' }
+        };
+
+        let currentStatusIndex = statuses.indexOf(currentStatus);
+        if (currentStatus === 'Cancelled') {
+            timelineContainer.innerHTML = `
+                <div class="status-step cancelled">
+                    <div class="status-icon"><i class="fas fa-xmark"></i></div>
+                    <div class="status-label">Order Cancelled</div>
+                </div>
+            `;
+            return;
+        }
+
+        timelineContainer.innerHTML = statuses.map((status, index) => {
+            const isActive = index <= currentStatusIndex;
+            const isCurrent = index === currentStatusIndex;
+            const statusInfo = statusMap[status];
+            return `
+                <div class="status-step ${isActive ? 'active' : ''} ${isCurrent ? 'current' : ''}">
+                    <div class="status-icon"><i class="fas ${statusInfo.icon}"></i></div>
+                    <div class="status-label">${statusInfo.text}</div>
+                </div>
+                ${index < statuses.length - 1 ? '<div class="status-line ' + (isActive ? 'active' : '') + '"></div>' : ''}
+            `;
+        }).join('');
+    },
+
+    renderDrawerItems: (items) => {
+        const container = document.getElementById('drawerItemsList');
+        if (!container || !items) {
+            container.innerHTML = '<p>No items found in this order.</p>';
+            return;
+        }
+        container.innerHTML = items.map(item => `
+            <div class="drawer-item">
+                <img src="${UI.getOptimizedImageUrl(item.image, 96, 96)}" alt="${item.name}" class="drawer-item-thumb">
+                <div class="drawer-item-info">
+                    <div class="drawer-item-name">${item.name}</div>
+                    <div class="drawer-item-qty">Qty: ${item.qty}</div>
+                </div>
+                <div class="drawer-item-price">₹${item.price * item.qty}</div>
+            </div>
+        `).join('');
+    },
+
+    renderDrawerBillSummary: (order) => {
+        const container = document.getElementById('drawerBillDetails');
+        if (!container || !order) return;
+
+        let billHTML = `<div class="drawer-bill-row"><span>Item Total</span><span>₹${order.subtotal.toFixed(2)}</span></div>`;
+
+        if (order.coupon && order.coupon.discount > 0) {
+            billHTML += `
+                <div class="drawer-bill-row discount">
+                    <span>Coupon Discount (${order.coupon.code})</span>
+                    <span>- ₹${order.coupon.discount.toFixed(2)}</span>
+                </div>`;
+        }
+
+        billHTML += `<div class="drawer-bill-row"><span>Delivery Fee</span><span>${order.deliveryFee > 0 ? `₹${order.deliveryFee.toFixed(2)}` : 'FREE'}</span></div>`;
+
+        billHTML += `
+            <div class="drawer-bill-row grand-total">
+                <span>Grand Total</span>
+                <span>₹${order.total.toFixed(2)}</span>
+            </div>`;
+
+        container.innerHTML = billHTML;
+    },
+
+    renderDrawerAddress: (address) => {
+        const nameEl = document.getElementById('drawerAddressName');
+        const fullAddressEl = document.getElementById('drawerAddressFull');
+
+        if (!address || !nameEl || !fullAddressEl) {
+            if (nameEl) nameEl.textContent = 'Address not available.';
+            if (fullAddressEl) fullAddressEl.textContent = '';
+            return;
+        }
+
+        nameEl.textContent = address.fullName;
+        fullAddressEl.innerHTML = `
+            ${address.house}, ${address.street}<br>
+            ${address.city}, ${address.pincode}<br>
+            Phone: ${address.mobile}`;
     },
 
     closeOrderDetailsDrawer: () => {

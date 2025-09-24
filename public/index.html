@@ -834,37 +834,44 @@
         <button class="drawer-close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
       </div>
       <div class="drawer-content">
+        <!-- Order Meta -->
         <div class="drawer-section">
           <div class="drawer-order-meta">
-            <div>
-              <div class="meta-label">Order ID</div>
-              <div class="meta-value" id="drawerOrderId"></div>
-            </div>
-            <div>
-              <div class="meta-label">Placed On</div>
-              <div class="meta-value" id="drawerOrderDate"></div>
-            </div>
-            <div>
-              <div class="meta-label">Payment</div>
-              <div class="meta-value" id="drawerPaymentMethod"></div>
-            </div>
+            <div><div class="meta-label">Order ID</div><div class="meta-value" id="drawerOrderId"></div></div>
+            <div><div class="meta-label">Placed On</div><div class="meta-value" id="drawerOrderDate"></div></div>
+            <div><div class="meta-label">Payment</div><div class="meta-value" id="drawerPaymentMethod"></div></div>
           </div>
         </div>
+
+        <!-- NEW: Order Status Timeline -->
+        <div class="drawer-section">
+          <h3 class="drawer-section-title">Order Status</h3>
+          <div class="order-status-timeline" id="drawerStatusTimeline">
+            <!-- Status steps will be injected here by JS -->
+          </div>
+        </div>
+
+        <!-- Items List -->
         <div class="drawer-section">
           <h3 class="drawer-section-title">Items</h3>
           <div id="drawerItemsList"></div>
         </div>
-        <!-- NEW: Address Section -->
+
+        <!-- Bill Summary -->
+        <div class="drawer-section">
+          <h3 class="drawer-section-title">Bill Summary</h3>
+          <div class="drawer-bill-details" id="drawerBillDetails">
+            <!-- Bill rows will be injected here by JS -->
+          </div>
+        </div>
+
+        <!-- Address Section -->
         <div class="drawer-section">
           <h3 class="drawer-section-title">Delivery Address</h3>
           <div class="drawer-address-content">
             <strong id="drawerAddressName"></strong>
             <p id="drawerAddressFull"></p>
           </div>
-        </div>
-        <div class="drawer-section drawer-total-section">
-          <span>Grand Total</span>
-          <span id="drawerGrandTotal"></span>
         </div>
       </div>
       <div class="drawer-footer" id="drawerFooter"></div>
