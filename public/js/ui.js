@@ -1207,48 +1207,56 @@ export const UI = {
     },
 
     openOrderDetailsDrawer: (order) => {
-        const drawerOverlay = document.getElementById('orderDetailsDrawerOverlay');
-        const drawer = document.getElementById('orderDetailsDrawer');
-        if (!drawerOverlay || !drawer) return;
+        try {
+            const drawerOverlay = document.getElementById('orderDetailsDrawerOverlay');
+            const drawer = document.getElementById('orderDetailsDrawer');
+            if (!drawerOverlay || !drawer) return;
 
-        document.getElementById('drawerOrderId').textContent = `#${order.orderId}`;
-        document.getElementById('drawerOrderDate').textContent = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
-        document.getElementById('drawerPaymentMethod').textContent = order.paymentMethod === 'cod' ? 'Cash on Delivery' : order.paymentMethod.toUpperCase();
+            // FIX: Correctly reference `order.orderId` (lowercase 'o')
+            document.getElementById('drawerOrderId').textContent = `#${order.orderId}`;
+            document.getElementById('drawerOrderDate').textContent = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
+            document.getElementById('drawerPaymentMethod').textContent = order.paymentMethod === 'cod' ? 'Cash on Delivery' : order.paymentMethod.toUpperCase();
 
-        // Render all sections
-        UI.renderDrawerStatus(order.status);
-        UI.renderDrawerItems(order.items);
-        UI.renderDrawerBillSummary(order);
-        UI.renderDrawerAddress(order.address);
+            // Render all sections
+            UI.renderDrawerStatus(order.status);
+            UI.renderDrawerItems(order.items);
+            UI.renderDrawerBillSummary(order);
+            UI.renderDrawerAddress(order.address);
 
-        document.getElementById('drawerFooter').innerHTML = `
+            document.getElementById('drawerFooter').innerHTML = `
       <button class="drawer-action-btn" id="drawerCopyIdBtn">Copy ID</button>
       <button class="drawer-action-btn" id="drawerSupportBtn">Contact Support</button>
       <button class="drawer-action-btn primary" id="drawerReorderBtn">Reorder</button>
     `;
 
-        document.getElementById('drawerCopyIdBtn').onclick = () => {
-            navigator.clipboard.writeText(order.orderId).then(() => UI.showToast('Order ID copied!'));
-        };
-        document.getElementById('drawerSupportBtn').onclick = () => Handlers.openWhatsApp('support', order.orderId);
-        document.getElementById('drawerReorderBtn').onclick = () => Handlers.addMultipleToCart(order.items);
+            document.getElementById('drawerCopyIdBtn').onclick = () => {
+                navigator.clipboard.writeText(order.orderId).then(() => UI.showToast('Order ID copied!'));
+            };
+            document.getElementById('drawerSupportBtn').onclick = () => Handlers.openWhatsApp('support', order.orderId);
+            document.getElementById('drawerReorderBtn').onclick = () => Handlers.addMultipleToCart(order.items);
 
-        drawerOverlay.style.display = 'flex';
-        setTimeout(() => drawerOverlay.classList.add('active'), 10);
+            drawerOverlay.style.display = 'flex';
+            setTimeout(() => drawerOverlay.classList.add('active'), 10);
 
-        const closeBtn = drawer.querySelector('.drawer-close-btn');
-        state.previouslyFocusedElement = document.activeElement;
-        setTimeout(() => closeBtn.focus(), 300);
+            const closeBtn = drawer.querySelector('.drawer-close-btn');
+            state.previouslyFocusedElement = document.activeElement;
+            setTimeout(() => closeBtn.focus(), 300);
 
-        const closeDrawerHandler = () => UI.closeOrderDetailsDrawer();
-        closeBtn.onclick = closeDrawerHandler;
-        drawerOverlay.onclick = (e) => { if (e.target === drawerOverlay) closeDrawerHandler(); };
-        const escHandler = (e) => { if (e.key === 'Escape') closeDrawerHandler(); };
-        document.addEventListener('keydown', escHandler);
+            const closeDrawerHandler = () => UI.closeOrderDetailsDrawer();
+            closeBtn.onclick = closeDrawerHandler;
+            drawerOverlay.onclick = (e) => { if (e.target === drawerOverlay) closeDrawerHandler(); };
+            const escHandler = (e) => { if (e.key === 'Escape') closeDrawerHandler(); };
+            document.addEventListener('keydown', escHandler);
 
-        drawer.cleanup = () => {
-            document.removeEventListener('keydown', escHandler);
-        };
+            drawer.cleanup = () => {
+                document.removeEventListener('keydown', escHandler);
+            };
+        } catch (error) {
+            console.error("Error opening order details drawer:", error);
+            UI.showToast("Could not display order details.", true);
+            // Ensure the drawer doesn't get stuck open if an error occurs
+            UI.closeOrderDetailsDrawer();
+        }
     },
 
     renderDrawerStatus: (currentStatus) => {
