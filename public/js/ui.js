@@ -1028,7 +1028,8 @@ export const UI = {
             document.getElementById('addressFullName').value = state.currentUser.displayName;
         }
         document.getElementById('addressListContainer').style.display = 'none';
-        document.getElementById('addressFormContainer').style.display = 'block';
+        const formContainer = document.getElementById('addressFormContainer');
+        formContainer.classList.add('active'); // Use class to show
         document.querySelector('#addressForm .cta').textContent = 'Save Address';
         // NEW: Initialize the map when the form is shown
         UI.initMap();
@@ -1100,7 +1101,8 @@ export const UI = {
 
     showAddressList: () => {
         document.getElementById('addressListContainer').style.display = 'block';
-        document.getElementById('addressFormContainer').style.display = 'none';
+        const formContainer = document.getElementById('addressFormContainer');
+        formContainer.classList.remove('active'); // Use class to hide
     },
 
     renderAddressList: async () => {
