@@ -365,14 +365,6 @@ export const Handlers = {
             }
         });
 
-        // Cart page buttons
-        // Checkout button
-        document.getElementById('cartPlaceOrderBtn').addEventListener('click', (e) => {
-            if (e.target.closest('.checkout-btn')) {
-                Handlers.checkout();
-            }
-        });
-
         // Coupon section
         document.getElementById('cartCouponSection').addEventListener('click', e => {
             if (e.target.id === 'applyCouponBtn') {
