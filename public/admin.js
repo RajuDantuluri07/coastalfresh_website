@@ -147,6 +147,29 @@ function renderFilteredOrders() {
     const filteredOrders = filter === 'all' ? allOrders : allOrders.filter(order => order.status === filter);
     const orderHTML = filteredOrders.map(createOrderCardHTML).join('');
     ordersContainerEl.innerHTML = orderHTML || '<p style="text-align: center; padding: 2rem;">No orders match this filter.</p>';
+
+    // NEW: After rendering, initialize maps for orders with coordinates
+    initOrderMaps();
+}
+
+/**
+ * NEW: Initializes Leaflet maps on order cards that have location data.
+ */
+function initOrderMaps() {
+    const mapContainers = document.querySelectorAll('.admin-map-container');
+    mapContainers.forEach(container => {
+        const lat = parseFloat(container.dataset.lat);
+        const lon = parseFloat(container.dataset.lon);
+
+        if (!isNaN(lat) && !isNaN(lon)) {
+            const map = L.map(container).setView([lat, lon], 16);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap'
+            }).addTo(map);
+            L.marker([lat, lon]).addTo(map)
+                .bindPopup('Customer Location').openPopup();
+        }
+    });
 }
 
 /**
@@ -324,6 +347,15 @@ function createOrderCardHTML(order) {
                         <p><strong>Name:</strong> ${order.address.fullName}</p>
                         <p><strong>Phone:</strong> ${order.address.mobile}</p>
                         <p><strong>Address:</strong> ${order.address.house}, ${order.address.street}, ${order.address.pincode}</p>
+                        ${order.address.latitude && order.address.longitude ? `
+                            <div class="admin-map-container" 
+                                 id="map-${order.id}" 
+                                 data-lat="${order.address.latitude}" 
+                                 data-lon="${order.address.longitude}">
+                            </div>
+                            <p style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.5rem;">
+                                <a href="https://www.google.com/maps?q=${order.address.latitude},${order.address.longitude}" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
+                            </p>` : ''}
                         <p class="order-date"><strong>Ordered:</strong> ${orderDate}</p>
                     </div>
                 </div>

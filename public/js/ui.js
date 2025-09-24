@@ -1030,6 +1030,66 @@ export const UI = {
         document.getElementById('addressListContainer').style.display = 'none';
         document.getElementById('addressFormContainer').style.display = 'block';
         document.querySelector('#addressForm .cta').textContent = 'Save Address';
+        // NEW: Initialize the map when the form is shown
+        UI.initMap();
+    },
+
+    initMap: () => {
+        if (state.map) {
+            state.map.remove();
+        }
+
+        // Default to a central point in Hyderabad
+        const defaultCoords = [17.412, 78.434];
+        state.map = L.map('addressMapContainer').setView(defaultCoords, 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(state.map);
+
+        state.mapMarker = L.marker(defaultCoords, { draggable: true }).addTo(state.map);
+
+        state.map.on('click', (e) => {
+            state.mapMarker.setLatLng(e.latlng);
+            UI.updateAddressFieldsFromMap(); // Auto-update on pin move
+        });
+
+        state.mapMarker.on('dragend', () => {
+            const position = state.mapMarker.getLatLng();
+            state.map.panTo(position);
+            UI.updateAddressFieldsFromMap(); // Auto-update on pin move
+        });
+    },
+
+    updateMapLocation: (lat, lng, zoom = 16) => {
+        if (state.map && state.mapMarker) {
+            const newLatLng = L.latLng(lat, lng);
+            state.map.setView(newLatLng, zoom);
+            state.mapMarker.setLatLng(newLatLng);
+        }
+    },
+
+    updateAddressFieldsFromMap: async () => {
+        if (!state.mapMarker) return;
+
+        const { lat, lng } = state.mapMarker.getLatLng();
+        document.getElementById('addressLatitude').value = lat;
+        document.getElementById('addressLongitude').value = lng;
+
+        UI.showToast('Updating address from map...');
+
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const data = await response.json();
+
+            if (data && data.address) {
+                document.getElementById('addressStreet').value = data.address.road || data.address.suburb || '';
+                document.getElementById('addressPincode').value = data.address.postcode || '';
+            }
+        } catch (error) {
+            console.error('Reverse geocoding failed:', error);
+            UI.showToast('Could not fetch address details.', true);
+        }
     },
 
     showAddressList: () => {

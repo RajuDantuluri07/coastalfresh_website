@@ -532,6 +532,15 @@ body {
     color: var(--gray-600);
 }
 
+.admin-map-container {
+    height: 200px;
+    border-radius: 8px;
+    background-color: var(--gray-100);
+    margin-top: 1rem;
+    border: 1px solid var(--gray-200);
+    z-index: 1; /* Ensure map is interactive */
+}
+
 .status-selector {
     display: flex;
     flex-direction: column;
