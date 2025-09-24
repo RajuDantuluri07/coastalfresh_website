@@ -330,7 +330,7 @@ export const Handlers = {
 
         // Product Popup buttons
         document.getElementById('ordersMainContent').addEventListener('click', e => {
-            const reorderBtn = e.target.closest('.reorder-btn');
+            const reorderBtn = e.target.closest('.order-card-btn.reorder');
             if (reorderBtn) {
                 e.stopPropagation();
                 const orderId = reorderBtn.dataset.orderId;
@@ -341,7 +341,7 @@ export const Handlers = {
                 });
             }
 
-            const supportBtn = e.target.closest('.support-btn');
+            const supportBtn = e.target.closest('.order-card-btn.support');
             if (supportBtn) {
                 e.stopPropagation();
                 const userOrderId = supportBtn.dataset.userOrderId;
@@ -350,7 +350,7 @@ export const Handlers = {
 
             // NEW: Handle click on the entire order card to show details
             const orderCard = e.target.closest('.order-card');
-            if (orderCard && !e.target.closest('.reorder-btn, .support-btn')) {
+            if (orderCard && !e.target.closest('.order-card-btn')) {
                 const orderId = orderCard.dataset.orderId;
                 if (orderId) {
                     state.db.collection('orders').doc(orderId).get().then(doc => {

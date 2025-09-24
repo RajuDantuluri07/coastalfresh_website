@@ -1145,57 +1145,54 @@ export const UI = {
                 document.getElementById('shopFromOrdersBtn').addEventListener('click', () => UI.showPage('home'));
             } else {
                 // NEW: Status mapping for better UX
-                 const statusMap = {
-                    'Pending': { text: 'Order Confirmed', icon: 'fas fa-check', class: 'confirmed' },
-                    'Accepted': { text: 'Being Prepared', icon: 'fas fa-utensils', class: 'preparing' },
-                    'Out for Delivery': { text: 'Out for Delivery', icon: 'fas fa-truck', class: 'delivery' },
-                    'Completed': { text: 'Delivered', icon: 'fas fa-check-double', class: 'completed' },
-                    'Cancelled': { text: 'Cancelled', icon: 'fas fa-times', class: 'cancelled' }
+                const statusMap = {
+                    'Pending': { text: 'Pending', class: 'inprogress' },
+                    'Accepted': { text: 'Preparing', class: 'inprogress' },
+                    'Out for Delivery': { text: 'In Transit', class: 'inprogress' },
+                    'Completed': { text: 'Completed', class: 'completed' },
+                    'Cancelled': { text: 'Cancelled', class: 'cancelled' }
                 };
 
                 const ordersHTML = ordersSnapshot.docs.map(doc => {
                     const order = doc.data();
                     const orderDate = order.createdAt?.toDate ? order.createdAt.toDate() : new Date();
-                    const datePart = orderDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-                    const timePart = orderDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-                    const formattedDate = `Placed at ${datePart}, ${timePart}`;
+                    const datePart = orderDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+                    const timePart = orderDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase();
+                    const formattedDateTime = `${datePart} • ${timePart}`;
 
-                    const displayStatus = statusMap[order.status] || { text: order.status, icon: 'fas fa-question-circle', class: 'pending' };
+                    const displayStatus = statusMap[order.status] || { text: order.status, class: 'inprogress' };
 
-                    let itemSummaryHTML = '';
+                    let firstItem = { name: 'Order', image: '' };
+                    let moreItemsText = `${order.items.length} item(s)`;
                     if (order.items && order.items.length > 0) {
-                        const firstItemName = order.items[0].name;
-                        const remainingItems = order.items.length - 1;
-                        const imagesHTML = order.items.slice(0, 3).map(item =>
-                            `<img src="${UI.getOptimizedImageUrl(item.image, 96, 96)}" alt="${item.name}" loading="lazy">`
-                        ).join('');
-
-                        itemSummaryHTML = `
-                            <div class="order-item-summary">
-                                <div class="order-item-images">${imagesHTML}</div>
-                                <div class="order-item-text">
-                                    <div class="item-name">${firstItemName}</div>
-                                    ${remainingItems > 0 ? `<div class="more-items">+ ${remainingItems} more item(s)</div>` : ''}
-                                </div>
-                                <div class="order-total-small">₹${order.total}</div>
-                            </div>
-                        `;
+                        firstItem = order.items[0];
+                        moreItemsText = order.items.length > 1 ? `+ ${order.items.length - 1} more` : `${firstItem.net} Net Wt`;
                     }
+                    const thumbImg = UI.getOptimizedImageUrl(firstItem.image, 80, 80);
 
                     return `
-                        <div class="order-card" data-order-id="${doc.id}" data-order-status="${order.status}">
-                            <div class="order-header">
-                                <div>
+                        <div class="order-card" data-order-id="${doc.id}">
+                            <div class="order-card-top">
+                                <div class="order-id-block">
                                     <div class="order-id">Order #${order.orderId}</div>
-                                    <div class="order-date">${formattedDate}</div>
+                                    <div class="order-meta">${formattedDateTime}</div>
+                                </div>
+                                <div class="order-price">₹${order.total}</div>
+                            </div>
+                            <div class="order-items">
+                                <div class="order-thumb">
+                                    <img src="${thumbImg}" alt="${firstItem.name}" loading="lazy">
+                                </div>
+                                <div class="order-item-meta">
+                                    <div class="order-item-title">${firstItem.name}</div>
+                                    <div class="order-item-sub">${moreItemsText}</div>
                                 </div>
                             </div>
-                            <div class="order-body">${itemSummaryHTML}</div>
-                            <div class="order-footer">
-                                <div class="order-status ${displayStatus.class}"><i class="${displayStatus.icon}"></i> ${displayStatus.text}</div>
-                                <div class="order-actions">
-                                    <button class="order-action-btn reorder-btn" data-order-id="${doc.id}">Reorder</button>
-                                    <button class="order-action-btn support-btn" data-user-order-id="${order.orderId}">Support</button>
+                            <div class="order-card-bottom">
+                                <div class="order-status ${displayStatus.class}"><span class="dot"></span>${displayStatus.text}</div>
+                                <div class="order-card-actions">
+                                    <button class="order-card-btn reorder" data-order-id="${doc.id}">Reorder</button>
+                                    <button class="order-card-btn support" data-user-order-id="${order.orderId}">Support</button>
                                 </div>
                             </div>
                         </div>
@@ -1210,13 +1207,6 @@ export const UI = {
     },
 
     openOrderDetailsDrawer: (order) => {
-        // This function is now deprecated by the new design but kept for potential future use.
-        // The new design shows details inline or via a separate page.
-        // For now, clicking a card might do nothing or we can re-implement this.
-        // Let's just show a toast for now.
-        UI.showToast(`Order ID: ${order.orderId}`);
-        return;
-
         const drawerOverlay = document.getElementById('orderDetailsDrawerOverlay');
         const drawer = document.getElementById('orderDetailsDrawer');
         if (!drawerOverlay || !drawer) return;
