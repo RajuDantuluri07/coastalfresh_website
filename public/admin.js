@@ -24,10 +24,8 @@ const newSignupsTodayEl = document.getElementById('new-signups-today');
 const activeUsersTodayEl = document.getElementById('active-users-today');
 const ordersContainerEl = document.getElementById('orders-container');
 const statusFilterEl = document.getElementById('status-filter');
-const revenueChartCanvas = document.getElementById('revenueChart');
 
 let allOrders = []; // Cache for all orders to allow client-side filtering
-let revenueChart; // To hold the chart instance
 
 // List of authorized admin User IDs.
 const ADMIN_UIDS = [
@@ -111,7 +109,6 @@ function initDashboard() {
     fetchCustomerCount();
     fetchNewSignupsToday();
     fetchActiveUsersToday();
-    fetchAndRenderChart();
 }
 
 /**
@@ -271,85 +268,6 @@ function fetchActiveUsersToday() {
                 "Firestore index missing for 'active users' query. " +
                 "Please create a single-field index on the 'lastSeen' field in the 'users' collection."
             );
-        }
-    });
-}
-
-/**
- * Fetches data and renders the revenue chart for the last 30 days.
- */
-function fetchAndRenderChart() {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    thirtyDaysAgo.setHours(0, 0, 0, 0);
-
-    db.collection('orders')
-      .where('status', '==', 'Completed')
-      .where('createdAt', '>=', thirtyDaysAgo)
-      .orderBy('createdAt', 'asc')
-      .get()
-      .then(snapshot => {
-        const dailyData = new Map();
-
-        // Initialize the last 30 days with 0 revenue
-        for (let i = 0; i < 30; i++) {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-            const dateString = date.toISOString().split('T')[0]; // YYYY-MM-DD
-            dailyData.set(dateString, 0);
-        }
-
-        // Populate with actual data
-        snapshot.forEach(doc => {
-            const order = doc.data();
-            const orderDate = order.createdAt.toDate().toISOString().split('T')[0];
-            if (dailyData.has(orderDate)) {
-                dailyData.set(orderDate, dailyData.get(orderDate) + order.total);
-            }
-        });
-
-        // Sort data by date and prepare for chart
-        const sortedData = new Map([...dailyData.entries()].sort());
-        const labels = Array.from(sortedData.keys());
-        const data = Array.from(sortedData.values());
-
-        renderRevenueChart(labels, data);
-      })
-      .catch(error => {
-        console.error("Error fetching chart data:", error);
-        revenueChartCanvas.parentElement.innerHTML = '<p class="error-message">Could not load chart data.</p>';
-      });
-}
-
-/**
- * Renders the revenue chart using Chart.js.
- * @param {string[]} labels - The chart labels (dates).
- * @param {number[]} data - The chart data (revenue).
- */
-function renderRevenueChart(labels, data) {
-    if (revenueChart) {
-        revenueChart.destroy();
-    }
-
-    const ctx = revenueChartCanvas.getContext('2d');
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(14, 165, 233, 0.5)');
-    gradient.addColorStop(1, 'rgba(14, 165, 233, 0)');
-
-    revenueChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Daily Revenue',
-                data: data,
-                borderColor: 'var(--primary)',
-                backgroundColor: gradient,
-                borderWidth: 2,
-                pointBackgroundColor: 'var(--primary)',
-                tension: 0.4,
-                fill: true,
-            }]
         }
     });
 }

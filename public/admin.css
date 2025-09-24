@@ -379,15 +379,6 @@ body {
     margin-bottom: 0.25rem;
 }
 
-/* NEW: Chart Section */
-.chart-section {
-    background: white;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    margin-bottom: 2rem;
-    padding: 1rem;
-}
-
 /* Orders Section */
 .orders-section {
     background: white;
