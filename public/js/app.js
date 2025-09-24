@@ -160,6 +160,13 @@ async function init() {
 
       UI.showInitialSkeletons();
 
+      UI.renderTrustIcons();
+      UI.renderCategories();
+      UI.renderCustomerReviews();
+      Handlers.setupEvents();
+      UI.initCarousel('#home .carousel');
+      UI.initCarousel('#communicationCarousel');
+
       try {
           const response = await fetch('/products.json');
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -194,13 +201,6 @@ async function init() {
           console.error("Could not load product data:", error);
           UI.showToast('Could not load products. Please check your connection.');
       }
-
-      UI.renderTrustIcons();
-      UI.renderCategories();
-      UI.renderCustomerReviews();
-      Handlers.setupEvents();
-      UI.initCarousel('#home .carousel');
-      UI.initCarousel('#communicationCarousel');
 
       if ('serviceWorker' in navigator) {
           window.addEventListener('load', () => {
