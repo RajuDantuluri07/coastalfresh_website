@@ -542,10 +542,11 @@ export const Handlers = {
             try {
                 // We prioritize sharing the text to ensure the referral link is always sent.
                 // Some apps, like WhatsApp, ignore text when an image file is included.
+                // By removing the `url` property, we prevent apps like WhatsApp from showing the link twice,
+                // as it's already included in `referralMessage`.
                 await navigator.share({
                     title: shareTitle,
-                    text: referralMessage,
-                    url: referralLink // Providing the URL separately helps some apps create a better preview.
+                    text: referralMessage
                 });
             } catch (error) {
                 // This error is thrown if the user cancels the share dialog, which is normal behavior.
