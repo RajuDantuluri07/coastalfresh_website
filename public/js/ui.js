@@ -1104,6 +1104,16 @@ export const UI = {
     },
 
     renderOrdersPage: async () => {
+        // Since the dedicated header is removed, we'll inject a title and controls
+        // directly into the main content area for a more integrated feel.
+        const pageHeaderHTML = `
+            <h1 class="section-title" style="padding: 0 0 16px 0;">My Orders</h1>
+            <div class="order-controls" style="margin-bottom: 16px;">
+                <div class="order-filter-tabs" id="orderFilterTabs" role="tablist" aria-label="Filter orders by status">
+                    <!-- Tabs will be injected by JS -->
+                </div>
+            </div>
+        `;
         const ordersPage = document.getElementById('ordersPage');
         const mainContent = ordersPage.querySelector('main');
 
@@ -1120,7 +1130,7 @@ export const UI = {
             return;
         }
 
-        mainContent.innerHTML = '<div class="loading" style="margin: 40px auto;"></div>';
+        mainContent.innerHTML = `${pageHeaderHTML}<div class="loading" style="margin: 40px auto;"></div>`;
 
         try {
             const ordersSnapshot = await state.db.collection('orders')
@@ -1129,7 +1139,7 @@ export const UI = {
                 .get();
 
             if (ordersSnapshot.empty) {
-                mainContent.innerHTML = `
+                mainContent.innerHTML = `${pageHeaderHTML}
           <div class="empty-cart" style="flex-grow: 1; min-height: 60vh;">
             <i class="fas fa-box-open" style="font-size: 64px; margin-bottom: 24px; color: var(--border-color);"></i>
             <h3>No Orders Yet</h3>
@@ -1145,28 +1155,30 @@ export const UI = {
                 document.getElementById('shopFromOrdersBtn').addEventListener('click', () => UI.showPage('home'));
             } else {
                 // NEW: Status mapping for better UX
-                const statusMap = {
-                    'Pending': { text: 'Pending', class: 'inprogress' },
-                    'Accepted': { text: 'Preparing', class: 'inprogress' },
-                    'Out for Delivery': { text: 'In Transit', class: 'inprogress' },
-                    'Completed': { text: 'Completed', class: 'completed' },
-                    'Cancelled': { text: 'Cancelled', class: 'cancelled' }
+                 const statusMap = {
+                    'Pending': { text: 'Order Placed', class: 'inprogress', icon: 'fa-solid fa-check' },
+                    'Accepted': { text: 'Preparing', class: 'inprogress', icon: 'fa-solid fa-utensils' },
+                    'Out for Delivery': { text: 'In Transit', class: 'transit', icon: 'fa-solid fa-truck-fast' },
+                    'Completed': { text: 'Delivered', class: 'completed', icon: 'fa-solid fa-house-chimney-user' },
+                    'Cancelled': { text: 'Cancelled', class: 'cancelled', icon: 'fa-solid fa-xmark' }
                 };
 
                 const ordersHTML = ordersSnapshot.docs.map(doc => {
                     const order = doc.data();
                     const orderDate = order.createdAt?.toDate ? order.createdAt.toDate() : new Date();
-                    const datePart = orderDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
-                    const timePart = orderDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase();
-                    const formattedDateTime = `${datePart} • ${timePart}`;
+                    const formattedDateTime = orderDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
-                    const displayStatus = statusMap[order.status] || { text: order.status, class: 'inprogress' };
+                    const displayStatus = statusMap[order.status] || { text: order.status, class: 'inprogress', icon: 'fa-solid fa-question-circle' };
 
                     let firstItem = { name: 'Order', image: '' };
-                    let moreItemsText = `${order.items.length} item(s)`;
+                    let moreItemsText = '';
                     if (order.items && order.items.length > 0) {
                         firstItem = order.items[0];
-                        moreItemsText = order.items.length > 1 ? `+ ${order.items.length - 1} more` : `${firstItem.net} Net Wt`;
+                        if (order.items.length > 1) {
+                            moreItemsText = `+ ${order.items.length - 1} more item(s)`;
+                        } else if (firstItem.net) {
+                            moreItemsText = `${firstItem.net} Net Wt`;
+                        }
                     }
                     const thumbImg = UI.getOptimizedImageUrl(firstItem.image, 80, 80);
 
@@ -1174,22 +1186,22 @@ export const UI = {
                         <div class="order-card" data-order-id="${doc.id}">
                             <div class="order-card-top">
                                 <div class="order-id-block">
-                                    <div class="order-id">Order #${order.orderId}</div>
+                                    <div class="order-id">ID: #${order.orderId.slice(-6)}</div>
                                     <div class="order-meta">${formattedDateTime}</div>
                                 </div>
                                 <div class="order-price">₹${order.total}</div>
                             </div>
-                            <div class="order-items">
+                            <div class="order-item-summary">
                                 <div class="order-thumb">
                                     <img src="${thumbImg}" alt="${firstItem.name}" loading="lazy">
                                 </div>
                                 <div class="order-item-meta">
                                     <div class="order-item-title">${firstItem.name}</div>
-                                    <div class="order-item-sub">${moreItemsText}</div>
+                                    ${moreItemsText ? `<div class="order-item-sub">${moreItemsText}</div>` : ''}
                                 </div>
                             </div>
                             <div class="order-card-bottom">
-                                <div class="order-status ${displayStatus.class}"><span class="dot"></span>${displayStatus.text}</div>
+                                <div class="order-status ${displayStatus.class}"><i class="${displayStatus.icon}"></i> ${displayStatus.text}</div>
                                 <div class="order-card-actions">
                                     <button class="order-card-btn reorder" data-order-id="${doc.id}">Reorder</button>
                                     <button class="order-card-btn support" data-user-order-id="${order.orderId}">Support</button>
@@ -1198,7 +1210,7 @@ export const UI = {
                         </div>
                     `;
                 }).join('');
-                mainContent.innerHTML = ordersHTML;
+                mainContent.innerHTML = `${pageHeaderHTML}<div class="order-list">${ordersHTML}</div>`;
             }
         } catch (error) {
             console.error("Error fetching orders:", error);
