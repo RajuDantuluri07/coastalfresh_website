@@ -1,12 +1,16 @@
-let state, config, Handlers, DOMPurify, history;
+let state, config, DOMPurify, history, Handlers;
 
 export const UI = {
-    init: (appState, appConfig, appHandlers, purifier, historyObj) => {
+    init: (appState, appConfig, purifier, historyObj) => {
         state = appState;
         config = appConfig;
-        Handlers = appHandlers;
         DOMPurify = purifier;
         history = historyObj;
+    },
+
+    // NEW: Setter function to receive Handlers after it's initialized
+    setHandlers: (appHandlers) => {
+        Handlers = appHandlers;
     },
 
     renderTrustIcons: () => {
