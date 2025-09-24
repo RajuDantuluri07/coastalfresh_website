@@ -1178,7 +1178,7 @@ export const UI = {
                             </div>` : ''}
                             <div class="card-actions">
                                 <button class="btn btn-outline reorder-btn" data-order-id="${doc.id}">Reorder</button>
-                                <button class="btn btn-primary support-btn" data-user-order-id="${order.orderId}">Support</button>
+                                <button class="btn btn-primary support-btn" data-order-id="${doc.id}">Support</button>
                             </div>
                         </div>
                     `;
