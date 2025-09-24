@@ -31,6 +31,13 @@ export const Handlers = {
             if (productCard && !target.closest('.cart-controls, .add-to-cart-btn')) {
                 e.preventDefault();
                 const productId = productCard.dataset.id;
+                // OPTIMIZATION: Prefetch the large image on mousedown/touchstart for faster popup load
+                const product = state.products.find(p => p.id === parseInt(productId));
+                if (product) {
+                    const img = new Image();
+                    img.src = UI.getOptimizedImageUrl(product.image, 600, 600);
+                }
+
                 if (productId) UI.showProductPopup(parseInt(productId));
             }
 
@@ -655,7 +662,7 @@ export const Handlers = {
 
         if (state.selectedPaymentMethod === 'online') {
             UI.showToast('Online payment is coming soon! Please select Cash on Delivery.');
-            return;
+            return; // Stop checkout if online payment is selected
         }
 
         if (!state.currentUser) {
@@ -954,7 +961,11 @@ export const Handlers = {
 
     handleLogout: () => {
         firebase.auth().signOut().then(() => {
+            // Anonymize user for analytics
+            if (window.Analytics) window.Analytics.anonymizeUser();
+            state.currentUser = null;
             UI.showToast('You have been logged out.');
+            Handlers.updateUIForAuthState();
             UI.showPage('home');
         }).catch(error => {
             console.error('Logout Error:', error);
@@ -1021,11 +1032,8 @@ export const Handlers = {
                 setTimeout(state.afterLoginAction, 100);
                 state.afterLoginAction = null;
             }
-        } else {
-            if (window.hj) {
-                hj('identify', null, {});
-                console.log('Hotjar user session anonymized.');
-            }
+        } else { // User is logged out
+            if (window.Analytics) window.Analytics.anonymizeUser();
         }
     },
 

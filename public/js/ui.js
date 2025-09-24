@@ -269,49 +269,19 @@ export const UI = {
         const product = state.products.find(p => p.id === numericId);
         if (!product) return;
 
+        // --- OPTIMIZATION: Prioritize visual updates first ---
+
         state.popupProduct = product;
         state.currentProductQty = state.cart[product.id] || 1;
-        const popup = document.getElementById('productPopup');
 
-        const productSlug = UI.generateProductSlug(product);
-        const productUrl = `/product/${productSlug}`;
-        const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
-        const productDesc = product.desc;
-        const optimizedProductImage = UI.getOptimizedImageUrl(product.image, 1200, 630);
-        UI.updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
+        // Use cached DOM elements for speed
+        const { main: popup, title, weight, priceSection, infoContent, mainImage, contentWrapper, backBtn } = state.dom.popup;
 
-        try {
-            const existing = document.getElementById('product-breadcrumb-jsonld');
-            if (existing) existing.remove();
+        title.textContent = DOMPurify.sanitize(product.name);
+        weight.textContent = `${product.net} Net Weight`;
 
-            const breadcrumb = {
-                "@context": "https://schema.org",
-                "@type": "BreadcrumbList",
-                "itemListElement": [
-                    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" },
-                    { "@type": "ListItem", "position": 2, "name": "All Products", "item": "https://www.coastalfresh.in/catalog" },
-                    { "@type": "ListItem", "position": 3, "name": product.name, "item": `https://www.coastalfresh.in${productUrl}` }
-                ]
-            };
-
-            const script = document.createElement('script');
-            script.type = 'application/ld+json';
-            script.id = 'product-breadcrumb-jsonld';
-            script.textContent = JSON.stringify(breadcrumb);
-            document.head.appendChild(script);
-        } catch (e) {
-            console.warn('Could not inject breadcrumb JSON-LD', e);
-        }
-
-        const ratingContainer = document.getElementById('popupRatingContainer');
-        if (ratingContainer) ratingContainer.setAttribute('aria-label', '4.2 out of 5 stars');
-
-        document.getElementById('popupProductTitle').textContent = DOMPurify.sanitize(product.name);
-        document.getElementById('popupProductWeight').textContent = `${product.net} Net Weight`;
-
-        const priceSection = document.getElementById('popupPriceSection');
         if (product.mrp > product.finalPrice) {
-            const savings = product.mrp - product.finalPrice
+            const savings = product.mrp - product.finalPrice;
             priceSection.innerHTML = `
         <span class="popup-price-final">₹${product.finalPrice}</span>
         <span class="popup-price-mrp">₹${product.mrp}</span>
@@ -321,17 +291,17 @@ export const UI = {
             priceSection.innerHTML = `<span class="popup-price-final">₹${product.finalPrice}</span>`;
         }
 
-        const productInfoContent = document.getElementById('productInfoContent');
-        productInfoContent.innerHTML = `
+        infoContent.innerHTML = `
       <p>${DOMPurify.sanitize(product.desc)}</p>
       <p style="margin-top: 16px;"><strong>Gross Wt:</strong> ${product.gross} | <strong>Net Wt:</strong> ${product.net}<br><small>Net weight is after cleaning. Weight loss varies by product.</small></p>`;
 
         const optimizedPopupImage = UI.getOptimizedImageUrl(product.image, 600, 600);
-        document.getElementById('popupMainImage').src = optimizedPopupImage;
-        document.getElementById('popupMainImage').alt = `High-quality ${DOMPurify.sanitize(product.name)} from Coastal Fresh India`;
+        mainImage.src = optimizedPopupImage;
+        mainImage.alt = `High-quality ${DOMPurify.sanitize(product.name)} from Coastal Fresh India`;
 
         document.getElementById('popupImageIndicators').style.display = 'none';
 
+        // Reset accordion state
         document.querySelectorAll('.detail-item.active').forEach(item => {
             item.classList.remove('active');
             item.querySelector('.detail-content').style.maxHeight = '0';
@@ -341,15 +311,43 @@ export const UI = {
         });
 
         UI.updatePopupCta();
-
-        const contentWrapper = document.getElementById('popupContentWrapper');
         if (contentWrapper) contentWrapper.scrollTop = 0;
 
+        // --- Show the modal immediately ---
         state.isPopupOpen = true;
-        UI.openModal(popup, popup.querySelector('.popup-back-btn'));
+        UI.openModal(popup, backBtn);
 
-        history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
+        // --- OPTIMIZATION: Defer non-critical tasks to run after the popup is visible ---
+        const runDeferredTasks = () => {
+            const productSlug = UI.generateProductSlug(product);
+            const productUrl = `/product/${productSlug}`;
+            const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
+            const productDesc = product.desc;
+            const optimizedProductImage = UI.getOptimizedImageUrl(product.image, 1200, 630);
 
+            // Update SEO tags and browser history
+            UI.updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
+            history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
+
+            // Inject JSON-LD schema
+            const existingJsonLd = document.getElementById('product-breadcrumb-jsonld');
+            if (existingJsonLd) existingJsonLd.remove();
+            const breadcrumb = { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" }, { "@type": "ListItem", "position": 2, "name": "All Products", "item": "https://www.coastalfresh.in/catalog" }, { "@type": "ListItem", "position": 3, "name": product.name, "item": `https://www.coastalfresh.in${productUrl}` }] };
+            const script = document.createElement('script');
+            script.type = 'application/ld+json';
+            script.id = 'product-breadcrumb-jsonld';
+            script.textContent = JSON.stringify(breadcrumb);
+            document.head.appendChild(script);
+        };
+
+        // Use requestIdleCallback for modern browsers, fallback to setTimeout
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(runDeferredTasks, { timeout: 500 });
+        } else {
+            setTimeout(runDeferredTasks, 100);
+        }
+
+        // Analytics can also be tracked after the initial render
         window.Analytics.trackEvent('view_item', {
             currency: 'INR',
             value: product.finalPrice,
@@ -1311,6 +1309,28 @@ export const UI = {
             schemaContainer.appendChild(script);
         });
         document.head.appendChild(schemaContainer);
+    },
+
+    /**
+     * Displays a toast message.
+     * @param {string} text - The message to display.
+     * @param {boolean} isError - If true, shows an error style.
+     */
+    showToast: (text, isError = false) => {
+        const toast = document.getElementById('toast');
+        const toastText = document.getElementById('toastText');
+        if (!toast || !toastText) return;
+
+        toastText.textContent = text;
+        toast.className = 'toast'; // Reset classes
+        toast.classList.add('show');
+        if (isError) {
+            toast.classList.add('error');
+        }
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2500);
     },
 
     openModal: (modalElement, elementToFocus) => {
