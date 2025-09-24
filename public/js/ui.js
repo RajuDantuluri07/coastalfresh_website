@@ -1145,12 +1145,12 @@ export const UI = {
                 document.getElementById('shopFromOrdersBtn').addEventListener('click', () => UI.showPage('home'));
             } else {
                 // NEW: Status mapping for better UX
-                 const statusMap = {
-                    'Pending': { text: 'Order Placed', class: 'inprogress', icon: 'fa-solid fa-check' },
-                    'Accepted': { text: 'Preparing', class: 'inprogress', icon: 'fa-solid fa-utensils' },
-                    'Out for Delivery': { text: 'In Transit', class: 'transit', icon: 'fa-solid fa-truck-fast' },
-                    'Completed': { text: 'Delivered', class: 'completed', icon: 'fa-solid fa-house-chimney-user' },
-                    'Cancelled': { text: 'Cancelled', class: 'cancelled', icon: 'fa-solid fa-xmark' }
+                const statusMap = {
+                    'Pending': { text: 'Pending', class: 'inprogress' },
+                    'Accepted': { text: 'Preparing', class: 'inprogress' },
+                    'Out for Delivery': { text: 'In Transit', class: 'inprogress' },
+                    'Completed': { text: 'Completed', class: 'completed' },
+                    'Cancelled': { text: 'Cancelled', class: 'cancelled' }
                 };
 
                 const ordersHTML = ordersSnapshot.docs.map(doc => {
@@ -1159,17 +1159,14 @@ export const UI = {
                     const datePart = orderDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
                     const timePart = orderDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase();
                     const formattedDateTime = `${datePart} • ${timePart}`;
-                    const displayStatus = statusMap[order.status] || { text: order.status, class: 'inprogress', icon: 'fa-solid fa-question-circle' };
+
+                    const displayStatus = statusMap[order.status] || { text: order.status, class: 'inprogress' };
 
                     let firstItem = { name: 'Order', image: '' };
-                    let moreItemsText = '';
+                    let moreItemsText = `${order.items.length} item(s)`;
                     if (order.items && order.items.length > 0) {
                         firstItem = order.items[0];
-                        if (order.items.length > 1) {
-                            moreItemsText = `+ ${order.items.length - 1} more item(s)`;
-                        } else if (firstItem.net) {
-                            moreItemsText = `${firstItem.net} Net Wt`;
-                        }
+                        moreItemsText = order.items.length > 1 ? `+ ${order.items.length - 1} more` : `${firstItem.net} Net Wt`;
                     }
                     const thumbImg = UI.getOptimizedImageUrl(firstItem.image, 80, 80);
 
@@ -1177,28 +1174,31 @@ export const UI = {
                         <div class="order-card" data-order-id="${doc.id}">
                             <div class="order-card-top">
                                 <div class="order-id-block">
-                                    <div class="order-id">ID: #${order.orderId.slice(-6)}</div>
+                                    <div class="order-id">Order #${order.orderId}</div>
                                     <div class="order-meta">${formattedDateTime}</div>
                                 </div>
                                 <div class="order-price">₹${order.total}</div>
                             </div>
-                            <div class="order-item-summary">
+                            <div class="order-items">
                                 <div class="order-thumb">
                                     <img src="${thumbImg}" alt="${firstItem.name}" loading="lazy">
                                 </div>
                                 <div class="order-item-meta">
                                     <div class="order-item-title">${firstItem.name}</div>
-                                    ${moreItemsText ? `<div class="order-item-sub">${moreItemsText}</div>` : ''}
+                                    <div class="order-item-sub">${moreItemsText}</div>
                                 </div>
                             </div>
                             <div class="order-card-bottom">
-                                <div class="order-status ${displayStatus.class}"><i class="${displayStatus.icon}"></i> ${displayStatus.text}</div>
-                                <!-- The entire card is clickable to track, so a button is not needed here -->
+                                <div class="order-status ${displayStatus.class}"><span class="dot"></span>${displayStatus.text}</div>
+                                <div class="order-card-actions">
+                                    <button class="order-card-btn reorder" data-order-id="${doc.id}">Reorder</button>
+                                    <button class="order-card-btn support" data-user-order-id="${order.orderId}">Support</button>
+                                </div>
                             </div>
                         </div>
                     `;
                 }).join('');
-                mainContent.innerHTML = `<div class="order-list">${ordersHTML}</div>`;
+                mainContent.innerHTML = ordersHTML;
             }
         } catch (error) {
             console.error("Error fetching orders:", error);

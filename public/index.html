@@ -125,7 +125,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js"></script>
 
   <!-- External CSS -->
-  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/main.css">
 </head>
 <body>
   <div class="app">
@@ -492,7 +492,7 @@
 
     <!-- NEW: Orders Page -->
     <div class="page" id="ordersPage">
-      <header class="header">
+      <header class="header" id="ordersHeader">
         <div class="header-top">
           <button class="back-btn" aria-label="Go Back">
             <i class="fas fa-arrow-left"></i>
@@ -500,10 +500,14 @@
           <h1 class="logo">My Orders</h1>
           <div style="width: 36px;"></div> <!-- Spacer -->
         </div>
+        <!-- NEW: Order Filters and Search -->
         <div class="order-controls">
-          <div class="order-filter-tabs" id="orderFilterTabs" role="tablist" aria-label="Filter orders by status"></div>
+          <div class="order-filter-tabs" id="orderFilterTabs" role="tablist" aria-label="Filter orders by status">
+            <!-- Tabs will be injected by JS -->
+          </div>
         </div>
       </header>
+
       <main class="section" id="ordersMainContent">
         <!-- Order list will be injected here -->
         <div class="empty-cart" id="ordersEmptyState" style="display: none; flex-grow: 1; min-height: 60vh;">
@@ -854,14 +858,6 @@
           <h3 class="drawer-section-title">Items</h3>
           <div id="drawerItemsList"></div>
         </div>
-        <!-- NEW: Address Section -->
-        <div class="drawer-section">
-          <h3 class="drawer-section-title">Delivery Address</h3>
-          <div class="drawer-address-content">
-            <strong id="drawerAddressName"></strong>
-            <p id="drawerAddressFull"></p>
-          </div>
-        </div>
         <div class="drawer-section drawer-total-section">
           <span>Grand Total</span>
           <span id="drawerGrandTotal"></span>
@@ -915,7 +911,7 @@
   </script>
 
   <!-- External JS -->
-  <script src="/js/analytics.js" defer></script>
+  <script src="/analytics.js" defer></script>
   <script src="/js/app.js" type="module" defer></script>
 </body>
 </html>

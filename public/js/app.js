@@ -1,6 +1,6 @@
 import { UI } from './ui.js';
 import { Handlers } from './handlers.js';
-import { firebaseConfig } from './js/firebase-config.js';
+import { firebaseConfig } from './firebase-config.js';
 
 // App Configuration
 export const config = {
@@ -155,6 +155,8 @@ async function init() {
       state.dom.popup.cta = document.getElementById('popupStickyCta');
       state.dom.popup.contentWrapper = document.getElementById('popupContentWrapper');
       state.dom.popup.backBtn = state.dom.popup.main.querySelector('.popup-back-btn');
+
+
 
       UI.showInitialSkeletons();
 

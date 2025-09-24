@@ -1,4 +1,4 @@
-let state, config, UI, DOMPurify, firebase;
+let state, config, UI;
 
 /**
  * Creates a simple, non-cryptographic hash from a string.
@@ -14,13 +14,11 @@ function _simpleHash(str) {
     return Math.abs(hash);
 }
 
-
 export const Handlers = {
-    init: (appState, appConfig, uiModule, purifier, fb) => {
+    init: (appState, appConfig, uiModule) => {
         state = appState;
         config = appConfig;
         UI = uiModule;
-        DOMPurify = purifier;
     },
 
     /**
@@ -332,9 +330,27 @@ export const Handlers = {
 
         // Product Popup buttons
         document.getElementById('ordersMainContent').addEventListener('click', e => {
+            const reorderBtn = e.target.closest('.order-card-btn.reorder');
+            if (reorderBtn) {
+                e.stopPropagation();
+                const orderId = reorderBtn.dataset.orderId;
+                state.db.collection('orders').doc(orderId).get().then(doc => {
+                    if (doc.exists) {
+                        Handlers.addMultipleToCart(doc.data().items);
+                    }
+                });
+            }
+
+            const supportBtn = e.target.closest('.order-card-btn.support');
+            if (supportBtn) {
+                e.stopPropagation();
+                const userOrderId = supportBtn.dataset.userOrderId;
+                Handlers.openWhatsApp('support', userOrderId);
+            }
+
             // NEW: Handle click on the entire order card to show details
             const orderCard = e.target.closest('.order-card');
-            if (orderCard) { // The entire card is now the "Track Order" button
+            if (orderCard && !e.target.closest('.order-card-btn')) {
                 const orderId = orderCard.dataset.orderId;
                 if (orderId) {
                     state.db.collection('orders').doc(orderId).get().then(doc => {
@@ -544,11 +560,10 @@ export const Handlers = {
             try {
                 // We prioritize sharing the text to ensure the referral link is always sent.
                 // Some apps, like WhatsApp, ignore text when an image file is included.
-                // By removing the `url` property, we prevent apps like WhatsApp from showing the link twice,
-                // as it's already included in `referralMessage`.
                 await navigator.share({
                     title: shareTitle,
-                    text: referralMessage
+                    text: referralMessage,
+                    url: referralLink // Providing the URL separately helps some apps create a better preview.
                 });
             } catch (error) {
                 // This error is thrown if the user cancels the share dialog, which is normal behavior.

@@ -588,12 +588,12 @@ z-index: 2;                 /* sits above input content */
 }
 
 .trust-item {
+  flex: 1;
   display: flex;
-  align-items: center; /* Vertically align icon and text */
-  gap: 8px; /* Space between icon and text block */
-  text-align: left; /* Align text to the left */
-  flex: 1 1 0px; /* Allow items to grow and shrink evenly */
-  min-width: 0; /* Prevent overflow on small screens */
+  flex-direction: column;
+  align-items: center;
+  gap: 2px; /* Tighter gap between icon and text */
+  text-align: center;      
   padding: 8px 4px;
   background: var(--bg-white);
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
@@ -613,16 +613,11 @@ z-index: 2;                 /* sits above input content */
   width: 32px; /* Smaller icon container */
   height: 32px;
   border-radius: 12px;
-  font-size: 14px;
+  font-size: 14px; /* Smaller icon */
+  margin-bottom: 2px;
   background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
   color: var(--bg-white);
-  border: none;
-  flex-shrink: 0; /* Prevent icon from shrinking */
-}
-
-.trust-content {
-  display: flex;
-  flex-direction: column;
+  border: none; /* Cleaner look */
 }
 
 .trust-title {
@@ -637,7 +632,6 @@ z-index: 2;                 /* sits above input content */
   font-size: 11px;
   color: var(--text-secondary);
   line-height: 1.3;
-  /* FIX: Allow subtitle to wrap if needed */
   white-space: nowrap; /* FIX: Prevent subtitle from breaking */
 }
 
@@ -727,12 +721,7 @@ z-index: 2;                 /* sits above input content */
 }
 
 .flash-sale-products::-webkit-scrollbar { display: none; }
-.flash-sale-products .product {
-  /* FIX: Use a fixed width for consistency instead of a percentage */
-  flex: 0 0 150px;
-  width: 150px;
-  max-width: 180px;
-}
+.flash-sale-products .product { flex: 0 0 45%; max-width: 180px; }
 
 /* --- NEW: Flash Sale Product Card Overrides --- */
 .flash-sale-item .product-image {
@@ -866,12 +855,7 @@ z-index: 2;                 /* sits above input content */
   scrollbar-width: none; /* Firefox */
 }
 
-.featured-products .product {
-  /* FIX: Use a fixed width for consistency instead of a percentage */
-  flex: 0 0 150px;
-  width: 150px;
-  max-width: 180px;
-}
+.featured-products .product { flex: 0 0 45%; max-width: 180px; }
 
 /* Categories for Catalog */
 .categories {
@@ -1009,17 +993,15 @@ z-index: 2;                 /* sits above input content */
 
 .product-name {
   font-size: 16px; /* H2 Product Name */
-  font-weight: 500;
+  font-weight: 500; /* UPDATED */
   margin-bottom: 4px;
   color: var(--text-primary);
-  /* FIX: Ensure consistent height for product names */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  height: 2.4em; /* Approx 2 lines of text */
 }
 
 .product-weight {
@@ -1032,8 +1014,7 @@ z-index: 2;                 /* sits above input content */
 .product-footer {
   display: flex;
   justify-content: space-between;
-  /* FIX: Align items to the center for better vertical balance */
-  align-items: center;
+  align-items: flex-end; /* Align price and button to the bottom */
   margin-top: 8px;
 }
 
@@ -2910,6 +2891,12 @@ body.popup-open .bottom-bar {
 }
 
 /* --- NEW: Orders Page Styles --- */
+#ordersPage .header {
+  position: sticky;
+  top: 0;
+  z-index: 101;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
 .order-list {
   display: flex;
   flex-direction: column;
@@ -2918,7 +2905,6 @@ body.popup-open .bottom-bar {
 
 
 #ordersPage main {
-  padding-top: 16px; /* Add padding since header is gone */
   background-color: var(--bg-light);
   min-height: calc(100vh - 150px); /* Adjust based on header height */
 }
@@ -2969,69 +2955,79 @@ body.popup-open .bottom-bar {
   display: none; /* Hidden for now, can be enabled later */
 }
 
-/* --- FINAL: Compact & Refined Order Card Styles --- */
+/* --- NEW: Revamped Dense Order Card Styles --- */
 .order-card {
   background: var(--bg-white);
-  border-radius: 12px;
-  padding: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 8px;
+  box-shadow: 0 6px 12px rgba(16,40,47,0.05);
+  border: 1px solid rgba(18,52,63,0.035);
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform .1s ease, box-shadow .1s ease;
 }
-.order-card:active { transform: scale(0.98); }
+.order-card:active { transform: scale(.99); }
 
-.order-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
-.order-id-block { display: flex; flex-direction: column; gap: 4px; }
-.order-id { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
-.order-meta { font-size: 12px; color: var(--text-secondary); }
-.order-price { font-weight: 700; color: var(--primary-dark); font-size: 18px; }
+.order-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.order-id-block { display: flex; flex-direction: column; gap: 2px; }
+.order-id { font-size: 13px; font-weight: 700; }
+.order-meta { font-size: 11px; color: var(--text-secondary); }
+.order-price { font-weight: 800; color: var(--primary-dark); font-size: 14px; }
 
-.order-item-summary {
+.order-items {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
-  padding: 10px 0;
-  border-top: 1px solid var(--bg-light);
-  border-bottom: 1px solid var(--bg-light);
+  padding-top: 8px;
+  padding-bottom: 6px;
+  border-top: 1px solid rgba(18,52,63,0.03);
+  margin-top: 6px;
 }
 .order-thumb {
-  width: 48px; height: 48px; flex: 0 0 48px;
-  border-radius: 8px; overflow: hidden; background: var(--bg-light);
+  width: 40px; height: 40px; flex: 0 0 40px;
+  border-radius: 8px; overflow: hidden; background: #f0f3f4;
   display: grid; place-items: center;
 }
-.order-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.order-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .order-item-meta { flex: 1; min-width: 0; }
-.order-item-title { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.order-item-sub { font-size: 13px; color: var(--text-secondary); }
+.order-item-title { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-item-sub { font-size: 11px; color: var(--text-secondary); }
 
-.order-card-bottom {
-  display: flex;
-  justify-content: center; /* Center the status badge */
-  align-items: center; margin-top: 10px;
-}
+.order-card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
 
 .order-status {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 5px 10px; border-radius: 16px;
-  font-size: 12px; font-weight: 600;
+  padding: 4px 8px; border-radius: 999px;
+  font-size: 12px; font-weight: 700;
   text-transform: capitalize;
 }
-.order-status i { font-size: 11px; }
+.order-status .dot { width: 8px; height: 8px; border-radius: 50%; }
 
-/* Status: In Progress (Pending, Accepted) */
-.order-status.inprogress { background-color: #FFF3E0; color: #EF6C00; }
-
-/* Status: In Transit */
-.order-status.transit { background-color: #E3F2FD; color: #1E88E5; }
+/* Status: In Progress (Pending, Accepted, Out for Delivery) */
+.order-status.inprogress { background: rgba(1, 101, 154, 0.08); color: var(--primary-color); }
+.order-status.inprogress .dot { background: var(--primary-color); }
 
 /* Status: Completed */
-.order-status.completed { background-color: #E8F5E9; color: #388E3C; }
+.order-status.completed { background: rgba(56, 142, 60, 0.08); color: var(--success-color); }
+.order-status.completed .dot { background: var(--success-color); }
 
 /* Status: Cancelled */
-.order-status.cancelled { background-color: #FFEBEE; color: #D32F2F; }
+.order-status.cancelled { background: rgba(211, 47, 47, 0.08); color: var(--error-color); }
+.order-status.cancelled .dot { background: var(--error-color); }
+
+.order-card-actions { display: flex; gap: 6px; }
+.order-card-btn {
+  background: none; border: none;
+  color: var(--text-secondary);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+.order-card-btn:hover { background-color: var(--bg-light); }
+.order-card-btn.reorder { color: var(--primary-color); }
 
 /* --- NEW: Order Details Drawer --- */
 .drawer-overlay {
@@ -3073,13 +3069,6 @@ body.popup-open .bottom-bar {
 .drawer-item-name { font-weight: 500; }
 .drawer-item-qty { font-size: 13px; color: var(--text-secondary); }
 .drawer-item-price { font-weight: 600; }
-
-.drawer-address-content strong {
-  display: block; font-size: 15px; font-weight: 600; margin-bottom: 4px;
-}
-.drawer-address-content p {
-  font-size: 14px; color: var(--text-secondary); line-height: 1.5;
-}
 
 .drawer-total-section { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 700; }
 

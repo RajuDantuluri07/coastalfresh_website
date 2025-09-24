@@ -56,10 +56,8 @@ const CACHE_NAME = 'coastal-fresh-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/css/main.css',
-  '/css/admin.css',
+  '/main.css',
   '/js/app.js',
-  '/js/analytics.js',
   '/js/ui.js',
   '/js/handlers.js',
   '/products.json',
