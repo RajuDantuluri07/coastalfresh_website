@@ -857,6 +857,73 @@ export const UI = {
         }
     },
 
+    initCarousel: (selector) => {
+        const carouselContainer = document.querySelector(selector);
+        if (!carouselContainer) return;
+
+        const slidesContainer = carouselContainer.querySelector('.slides');
+        const slides = slidesContainer.children;
+        const dotsContainer = carouselContainer.querySelector('.carousel-dots');
+        const total = slides.length;
+
+        if (total <= 1) {
+            if (dotsContainer) dotsContainer.style.display = 'none';
+            return;
+        }
+
+        let timer = null;
+
+        if (dotsContainer) {
+            dotsContainer.innerHTML = Array.from({ length: total }, (_, i) =>
+                `<div class="dot ${i === 0 ? 'active' : ''}"></div>`
+            ).join('');
+        }
+
+        const dots = dotsContainer ? Array.from(dotsContainer.children) : [];
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(slides).indexOf(entry.target);
+                    if (dotsContainer) {
+                        dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+                    }
+                }
+            });
+        }, { root: carouselContainer, threshold: 0.5 });
+
+        Array.from(slides).forEach(slide => observer.observe(slide));
+
+        function advanceSlide() {
+            let currentScroll = carouselContainer.scrollLeft;
+            let slideWidth = carouselContainer.clientWidth;
+            let nextScroll = currentScroll + slideWidth;
+
+            if (nextScroll >= carouselContainer.scrollWidth - 1) { // -1 for precision
+                carouselContainer.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+                carouselContainer.scrollBy({ left: slideWidth, behavior: 'smooth' });
+            }
+        }
+
+        function startTimer() {
+            if (timer) clearInterval(timer);
+            timer = setInterval(advanceSlide, 5000);
+        }
+        function stopTimer() {
+            clearInterval(timer);
+        }
+
+        carouselContainer.addEventListener('pointerdown', stopTimer);
+        carouselContainer.addEventListener('scroll', stopTimer);
+
+        document.addEventListener('visibilitychange', () => {
+            document.hidden ? stopTimer() : startTimer();
+        });
+
+        startTimer();
+    },
+
     initFlashSaleTimer: () => {
         if (!config.ENABLE_FLASH_SALE) return;
 
