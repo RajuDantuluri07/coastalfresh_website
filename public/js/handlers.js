@@ -291,9 +291,6 @@ export const Handlers = {
                 street: document.getElementById('addressStreet').value,
                 city: document.getElementById('addressCity').value,
                 pincode: pincodeInput.value,
-                // NEW: Add hidden fields for lat/lng to the address data
-                latitude: document.getElementById('addressLatitude').value || null,
-                longitude: document.getElementById('addressLongitude').value || null,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
@@ -1125,9 +1122,7 @@ export const Handlers = {
                 document.getElementById('addressPincode').value = address.pincode || '';
 
                 document.getElementById('addressListContainer').style.display = 'none';
-                const formContainer = document.getElementById('addressFormContainer');
-                formContainer.classList.add('active');
-                UI.initMap(); // Re-initialize map for editing
+                document.getElementById('addressFormContainer').style.display = 'block';
                 document.querySelector('#addressForm .cta').textContent = 'Update Address';
             } else {
                 UI.showToast('Address not found.');
@@ -1274,46 +1269,6 @@ export const Handlers = {
                 installBtn.focus();
                 e.preventDefault();
             }
-        }
-    },
-
-    getCurrentLocationForMap: () => {
-        if (!navigator.geolocation) {
-            UI.showToast('Geolocation is not supported by your browser.', true);
-            return;
-        }
-
-        UI.showToast('Getting your location...');
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const { latitude, longitude } = position.coords;
-                UI.updateMapLocation(latitude, longitude);
-            },
-            () => {
-                UI.showToast('Unable to retrieve your location.', true);
-            }
-        );
-    },
-
-    searchLocationOnMap: async () => {
-        const searchInput = document.getElementById('addressMapSearch');
-        const query = searchInput.value;
-        if (query.length < 3) return;
-
-        UI.showToast('Searching...');
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=in&viewbox=78.2,17.1,78.8,17.7&bounded=1`);
-            const results = await response.json();
-
-            if (results && results.length > 0) {
-                const { lat, lon } = results[0];
-                UI.updateMapLocation(parseFloat(lat), parseFloat(lon));
-            } else {
-                UI.showToast('Location not found.', true);
-            }
-        } catch (error) {
-            console.error('Map search failed:', error);
-            UI.showToast('Could not perform search.', true);
         }
     },
 
