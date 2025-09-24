@@ -105,10 +105,8 @@ statusFilterEl.addEventListener('change', () => {
  */
 function initDashboard() {
     fetchAndRenderOrders();
-    fetchAndRenderSummary();
-    fetchCustomerCount();
-    fetchNewSignupsToday();
-    fetchActiveUsersToday();
+    fetchAndRenderDailySummary();
+    fetchAndRenderAggregateStats();
 }
 
 /**
@@ -125,13 +123,6 @@ function fetchAndRenderOrders() {
 
         allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderFilteredOrders();
-
-        // Update summary stats that depend on all orders
-        totalOrdersEl.textContent = allOrders.length;
-        const pendingCount = allOrders.filter(o => o.status === 'Pending' || o.status === 'Accepted').length;
-        pendingOrdersEl.textContent = pendingCount;
-        const completedCount = allOrders.filter(o => o.status === 'Completed').length;
-        completedOrdersEl.textContent = completedCount;
 
     }, error => {
         console.error("Error fetching orders: ", error);
@@ -150,43 +141,85 @@ function renderFilteredOrders() {
 }
 
 /**
- * Fetches completed orders for the day and calculates revenue.
+ * Fetches real-time summary data for the current day, like revenue.
+ * This is optimized to read from a pre-aggregated document.
  */
-function fetchAndRenderSummary() {
-    // NOTE: This query requires a composite index in Firestore.
-    // If "Today's Revenue" is not loading, please create the following index in your
-    // Firebase Console -> Firestore Database -> Indexes:
-    //
-    // Collection ID: orders
-    // Fields to index:
-    // 1. status (Ascending)
-    // 2. createdAt (Descending)
-    // Query scope: Collection
-
+function fetchAndRenderDailySummary() {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Start of today
+    const dateString = today.toISOString().split('T')[0]; // YYYY-MM-DD
+    const dailySummaryRef = db.collection('summaries').doc(dateString);
 
-    // Corrected query with orderBy, which is required for a range filter.
-    db.collection('orders')
-      .where('status', '==', 'Completed')
-      .where('createdAt', '>=', today) // This query needs a composite index
-      .orderBy('createdAt', 'desc')
-      .onSnapshot(snapshot => {
-        let totalRevenue = 0;
-        snapshot.forEach(doc => {
-            totalRevenue += doc.data().total;
-        });
-        dailyRevenueEl.textContent = `₹${totalRevenue.toFixed(2)}`;
-    }, (error) => {
-        console.error("Error fetching summary data: ", error);
-        if (error.code === 'failed-precondition') {
-            dailyRevenueEl.innerHTML = `<span style="font-size: 1rem; color: var(--danger);">Index Required</span>`;
-            console.warn(
-                "Firestore index missing for 'Today\'s Revenue' query. Please create a composite index in Firestore: Collection='orders', Fields: status (Ascending), createdAt (Descending)."
-            );
+    dailySummaryRef.onSnapshot(doc => {
+        if (doc.exists) {
+            const data = doc.data();
+            dailyRevenueEl.textContent = `₹${(data.revenue || 0).toFixed(2)}`;
+        } else {
+            // If the document doesn't exist, it means no revenue yet for today.
+            dailyRevenueEl.textContent = `₹0.00`;
         }
+    }, error => {
+        console.error("Error fetching daily summary: ", error);
         dailyRevenueEl.textContent = 'Error';
     });
+}
+
+/**
+ * Fetches aggregate counts for orders and users efficiently using count().
+ * This runs once on load and is not real-time to save on reads.
+ * For real-time, you could wrap this in an onSnapshot on a metadata doc.
+ */
+async function fetchAndRenderAggregateStats() {
+    try {
+        // Set loading state
+        [totalOrdersEl, pendingOrdersEl, completedOrdersEl, newSignupsTodayEl, activeUsersTodayEl].forEach(el => el.textContent = '...');
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Order Counts
+        const totalOrdersQuery = db.collection('orders').count().get();
+        const pendingOrdersQuery = db.collection('orders').where('status', 'in', ['Pending', 'Accepted']).count().get();
+        const completedOrdersQuery = db.collection('orders').where('status', '==', 'Completed').count().get();
+
+        // User Counts
+        const newSignupsQuery = db.collection('users').where('createdAt', '>=', today).count().get();
+        const activeUsersQuery = db.collection('users').where('lastSeen', '>=', today).count().get();
+
+        // Fetch all counts in parallel
+        const [
+            totalOrdersSnap,
+            pendingOrdersSnap,
+            completedOrdersSnap,
+            newSignupsSnap,
+            activeUsersSnap
+        ] = await Promise.all([
+            totalOrdersQuery,
+            pendingOrdersQuery,
+            completedOrdersQuery,
+            newSignupsQuery,
+            activeUsersQuery
+        ]);
+
+        // Update UI with the counts
+        totalOrdersEl.textContent = totalOrdersSnap.data().count;
+        pendingOrdersEl.textContent = pendingOrdersSnap.data().count;
+        completedOrdersEl.textContent = completedOrdersSnap.data().count;
+        newSignupsTodayEl.textContent = newSignupsSnap.data().count;
+        activeUsersTodayEl.textContent = activeUsersSnap.data().count;
+
+    } catch (error) {
+        console.error("Error fetching aggregate stats:", error);
+        // Set error state
+        [totalOrdersEl, pendingOrdersEl, completedOrdersEl, newSignupsTodayEl, activeUsersTodayEl].forEach(el => el.textContent = 'N/A');
+
+        // Helpful console warnings for missing indexes
+        if (error.code === 'failed-precondition') {
+            console.warn(
+                "A Firestore index is likely missing for one of the aggregate stat queries. " +
+                "Please check the Firestore console for index creation links in the error logs."
+            );
+        }
+    }
 }
 
 /**
@@ -218,57 +251,6 @@ function fetchCustomerCount() {
     }, error => {
         console.error("Error fetching customer count: ", error);
         totalCustomersEl.textContent = 'N/A';
-    });
-}
-
-/**
- * Fetches the count of users who signed up today.
- * NOTE: This query requires a single-field index on 'createdAt' in the 'users' collection.
- */
-function fetchNewSignupsToday() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Start of today
-
-    db.collection('users')
-      .where('createdAt', '>=', today)
-      .onSnapshot((snapshot) => {
-        newSignupsTodayEl.textContent = snapshot.size;
-    }, (error) => {
-        console.error("Error fetching new signups: ", error);
-        if (error.code === 'failed-precondition') {
-            console.warn(
-                "Firestore index missing for 'new signups' query. " +
-                "Please create a single-field index on the 'createdAt' field in the 'users' collection."
-            );
-        }
-        newSignupsTodayEl.textContent = 'N/A';
-    });
-}
-
-/**
- * Fetches the count of users who were active today.
- * NOTE: This query requires a single-field index on 'lastSeen' in the 'users' collection.
- */
-function fetchActiveUsersToday() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Start of today
-
-    // To get Daily Active Users (DAU), we query for users whose 'lastSeen'
-    // timestamp is on or after the beginning of today.
-    db.collection('users')
-      .where('lastSeen', '>=', today)
-      .onSnapshot((snapshot) => {
-        activeUsersTodayEl.textContent = snapshot.size;
-    }, (error) => {
-        console.error("Error fetching active users: ", error);
-        activeUsersTodayEl.textContent = 'N/A';
-        // Provide a helpful message if the index is missing.
-        if (error.code === 'failed-precondition') {
-            console.warn(
-                "Firestore index missing for 'active users' query. " +
-                "Please create a single-field index on the 'lastSeen' field in the 'users' collection."
-            );
-        }
     });
 }
 

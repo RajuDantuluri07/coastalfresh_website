@@ -222,6 +222,9 @@ export const Handlers = {
             const profileBtn = target.closest('.profile-button');
             if (profileBtn) Handlers.handleProfileButtonClick(profileBtn);
 
+            // Checkout button in cart
+            if (target.id === 'cartPlaceOrderBtn') Handlers.checkout();
+
         });
 
         // Typewriter focus/blur handlers
