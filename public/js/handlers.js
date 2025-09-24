@@ -389,7 +389,7 @@ export const Handlers = {
         document.getElementById('shopFromOrdersBtn').addEventListener('click', () => UI.showPage('home'));
 
         // Checkout button
-        document.getElementById('cartFooter').addEventListener('click', (e) => {
+        document.getElementById('cartPlaceOrderBtn').addEventListener('click', (e) => {
             if (e.target.closest('.checkout-btn')) {
                 Handlers.checkout();
             }
@@ -660,8 +660,11 @@ export const Handlers = {
 
         if (!state.currentUser) {
             document.getElementById('cartModal').classList.remove('active');
-            UI.showToast('Please sign up or log in to place your order.');
-            state.afterLoginAction = Handlers.checkout;
+            UI.showToast('Please log in to continue checkout.');
+            // FIX: Instead of re-running checkout, just show the cart again after login.
+            // This allows the user to review their cart before placing the order.
+            state.afterLoginAction = UI.showCart;
+
             UI.showLoginModal(null, 'signup');
             return;
         }
