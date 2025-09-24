@@ -21,6 +21,13 @@ export const Handlers = {
         UI = uiModule;
     },
 
+    /**
+     * A helper function to safely add event listeners.
+     * It checks if the element exists before adding the listener.
+     * @param {string} selector - The CSS selector for the element.
+     * @param {string} event - The event type (e.g., 'click').
+     * @param {Function} handler - The event handler function.
+     */
     setupEvents: () => {
         // --- Event Delegation on the Body for Dynamic/Repeated Elements ---
         document.body.addEventListener('click', (e) => {
@@ -119,6 +126,102 @@ export const Handlers = {
                     if (icon) icon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
                 }
             }
+
+            // --- Safely handle clicks on page-specific or modal buttons ---
+
+            // Login/Signup form toggling
+            if (target.id === 'showLogin') {
+                e.preventDefault();
+                document.getElementById('authTitle').textContent = 'Welcome Back';
+                document.getElementById('authSubtitle').textContent = 'Login to access your account';
+                document.getElementById('signupForm').classList.remove('active');
+                document.getElementById('loginForm').classList.add('active');
+                document.getElementById('authError').textContent = '';
+            }
+            if (target.id === 'showSignup') {
+                e.preventDefault();
+                document.getElementById('authTitle').textContent = 'Get Started';
+                document.getElementById('authSubtitle').textContent = 'Sign up to order the freshest coastal seafood';
+                document.getElementById('loginForm').classList.remove('active');
+                document.getElementById('signupForm').classList.add('active');
+                document.getElementById('authError').textContent = '';
+            }
+
+            // Category filter buttons
+            const categoryButton = target.closest('.category');
+            if (categoryButton) {
+                if (categoryButton.classList.contains('active')) return;
+                document.querySelector('.category.active').classList.remove('active');
+                categoryButton.classList.add('active');
+                state.currentCategory = categoryButton.dataset.category;
+                state.currentPageNumber = 1;
+                const searchInput = document.getElementById('catalogSearch');
+                if (searchInput) searchInput.value = '';
+                state.currentSearch = '';
+                UI.renderCatalogProducts();
+                window.Analytics.trackEvent('select_category', { category: state.currentCategory });
+            }
+
+            // Header buttons and View All
+            if (target.closest('#home .view-all')) {
+                e.preventDefault();
+                UI.showPage('catalog');
+            }
+
+            // Back buttons
+            const backBtn = target.closest('.page .back-btn');
+            if (backBtn) {
+                const pageId = backBtn.closest('.page').id;
+                if (pageId === 'addressPage') {
+                    state.editingAddressId ? Handlers.cancelEditAddress() : Handlers.goBack();
+                } else if (pageId !== 'loginModal' && pageId !== 'productPopup' && pageId !== 'cartModal') {
+                    Handlers.goBack();
+                }
+            }
+
+            // Address list actions
+            const optionsBtn = target.closest('.address-options-btn');
+            if (optionsBtn) {
+                const dropdown = optionsBtn.nextElementSibling;
+                document.querySelectorAll('.address-dropdown-content.active').forEach(openDropdown => {
+                    if (openDropdown !== dropdown) openDropdown.classList.remove('active');
+                });
+                dropdown.classList.toggle('active');
+                e.stopPropagation();
+                return;
+            }
+            const actionBtn = target.closest('.address-action-btn');
+            if (actionBtn) {
+                const addressId = actionBtn.dataset.id;
+                if (actionBtn.classList.contains('delete-address-btn')) Handlers.deleteAddress(addressId);
+                else if (actionBtn.classList.contains('set-default-btn')) Handlers.setDefaultAddress(addressId);
+                else if (actionBtn.classList.contains('edit-address-btn')) Handlers.editAddress(addressId);
+                actionBtn.closest('.address-dropdown-content').classList.remove('active');
+                return;
+            }
+            if (!target.closest('.address-options-menu')) {
+                document.querySelectorAll('.address-dropdown-content.active').forEach(d => d.classList.remove('active'));
+            }
+
+            // Confirmation modal buttons
+            if (target.id === 'cancelDeleteBtn') document.getElementById('confirmDeleteModal').classList.remove('active');
+            if (target.id === 'confirmDeleteBtn') Handlers.executeDeleteAddress();
+
+            // Order Success modal buttons
+            if (target.id === 'continueShoppingBtn') UI.closeOrderSuccessModal();
+            if (target.id === 'trackOrderBtn') Handlers.handleTrackOrder(e);
+
+            // Fixed "Add New Address" button
+            if (target.id === 'addNewAddressBtnFixed') UI.showAddressForm();
+
+            // Cart back button
+            if (target.closest('#cartModal .back-btn')) UI.closeCart();
+            if (target.closest('.cart-btn')) UI.showCart();
+
+            // Profile page buttons
+            const profileBtn = target.closest('.profile-button');
+            if (profileBtn) Handlers.handleProfileButtonClick(profileBtn);
+
         });
 
         // Typewriter focus/blur handlers
@@ -146,110 +249,11 @@ export const Handlers = {
         document.getElementById('googleLoginBtn').addEventListener('click', Handlers.handleGoogleLogin);
         document.getElementById('forgotPassword').addEventListener('click', Handlers.handlePasswordReset);
 
-        // Login/Signup form toggling
-        document.getElementById('showLogin').addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('authTitle').textContent = 'Welcome Back';
-            document.getElementById('authSubtitle').textContent = 'Login to access your account';
-            document.getElementById('signupForm').classList.remove('active');
-            document.getElementById('loginForm').classList.add('active');
-            document.getElementById('authError').textContent = '';
-        });
-        document.getElementById('showSignup').addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('authTitle').textContent = 'Get Started';
-            document.getElementById('authSubtitle').textContent = 'Sign up to order the freshest coastal seafood';
-            document.getElementById('loginForm').classList.remove('active');
-            document.getElementById('signupForm').classList.add('active');
-            document.getElementById('authError').textContent = '';
-        });
-
         // Header search inputs
         document.getElementById('catalogSearch').addEventListener('input', (e) => {
             clearTimeout(state.searchDebounceTimer);
             state.searchDebounceTimer = setTimeout(() => Handlers.handleCatalogSearch(e), 300);
         });
-
-        // Category filter buttons
-        document.getElementById('categories').addEventListener('click', (e) => {
-            const categoryButton = e.target.closest('.category');
-            if (categoryButton) {
-                if (categoryButton.classList.contains('active')) return;
-
-                document.querySelector('.category.active').classList.remove('active');
-                categoryButton.classList.add('active');
-                state.currentCategory = categoryButton.dataset.category;
-                state.currentPageNumber = 1;
-                document.getElementById('catalogSearch').value = '';
-                state.currentSearch = '';
-                UI.renderCatalogProducts();
-                window.Analytics.trackEvent('select_category', { category: state.currentCategory });
-            }
-        });
-
-        // Header buttons and View All
-        document.querySelector('#home .view-all').addEventListener('click', (e) => {
-            e.preventDefault(); // Prevent default link behavior
-            UI.showPage('catalog');
-        });
-
-        // Consolidate all back button listeners into one loop
-        document.querySelectorAll('.page .back-btn').forEach(btn => {
-            const pageId = btn.closest('.page').id;
-            if (pageId === 'addressPage') {
-                btn.addEventListener('click', () => state.editingAddressId ? Handlers.cancelEditAddress() : Handlers.goBack());
-            } else if (pageId !== 'loginModal' && pageId !== 'productPopup' && pageId !== 'cartModal') {
-                btn.addEventListener('click', Handlers.goBack);
-            }
-        });
-
-        // Event delegation for address list actions
-        document.getElementById('addressListContainer').addEventListener('click', e => {
-            const target = e.target;
-            const optionsBtn = target.closest('.address-options-btn');
-            if (optionsBtn) {
-                const dropdown = optionsBtn.nextElementSibling;
-                document.querySelectorAll('.address-dropdown-content.active').forEach(openDropdown => {
-                    if (openDropdown !== dropdown) {
-                        openDropdown.classList.remove('active');
-                    }
-                });
-                dropdown.classList.toggle('active');
-                e.stopPropagation();
-                return;
-            }
-
-            const actionBtn = target.closest('.address-action-btn');
-            if (actionBtn) {
-                const addressId = actionBtn.dataset.id;
-                if (actionBtn.classList.contains('delete-address-btn')) {
-                    Handlers.deleteAddress(addressId);
-                } else if (actionBtn.classList.contains('set-default-btn')) {
-                    Handlers.setDefaultAddress(addressId);
-                } else if (actionBtn.classList.contains('edit-address-btn')) {
-                    Handlers.editAddress(addressId);
-                }
-                actionBtn.closest('.address-dropdown-content').classList.remove('active');
-                return;
-            }
-        });
-
-        // Close dropdowns if clicking anywhere else
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.address-options-menu')) {
-                document.querySelectorAll('.address-dropdown-content.active').forEach(openDropdown => {
-                    openDropdown.classList.remove('active');
-                });
-            }
-        });
-
-        // Confirmation modal buttons
-        document.getElementById('cancelDeleteBtn').addEventListener('click', () => document.getElementById('confirmDeleteModal').classList.remove('active'));
-        document.getElementById('confirmDeleteBtn').addEventListener('click', Handlers.executeDeleteAddress);
-
-        // Order Success modal buttons
-        document.getElementById('continueShoppingBtn').addEventListener('click', UI.closeOrderSuccessModal);
-        document.getElementById('trackOrderBtn').addEventListener('click', Handlers.handleTrackOrder);
 
         // Address form submission
         document.getElementById('addressForm').addEventListener('submit', async (e) => {
@@ -324,38 +328,6 @@ export const Handlers = {
             }
         });
 
-        // Listener for the fixed "Add New Address" button
-        document.getElementById('addNewAddressBtnFixed').addEventListener('click', UI.showAddressForm);
-
-        // The cart back button
-        document.querySelector('#cartModal .back-btn').addEventListener('click', UI.closeCart);
-
-        document.querySelectorAll('.cart-btn').forEach(btn => btn.addEventListener('click', UI.showCart));
-
-        // Profile page buttons
-        document.querySelector('.profile-button.orders').addEventListener('click', () => UI.showPage('ordersPage'));
-        document.querySelector('.profile-button.address').addEventListener('click', async () => {
-            if (state.currentUser) {
-                await UI.renderAddressList();
-                UI.showPage('addressPage');
-            } else {
-                UI.showToast('Please login to manage your address.');
-                UI.showLoginModal();
-            }
-        });
-        document.querySelector('.profile-button.faq').addEventListener('click', () => UI.showPage('faqPage'));
-        document.querySelector('.profile-button.about').addEventListener('click', () => UI.showPage('aboutPage'));
-        document.querySelector('.profile-button.support').addEventListener('click', () => Handlers.openWhatsApp('support'));
-        document.getElementById('referBtn').addEventListener('click', () => UI.showPage('referPage'));
-        document.getElementById('profileInstallBtn').addEventListener('click', UI.triggerInstallPrompt);
-        document.getElementById('aboutPageCtaBtn').addEventListener('click', () => UI.showPage('catalog'));
-        document.querySelector('#aboutPage .back-btn').addEventListener('click', Handlers.goBack);
-
-        // Refer a Friend page buttons
-        document.querySelector('#referPage .back-btn').addEventListener('click', Handlers.goBack);
-        document.getElementById('copyReferralBtn').addEventListener('click', Handlers.copyReferralLink);
-        document.getElementById('shareOnWhatsAppBtn').addEventListener('click', () => Handlers.openWhatsApp('refer'));
-
         // Product Popup buttons
         document.getElementById('ordersMainContent').addEventListener('click', e => {
             const reorderBtn = e.target.closest('.reorder-btn');
@@ -376,8 +348,6 @@ export const Handlers = {
                 Handlers.openWhatsApp('support', userOrderId);
             }
         });
-        document.getElementById('logoutBtn').addEventListener('click', Handlers.handleLogout);
-        document.getElementById('guestProfileCta').addEventListener('click', (e) => UI.showLoginModal(e, 'signup'));
         document.querySelector('.popup-back-btn').addEventListener('click', UI.closePopup);
         document.querySelector('.popup-action-btn.favorite').addEventListener('click', Handlers.toggleFavorite);
         document.querySelector('.popup-action-btn.share').addEventListener('click', Handlers.shareProduct);
@@ -472,6 +442,34 @@ export const Handlers = {
         if (cartFooterEl && cartContentWrapperEl) cartResizeObserver.observe(cartFooterEl);
 
         Handlers.setupInstallPromptEvents();
+    },
+
+    handleProfileButtonClick: async (button) => {
+        if (button.id === 'guestProfileCta') {
+            UI.showLoginModal(null, 'signup');
+        } else if (button.id === 'logoutBtn') {
+            Handlers.handleLogout();
+        } else if (button.id === 'referBtn') {
+            UI.showPage('referPage');
+        } else if (button.id === 'profileInstallBtn') {
+            UI.triggerInstallPrompt();
+        } else if (button.classList.contains('orders')) {
+            UI.showPage('ordersPage');
+        } else if (button.classList.contains('address')) {
+            if (state.currentUser) {
+                await UI.renderAddressList();
+                UI.showPage('addressPage');
+            } else {
+                UI.showToast('Please login to manage your address.');
+                UI.showLoginModal();
+            }
+        } else if (button.classList.contains('faq')) {
+            UI.showPage('faqPage');
+        } else if (button.classList.contains('about')) {
+            UI.showPage('aboutPage');
+        } else if (button.classList.contains('support')) {
+            Handlers.openWhatsApp('support');
+        }
     },
 
     changePopupQty: (change) => {
