@@ -355,7 +355,6 @@ function createOrderCardHTML(order) {
 function updateOrderStatus(orderId, newStatus) {
     db.collection('orders').doc(orderId).update({ status: newStatus })
         .then(() => {
-            // Consider triggering a cloud function here instead
             console.log(`Order ${orderId} updated to ${newStatus}`);
             // The onSnapshot listener will automatically re-render the card with the new status.
         })
