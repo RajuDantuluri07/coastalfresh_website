@@ -631,6 +631,10 @@ export const UI = {
         const total = subtotal - couponDiscount + deliveryFee;
         const totalSavings = productSavings + couponDiscount + (deliveryFee === 0 ? 100 : 0);
         if (itemTotalEl) itemTotalEl.textContent = `₹${subtotal}`;
+        // FIX: Update the delivery fee and total pay amount in the UI
+        if (deliveryFeeEl) deliveryFeeEl.textContent = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
+        if (toPayEl) toPayEl.textContent = `₹${Math.round(total)}`;
+
         if (placeOrderBtn) placeOrderBtn.textContent = `Place Order – Pay ₹${Math.round(total)}`;
 
         if (discountRowEl && discountEl) {

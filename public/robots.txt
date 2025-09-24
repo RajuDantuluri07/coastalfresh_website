@@ -1,12 +1,13 @@
 User-agent: *
+# Allow all crawlers to access the site by default
 Allow: /
 
-# Disallow tracking and marketing parameters to prevent duplicate content
-Disallow: /*?utm_
-Disallow: /*&utm_
-Disallow: /*?ref=
+# Disallow admin pages
+Disallow: /admin.html
+Disallow: /admin.css
+Disallow: /admin.js
 
-# Disallow internal search result pages
-Disallow: /*?q=
+# Disallow internal search result pages specifically
+Disallow: /?q=
 
 Sitemap: https://coastalfresh.in/sitemap.xml
