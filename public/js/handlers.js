@@ -1125,8 +1125,6 @@ export const Handlers = {
                 document.getElementById('addressPincode').value = address.pincode || '';
 
                 document.getElementById('addressListContainer').style.display = 'none';
-                document.getElementById('addressFormContainer').style.display = 'block';
-                // FIX: Use the active class to show the form
                 const formContainer = document.getElementById('addressFormContainer');
                 formContainer.classList.add('active');
                 UI.initMap(); // Re-initialize map for editing
