@@ -1021,13 +1021,12 @@ export const Handlers = {
         Handlers.updateUIForAuthState();
 
         if (user) {
-            window.Analytics.identifyUser(user);
-            // NEW: Update the user's last seen timestamp for active user tracking.
-            // Use { merge: true } to avoid overwriting other user data.
+            // Update the user's last seen timestamp for active user tracking.
+            // Use { merge: true } to avoid overwriting other user data like 'createdAt'.
             state.db.collection('users').doc(user.uid).set({
                 lastSeen: firebase.firestore.FieldValue.serverTimestamp()
             }, { merge: true });
-
+            window.Analytics.identifyUser(user);
             if (typeof state.afterLoginAction === 'function') {
                 setTimeout(state.afterLoginAction, 100);
                 state.afterLoginAction = null;

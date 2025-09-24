@@ -24,8 +24,10 @@ const newSignupsTodayEl = document.getElementById('new-signups-today');
 const activeUsersTodayEl = document.getElementById('active-users-today');
 const ordersContainerEl = document.getElementById('orders-container');
 const statusFilterEl = document.getElementById('status-filter');
+const revenueChartCanvas = document.getElementById('revenueChart');
 
 let allOrders = []; // Cache for all orders to allow client-side filtering
+let revenueChart; // To hold the chart instance
 
 // List of authorized admin User IDs.
 const ADMIN_UIDS = [
@@ -109,6 +111,7 @@ function initDashboard() {
     fetchCustomerCount();
     fetchNewSignupsToday();
     fetchActiveUsersToday();
+    fetchAndRenderChart();
 }
 
 /**
@@ -166,17 +169,25 @@ function fetchAndRenderSummary() {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Start of today
 
+    // Corrected query with orderBy, which is required for a range filter.
     db.collection('orders')
-      .where('createdAt', '>=', today) // This query needs a composite index
       .where('status', '==', 'Completed')
+      .where('createdAt', '>=', today) // This query needs a composite index
+      .orderBy('createdAt', 'desc')
       .onSnapshot(snapshot => {
         let totalRevenue = 0;
         snapshot.forEach(doc => {
             totalRevenue += doc.data().total;
         });
         dailyRevenueEl.textContent = `₹${totalRevenue.toFixed(2)}`;
-    }, error => {
+    }, (error) => {
         console.error("Error fetching summary data: ", error);
+        if (error.code === 'failed-precondition') {
+            dailyRevenueEl.innerHTML = `<span style="font-size: 1rem; color: var(--danger);">Index Required</span>`;
+            console.warn(
+                "Firestore index missing for 'Today\'s Revenue' query. Please create a composite index in Firestore: Collection='orders', Fields: status (Ascending), createdAt (Descending)."
+            );
+        }
         dailyRevenueEl.textContent = 'Error';
     });
 }
@@ -193,11 +204,19 @@ function fetchCustomerCount() {
     // 2. Create a new collection called 'metadata'.
     // 3. Inside 'metadata', create a new document with the ID 'userStats'.
     // 4. In that document, add a 'count' field (Number type) and set its value to your current number of users.
-    db.collection('metadata').doc('userStats').onSnapshot(doc => {
+    db.collection('metadata').doc('userStats').onSnapshot((doc) => {
         if (doc.exists && doc.data().count !== undefined) {
             totalCustomersEl.textContent = doc.data().count;
         } else {
-            totalCustomersEl.textContent = '0';
+            // Fallback: If userStats doesn't exist, count the users directly.
+            // This is less efficient but provides a good fallback.
+            console.warn("metadata/userStats document not found. Falling back to counting users collection. This is less efficient.");
+            db.collection('users').get().then(snapshot => {
+                totalCustomersEl.textContent = snapshot.size;
+            }).catch(err => {
+                console.error("Error counting users collection:", err);
+                totalCustomersEl.textContent = 'N/A';
+            });
         }
     }, error => {
         console.error("Error fetching customer count: ", error);
@@ -215,10 +234,16 @@ function fetchNewSignupsToday() {
 
     db.collection('users')
       .where('createdAt', '>=', today)
-      .onSnapshot(snapshot => {
+      .onSnapshot((snapshot) => {
         newSignupsTodayEl.textContent = snapshot.size;
-    }, error => {
+    }, (error) => {
         console.error("Error fetching new signups: ", error);
+        if (error.code === 'failed-precondition') {
+            console.warn(
+                "Firestore index missing for 'new signups' query. " +
+                "Please create a single-field index on the 'createdAt' field in the 'users' collection."
+            );
+        }
         newSignupsTodayEl.textContent = 'N/A';
     });
 }
@@ -235,9 +260,9 @@ function fetchActiveUsersToday() {
     // timestamp is on or after the beginning of today.
     db.collection('users')
       .where('lastSeen', '>=', today)
-      .onSnapshot(snapshot => {
+      .onSnapshot((snapshot) => {
         activeUsersTodayEl.textContent = snapshot.size;
-    }, error => {
+    }, (error) => {
         console.error("Error fetching active users: ", error);
         activeUsersTodayEl.textContent = 'N/A';
         // Provide a helpful message if the index is missing.
@@ -250,6 +275,84 @@ function fetchActiveUsersToday() {
     });
 }
 
+/**
+ * Fetches data and renders the revenue chart for the last 30 days.
+ */
+function fetchAndRenderChart() {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    thirtyDaysAgo.setHours(0, 0, 0, 0);
+
+    db.collection('orders')
+      .where('status', '==', 'Completed')
+      .where('createdAt', '>=', thirtyDaysAgo)
+      .orderBy('createdAt', 'asc')
+      .get()
+      .then(snapshot => {
+        const dailyData = new Map();
+
+        // Initialize the last 30 days with 0 revenue
+        for (let i = 0; i < 30; i++) {
+            const date = new Date();
+            date.setDate(date.getDate() - i);
+            const dateString = date.toISOString().split('T')[0]; // YYYY-MM-DD
+            dailyData.set(dateString, 0);
+        }
+
+        // Populate with actual data
+        snapshot.forEach(doc => {
+            const order = doc.data();
+            const orderDate = order.createdAt.toDate().toISOString().split('T')[0];
+            if (dailyData.has(orderDate)) {
+                dailyData.set(orderDate, dailyData.get(orderDate) + order.total);
+            }
+        });
+
+        // Sort data by date and prepare for chart
+        const sortedData = new Map([...dailyData.entries()].sort());
+        const labels = Array.from(sortedData.keys());
+        const data = Array.from(sortedData.values());
+
+        renderRevenueChart(labels, data);
+      })
+      .catch(error => {
+        console.error("Error fetching chart data:", error);
+        revenueChartCanvas.parentElement.innerHTML = '<p class="error-message">Could not load chart data.</p>';
+      });
+}
+
+/**
+ * Renders the revenue chart using Chart.js.
+ * @param {string[]} labels - The chart labels (dates).
+ * @param {number[]} data - The chart data (revenue).
+ */
+function renderRevenueChart(labels, data) {
+    if (revenueChart) {
+        revenueChart.destroy();
+    }
+
+    const ctx = revenueChartCanvas.getContext('2d');
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(14, 165, 233, 0.5)');
+    gradient.addColorStop(1, 'rgba(14, 165, 233, 0)');
+
+    revenueChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Daily Revenue',
+                data: data,
+                borderColor: 'var(--primary)',
+                backgroundColor: gradient,
+                borderWidth: 2,
+                pointBackgroundColor: 'var(--primary)',
+                tension: 0.4,
+                fill: true,
+            }]
+        }
+    });
+}
 
 /**
  * Creates the HTML for a single order card.
@@ -258,8 +361,36 @@ function fetchActiveUsersToday() {
  */
 function createOrderCardHTML(order) {
     const orderDate = order.createdAt?.toDate().toLocaleString('en-IN') || 'N/A';
-    const statusOptions = ['Pending', 'Accepted', 'Out for Delivery', 'Completed', 'Cancelled'];
     const statusBadgeClass = order.status.replace(/\s+/g, '-');
+    const isTerminalState = order.status === 'Completed' || order.status === 'Cancelled';
+
+    // Define the possible next states for each current state.
+    const validTransitions = {
+        'Pending': ['Pending', 'Accepted', 'Cancelled'],
+        'Accepted': ['Accepted', 'Out for Delivery', 'Cancelled'],
+        'Out for Delivery': ['Out for Delivery', 'Completed', 'Cancelled'],
+    };
+
+    // Determine which options to show in the dropdown.
+    const availableOptions = validTransitions[order.status] || [];
+
+    // Generate the HTML for the order management section.
+    let managementHTML;
+    if (isTerminalState) {
+        // If the order is completed or cancelled, disable the dropdown.
+        managementHTML = `
+            <div class="status-selector-disabled">
+                <span>Status is final</span>
+            </div>
+        `;
+    } else {
+        // Otherwise, show a dropdown with only the valid next states.
+        managementHTML = `
+            <select class="status-select" data-order-id="${order.id}">
+                ${availableOptions.map(status => `<option value="${status}" ${order.status === status ? 'selected' : ''}>${status}</option>`).join('')}
+            </select>
+        `;
+    }
 
     return `
         <div class="order-card" data-id="${order.id}" data-status="${order.status}">
@@ -291,11 +422,7 @@ function createOrderCardHTML(order) {
                 </div>
                 <div class="order-section">
                     <h4>Order Management</h4>
-                    <div class="status-selector">
-                        <select class="status-select" data-order-id="${order.id}">
-                            ${statusOptions.map(status => `<option value="${status}" ${order.status === status ? 'selected' : ''}>${status}</option>`).join('')}
-                        </select>
-                    </div>
+                    ${managementHTML}
                 </div>
             </div>
         </div>
