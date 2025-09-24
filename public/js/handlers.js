@@ -225,6 +225,18 @@ export const Handlers = {
             // Checkout button in cart
             if (target.id === 'cartPlaceOrderBtn') Handlers.checkout();
 
+            // NEW: Handle click on the entire order card to show details
+            const orderCard = target.closest('.order-card');
+            if (orderCard) {
+                const orderId = orderCard.dataset.orderId;
+                if (orderId) {
+                    state.db.collection('orders').doc(orderId).get().then(doc => {
+                        if (doc.exists) {
+                            UI.openOrderDetailsDrawer(doc.data());
+                        }
+                    });
+                }
+            }
         });
 
         // Typewriter focus/blur handlers
@@ -331,21 +343,6 @@ export const Handlers = {
             }
         });
 
-        // Product Popup buttons
-        document.getElementById('ordersMainContent').addEventListener('click', e => {
-            // NEW: Handle click on the entire order card to show details
-            const orderCard = e.target.closest('.order-card');
-            if (orderCard) { // The entire card is now the "Track Order" button
-                const orderId = orderCard.dataset.orderId;
-                if (orderId) {
-                    state.db.collection('orders').doc(orderId).get().then(doc => {
-                        if (doc.exists) {
-                            UI.openOrderDetailsDrawer(doc.data());
-                        }
-                    });
-                }
-            }
-        });
         document.querySelector('.popup-back-btn').addEventListener('click', UI.closePopup);
         document.querySelector('.popup-action-btn.favorite').addEventListener('click', Handlers.toggleFavorite);
         document.querySelector('.popup-action-btn.share').addEventListener('click', Handlers.shareProduct);
