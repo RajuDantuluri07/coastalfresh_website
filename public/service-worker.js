@@ -57,6 +57,7 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/css/main.css',
+  '/css/admin.css',
   '/js/app.js',
   '/js/analytics.js',
   '/js/ui.js',
