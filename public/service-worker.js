@@ -11,7 +11,7 @@ firebase.initializeApp(self.firebaseConfig);
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage(function (payload) {
-  console.log("[service-worker.js] Received background message ", payload);
+  console.log("[firebase-messaging-sw.js] Received background message ", payload);
 
   // More robustly get title and options from either notification or data payload
   const notificationTitle = payload.notification?.title || payload.data?.title || "New Message from Coastal Fresh";
