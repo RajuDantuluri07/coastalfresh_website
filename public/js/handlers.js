@@ -396,9 +396,6 @@ export const Handlers = {
         });
 
         // Cart page buttons
-        document.querySelector('#cartModal .empty-cart-btn').addEventListener('click', () => { UI.showPage('catalog'); UI.closeCart(); });
-        document.getElementById('shopFromOrdersBtn').addEventListener('click', () => UI.showPage('home'));
-
         // Checkout button
         document.getElementById('cartPlaceOrderBtn').addEventListener('click', (e) => {
             if (e.target.closest('.checkout-btn')) {

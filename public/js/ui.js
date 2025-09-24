@@ -1132,6 +1132,11 @@ export const UI = {
             <button class="empty-cart-btn" id="shopFromOrdersBtn">Start Shopping</button>
           </div>
         `;
+                // FIX: Attach event listener only when the button is rendered.
+                const shopBtn = mainContent.querySelector('#shopFromOrdersBtn');
+                if (shopBtn) {
+                    shopBtn.addEventListener('click', () => UI.showPage('home'));
+                }
                 document.getElementById('shopFromOrdersBtn').addEventListener('click', () => UI.showPage('home'));
             } else {
                 // NEW: Status mapping for better UX
