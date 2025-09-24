@@ -1059,6 +1059,12 @@ export const UI = {
             state.map.panTo(position);
             UI.updateAddressFieldsFromMap(); // Auto-update on pin move
         });
+
+        // FIX: Invalidate map size after it becomes visible to fix rendering issues.
+        // A short timeout ensures the browser has completed layout updates.
+        setTimeout(() => {
+            state.map.invalidateSize();
+        });
     },
 
     updateMapLocation: (lat, lng, zoom = 16) => {
