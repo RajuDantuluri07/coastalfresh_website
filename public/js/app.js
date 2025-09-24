@@ -66,6 +66,17 @@ export const state = {
     popupDetailsExpanded: false,
     popupDescriptionExpanded: false,
     popupProduct: null,
+    // NEW: Cache for DOM elements
+    dom: {
+        profile: {
+            userName: null,
+            userStatus: null,
+            logoutBtn: null,
+            guestCta: null,
+            referBtn: null,
+            avatar: null
+        }
+    }
 };
 
 // --- NEW: Global Error Handling ---
