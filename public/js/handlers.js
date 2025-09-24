@@ -15,9 +15,11 @@ function _simpleHash(str) {
 }
 
 export const Handlers = {
-    init: (appState, appConfig,  
+    init: (appState, appConfig, purifier, fb) => {
+        state = appState;
         config = appConfig;
-        DOMPurify = purifi;
+        DOMPurify = purifier;
+        firebase = fb;
     },
 
     setUI: (uiModule) => {
