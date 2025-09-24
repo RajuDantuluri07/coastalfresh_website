@@ -330,27 +330,9 @@ export const Handlers = {
 
         // Product Popup buttons
         document.getElementById('ordersMainContent').addEventListener('click', e => {
-            const reorderBtn = e.target.closest('.order-card-btn.reorder');
-            if (reorderBtn) {
-                e.stopPropagation();
-                const orderId = reorderBtn.dataset.orderId;
-                state.db.collection('orders').doc(orderId).get().then(doc => {
-                    if (doc.exists) {
-                        Handlers.addMultipleToCart(doc.data().items);
-                    }
-                });
-            }
-
-            const supportBtn = e.target.closest('.order-card-btn.support');
-            if (supportBtn) {
-                e.stopPropagation();
-                const userOrderId = supportBtn.dataset.userOrderId;
-                Handlers.openWhatsApp('support', userOrderId);
-            }
-
             // NEW: Handle click on the entire order card to show details
             const orderCard = e.target.closest('.order-card');
-            if (orderCard && !e.target.closest('.order-card-btn')) {
+            if (orderCard) { // The entire card is now the "Track Order" button
                 const orderId = orderCard.dataset.orderId;
                 if (orderId) {
                     state.db.collection('orders').doc(orderId).get().then(doc => {

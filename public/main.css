@@ -2988,7 +2988,11 @@ body.popup-open .bottom-bar {
 .order-item-title { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .order-item-sub { font-size: 13px; color: var(--text-secondary); }
 
-.order-card-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.order-card-bottom {
+  display: flex;
+  justify-content: center; /* Center the status badge */
+  align-items: center; margin-top: 10px;
+}
 
 .order-status {
   display: inline-flex; align-items: center; gap: 6px;
@@ -3009,23 +3013,6 @@ body.popup-open .bottom-bar {
 
 /* Status: Cancelled */
 .order-status.cancelled { background-color: #FFEBEE; color: #D32F2F; }
-
-.order-card-actions { display: flex; gap: 6px; }
-.order-card-btn {
-  background: none; border: none;
-  color: var(--text-secondary);
-  font-size: 13px; font-weight: 500;
-  cursor: pointer;
-  padding: 6px 10px;
-  border-radius: 8px;
-  transition: background-color 0.2s;
-}
-.order-card-btn:hover { background-color: var(--bg-light); }
-.order-card-btn.reorder {
-  color: var(--primary-color);
-  font-weight: 600;
-  background-color: var(--primary-light);
-}
 
 /* --- NEW: Order Details Drawer --- */
 .drawer-overlay {
@@ -3067,6 +3054,13 @@ body.popup-open .bottom-bar {
 .drawer-item-name { font-weight: 500; }
 .drawer-item-qty { font-size: 13px; color: var(--text-secondary); }
 .drawer-item-price { font-weight: 600; }
+
+.drawer-address-content strong {
+  display: block; font-size: 15px; font-weight: 600; margin-bottom: 4px;
+}
+.drawer-address-content p {
+  font-size: 14px; color: var(--text-secondary); line-height: 1.5;
+}
 
 .drawer-total-section { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: 700; }
 

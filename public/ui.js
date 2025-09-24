@@ -1193,7 +1193,10 @@ export const UI = {
                             </div>
                             <div class="order-card-bottom">
                                 <div class="order-status ${displayStatus.class}"><i class="${displayStatus.icon}"></i> ${displayStatus.text}</div>
-                                <!-- The entire card is clickable to track, so a button is not needed here -->
+                                <div class="order-card-actions">
+                                    <button class="order-card-btn reorder" data-order-id="${doc.id}">Reorder</button>
+                                    <button class="order-card-btn support" data-user-order-id="${order.orderId}">Support</button>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1215,6 +1218,15 @@ export const UI = {
         document.getElementById('drawerOrderDate').textContent = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
         document.getElementById('drawerPaymentMethod').textContent = order.paymentMethod.toUpperCase();
         document.getElementById('drawerGrandTotal').textContent = `₹${order.status === 'Cancelled' ? 0 : order.total}`;
+
+        // NEW: Populate address details
+        if (order.address) {
+            document.getElementById('drawerAddressName').textContent = order.address.fullName;
+            document.getElementById('drawerAddressFull').textContent = `
+                ${order.address.house}, ${order.address.street}, 
+                ${order.address.city}, ${order.address.pincode}. 
+                Phone: ${order.address.mobile}`;
+        }
 
         document.getElementById('drawerItemsList').innerHTML = order.items.map(item => `
       <div class="drawer-item">
