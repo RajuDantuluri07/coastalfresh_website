@@ -1,6 +1,6 @@
 // This script should be loaded as a module in admin.html
-// <script src="/admin.js" type="module"></script>
-import { firebaseConfig } from './js/firebase-config.js';
+// <script src="/js/admin.js" type="module"></script>
+import { firebaseConfig } from './firebase-config.js';
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);

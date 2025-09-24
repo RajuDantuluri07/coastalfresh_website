@@ -3,9 +3,9 @@ User-agent: *
 Allow: /
 
 # Disallow admin pages
-Disallow: /admin.html
-Disallow: /admin.css
-Disallow: /admin.js
+Disallow: /admin.html$
+Disallow: /css/admin.css$
+Disallow: /js/admin.js$
 
 # Disallow internal search result pages specifically
 Disallow: /?q=
