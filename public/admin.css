@@ -532,7 +532,7 @@ body {
     color: var(--gray-600);
 }
 
-c.status-selector {
+.status-selector {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;

@@ -2669,9 +2669,6 @@ body.popup-open .bottom-bar {
 #addressPage {
   background-color: var(--bg-light);
 }
-#addressPage main {
-  padding: 0; /* Remove default padding to allow full-width map */
-}
 
 /* Empty state for address list */
 #addressListContainer .empty-state-address {

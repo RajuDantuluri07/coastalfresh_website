@@ -328,12 +328,6 @@ export const Handlers = {
             }
         });
 
-        // NEW: Embedded Map Handlers
-        document.getElementById('addressMapCurrentLocationBtn').addEventListener('click', Handlers.getCurrentLocationForMap);
-        document.getElementById('addressMapSearch').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') Handlers.searchLocationOnMap();
-        });
-
         // Product Popup buttons
         document.getElementById('ordersMainContent').addEventListener('click', e => {
             // NEW: Handle click on the entire order card to show details
