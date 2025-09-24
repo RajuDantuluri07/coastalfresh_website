@@ -588,12 +588,12 @@ z-index: 2;                 /* sits above input content */
 }
 
 .trust-item {
-  flex: 1;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px; /* Tighter gap between icon and text */
-  text-align: center;      
+  align-items: center; /* Vertically align icon and text */
+  gap: 8px; /* Space between icon and text block */
+  text-align: left; /* Align text to the left */
+  flex: 1 1 0px; /* Allow items to grow and shrink evenly */
+  min-width: 0; /* Prevent overflow on small screens */
   padding: 8px 4px;
   background: var(--bg-white);
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
@@ -613,11 +613,16 @@ z-index: 2;                 /* sits above input content */
   width: 32px; /* Smaller icon container */
   height: 32px;
   border-radius: 12px;
-  font-size: 14px; /* Smaller icon */
-  margin-bottom: 2px;
+  font-size: 14px;
   background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
   color: var(--bg-white);
-  border: none; /* Cleaner look */
+  border: none;
+  flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.trust-content {
+  display: flex;
+  flex-direction: column;
 }
 
 .trust-title {
@@ -632,6 +637,7 @@ z-index: 2;                 /* sits above input content */
   font-size: 11px;
   color: var(--text-secondary);
   line-height: 1.3;
+  /* FIX: Allow subtitle to wrap if needed */
   white-space: nowrap; /* FIX: Prevent subtitle from breaking */
 }
 
@@ -721,7 +727,12 @@ z-index: 2;                 /* sits above input content */
 }
 
 .flash-sale-products::-webkit-scrollbar { display: none; }
-.flash-sale-products .product { flex: 0 0 45%; max-width: 180px; }
+.flash-sale-products .product {
+  /* FIX: Use a fixed width for consistency instead of a percentage */
+  flex: 0 0 150px;
+  width: 150px;
+  max-width: 180px;
+}
 
 /* --- NEW: Flash Sale Product Card Overrides --- */
 .flash-sale-item .product-image {
@@ -855,7 +866,12 @@ z-index: 2;                 /* sits above input content */
   scrollbar-width: none; /* Firefox */
 }
 
-.featured-products .product { flex: 0 0 45%; max-width: 180px; }
+.featured-products .product {
+  /* FIX: Use a fixed width for consistency instead of a percentage */
+  flex: 0 0 150px;
+  width: 150px;
+  max-width: 180px;
+}
 
 /* Categories for Catalog */
 .categories {
@@ -993,15 +1009,17 @@ z-index: 2;                 /* sits above input content */
 
 .product-name {
   font-size: 16px; /* H2 Product Name */
-  font-weight: 500; /* UPDATED */
+  font-weight: 500;
   margin-bottom: 4px;
   color: var(--text-primary);
+  /* FIX: Ensure consistent height for product names */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  height: 2.4em; /* Approx 2 lines of text */
 }
 
 .product-weight {
@@ -1014,7 +1032,8 @@ z-index: 2;                 /* sits above input content */
 .product-footer {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end; /* Align price and button to the bottom */
+  /* FIX: Align items to the center for better vertical balance */
+  align-items: center;
   margin-top: 8px;
 }
 
