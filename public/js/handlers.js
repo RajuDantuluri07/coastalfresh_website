@@ -15,12 +15,13 @@ function _simpleHash(str) {
 }
 
 export const Handlers = {
-    init: (appState, appConfig, uiModule, purifier, fb) => {
-        state = appState;
+    init: (appState, appConfig,  
         config = appConfig;
+        DOMPurify = purifi;
+    },
+
+    setUI: (uiModule) => {
         UI = uiModule;
-        DOMPurify = purifier;
-        firebase = fb;
     },
 
     /**

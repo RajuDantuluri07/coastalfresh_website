@@ -130,12 +130,12 @@ try {
 async function init() {
   try {
       // Initialize modules and pass dependencies in the correct order
-      UI.init(state, config, window.DOMPurify, window.history); // Initialize UI first
-      Handlers.init(state, config, UI, window.DOMPurify, window.firebase); // Init Handlers with UI
-
-      // NEW: Set Handlers within UI after Handlers is initialized
-      // This ensures that all dependencies are correctly loaded
+      // 1. Initialize modules with their own dependencies first.
+      UI.init(state, config, window.DOMPurify, window.history);
+      Handlers.init(state, config, window.DOMPurify, window.firebase);
+      // 2. Now that both are initialized, inject the cross-dependencies.
       UI.setHandlers(Handlers);
+      Handlers.setUI(UI);
 
       // Firebase Auth Listener
       firebase.auth().onAuthStateChanged(Handlers.handleAuthStateChange);

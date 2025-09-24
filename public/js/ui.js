@@ -8,7 +8,7 @@ export const UI = {
         history = historyObj;
     },
 
-    // NEW: Setter function to receive Handlers after it's initialized
+    // Setter function to receive Handlers after it's initialized
     setHandlers: (appHandlers) => {
         Handlers = appHandlers;
     },
