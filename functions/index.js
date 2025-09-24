@@ -75,21 +75,23 @@ exports.onOrderStatusUpdate = functions.firestore
       const response = await admin.messaging().sendToDevice(tokens, payload);
 
       // Clean up invalid tokens
-      const tokensToRemove = [];
+      const promises = [];
       response.results.forEach((result, index) => {
         const error = result.error;
         if (error) {
           console.error("Failure sending notification to", tokens[index], error);
           // Check for common errors indicating an invalid or unregistered token
-          if (
+          const isInvalidToken =
             error.code === "messaging/invalid-registration-token" ||
-            error.code === "messaging/registration-token-not-registered"
-          ) {
-            tokensToRemove.push(tokensSnapshot.docs[index].ref.delete());
+            error.code === "messaging/registration-token-not-registered";
+
+          if (isInvalidToken) {
+            const tokenRef = tokensSnapshot.docs[index].ref;
+            promises.push(tokenRef.delete());
           }
         }
       });
 
       // Wait for all invalid token deletions to complete
-      return Promise.all(tokensToRemove);
+      return Promise.all(promises);
     });
