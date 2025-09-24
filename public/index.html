@@ -492,18 +492,36 @@
 
     <!-- NEW: Orders Page -->
     <div class="page" id="ordersPage">
-      <div class="orders-page-wrap">
-        <header class="orders-page-header">
+      <header class="header" id="ordersHeader">
+        <div class="header-top">
           <button class="back-btn" aria-label="Go Back">
             <i class="fas fa-arrow-left"></i>
           </button>
-          <div>
-            <h1>Your Orders</h1>
-            <div class="subtitle">Recent activity</div>
+          <h1 class="logo">My Orders</h1>
+          <div style="width: 36px;"></div> <!-- Spacer -->
+        </div>
+        <!-- NEW: Order Filters and Search -->
+        <div class="order-controls">
+          <div class="order-filter-tabs" id="orderFilterTabs" role="tablist" aria-label="Filter orders by status">
+            <!-- Tabs will be injected by JS -->
           </div>
-        </header>
-        <main class="orders-list-container" id="ordersMainContent"></main>
-      </div>
+          <div class="order-search-container">
+            <label for="orderSearch" class="visually-hidden">Search your orders by ID, item, or date</label>
+            <i class="fas fa-search search-icon"></i>
+            <input type="search" class="search" placeholder="Search orders..." id="orderSearch" aria-label="Search your orders">
+          </div>
+        </div>
+      </header>
+
+      <main class="section" id="ordersMainContent">
+        <!-- Order list will be injected here -->
+        <div class="empty-cart" id="ordersEmptyState" style="display: none; flex-grow: 1; min-height: 60vh;">
+          <i class="fas fa-receipt" style="font-size: 64px; margin-bottom: 24px; color: var(--border-color);"></i>
+          <h3>No Orders Yet</h3>
+          <p>Your past and current orders will appear here.</p>
+          <button class="empty-cart-btn" id="shopFromOrdersBtn">Start Shopping</button>
+        </div>
+      </main>
     </div>
 
     <!-- NEW: Address Page -->
@@ -614,7 +632,6 @@
 
     <!-- NEW: Updated Product Popup with new design -->
     <div class="product-popup" id="productPopup">
-    <div class="product-popup" id="productPopup" role="dialog" aria-modal="true" aria-labelledby="popupProductTitle" aria-hidden="true">
       <div class="popup-header">
         <button class="popup-back-btn popup-action-btn" aria-label="Close Product View"><i class="fas fa-arrow-left"></i></button>
         <div class="popup-header-actions">
