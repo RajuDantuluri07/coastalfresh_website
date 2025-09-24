@@ -347,6 +347,19 @@ export const Handlers = {
                 const userOrderId = supportBtn.dataset.userOrderId;
                 Handlers.openWhatsApp('support', userOrderId);
             }
+
+            // NEW: Handle click on the entire order card to show details
+            const orderCard = e.target.closest('.order-card');
+            if (orderCard && !e.target.closest('.reorder-btn, .support-btn')) {
+                const orderId = orderCard.dataset.orderId;
+                if (orderId) {
+                    state.db.collection('orders').doc(orderId).get().then(doc => {
+                        if (doc.exists) {
+                            UI.openOrderDetailsDrawer(doc.data());
+                        }
+                    });
+                }
+            }
         });
         document.querySelector('.popup-back-btn').addEventListener('click', UI.closePopup);
         document.querySelector('.popup-action-btn.favorite').addEventListener('click', Handlers.toggleFavorite);

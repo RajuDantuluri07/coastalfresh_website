@@ -1162,33 +1162,41 @@ export const UI = {
 
                     const displayStatus = statusMap[order.status] || { text: order.status, icon: 'fas fa-question-circle', class: 'pending' };
 
-                    let thumbsHTML = '';
+                    let itemSummaryHTML = '';
                     if (order.items && order.items.length > 0) {
-                        thumbsHTML = order.items.map(item => `
-                            <div class="thumb">
-                                <img src="${UI.getOptimizedImageUrl(item.image, 100, 100)}" alt="${item.name}" loading="lazy">
-                            </div>`).join('');
+                        const firstItemName = order.items[0].name;
+                        const remainingItems = order.items.length - 1;
+                        const imagesHTML = order.items.slice(0, 3).map(item =>
+                            `<img src="${UI.getOptimizedImageUrl(item.image, 96, 96)}" alt="${item.name}" loading="lazy">`
+                        ).join('');
+
+                        itemSummaryHTML = `
+                            <div class="order-item-summary">
+                                <div class="order-item-images">${imagesHTML}</div>
+                                <div class="order-item-text">
+                                    <div class="item-name">${firstItemName}</div>
+                                    ${remainingItems > 0 ? `<div class="more-items">+ ${remainingItems} more item(s)</div>` : ''}
+                                </div>
+                                <div class="order-total-small">₹${order.total}</div>
+                            </div>
+                        `;
                     }
 
                     return `
-                        <div class="order-card" data-order-id="${doc.id}">
-                            <div class="card-top">
-                                <div class="status-area">
-                                    <div class="status-row">
-                                        <div class="status-text">${displayStatus.text}</div>
-                                        <div class="status-dot ${displayStatus.class}"><i class="${displayStatus.icon}"></i></div>
-                                    </div>
-                                    <div class="placed">${formattedDate}</div>
+                        <div class="order-card" data-order-id="${doc.id}" data-order-status="${order.status}">
+                            <div class="order-header">
+                                <div>
+                                    <div class="order-id">Order #${order.orderId}</div>
+                                    <div class="order-date">${formattedDate}</div>
                                 </div>
-                                <div class="price">₹${order.total}</div>
                             </div>
-                            ${thumbsHTML ? `
-                            <div class="thumbs">
-                                <div class="thumbs-inner">${thumbsHTML}</div>
-                            </div>` : ''}
-                            <div class="card-actions">
-                                <button class="btn btn-outline reorder-btn" data-order-id="${doc.id}">Reorder</button>
-                                <button class="btn btn-primary support-btn" data-order-id="${doc.id}">Support</button>
+                            <div class="order-body">${itemSummaryHTML}</div>
+                            <div class="order-footer">
+                                <div class="order-status ${displayStatus.class}"><i class="${displayStatus.icon}"></i> ${displayStatus.text}</div>
+                                <div class="order-actions">
+                                    <button class="order-action-btn reorder-btn" data-order-id="${doc.id}">Reorder</button>
+                                    <button class="order-action-btn support-btn" data-user-order-id="${order.orderId}">Support</button>
+                                </div>
                             </div>
                         </div>
                     `;
