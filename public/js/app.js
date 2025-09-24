@@ -114,6 +114,14 @@ async function init() {
       firebase.auth().onAuthStateChanged(Handlers.handleAuthStateChange);
       state.db = firebase.firestore();
 
+      // NEW: Cache profile page DOM elements for performance
+      state.dom.profile.userName = document.getElementById('profileUserName');
+      state.dom.profile.userStatus = document.getElementById('profileUserStatus');
+      state.dom.profile.logoutBtn = document.getElementById('logoutBtn');
+      state.dom.profile.guestCta = document.getElementById('guestProfileCta');
+      state.dom.profile.referBtn = document.getElementById('referBtn');
+      state.dom.profile.avatar = document.querySelector('.profile-avatar-small');
+
       UI.showInitialSkeletons();
 
       try {
@@ -155,8 +163,8 @@ async function init() {
       UI.renderCategories();
       UI.renderCustomerReviews();
       Handlers.setupEvents();
-      UI.initCarousel('#slides');
-      UI.initCarousel('#communicationCarousel .slides');
+      UI.initCarousel('#home .carousel');
+      UI.initCarousel('#communicationCarousel');
 
       if ('serviceWorker' in navigator) {
           window.addEventListener('load', () => {

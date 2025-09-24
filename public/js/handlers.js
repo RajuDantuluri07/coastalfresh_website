@@ -121,13 +121,6 @@ export const Handlers = {
             if (!catalogSearchInput.value) UI.startTypewriter();
         });
 
-        // Keyboard accessibility for carousel slides and other role="button" elements
-        document.body.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                if (e.target.matches('.slide[data-action], [role="button"]')) e.target.click();
-            }
-        });
-
         // Tooltip handler
         document.body.addEventListener('click', e => {
             const infoIcon = e.target.closest('.summary-row .fa-info-circle');
@@ -188,7 +181,10 @@ export const Handlers = {
         });
 
         // Header buttons and View All
-        document.querySelector('#home .view-all').addEventListener('click', () => UI.showPage('catalog'));
+        document.querySelector('#home .view-all').addEventListener('click', (e) => {
+            e.preventDefault(); // Prevent default link behavior
+            UI.showPage('catalog');
+        });
 
         // Consolidate all back button listeners into one loop
         document.querySelectorAll('.page .back-btn').forEach(btn => {
@@ -616,7 +612,10 @@ export const Handlers = {
                     qtyEl.textContent = state.cart[id];
                 } else {
                     itemEl.classList.add('removing');
-                    itemEl.addEventListener('transitionend', () => UI.showCart(), { once: true });
+                    // Instead of re-rendering the whole cart, just remove the element
+                    itemEl.addEventListener('transitionend', () => {
+                        itemEl.remove();
+                    }, { once: true });
                 }
             }
             UI.updateCartSummary();
@@ -629,6 +628,7 @@ export const Handlers = {
 
     checkout: async () => {
         const cartFooter = document.getElementById('cartFooter');
+        const checkoutBtn = document.getElementById('cartPlaceOrderBtn');
         const rawItems = Object.keys(state.cart).map(id => {
             const product = state.products.find(p => p.id === parseInt(id));
             if (!product) {
@@ -687,6 +687,11 @@ export const Handlers = {
             return;
         }
 
+        // NEW: Disable the button to prevent double-clicks
+        if (checkoutBtn) {
+            checkoutBtn.disabled = true;
+            checkoutBtn.innerHTML = '<div class="loading"></div>';
+        }
         const orderId = `CF-${Date.now()}${Math.floor(Math.random() * 100)}`;
 
         const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
@@ -719,6 +724,9 @@ export const Handlers = {
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
+        // Track that the user has initiated the checkout process.
+        window.Analytics.trackBeginCheckout(orderId, total, items);
+
         state.db.collection('orders').add(orderData)
             .then(() => {
                 state.cart = {};
@@ -735,6 +743,14 @@ export const Handlers = {
                 window.Analytics.trackEvent('purchase_failure', {
                     error_message: error.message
                 });
+            })
+            .finally(() => {
+                // NEW: Re-enable the button after the process is complete
+                if (checkoutBtn) {
+                    checkoutBtn.disabled = false;
+                    // The text will be updated by updateCartSummary if the cart is still open
+                    checkoutBtn.textContent = 'Place Order';
+                }
             });
     },
 
@@ -992,6 +1008,11 @@ export const Handlers = {
 
         if (user) {
             window.Analytics.identifyUser(user);
+            // NEW: Update the user's last seen timestamp for active user tracking.
+            // Use { merge: true } to avoid overwriting other user data.
+            state.db.collection('users').doc(user.uid).set({
+                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
 
             if (typeof state.afterLoginAction === 'function') {
                 setTimeout(state.afterLoginAction, 100);

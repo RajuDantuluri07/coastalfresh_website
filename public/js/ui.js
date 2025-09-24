@@ -455,11 +455,30 @@ export const UI = {
         const product = state.products.find(p => p.id === productId);
         if (!product) return;
 
-        const newCardHTML = UI.createProductHTML(product);
         productCards.forEach(card => {
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = newCardHTML;
-            card.parentNode.replaceChild(tempDiv.firstElementChild, card);
+            const footer = card.querySelector('.product-footer');
+            if (!footer) return;
+
+            const isInCart = state.cart[product.id];
+
+            // Generate only the new footer HTML
+            const newFooterHTML = `
+                <div class="product-price">
+                  <span class="price">₹${product.finalPrice}</span>
+                  ${product.mrp > product.finalPrice ? `<span class="old-price">₹${product.mrp}</span>` : ''}
+                </div>
+                ${product.available ?
+                    (isInCart ?
+                        `<div class="cart-controls" data-id="${product.id}">
+                      <button class="qty-btn dec">-</button>
+                      <span class="qty">${isInCart}</span>
+                      <button class="qty-btn inc">+</button>
+                    </div>`
+                        : `<button class="add-to-cart-btn add-pill" data-id="${product.id}"><i class="fas fa-plus"></i> Add</button>`)
+                    : ''}
+            `;
+
+            footer.innerHTML = newFooterHTML;
         });
     },
 
@@ -552,7 +571,7 @@ export const UI = {
         <div class="cart-coupon-wrap">
           <div class="cart-coupon">
             <span style="margin-right:8px;opacity:0.7">🏷️</span>
-            <input id="couponInput" placeholder="Enter coupon code" aria-label="coupon code" autocapitalize="characters">
+            <input id="couponInput" placeholder="Enter coupon code" aria-label="coupon code">
           </div>
           <button class="cart-coupon-apply-btn" id="applyCouponBtn">Apply</button>
         </div>
@@ -611,10 +630,7 @@ export const UI = {
         const deliveryFee = (subtotal - couponDiscount) >= config.FREE_DELIVERY_THRESHOLD ? 0 : 100;
         const total = subtotal - couponDiscount + deliveryFee;
         const totalSavings = productSavings + couponDiscount + (deliveryFee === 0 ? 100 : 0);
-
         if (itemTotalEl) itemTotalEl.textContent = `₹${subtotal}`;
-        if (deliveryFeeEl) deliveryFeeEl.textContent = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
-        if (toPayEl) toPayEl.textContent = `₹${Math.round(total)}`;
         if (placeOrderBtn) placeOrderBtn.textContent = `Place Order – Pay ₹${Math.round(total)}`;
 
         if (discountRowEl && discountEl) {
@@ -752,138 +768,6 @@ export const UI = {
         } else {
             UI.stopTypewriter();
         }
-    },
-
-    showToast: (text) => {
-        const toast = document.getElementById('toast');
-        const toastText = document.getElementById('toastText');
-        if (toast && toastText) {
-            toastText.textContent = text;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2000);
-        }
-    },
-
-    initCarousel: (slidesSelector, isInfinite = true) => {
-        const slides = document.querySelector(slidesSelector);
-        if (!slides) return;
-
-        const carouselContainer = slides.closest('.carousel, .communication-carousel');
-        if (!carouselContainer) return;
-
-        const total = slides.children.length;
-        const dotsContainer = carouselContainer.querySelector('.carousel-dots');
-
-        if (total <= 1) {
-            if (dotsContainer) dotsContainer.style.display = 'none';
-            return;
-        }
-
-        if (isInfinite) {
-            const firstClone = slides.firstElementChild.cloneNode(true);
-            const lastClone = slides.lastElementChild.cloneNode(true);
-            slides.appendChild(firstClone);
-            slides.insertBefore(lastClone, slides.firstElementChild);
-        }
-
-        let currentIndex = 0;
-        let timer = null;
-        let isTransitioning = false;
-
-        if (dotsContainer) {
-            dotsContainer.innerHTML = Array.from({ length: total }, (_, i) =>
-                `<div class="dot ${i === 0 ? 'active' : ''}"></div>`
-            ).join('');
-        }
-        const dots = dotsContainer ? dotsContainer.children : [];
-
-        function goToSlide(index) {
-            if (isTransitioning) return;
-            isTransitioning = true;
-
-            currentIndex = index;
-            const offset = isInfinite ? 1 : 0;
-            slides.style.transition = 'transform 0.5s ease';
-            slides.style.transform = `translateX(${-(currentIndex + offset) * 100}%)`;
-
-            if (dotsContainer) {
-                let realIndex = index;
-                if (index === total) realIndex = 0;
-                if (index === -1) realIndex = total - 1;
-                Array.from(dots).forEach((dot, i) => dot.classList.toggle('active', i === realIndex));
-            }
-        }
-
-        slides.addEventListener('transitionend', () => {
-            isTransitioning = false;
-            if (isInfinite) {
-                if (currentIndex === -1) {
-                    slides.style.transition = 'none';
-                    currentIndex = total - 1;
-                    slides.style.transform = `translateX(${-(currentIndex + 1) * 100}%)`;
-                }
-                if (currentIndex === total) {
-                    slides.style.transition = 'none';
-                    currentIndex = 0;
-                    slides.style.transform = `translateX(-100%)`;
-                }
-            }
-        });
-
-        function next() {
-            if (isTransitioning) return;
-            goToSlide(currentIndex + 1);
-        }
-
-        function startTimer() {
-            stopTimer();
-            timer = setInterval(next, 5000);
-        }
-        function stopTimer() {
-            clearInterval(timer);
-        }
-
-        carouselContainer.addEventListener('mouseenter', stopTimer);
-        carouselContainer.addEventListener('mouseleave', startTimer);
-
-        let startX = 0;
-        let isDragging = false;
-
-        carouselContainer.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            isDragging = true;
-            stopTimer();
-        });
-
-        carouselContainer.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            const currentX = e.touches[0].clientX;
-            const diff = startX - currentX;
-            slides.style.transform = `translateX(calc(${-currentIndex * 100}% - ${diff}px))`;
-        });
-
-        carouselContainer.addEventListener('touchend', (e) => {
-            if (isDragging) {
-                isDragging = false;
-                const endX = e.changedTouches[0].clientX;
-                const diff = startX - endX;
-                slides.style.transition = 'transform 0.5s ease';
-                if (Math.abs(diff) > 50) {
-                    goToSlide(diff > 0 ? currentIndex + 1 : currentIndex - 1);
-                } else {
-                    goToSlide(currentIndex);
-                }
-                startTimer();
-            }
-        });
-
-        if (isInfinite && total > 1) slides.style.transform = 'translateX(-100%)';
-
-        document.addEventListener('visibilitychange', () => {
-            document.hidden ? stopTimer() : startTimer();
-        });
-
-        startTimer();
     },
 
     startTypewriter: () => {
@@ -1335,9 +1219,22 @@ export const UI = {
                     "priceValidUntil": new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0],
                     "itemCondition": "https://schema.org/NewCondition",
                     "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-                },
-                "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.2", "bestRating": "5", "ratingCount": "387" }
+                }
             };
+
+            // NEW: Dynamically add review and rating data if available
+            const relevantReviews = config.CUSTOMER_REVIEWS.filter(r => r.review.toLowerCase().includes(product.name.split(' ')[0].toLowerCase()));
+            if (relevantReviews.length > 0) {
+                schema.review = relevantReviews.map(r => ({
+                    "@type": "Review",
+                    "author": { "@type": "Person", "name": r.name },
+                    "reviewRating": { "@type": "Rating", "ratingValue": r.rating, "bestRating": "5" },
+                    "reviewBody": r.review
+                }));
+
+                const avgRating = relevantReviews.reduce((sum, r) => sum + r.rating, 0) / relevantReviews.length;
+                schema.aggregateRating = { "@type": "AggregateRating", "ratingValue": avgRating.toFixed(1), "reviewCount": relevantReviews.length };
+            }
 
             script.textContent = JSON.stringify(schema);
             schemaContainer.appendChild(script);

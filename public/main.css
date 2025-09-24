@@ -339,13 +339,15 @@ body {
   margin-bottom: 12px;
 }
 
-/* --- FIX: Left-align header titles with back button --- */
-#catalog .header-top,
-#faqPage .header-top,
-#profilePage .header-top,
-#cartModal .header-top,
-#ordersPage .header-top { /* ADDED */
+/* NEW: Generic class for modal/page headers with a back button */
+.modal-header-main {
   justify-content: flex-start;
+  gap: 8px; /* Add a small gap between back button and title */
+}
+
+/* --- FIX: Push cart button to the right on catalog page --- */
+#catalog .cart-btn {
+  margin-left: auto;
 }
 /* --- End of Fix --- */
 
@@ -382,12 +384,6 @@ h1.logo {
   align-items: center;
   gap: 10px;
 }
-
-/* --- FIX: Push cart button to the right on catalog page --- */
-#catalog .cart-btn {
-  margin-left: auto;
-}
-/* --- End of Fix --- */
 
 .logo-img {
   height: var(--logo-height);
@@ -512,12 +508,20 @@ z-index: 2;                 /* sits above input content */
 
 /* Carousel */
 .carousel {
-  margin: 0 20px 32px; /* Increased bottom margin */
+  margin: 0 20px 32px;
   overflow: hidden;
   border-radius: 16px;
   position: relative;
   height: var(--carousel-height);
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  /* NEW: Enable horizontal scrolling */
+  overflow-x: auto;
+  /* NEW: Hide scrollbar across browsers */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  /* NEW: Enable CSS Scroll Snap */
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
 }
 
 .slides {
@@ -529,6 +533,8 @@ z-index: 2;                 /* sits above input content */
 .slide {
   min-width: 100%;
   height: 100%;
+  /* NEW: Define snap points for each slide */
+  scroll-snap-align: start;
   position: relative;
 }
 

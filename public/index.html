@@ -160,9 +160,9 @@
       <!-- Carousel -->
       <div class="carousel">
         <div class="slides" id="slides">
-          <div class="slide" data-action="showPage" data-target="catalog" style="cursor: pointer;" role="button" tabindex="0" aria-label="View all our fresh seafood products"><img src="https://res.cloudinary.com/dpyniai9l/image/upload/f_auto,q_auto,c_fill,w_960,h_300/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" alt="Order fresh seafood online in Hyderabad from Coastal Fresh India"></div>
-          <div class="slide" data-action="showProductPopup" data-target="20" style="cursor: pointer;" role="button" tabindex="0" aria-label="View our Freshwater Prawns"><img src="https://res.cloudinary.com/dpyniai9l/image/upload/f_auto,q_auto,c_fill,w_960,h_300/v1756722096/Prawns_-_Banner_cyzx5z.png" alt="Freshwater Prawns for sale in Hyderabad"></div>
-          <div class="slide" data-action="showProductPopup" data-target="27" style="cursor: pointer;" role="button" tabindex="0" aria-label="View our authentic Andhra Prawns Pickle"><img src="https://res.cloudinary.com/dpyniai9l/image/upload/f_auto,q_auto,c_fill,w_960,h_300/v1756722094/Pickle_-_Banner_2_kkh04c.png" alt="Authentic Andhra Prawns Pickle for sale online"></div>
+          <div class="slide" data-action="showPage" data-target="catalog" style="cursor: pointer;" role="button" tabindex="0" aria-label="View all our fresh seafood products"><img src="https://res.cloudinary.com/dpyniai9l/image/upload/f_auto,q_auto,c_fill,w_960,h_300/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" alt="Order fresh seafood online in Hyderabad from Coastal Fresh India" loading="eager" width="960" height="300"></div>
+          <div class="slide" data-action="showProductPopup" data-target="20" style="cursor: pointer;" role="button" tabindex="0" aria-label="View our Freshwater Prawns"><img src="https://res.cloudinary.com/dpyniai9l/image/upload/f_auto,q_auto,c_fill,w_960,h_300/v1756722096/Prawns_-_Banner_cyzx5z.png" alt="Freshwater Prawns for sale in Hyderabad" loading="lazy" width="960" height="300"></div>
+          <div class="slide" data-action="showProductPopup" data-target="27" style="cursor: pointer;" role="button" tabindex="0" aria-label="View our authentic Andhra Prawns Pickle"><img src="https://res.cloudinary.com/dpyniai9l/image/upload/f_auto,q_auto,c_fill,w_960,h_300/v1756722094/Pickle_-_Banner_2_kkh04c.png" alt="Authentic Andhra Prawns Pickle for sale online" loading="lazy" width="960" height="300"></div>
         </div>
         <div class="carousel-dots" id="carouselDots"></div>
       </div>
@@ -188,12 +188,12 @@
       <div class="section-divider"></div>
 
       <main class="section featured-section">
-        <h2 class="section-title">
+        <h1 class="section-title">
           <div class="section-title-main">
             ✨ Featured Products
           </div>
           <span class="view-all" role="button">View All</span>
-        </h2>
+        </h1>
         <div class="featured-products" id="featuredProducts"></div>
       </main>
 
@@ -225,7 +225,7 @@
     <!-- Catalog Page -->
     <div class="page" id="catalog">
       <header class="header">
-        <div class="header-top">
+        <div class="header-top modal-header-main">
           <button class="back-btn" aria-label="Go Back">
             <i class="fas fa-arrow-left"></i>
           </button>
@@ -253,7 +253,7 @@
     <!-- FAQ Page -->
     <div class="page" id="faqPage">
       <header class="header">
-        <div class="header-top">
+        <div class="header-top modal-header-main">
           <button class="back-btn" aria-label="Go Back">
             <i class="fas fa-arrow-left"></i>
           </button>
@@ -586,11 +586,11 @@
 
         <!-- Login Form -->
         <form id="loginForm" class="login-form">
-          <div>
+          <div class="form-group">
             <label for="loginEmail">Email Address</label>
             <input id="loginEmail" class="input" type="email" placeholder="you@example.com" required>
           </div>
-          <div>
+          <div class="form-group">
             <label for="loginPassword">Password</label>
             <input id="loginPassword" class="input" type="password" required>
           </div>
@@ -603,11 +603,11 @@
 
         <!-- Signup Form -->
         <form id="signupForm" class="login-form active">
-          <div>
+          <div class="form-group">
             <label for="signupEmail">Email Address</label>
             <input id="signupEmail" class="input" type="email" placeholder="you@example.com" required>
           </div>
-          <div>
+          <div class="form-group">
             <label for="signupPassword">Create Password</label>
             <input id="signupPassword" class="input" type="password" placeholder="At least 8 characters" required>
           </div>

@@ -20,6 +20,8 @@ const pendingOrdersEl = document.getElementById('pending-orders');
 const totalOrdersEl = document.getElementById('total-orders');
 const totalCustomersEl = document.getElementById('total-customers');
 const completedOrdersEl = document.getElementById('completed-orders');
+const newSignupsTodayEl = document.getElementById('new-signups-today');
+const activeUsersTodayEl = document.getElementById('active-users-today');
 const ordersContainerEl = document.getElementById('orders-container');
 const statusFilterEl = document.getElementById('status-filter');
 
@@ -105,6 +107,8 @@ function initDashboard() {
     fetchAndRenderOrders();
     fetchAndRenderSummary();
     fetchCustomerCount();
+    fetchNewSignupsToday();
+    fetchActiveUsersToday();
 }
 
 /**
@@ -149,11 +153,21 @@ function renderFilteredOrders() {
  * Fetches completed orders for the day and calculates revenue.
  */
 function fetchAndRenderSummary() {
+    // NOTE: This query requires a composite index in Firestore.
+    // If "Today's Revenue" is not loading, please create the following index in your
+    // Firebase Console -> Firestore Database -> Indexes:
+    //
+    // Collection ID: orders
+    // Fields to index:
+    // 1. status (Ascending)
+    // 2. createdAt (Descending)
+    // Query scope: Collection
+
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Start of today
 
     db.collection('orders')
-      .where('createdAt', '>=', today)
+      .where('createdAt', '>=', today) // This query needs a composite index
       .where('status', '==', 'Completed')
       .onSnapshot(snapshot => {
         let totalRevenue = 0;
@@ -171,13 +185,71 @@ function fetchAndRenderSummary() {
  * Fetches the total number of customers (users).
  */
 function fetchCustomerCount() {
-    db.collection('users').onSnapshot(snapshot => {
-        totalCustomersEl.textContent = snapshot.size;
+    // This is a more efficient way to get the user count.
+    // It reads a single document containing the count instead of the entire 'users' collection.
+    //
+    // IMPORTANT: You must create this document in your Firestore database:
+    // 1. Go to your Firestore console.
+    // 2. Create a new collection called 'metadata'.
+    // 3. Inside 'metadata', create a new document with the ID 'userStats'.
+    // 4. In that document, add a 'count' field (Number type) and set its value to your current number of users.
+    db.collection('metadata').doc('userStats').onSnapshot(doc => {
+        if (doc.exists && doc.data().count !== undefined) {
+            totalCustomersEl.textContent = doc.data().count;
+        } else {
+            totalCustomersEl.textContent = '0';
+        }
     }, error => {
         console.error("Error fetching customer count: ", error);
         totalCustomersEl.textContent = 'N/A';
     });
 }
+
+/**
+ * Fetches the count of users who signed up today.
+ * NOTE: This query requires a single-field index on 'createdAt' in the 'users' collection.
+ */
+function fetchNewSignupsToday() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today
+
+    db.collection('users')
+      .where('createdAt', '>=', today)
+      .onSnapshot(snapshot => {
+        newSignupsTodayEl.textContent = snapshot.size;
+    }, error => {
+        console.error("Error fetching new signups: ", error);
+        newSignupsTodayEl.textContent = 'N/A';
+    });
+}
+
+/**
+ * Fetches the count of users who were active today.
+ * NOTE: This query requires a single-field index on 'lastSeen' in the 'users' collection.
+ */
+function fetchActiveUsersToday() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today
+
+    // To get Daily Active Users (DAU), we query for users whose 'lastSeen'
+    // timestamp is on or after the beginning of today.
+    db.collection('users')
+      .where('lastSeen', '>=', today)
+      .onSnapshot(snapshot => {
+        activeUsersTodayEl.textContent = snapshot.size;
+    }, error => {
+        console.error("Error fetching active users: ", error);
+        activeUsersTodayEl.textContent = 'N/A';
+        // Provide a helpful message if the index is missing.
+        if (error.code === 'failed-precondition') {
+            console.warn(
+                "Firestore index missing for 'active users' query. " +
+                "Please create a single-field index on the 'lastSeen' field in the 'users' collection."
+            );
+        }
+    });
+}
+
 
 /**
  * Creates the HTML for a single order card.
