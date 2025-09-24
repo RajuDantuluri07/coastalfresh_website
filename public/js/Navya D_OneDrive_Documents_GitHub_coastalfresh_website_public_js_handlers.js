@@ -372,8 +372,8 @@ export const Handlers = {
             const supportBtn = e.target.closest('.support-btn');
             if (supportBtn) {
                 e.stopPropagation();
-                const orderId = supportBtn.dataset.orderId;
-                Handlers.openWhatsApp('support', orderId);
+                const userOrderId = supportBtn.dataset.userOrderId;
+                Handlers.openWhatsApp('support', userOrderId);
             }
         });
         document.getElementById('logoutBtn').addEventListener('click', Handlers.handleLogout);
