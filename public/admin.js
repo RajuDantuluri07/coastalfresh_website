@@ -22,7 +22,8 @@ const segmented = document.querySelector('.segmented');
 // List of authorized admin User IDs.
 const ADMIN_UIDS = [
     "p4uS2H3JFXNvmhkQWftUH721a2n2",
-    "pel0OXjpAva5fe9367PgIHsRaak1"
+    "pel0OXjpAva5fe9367PgIHsRaak1",
+    "PASTE_THE_NEW_ADMIN_UID_HERE" // Add the new admin's UID here
 ];
 // Local cache & helpers
 let allOrders = [];
@@ -106,6 +107,30 @@ segmented.addEventListener('click', (ev) => {
     // render
     renderOrders(btn.dataset.filter);
 });
+
+function updateFilterCounts() {
+    const counts = {
+        'all': allOrders.length,
+        'Pending': 0,
+        'Accepted': 0,
+        'Out for Delivery': 0,
+        'Completed': 0,
+        'Cancelled': 0
+    };
+
+    for (const order of allOrders) {
+        if (order.status && counts.hasOwnProperty(order.status)) {
+            counts[order.status]++;
+        }
+    }
+
+    document.querySelectorAll('.segmented button[data-filter]').forEach(btn => {
+        const filter = btn.dataset.filter;
+        const countEl = btn.querySelector('.count');
+        const count = counts[filter];
+        if (countEl) countEl.textContent = count > 0 ? count : '';
+    });
+}
 // Render orders list (mobile-friendly, collapsible)
 function renderOrders(filter = 'all') {
     const filtered = filter === 'all' ? allOrders : allOrders.filter(o => o.status === filter);
@@ -332,13 +357,15 @@ async function fetchAggregateCounts() {
 // metadata user count listener
 function fetchCustomerCount() {
     db.collection('metadata').doc('userStats').onSnapshot(doc => {
+        // This function is intended to get the *total* number of users.
+        // We will use the 'Active Users' stat card for this purpose.
         if (doc.exists && doc.data().count !== undefined) {
-            document.getElementById('new-signups-today').textContent = doc.data().count; // reuse this stat slot
+            activeUsersTodayEl.textContent = doc.data().count;
         } else {
-            // fallback
+            // Fallback if the metadata document doesn't exist.
             db.collection('users').get().then(s => {
-                document.getElementById('new-signups-today').textContent = s.size;
-            }).catch(() => document.getElementById('new-signups-today').textContent = 'N/A');
+                activeUsersTodayEl.textContent = s.size;
+            }).catch(() => activeUsersTodayEl.textContent = 'N/A');
         }
     });
 }
