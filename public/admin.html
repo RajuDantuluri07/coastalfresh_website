@@ -38,7 +38,9 @@
     <div id="dashboard-view" class="app" style="display:none">
       <header class="app-header">
         <div class="brand">
-          <div class="logo">🐟</div>
+          <div class="logo" style="padding: 4px; background: #fff;">
+            <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png" alt="Coastal Fresh Logo" style="width: 100%; height: 100%; object-fit: contain;">
+          </div>
           <div>
             <div style="font-size:0.95rem">Coastal Fresh</div>
             <div style="font-size:.76rem;opacity:.9">Admin</div>
@@ -54,7 +56,7 @@
       </header>
 
       <!-- Stats scroller -->
-      <div class="stats-scroll" role="region" aria-label="Quick stats">
+      <div class="stats-grid" role="region" aria-label="Quick stats">
         <div class="stat">
           <small>Today's Revenue</small>
           <div class="val" id="daily-revenue">₹0.00</div>
@@ -83,12 +85,12 @@
 
       <!-- Filter / segment -->
       <div class="segmented" role="tablist" aria-label="Order status filter">
-        <button data-filter="all" class="active" aria-selected="true">All</button>
-        <button data-filter="Pending">Pending</button>
-        <button data-filter="Accepted">Accepted</button>
-        <button data-filter="Out for Delivery">Out for Delivery</button>
-        <button data-filter="Completed">Completed</button>
-        <button data-filter="Cancelled">Cancelled</button>
+        <button data-filter="all" class="active" aria-selected="true">All<span class="count"></span></button>
+        <button data-filter="Pending">Pending<span class="count"></span></button>
+        <button data-filter="Accepted">Accepted<span class="count"></span></button>
+        <button data-filter="Out for Delivery">Out for Delivery<span class="count"></span></button>
+        <button data-filter="Completed">Completed<span class="count"></span></button>
+        <button data-filter="Cancelled">Cancelled<span class="count"></span></button>
       </div>
 
       <!-- Orders -->
@@ -99,8 +101,6 @@
       <!-- Bottom nav -->
       <nav class="bottom-nav" role="navigation" aria-label="Main">
         <button data-page="dashboard" class="active"><i class="fa-solid fa-house"></i><span>Home</span></button>
-        <button data-page="orders"><i class="fa-solid fa-bag-shopping"></i><span>Orders</span></button>
-        <button data-page="customers"><i class="fa-solid fa-users"></i><span>Customers</span></button>
         <button id="refresh-btn"><i class="fa-solid fa-arrows-rotate"></i><span>Refresh</span></button>
       </nav>
     </div>

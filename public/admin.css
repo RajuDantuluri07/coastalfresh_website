@@ -132,16 +132,14 @@ header.app-header {
   font-weight: 700;
   font-size: .95rem;
 }
-/* Stats: horizontal scroller for mobile */
-.stats-scroll {
-  display: flex;
-  gap: .75rem;
+/* Stats: 2-column grid for mobile */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
   padding: 1rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 .stat {
-  min-width: 160px;
   background: var(--surface);
   border-radius: 12px;
   padding: .9rem;

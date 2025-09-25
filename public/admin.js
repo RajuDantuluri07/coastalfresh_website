@@ -86,6 +86,7 @@ function fetchAndListenOrders() {
         }
         allOrders = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         renderOrders(currentFilter());
+          updateFilterCounts();
     }, err => {
         console.error('Orders listener error', err);
         ordersContainerEl.innerHTML = '<div class="empty">Unable to load orders.</div>';
@@ -243,6 +244,17 @@ function confirmAndUpdate(orderId, newStatus) {
         try {
             await db.collection('orders').doc(orderId).update({ status: newStatus });
             toast('Status updated');
+
+            // If the new status is 'Completed', update the daily revenue summary.
+            if (newStatus === 'Completed') {
+                const today = new Date();
+                const dateString = today.toISOString().split('T')[0]; // YYYY-MM-DD
+                const summaryRef = db.collection('summaries').doc(dateString);
+                // Atomically increment revenue. Creates the doc if it doesn't exist.
+                await summaryRef.set({
+                    revenue: firebase.firestore.FieldValue.increment(order.total || 0)
+                }, { merge: true });
+            }
             // Firestore snapshot will update local allOrders
         } catch (err) {
             console.error('Update failed', err);
