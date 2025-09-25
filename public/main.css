@@ -1072,9 +1072,8 @@ z-index: 2;                 /* sits above input content */
   z-index: 2;
   /* NEW: From new design, adapted for quantity controls */
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 12px;
+  right: 8px; /* MOVED to the right */
+  bottom: 8px; /* MOVED to the bottom */
   border-radius: 22px;
 }
 
@@ -1111,9 +1110,8 @@ z-index: 2;                 /* sits above input content */
   border-radius: 16px;
   /* NEW: From new design */
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 12px;
+  right: 8px; /* MOVED to the right */
+  bottom: 8px; /* MOVED to the bottom */
   background: white;
   border-radius: 22px;
   padding: 6px 18px;
