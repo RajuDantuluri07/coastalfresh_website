@@ -249,12 +249,7 @@ export const UI = {
                 </div>
                 ${hasOffer ? `<div class="product-save">SAVE ₹${savings}</div>` : ''}
                 <div class="product-name">${sanitizedName}</div>
-                ${product.category === 'Prawns' ? 
-                    `<div style="margin-top:6px">
-                        <span class="product-badge" title="Fresh from the sea">Sea Water</span>
-                    </div>` : 
-                    `<div class="product-weight" style="margin-top:6px">${product.net} Net Weight</div>`
-                }
+                <div class="product-weight" style="margin-top:6px">${product.net} Net</div>
             </div>
           </div>
         `;
@@ -462,30 +457,30 @@ export const UI = {
         if (!product) return;
 
         productCards.forEach(card => {
-            const footer = card.querySelector('.product-footer');
-            if (!footer) return;
+            const imageContainer = card.querySelector('.product-image');
+            if (!imageContainer) return;
 
             const isInCart = state.cart[product.id];
 
-            // Generate only the new footer HTML
+            // Determine the action button: either "ADD" or the quantity controls
             const actionButtonHTML = product.available ?
                 (isInCart ?
                     `<div class="cart-controls" data-id="${product.id}">
                         <button class="qty-btn dec">-</button>
                         <span class="qty">${isInCart}</span>
                         <button class="qty-btn inc">+</button>
-                    </div>`
-                    : `<button class="add-to-cart-btn" data-id="${product.id}">ADD</button>`)
+                    </div>` :
+                    `<button class="add-to-cart-btn" data-id="${product.id}">ADD</button>`)
                 : '';
 
-            const newFooterHTML = `
-                <img src="${UI.getOptimizedImageUrl(product.image, 300, 300)}" alt="Fresh ${DOMPurify.sanitize(product.name)} delivery in Hyderabad by Coastal Fresh India" loading="lazy" width="300" height="300">
+            // Regenerate the inner HTML for the image container to swap the button
+            const newImageContainerHTML = `
                 ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
+                <img src="${UI.getOptimizedImageUrl(product.image, 300, 300)}" alt="Fresh ${DOMPurify.sanitize(product.name)} delivery in Hyderabad by Coastal Fresh India" loading="lazy" width="300" height="300">
                 ${actionButtonHTML}
             `;
-
-            const imageContainer = card.querySelector('.product-image');
-            if (imageContainer) imageContainer.innerHTML = newFooterHTML;
+            
+            imageContainer.innerHTML = newImageContainerHTML;
         });
     },
 

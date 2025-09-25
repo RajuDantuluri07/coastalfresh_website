@@ -1066,15 +1066,15 @@ z-index: 2;                 /* sits above input content */
   display: flex;
   align-items: center;
   gap: 8px;
-  background: var(--primary-color); /* Use main blue for consistency */
-  border-radius: 18px;
-  padding: 4px;
+  background: var(--primary-color);
+  border-radius: 22px;
+  padding: 6px;
   z-index: 2;
   /* NEW: From new design, adapted for quantity controls */
   position: absolute;
   right: 8px; /* MOVED to the right */
   bottom: 8px; /* MOVED to the bottom */
-  border-radius: 22px;
+  box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3); /* Stronger shadow */
 }
 
 .cart-controls .qty-btn {
@@ -1100,6 +1100,7 @@ z-index: 2;                 /* sits above input content */
 .cart-controls .qty {
   color: white;
   font-weight: 500;
+  font-size: 16px; /* Larger quantity number */
   min-width: 20px;
   text-align: center;
 }
@@ -1113,10 +1114,9 @@ z-index: 2;                 /* sits above input content */
   right: 8px; /* MOVED to the right */
   bottom: 8px; /* MOVED to the bottom */
   background: white;
-  border-radius: 22px;
-  padding: 6px 18px;
   border: 2px solid var(--accent-color);
   color: var(--accent-color);
+  border-radius: 22px;
   background: var(--primary-color); /* Use main blue for Add to Cart */
   color: white;
   border: none;
@@ -1124,14 +1124,15 @@ z-index: 2;                 /* sits above input content */
   align-items: center;
   justify-content: center;
   padding: 0 12px;
+  padding: 8px 20px; /* Increased padding */
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(1, 101, 154, 0.4); /* Shadow to match new color */
+  box-shadow: 0 4px 12px rgba(1, 101, 154, 0.4); /* Stronger shadow */
   transition: all 0.2s;
   z-index: 2;
-  font-weight: 700;
+  font-weight: 700; /* Bolder font */
   /* Resetting some old styles */
   height: auto;
-  font-size: 14px;
+  font-size: 15px; /* Larger font */
 }
 
 .add-to-cart-btn:active {
