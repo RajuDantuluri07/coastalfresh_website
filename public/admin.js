@@ -394,15 +394,15 @@ function fetchDailySummary() {
 async function fetchAggregateCounts() {
     try {
         [totalOrdersEl.textContent, pendingOrdersEl.textContent, completedOrdersEl.textContent] = ['...', '...', '...'];
-        const totalOrdersQuery = db.collection('orders').count().get();
-        const pendingOrdersQuery = db.collection('orders').where('status', 'in', ['Pending', 'Accepted']).count().get();
-        const completedOrdersQuery = db.collection('orders').where('status', '==', 'Completed').count().get();
+        const totalOrdersQuery = db.collection('orders').get();
+        const pendingOrdersQuery = db.collection('orders').where('status', 'in', ['Pending', 'Accepted']).get();
+        const completedOrdersQuery = db.collection('orders').where('status', '==', 'Completed').get();
 
         const [totalOrdersSnap, pendingOrdersSnap, completedOrdersSnap] = await Promise.all([totalOrdersQuery, pendingOrdersQuery, completedOrdersQuery]);
 
-        totalOrdersEl.textContent = totalOrdersSnap.data().count;
-        pendingOrdersEl.textContent = pendingOrdersSnap.data().count;
-        completedOrdersEl.textContent = completedOrdersSnap.data().count;
+        totalOrdersEl.textContent = totalOrdersSnap.size;
+        pendingOrdersEl.textContent = pendingOrdersSnap.size;
+        completedOrdersEl.textContent = completedOrdersSnap.size;
 
     } catch (err) {
         console.error('Order aggregate counts error', err);
@@ -416,21 +416,22 @@ async function fetchAggregateCounts() {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const newSignupsQuery = db.collection('users').where('createdAt', '>=', today).count().get();
-        const activeUsersQuery = db.collection('users').where('lastSeen', '>=', today).count().get();
+        const newSignupsQuery = db.collection('users').where('createdAt', '>=', today).get();
+        const activeUsersQuery = db.collection('users').where('lastSeen', '>=', today).get();
 
         const [newSignupsSnap, activeUsersSnap] = await Promise.all([newSignupsQuery, activeUsersQuery]);
 
-        newSignupsTodayEl.textContent = newSignupsSnap.data().count;
-        activeUsersTodayEl.textContent = activeUsersSnap.data().count;
+        newSignupsTodayEl.textContent = newSignupsSnap.size;
+        activeUsersTodayEl.textContent = activeUsersSnap.size;
     } catch (err) {
         console.error('User aggregate counts error:', err);
         [newSignupsTodayEl.textContent, activeUsersTodayEl.textContent] = ['N/A', 'N/A'];
         if (err.code === 'failed-precondition') {
             console.warn(
-                "A Firestore index is likely missing for user statistics (e.g., on 'createdAt' or 'lastSeen'). " +
-                "Please check the Firestore console for index creation links in the error logs. The rest of the dashboard will continue to function."
+                "A Firestore index is required for user statistics. The error message below contains a link to create it automatically. Click the link, create the index, and then refresh the admin panel after a few minutes."
             );
+            // Log the full error, which contains the creation link
+            console.error(err);
         }
     }
 }
