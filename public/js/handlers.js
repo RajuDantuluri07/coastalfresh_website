@@ -753,7 +753,7 @@ export const Handlers = {
                 Handlers.saveCart();
                 UI.updateCartUI();
                 UI.closeCart();
-                UI.showOrderSuccessModal(orderId, message);
+                UI.showOrderSuccessModal(orderId);
 
                 window.Analytics.trackPurchase(orderId, total, items);
             })
@@ -774,12 +774,9 @@ export const Handlers = {
             });
     },
 
-    handleTrackOrder: (e) => {
-        const message = e.currentTarget.dataset.message;
-        if (message) {
-            window.open(`https://wa.me/919985125678?text=${encodeURIComponent(message)}`, '_blank');
-        }
-        UI.closeOrderSuccessModal();
+    handleTrackOrder: () => {
+        UI.closeModal(document.getElementById('orderSuccessModal'));
+        UI.showPage('ordersPage');
     },
 
     handleCatalogSearch: (e) => {
