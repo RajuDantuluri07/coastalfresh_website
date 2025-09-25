@@ -1002,6 +1002,20 @@ z-index: 2;                 /* sits above input content */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* NEW: From new design - for consistency */
+  font-size: 15px;
+  color: #062028;
+  font-weight: 600;
+  margin-top: 6px;
+  margin-bottom: 0; /* Adjusted from new design */
+}
+
+/* NEW: Badge for product card from new design */
+.product-badge {
+  display: inline-flex;align-items:center;gap:6px;padding:6px 8px;border-radius:14px;font-size:12px;background:#e9fbfb;color:#0b4d4f;margin-top:8px;
+}
+.product-save {
+  color: #007a87; font-weight: 700; font-size: 13px; margin-top: 6px;
 }
 
 .product-weight {
@@ -1012,10 +1026,12 @@ z-index: 2;                 /* sits above input content */
 }
 
 .product-footer {
+  /* This will be replaced by absolute positioning for the add button */
   display: flex;
   justify-content: space-between;
   align-items: flex-end; /* Align price and button to the bottom */
-  margin-top: 8px;
+  /* margin-top: 8px; */ /* No longer needed */
+  padding: 8px 6px 28px 6px;
 }
 
 .product-price {
@@ -1023,6 +1039,9 @@ z-index: 2;                 /* sits above input content */
   flex-direction: column;
   align-items: flex-start;
   gap: 2px; /* Tighter gap */
+  /* NEW from design */
+  flex-direction: row;
+  align-items: baseline;
 }
 
 /* Default product pricing */
@@ -1030,6 +1049,7 @@ z-index: 2;                 /* sits above input content */
   font-size: 15px; /* More prominent */
   font-weight: 600; /* Bolder */
   color: var(--text-primary);
+  font-weight: 800; color: #042022; /* From new design */
 }
 
 /* Default old price */
@@ -1038,6 +1058,7 @@ z-index: 2;                 /* sits above input content */
   color: var(--text-secondary);
   font-weight: 500;
   text-decoration: line-through;
+  font-size: 13px; /* From new design */
 }
 
 /* Cart quantity controls on product card */
@@ -1049,6 +1070,12 @@ z-index: 2;                 /* sits above input content */
   border-radius: 18px;
   padding: 4px;
   z-index: 2;
+  /* NEW: From new design, adapted for quantity controls */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 12px;
+  border-radius: 22px;
 }
 
 .cart-controls .qty-btn {
@@ -1082,6 +1109,16 @@ z-index: 2;                 /* sits above input content */
   flex-shrink: 0;
   height: 30px;
   border-radius: 16px;
+  /* NEW: From new design */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 12px;
+  background: white;
+  border-radius: 22px;
+  padding: 6px 18px;
+  border: 2px solid var(--accent-color);
+  color: var(--accent-color);
   background: var(--primary-color); /* Use main blue for Add to Cart */
   color: white;
   border: none;
@@ -1093,8 +1130,10 @@ z-index: 2;                 /* sits above input content */
   box-shadow: 0 2px 8px rgba(1, 101, 154, 0.4); /* Shadow to match new color */
   transition: all 0.2s;
   z-index: 2;
-  font-size: var(--add-pill-font-size); /* UPDATED */
-  font-weight: 500; /* UPDATED */
+  font-weight: 700;
+  /* Resetting some old styles */
+  height: auto;
+  font-size: 14px;
 }
 
 .add-to-cart-btn:active {

@@ -218,35 +218,43 @@ export const UI = {
                 return ''; // Return an empty string to not break the .join('')
             }
 
-            const hasOffer = product.mrp > product.finalPrice;
+            const hasOffer = product.mrp && product.mrp > product.finalPrice;
+            const savings = hasOffer ? product.mrp - product.finalPrice : 0;
             const isInCart = state.cart[product.id];
             const optimizedImage = UI.getOptimizedImageUrl(product.image, 300, 300);
             const sanitizedName = DOMPurify.sanitize(product.name);
+
+            // Determine the action button: either "ADD" or the quantity controls
+            const actionButtonHTML = product.available ?
+                (isInCart ?
+                    `<div class="cart-controls" data-id="${product.id}">
+                        <button class="qty-btn dec">-</button>
+                        <span class="qty">${isInCart}</span>
+                        <button class="qty-btn inc">+</button>
+                    </div>`
+                    : `<button class="add-to-cart-btn" data-id="${product.id}">ADD</button>`)
+                : '';
+
             return `
           <div class="product" data-id="${product.id}">
             <div class="product-image">
-              ${hasOffer ? `<div class="offer-badge">${product.offer}% OFF</div>` : ''}
               ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
               <img src="${optimizedImage}" alt="Fresh ${sanitizedName} delivery in Hyderabad by Coastal Fresh India" loading="lazy" width="300" height="300">
+              ${actionButtonHTML}
             </div>
-            <div class="product-info">
-              <div class="product-name">${sanitizedName}</div>
-              <div class="product-weight">${product.net} Net Weight</div>
-              <div class="product-footer">
+            <div class="product-info" style="padding: 8px 6px 28px 6px;">
                 <div class="product-price">
-                  <span class="price">₹${product.finalPrice}</span>
-                  ${hasOffer ? `<span class="old-price">₹${product.mrp}</span>` : ''}
+                    <span class="price">₹${product.finalPrice}</span>
+                    ${hasOffer ? `<span class="old-price">₹${product.mrp}</span>` : ''}
                 </div>
-                ${product.available ?
-                    (isInCart ?
-                        `<div class="cart-controls" data-id="${product.id}">
-                      <button class="qty-btn dec">-</button>
-                      <span class="qty">${isInCart}</span>
-                      <button class="qty-btn inc">+</button>
-                    </div>`
-                        : `<button class="add-to-cart-btn add-pill" data-id="${product.id}"><i class="fas fa-plus"></i> Add</button>`)
-                    : ''}
-              </div>
+                ${hasOffer ? `<div class="product-save">SAVE ₹${savings}</div>` : ''}
+                <div class="product-name">${sanitizedName}</div>
+                ${product.category === 'Prawns' ? 
+                    `<div style="margin-top:6px">
+                        <span class="product-badge" title="Fresh from the sea">Sea Water</span>
+                    </div>` : 
+                    `<div class="product-weight" style="margin-top:6px">${product.net} Net Weight</div>`
+                }
             </div>
           </div>
         `;
@@ -460,23 +468,24 @@ export const UI = {
             const isInCart = state.cart[product.id];
 
             // Generate only the new footer HTML
-            const newFooterHTML = `
-                <div class="product-price">
-                  <span class="price">₹${product.finalPrice}</span>
-                  ${product.mrp > product.finalPrice ? `<span class="old-price">₹${product.mrp}</span>` : ''}
-                </div>
-                ${product.available ?
-                    (isInCart ?
-                        `<div class="cart-controls" data-id="${product.id}">
-                      <button class="qty-btn dec">-</button>
-                      <span class="qty">${isInCart}</span>
-                      <button class="qty-btn inc">+</button>
+            const actionButtonHTML = product.available ?
+                (isInCart ?
+                    `<div class="cart-controls" data-id="${product.id}">
+                        <button class="qty-btn dec">-</button>
+                        <span class="qty">${isInCart}</span>
+                        <button class="qty-btn inc">+</button>
                     </div>`
-                        : `<button class="add-to-cart-btn add-pill" data-id="${product.id}"><i class="fas fa-plus"></i> Add</button>`)
-                    : ''}
+                    : `<button class="add-to-cart-btn" data-id="${product.id}">ADD</button>`)
+                : '';
+
+            const newFooterHTML = `
+                <img src="${UI.getOptimizedImageUrl(product.image, 300, 300)}" alt="Fresh ${DOMPurify.sanitize(product.name)} delivery in Hyderabad by Coastal Fresh India" loading="lazy" width="300" height="300">
+                ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
+                ${actionButtonHTML}
             `;
 
-            footer.innerHTML = newFooterHTML;
+            const imageContainer = card.querySelector('.product-image');
+            if (imageContainer) imageContainer.innerHTML = newFooterHTML;
         });
     },
 
