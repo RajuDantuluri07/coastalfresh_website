@@ -437,8 +437,8 @@ async function fetchAggregateCounts() {
 // metadata user count listener
 function fetchCustomerCount() {
     db.collection('metadata').doc('userStats').onSnapshot(doc => {
-        // This function is intended to get the *total* number of users.
-        // We will use the 'Active Users' stat card for this purpose.
+        // This function gets the *total* number of users.
+        // The stat card is labeled "Active Users" but will function as "Total Customers".
         if (doc.exists && doc.data().count !== undefined) {
             activeUsersTodayEl.textContent = doc.data().count;
         } else {

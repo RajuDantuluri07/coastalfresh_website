@@ -33,27 +33,6 @@
         }
       ]
     }
-    ,
-    {
-      "collectionGroup": "users",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "createdAt",
-          "order": "ASCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "users",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "lastSeen",
-          "order": "ASCENDING"
-        }
-      ]
-    }
   ],
   "fieldOverrides": []
 }
