@@ -1,190 +1,290 @@
-// This script should be loaded as a module in admin.html
-// <script src="/admin.js" type="module"></script>
 import { firebaseConfig } from './js/firebase-config.js';
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
-
 // DOM Elements
 const loginView = document.getElementById('login-view');
 const dashboardView = document.getElementById('dashboard-view');
 const loginForm = document.getElementById('login-form');
 const loginError = document.getElementById('login-error');
-const adminEmailEl = document.getElementById('admin-email');
 const adminAvatarEl = document.getElementById('admin-avatar');
 const logoutBtn = document.getElementById('logout-btn');
 const dailyRevenueEl = document.getElementById('daily-revenue');
 const pendingOrdersEl = document.getElementById('pending-orders');
 const totalOrdersEl = document.getElementById('total-orders');
-const totalCustomersEl = document.getElementById('total-customers');
 const completedOrdersEl = document.getElementById('completed-orders');
 const newSignupsTodayEl = document.getElementById('new-signups-today');
 const activeUsersTodayEl = document.getElementById('active-users-today');
 const ordersContainerEl = document.getElementById('orders-container');
-const statusFilterEl = document.getElementById('status-filter');
-
-let allOrders = []; // Cache for all orders to allow client-side filtering
-
+const segmented = document.querySelector('.segmented');
 // List of authorized admin User IDs.
 const ADMIN_UIDS = [
     "p4uS2H3JFXNvmhkQWftUH721a2n2",
     "pel0OXjpAva5fe9367PgIHsRaak1"
 ];
-
-/**
- * Handles the authentication state change.
- * Shows the dashboard for an admin user, otherwise shows the login page.
- */
+// Local cache & helpers
+let allOrders = [];
+let unsubscribeOrders = null;
+let pendingUpdate = {}; // debounced updates
+// ---------- Auth state ----------
 auth.onAuthStateChanged(user => {
     if (user && ADMIN_UIDS.includes(user.uid)) {
-        // User is an admin
+        // show dashboard
         loginView.style.display = 'none';
         dashboardView.style.display = 'flex';
-        adminEmailEl.textContent = user.email;
-        adminAvatarEl.textContent = user.email ? user.email.charAt(0).toUpperCase() : 'A';
-        initDashboard();
+        adminAvatarEl.textContent = (user.email || 'A').charAt(0).toUpperCase();
+        startDashboard();
     } else {
-        // User is not an admin or not logged in
+        // show login
         loginView.style.display = 'flex';
         dashboardView.style.display = 'none';
         if (user) {
-            // If a non-admin user is logged in, show an error and sign them out.
             loginError.textContent = 'You do not have permission to access this page.';
             auth.signOut();
+        } else {
+            loginError.textContent = '';
         }
+        stopDashboard();
     }
 });
-
-/**
- * Handles the admin login form submission.
- */
+// ---------- Login ----------
 loginForm.addEventListener('submit', (e) => {
     e.preventDefault();
     loginError.textContent = '';
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    auth.signInWithEmailAndPassword(email, password)
-        .catch(error => {
-            console.error("Admin login failed:", error);
-            loginError.textContent = error.message;
-        });
+    const email = e.target.email.value.trim();
+    const password = e.target.password.value;
+    auth.signInWithEmailAndPassword(email, password).catch(err => {
+        console.error('Login failed', err);
+        loginError.textContent = err.message || 'Login failed';
+    });
 });
-
-/**
- * Handles the logout button click.
- */
-logoutBtn.addEventListener('click', () => {
-    auth.signOut();
+logoutBtn.addEventListener('click', () => auth.signOut());
+// ---------- Dashboard lifecycle ----------
+function startDashboard() {
+    fetchAndListenOrders();
+    fetchDailySummary();
+    fetchAggregateCounts();
+    fetchCustomerCount(); // metadata listener
+}
+function stopDashboard() {
+    if (unsubscribeOrders) unsubscribeOrders();
+    unsubscribeOrders = null;
+}
+// ---------- Orders (real-time) ----------
+function fetchAndListenOrders() {
+    // unsubscribe previous
+    if (unsubscribeOrders) unsubscribeOrders();
+    ordersContainerEl.innerHTML = '<div class="empty"><div class="spinner" aria-hidden="true"></div></div>';
+    unsubscribeOrders = db.collection('orders').orderBy('createdAt', 'desc')
+        .onSnapshot(snapshot => {
+        if (snapshot.empty) {
+            allOrders = [];
+            ordersContainerEl.innerHTML = '<div class="empty">No orders yet.</div>';
+            return;
+        }
+        allOrders = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderOrders(currentFilter());
+    }, err => {
+        console.error('Orders listener error', err);
+        ordersContainerEl.innerHTML = '<div class="empty">Unable to load orders.</div>';
+    });
+}
+// ---------- Render & UI Helpers ----------
+function currentFilter() {
+    const active = document.querySelector('.segmented button.active');
+    return active?.dataset?.filter || 'all';
+}
+// segmented filter taps
+segmented.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('button[data-filter]');
+    if (!btn) return;
+    segmented.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    // render
+    renderOrders(btn.dataset.filter);
 });
-
-/**
- * Event delegation for status changes.
- */
-ordersContainerEl.addEventListener('change', (e) => {
-    if (e.target.matches('.status-select')) {
-        const orderId = e.target.dataset.orderId;
-        const newStatus = e.target.value;
-        if (orderId && newStatus) {
-            updateOrderStatus(orderId, newStatus);
+// Render orders list (mobile-friendly, collapsible)
+function renderOrders(filter = 'all') {
+    const filtered = filter === 'all' ? allOrders : allOrders.filter(o => o.status === filter);
+    if (!filtered.length) {
+        ordersContainerEl.innerHTML = '<div class="empty">No orders match this filter.</div>';
+        return;
+    }
+    ordersContainerEl.innerHTML = filtered.map(orderCardHTML).join('');
+}
+// Build order card HTML
+function orderCardHTML(order) {
+    const created = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleString('en-IN') : 'N/A';
+    const total = (order.total || 0).toFixed(2);
+    const status = order.status || 'Pending';
+    const terminal = status === 'Completed' || status === 'Cancelled';
+    // safe-guard items
+    const items = (order.items || []).map(i => `<li><span>${escapeHtml(i.name)}</span><strong>×${i.qty}</strong></li>`).join('');
+    const address = order.address || {};
+    return `
+        <div class="order-card" data-id="${order.id}" data-status="${status}">
+          <div class="order-head" role="button" tabindex="0" aria-expanded="false" data-action="toggle">
+            <div class="order-meta">
+              <div class="id">#${escapeHtml(order.orderId || order.id)}</div>
+              <div class="time">${escapeHtml(created)}</div>
+              <div style="font-size:.85rem;color:var(--muted)"> ${escapeHtml(address.fullName || '—')} • ${escapeHtml(address.mobile || '—')}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem">
+              <div class="order-total">₹${total}</div>
+              <div class="status-badge" style="font-size:.78rem;color:var(--muted)">${escapeHtml(status)}</div>
+            </div>
+          </div>
+          <div class="order-body" aria-hidden="true">
+            <div class="order-section">
+              <strong style="font-size:.92rem">Delivery</strong>
+              <div style="font-size:.9rem;color:var(--muted)">${escapeHtml(address.house || '')} ${escapeHtml(address.street || '')} ${escapeHtml(address.pincode || '')}</div>
+            </div>
+            <div class="order-section">
+              <strong style="font-size:.92rem">Items</strong>
+              <ul class="order-items">${items || '<li style="opacity:.7">No items</li>'}</ul>
+            </div>
+            <div class="order-section">
+              <strong style="font-size:.92rem">Manage</strong>
+              <div class="management">
+                ${ terminal ? `<div style="font-weight:700;color:var(--muted)">Status final</div>` :
+                  `<select class="select" data-order-id="${order.id}" aria-label="Change status">
+                     ${statusOptionsFor(status).map(s => `<option value="${s}" ${s===status?'selected':''}>${s}</option>`).join('')}
+                   </select>
+                   <button class="btn-small btn-primary" data-confirm="${order.id}" aria-label="Confirm status change">Update</button>`
+                }
+                <button class="btn-small" style="background:#f3f4f6;border:1px solid #e6e9ee" data-copy="${order.id}" aria-label="Copy phone">Copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+}
+// status transitions allowed
+function statusOptionsFor(status) {
+    const validTransitions = {
+        'Pending': ['Pending', 'Accepted', 'Cancelled'],
+        'Accepted': ['Accepted', 'Out for Delivery', 'Cancelled'],
+        'Out for Delivery': ['Out for Delivery', 'Completed', 'Cancelled'],
+    };
+    return validTransitions[status] || [status];
+}
+// delegated click handler for toggles + buttons
+document.addEventListener('click', (ev) => {
+    const toggle = ev.target.closest('[data-action="toggle"]');
+    if (toggle) {
+        const card = toggle.closest('.order-card');
+        toggleOrderBody(card);
+    }
+    const updateBtn = ev.target.closest('[data-confirm]');
+    if (updateBtn) {
+        const orderId = updateBtn.dataset.confirm;
+        const select = document.querySelector(`select[data-order-id="${orderId}"]`);
+        if (!select) return;
+        const newStatus = select.value;
+        confirmAndUpdate(orderId, newStatus);
+    }
+    const copyBtn = ev.target.closest('[data-copy]');
+    if (copyBtn) {
+        const id = copyBtn.dataset.copy;
+        const order = allOrders.find(o => o.id === id);
+        if (order && order.address && order.address.mobile) {
+            navigator.clipboard?.writeText(order.address.mobile).then(() => {
+                toast('Phone copied to clipboard');
+            });
         }
     }
 });
-
-/**
- * Filter orders when the status dropdown changes.
- */
-statusFilterEl.addEventListener('change', () => {
-    renderFilteredOrders();
-});
-
-/**
- * Initializes the dashboard by fetching and rendering data.
- */
-function initDashboard() {
-    fetchAndRenderOrders();
-    fetchAndRenderDailySummary();
-    fetchAndRenderAggregateStats();
-}
-
-/**
- * Fetches orders from Firestore and renders them in real-time.
- */
-function fetchAndRenderOrders() {
-    db.collection('orders').orderBy('createdAt', 'desc').onSnapshot(snapshot => {
-        ordersContainerEl.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-        if (snapshot.empty) {
-            ordersContainerEl.innerHTML = '<p style="text-align: center; padding: 2rem;">No orders found.</p>';
-            allOrders = [];
-            return;
+// keyboard toggle (accessibility)
+document.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') {
+        const el = document.activeElement;
+        if (el && el.matches('[data-action="toggle"]')) {
+            const card = el.closest('.order-card');
+            toggleOrderBody(card);
         }
-
-        allOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderFilteredOrders();
-
-    }, error => {
-        console.error("Error fetching orders: ", error);
-        ordersContainerEl.innerHTML = '<p class="error-message" style="text-align: center; padding: 2rem; color: var(--danger);">Could not load orders.</p>';
-    });
+    }
+});
+function toggleOrderBody(card) {
+    if (!card) return;
+    const body = card.querySelector('.order-body');
+    const head = card.querySelector('[data-action="toggle"]');
+    const isOpen = body.classList.contains('open');
+    if (isOpen) {
+        body.classList.remove('open');
+        head.setAttribute('aria-expanded', 'false');
+        body.setAttribute('aria-hidden', 'true');
+    } else {
+        body.classList.add('open');
+        head.setAttribute('aria-expanded', 'true');
+        body.setAttribute('aria-hidden', 'false');
+    }
 }
-
-/**
- * Renders orders based on the current filter.
- */
-function renderFilteredOrders() {
-    const filter = statusFilterEl.value;
-    const filteredOrders = filter === 'all' ? allOrders : allOrders.filter(order => order.status === filter);
-    const orderHTML = filteredOrders.map(createOrderCardHTML).join('');
-    ordersContainerEl.innerHTML = orderHTML || '<p style="text-align: center; padding: 2rem;">No orders match this filter.</p>';
+// ---------- Confirm + optimistic update with debounce revert ----------
+function confirmAndUpdate(orderId, newStatus) {
+    const order = allOrders.find(o => o.id === orderId);
+    if (!order) return toast('Order not found');
+    if (order.status === newStatus) return toast('Status unchanged');
+    // confirm via native confirm (mobile-friendly) — you can replace with custom modal
+    const ok = confirm(`Change order #${order.orderId || orderId} status to "${newStatus}"?`);
+    if (!ok) return;
+    // optimistic update in UI
+    const card = document.querySelector(`.order-card[data-id="${orderId}"]`);
+    const statusBadge = card?.querySelector('.status-badge');
+    const prevStatus = order.status;
+    if (statusBadge) statusBadge.textContent = newStatus;
+    // disable controls briefly
+    const select = document.querySelector(`select[data-order-id="${orderId}"]`);
+    if (select) select.disabled = true;
+    // debounce writes (prevent double taps)
+    if (pendingUpdate[orderId]) clearTimeout(pendingUpdate[orderId]);
+    pendingUpdate[orderId] = setTimeout(async () => {
+        try {
+            await db.collection('orders').doc(orderId).update({ status: newStatus });
+            toast('Status updated');
+            // Firestore snapshot will update local allOrders
+        } catch (err) {
+            console.error('Update failed', err);
+            // revert UI
+            if (statusBadge) statusBadge.textContent = prevStatus;
+            if (select) {
+                select.value = prevStatus;
+                select.disabled = false;
+            }
+            toast('Failed to update — try again');
+        } finally {
+            delete pendingUpdate[orderId];
+        }
+    }, 350); // short debounce
 }
-
-/**
- * Fetches real-time summary data for the current day, like revenue.
- * This is optimized to read from a pre-aggregated document.
- */
-function fetchAndRenderDailySummary() {
+// ---------- Fetch summaries & counts ----------
+function fetchDailySummary() {
     const today = new Date();
     const dateString = today.toISOString().split('T')[0]; // YYYY-MM-DD
-    const dailySummaryRef = db.collection('summaries').doc(dateString);
-
-    dailySummaryRef.onSnapshot(doc => {
+    db.collection('summaries').doc(dateString).onSnapshot(doc => {
         if (doc.exists) {
-            const data = doc.data();
-            dailyRevenueEl.textContent = `₹${(data.revenue || 0).toFixed(2)}`;
+            dailyRevenueEl.textContent = `₹${(doc.data().revenue || 0).toFixed(2)}`;
         } else {
-            // If the document doesn't exist, it means no revenue yet for today.
             dailyRevenueEl.textContent = `₹0.00`;
         }
-    }, error => {
-        console.error("Error fetching daily summary: ", error);
-        dailyRevenueEl.textContent = 'Error';
+    }, err => {
+        console.error('Daily summary error', err);
+        dailyRevenueEl.textContent = '—';
     });
 }
-
-/**
- * Fetches aggregate counts for orders and users efficiently using count().
- * This runs once on load and is not real-time to save on reads.
- * For real-time, you could wrap this in an onSnapshot on a metadata doc.
- */
-async function fetchAndRenderAggregateStats() {
+async function fetchAggregateCounts() {
     try {
-        // Set loading state
-        [totalOrdersEl, pendingOrdersEl, completedOrdersEl, newSignupsTodayEl, activeUsersTodayEl].forEach(el => el.textContent = '...');
-
+        [totalOrdersEl.textContent, pendingOrdersEl.textContent, completedOrdersEl.textContent] = ['...', '...', '...'];
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-
         // Order Counts
         const totalOrdersQuery = db.collection('orders').count().get();
         const pendingOrdersQuery = db.collection('orders').where('status', 'in', ['Pending', 'Accepted']).count().get();
         const completedOrdersQuery = db.collection('orders').where('status', '==', 'Completed').count().get();
-
         // User Counts
         const newSignupsQuery = db.collection('users').where('createdAt', '>=', today).count().get();
         const activeUsersQuery = db.collection('users').where('lastSeen', '>=', today).count().get();
-
         // Fetch all counts in parallel
         const [
             totalOrdersSnap,
@@ -194,154 +294,63 @@ async function fetchAndRenderAggregateStats() {
             activeUsersSnap
         ] = await Promise.all([
             totalOrdersQuery,
-            pendingOrdersQuery,
-            completedOrdersQuery,
-            newSignupsQuery,
-            activeUsersQuery
+            pendingOrdersQuery, completedOrdersQuery,
+            newSignupsQuery, activeUsersQuery
         ]);
-
         // Update UI with the counts
         totalOrdersEl.textContent = totalOrdersSnap.data().count;
         pendingOrdersEl.textContent = pendingOrdersSnap.data().count;
         completedOrdersEl.textContent = completedOrdersSnap.data().count;
         newSignupsTodayEl.textContent = newSignupsSnap.data().count;
         activeUsersTodayEl.textContent = activeUsersSnap.data().count;
-
-    } catch (error) {
-        console.error("Error fetching aggregate stats:", error);
-        // Set error state
-        [totalOrdersEl, pendingOrdersEl, completedOrdersEl, newSignupsTodayEl, activeUsersTodayEl].forEach(el => el.textContent = 'N/A');
-
-        // Helpful console warnings for missing indexes
-        if (error.code === 'failed-precondition') {
-            console.warn(
-                "A Firestore index is likely missing for one of the aggregate stat queries. " +
-                "Please check the Firestore console for index creation links in the error logs."
-            );
-        }
+    } catch (err) {
+        console.error('Aggregate counts error', err);
+        [totalOrdersEl.textContent, pendingOrdersEl.textContent, completedOrdersEl.textContent] = ['N/A', 'N/A', 'N/A'];
     }
 }
-
-/**
- * Fetches the total number of customers (users).
- */
+// metadata user count listener
 function fetchCustomerCount() {
-    // This is a more efficient way to get the user count.
-    // It reads a single document containing the count instead of the entire 'users' collection.
-    //
-    // IMPORTANT: You must create this document in your Firestore database:
-    // 1. Go to your Firestore console.
-    // 2. Create a new collection called 'metadata'.
-    // 3. Inside 'metadata', create a new document with the ID 'userStats'.
-    // 4. In that document, add a 'count' field (Number type) and set its value to your current number of users.
-    db.collection('metadata').doc('userStats').onSnapshot((doc) => {
+    db.collection('metadata').doc('userStats').onSnapshot(doc => {
         if (doc.exists && doc.data().count !== undefined) {
-            totalCustomersEl.textContent = doc.data().count;
+            document.getElementById('new-signups-today').textContent = doc.data().count; // reuse this stat slot
         } else {
-            // Fallback: If userStats doesn't exist, count the users directly.
-            // This is less efficient but provides a good fallback.
-            console.warn("metadata/userStats document not found. Falling back to counting users collection. This is less efficient.");
-            db.collection('users').get().then(snapshot => {
-                totalCustomersEl.textContent = snapshot.size;
-            }).catch(err => {
-                console.error("Error counting users collection:", err);
-                totalCustomersEl.textContent = 'N/A';
-            });
+            // fallback
+            db.collection('users').get().then(s => {
+                document.getElementById('new-signups-today').textContent = s.size;
+            }).catch(() => document.getElementById('new-signups-today').textContent = 'N/A');
         }
-    }, error => {
-        console.error("Error fetching customer count: ", error);
-        totalCustomersEl.textContent = 'N/A';
     });
 }
-
-/**
- * Creates the HTML for a single order card.
- * @param {object} order - The order data.
- * @returns {string} The HTML string for the order card.
- */
-function createOrderCardHTML(order) {
-    const orderDate = order.createdAt?.toDate().toLocaleString('en-IN') || 'N/A';
-    const statusBadgeClass = order.status.replace(/\s+/g, '-');
-    const isTerminalState = order.status === 'Completed' || order.status === 'Cancelled';
-
-    // Define the possible next states for each current state.
-    const validTransitions = {
-        'Pending': ['Pending', 'Accepted', 'Cancelled'],
-        'Accepted': ['Accepted', 'Out for Delivery', 'Cancelled'],
-        'Out for Delivery': ['Out for Delivery', 'Completed', 'Cancelled'],
-    };
-
-    // Determine which options to show in the dropdown.
-    const availableOptions = validTransitions[order.status] || [];
-
-    // Generate the HTML for the order management section.
-    let managementHTML;
-    if (isTerminalState) {
-        // If the order is completed or cancelled, disable the dropdown.
-        managementHTML = `
-            <div class="status-selector-disabled">
-                <span>Status is final</span>
-            </div>
-        `;
-    } else {
-        // Otherwise, show a dropdown with only the valid next states.
-        managementHTML = `
-            <select class="status-select" data-order-id="${order.id}">
-                ${availableOptions.map(status => `<option value="${status}" ${order.status === status ? 'selected' : ''}>${status}</option>`).join('')}
-            </select>
-        `;
-    }
-
-    return `
-        <div class="order-card" data-id="${order.id}" data-status="${order.status}">
-            <div class="order-header">
-                <span class="order-id">#${order.orderId}</span>
-                <span class="status-badge ${statusBadgeClass}">${order.status}</span>
-                <span class="order-total">₹${order.total.toFixed(2)}</span>
-            </div>
-            <div class="order-body">
-                <div class="order-section">
-                    <h4>Customer Details</h4>
-                    <div class="customer-info">
-                        <p><strong>Name:</strong> ${order.address.fullName}</p>
-                        <p><strong>Phone:</strong> ${order.address.mobile}</p>
-                        <p><strong>Address:</strong> ${order.address.house}, ${order.address.street}, ${order.address.pincode}</p>
-                        <p class="order-date"><strong>Ordered:</strong> ${orderDate}</p>
-                    </div>
-                </div>
-                <div class="order-section">
-                    <h4>Order Items</h4>
-                    <ul class="order-items">
-                        ${order.items.map(item => `
-                            <li>
-                                <span class="item-name">${item.name}</span>
-                                <span class="item-qty">×${item.qty}</span>
-                            </li>
-                        `).join('')}
-                    </ul>
-                </div>
-                <div class="order-section">
-                    <h4>Order Management</h4>
-                    ${managementHTML}
-                </div>
-            </div>
-        </div>
-    `;
+// refresh button in bottom nav
+document.getElementById('refresh-btn').addEventListener('click', () => {
+    toast('Refreshing...');
+    fetchAndListenOrders();
+    fetchAggregateCounts();
+    fetchDailySummary();
+});
+// small toast implement
+function toast(msg) {
+    // tiny accessible toast using alert role
+    const el = document.createElement('div');
+    el.setAttribute('role', 'status');
+    el.style.position = 'fixed';
+    el.style.left = '50%';
+    el.style.bottom = '80px';
+    el.style.transform = 'translateX(-50%)';
+    el.style.background = 'rgba(15,23,42,0.95)';
+    el.style.color = 'white';
+    el.style.padding = '.6rem 1rem';
+    el.style.borderRadius = '999px';
+    el.style.zIndex = 9999;
+    el.style.fontWeight = 700;
+    el.style.boxShadow = '0 6px 20px rgba(2,6,23,0.2)';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.style.opacity = '0.0', 1600);
+    setTimeout(() => el.remove(), 2000);
 }
-
-/**
- * Updates the status of an order in Firestore.
- * @param {string} orderId - The document ID of the order.
- * @param {string} newStatus - The new status to set.
- */
-function updateOrderStatus(orderId, newStatus) {
-    db.collection('orders').doc(orderId).update({ status: newStatus })
-        .then(() => {
-            console.log(`Order ${orderId} updated to ${newStatus}`);
-            // The onSnapshot listener will automatically re-render the card with the new status.
-        })
-        .catch(error => {
-            console.error("Error updating order status: ", error);
-            alert('Failed to update status. See console for details.');
-        });
+// simple html escape to avoid XSS in injected HTML (we're still injecting trusted data but be safe)
+function escapeHtml(str) {
+    if (str === undefined || str === null) return '';
+    return String(str).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }

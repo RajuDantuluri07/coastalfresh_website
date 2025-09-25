@@ -1,179 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coastal Fresh - Admin Panel</title>
-    <link rel="icon" href="/favicon.ico" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" href="/admin.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <title>Coastal Fresh — Admin (Mobile)</title>
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="/admin.css">
 </head>
 <body>
-    <div id="admin-app">
-        <!-- Login View -->
-        <div id="login-view" class="view">
-            <div class="login-container">
-                <h1>Admin Panel</h1>
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" required>
-                    </div>
-                    <button type="submit">Login</button>
-                    <p id="login-error" class="error-message"></p>
-                </form>
-            </div>
-        </div>
-
-        <!-- NEW Dashboard View -->
-        <div id="dashboard-view" class="dashboard" style="display: none;">
-            <!-- Sidebar -->
-            <aside class="sidebar" id="sidebar">
-                <div class="sidebar-header">
-                    <h2>🐟 Coastal Fresh</h2>
-                    <p>Admin Dashboard</p>
-                </div>
-                <nav class="sidebar-nav">
-                    <a href="#" class="nav-item active" data-page="dashboard">
-                        <i class="fas fa-tachometer-alt"></i>
-                        Dashboard
-                    </a>
-                </nav>
-            </aside>
-
-            <!-- Main Content -->
-            <main class="main-content" id="main-content">
-                <header class="main-header">
-                    <div class="header-left">
-                        <h1 class="page-title">Dashboard</h1>
-                    </div>
-                    <div class="header-right">
-                        <div class="admin-info">
-                            <div class="admin-avatar" id="admin-avatar">A</div>
-                            <div class="admin-details">
-                                <span id="admin-email">admin@coastalfresh.com</span>
-                            </div>
-                        </div>
-                        <button class="logout-btn" id="logout-btn">
-                            <i class="fas fa-sign-out-alt"></i>
-                            Logout
-                        </button>
-                    </div>
-                </header>
-
-                <div class="content-area">
-                    <!-- Stats Grid -->
-                    <div class="stats-grid">
-                        <div class="stat-card revenue">
-                            <div class="stat-header">
-                                <span class="stat-title">Today's Revenue</span>
-                                <div class="stat-icon">
-                                    <i class="fas fa-rupee-sign"></i>
-                                </div>
-                            </div>
-                            <div class="stat-value" id="daily-revenue">₹0.00</div>
-                        </div>
-
-                        <div class="stat-card orders">
-                            <div class="stat-header">
-                                <span class="stat-title">Total Orders</span>
-                                <div class="stat-icon">
-                                    <i class="fas fa-shopping-bag"></i>
-                                </div>
-                            </div>
-                            <div class="stat-value" id="total-orders">0</div>
-                        </div>
-
-                        <div class="stat-card pending">
-                            <div class="stat-header">
-                                <span class="stat-title">Pending Orders</span>
-                                <div class="stat-icon">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                            </div>
-                            <div class="stat-value" id="pending-orders">0</div>
-                        </div>
-
-                        <!-- NEW: New Sign-ups Today Card -->
-                        <div class="stat-card new-signups">
-                            <div class="stat-header">
-                                <span class="stat-title">New Sign-ups Today</span>
-                                <div class="stat-icon">
-                                    <i class="fas fa-user-plus"></i>
-                                </div>
-                            </div>
-                            <div class="stat-value" id="new-signups-today">0</div>
-                        </div>
-
-                        <!-- NEW: Daily Active Users Card -->
-                        <div class="stat-card active-users">
-                            <div class="stat-header">
-                                <span class="stat-title">Daily Active Users</span>
-                                <div class="stat-icon">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                            </div>
-                            <div class="stat-value" id="active-users-today">0</div>
-                        </div>
-
-                        <div class="stat-card customers">
-                            <div class="stat-header">
-                                <span class="stat-title">Total Customers</span>
-                                <div class="stat-icon">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                            </div>
-                            <div class="stat-value" id="total-customers">0</div>
-                        </div>
-
-                        <div class="stat-card completed">
-                            <div class="stat-header">
-                                <span class="stat-title">Completed Orders</span>
-                                <div class="stat-icon">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                            </div>
-                            <div class="stat-value" id="completed-orders">0</div>
-                        </div>
-                    </div>
-
-                    <!-- Orders Section -->
-                    <div class="orders-section">
-                        <div class="section-header">
-                            <h2 class="section-title">Recent Orders</h2>
-                            <div class="filters">
-                                <select class="filter-select" id="status-filter">
-                                    <option value="all">All Status</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="Accepted">Accepted</option>
-                                    <option value="Out for Delivery">Out for Delivery</option>
-                                    <option value="Completed">Completed</option>
-                                    <option value="Cancelled">Cancelled</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="orders-container" id="orders-container">
-                            <!-- Orders will be injected here by JS -->
-                        </div>
-                    </div>
-                </div>
-            </main>
-        </div>
+  <div id="admin-app">
+    <!-- Login -->
+    <div id="login-view" class="center" aria-hidden="false">
+      <div class="card" role="dialog" aria-labelledby="login-title">
+        <h1 id="login-title">Coastal Fresh — Admin</h1>
+        <form id="login-form" autocomplete="on">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required inputmode="email" />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" required />
+          </div>
+          <div class="field">
+            <button class="btn" type="submit" aria-label="Login"> <i class="fa-solid fa-right-to-bracket"></i> Login</button>
+          </div>
+          <p id="login-error" class="empty" role="status" aria-live="polite"></p>
+        </form>
+      </div>
     </div>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <!-- Dashboard -->
+    <div id="dashboard-view" class="app" style="display:none">
+      <header class="app-header">
+        <div class="brand">
+          <div class="logo">🐟</div>
+          <div>
+            <div style="font-size:0.95rem">Coastal Fresh</div>
+            <div style="font-size:.76rem;opacity:.9">Admin</div>
+          </div>
+        </div>
 
-    <!-- Admin Script -->
-    <script src="/admin.js" type="module"></script>
+        <div class="header-actions">
+          <div class="avatar" id="admin-avatar">A</div>
+          <button id="logout-btn" class="btn-small btn-danger" style="padding:.35rem .6rem" aria-label="Logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Stats scroller -->
+      <div class="stats-scroll" role="region" aria-label="Quick stats">
+        <div class="stat">
+          <small>Today's Revenue</small>
+          <div class="val" id="daily-revenue">₹0.00</div>
+        </div>
+        <div class="stat">
+          <small>Total Orders</small>
+          <div class="val" id="total-orders">0</div>
+        </div>
+        <div class="stat">
+          <small>Pending</small>
+          <div class="val" id="pending-orders">0</div>
+        </div>
+        <div class="stat">
+          <small>Completed</small>
+          <div class="val" id="completed-orders">0</div>
+        </div>
+        <div class="stat">
+          <small>New Signups</small>
+          <div class="val" id="new-signups-today">0</div>
+        </div>
+        <div class="stat">
+          <small>Active Users</small>
+          <div class="val" id="active-users-today">0</div>
+        </div>
+      </div>
+
+      <!-- Filter / segment -->
+      <div class="segmented" role="tablist" aria-label="Order status filter">
+        <button data-filter="all" class="active" aria-selected="true">All</button>
+        <button data-filter="Pending">Pending</button>
+        <button data-filter="Accepted">Accepted</button>
+        <button data-filter="Out for Delivery">Out for Delivery</button>
+        <button data-filter="Completed">Completed</button>
+        <button data-filter="Cancelled">Cancelled</button>
+      </div>
+
+      <!-- Orders -->
+      <div class="orders" id="orders-container" aria-live="polite">
+        <div class="empty"><div class="spinner" aria-hidden="true"></div></div>
+      </div>
+
+      <!-- Bottom nav -->
+      <nav class="bottom-nav" role="navigation" aria-label="Main">
+        <button data-page="dashboard" class="active"><i class="fa-solid fa-house"></i><span>Home</span></button>
+        <button data-page="orders"><i class="fa-solid fa-bag-shopping"></i><span>Orders</span></button>
+        <button data-page="customers"><i class="fa-solid fa-users"></i><span>Customers</span></button>
+        <button id="refresh-btn"><i class="fa-solid fa-arrows-rotate"></i><span>Refresh</span></button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <!-- Admin Script -->
+  <script src="/admin.js" type="module"></script>
 </body>
 </html>
