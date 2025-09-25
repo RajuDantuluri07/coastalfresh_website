@@ -98,9 +98,16 @@
         <div class="empty"><div class="spinner" aria-hidden="true"></div></div>
       </div>
 
+      <!-- NEW: Customers View (initially hidden) -->
+      <div id="customers-view" style="display:none; padding: 1rem; flex-direction: column; gap: 1rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; padding: 0 .5rem;">Manage Customers</h2>
+        <div id="customers-container" class="orders" style="padding: 0;"></div>
+      </div>
+
       <!-- Bottom nav -->
       <nav class="bottom-nav" role="navigation" aria-label="Main">
         <button data-page="dashboard" class="active"><i class="fa-solid fa-house"></i><span>Home</span></button>
+        <button data-page="customers"><i class="fa-solid fa-users"></i><span>Customers</span></button>
         <button id="refresh-btn"><i class="fa-solid fa-arrows-rotate"></i><span>Refresh</span></button>
       </nav>
     </div>

@@ -19,11 +19,11 @@ const newSignupsTodayEl = document.getElementById('new-signups-today');
 const activeUsersTodayEl = document.getElementById('active-users-today');
 const ordersContainerEl = document.getElementById('orders-container');
 const segmented = document.querySelector('.segmented');
+const bottomNav = document.querySelector('.bottom-nav');
 // List of authorized admin User IDs.
 const ADMIN_UIDS = [
     "p4uS2H3JFXNvmhkQWftUH721a2n2",
-    "pel0OXjpAva5fe9367PgIHsRaak1",
-    "PASTE_THE_NEW_ADMIN_UID_HERE" // Add the new admin's UID here
+    "pel0OXjpAva5fe9367PgIHsRaak1" // Add the new admin's UID here
 ];
 // Local cache & helpers
 let allOrders = [];
@@ -221,6 +221,16 @@ document.addEventListener('click', (ev) => {
             });
         }
     }
+
+    // NEW: Handle role update button
+    const roleUpdateBtn = ev.target.closest('[data-update-role]');
+    if (roleUpdateBtn) {
+        const userId = roleUpdateBtn.dataset.updateRole;
+        const input = document.querySelector(`input[data-role-input="${userId}"]`);
+        if (!input) return;
+        const newRole = input.value.trim();
+        updateUserRole(userId, newRole);
+    }
 });
 // keyboard toggle (accessibility)
 document.addEventListener('keydown', (ev) => {
@@ -294,6 +304,76 @@ function confirmAndUpdate(orderId, newStatus) {
             delete pendingUpdate[orderId];
         }
     }, 350); // short debounce
+}
+
+// ---------- NEW: Customer/User Management ----------
+
+bottomNav.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('button[data-page]');
+    if (!btn || btn.id === 'refresh-btn') return;
+
+    bottomNav.querySelectorAll('button[data-page]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const page = btn.dataset.page;
+    showMainView(page);
+});
+
+function showMainView(page) {
+    const dashboardContent = [document.querySelector('.stats-scroll'), document.querySelector('.segmented'), document.getElementById('orders-container')];
+    const customersView = document.getElementById('customers-view');
+
+    if (page === 'customers') {
+        dashboardContent.forEach(el => el.style.display = 'none');
+        customersView.style.display = 'flex';
+        renderCustomersPage();
+    } else { // Default to dashboard
+        dashboardContent.forEach(el => el.style.display = 'flex');
+        customersView.style.display = 'none';
+    }
+}
+
+async function renderCustomersPage() {
+    const container = document.getElementById('customers-container');
+    container.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+
+    try {
+        const usersSnapshot = await db.collection('users').get();
+        if (usersSnapshot.empty) {
+            container.innerHTML = '<div class="empty">No customers found.</div>';
+            return;
+        }
+
+        const customersHTML = usersSnapshot.docs.map(doc => {
+            const user = doc.data();
+            const role = user.role || 'customer'; // Default role
+            return `
+                <div class="customer-card">
+                    <div class="customer-info">
+                        <div class="email">${escapeHtml(user.email)}</div>
+                        <div class="uid">UID: ${doc.id}</div>
+                        <div class="role">Current Role: <strong>${escapeHtml(role)}</strong></div>
+                    </div>
+                    <div class="management">
+                        <input type="text" class="select" style="flex: 1;" value="${escapeHtml(role)}" data-role-input="${doc.id}" placeholder="Enter new role">
+                        <button class="btn-small btn-primary" data-update-role="${doc.id}">Update Role</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        container.innerHTML = customersHTML;
+
+    } catch (err) {
+        console.error("Error fetching customers:", err);
+        container.innerHTML = '<div class="empty">Could not load customers.</div>';
+    }
+}
+
+async function updateUserRole(userId, newRole) {
+    if (!userId || !newRole) return toast('User ID and role are required.');
+    await db.collection('users').doc(userId).update({ role: newRole });
+    toast(`User role updated to "${newRole}"`);
+    renderCustomersPage(); // Re-render to show the change
 }
 // ---------- Fetch summaries & counts ----------
 function fetchDailySummary() {

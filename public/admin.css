@@ -277,6 +277,34 @@ header.app-header {
   border-radius: 8px;
   font-weight: 600;
 }
+
+/* NEW: Customer Card Styles */
+.customer-card {
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: .9rem;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+.customer-info {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+.customer-info .email { font-weight: 700; }
+.customer-info .uid { font-size: .8rem; color: var(--muted); font-family: monospace; }
+.customer-info .role { font-size: .85rem; font-weight: 600; color: var(--primary); }
+
+/* Management area */
+.management {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  margin-top: .5rem;
+  flex-wrap: wrap;
+}
 /* Management area */
 .management {
   display: flex;
