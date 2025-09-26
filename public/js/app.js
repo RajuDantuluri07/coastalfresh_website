@@ -207,21 +207,21 @@ async function init() {
           window.addEventListener('load', () => {
               navigator.serviceWorker.register('/service-worker.js').then(registration => {
                   console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                  
-                  // NEW: On first launch of the installed app, directly trigger the notification permission logic.
+
+                  // FIX: Only attempt to get a notification token on the first launch of the installed PWA.
+                  // This prevents an unhandled promise rejection on every page load.
                   const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
                   const canRequestPermission = 'Notification' in window && Notification.permission === 'default';
 
                   if (isStandalone && canRequestPermission) {
-                    try {
-                      const notificationPrompted = localStorage.getItem('notificationPrompted');
-                      if (!notificationPrompted) {
-                        console.log('First launch in PWA mode, requesting notification permission.');
-                        localStorage.setItem('notificationPrompted', 'true');
-                        // Directly initialize messaging, which will now handle the prompt.
-                        Handlers.initFirebaseMessaging(registration);
-                      }
-                    } catch (e) { console.error('Could not access localStorage for notification prompt.', e); }
+                      try {
+                          const notificationPrompted = localStorage.getItem('notificationPrompted');
+                          if (!notificationPrompted) {
+                              console.log('First launch in PWA mode, requesting notification permission.');
+                              localStorage.setItem('notificationPrompted', 'true');
+                              Handlers.initFirebaseMessaging(registration);
+                          }
+                      } catch (e) { console.error('Could not access localStorage for notification prompt.', e); }
                   }
               }, err => {
                   console.log('ServiceWorker registration failed: ', err);
