@@ -1567,7 +1567,8 @@ export const UI = {
                 avatar.innerHTML = `<i class="fas fa-user"></i>`;
             }
 
-            const referralLinkEl = document.getElementById('referralLink');
+            // NEW: Update both the old and new referral code elements
+            const referralLinkEl = document.getElementById('refCode');
             if (referralLinkEl) {
                 referralLinkEl.textContent = `https://coastalfresh.in?ref=${_simpleHash(state.currentUser.uid)}`;
             }

@@ -254,6 +254,25 @@ export const Handlers = {
             }
         });
 
+        // --- NEW: Event listeners specific to the enhanced Refer a Friend page ---
+        const referPage = document.getElementById('referPage');
+        if (referPage) {
+            referPage.addEventListener('click', (e) => {
+                if (e.target.id === 'copyReferralBtn') {
+                    Handlers.copyReferralLink();
+                }
+                if (e.target.id === 'shareOnWhatsAppBtn') {
+                    Handlers.openWhatsApp('refer');
+                }
+                if (e.target.id === 'shareOnOtherAppsBtn') {
+                    Handlers.shareProduct(); // Re-use the generic share handler
+                }
+                if (e.target.id === 'showTermsBtn') {
+                    UI.openModal(document.getElementById('referralTermsModal'), document.getElementById('closeTermsBtn'));
+                }
+            });
+        }
+
         // Typewriter focus/blur handlers
         const catalogSearchInput = document.getElementById('catalogSearch');
         catalogSearchInput.addEventListener('focus', UI.stopTypewriter);

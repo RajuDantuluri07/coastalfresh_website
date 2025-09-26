@@ -383,38 +383,66 @@
       </main>
     </div>
 
-    <!-- NEW: Refer a Friend Page -->
+    <!-- UPDATED: Refer a Friend Page -->
     <div class="page" id="referPage">
       <header class="header">
         <div class="header-top">
           <button class="back-btn" aria-label="Go Back">
             <i class="fas fa-arrow-left"></i>
           </button>
-          <h1 class="logo">Refer & Earn</h1>
+          <h1 class="logo">Refer a friend & earn upto ₹100</h1>
           <div></div>
         </div>
       </header>
 
-      <main class="section" style="padding-top: 20px;">
-        <div class="refer-content">
-          <div class="refer-icon">
-            <i class="fas fa-gift"></i>
-          </div>
-          <h2 class="refer-title">Share the Freshness, Get Rewards!</h2>
-          <p class="refer-subtitle">
-            Give your friends <strong>10% OFF</strong> their first order, and you'll get a <strong>10% discount coupon</strong> for your next purchase once they order. It's a win-win!
-          </p>
-          <div class="refer-code-box">
-            <p>Your unique referral link:</p>
-            <div class="refer-link-container">
-              <span id="referralLink" class="refer-link">https://coastalfresh.in?ref=GUEST123</span>
-              <button id="copyReferralBtn" class="copy-link-btn" aria-label="Copy referral link">
-                <i class="far fa-copy"></i>
-              </button>
+      <main class="section" style="padding-top: 16px; background-color: #fff;">
+        <!-- Steps -->
+        <section class="steps">
+          <h3>More friends. More earnings!</h3>
+          <div class="step-box">
+            <div class="step">
+              <img src="https://img.icons8.com/ios-filled/50/FF69B4/share.png" alt="invite" />
+              Invite your friends using your referral code
+            </div>
+            <div class="step">
+              <img src="https://img.icons8.com/ios-filled/50/1E90FF/shopping-cart.png" alt="order" />
+              Your friend places his 1st order
+            </div>
+            <div class="step">
+              <img src="https://img.icons8.com/ios-filled/50/FFD700/coins.png" alt="cashback" />
+              You get ₹200 cashback once their 1st order
             </div>
           </div>
-          <div class="share-buttons">
-            <button id="shareOnWhatsAppBtn" class="share-btn whatsapp"><i class="fab fa-whatsapp"></i> Share on WhatsApp</button>
+        </section>
+
+        <!-- Referral Code -->
+        <div class="referral">
+          Referral Code: <span id="refCode">GUEST123</span>
+        </div>
+
+        <!-- Share Buttons -->
+        <div class="buttons">
+          <button class="btn btn-share" id="shareOnOtherAppsBtn">Share</button>
+          <button class="btn btn-whatsapp" id="shareOnWhatsAppBtn">Whatsapp</button>
+        </div>
+
+        <!-- Earnings Summary -->
+        <div class="summary">
+          Gautam had earned ₹12000 from 20 friends. <br />
+          Get your friends and earn more.
+        </div>
+
+        <!-- Influencer -->
+        <div class="influencer">
+          Are you an influencer? <br />
+          <a href="mailto:raju@winx.com">Email us at raju@winx.com</a>
+        </div>
+
+        <!-- Terms Modal (re-using existing modal) -->
+        <div class="refer-steps-section" style="margin-top: 20px; border-style: solid;">
+          <div class="refer-steps-header">
+            <h3>How It Works & Terms</h3>
+            <button class="refer-terms-btn" id="showTermsBtn">View</button>
           </div>
         </div>
       </main>
