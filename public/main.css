@@ -549,12 +549,13 @@ z-index: 2;                 /* sits above input content */
 
 .carousel-dots {
   position: absolute;
-  bottom: 12px;
+  bottom: -20px; /* Position it below the carousel container */
   left: 0;
   right: 0;
   display: flex;
   justify-content: center;
   gap: 6px;
+  z-index: 5; /* Ensure it's on top of other elements */
 }
 
 .dot {
