@@ -1910,17 +1910,13 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
   margin-bottom: 24px; /* REFINED: Reduced margin */
   }
   
-  .empty-cart-btn {
+  /* REFINED: Style the empty cart button to match the checkout button */
+  .cart-cta.empty-cart-btn {
     background: var(--primary-color);
     color: white;
-    border: none;
-    border-radius: 10px; /* REFINED: Smaller radius */
-    padding: 12px 20px; /* REFINED: Reduced padding for a more compact button */
-    font-size: 15px; /* UPDATED */
-    font-weight: 500; /* Medium */
-    cursor: pointer;
-    width: 80%;
-    box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3);
+    font-weight: 700; /* Bolder to match checkout */
+    box-shadow: 0 6px 20px rgba(1, 101, 154, 0.2);
+    /* Other styles are inherited from .cart-cta */
   }
 
 /* FAQ */

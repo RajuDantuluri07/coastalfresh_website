@@ -519,21 +519,25 @@ export const UI = {
         const cartItemsEl = document.getElementById('cartItems');
         const emptyCartEl = document.getElementById('emptyCart');
         const cartFooterEl = document.getElementById('cartFooter');
+        const emptyCartFooterEl = document.getElementById('emptyCartFooter'); // NEW
         const cartSummaryContainerEl = document.getElementById('cartSummaryContainer');
 
         if (items.length === 0) {
             emptyCartEl.style.display = 'flex';
             cartItemsEl.innerHTML = '';
             if (cartFooterEl) cartFooterEl.style.display = 'none';
+            if (emptyCartFooterEl) emptyCartFooterEl.style.display = 'flex'; // NEW
             if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'none';
-            // FIX: Attach event listener for the empty cart button only when the cart is shown.
-            const emptyCartBtn = emptyCartEl.querySelector('.empty-cart-btn');
+            
+            // NEW: Attach event listener to the new sticky button
+            const emptyCartBtn = document.getElementById('emptyCartBrowseBtn');
             if (emptyCartBtn) {
                 emptyCartBtn.addEventListener('click', () => { UI.showPage('catalog'); UI.closeCart(); });
             }
         } else {
             emptyCartEl.style.display = 'none';
             if (cartFooterEl) cartFooterEl.style.display = 'flex';
+            if (emptyCartFooterEl) emptyCartFooterEl.style.display = 'none'; // NEW
             if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'block';
 
             cartItemsEl.innerHTML = items.map(item => {
