@@ -8,3 +8,8 @@ export const firebaseConfig = {
     appId: "1:782759620106:web:960ec7c125faa30675f9f3",
     measurementId: "G-GSHMPRYPW1"
 };
+
+// Make the config available to the service worker when imported via importScripts
+if (typeof self !== 'undefined') {
+    self.firebaseConfig = firebaseConfig;
+}
