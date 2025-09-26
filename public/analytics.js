@@ -113,7 +113,10 @@
      */
     identifyUser: function(user) {
       if (typeof gtag === 'function' && user && user.uid) {
-        gtag('config', 'G-GSHMPRYPW1', { 'user_id': user.uid });
+        // FIX: Use 'set' to add user_id to the existing configuration without sending a new page_view.
+        // This prevents interference with standard reporting.
+        gtag('set', 'user_properties', { 'user_id': user.uid });
+
         console.log('GA4 user identified with ID:', user.uid);
       }
       if (window.hj && user && user.uid) {
