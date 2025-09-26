@@ -237,6 +237,11 @@ export const Handlers = {
                     });
                 }
             }
+
+            // NEW: Handle click on the "Explore Today's Fresh Catch" button on the About Us page
+            if (target.id === 'aboutPageCtaBtn') {
+                UI.showPage('catalog');
+            }
         });
 
         // Typewriter focus/blur handlers

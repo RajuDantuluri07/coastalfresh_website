@@ -510,12 +510,12 @@ export const UI = {
             cartItemsEl.innerHTML = '';
             if (cartFooterEl) cartFooterEl.style.display = 'none';
             if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'none';
-        } else {
             // FIX: Attach event listener for the empty cart button only when the cart is shown.
             const emptyCartBtn = emptyCartEl.querySelector('.empty-cart-btn');
             if (emptyCartBtn) {
                 emptyCartBtn.addEventListener('click', () => { UI.showPage('catalog'); UI.closeCart(); });
             }
+        } else {
             emptyCartEl.style.display = 'none';
             if (cartFooterEl) cartFooterEl.style.display = 'flex';
             if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'block';
