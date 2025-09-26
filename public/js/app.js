@@ -68,6 +68,7 @@ export const state = {
     popupDescriptionExpanded: false,
     popupProduct: null,
     // NEW: Cache for DOM elements
+    isNewLogin: false, // Flag to trigger post-login actions like notification prompts
     dom: {
         profile: {
             userName: null,
@@ -204,15 +205,21 @@ async function init() {
       UI.initCarousel('#communicationCarousel');
 
       if ('serviceWorker' in navigator) {
-          window.addEventListener('load', () => {
-              navigator.serviceWorker.register('/service-worker.js').then(registration => {
+          window.addEventListener('load', async () => {
+              const registration = await navigator.serviceWorker.register('/service-worker.js');
+              try {
                   console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                  // The logic to initialize Firebase Messaging is now correctly handled
-                  // in `Handlers.handleProfileButtonClick` when the user clicks the "Notifications" button.
-                  // This avoids unsolicited permission prompts on page load.
-              }, err => {
+                  // NEW: Trigger notification prompt on first launch if permission is 'default'.
+                  if (Notification.permission === 'default' && !localStorage.getItem('notificationPrompted')) {
+                      setTimeout(() => {
+                          UI.showToast('Enable notifications to get order updates!');
+                          Handlers.initFirebaseMessaging(registration);
+                          localStorage.setItem('notificationPrompted', 'true');
+                      }, 5000); // Wait 5 seconds after page load.
+                  }
+              } catch (err) {
                   console.log('ServiceWorker registration failed: ', err);
-              });
+              }
           });
       }
 
@@ -225,6 +232,13 @@ async function init() {
           if (profileInstallBtn) {
               profileInstallBtn.style.display = 'flex';
           }
+      });
+
+      // NEW: Listen for the appinstalled event to prompt for notifications right after installation.
+      window.addEventListener('appinstalled', () => {
+        console.log('PWA was installed');
+        // Prompt for notifications immediately after install for a native-like experience.
+        navigator.serviceWorker.ready.then(Handlers.initFirebaseMessaging);
       });
   } catch (e) {
       console.error("A critical error occurred during app initialization:", e);

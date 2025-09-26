@@ -874,7 +874,8 @@ export const Handlers = {
                 state.db.collection('users').doc(user.uid).set({
                     email: user.email,
                     displayName: user.displayName || null,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    role: 'customer' // Assign default role
                 });
 
                 window.Analytics.trackEvent('sign_up', { method: 'Email' });
@@ -883,6 +884,8 @@ export const Handlers = {
                 } else {
                     UI.showToast('Account created successfully!');
                 }
+                // Set a flag to trigger the notification prompt
+                state.isNewLogin = true;
                 UI.closeLoginModal();
             })
             .catch(error => {
@@ -906,6 +909,8 @@ export const Handlers = {
                 } else {
                     UI.showToast('Logged in successfully!');
                 }
+                // Set a flag to trigger the notification prompt
+                state.isNewLogin = true;
                 UI.closeLoginModal();
             })
             .catch(error => {
@@ -925,7 +930,8 @@ export const Handlers = {
                     state.db.collection('users').doc(user.uid).set({
                         email: user.email,
                         displayName: user.displayName,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        role: 'customer' // Assign default role
                     });
                 }
 
@@ -940,6 +946,8 @@ export const Handlers = {
                 } else {
                     UI.showToast(`Welcome, ${result.user.displayName}!`);
                 }
+                // Set a flag to trigger the notification prompt
+                state.isNewLogin = true;
                 UI.closeLoginModal();
             }).catch(error => {
                 authError.textContent = error.message;
@@ -1070,13 +1078,6 @@ export const Handlers = {
             if (typeof state.afterLoginAction === 'function') {
                 setTimeout(state.afterLoginAction, 100);
                 state.afterLoginAction = null;
-            }
-            // NEW: Automatically trigger notification permission prompt on first login.
-            if (isNewLogin) {
-                setTimeout(() => {
-                    UI.showToast('Enable notifications to get order updates!');
-                    navigator.serviceWorker.ready.then(Handlers.initFirebaseMessaging);
-                }, 3000); // Wait 3 seconds for the UI to settle.
             }
         } else { // User is logged out
             if (window.Analytics) window.Analytics.anonymizeUser();
