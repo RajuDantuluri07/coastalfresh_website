@@ -990,52 +990,53 @@ export const Handlers = {
             console.log('Firebase Messaging is not supported in this browser.');
             return;
         }
-
+    
         const messaging = firebase.messaging();
-
+    
         messaging.onMessage(payload => {
             console.log('Message received. ', payload);
             if (payload.notification) {
                 UI.showToast(`${payload.notification.title}: ${payload.notification.body}`);
             }
         });
-
+    
         // Request permission if it hasn't been granted or denied yet.
         if (Notification.permission === 'default') {
             await Notification.requestPermission();
         }
         // If permission is not granted after the prompt (or was already denied), exit.
         if (Notification.permission !== 'granted') {
-            console.log('Notification permission not granted.');
+            console.log('Notification permission not granted. User will not receive push notifications.');
             return;
         }
-
+    
         try {
-            // FIX: Add the VAPID key, which is required for web push notifications.
-            // This key is generated in your Firebase project settings under Cloud Messaging.
+            // The VAPID key is required for web push notifications.
+            // This is generated in your Firebase project settings under Cloud Messaging.
             const vapidKey = "BBVKpOXnP5lq1tVGX0lAhnnsIzt9uET8jzdE98ocBBnO3-vlS7IDLRInG2iJ3COVkK5ycZ-toAE68kZdDpUuH_g";
             const token = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey });
-
+    
             if (token && state.currentUser) {
                 await Handlers.saveFcmToken(token);
             }
-
+    
             // Handle token refresh. FCM tokens can be updated periodically.
             messaging.onTokenRefresh(async () => {
                 try {
-                    const refreshedToken = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey: vapidKey });
+                    const refreshedToken = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey });
                     if (refreshedToken && state.currentUser) {
                         console.log('FCM token refreshed.');
                         await Handlers.saveFcmToken(refreshedToken);
                     }
                 } catch (refreshErr) {
-                    console.error('Unable to retrieve refreshed FCM token.', refreshErr);
+                    console.error('Unable to retrieve refreshed FCM token.', refreshErr.message);
                 }
             });
-
+    
         } catch (err) {
-            // FIX: Log the full error object for better debugging.
-            console.error('Could not get FCM token, likely due to permissions or environment:', err);
+            // This catch block is crucial. It handles errors from `getToken()` if permissions are denied
+            // or if the environment doesn't support it (e.g., incognito mode), preventing unhandled rejections.
+            console.warn('Could not get FCM token:', err.message);
         }
     },
 
