@@ -1,5 +1,17 @@
 let state, config, Handlers;
 
+/**
+ * Creates a simple, non-cryptographic hash from a string.
+ * @param {string} str The string to hash.
+ * @returns {number} A positive integer hash.
+ */
+function _simpleHash(str) {
+    if (!str) return 0;
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) { hash = (hash << 5) - hash + str.charCodeAt(i); hash |= 0; }
+    return Math.abs(hash);
+}
+
 export const UI = {
     init: (appState, appConfig, appHandlers) => {
         state = appState;
@@ -280,9 +292,9 @@ export const UI = {
         // --- Show the modal immediately ---
         state.isPopupOpen = true;
         UI.openModal(popup, backBtn);
-
-        // --- OPTIMIZATION: Defer all population and expensive calculations to the next frame ---
-        setTimeout(() => {
+        
+        // --- OPTIMIZATION: Defer all population and expensive calculations to run after the modal is visible ---
+        const populateAndDefer = () => {
             title.textContent = DOMPurify.sanitize(product.name);
             weight.textContent = `${product.net} Net Weight`;
 
@@ -323,7 +335,6 @@ export const UI = {
                 const icon = productInfoItem.querySelector('.detail-header i');
 
                 productInfoItem.classList.add('active');
-                // Set max-height to its scroll height to animate it open
                 content.style.maxHeight = content.scrollHeight + 'px';
                 content.style.padding = '0 0 16px 0';
                 if (icon) icon.style.transform = 'rotate(180deg)';
@@ -333,34 +344,38 @@ export const UI = {
             if (contentWrapper) contentWrapper.scrollTop = 0;
 
             // Defer non-critical SEO/History tasks to run after the popup is fully rendered
-            const productSlug = UI.generateProductSlug(product);
-            const productUrl = `/product/${productSlug}`;
-            const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
-            const productDesc = product.desc;
-            const optimizedProductImage = UI.getOptimizedImageUrl(product.image, 1200, 630);
+            const runLowestPriorityTasks = () => {
+                const productSlug = UI.generateProductSlug(product);
+                const productUrl = `/product/${productSlug}`;
+                const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
+                const productDesc = product.desc;
+                const optimizedProductImage = UI.getOptimizedImageUrl(product.image, 1200, 630);
 
-            const runDeferredSEOTasks = () => {
                 UI.updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
                 history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
+
+                // Inject JSON-LD schema
+                const existingJsonLd = document.getElementById('product-breadcrumb-jsonld');
+                if (existingJsonLd) existingJsonLd.remove();
+                const breadcrumb = { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" }, { "@type": "ListItem", "position": 2, "name": "All Products", "item": "https://www.coastalfresh.in/catalog" }, { "@type": "ListItem", "position": 3, "name": product.name, "item": `https://www.coastalfresh.in${productUrl}` }] };
+                const script = document.createElement('script');
+                script.type = 'application/ld+json';
+                script.id = 'product-breadcrumb-jsonld';
+                script.textContent = JSON.stringify(breadcrumb);
+                document.head.appendChild(script);
             };
 
-            // Inject JSON-LD schema
-            const existingJsonLd = document.getElementById('product-breadcrumb-jsonld');
-            if (existingJsonLd) existingJsonLd.remove();
-            const breadcrumb = { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" }, { "@type": "ListItem", "position": 2, "name": "All Products", "item": "https://www.coastalfresh.in/catalog" }, { "@type": "ListItem", "position": 3, "name": product.name, "item": `https://www.coastalfresh.in${productUrl}` }] };
-            const script = document.createElement('script');
-            script.type = 'application/ld+json';
-            script.id = 'product-breadcrumb-jsonld';
-            script.textContent = JSON.stringify(breadcrumb);
-            document.head.appendChild(script);
-
-            // Use requestIdleCallback for SEO tasks as they are lowest priority
+            // Use requestIdleCallback for lowest priority tasks
             if ('requestIdleCallback' in window) {
-                requestIdleCallback(runDeferredSEOTasks, { timeout: 500 });
+                requestIdleCallback(runLowestPriorityTasks, { timeout: 500 });
             } else {
-                setTimeout(runDeferredSEOTasks, 200); // A slightly longer delay
+                setTimeout(runLowestPriorityTasks, 200);
             }
-        }, 0);
+        };
+
+        // Use requestAnimationFrame to ensure the modal is visible before we populate it
+        requestAnimationFrame(populateAndDefer);
+
         // Analytics can also be tracked after the initial render
         window.Analytics.trackEvent('view_item', {
             currency: 'INR',

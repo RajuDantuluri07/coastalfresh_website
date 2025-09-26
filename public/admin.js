@@ -180,21 +180,12 @@ function orderCardHTML(order) {
                    </select>
                    <button class="btn-small btn-primary" data-confirm="${order.id}" aria-label="Confirm status change">Update</button>`
                 }
-                <button class="btn-small" style="background:#f3f4f6;border:1px solid #e6e9ee" data-copy="${order.id}" aria-label="Copy phone">Copy</button>
+                <button class="btn-small" style="background:#f3f4f6;border:1px solid #e6e9ee" data-copy="${escapeHtml(address.mobile || '')}" aria-label="Copy phone">Copy</button>
               </div>
             </div>
           </div>
         </div>
       `;
-}
-// status transitions allowed
-function statusOptionsFor(status) {
-    const validTransitions = {
-        'Pending': ['Pending', 'Accepted', 'Cancelled'],
-        'Accepted': ['Accepted', 'Out for Delivery', 'Cancelled'],
-        'Out for Delivery': ['Out for Delivery', 'Completed', 'Cancelled'],
-    };
-    return validTransitions[status] || [status];
 }
 // delegated click handler for toggles + buttons
 document.addEventListener('click', (ev) => {
@@ -213,13 +204,8 @@ document.addEventListener('click', (ev) => {
     }
     const copyBtn = ev.target.closest('[data-copy]');
     if (copyBtn) {
-        const id = copyBtn.dataset.copy;
-        const order = allOrders.find(o => o.id === id);
-        if (order && order.address && order.address.mobile) {
-            navigator.clipboard?.writeText(order.address.mobile).then(() => {
-                toast('Phone copied to clipboard');
-            });
-        }
+        const phone = copyBtn.dataset.copy;
+        if (phone) navigator.clipboard?.writeText(phone).then(() => toast('Phone copied to clipboard'));
     }
 
     // NEW: Handle role update button

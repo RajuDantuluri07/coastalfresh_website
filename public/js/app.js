@@ -144,7 +144,7 @@ async function init() {
       state.dom.profile.logoutBtn = document.getElementById('logoutBtn');
       state.dom.profile.guestCta = document.getElementById('guestProfileCta');
       state.dom.profile.referBtn = document.getElementById('referBtn');
-      state.dom.profile.avatar = document.querySelector('.profile-avatar-small');
+      state.dom.profile.avatar = document.querySelector('#profilePage .profile-avatar-small');
 
       // NEW: Cache popup DOM elements
       state.dom.popup.main = document.getElementById('productPopup');

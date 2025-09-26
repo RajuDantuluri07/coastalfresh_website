@@ -701,13 +701,11 @@ export const UI = {
         UI.closeModal(cartModal);
     },
 
-    showOrderSuccessModal: (orderId, whatsappMessage) => {
+    showOrderSuccessModal: (orderId) => {
         const modal = document.getElementById('orderSuccessModal');
         const messageEl = document.getElementById('orderSuccessMessage');
-        const trackBtn = document.getElementById('trackOrderBtn');
 
         messageEl.innerHTML = `Your Order ID is <strong>${orderId}</strong>. You can track its status in "My Orders".`;
-        trackBtn.dataset.message = whatsappMessage;
 
         UI.openModal(modal, document.getElementById('trackOrderBtn'));
     },
