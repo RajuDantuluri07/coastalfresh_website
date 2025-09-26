@@ -22,7 +22,7 @@ messaging.onBackgroundMessage(function (payload) {
     badge: "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png",
     // Add data to the notification to handle clicks
     data: {
-      url: payload.data?.url || '/' // Default to homepage if no URL is provided
+      url: payload.data?.url || payload.notification?.click_action || '/' // Default to homepage if no URL is provided
     }
   };
 
@@ -33,7 +33,8 @@ messaging.onBackgroundMessage(function (payload) {
 self.addEventListener('notificationclick', event => {
   event.notification.close(); // Close the notification
 
-  const urlToOpen = new URL(event.notification.data.url, self.location.origin).href;
+  // FIX: Safely construct the URL, falling back to the homepage if data is missing.
+  const urlToOpen = new URL(event.notification.data?.url || '/', self.location.origin).href;
 
   event.waitUntil(
     clients.matchAll({

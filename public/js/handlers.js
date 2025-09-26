@@ -457,15 +457,6 @@ export const Handlers = {
             UI.showPage('aboutPage');
         } else if (button.classList.contains('support')) {
             Handlers.openWhatsApp('support');
-        } else if (button.classList.contains('notifications')) {
-            if (!state.currentUser) {
-                UI.showToast('Please login to manage notifications.');
-                UI.showLoginModal();
-                return;
-            }
-            // Directly trigger the permission flow.
-            navigator.serviceWorker.ready.then(Handlers.initFirebaseMessaging);
-            UI.showToast('Please check your browser for a permission pop-up.');
         }
     },
 
@@ -1036,7 +1027,8 @@ export const Handlers = {
             });
 
         } catch (err) {
-            console.warn('Could not get FCM token, likely due to permissions or environment:', err.message);
+            // FIX: Log the full error object for better debugging.
+            console.error('Could not get FCM token, likely due to permissions or environment:', err);
         }
     },
 
@@ -1078,6 +1070,13 @@ export const Handlers = {
             if (typeof state.afterLoginAction === 'function') {
                 setTimeout(state.afterLoginAction, 100);
                 state.afterLoginAction = null;
+            }
+            // NEW: Automatically trigger notification permission prompt on first login.
+            if (isNewLogin) {
+                setTimeout(() => {
+                    UI.showToast('Enable notifications to get order updates!');
+                    navigator.serviceWorker.ready.then(Handlers.initFirebaseMessaging);
+                }, 3000); // Wait 3 seconds for the UI to settle.
             }
         } else { // User is logged out
             if (window.Analytics) window.Analytics.anonymizeUser();
