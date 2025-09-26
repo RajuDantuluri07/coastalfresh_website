@@ -206,19 +206,22 @@ async function init() {
           window.addEventListener('load', () => {
               navigator.serviceWorker.register('/service-worker.js').then(registration => {
                   console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                  // NEW: Prompt for notifications on first launch after PWA installation
+                  
+                  // NEW: On first launch of the installed app, directly trigger the notification permission logic.
                   const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-                  if (isStandalone) {
+                  const canRequestPermission = 'Notification' in window && Notification.permission === 'default';
+
+                  if (isStandalone && canRequestPermission) {
                     try {
                       const notificationPrompted = localStorage.getItem('notificationPrompted');
                       if (!notificationPrompted) {
-                        console.log('First launch in PWA mode, setting up notification prompt.');
+                        console.log('First launch in PWA mode, requesting notification permission.');
                         localStorage.setItem('notificationPrompted', 'true');
+                        // Directly initialize messaging, which will now handle the prompt.
+                        Handlers.initFirebaseMessaging(registration);
                       }
                     } catch (e) { console.error('Could not access localStorage for notification prompt.', e); }
                   }
-                  // Now initialize messaging, which will check the flag we just set.
-                  Handlers.initFirebaseMessaging(registration);
               }, err => {
                   console.log('ServiceWorker registration failed: ', err);
               });
