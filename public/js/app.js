@@ -209,16 +209,12 @@ async function init() {
             try {
                 const registration = await navigator.serviceWorker.register('/service-worker.js');
                 console.log('ServiceWorker registration successful with scope: ', registration.scope);
-
-                // FIX: The Handlers module is now guaranteed to be initialized.
-                // Trigger notification prompt on first launch if permission is 'default'.
-                if (Notification.permission === 'default' && !localStorage.getItem('notificationPrompted')) {
-                    setTimeout(() => {
-                        UI.showToast('Enable notifications to get order updates!');
-                        Handlers.initFirebaseMessaging(registration);
-                        localStorage.setItem('notificationPrompted', 'true');
-                    }, 5000); // Wait 5 seconds after page load.
-                }
+                
+                // If permission has already been granted, initialize messaging to get the token.
+                // The prompt for permission is now handled on user action (login) or app install.
+                 if (Notification.permission === 'granted') {
+                    Handlers.initFirebaseMessaging(registration);
+                 }
             } catch (err) {
                 console.log('ServiceWorker registration failed: ', err);
             }
@@ -239,8 +235,14 @@ async function init() {
       // NEW: Listen for the appinstalled event to prompt for notifications right after installation.
       window.addEventListener('appinstalled', () => {
         console.log('PWA was installed');
-        // Prompt for notifications immediately after install for a native-like experience.
-        navigator.serviceWorker.ready.then(Handlers.initFirebaseMessaging);
+        // After installation, show a toast and then request permission.
+        // This provides context to the user for the upcoming permission dialog.
+        UI.showToast('App installed! Enable notifications for order updates.');
+        
+        // Wait a moment for the toast to be seen, then request permission.
+        setTimeout(() => {
+            navigator.serviceWorker.ready.then(Handlers.initFirebaseMessaging);
+        }, 2000);
       });
   } catch (e) {
       console.error("A critical error occurred during app initialization:", e);

@@ -1078,6 +1078,18 @@ export const Handlers = {
                 setTimeout(state.afterLoginAction, 100);
                 state.afterLoginAction = null;
             }
+
+            // NEW: If this is a new login session and notifications are not yet set,
+            // prompt the user to enable them. This is the PWA equivalent of the runtime permission.
+            if (state.isNewLogin && Notification.permission === 'default') {
+                setTimeout(() => {
+                    UI.showToast('Enable notifications to get order updates!');
+                    navigator.serviceWorker.ready.then(Handlers.initFirebaseMessaging);
+                }, 3000); // Wait a few seconds after login.
+            }
+            // Reset the flag after checking.
+            state.isNewLogin = false;
+
         } else { // User is logged out
             if (window.Analytics) window.Analytics.anonymizeUser();
         }
