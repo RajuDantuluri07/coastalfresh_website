@@ -155,7 +155,9 @@ async function init() {
       state.dom.popup.mainImage = document.getElementById('popupMainImage');
       state.dom.popup.cta = document.getElementById('popupStickyCta');
       state.dom.popup.contentWrapper = document.getElementById('popupContentWrapper');
-      state.dom.popup.backBtn = state.dom.popup.main.querySelector('.popup-back-btn');
+      if (state.dom.popup.main) {
+        state.dom.popup.backBtn = state.dom.popup.main.querySelector('.popup-back-btn');
+      }
 
 
 
