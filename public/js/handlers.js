@@ -238,6 +238,20 @@ export const Handlers = {
                 e.preventDefault();
                 Handlers.openWhatsApp('refer');
             }
+
+            // NEW: Handle "Share on Other Apps" button on refer page
+            if (target.id === 'shareOnOtherAppsBtn') {
+                e.preventDefault();
+                Handlers.shareProduct(); // Re-use the generic share handler
+            }
+
+            // NEW: Handle "Terms" button on refer page
+            if (target.id === 'showTermsBtn') {
+                UI.openModal(document.getElementById('referralTermsModal'));
+            }
+            if (target.id === 'closeTermsBtn') {
+                UI.closeModal(document.getElementById('referralTermsModal'));
+            }
         });
 
         // Typewriter focus/blur handlers

@@ -2102,66 +2102,108 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
 .about-cta-btn {
   background: var(--primary-color);
   color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 14px 20px; /* Reduced padding */
-  font-size: 15px; /* Reduced font size */
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3);
+  border: none; border-radius: 12px; padding: 14px 20px; font-size: 15px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px;
 }
-/* NEW: Refer a Friend Page Styles */
-.refer-content {
+
+/* --- NEW: Enhanced Refer & Earn Page Styles --- */
+.refer-hero {
+  background: linear-gradient(180deg, var(--primary-light), var(--bg-white));
+  border-radius: 16px;
+  margin-bottom: 16px;
+  padding: 24px 20px;
   text-align: center;
-  padding: 20px 0;
+  border: 1px solid var(--border-color);
 }
-.refer-icon {
-  font-size: 48px;
-  color: var(--accent-color);
-  background: var(--primary-light);
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 24px;
-  box-shadow: 0 4px 12px rgba(11, 173, 226, 0.2);
+.refer-hero-icon {
+  width: 84px; height: 84px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  background: radial-gradient(var(--primary-light), var(--bg-white));
+  box-shadow: 0 12px 30px rgba(1, 101, 154, 0.08); margin-bottom: 16px;
+  font-size: 40px; color: var(--primary-color);
 }
-.refer-title {
-  font-size: 20px; /* H1 Title */
-  font-weight: 700;
-  color: var(--primary-dark);
-  margin-bottom: 12px;
+.refer-title { font-size: 20px; font-weight: 700; color: var(--primary-dark); margin-bottom: 8px; }
+.refer-subtitle { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 20px; }
+.refer-subtitle strong { color: var(--primary-dark); }
+
+.refer-code-box { background: var(--bg-white); border-radius: 12px; padding: 12px; border: 1px solid var(--border-color); margin-bottom: 16px; }
+.refer-link-container { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+.refer-link { font-weight: 600; color: var(--primary-color); font-size: 14px; word-break: break-all; }
+.copy-link-btn {
+  background: var(--bg-light); color: var(--primary-color); border: 1px solid var(--border-color);
+  padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px;
+  display: flex; align-items: center; gap: 6px;
 }
-.refer-subtitle {
-  font-size: 14px; /* Body Text */
+
+.share-buttons { display: flex; flex-direction: column; gap: 12px; }
+.share-btn {
+  padding: 14px; border-radius: 12px; border: none; font-size: 15px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s;
+}
+.share-btn.whatsapp { background: #25D366; color: white; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); }
+.share-btn.other-apps { background: var(--primary-color); color: white; box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3); }
+.share-btn:active { transform: scale(0.98); }
+
+/* How it Works Section */
+.refer-steps-section {
+  margin-bottom: 16px;
+  background: var(--bg-white);
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px dashed var(--border-color);
+}
+.refer-steps-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.refer-steps-header h3 { font-size: 16px; font-weight: 600; margin: 0; }
+.refer-terms-btn {
+  background: var(--bg-light); color: var(--text-secondary); border: 1px solid var(--border-color);
+  padding: 6px 10px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px;
+}
+.refer-step { display: flex; gap: 16px; align-items: flex-start; }
+.refer-step + .refer-step { margin-top: 16px; }
+.refer-step-num {
+  width: 36px; height: 36px; flex-shrink: 0; border-radius: 12px;
+  background: linear-gradient(180deg, var(--primary-light), var(--bg-white));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 16px; color: var(--primary-dark);
+  box-shadow: 0 6px 18px rgba(1, 101, 154, 0.06);
+}
+.refer-step-text { flex: 1; }
+.refer-step-desc { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+.refer-step-muted { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+.refer-step-muted strong { color: var(--primary-dark); }
+
+/* Influencer Card */
+.refer-influencer-card {
+  background: var(--bg-white); border-radius: 12px; padding: 16px; border: 1px solid var(--border-color);
+  display: flex; gap: 12px; align-items: center; justify-content: space-between;
+}
+.refer-influencer-text { font-size: 14px; color: var(--text-primary); }
+.refer-influencer-text span { font-size: 13px; color: var(--text-secondary); }
+.refer-influencer-contact {
+  background: var(--primary-color); color: white; text-decoration: none;
+  padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; white-space: nowrap;
+}
+
+/* Terms Modal List */
+.terms-list {
+  text-align: left;
+  padding-left: 20px;
+  font-size: 14px;
   color: var(--text-secondary);
-  line-height: 1.6;
   margin-bottom: 24px;
 }
-.refer-code-box {
-  background: var(--bg-light);
+.terms-list li {
+  margin-bottom: 10px;
+}
+
+/* Old refer styles - can be removed or will be overridden */
+.refer-content { text-align: center; padding: 20px 0; }
+.refer-icon { display: none; } /* Hide old icon */
+.refer-code-box-old { /* Renaming old class to avoid conflict */
+  background: var(--bg-light); /* This is the old style */
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 24px;
 }
-.refer-code-box p { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
-.refer-link-container { display: flex; align-items: center; background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; }
-.refer-link { flex-grow: 1; text-align: left; font-weight: 500; color: var(--primary-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.copy-link-btn { background: none; border: none; font-size: 18px; color: var(--text-secondary); cursor: pointer; padding: 4px; }
-.share-buttons { display: flex; flex-direction: column; gap: 12px; }
-.share-btn {
-  padding: 16px; border-radius: 12px; border: none; font-size: 16px; font-weight: 600; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.2s;
-}
-.share-btn.whatsapp {
-  background: #25D366; color: white; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
-}
-.share-btn:active {
-  transform: scale(0.98);
-}
-
 
 /* Profile Page */
 #profilePage .section {
