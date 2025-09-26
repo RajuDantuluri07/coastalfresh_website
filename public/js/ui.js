@@ -1223,10 +1223,7 @@ export const UI = {
                             </div>
                             <div class="order-card-bottom">
                                 <div class="order-status ${displayStatus.class}"><i class="${displayStatus.icon}"></i> ${displayStatus.text}</div>
-                                <div class="order-card-actions">
-                                    <button class="order-card-btn reorder" data-order-id="${doc.id}">Reorder</button>
-                                    <button class="order-card-btn support" data-user-order-id="${order.orderId}">Support</button>
-                                </div>
+                                <!-- The entire card is clickable to track, so a button is not needed here -->
                             </div>
                         </div>
                     `;
