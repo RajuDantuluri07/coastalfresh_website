@@ -461,6 +461,15 @@ export const Handlers = {
             UI.showPage('aboutPage');
         } else if (button.classList.contains('support')) {
             Handlers.openWhatsApp('support');
+        } else if (button.classList.contains('notifications')) {
+            if (!state.currentUser) {
+                UI.showToast('Please login to manage notifications.');
+                UI.showLoginModal();
+                return;
+            }
+            // Directly trigger the permission flow.
+            navigator.serviceWorker.ready.then(Handlers.initFirebaseMessaging);
+            UI.showToast('Please check your browser for a permission pop-up.');
         }
     },
 
@@ -498,10 +507,13 @@ export const Handlers = {
 
         let itemsAddedCount = 0;
         items.forEach(item => {
-            const product = state.products.find(p => p.id === item.id);
+            const product = state.products.find(p => p.id === parseInt(item.id));
+            const qtyToAdd = (typeof item.qty === 'number' && item.qty > 0) ? item.qty : 1;
             if (product && product.available) {
-                state.cart[item.id] = (state.cart[item.id] || 0) + item.qty;
+                state.cart[item.id] = (state.cart[item.id] || 0) + qtyToAdd;
                 itemsAddedCount++;
+                // FIX: Add analytics tracking for each reordered item
+                window.Analytics.trackAddToCart(product, qtyToAdd);
             }
         });
 
@@ -670,7 +682,7 @@ export const Handlers = {
             Handlers.saveCart();
             UI.updateCartUI();
             UI.showToast("Some items were removed as they are no longer available. Please review your cart.");
-            return;
+            return; // FIX: Stop checkout if cart was modified to allow user review.
         }
 
         if (items.length === 0) return;
@@ -721,20 +733,10 @@ export const Handlers = {
 
         const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
         const couponDiscount = state.appliedCoupon ? (state.appliedCoupon.type === 'percent' ? (subtotal * state.appliedCoupon.value) / 100 : state.appliedCoupon.value) : 0;
-        const finalSubtotal = subtotal - couponDiscount;
-        // NEW: Delivery is now always free.
-        const deliveryFee = 0;
-        const total = finalSubtotal + deliveryFee;
-
-        let message = `Hi! I'd like to place an order (ID: ${orderId}):\n\n`;
-        items.forEach(item => {
-            const safeName = item.name.replace(/[^\w\s-]/g, '');
-            message += `• ${safeName} x${item.qty} - ₹${item.finalPrice * item.qty}\n`;
-        });
-        message += `\nSubtotal: ₹${subtotal}\nDelivery: ${deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`}\nTotal: ₹${total}\n`;
-        message += `\nPayment Method: ${state.selectedPaymentMethod.toUpperCase()}\n`;
-        message += `\n--- Delivery Address ---\nName: ${userAddress.fullName}\nMobile: ${userAddress.mobile}\nAddress: ${userAddress.house}, ${userAddress.street}, ${userAddress.city}, ${userAddress.pincode}\n\n`;
-        message += "\nPlease confirm availability.";
+        
+        // FIX: Calculate delivery fee using the same logic as the UI for consistency.
+        const deliveryFee = (subtotal - couponDiscount) >= config.FREE_DELIVERY_THRESHOLD ? 0 : 100;
+        const total = subtotal - couponDiscount + deliveryFee;
 
         const orderData = {
             orderId: orderId,
@@ -742,7 +744,7 @@ export const Handlers = {
             items: items.map(item => ({ id: item.id, name: item.name, qty: item.qty, price: item.finalPrice, image: item.image })),
             subtotal: Math.round(subtotal),
             coupon: state.appliedCoupon ? { code: state.appliedCoupon.code, discount: Math.round(couponDiscount) } : null,
-            deliveryFee: deliveryFee,
+            deliveryFee: Math.round(deliveryFee),
             total: Math.round(total),
             address: userAddress,
             paymentMethod: state.selectedPaymentMethod,
@@ -812,7 +814,8 @@ export const Handlers = {
 
     openWhatsApp: (type, orderId = null) => {
         let message = '';
-        let url = 'https://wa.me/919985125678';
+        // FIX: Use centralized phone number from config
+        let url = `https://wa.me/${config.SUPPORT_PHONE_NUMBER}`;
 
         if (type === 'support') {
             message = orderId
@@ -1011,19 +1014,30 @@ export const Handlers = {
             if (Notification.permission !== 'granted') {
                 return;
             }
-            const token = await messaging.getToken({ serviceWorkerRegistration: registration });
+            // NEW: Add the VAPID key, which is required for web push notifications.
+            // This key is generated in your Firebase project settings under Cloud Messaging.
+            const vapidKey = "BBVKpOXnP5lq1tVGX0lAhnnsIzt9uET8jzdE98ocBBnO3-vlS7IDLRInG2iJ3COVkK5ycZ-toAE68kZdDpUuH_g";
+            const token = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey: vapidKey });
 
             if (token && state.currentUser) {
                 // Save the token to Firestore for the current user.
-                // This is a "fire and forget" operation; we don't need to wait for it.
-                // If it fails, it will be caught by the global unhandledrejection handler.
-                state.db.collection('users').doc(state.currentUser.uid).collection('fcmTokens').doc(token).set({
-                    token: token,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => {
-                    console.log('FCM token saved for user.');
-                });
+                await Handlers.saveFcmToken(token);
             }
+
+            // NEW: Handle token refresh. FCM tokens can be updated periodically.
+            // This ensures the user's token in the database is always current.
+            messaging.onTokenRefresh(async () => {
+                try {
+                    const refreshedToken = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey: vapidKey });
+                    if (refreshedToken && state.currentUser) {
+                        console.log('FCM token refreshed.');
+                        await Handlers.saveFcmToken(refreshedToken);
+                    }
+                } catch (err) {
+                    console.error('Unable to retrieve refreshed FCM token.', err);
+                }
+            });
+
         } catch (err) {
             // This catch block is crucial. It handles errors from `getToken()` if permissions are denied
             // or if the environment doesn't support it (e.g., incognito mode), preventing the unhandled rejection.
@@ -1031,10 +1045,33 @@ export const Handlers = {
         }
     },
 
+    /**
+     * Saves or updates the user's FCM token in Firestore.
+     * @param {string} token The FCM token to save.
+     */
+    saveFcmToken: async (token) => {
+        if (!state.currentUser || !token) return;
+
+        try {
+            const tokenRef = state.db.collection('users').doc(state.currentUser.uid).collection('fcmTokens').doc(token);
+            await tokenRef.set({
+                token: token,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                userAgent: navigator.userAgent,
+                platform: navigator.platform
+            });
+            console.log('FCM token saved for user.');
+            UI.showToast('Notification preferences updated!');
+        } catch (error) {
+            console.error('Error saving FCM token:', error);
+            UI.showToast('Could not save notification preferences.', true);
+        }
+    },
+
     handleAuthStateChange: (user) => {
         const isNewLogin = !state.currentUser && user;
         state.currentUser = user;
-        Handlers.updateUIForAuthState();
+        UI.updateUIForAuthState();
 
         if (user) {
             // Update the user's last seen timestamp for active user tracking.
@@ -1049,56 +1086,6 @@ export const Handlers = {
             }
         } else { // User is logged out
             if (window.Analytics) window.Analytics.anonymizeUser();
-        }
-    },
-
-    updateUIForAuthState: () => {
-        const userNameEl = document.getElementById('profileUserName');
-        const userStatusEl = document.getElementById('profileUserStatus');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const guestCtaBtn = document.getElementById('guestProfileCta');
-        const referBtn = document.getElementById('referBtn');
-        const avatarEl = document.querySelector('.profile-avatar-small');
-
-        if (state.currentUser) {
-            if (state.currentUser.photoURL) {
-                avatarEl.innerHTML = `<img src="${state.currentUser.photoURL}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
-            } else {
-                avatarEl.innerHTML = `<i class="fas fa-user"></i>`;
-            }
-
-            const referralLinkEl = document.getElementById('referralLink');
-            if (referralLinkEl) {
-                referralLinkEl.textContent = `https://coastalfresh.in?ref=${_simpleHash(state.currentUser.uid)}`;
-            }
-
-            let displayName = 'Valued Customer';
-            if (state.currentUser.displayName) {
-                displayName = state.currentUser.displayName;
-            } else if (state.currentUser.email) {
-                const emailName = state.currentUser.email.split('@')[0];
-                const cleanedName = emailName.replace(/[\._-]/g, ' ').split(' ')[0];
-                displayName = cleanedName.charAt(0).toUpperCase() + cleanedName.slice(1);
-            }
-
-            userNameEl.textContent = displayName;
-            userStatusEl.textContent = state.currentUser.email;
-            logoutBtn.style.display = 'flex';
-            if (guestCtaBtn) guestCtaBtn.style.display = 'none';
-            if (referBtn) referBtn.style.display = 'flex';
-        } else {
-            avatarEl.innerHTML = `<i class="fas fa-user"></i>`;
-            userNameEl.textContent = 'Guest User';
-            userStatusEl.textContent = 'You are browsing as a guest.';
-
-            const referralLinkEl = document.getElementById('referralLink');
-            if (referralLinkEl) {
-                referralLinkEl.textContent = `https://coastalfresh.in?ref=GUEST123`;
-            }
-
-            logoutBtn.style.display = 'none';
-            if (guestCtaBtn) guestCtaBtn.style.display = 'flex';
-            if (referBtn) referBtn.style.display = 'none';
         }
     },
 

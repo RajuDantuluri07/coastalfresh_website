@@ -1540,5 +1540,51 @@ export const UI = {
         if (profileInstallBtn && state.installPromptUsed) {
             profileInstallBtn.style.display = 'none';
         }
+    },
+
+    // NEW: Moved from handlers.js for better separation of concerns
+    updateUIForAuthState: () => {
+        const userNameEl = document.getElementById('profileUserName');
+        const userStatusEl = document.getElementById('profileUserStatus');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const guestCtaBtn = document.getElementById('guestProfileCta');
+        const referBtn = document.getElementById('referBtn');
+        const avatarEl = document.querySelector('.profile-avatar-small');
+
+        if (state.currentUser) {
+            if (state.currentUser.photoURL) {
+                avatarEl.innerHTML = `<img src="${state.currentUser.photoURL}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+            } else {
+                avatarEl.innerHTML = `<i class="fas fa-user"></i>`;
+            }
+
+            const referralLinkEl = document.getElementById('referralLink');
+            if (referralLinkEl) {
+                // Note: _simpleHash is not in this file, so we call it via Handlers
+                referralLinkEl.textContent = `https://coastalfresh.in?ref=${Handlers.getReferralHash(state.currentUser.uid)}`;
+            }
+
+            let displayName = 'Valued Customer';
+            if (state.currentUser.displayName) {
+                displayName = state.currentUser.displayName;
+            } else if (state.currentUser.email) {
+                const emailName = state.currentUser.email.split('@')[0];
+                const cleanedName = emailName.replace(/[\._-]/g, ' ').split(' ')[0];
+                displayName = cleanedName.charAt(0).toUpperCase() + cleanedName.slice(1);
+            }
+
+            userNameEl.textContent = displayName;
+            userStatusEl.textContent = state.currentUser.email;
+            logoutBtn.style.display = 'flex';
+            if (guestCtaBtn) guestCtaBtn.style.display = 'none';
+            if (referBtn) referBtn.style.display = 'flex';
+        } else {
+            avatarEl.innerHTML = `<i class="fas fa-user"></i>`;
+            userNameEl.textContent = 'Guest User';
+            userStatusEl.textContent = 'You are browsing as a guest.';
+            logoutBtn.style.display = 'none';
+            if (guestCtaBtn) guestCtaBtn.style.display = 'flex';
+            if (referBtn) referBtn.style.display = 'none';
+        }
     }
 };

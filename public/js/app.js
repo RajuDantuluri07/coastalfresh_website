@@ -31,6 +31,7 @@ export const config = {
         'SAVE50': { type: 'fixed', value: 50, description: 'Flat ₹50 off' },
         'NEWUSER': { type: 'percent', value: 15, minOrder: 500, description: '15% off on orders above ₹500' }
     },
+    SUPPORT_PHONE_NUMBER: '919985125678',
     ITEMS_PER_PAGE: 8,
 };
 
