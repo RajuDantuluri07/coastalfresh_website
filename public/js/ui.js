@@ -243,7 +243,7 @@ export const UI = {
             </div>
             <div class="product-info">
               <div class="product-name">${sanitizedName}</div>
-              <div class="product-weight">${product.net} Net Weight</div>
+              <div class="product-weight">${product.net} Net</div>
               <div class="product-footer">
                 <div class="product-price">
                   <span class="price">₹${product.finalPrice}</span>

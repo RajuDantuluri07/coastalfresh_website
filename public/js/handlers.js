@@ -729,9 +729,9 @@ export const Handlers = {
 
         const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
         const couponDiscount = state.appliedCoupon ? (state.appliedCoupon.type === 'percent' ? (subtotal * state.appliedCoupon.value) / 100 : state.appliedCoupon.value) : 0;
-        
-        // FIX: Calculate delivery fee using the same logic as the UI for consistency.
-        const deliveryFee = (subtotal - couponDiscount) >= config.FREE_DELIVERY_THRESHOLD ? 0 : 100;
+
+        // FIX: Delivery is now always free. Match UI logic.
+        const deliveryFee = 0;
         const total = subtotal - couponDiscount + deliveryFee;
 
         const orderData = {

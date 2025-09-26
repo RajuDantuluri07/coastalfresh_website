@@ -67,7 +67,6 @@ function startDashboard() {
     fetchAndListenOrders();
     fetchDailySummary();
     fetchAggregateCounts();
-    fetchCustomerCount(); // metadata listener
 }
 function stopDashboard() {
     if (unsubscribeOrders) unsubscribeOrders();
@@ -431,21 +430,6 @@ async function fetchAggregateCounts() {
             console.error(err);
         }
     }
-}
-// metadata user count listener
-function fetchCustomerCount() {
-    db.collection('metadata').doc('userStats').onSnapshot(doc => {
-        // This function gets the *total* number of users.
-        // The stat card is labeled "Active Users" but will function as "Total Customers".
-        if (doc.exists && doc.data().count !== undefined) {
-            activeUsersTodayEl.textContent = doc.data().count;
-        } else {
-            // Fallback if the metadata document doesn't exist.
-            db.collection('users').get().then(s => {
-                activeUsersTodayEl.textContent = s.size;
-            }).catch(() => activeUsersTodayEl.textContent = 'N/A');
-        }
-    });
 }
 // refresh button in bottom nav
 document.getElementById('refresh-btn').addEventListener('click', () => {
