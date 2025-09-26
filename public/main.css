@@ -990,6 +990,8 @@ z-index: 2;                 /* sits above input content */
   padding: 10px;
   /* NEW: Allow this section to grow and push the footer down */
   flex-grow: 1;
+  /* NEW: Prevent product name from pushing footer content */
+  display: flex; flex-direction: column;
 }
 
 .product-name {
@@ -1008,6 +1010,8 @@ z-index: 2;                 /* sits above input content */
 .product-weight {
   font-size: 12px; /* Caption */
   color: var(--text-secondary);
+  /* NEW: Allow this element to shrink if needed */
+  flex-shrink: 0;
   font-weight: 400; /* Regular */
   margin-bottom: 6px;
 }
@@ -1016,6 +1020,8 @@ z-index: 2;                 /* sits above input content */
   display: flex;
   justify-content: space-between;
   align-items: flex-end; /* Align price and button to the bottom */
+  /* NEW: Ensure footer doesn't get pushed by content above it */
+  margin-top: auto;
   margin-top: 8px;
 }
 
