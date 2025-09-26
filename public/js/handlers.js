@@ -613,6 +613,12 @@ export const Handlers = {
         UI.updateProductCardState(id);
         UI.showToast(`${product.name} added to cart!`);
 
+        // NEW: If the cart is currently open, re-render it to show the newly added item.
+        // This is crucial for adding items from the "You might also like" section on the empty cart.
+        if (document.getElementById('cartModal')?.classList.contains('active')) {
+            UI.showCart();
+        }
+
         const addedProduct = state.products.find(p => p.id === parseInt(id));
         if (addedProduct) window.Analytics.trackAddToCart(addedProduct, qty);
     },
