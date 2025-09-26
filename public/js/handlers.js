@@ -979,7 +979,7 @@ export const Handlers = {
             if (window.Analytics) window.Analytics.anonymizeUser();
             state.currentUser = null;
             UI.showToast('You have been logged out.');
-            Handlers.updateUIForAuthState();
+            UI.updateUIForAuthState(); // This now correctly calls the function in ui.js
             UI.showPage('home');
         }).catch(error => {
             console.error('Logout Error:', error);

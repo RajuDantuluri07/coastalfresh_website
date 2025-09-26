@@ -243,7 +243,7 @@ export const UI = {
             </div>
             <div class="product-info">
               <div class="product-name">${sanitizedName}</div>
-              <div class="product-weight">${product.net} Net</div>
+              <div class="product-weight">${product.net} Net Weight</div>
               <div class="product-footer">
                 <div class="product-price">
                   <span class="price">₹${product.finalPrice}</span>
@@ -292,7 +292,7 @@ export const UI = {
         // --- Show the modal immediately ---
         state.isPopupOpen = true;
         UI.openModal(popup, backBtn);
-        
+
         // --- OPTIMIZATION: Defer all population and expensive calculations to run after the modal is visible ---
         const populateAndDefer = () => {
             title.textContent = DOMPurify.sanitize(product.name);
@@ -944,7 +944,7 @@ export const UI = {
 
         function startTimer() {
             if (timer) clearInterval(timer);
-            timer = setInterval(advanceSlide, 3000); // Changed from 5s to 3s for faster sliding
+            timer = setInterval(advanceSlide, 5000);
         }
         function stopTimer() {
             clearInterval(timer);
@@ -954,8 +954,7 @@ export const UI = {
         }
 
         carouselContainer.addEventListener('pointerdown', stopTimer);
-        // Use a debounced scroll handler to avoid stopping/starting the timer too frequently
-        carouselContainer.addEventListener('scroll', () => { clearTimeout(restartTimer); restartTimer = setTimeout(startTimer, 8000); });
+        carouselContainer.addEventListener('scroll', stopTimer, { passive: true });
         document.addEventListener('visibilitychange', () => {
             document.hidden ? stopTimer() : startTimer();
         });
@@ -1166,15 +1165,14 @@ export const UI = {
             <i class="fas fa-box-open" style="font-size: 64px; margin-bottom: 24px; color: var(--border-color);"></i>
             <h3>No Orders Yet</h3>
             <p>Your past and current orders will appear here.</p>
-            <button class="empty-cart-btn" id="shopFromOrdersBtn">Start Shopping</button>
+            <button class="empty-cart-btn" id="shopFromEmptyOrdersBtn">Start Shopping</button>
           </div>
         `;
                 // FIX: Attach event listener only when the button is rendered.
-                const shopBtn = mainContent.querySelector('#shopFromOrdersBtn');
+                const shopBtn = mainContent.querySelector('#shopFromEmptyOrdersBtn');
                 if (shopBtn) {
                     shopBtn.addEventListener('click', () => UI.showPage('home'));
                 }
-                document.getElementById('shopFromOrdersBtn').addEventListener('click', () => UI.showPage('home'));
             } else {
                 // NEW: Status mapping for better UX
                  const statusMap = {
@@ -1225,7 +1223,10 @@ export const UI = {
                             </div>
                             <div class="order-card-bottom">
                                 <div class="order-status ${displayStatus.class}"><i class="${displayStatus.icon}"></i> ${displayStatus.text}</div>
-                                <!-- The entire card is clickable to track, so a button is not needed here -->
+                                <div class="order-card-actions">
+                                    <button class="order-card-btn reorder" data-order-id="${doc.id}">Reorder</button>
+                                    <button class="order-card-btn support" data-user-order-id="${order.orderId}">Support</button>
+                                </div>
                             </div>
                         </div>
                     `;
@@ -1560,24 +1561,18 @@ export const UI = {
 
     // NEW: Moved from handlers.js for better separation of concerns
     updateUIForAuthState: () => {
-        const userNameEl = document.getElementById('profileUserName');
-        const userStatusEl = document.getElementById('profileUserStatus');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const guestCtaBtn = document.getElementById('guestProfileCta');
-        const referBtn = document.getElementById('referBtn');
-        const avatarEl = document.querySelector('.profile-avatar-small');
+        const { userName, userStatus, logoutBtn, guestCta, referBtn, avatar } = state.dom.profile;
 
         if (state.currentUser) {
             if (state.currentUser.photoURL) {
-                avatarEl.innerHTML = `<img src="${state.currentUser.photoURL}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                avatar.innerHTML = `<img src="${state.currentUser.photoURL}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
             } else {
-                avatarEl.innerHTML = `<i class="fas fa-user"></i>`;
+                avatar.innerHTML = `<i class="fas fa-user"></i>`;
             }
 
             const referralLinkEl = document.getElementById('referralLink');
             if (referralLinkEl) {
-                // Note: _simpleHash is not in this file, so we call it via Handlers
-                referralLinkEl.textContent = `https://coastalfresh.in?ref=${Handlers.getReferralHash(state.currentUser.uid)}`;
+                referralLinkEl.textContent = `https://coastalfresh.in?ref=${_simpleHash(state.currentUser.uid)}`;
             }
 
             let displayName = 'Valued Customer';
@@ -1589,17 +1584,17 @@ export const UI = {
                 displayName = cleanedName.charAt(0).toUpperCase() + cleanedName.slice(1);
             }
 
-            userNameEl.textContent = displayName;
-            userStatusEl.textContent = state.currentUser.email;
+            userName.textContent = displayName;
+            userStatus.textContent = state.currentUser.email;
             logoutBtn.style.display = 'flex';
-            if (guestCtaBtn) guestCtaBtn.style.display = 'none';
+            if (guestCta) guestCta.style.display = 'none';
             if (referBtn) referBtn.style.display = 'flex';
         } else {
-            avatarEl.innerHTML = `<i class="fas fa-user"></i>`;
-            userNameEl.textContent = 'Guest User';
-            userStatusEl.textContent = 'You are browsing as a guest.';
+            avatar.innerHTML = `<i class="fas fa-user"></i>`;
+            userName.textContent = 'Guest User';
+            userStatus.textContent = 'You are browsing as a guest.';
             logoutBtn.style.display = 'none';
-            if (guestCtaBtn) guestCtaBtn.style.display = 'flex';
+            if (guestCta) guestCta.style.display = 'flex';
             if (referBtn) referBtn.style.display = 'none';
         }
     }
