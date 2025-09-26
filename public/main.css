@@ -1801,7 +1801,7 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
 
 .empty-cart {
   text-align: center;
-  padding: 40px 20px;
+  padding: 24px 20px; /* REFINED: Reduced vertical padding */
   color: var(--text-secondary);
   display: flex;
   flex-direction: column;
@@ -1813,9 +1813,9 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
 /* --- NEW: Simple & Clean Empty Cart Animation --- */
 .empty-cart-animation {
   position: relative;
-  width: 200px;
-  height: 140px;
-  margin-bottom: 24px;
+  width: 160px; /* REFINED: Smaller width */
+  height: 110px; /* REFINED: Reduced height */
+  margin-bottom: 16px; /* REFINED: Reduced margin */
   overflow: hidden;
   background: linear-gradient(to bottom, #e0f7ff, #a3daff);
   border-radius: 16px;
@@ -1907,15 +1907,15 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
 }
 
 .empty-cart p {
-  margin-bottom: 32px;
+  margin-bottom: 24px; /* REFINED: Reduced margin */
   }
   
   .empty-cart-btn {
     background: var(--primary-color);
     color: white;
     border: none;
-    border-radius: 12px;
-    padding: 16px 24px; /* Button / CTA */
+    border-radius: 10px; /* REFINED: Smaller radius */
+    padding: 12px 20px; /* REFINED: Reduced padding for a more compact button */
     font-size: 15px; /* UPDATED */
     font-weight: 500; /* Medium */
     cursor: pointer;
@@ -1927,8 +1927,8 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
 .empty-cart-recs-container {
   display: none; /* Hidden by default, shown by JS if items exist */
   width: 100%;
-  margin-top: 40px;
-  padding-top: 24px;
+  margin-top: 24px; /* REFINED: Reduced top margin */
+  padding-top: 20px; /* REFINED: Reduced top padding */
   border-top: 1px solid var(--border-color);
 }
 
@@ -1960,6 +1960,7 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  min-height: 210px; /* REFINED: Set a minimum height to ensure all content is visible */
 }
 
 .small-product-image {
@@ -1972,7 +1973,7 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
   object-fit: cover;
 }
 
-.small-product-info { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; }
+.small-product-info { padding: 8px; display: flex; flex-direction: column; flex-grow: 1; } /* REFINED: Ensure flex-grow works with min-height */
 .small-product-name {
   font-size: 13px;
   font-weight: 500;
