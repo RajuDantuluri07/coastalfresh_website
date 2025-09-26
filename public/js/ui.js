@@ -1,1302 +1,1590 @@
-let state, config, UI;
+let state, config, Handlers;
 
-/**
- * Creates a simple, non-cryptographic hash from a string.
- * @param {string} str The string to hash.
- * @returns {number} A positive integer hash.
- */
-function _simpleHash(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        hash = (hash << 5) - hash + str.charCodeAt(i);
-        hash |= 0; // Convert to 32bit integer
-    }
-    return Math.abs(hash);
-}
-
-export const Handlers = {
-    init: (appState, appConfig, uiModule) => {
+export const UI = {
+    init: (appState, appConfig, appHandlers) => {
         state = appState;
         config = appConfig;
-        UI = uiModule;
+        Handlers = appHandlers;
     },
 
-    /**
-     * A helper function to safely add event listeners.
-     * It checks if the element exists before adding the listener.
-     * @param {string} selector - The CSS selector for the element.
-     * @param {string} event - The event type (e.g., 'click').
-     * @param {Function} handler - The event handler function.
-     */
-    setupEvents: () => {
-        // --- Event Delegation on the Body for Dynamic/Repeated Elements ---
-        document.body.addEventListener('click', (e) => {
-            const target = e.target;
+    renderTrustIcons: () => {
+        const container = document.getElementById('trustStrip');
+        if (!container) return;
 
-            // Product card click (but not on buttons)
-            const productCard = target.closest('.product');
-            if (productCard && !target.closest('.cart-controls, .add-to-cart-btn')) {
-                e.preventDefault();
-                const productId = productCard.dataset.id;
-                // OPTIMIZATION: Prefetch the large image on mousedown/touchstart for faster popup load
-                const product = state.products.find(p => p.id === parseInt(productId));
-                if (product) {
-                    const img = new Image();
-                    img.src = UI.getOptimizedImageUrl(product.image, 600, 600);
-                }
+        container.innerHTML = '';
+        config.TRUST_ICONS.forEach((t, i) => {
+            const item = document.createElement('div');
+            item.className = 'trust-item';
+            item.setAttribute('data-index', String(i));
+            item.setAttribute('data-title', t.title);
 
-                if (productId) UI.showProductPopup(parseInt(productId));
-            }
+            const iconWrap = document.createElement('div');
+            iconWrap.className = 'icon-container';
+            iconWrap.innerHTML = `<i class="${t.icon}"></i>`;
+            const content = document.createElement('div');
+            content.className = 'trust-content';
+            const title = document.createElement('div'); title.className = 'trust-title'; title.textContent = t.title;
+            const sub = document.createElement('div'); sub.className = 'trust-sub'; sub.textContent = t.text;
 
-            // Add to cart button on product cards
-            const addBtn = target.closest('.add-to-cart-btn');
-            if (addBtn) {
-                e.stopPropagation();
-                const productId = addBtn.dataset.id;
-                if (productId) Handlers.addToCart(parseInt(productId));
-            }
-
-            // Quantity controls on product cards
-            const productQtyBtn = target.closest('.product .cart-controls .qty-btn');
-            if (productQtyBtn) {
-                e.stopPropagation();
-                const controls = productQtyBtn.closest('.cart-controls');
-                const productId = controls.dataset.id;
-                if (productId) {
-                    const change = productQtyBtn.classList.contains('inc') ? 1 : -1;
-                    Handlers.updateQty(parseInt(productId), change);
-                }
-            }
-
-            // Quantity controls in the cart
-            const cartQtyBtn = target.closest('.cart-item-card .qty-controls .cart-qty-btn');
-            if (cartQtyBtn) {
-                const productId = cartQtyBtn.dataset.id;
-                if (productId) {
-                    const change = cartQtyBtn.classList.contains('inc') ? 1 : -1;
-                    Handlers.updateQty(parseInt(productId), change);
-                }
-            }
-
-            // FAQ toggle
-            const faqToggle = target.closest('.faq .q');
-            if (faqToggle) {
-                UI.toggleFAQ(faqToggle);
-            }
-
-            // Carousel slide click
-            const slide = target.closest('.slide[data-action]');
-            if (slide) {
-                const { action, target: slideTarget } = slide.dataset;
-                if (action === 'showPage' && typeof UI.showPage === 'function') {
-                    UI.showPage(slideTarget);
-                } else if (action === 'showProductPopup' && typeof UI.showProductPopup === 'function') {
-                    const productId = parseInt(slideTarget, 10);
-                    if (!isNaN(productId)) {
-                        UI.showProductPopup(productId);
-                    }
-                } else if (action === 'openWhatsApp' && typeof Handlers.openWhatsApp === 'function') {
-                    Handlers.openWhatsApp(slideTarget);
-                }
-            }
-
-            // Product description toggle
-            const descToggle = target.closest('.popup-description-toggle');
-            if (descToggle) {
-                UI.toggleProductDescription();
-            }
-
-            // Accordion toggle for product details
-            const detailHeader = target.closest('.detail-header');
-            if (detailHeader) {
-                const detailItem = detailHeader.closest('.detail-item');
-                if (detailItem) {
-                    if (detailItem.id === 'productInfoDetailItem') {
-                        window.Analytics.trackEvent('view_item_details', {
-                            item_id: state.popupProduct?.id,
-                            item_name: state.popupProduct?.name
-                        });
-                    }
-                    const content = detailItem.querySelector('.detail-content');
-                    const icon = detailHeader.querySelector('i');
-                    const isOpen = detailItem.classList.toggle('active');
-
-                    content.style.maxHeight = isOpen ? content.scrollHeight + 'px' : '0';
-                    content.style.padding = isOpen ? '0 0 16px 0' : '0';
-                    if (icon) icon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
-                }
-            }
-
-            // --- Safely handle clicks on page-specific or modal buttons ---
-
-            // Login/Signup form toggling
-            if (target.id === 'showLogin') {
-                e.preventDefault();
-                document.getElementById('authTitle').textContent = 'Welcome Back';
-                document.getElementById('authSubtitle').textContent = 'Login to access your account';
-                document.getElementById('signupForm').classList.remove('active');
-                document.getElementById('loginForm').classList.add('active');
-                document.getElementById('authError').textContent = '';
-            }
-            if (target.id === 'showSignup') {
-                e.preventDefault();
-                document.getElementById('authTitle').textContent = 'Get Started';
-                document.getElementById('authSubtitle').textContent = 'Sign up to order the freshest coastal seafood';
-                document.getElementById('loginForm').classList.remove('active');
-                document.getElementById('signupForm').classList.add('active');
-                document.getElementById('authError').textContent = '';
-            }
-
-            // Category filter buttons
-            const categoryButton = target.closest('.category');
-            if (categoryButton) {
-                if (categoryButton.classList.contains('active')) return;
-                document.querySelector('.category.active').classList.remove('active');
-                categoryButton.classList.add('active');
-                state.currentCategory = categoryButton.dataset.category;
-                state.currentPageNumber = 1;
-                const searchInput = document.getElementById('catalogSearch');
-                if (searchInput) searchInput.value = '';
-                state.currentSearch = '';
-                UI.renderCatalogProducts();
-                window.Analytics.trackEvent('select_category', { category: state.currentCategory });
-            }
-
-            // Header buttons and View All
-            if (target.closest('#home .view-all')) {
-                e.preventDefault();
-                UI.showPage('catalog');
-            }
-
-            // Back buttons
-            const backBtn = target.closest('.page .back-btn');
-            if (backBtn) {
-                const pageId = backBtn.closest('.page').id;
-                if (pageId === 'addressPage') {
-                    state.editingAddressId ? Handlers.cancelEditAddress() : Handlers.goBack();
-                } else if (pageId !== 'loginModal' && pageId !== 'productPopup' && pageId !== 'cartModal') {
-                    Handlers.goBack();
-                }
-            }
-
-            // Address list actions
-            const optionsBtn = target.closest('.address-options-btn');
-            if (optionsBtn) {
-                const dropdown = optionsBtn.nextElementSibling;
-                document.querySelectorAll('.address-dropdown-content.active').forEach(openDropdown => {
-                    if (openDropdown !== dropdown) openDropdown.classList.remove('active');
-                });
-                dropdown.classList.toggle('active');
-                e.stopPropagation();
-                return;
-            }
-            const actionBtn = target.closest('.address-action-btn');
-            if (actionBtn) {
-                const addressId = actionBtn.dataset.id;
-                if (actionBtn.classList.contains('delete-address-btn')) Handlers.deleteAddress(addressId);
-                else if (actionBtn.classList.contains('set-default-btn')) Handlers.setDefaultAddress(addressId);
-                else if (actionBtn.classList.contains('edit-address-btn')) Handlers.editAddress(addressId);
-                actionBtn.closest('.address-dropdown-content').classList.remove('active');
-                return;
-            }
-            if (!target.closest('.address-options-menu')) {
-                document.querySelectorAll('.address-dropdown-content.active').forEach(d => d.classList.remove('active'));
-            }
-
-            // Confirmation modal buttons
-            if (target.id === 'cancelDeleteBtn') document.getElementById('confirmDeleteModal').classList.remove('active');
-            if (target.id === 'confirmDeleteBtn') Handlers.executeDeleteAddress();
-
-            // Order Success modal buttons
-            if (target.id === 'continueShoppingBtn') UI.closeOrderSuccessModal();
-            if (target.id === 'trackOrderBtn') Handlers.handleTrackOrder(e);
-
-            // Fixed "Add New Address" button
-            if (target.id === 'addNewAddressBtnFixed') UI.showAddressForm();
-
-            // Cart back button
-            if (target.closest('#cartModal .back-btn')) UI.closeCart();
-            if (target.closest('.cart-btn')) UI.showCart();
-
-            // Profile page buttons
-            const profileBtn = target.closest('.profile-button');
-            if (profileBtn) Handlers.handleProfileButtonClick(profileBtn);
-
-            // Checkout button in cart
-            if (target.id === 'cartPlaceOrderBtn') Handlers.checkout();
-
-            // NEW: Handle click on the entire order card to show details
-            const orderCard = target.closest('.order-card');
-            if (orderCard) {
-                const orderId = orderCard.dataset.orderId;
-                if (orderId) {
-                    state.db.collection('orders').doc(orderId).get().then(doc => {
-                        if (doc.exists) {
-                            UI.openOrderDetailsDrawer(doc.data());
-                        }
-                    });
-                }
-            }
-
-            // NEW: Handle click on the "Explore Today's Fresh Catch" button on the About Us page
-            if (target.id === 'aboutPageCtaBtn') {
-                UI.showPage('catalog');
-            }
-        });
-
-        // Typewriter focus/blur handlers
-        const catalogSearchInput = document.getElementById('catalogSearch');
-        catalogSearchInput.addEventListener('focus', UI.stopTypewriter);
-        catalogSearchInput.addEventListener('blur', () => {
-            if (!catalogSearchInput.value) UI.startTypewriter();
-        });
-
-        // Tooltip handler
-        document.body.addEventListener('click', e => {
-            const infoIcon = e.target.closest('.cart-bill-row .fa-info-circle');
-            if (infoIcon) {
-                e.preventDefault();
-                UI.showSimpleTooltip(infoIcon);
-            }
-        });
-
-        // Login Modal Close Button
-        document.querySelector('#loginModal .back-btn').addEventListener('click', UI.closeLoginModal);
-
-        // Auth Form Submissions
-        document.getElementById('loginForm').addEventListener('submit', Handlers.handleEmailLogin);
-        document.getElementById('signupForm').addEventListener('submit', Handlers.handleEmailSignup);
-        document.getElementById('googleLoginBtn').addEventListener('click', Handlers.handleGoogleLogin);
-        document.getElementById('forgotPassword').addEventListener('click', Handlers.handlePasswordReset);
-
-        // Header search inputs
-        document.getElementById('catalogSearch').addEventListener('input', (e) => {
-            clearTimeout(state.searchDebounceTimer);
-            state.searchDebounceTimer = setTimeout(() => Handlers.handleCatalogSearch(e), 300);
-        });
-
-        // Address form submission
-        document.getElementById('addressForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!state.currentUser) {
-                if (state.afterAddressAction) {
-                    state.afterAddressAction = null;
-                }
-                UI.showToast('You must be logged in to save an address.');
-                return;
-            }
-
-            const mobileInput = document.getElementById('addressMobile');
-            const pincodeInput = document.getElementById('addressPincode');
-
-            if (!/^\d{10}$/.test(mobileInput.value)) {
-                UI.showToast('Please enter a valid 10-digit mobile number.');
-                mobileInput.focus();
-                return;
-            }
-            if (!/^\d{6}$/.test(pincodeInput.value)) {
-                UI.showToast('Please enter a valid 6-digit pincode.');
-                pincodeInput.focus();
-                return;
-            }
-
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<div class="loading"></div>';
-
-            const addressData = {
-                fullName: document.getElementById('addressFullName').value,
-                mobile: mobileInput.value,
-                house: document.getElementById('addressHouse').value,
-                street: document.getElementById('addressStreet').value,
-                city: document.getElementById('addressCity').value,
-                pincode: pincodeInput.value,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            try {
-                const addressesRef = state.db.collection('users').doc(state.currentUser.uid).collection('addresses');
-
-                if (state.editingAddressId) {
-                    await addressesRef.doc(state.editingAddressId).update(addressData);
-                    UI.showToast('Address updated successfully!');
-                } else {
-                    const snapshot = await addressesRef.get();
-                    if (snapshot.empty) {
-                        addressData.isDefault = true;
-                    }
-                    await addressesRef.add(addressData);
-                    UI.showToast('Address saved successfully!');
-                }
-
-                if (typeof state.afterAddressAction === 'function') {
-                    UI.showToast('Address saved! Completing your order...');
-                    const action = state.afterAddressAction;
-                    state.afterAddressAction = null;
-                    action();
-                } else {
-                    await UI.renderAddressList();
-                    Handlers.goBack();
-                }
-            } catch (error) {
-                console.error("Error saving address: ", error);
-                UI.showToast('Failed to save address. Please try again.');
-                if (state.afterAddressAction) state.afterAddressAction = null;
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Save Address';
-            }
-        });
-
-        document.querySelector('.popup-back-btn').addEventListener('click', UI.closePopup);
-        document.querySelector('.popup-action-btn.favorite').addEventListener('click', Handlers.toggleFavorite);
-        document.querySelector('.popup-action-btn.share').addEventListener('click', Handlers.shareProduct);
-
-        // Event delegation for the dynamic sticky CTA
-        document.getElementById('popupStickyCta').addEventListener('click', (e) => {
-            const addBtn = e.target.closest('.popup-cta-add-btn');
-            const qtyBtn = e.target.closest('.qty-btn');
-            if (addBtn) Handlers.addPopupToCart();
-            if (qtyBtn) {
-                const isInCart = state.cart[state.popupProduct?.id] > 0;
-                const change = qtyBtn.classList.contains('inc') ? 1 : -1;
-                if (isInCart) Handlers.updateQty(state.popupProduct.id, change);
-                else Handlers.changePopupQty(change);
-            }
-        });
-
-        // Coupon section
-        document.getElementById('cartCouponSection').addEventListener('click', e => {
-            if (e.target.id === 'applyCouponBtn') {
-                Handlers.applyCoupon();
-            }
-            if (e.target.id === 'removeCouponBtn') {
-                Handlers.removeCoupon();
-            }
-        });
-
-        // Payment options
-        document.getElementById('paymentOptions').addEventListener('click', e => {
-            const paymentBtn = e.target.closest('.cart-pay-item');
-            if (paymentBtn && !paymentBtn.classList.contains('active')) {
-                document.querySelector('.payment-btn.active').classList.remove('active');
-                paymentBtn.classList.add('active');
-                state.selectedPaymentMethod = paymentBtn.dataset.method;
-
-                window.Analytics.trackEvent('select_payment_method', { method: state.selectedPaymentMethod });
-
-                if (state.selectedPaymentMethod === 'online') {
-                    UI.showToast('Online payment is coming soon!');
-                }
-            }
-        });
-
-        // Bottom Navigation
-        document.getElementById('bottomNav').addEventListener('click', e => {
-            const navItem = e.target.closest('.nav-item');
-            if (!navItem) return;
-            const page = navItem.dataset.page;
-            if (page === 'cart') {
-                UI.showCart();
-            } else if (page) {
-                if (page === 'profilePage' && !state.currentUser) {
-                    UI.showPage(page);
-                } else {
-                    UI.showPage(page);
-                }
-            }
-        });
-
-        // Dynamic Padding & Keyboard Handling for Product Popup
-        const popupStickyCta = document.getElementById('popupStickyCta');
-        const popupContentWrapper = document.getElementById('popupContentWrapper');
-
-        const resizeObserver = new ResizeObserver(() => {
-            const ctaHeight = popupStickyCta.offsetHeight;
-            popupContentWrapper.style.paddingBottom = `${ctaHeight + 10}px`;
-        });
-        if (popupStickyCta) resizeObserver.observe(popupStickyCta);
-
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', () => {
-                const isKeyboardOpen = window.visualViewport.height < window.innerHeight * 0.7;
-                popupStickyCta.classList.toggle('keyboard-open', isKeyboardOpen);
+            content.appendChild(title); content.appendChild(sub);
+            item.appendChild(iconWrap); item.appendChild(content);
+            item.addEventListener('click', () => {
+                window.Analytics.trackEvent('click', { location: 'trust_strip', item_title: t.title, item_index: i });
             });
-        }
-
-        // Dynamic Padding for Cart Footer
-        const cartFooterEl = document.getElementById('cartFooter');
-        const cartContentWrapperEl = document.querySelector('.cart-content-wrapper');
-        const cartResizeObserver = new ResizeObserver(() => {
-            const footerHeight = cartFooterEl.offsetHeight;
-            cartContentWrapperEl.style.paddingBottom = `${footerHeight}px`;
-        });
-        if (cartFooterEl && cartContentWrapperEl) cartResizeObserver.observe(cartFooterEl);
-
-        Handlers.setupInstallPromptEvents();
-    },
-
-    handleProfileButtonClick: async (button) => {
-        if (button.id === 'guestProfileCta') {
-            UI.showLoginModal(null, 'signup');
-        } else if (button.id === 'logoutBtn') {
-            Handlers.handleLogout();
-        } else if (button.id === 'referBtn') {
-            UI.showPage('referPage');
-        } else if (button.id === 'profileInstallBtn') {
-            UI.triggerInstallPrompt();
-        } else if (button.classList.contains('orders')) {
-            UI.showPage('ordersPage');
-        } else if (button.classList.contains('address')) {
-            if (state.currentUser) {
-                await UI.renderAddressList();
-                UI.showPage('addressPage');
-            } else {
-                UI.showToast('Please login to manage your address.');
-                UI.showLoginModal();
-            }
-        } else if (button.classList.contains('faq')) {
-            UI.showPage('faqPage');
-        } else if (button.classList.contains('about')) {
-            UI.showPage('aboutPage');
-        } else if (button.classList.contains('support')) {
-            Handlers.openWhatsApp('support');
-        } else if (button.classList.contains('notifications')) {
-            if (!state.currentUser) {
-                UI.showToast('Please login to manage notifications.');
-                UI.showLoginModal();
-                return;
-            }
-            // Directly trigger the permission flow.
-            navigator.serviceWorker.ready.then(Handlers.initFirebaseMessaging);
-            UI.showToast('Please check your browser for a permission pop-up.');
-        }
-    },
-
-    changePopupQty: (change) => {
-        state.currentProductQty = Math.max(1, Math.min(99, state.currentProductQty + change));
-        UI.updatePopupCta();
-    },
-
-    addPopupToCart: () => {
-        if (!state.popupProduct || !state.popupProduct.available) return;
-
-        const qty = state.currentProductQty;
-
-        if (state.cart[state.popupProduct.id]) {
-            state.cart[state.popupProduct.id] = Math.min(99, state.cart[state.popupProduct.id] + qty);
-        } else {
-            state.cart[state.popupProduct.id] = qty;
-        }
-
-        Handlers.saveCart();
-        UI.updateCartUI();
-        UI.showToast(`${DOMPurify.sanitize(state.popupProduct.name)} added to cart!`);
-        UI.closePopup();
-
-        window.Analytics.trackAddToCart(state.popupProduct, qty);
-    },
-
-    /**
-     * Adds multiple items to the cart, saves, and updates UI.
-     * This is more efficient than calling addToCart in a loop as it shows a single toast.
-     * @param {Array} items - Array of items from an order ({ id, qty }).
-     */
-    addMultipleToCart: (items) => {
-        if (!items || items.length === 0) return;
-
-        let itemsAddedCount = 0;
-        items.forEach(item => {
-            const product = state.products.find(p => p.id === parseInt(item.id));
-            const qtyToAdd = (typeof item.qty === 'number' && item.qty > 0) ? item.qty : 1;
-            if (product && product.available) {
-                state.cart[item.id] = (state.cart[item.id] || 0) + qtyToAdd;
-                itemsAddedCount++;
-                // FIX: Add analytics tracking for each reordered item
-                window.Analytics.trackAddToCart(product, qtyToAdd);
-            }
-        });
-
-        if (itemsAddedCount > 0) {
-            Handlers.saveCart();
-            UI.updateCartUI();
-            UI.showToast(`${itemsAddedCount} item(s) from your previous order have been added to the cart!`);
-            UI.showCart();
-        }
-    },
-    toggleFavorite: () => {
-        state.isPopupFavorite = !state.isPopupFavorite;
-        const favoriteBtn = document.querySelector('.popup-action-btn.favorite');
-        favoriteBtn.setAttribute('aria-pressed', state.isPopupFavorite);
-        favoriteBtn.setAttribute('aria-label', state.isPopupFavorite ? 'Remove from Favorites' : 'Add to Favorites');
-        favoriteBtn.innerHTML = `<i class="${state.isPopupFavorite ? 'fas' : 'far'} fa-heart"></i>`;
-        favoriteBtn.style.color = state.isPopupFavorite ? 'var(--error-color)' : 'var(--primary-color)';
-
-        if (state.popupProduct) {
-            window.Analytics.trackEvent(state.isPopupFavorite ? 'add_to_wishlist' : 'remove_from_wishlist', {
-                currency: 'INR',
-                value: state.popupProduct.finalPrice * state.currentProductQty,
-                items: [{
-                    item_id: state.popupProduct.id,
-                    item_name: state.popupProduct.name,
-                    item_category: state.popupProduct.category,
-                    price: state.popupProduct.finalPrice
-                }]
-            });
-        }
-    },
-
-    shareProduct: async () => {
-        let referralLink = 'https://coastalfresh.in?ref=GUEST123';
-        if (state.currentUser && state.currentUser.uid) {
-            referralLink = `https://coastalfresh.in?ref=${_simpleHash(state.currentUser.uid)}`;
-        }
-        // The text message is the most important part, as it contains the referral link.
-        const referralMessage = `Hey! I’ve been ordering from Coastal Fresh – always fresh and delivered to my home in Hyderabad. You should try it! Use my link for 10% off on your first order. 👉 ${referralLink}`;
-        const shareTitle = 'Get 10% Off at Coastal Fresh!';
-
-        if (navigator.share) {
-            try {
-                // We prioritize sharing the text to ensure the referral link is always sent.
-                // Some apps, like WhatsApp, ignore text when an image file is included.
-                await navigator.share({
-                    title: shareTitle,
-                    text: referralMessage,
-                    url: referralLink // Providing the URL separately helps some apps create a better preview.
-                });
-            } catch (error) {
-                // This error is thrown if the user cancels the share dialog, which is normal behavior.
-                console.log('Share was cancelled or failed', error);
-            }
-        } else {
-            // Fallback for desktop browsers or those that don't support the Web Share API.
-            window.open(`https://wa.me/?text=${encodeURIComponent(referralMessage)}`, '_blank');
-        }
-
-        window.Analytics.trackEvent('share', {
-            method: 'Web Share API',
-            content_type: 'referral',
-            item_id: 'referral_link',
+            container.appendChild(item);
         });
     },
 
-    goBack: () => {
-        if (state.pageHistory.length > 1) {
-            state.pageHistory.pop();
-            const previousPage = state.pageHistory[state.pageHistory.length - 1];
-            UI.showPage(previousPage);
-        } else {
-            UI.showPage('home');
-        }
+    renderCategories: () => {
+        const container = document.getElementById('categories');
+        if (!container) return;
+
+        container.innerHTML = config.CATEGORIES_DATA.map((cat, index) => `
+      <button class="category ${index === 0 ? 'active' : ''}" data-category="${cat.key}">
+        ${cat.icon ? `<img src="${cat.icon}" alt="${cat.label}" class="category-icon" loading="lazy">` : ''}
+        <span>${cat.label}</span>
+      </button>
+    `).join('');
     },
 
-    addToCart: (id, qty = 1) => {
-        const product = state.products.find(p => p.id === id);
-        if (!product || !product.available) return;
+    renderCustomerReviews: () => {
+        const container = document.getElementById('reviewsCarousel');
+        if (!container) return;
 
-        if (state.cart[id]) {
-            state.cart[id] = Math.min(99, state.cart[id] + qty);
-        } else {
-            state.cart[id] = qty;
-        }
+        container.innerHTML = config.CUSTOMER_REVIEWS.map(review => {
+            const firstName = review.name.split(' ')[0];
+            const safeName = DOMPurify.sanitize(firstName);
+            const safeLocation = DOMPurify.sanitize(review.location);
+            const safeReview = DOMPurify.sanitize(review.review);
 
-        Handlers.saveCart();
-        UI.updateCartUI();
-        UI.updatePopupCta();
-        UI.updateProductCardState(id);
-        UI.showToast(`${product.name} added to cart!`);
+            const rating = (typeof review.rating === 'number' && review.rating >= 0 && review.rating <= 5)
+                ? review.rating
+                : 0;
 
-        const addedProduct = state.products.find(p => p.id === parseInt(id));
-        if (addedProduct) window.Analytics.trackAddToCart(addedProduct, qty);
+            const avatar = review.image
+                ? `<img src="${review.image}" alt="Avatar of ${safeName}" class="review-avatar" loading="lazy">`
+                : `<div class="review-avatar-initials">${review.name.charAt(0)}</div>`;
+
+            let stars = '';
+            for (let i = 0; i < 5; i++) {
+                stars += `<i class="fas fa-star ${i < rating ? '' : 'far'}"></i>`;
+            }
+
+            return `
+        <div class="review-card">
+          <div class="review-header">
+            ${avatar}
+            <div class="review-customer">
+              <div class="review-name">${safeName}</div>
+              <div class="review-location">${safeLocation}</div>
+            </div>
+          </div>
+          <div class="review-rating" role="img" aria-label="Rating: ${rating} out of 5 stars">${stars}</div>
+          <p class="review-body">“${safeReview}”</p>
+        </div>
+      `;
+        }).join('');
     },
 
-    updateQty: (id, change) => {
-        if (!state.cart[id]) return;
-
-        const product = state.products.find(p => p.id === parseInt(id));
-        const originalQty = state.cart[id];
-
-        state.cart[id] += change;
-        if (state.cart[id] <= 0) {
-            delete state.cart[id];
-            if (product) {
-                window.Analytics.trackEvent('remove_from_cart', {
-                    currency: 'INR',
-                    value: product.finalPrice * originalQty,
-                    items: [{
-                        item_id: product.id,
-                        item_name: product.name,
-                        item_category: product.category,
-                        price: product.finalPrice,
-                        quantity: originalQty
-                    }]
-                });
-            }
-        } else {
-            if (product) window.Analytics.trackChangeQty(product, change, state.cart[id]);
-        }
-        Handlers.saveCart();
-
-        if (document.getElementById('cartModal').classList.contains('active')) {
-            const itemEl = document.querySelector(`.cart-item-card[data-id="${id}"]`);
-            UI.updatePopupCta();
-            if (itemEl) {
-                if (state.cart[id]) {
-                    const qtyEl = itemEl.querySelector('.cart-qty');
-                    qtyEl.textContent = state.cart[id];
-                } else {
-                    itemEl.classList.add('removing');
-                    // Instead of re-rendering the whole cart, just remove the element
-                    itemEl.addEventListener('transitionend', () => {
-                        itemEl.remove();
-                    }, { once: true });
-                }
-            }
-            UI.updateCartSummary();
-            UI.updateCartBadges();
-        } else {
-            UI.updateCartUI();
-        }
-        UI.updateProductCardState(id);
-    },
-
-    checkout: async () => {
-        const cartFooter = document.getElementById('cartFooter');
-        const checkoutBtn = document.getElementById('cartPlaceOrderBtn');
-        const rawItems = Object.keys(state.cart).map(id => {
-            const product = state.products.find(p => p.id === parseInt(id));
-            if (!product) {
-                console.warn(`Product ID ${id} from cart not found in products data. It will be removed.`);
-                return null;
-            }
-            return { ...product, qty: state.cart[id] };
-        });
-
-        const items = rawItems.filter(Boolean);
-
-        if (items.length !== rawItems.length) {
-            state.cart = items.reduce((acc, item) => {
-                acc[item.id] = item.qty;
-                return acc;
-            }, {});
-            Handlers.saveCart();
-            UI.updateCartUI();
-            UI.showToast("Some items were removed as they are no longer available. Please review your cart.");
-            return; // FIX: Stop checkout if cart was modified to allow user review.
-        }
-
-        if (items.length === 0) return;
-
-        if (state.selectedPaymentMethod === 'online') {
-            UI.showToast('Online payment is coming soon! Please select Cash on Delivery.');
-            return; // Stop checkout if online payment is selected
-        }
-
-        if (!state.currentUser) {
-            document.getElementById('cartModal').classList.remove('active');
-            UI.showToast('Please log in to continue checkout.');
-            // FIX: Instead of re-running checkout, just show the cart again after login.
-            // This allows the user to review their cart before placing the order.
-            state.afterLoginAction = UI.showCart;
-
-            UI.showLoginModal(null, 'signup');
+    renderFlashSale: () => {
+        const section = document.getElementById('flashSaleSection');
+        if (!config.ENABLE_FLASH_SALE) {
+            if (section) section.style.display = 'none';
             return;
         }
 
-        let userAddress = null;
+        const container = document.getElementById('flashSaleProducts');
+        if (!container) return;
+
+        let skeletonHTML = '';
+        for (let i = 0; i < config.FLASH_SALE_PRODUCT_IDS.length; i++) {
+            skeletonHTML += UI.createSkeletonProductHTML();
+        }
+        container.innerHTML = skeletonHTML;
+
+        const flashSaleProducts = state.products.filter(p => config.FLASH_SALE_PRODUCT_IDS.includes(p.id));
+        if (flashSaleProducts.length === 0) {
+            if (section) section.style.display = 'none';
+            return;
+        }
+        container.innerHTML = flashSaleProducts.map(p => UI.createProductHTML(p, { isFlashSale: true })).join('');
+    },
+
+    createSkeletonProductHTML: () => {
+        return `
+      <div class="skeleton-card">
+        <div class="skeleton-image shimmer"></div>
+        <div class="skeleton-info">
+          <div class="skeleton-text shimmer w-75"></div>
+          <div class="skeleton-text shimmer w-50"></div>
+          <div class="skeleton-footer">
+            <div class="skeleton-price shimmer"></div>
+            <div class="skeleton-button shimmer"></div>
+          </div>
+        </div>
+      </div>
+    `;
+    },
+
+    updateSEOTags: ({ title, description, canonicalPath, imageUrl }) => {
+        const defaultTitle = 'Coastal Fresh India: Buy Fresh Fish & Seafood Online in Hyderabad';
+        const defaultDesc = 'The best place to buy fresh fish and seafood online in Hyderabad, India! Coastal Fresh offers a wide variety of hygienically cleaned fish, prawns, crabs, and authentic Andhra pickles with next-day delivery. Order now for the freshest catch.';
+        const defaultImage = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png';
+        const baseUrl = 'https://www.coastalfresh.in';
+
+        const finalTitle = title || defaultTitle;
+        const finalDesc = description || defaultDesc;
+        const finalCanonical = baseUrl + (canonicalPath || '/');
+        const finalImage = imageUrl || defaultImage;
+
+        document.title = finalTitle;
+
+        const descTag = document.querySelector('meta[name="description"]');
+        if (descTag) descTag.setAttribute('content', finalDesc);
+
+        const canonicalTag = document.querySelector('link[rel="canonical"]');
+        if (canonicalTag) canonicalTag.setAttribute('href', finalCanonical);
+
+        document.querySelector('meta[property="og:title"]').setAttribute('content', finalTitle);
+        document.querySelector('meta[property="og:description"]').setAttribute('content', finalDesc);
+        document.querySelector('meta[property="og:url"]').setAttribute('content', finalCanonical);
+        document.querySelector('meta[property="og:image"]').setAttribute('content', finalImage);
+        document.querySelector('meta[name="twitter:title"]').setAttribute('content', finalTitle);
+        document.querySelector('meta[name="twitter:description"]').setAttribute('content', finalDesc);
+        document.querySelector('meta[name="twitter:image"]').setAttribute('content', finalImage);
+    },
+
+    getOptimizedImageUrl: (url, width, height) => {
+        if (!url || !url.includes('res.cloudinary.com')) {
+            return url;
+        }
+        const transformations = `f_auto,q_auto,c_fill,w_${width},h_${height}`;
+        return url.replace('/image/upload/', `/image/upload/${transformations}/`);
+    },
+
+    renderFeaturedProducts: () => {
+        const container = document.getElementById('featuredProducts');
+        if (!container) return;
+
+        const featured = state.products.filter(p => config.FEATURED_PRODUCT_IDS.includes(p.id));
+        container.innerHTML = featured.map(UI.createProductHTML).join('');
+    },
+
+    renderCatalogProducts: () => {
+        const container = document.getElementById('catalogProducts');
+        if (!container) return;
+
+        if (state.currentPageNumber === 1) {
+            let skeletonHTML = '';
+            for (let i = 0; i < config.ITEMS_PER_PAGE; i++) {
+                skeletonHTML += UI.createSkeletonProductHTML();
+            }
+            container.innerHTML = skeletonHTML;
+        } else {
+            const showMoreBtn = container.querySelector('.show-more-btn');
+            if (showMoreBtn) {
+                showMoreBtn.innerHTML = '<div class="loading"></div>';
+                showMoreBtn.disabled = true;
+            }
+        }
+
+        UI.populateCatalogProducts();
+    },
+
+    populateCatalogProducts: () => {
+        const container = document.getElementById('catalogProducts');
+        if (!container) return;
+
+        let filtered = state.products.filter(p => {
+            const matchCategory = state.currentCategory === 'All' || p.category === state.currentCategory;
+            const matchSearch = !state.currentSearch || p.name.toLowerCase().includes(state.currentSearch.toLowerCase()) ||
+                (p.desc && p.desc.toLowerCase().includes(state.currentSearch.toLowerCase()));
+            return matchCategory && matchSearch;
+        });
+
+        if (filtered.length === 0) {
+            container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #8E8E93;">No products found</div>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(UI.createProductHTML).join('');
+    },
+
+    createProductHTML: (product, options = {}) => {
         try {
-            const addressSnapshot = await state.db.collection('users').doc(state.currentUser.uid).collection('addresses').where('isDefault', '==', true).limit(1).get();
-            if (!addressSnapshot.empty) {
-                userAddress = addressSnapshot.docs[0].data();
+            // Defensive check for the most critical product properties.
+            if (!product || typeof product.id === 'undefined' || !product.name) {
+                console.warn('Skipping render for invalid product data:', product);
+                return ''; // Return an empty string to not break the .join('')
             }
+
+            const hasOffer = product.mrp > product.finalPrice;
+            const isInCart = state.cart[product.id];
+            const optimizedImage = UI.getOptimizedImageUrl(product.image, 300, 300);
+            const sanitizedName = DOMPurify.sanitize(product.name);
+            return `
+          <div class="product" data-id="${product.id}">
+            <div class="product-image">
+              ${hasOffer ? `<div class="offer-badge">${product.offer}% OFF</div>` : ''}
+              ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
+              <img src="${optimizedImage}" alt="Fresh ${sanitizedName} delivery in Hyderabad by Coastal Fresh India" loading="lazy" width="300" height="300">
+            </div>
+            <div class="product-info">
+              <div class="product-name">${sanitizedName}</div>
+              <div class="product-weight">${product.net} Net</div>
+              <div class="product-footer">
+                <div class="product-price">
+                  <span class="price">₹${product.finalPrice}</span>
+                  ${hasOffer ? `<span class="old-price">₹${product.mrp}</span>` : ''}
+                </div>
+                ${product.available ?
+                    (isInCart ?
+                        `<div class="cart-controls" data-id="${product.id}">
+                      <button class="qty-btn dec">-</button>
+                      <span class="qty">${isInCart}</span>
+                      <button class="qty-btn inc">+</button>
+                    </div>`
+                        : `<button class="add-to-cart-btn add-pill" data-id="${product.id}"><i class="fas fa-plus"></i> Add</button>`)
+                    : ''}
+              </div>
+            </div>
+          </div>
+        `;
         } catch (error) {
-            console.error("Error fetching user address for checkout:", error);
-            UI.showToast("Could not verify your address. Please try again.");
-            return;
+            console.error(`Error rendering product card for product ID ${product?.id}:`, error);
+            // Return an empty string so the rest of the products can render.
+            return '';
+        }
+    },
+
+    generateProductSlug: (product) => {
+        if (!product || !product.name) return '';
+        const namePart = product.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
+        return `${namePart}-${product.id}`;
+    },
+
+    showProductPopup: (id) => {
+        const numericId = parseInt(id);
+        if (isNaN(numericId)) return;
+        const product = state.products.find(p => p.id === numericId);
+        if (!product) return;
+
+        // --- OPTIMIZATION: Prioritize visual updates first ---
+
+        state.popupProduct = product;
+        state.currentProductQty = state.cart[product.id] || 1;
+
+        // Use cached DOM elements for speed
+        const { main: popup, title, weight, priceSection, infoContent, mainImage, contentWrapper, backBtn } = state.dom.popup;
+
+        title.textContent = DOMPurify.sanitize(product.name);
+        weight.textContent = `${product.net} Net Weight`;
+
+        if (product.mrp > product.finalPrice) {
+            const savings = product.mrp - product.finalPrice;
+            priceSection.innerHTML = `
+        <span class="popup-price-final">₹${product.finalPrice}</span>
+        <span class="popup-price-mrp">₹${product.mrp}</span>
+        <span class="popup-price-savings-badge">SAVE ₹${savings}</span>
+      `;
+        } else {
+            priceSection.innerHTML = `<span class="popup-price-final">₹${product.finalPrice}</span>`;
         }
 
-        if (!userAddress) {
-            state.afterAddressAction = Handlers.checkout;
-            UI.showToast('Please add a delivery address to continue.');
-            UI.showPage('addressPage');
-            UI.showAddressForm();
-            UI.closeCart();
-            return;
+        infoContent.innerHTML = `
+      <p>${DOMPurify.sanitize(product.desc)}</p>
+      <p style="margin-top: 16px;"><strong>Gross Wt:</strong> ${product.gross} | <strong>Net Wt:</strong> ${product.net}<br><small>Net weight is after cleaning. Weight loss varies by product.</small></p>`;
+
+        const optimizedPopupImage = UI.getOptimizedImageUrl(product.image, 600, 600);
+        mainImage.src = optimizedPopupImage;
+        mainImage.alt = `High-quality ${DOMPurify.sanitize(product.name)} from Coastal Fresh India`;
+
+        document.getElementById('popupImageIndicators').style.display = 'none';
+
+        // Reset accordion state
+        document.querySelectorAll('.detail-item.active').forEach(item => {
+            item.classList.remove('active');
+            item.querySelector('.detail-content').style.maxHeight = '0';
+            item.querySelector('.detail-content').style.padding = '0';
+            const icon = item.querySelector('.detail-header i');
+            if (icon) icon.style.transform = 'rotate(0deg)';
+        });
+
+        // NEW: Automatically open the "Product Details" accordion by default
+        const productInfoItem = document.getElementById('productInfoDetailItem');
+        if (productInfoItem) {
+            const content = productInfoItem.querySelector('.detail-content');
+            const icon = productInfoItem.querySelector('.detail-header i');
+
+            productInfoItem.classList.add('active');
+            // Set max-height to its scroll height to animate it open
+            content.style.maxHeight = content.scrollHeight + 'px';
+            content.style.padding = '0 0 16px 0';
+            if (icon) icon.style.transform = 'rotate(180deg)';
         }
 
-        // NEW: Disable the button to prevent double-clicks
-        if (checkoutBtn) {
-            checkoutBtn.disabled = true;
-            checkoutBtn.innerHTML = '<div class="loading"></div>';
-        }
-        const orderId = `CF-${Date.now()}${Math.floor(Math.random() * 100)}`;
+        UI.updatePopupCta();
+        if (contentWrapper) contentWrapper.scrollTop = 0;
 
-        const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
-        const couponDiscount = state.appliedCoupon ? (state.appliedCoupon.type === 'percent' ? (subtotal * state.appliedCoupon.value) / 100 : state.appliedCoupon.value) : 0;
-        
-        // FIX: Calculate delivery fee using the same logic as the UI for consistency.
-        const deliveryFee = (subtotal - couponDiscount) >= config.FREE_DELIVERY_THRESHOLD ? 0 : 100;
-        const total = subtotal - couponDiscount + deliveryFee;
+        // --- Show the modal immediately ---
+        state.isPopupOpen = true;
+        UI.openModal(popup, backBtn);
 
-        const orderData = {
-            orderId: orderId,
-            userId: state.currentUser.uid,
-            items: items.map(item => ({ id: item.id, name: item.name, qty: item.qty, price: item.finalPrice, image: item.image })),
-            subtotal: Math.round(subtotal),
-            coupon: state.appliedCoupon ? { code: state.appliedCoupon.code, discount: Math.round(couponDiscount) } : null,
-            deliveryFee: Math.round(deliveryFee),
-            total: Math.round(total),
-            address: userAddress,
-            paymentMethod: state.selectedPaymentMethod,
-            status: 'Pending',
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        // --- OPTIMIZATION: Defer non-critical tasks to run after the popup is visible ---
+        const runDeferredTasks = () => {
+            const productSlug = UI.generateProductSlug(product);
+            const productUrl = `/product/${productSlug}`;
+            const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
+            const productDesc = product.desc;
+            const optimizedProductImage = UI.getOptimizedImageUrl(product.image, 1200, 630);
+
+            // Update SEO tags and browser history
+            UI.updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
+            history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
+
+            // Inject JSON-LD schema
+            const existingJsonLd = document.getElementById('product-breadcrumb-jsonld');
+            if (existingJsonLd) existingJsonLd.remove();
+            const breadcrumb = { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" }, { "@type": "ListItem", "position": 2, "name": "All Products", "item": "https://www.coastalfresh.in/catalog" }, { "@type": "ListItem", "position": 3, "name": product.name, "item": `https://www.coastalfresh.in${productUrl}` }] };
+            const script = document.createElement('script');
+            script.type = 'application/ld+json';
+            script.id = 'product-breadcrumb-jsonld';
+            script.textContent = JSON.stringify(breadcrumb);
+            document.head.appendChild(script);
         };
 
-        // Track that the user has initiated the checkout process.
-        window.Analytics.trackBeginCheckout(orderId, total, items);
-
-        state.db.collection('orders').add(orderData)
-            .then(() => {
-                state.cart = {};
-                Handlers.saveCart();
-                UI.updateCartUI();
-                UI.closeCart();
-                UI.showOrderSuccessModal(orderId);
-
-                window.Analytics.trackPurchase(orderId, total, items);
-            })
-            .catch((error) => {
-                console.error("Error saving order to Firestore:", error);
-                UI.showToast("Could not place your order. Please try again.");
-                window.Analytics.trackEvent('purchase_failure', {
-                    error_message: error.message
-                });
-            })
-            .finally(() => {
-                // NEW: Re-enable the button after the process is complete
-                if (checkoutBtn) {
-                    checkoutBtn.disabled = false;
-                    // The text will be updated by updateCartSummary if the cart is still open
-                    checkoutBtn.textContent = 'Place Order';
-                }
-            });
-    },
-
-    handleTrackOrder: () => {
-        UI.closeModal(document.getElementById('orderSuccessModal'));
-        UI.showPage('ordersPage');
-    },
-
-    handleCatalogSearch: (e) => {
-        state.currentSearch = e.target.value;
-        state.currentPageNumber = 1;
-        UI.renderCatalogProducts();
-
-        if (state.currentSearch) {
-            window.Analytics.trackEvent('view_search_results', {
-                search_term: state.currentSearch,
-                category: state.currentCategory
-            });
-        }
-    },
-
-    copyReferralLink: () => {
-        const referralLink = document.getElementById('referralLink').textContent;
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(referralLink).then(() => {
-                UI.showToast('Referral link copied!');
-            }, (err) => {
-                console.error('Could not copy text: ', err);
-                UI.showToast('Failed to copy link.');
-            });
-        }
-    },
-
-    openWhatsApp: (type, orderId = null) => {
-        let message = '';
-        // FIX: Use centralized phone number from config
-        let url = `https://wa.me/${config.SUPPORT_PHONE_NUMBER}`;
-
-        if (type === 'support') {
-            message = orderId
-                ? `Hi Coastal Fresh, I need assistance with my order #${orderId}.`
-                : 'Hi Coastal Fresh, I need some assistance.';
-        } else if (type === 'refer') {
-            const referralLink = document.getElementById('referralLink').textContent;
-            message = `Hey! I’ve been ordering seafood from Coastal Fresh – always fresh, neatly cleaned and delivered to my home in Hyderabad. You should try it! Use my referral link for 10% off on your first order. 👉 ${referralLink}`;
-            url = 'https://wa.me/';
-        }
-        window.open(`${url}?text=${encodeURIComponent(message)}`, '_blank');
-    },
-
-    loadCart: () => {
-        try {
-            const saved = localStorage.getItem('coastalFreshCart');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                state.cart = Handlers.sanitizeCartShape(parsed);
-                UI.updateCartUI();
-            }
-        } catch (e) {
-            console.error('Error loading cart from localStorage:', e);
-        }
-    },
-
-    saveCart: () => {
-        try {
-            localStorage.setItem('coastalFreshCart', JSON.stringify(state.cart));
-        } catch (e) {
-            if (e.name === 'QuotaExceededError') {
-                console.warn('Storage quota exceeded, cart may not persist.');
-            } else {
-                console.error('Error saving cart:', e);
-            }
-        }
-    },
-
-    sanitizeCartShape: (cartData) => {
-        if (!cartData || typeof cartData !== 'object') return {};
-        const sanitized = {};
-
-        for (const [id, qty] of Object.entries(cartData)) {
-            const product = state.products.find(p => p.id === parseInt(id));
-            if (!product) continue;
-
-            const numericQty = parseInt(qty);
-            if (isNaN(numericQty)) continue;
-
-            const clampedQty = Math.max(0, Math.min(99, numericQty));
-            if (clampedQty > 0) {
-                sanitized[id] = clampedQty;
-            }
+        // Use requestIdleCallback for modern browsers, fallback to setTimeout
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(runDeferredTasks, { timeout: 500 });
+        } else {
+            setTimeout(runDeferredTasks, 100);
         }
 
-        return sanitized;
-    },
-
-    handleEmailSignup: (e) => {
-        e.preventDefault();
-        const email = document.getElementById('signupEmail').value;
-        const password = document.getElementById('signupPassword').value;
-        const authError = document.getElementById('authError');
-        authError.textContent = '';
-
-        firebase.auth().createUserWithEmailAndPassword(email, password)
-            .then(userCredential => {
-                const user = userCredential.user;
-                state.db.collection('users').doc(user.uid).set({
-                    email: user.email,
-                    displayName: user.displayName || null,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                window.Analytics.trackEvent('sign_up', { method: 'Email' });
-                if (state.afterLoginAction) {
-                    UI.showToast('Success! Taking you to checkout...');
-                } else {
-                    UI.showToast('Account created successfully!');
-                }
-                UI.closeLoginModal();
-            })
-            .catch(error => {
-                authError.textContent = error.message;
-                window.Analytics.trackEvent('sign_up_failure', { method: 'Email' });
-            });
-    },
-
-    handleEmailLogin: (e) => {
-        e.preventDefault();
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        const authError = document.getElementById('authError');
-        authError.textContent = '';
-
-        firebase.auth().signInWithEmailAndPassword(email, password)
-            .then(userCredential => {
-                window.Analytics.trackEvent('login', { method: 'Email' });
-                if (state.afterLoginAction) {
-                    UI.showToast('Success! Taking you to checkout...');
-                } else {
-                    UI.showToast('Logged in successfully!');
-                }
-                UI.closeLoginModal();
-            })
-            .catch(error => {
-                authError.textContent = error.message;
-            });
-    },
-
-    handleGoogleLogin: () => {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        const authError = document.getElementById('authError');
-        authError.textContent = '';
-        firebase.auth().signInWithPopup(provider)
-            .then(result => {
-                const user = result.user;
-                const isNewUser = result.additionalUserInfo.isNewUser;
-                if (isNewUser) {
-                    state.db.collection('users').doc(user.uid).set({
-                        email: user.email,
-                        displayName: user.displayName,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-
-                if (result.additionalUserInfo && result.additionalUserInfo.isNewUser) {
-                    window.Analytics.trackEvent('sign_up', { method: 'Google' });
-                } else {
-                    window.Analytics.trackEvent('login', { method: 'Google' });
-                }
-
-                if (state.afterLoginAction) {
-                    UI.showToast('Success! Taking you to checkout...');
-                } else {
-                    UI.showToast(`Welcome, ${result.user.displayName}!`);
-                }
-                UI.closeLoginModal();
-            }).catch(error => {
-                authError.textContent = error.message;
-                window.Analytics.trackEvent('login_failure', { method: 'Google' });
-            });
-    },
-
-    handlePasswordReset: (e) => {
-        e.preventDefault();
-        const email = document.getElementById('loginEmail').value;
-        const authError = document.getElementById('authError');
-        if (!email) {
-            authError.textContent = 'Please enter your email in the login form to reset password.';
-            return;
-        }
-        firebase.auth().sendPasswordResetEmail(email)
-            .then(() => {
-                UI.showToast('Password reset email sent!');
-            })
-            .catch(error => {
-                authError.textContent = error.message;
-            });
-    },
-
-    handleLogout: () => {
-        firebase.auth().signOut().then(() => {
-            // Anonymize user for analytics
-            if (window.Analytics) window.Analytics.anonymizeUser();
-            state.currentUser = null;
-            UI.showToast('You have been logged out.');
-            Handlers.updateUIForAuthState();
-            UI.showPage('home');
-        }).catch(error => {
-            console.error('Logout Error:', error);
+        // Analytics can also be tracked after the initial render
+        window.Analytics.trackEvent('view_item', {
+            currency: 'INR',
+            value: product.finalPrice,
+            items: [{
+                item_id: product.id,
+                item_name: product.name,
+                item_category: product.category,
+                price: product.finalPrice
+            }]
         });
     },
 
-    initFirebaseMessaging: async (registration) => {
-        if (!('Notification' in window) || !('serviceWorker' in navigator) || !firebase.messaging.isSupported()) {
-            console.log('Firebase Messaging is not supported in this browser.');
-            return;
+    updatePopupCta: () => {
+        const ctaContainer = document.getElementById('popupStickyCta');
+        if (!state.popupProduct || !ctaContainer) return;
+
+        const qtyInCart = state.cart[state.popupProduct.id] || 0;
+        const isInCart = qtyInCart > 0;
+
+        if (isInCart) {
+            ctaContainer.innerHTML = `
+        <div class="popup-sticky-cta-inner">
+          <div class="cart-controls" data-id="${state.popupProduct.id}" style="margin-left: auto;">
+            <button class="qty-btn dec">-</button>
+            <span class="qty">${qtyInCart}</span>
+            <button class="qty-btn inc">+</button>
+          </div>
+        </div>`;
+        } else {
+            ctaContainer.innerHTML = `
+        <div class="popup-sticky-cta-inner">
+          <div class="popup-cta-qty-selector">
+            <button class="qty-btn dec" aria-label="Decrease quantity">-</button>
+            <span class="qty" aria-label="Current quantity">${state.currentProductQty}</span>
+            <button class="qty-btn inc" aria-label="Increase quantity">+</button>
+          </div>
+          <button class="popup-cta-add-btn">Add to Cart</button>
+        </div>`;
         }
+    },
 
-        const messaging = firebase.messaging();
+    toggleProductDescription: () => {
+        const container = document.getElementById('popupDescriptionContainer');
+        const shortDiv = container.querySelector('.popup-description-short');
+        const toggle = container.querySelector('.popup-description-toggle');
 
-        messaging.onMessage(payload => {
-            console.log('Message received. ', payload);
-            if (payload.notification) {
-                UI.showToast(`${payload.notification.title}: ${payload.notification.body}`);
+        state.popupDescriptionExpanded = !state.popupDescriptionExpanded;
+
+        if (state.popupDescriptionExpanded) {
+            shortDiv.style.webkitLineClamp = 'unset';
+            toggle.textContent = 'Read Less';
+        } else {
+            shortDiv.style.webkitLineClamp = '2';
+            toggle.textContent = 'Read More';
+        }
+    },
+
+    closePopup: () => {
+        const popup = document.getElementById('productPopup');
+        if (!popup) return;
+
+        UI.closeModal(popup);
+        state.isPopupOpen = false;
+        UI.updateProductCardState(state.popupProduct.id);
+        state.popupProduct = null;
+
+        const underlyingPage = state.pageHistory[state.pageHistory.length - 1] || 'home';
+        let pageInfo = { path: '/', title: 'Coastal Fresh India' };
+        if (underlyingPage === 'catalog') {
+            pageInfo = { path: '/catalog', title: 'All Products | Coastal Fresh India' };
+        } else if (underlyingPage === 'faqPage') {
+            pageInfo = { path: '/faq', title: 'FAQs | Coastal Fresh India' };
+        }
+        history.pushState({ page: underlyingPage }, pageInfo.title, pageInfo.path);
+
+        UI.showPage(underlyingPage, true);
+    },
+
+    updateCartUI: () => {
+        UI.updateCartBadges();
+    },
+
+    updateCartBadges: () => {
+        const totalQty = Object.values(state.cart).reduce((sum, qty) => sum + qty, 0);
+
+        ['cartCount', 'cartCountCatalog', 'navBadge'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (totalQty > 0) {
+                    el.style.display = 'flex';
+                    el.textContent = totalQty > 9 ? '9+' : totalQty;
+                } else {
+                    el.style.display = 'none';
+                }
             }
         });
-
-        try {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-            const notificationPrompted = localStorage.getItem('notificationPrompted') === 'true';
-
-            // Only request permission if it's the first launch of the PWA or if permission is currently 'default'.
-            if (Notification.permission === 'default' && (isStandalone && !notificationPrompted)) {
-                const permission = await Notification.requestPermission();
-                localStorage.setItem('notificationPrompted', 'true'); // Mark as prompted regardless of outcome
-                if (permission !== 'granted') {
-                    console.log('Notification permission denied on first launch.');
-                    return; // User denied, so we stop.
-                }
-            }
-            
-            // If permission is not granted at this point (either denied now or previously), do not proceed.
-            if (Notification.permission !== 'granted') {
-                return;
-            }
-
-            // If we are here, permission is 'granted'. Proceed to get the token.
-            const vapidKey = "BBVKpOXnP5lq1tVGX0lAhnnsIzt9uET8jzdE98ocBBnO3-vlS7IDLRInG2iJ3COVkK5ycZ-toAE68kZdDpUuH_g";
-            const token = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey: vapidKey });
-            
-            if (token && state.currentUser) {
-                await Handlers.saveFcmToken(token);
-            }
-
-            // NEW: Add a listener for token refreshes to keep the user's token up-to-date.
-            messaging.onTokenRefresh(async () => {
-                try {
-                    const refreshedToken = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey: vapidKey });
-                    if (refreshedToken && state.currentUser) {
-                        console.log('FCM token refreshed, updating in Firestore.');
-                        await Handlers.saveFcmToken(refreshedToken);
-                    }
-                } catch (err) {
-                    console.error('Unable to retrieve refreshed FCM token.', err);
-                }
-            });
-        } catch (err) {
-            // This catch block is crucial. It handles errors from `getToken()` if permissions are denied
-            // or if the environment doesn't support it (e.g., incognito mode), preventing the unhandled rejection.
-            console.warn('Could not get FCM token:', err.message);
-        }
     },
 
-    /**
-     * Saves or updates the user's FCM token in Firestore.
-     * @param {string} token The FCM token to save.
-     */
-    saveFcmToken: async (token) => {
-        if (!state.currentUser || !token) return;
+    updateProductCardState: (productId) => {
+        const productCards = document.querySelectorAll(`.product[data-id="${productId}"]`);
+        if (productCards.length === 0) return;
 
-        try {
-            const tokenRef = state.db.collection('users').doc(state.currentUser.uid).collection('fcmTokens').doc(token);
-            await tokenRef.set({
-                token: token,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                userAgent: navigator.userAgent,
-                platform: navigator.platform
-            });
-            console.log('FCM token saved for user.');
-            UI.showToast('Notification preferences updated!');
-        } catch (error) {
-            console.error('Error saving FCM token:', error);
-            UI.showToast('Could not save notification preferences.', true);
-        }
+        const product = state.products.find(p => p.id === productId);
+        if (!product) return;
+
+        productCards.forEach(card => {
+            const footer = card.querySelector('.product-footer');
+            if (!footer) return;
+
+            const isInCart = state.cart[product.id];
+
+            // Generate only the new footer HTML
+            const newFooterHTML = `
+                <div class="product-price">
+                  <span class="price">₹${product.finalPrice}</span>
+                  ${product.mrp > product.finalPrice ? `<span class="old-price">₹${product.mrp}</span>` : ''}
+                </div>
+                ${product.available ?
+                    (isInCart ?
+                        `<div class="cart-controls" data-id="${product.id}">
+                      <button class="qty-btn dec">-</button>
+                      <span class="qty">${isInCart}</span>
+                      <button class="qty-btn inc">+</button>
+                    </div>`
+                        : `<button class="add-to-cart-btn add-pill" data-id="${product.id}"><i class="fas fa-plus"></i> Add</button>`)
+                    : ''}
+            `;
+
+            footer.innerHTML = newFooterHTML;
+        });
     },
 
-    handleAuthStateChange: (user) => {
-        const isNewLogin = !state.currentUser && user;
-        state.currentUser = user;
-        UI.updateUIForAuthState();
-
-        if (user) {
-            // Update the user's last seen timestamp for active user tracking.
-            // Use { merge: true } to avoid overwriting other user data like 'createdAt'.
-            state.db.collection('users').doc(user.uid).set({
-                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-            window.Analytics.identifyUser(user);
-            if (typeof state.afterLoginAction === 'function') {
-                setTimeout(state.afterLoginAction, 100);
-                state.afterLoginAction = null;
-            }
-        } else { // User is logged out
-            if (window.Analytics) window.Analytics.anonymizeUser();
-        }
-    },
-
-    editAddress: async (addressId) => {
-        if (!state.currentUser || !addressId) return;
-        state.editingAddressId = addressId;
-
-        try {
-            const addressRef = state.db.collection('users').doc(state.currentUser.uid).collection('addresses').doc(addressId);
-            const doc = await addressRef.get();
-
-            if (doc.exists) {
-                const address = doc.data();
-                document.getElementById('addressFullName').value = address.fullName || '';
-                document.getElementById('addressMobile').value = address.mobile || '';
-                document.getElementById('addressHouse').value = address.house || '';
-                document.getElementById('addressStreet').value = address.street || '';
-                document.getElementById('addressCity').value = address.city || 'Hyderabad';
-                document.getElementById('addressPincode').value = address.pincode || '';
-
-                document.getElementById('addressListContainer').style.display = 'none';
-                document.getElementById('addressFormContainer').style.display = 'block';
-                document.querySelector('#addressForm .cta').textContent = 'Update Address';
-            } else {
-                UI.showToast('Address not found.');
-                state.editingAddressId = null;
-            }
-        } catch (error) {
-            console.error("Error fetching address for edit:", error);
-            UI.showToast('Could not load address data.');
-            state.editingAddressId = null;
-        }
-    },
-
-    cancelEditAddress: () => {
-        state.editingAddressId = null;
-        UI.showAddressList();
-    },
-
-    deleteAddress: async (addressId) => {
-        const modal = document.getElementById('confirmDeleteModal');
-        const confirmBtn = document.getElementById('confirmDeleteBtn');
-        const cancelBtn = document.getElementById('cancelDeleteBtn');
-        if (!modal || !confirmBtn) return;
-
-        confirmBtn.dataset.addressId = addressId;
-        UI.openModal(modal, cancelBtn);
-    },
-
-    executeDeleteAddress: async () => {
-        const confirmBtn = document.getElementById('confirmDeleteBtn');
-        const addressId = confirmBtn.dataset.addressId;
-
-        if (!state.currentUser || !addressId) return;
-
-        try {
-            await state.db.collection('users').doc(state.currentUser.uid).collection('addresses').doc(addressId).delete();
-            UI.showToast('Address deleted.');
-            await UI.renderAddressList();
-        } catch (error) {
-            console.error("Error deleting address:", error);
-            UI.showToast('Failed to delete address.');
-        } finally {
-            UI.closeModal(document.getElementById('confirmDeleteModal'));
-        }
-    },
-
-    setDefaultAddress: async (newDefaultId) => {
-        if (!state.currentUser || !newDefaultId) return;
-
-        const addressesRef = state.db.collection('users').doc(state.currentUser.uid).collection('addresses');
-        const batch = state.db.batch();
-
-        try {
-            const currentDefaultSnapshot = await addressesRef.where('isDefault', '==', true).get();
-            currentDefaultSnapshot.forEach(doc => {
-                batch.update(doc.ref, { isDefault: false });
-            });
-
-            const newDefaultRef = addressesRef.doc(newDefaultId);
-            batch.update(newDefaultRef, { isDefault: true });
-
-            await batch.commit();
-            UI.showToast('Default address updated.');
-            await UI.renderAddressList();
-        } catch (error) {
-            console.error("Error setting default address:", error);
-            UI.showToast('Failed to update default address.');
-        }
-    },
-
-    applyCoupon: () => {
-        const input = document.getElementById('couponInput');
-        if (!input) return;
-        const code = input.value.trim().toUpperCase();
+    showCart: () => {
         state.couponError = null;
-
-        if (!code) {
-            state.couponError = 'Please enter a coupon code.';
-            UI.updateCartSummary();
-            return;
-        }
-
-        const coupon = config.COUPONS[code];
         const items = Object.keys(state.cart).map(id => {
             const product = state.products.find(p => p.id === parseInt(id));
             return { ...product, qty: state.cart[id] };
         });
-        const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
 
-        if (!coupon || (coupon.minOrder && subtotal < coupon.minOrder)) {
-            state.couponError = coupon ? `This coupon is valid on orders above ₹${coupon.minOrder}.` : 'Promo code is invalid. Please try another code.';
-            UI.showToast(coupon ? `Minimum order of ₹${coupon.minOrder} required.` : 'Invalid coupon code.');
-            UI.updateCartSummary();
-            input.value = code;
-            return;
-        }
+        const cartItemsEl = document.getElementById('cartItems');
+        const emptyCartEl = document.getElementById('emptyCart');
+        const cartFooterEl = document.getElementById('cartFooter');
+        const cartSummaryContainerEl = document.getElementById('cartSummaryContainer');
 
-        state.appliedCoupon = { code, ...coupon };
-        UI.showToast(`Coupon '${code}' applied successfully!`);
-        UI.renderCouponSection();
-        UI.updateCartSummary();
-        window.Analytics.trackEvent('apply_coupon', { coupon: code });
-    },
-
-    removeCoupon: () => {
-        const removedCode = state.appliedCoupon.code;
-        state.appliedCoupon = null;
-        state.couponError = null;
-        UI.showToast('Coupon removed.');
-        UI.updateCartSummary();
-        window.Analytics.trackEvent('remove_coupon', { coupon: removedCode });
-    },
-
-    triggerInstallPrompt: async () => {
-        if (!state.deferredInstallPrompt) {
-            console.log('Install prompt not available.');
-            return;
-        }
-    
-        try {
-            window.Analytics.trackEvent('pwa_install_clicked');
-    
-            // Show the browser's installation prompt
-            state.deferredInstallPrompt.prompt();
-    
-            // Wait for the user to respond to the prompt
-            const { outcome } = await state.deferredInstallPrompt.userChoice;
-            state.installPromptUsed = true;
-            console.log(`User response to the install prompt: ${outcome}`);
-    
-            window.Analytics.trackEvent('pwa_install_outcome', { 'outcome': outcome });
-    
-            // Store install event in Firebase if accepted
-            if (outcome === 'accepted') {
-                state.db.collection('installs').add({
-                        userId: state.currentUser ? state.currentUser.uid : null,
-                        outcome: outcome,
-                        platform: 'web',
-                        userAgent: navigator.userAgent,
-                        installedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }).catch(error => {
-                        // This catch is for the Firestore write, not the prompt itself.
-                        console.error('Error recording PWA install event:', error);
-                    });
-            }
-        } catch (error) {
-            // This will catch errors if the prompt cannot be shown or if userChoice rejects.
-            console.error('Error during PWA install prompt:', error);
-        } finally {
-            // Always clean up, regardless of the outcome.
-            state.deferredInstallPrompt = null;
-            UI.hideInstallPrompt();
-        }
-    },
-
-    trapFocusInInstallPrompt: (e) => {
-        if (e.key !== 'Tab') return;
-
-        const installBtn = document.getElementById('installBtn');
-        const dismissBtn = document.getElementById('installDismissBtn');
-
-        if (e.shiftKey) {
-            if (document.activeElement === installBtn) {
-                dismissBtn.focus();
-                e.preventDefault();
+        if (items.length === 0) {
+            emptyCartEl.style.display = 'flex';
+            cartItemsEl.innerHTML = '';
+            if (cartFooterEl) cartFooterEl.style.display = 'none';
+            if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'none';
+            // FIX: Attach event listener for the empty cart button only when the cart is shown.
+            const emptyCartBtn = emptyCartEl.querySelector('.empty-cart-btn');
+            if (emptyCartBtn) {
+                emptyCartBtn.addEventListener('click', () => { UI.showPage('catalog'); UI.closeCart(); });
             }
         } else {
-            if (document.activeElement === dismissBtn) {
-                installBtn.focus();
-                e.preventDefault();
-            }
+            emptyCartEl.style.display = 'none';
+            if (cartFooterEl) cartFooterEl.style.display = 'flex';
+            if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'block';
+
+            cartItemsEl.innerHTML = items.map(item => {
+                const hasOffer = item.mrp > item.finalPrice;
+                const optimizedCartImage = UI.getOptimizedImageUrl(item.image, 128, 128);
+
+                return `
+          <article class="cart-item-card" data-id="${item.id}">
+            <img src="${optimizedCartImage}" alt="${item.name}" class="cart-item-thumb">
+            <div class="cart-item-meta">
+              <div class="cart-item-name">${item.name}</div>
+              <div class="cart-item-sub">${item.net} net</div>
+              <div class="cart-item-price">
+                ₹${item.finalPrice}
+                ${hasOffer ? `<span class="cart-item-mrp">₹${item.mrp}</span>` : ''}
+              </div>
+            </div>
+            <div class="cart-item-qty qty-controls">
+              <button class="qty-btn cart-qty-btn dec" data-id="${item.id}" aria-label="decrease quantity">−</button>
+              <div class="count cart-qty" aria-live="polite">${item.qty}</div>
+              <button class="qty-btn cart-qty-btn inc" data-id="${item.id}" aria-label="increase quantity">+</button>
+            </div>
+          </article>
+        `;
+            }).join('');
+
+            UI.updateCartSummary();
+            UI.renderCouponSection();
+        }
+
+        const cartModal = document.getElementById('cartModal');
+        UI.openModal(cartModal, cartModal.querySelector('.back-btn'));
+
+        const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
+        window.Analytics.trackEvent('view_cart', {
+            currency: 'INR',
+            value: subtotal,
+            items: items.map(item => ({
+                item_id: item.id,
+                item_name: item.name,
+                item_category: item.category,
+                price: item.finalPrice,
+                quantity: item.qty
+            }))
+        });
+    },
+
+    renderCouponSection: () => {
+        const container = document.getElementById('cartCouponSection');
+        if (!container) return;
+
+        if (state.appliedCoupon) {
+            container.innerHTML = `
+        <div class="cart-coupon-applied-card">
+          <div class="cart-coupon-applied-info">
+            <i class="fas fa-check-circle"></i>
+            <div>
+              <strong>'${state.appliedCoupon.code}' applied</strong>
+              <small>${config.COUPONS[state.appliedCoupon.code].description}</small>
+            </div>
+          </div>
+          <button id="removeCouponBtn" class="cart-coupon-remove-btn" aria-label="Remove Coupon">&times;</button>
+        </div>
+      `;
+        } else {
+            container.innerHTML = `
+        <div class="cart-coupon-wrap">
+          <div class="cart-coupon">
+            <span style="margin-right:8px;opacity:0.7">🏷️</span>
+            <input id="couponInput" placeholder="Enter coupon code" aria-label="coupon code">
+          </div>
+          <button class="cart-coupon-apply-btn" id="applyCouponBtn">Apply</button>
+        </div>
+        ${state.couponError ? `<p class="cart-coupon-error">${state.couponError}</p>` : ''}
+      `;
         }
     },
 
-    setupInstallPromptEvents: () => {
-        const installBtn = document.getElementById('installBtn');
-        const dismissBtn = document.getElementById('installDismissBtn');
+    updateCartSummary: () => {
+        const items = Object.keys(state.cart).map(id => {
+            const product = state.products.find(p => p.id === parseInt(id));
+            return { ...product, qty: state.cart[id] };
+        });
 
-        if (installBtn) {
-            installBtn.addEventListener('click', Handlers.triggerInstallPrompt);
+        const itemTotalEl = document.getElementById('cartItemTotal');
+        const deliveryFeeEl = document.getElementById('cartDeliveryFee');
+        const toPayEl = document.getElementById('cartToPay');
+        const placeOrderBtn = document.getElementById('cartPlaceOrderBtn');
+        const savedMsgEl = document.getElementById('cartSavedMsg');
+        const discountRowEl = document.getElementById('cartDiscountRow');
+        const discountEl = document.getElementById('cartDiscount');
+        const progressTextEl = document.getElementById('cartProgressText');
+        const progressBarEl = document.getElementById('cartProgressBar');
+        const paymentOptionsEl = document.getElementById('paymentOptions');
+
+        if (items.length === 0) {
+            const emptyCartEl = document.getElementById('emptyCart');
+            const cartFooterEl = document.getElementById('cartFooter');
+            const couponSectionEl = document.getElementById('cartCouponSection');
+            const cartSummaryContainerEl = document.getElementById('cartSummaryContainer');
+
+            if (emptyCartEl) emptyCartEl.style.display = 'flex';
+            if (cartFooterEl) cartFooterEl.style.display = 'none';
+            if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'none';
+            if (couponSectionEl) couponSectionEl.innerHTML = '';
+
+            state.appliedCoupon = null;
+            state.couponError = null;
+            return;
         }
 
-        if (dismissBtn) {
-            dismissBtn.addEventListener('click', UI.hideInstallPrompt);
+        const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
+        const originalTotal = items.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
+        const productSavings = originalTotal - subtotal;
+
+        let couponDiscount = 0;
+        if (state.appliedCoupon) {
+            if (state.appliedCoupon.type === 'percent') {
+                couponDiscount = (subtotal * state.appliedCoupon.value) / 100;
+            } else if (state.appliedCoupon.type === 'fixed') {
+                couponDiscount = state.appliedCoupon.value;
+            }
+            couponDiscount = Math.min(couponDiscount, subtotal);
+        }
+
+        // NEW: Delivery is now always free.
+        const deliveryFee = 0;
+        const total = subtotal - couponDiscount + deliveryFee;
+        const totalSavings = productSavings + couponDiscount + (deliveryFee === 0 ? 100 : 0);
+        if (itemTotalEl) itemTotalEl.textContent = `₹${subtotal}`;
+        // FIX: Update the delivery fee and total pay amount in the UI
+        if (deliveryFeeEl) deliveryFeeEl.textContent = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
+        if (toPayEl) toPayEl.textContent = `₹${Math.round(total)}`;
+
+        if (placeOrderBtn) placeOrderBtn.textContent = `Place Order – Pay ₹${Math.round(total)}`;
+
+        if (discountRowEl && discountEl) {
+            if (couponDiscount > 0) {
+                discountRowEl.style.display = 'flex';
+                discountEl.textContent = `- ₹${Math.round(couponDiscount)}`;
+            } else {
+                discountRowEl.style.display = 'none';
+            }
+        }
+
+        if (savedMsgEl) {
+            if (totalSavings > 0) {
+                savedMsgEl.style.display = 'block';
+                savedMsgEl.textContent = `You saved ₹${Math.round(totalSavings)} on this order 🎉`;
+            } else {
+                savedMsgEl.style.display = 'none';
+            }
+        }
+
+        const amountNeeded = config.FREE_DELIVERY_THRESHOLD - (subtotal - couponDiscount);
+        if (progressTextEl && progressBarEl) {
+            if (amountNeeded > 0) {
+                const progressPercent = ((subtotal - couponDiscount) / config.FREE_DELIVERY_THRESHOLD) * 100;
+                progressTextEl.innerHTML = `Add <strong>₹${Math.round(amountNeeded)}</strong> more for FREE Delivery!`;
+                progressBarEl.style.width = `${Math.min(100, progressPercent)}%`;
+            } else {
+                progressTextEl.innerHTML = `🎉 Yay! You've unlocked FREE Delivery!`;
+                progressBarEl.style.width = '100%';
+            }
+        }
+
+        UI.renderCouponSection();
+        UI.renderPaymentOptions();
+    },
+
+    renderPaymentOptions: () => {
+        const container = document.getElementById('paymentOptions');
+        if (!container) return;
+
+        container.innerHTML = `
+      <label class="cart-pay-item payment-btn ${state.selectedPaymentMethod === 'cod' ? 'active' : ''}" data-method="cod">
+        <input type="radio" name="pay" value="cod" ${state.selectedPaymentMethod === 'cod' ? 'checked' : ''}>
+        <div>
+          <div class="cart-pay-label">💵 Cash on Delivery</div>
+          <div class="cart-pay-sub">Pay with cash at delivery</div>
+        </div>
+      </label>
+      <label class="cart-pay-item payment-btn ${state.selectedPaymentMethod === 'online' ? 'active' : ''}" data-method="online">
+        <input type="radio" name="pay" value="online" ${state.selectedPaymentMethod === 'online' ? 'checked' : ''}>
+        <div>
+          <div class="cart-pay-label">💳 UPI / Card</div>
+          <div class="cart-pay-sub">Fast, secure online payment (Coming Soon)</div>
+        </div>
+      </label>
+    `;
+    },
+
+    closeCart: () => {
+        const cartModal = document.getElementById('cartModal');
+        UI.closeModal(cartModal);
+    },
+
+    showOrderSuccessModal: (orderId) => {
+        const modal = document.getElementById('orderSuccessModal');
+        const messageEl = document.getElementById('orderSuccessMessage');
+
+        messageEl.innerHTML = `Your Order ID is <strong>${orderId}</strong>. You can track its status in "My Orders".`;
+
+        UI.openModal(modal, document.getElementById('trackOrderBtn'));
+    },
+
+    closeOrderSuccessModal: () => {
+        UI.closeModal(document.getElementById('orderSuccessModal'));
+        UI.showPage('home');
+    },
+
+    showPage: (page, fromHistory = false) => {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(page).classList.add('active');
+
+        if (!fromHistory && page !== 'cart' && page !== state.pageHistory[state.pageHistory.length - 1]) {
+            state.pageHistory.push(page);
+        }
+
+        let pageTitle, pageDesc, pagePath;
+        if (page === 'catalog') {
+            if (state.afterAddressAction) {
+                state.afterAddressAction = null;
+                console.log('Cleared pending address action due to navigation.');
+            }
+            pageTitle = 'All Products - Fish, Prawns, Crabs & More | Coastal Fresh India';
+            pageDesc = 'Browse our entire collection of fresh seafood, including Pomfret, Prawns, Crabs, and authentic Andhra pickles. Order online for next-day delivery in Hyderabad.';
+            pagePath = '/catalog';
+        } else if (page === 'faqPage') {
+            pageTitle = 'Frequently Asked Questions | Coastal Fresh India';
+            pageDesc = 'Find answers to common questions about our delivery, sourcing, freshness, and payment for fresh seafood in Hyderabad.';
+            pagePath = '/faq';
+        } else if (page === 'referPage') {
+            pageTitle = 'Refer a Friend & Earn Rewards | Coastal Fresh India';
+            pageDesc = 'Share Coastal Fresh with your friends! They get 10% off their first order, and you get a 10% discount on your next purchase. Start sharing and earning today.';
+            pagePath = '/refer';
+        } else if (page === 'ordersPage') {
+            UI.renderOrdersPage();
+        } else if (page === 'profilePage' || page === 'addressPage' || page === 'ordersPage') {
+            pageTitle = 'Your Account | Coastal Fresh India';
+            pageDesc = 'Manage your orders, addresses, and profile settings at Coastal Fresh India.';
+            pagePath = '/profile';
+        } else {
+            pageTitle = null; pageDesc = null; pagePath = '/';
+        }
+        UI.updateSEOTags({ title: pageTitle, description: pageDesc, canonicalPath: pagePath });
+
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        const navItem = document.querySelector(`.nav-item[data-page='${page}']`);
+        if (navItem) navItem.classList.add('active');
+
+        state.currentPage = page;
+        window.scrollTo(0, 0);
+
+        const ticker = document.querySelector('.ticker-container');
+        const headers = document.querySelectorAll('.header');
+        if (page === 'home' || page === 'catalog') {
+            if (ticker) ticker.style.display = 'block';
+            headers.forEach(h => h.style.top = '30px');
+        } else {
+            if (ticker) ticker.style.display = 'none';
+            headers.forEach(h => h.style.top = '0px');
+        }
+
+        if (page === 'catalog') {
+            UI.startTypewriter();
+        } else {
+            UI.stopTypewriter();
+        }
+    },
+
+    startTypewriter: () => {
+        if (state.typewriterTimer) clearTimeout(state.typewriterTimer);
+
+        const base = 'Search — ';
+        const names = ['Prawns', 'Rohu', 'Sea Bass', 'Crab', 'Pickle'];
+        let i = 0, pos = 0, dir = 1, pause = 0;
+
+        const inputs = [document.getElementById('catalogSearch')].filter(Boolean);
+
+        function tick() {
+            const shouldAnimate = inputs.every(input => document.activeElement !== input && !input.value);
+            if (!shouldAnimate) return;
+
+            if (pause > 0) {
+                pause--;
+            } else {
+                const full = names[i];
+                const text = full.slice(0, pos);
+                inputs.forEach(input => input.setAttribute('placeholder', base + text));
+
+                pos += dir;
+                if (pos > full.length) {
+                    pause = 15; dir = -1;
+                }
+                if (pos < 0) {
+                    dir = 1; i = (i + 1) % names.length; pos = 0;
+                }
+            }
+            state.typewriterTimer = setTimeout(tick, dir === 1 ? 120 : 80);
+        }
+        tick();
+    },
+
+    stopTypewriter: () => {
+        if (state.typewriterTimer) clearTimeout(state.typewriterTimer);
+        const input = document.getElementById('catalogSearch');
+        if (input) input.setAttribute('placeholder', 'Search products...');
+    },
+
+    showInitialSkeletons: () => {
+        const featuredContainer = document.getElementById('featuredProducts');
+        if (featuredContainer) {
+            let skeletonHTML = '';
+            for (let i = 0; i < config.FEATURED_PRODUCT_IDS.length; i++) {
+                skeletonHTML += UI.createSkeletonProductHTML();
+            }
+            featuredContainer.innerHTML = skeletonHTML;
+        }
+
+        const catalogContainer = document.getElementById('catalogProducts');
+        if (catalogContainer) {
+            let skeletonHTML = '';
+            for (let i = 0; i < config.ITEMS_PER_PAGE; i++) {
+                skeletonHTML += UI.createSkeletonProductHTML();
+            }
+            catalogContainer.innerHTML = skeletonHTML;
+        }
+    },
+
+    showSimpleTooltip: (targetElement) => {
+        const tooltip = document.getElementById('simpleTooltip');
+        const text = targetElement.getAttribute('title');
+        if (!tooltip || !text) return;
+
+        UI.hideSimpleTooltip();
+
+        tooltip.textContent = text;
+        tooltip.classList.add('show');
+
+        const targetRect = targetElement.getBoundingClientRect();
+
+        const top = targetRect.top - 8;
+        const left = targetRect.left + (targetRect.width / 2);
+
+        tooltip.style.top = `${top}px`;
+        tooltip.style.left = `${left}px`;
+
+        setTimeout(UI.hideSimpleTooltip, 3000);
+    },
+
+    hideSimpleTooltip: () => {
+        const tooltip = document.getElementById('simpleTooltip');
+        if (tooltip) {
+            tooltip.classList.remove('show');
+        }
+    },
+
+    initCarousel: (selector) => {
+        const carouselContainer = document.querySelector(selector);
+        if (!carouselContainer) return;
+
+        const slidesContainer = carouselContainer.querySelector('.slides');
+        const slides = slidesContainer.children;
+        const dotsContainer = carouselContainer.querySelector('.carousel-dots');
+        const total = slides.length;
+
+        if (total <= 1) {
+            if (dotsContainer) dotsContainer.style.display = 'none';
+            return;
+        }
+
+        let timer = null;
+        let restartTimer = null; // To restart auto-play after user interaction
+
+        if (dotsContainer) {
+            dotsContainer.innerHTML = Array.from({ length: total }, (_, i) =>
+                `<div class="dot ${i === 0 ? 'active' : ''}"></div>`
+            ).join('');
+        }
+
+        const dots = dotsContainer ? Array.from(dotsContainer.children) : [];
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(slides).indexOf(entry.target);
+                    if (dotsContainer) {
+                        dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
+                    }
+                }
+            });
+        }, { root: carouselContainer, threshold: 0.5 });
+
+        Array.from(slides).forEach(slide => observer.observe(slide));
+
+        function advanceSlide() {
+            let currentScroll = carouselContainer.scrollLeft;
+            let slideWidth = carouselContainer.clientWidth;
+            let nextScroll = currentScroll + slideWidth;
+
+            if (nextScroll >= carouselContainer.scrollWidth - 1) { // -1 for precision
+                carouselContainer.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+                carouselContainer.scrollBy({ left: slideWidth, behavior: 'smooth' });
+            }
+        }
+
+        function startTimer() {
+            if (timer) clearInterval(timer);
+            timer = setInterval(advanceSlide, 3000); // Changed from 5s to 3s for faster sliding
+        }
+        function stopTimer() {
+            clearInterval(timer);
+            // If the user interacts, clear any pending restart and set a new one
+            clearTimeout(restartTimer);
+            restartTimer = setTimeout(startTimer, 8000); // Restart after 8 seconds of inactivity
+        }
+
+        carouselContainer.addEventListener('pointerdown', stopTimer);
+        // Use a debounced scroll handler to avoid stopping/starting the timer too frequently
+        carouselContainer.addEventListener('scroll', () => { clearTimeout(restartTimer); restartTimer = setTimeout(startTimer, 8000); });
+        document.addEventListener('visibilitychange', () => {
+            document.hidden ? stopTimer() : startTimer();
+        });
+
+        startTimer();
+    },
+
+    initFlashSaleTimer: () => {
+        if (!config.ENABLE_FLASH_SALE) return;
+
+        const timerContainer = document.getElementById('flashSaleTimer');
+        if (!timerContainer) return;
+
+        let endTime = localStorage.getItem('flashSaleEndTime');
+
+        if (!endTime || new Date().getTime() > endTime) {
+            endTime = new Date().getTime() + config.FLASH_SALE_DURATION_HOURS * 60 * 60 * 1000;
+            localStorage.setItem('flashSaleEndTime', endTime);
+        }
+
+        const hoursEl = document.getElementById('timer-h');
+        const minutesEl = document.getElementById('timer-m');
+        const secondsEl = document.getElementById('timer-s');
+
+        function updateTimer() {
+            const now = new Date().getTime();
+            const distance = endTime - now;
+
+            if (distance < 0) {
+                clearInterval(state.flashSaleTimerInterval);
+                timerContainer.innerHTML = '<div class="timer-ended">Sale Ended!</div>';
+                return;
+            }
+
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            hoursEl.textContent = String(hours).padStart(2, '0');
+            minutesEl.textContent = String(minutes).padStart(2, '0');
+            secondsEl.textContent = String(seconds).padStart(2, '0');
+        }
+
+        if (state.flashSaleTimerInterval) clearInterval(state.flashSaleTimerInterval);
+        updateTimer();
+        state.flashSaleTimerInterval = setInterval(updateTimer, 1000);
+    },
+
+    toggleFAQ: (button) => {
+        const faq = button.closest('.faq');
+        if (!faq) return;
+
+        const isActive = faq.classList.contains('active');
+        document.querySelectorAll('.faq.active').forEach(item => {
+            if (item !== faq) item.classList.remove('active');
+        });
+
+        faq.classList.toggle('active', !isActive);
+
+        const chevron = button.querySelector('.fa-chevron-down');
+        if (chevron) {
+            chevron.style.transform = faq.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0)';
+        }
+
+        if (faq.classList.contains('active')) {
+            const qTextEl = button.querySelector('.q-text');
+            const qText = qTextEl ? qTextEl.textContent : '';
+            window.Analytics.trackEvent('faq_click', { question: qText });
+        }
+    },
+
+    showLoginModal: (e, view = 'signup') => {
+        if (e && typeof e.preventDefault === 'function') e.preventDefault();
+        const loginModal = document.getElementById('loginModal');
+
+        if (view === 'login') {
+            document.getElementById('authTitle').textContent = 'Welcome Back';
+            document.getElementById('authSubtitle').textContent = 'Login to access your account';
+            document.getElementById('signupForm').classList.remove('active');
+            document.getElementById('loginForm').classList.add('active');
+            UI.openModal(loginModal, loginModal.querySelector('#loginEmail'));
+        } else {
+            document.getElementById('authTitle').textContent = 'Get Started';
+            document.getElementById('authSubtitle').textContent = 'Sign up to order the freshest coastal seafood';
+            document.getElementById('loginForm').classList.remove('active');
+            document.getElementById('signupForm').classList.add('active');
+            UI.openModal(loginModal, loginModal.querySelector('#signupEmail'));
+        }
+        document.getElementById('authError').textContent = '';
+    },
+
+    closeLoginModal: () => {
+        const loginModal = document.getElementById('loginModal');
+        UI.closeModal(loginModal);
+    },
+
+    showAddressForm: () => {
+        state.editingAddressId = null;
+        document.getElementById('addressForm').reset();
+        document.getElementById('addressCity').value = 'Hyderabad';
+        if (state.currentUser.displayName) {
+            document.getElementById('addressFullName').value = state.currentUser.displayName;
+        }
+        document.getElementById('addressListContainer').style.display = 'none';
+        document.getElementById('addressFormContainer').style.display = 'block';
+        document.querySelector('#addressForm .cta').textContent = 'Save Address';
+    },
+
+    showAddressList: () => {
+        document.getElementById('addressListContainer').style.display = 'block';
+        document.getElementById('addressFormContainer').style.display = 'none';
+    },
+
+    renderAddressList: async () => {
+        if (!state.currentUser) return;
+
+        const listContainer = document.getElementById('addressListContainer');
+        const addNewAddressBtnFixed = document.getElementById('addNewAddressBtnFixed');
+        listContainer.innerHTML = '<div class="loading" style="margin: 40px auto;"></div>';
+        addNewAddressBtnFixed.style.display = 'none';
+
+        try {
+            const addressesRef = state.db.collection('users').doc(state.currentUser.uid).collection('addresses');
+            const snapshot = await addressesRef.orderBy('updatedAt', 'desc').get();
+
+            if (snapshot.empty) {
+                listContainer.innerHTML = `
+          <div class="empty-state-address">
+            <i class="fas fa-map-marker-alt"></i>
+            <h3>No Saved Addresses</h3>
+            <p>Add an address for faster checkout.</p>
+            <button class="empty-cart-btn" id="addFirstAddressBtn">+ Add New Address</button>
+          </div>
+        `;
+                const addBtn = listContainer.querySelector('#addFirstAddressBtn');
+                if (addBtn) {
+                    addBtn.addEventListener('click', UI.showAddressForm);
+                }
+            } else {
+                let addressesHTML = snapshot.docs.map(doc => {
+                    const address = doc.data();
+                    return `
+            <div class="address-item ${address.isDefault ? 'default' : ''}" data-id="${doc.id}" role="listitem">
+              <div class="address-main-content">
+                <i class="fas fa-map-marker-alt address-pin-icon"></i>
+                <div class="address-text-content">
+                  <div class="address-name-line">
+                    <span class="address-name">${DOMPurify.sanitize(address.fullName)}</span>
+                    ${address.isDefault ? '<span class="default-badge" aria-label="Default Address">Default</span>' : ''}
+                  </div>
+                  <p class="address-full-text">${DOMPurify.sanitize(address.house)}, ${DOMPurify.sanitize(address.street)}<br>${DOMPurify.sanitize(address.city)}, ${DOMPurify.sanitize(address.pincode)}</p>
+                  <div class="address-mobile-line">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>${DOMPurify.sanitize(address.mobile)}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="address-options-menu">
+                <button class="address-options-btn" aria-label="Address options"><i class="fas fa-ellipsis-v"></i></button>
+                <div class="address-dropdown-content">
+                  <button class="address-action-btn edit-address-btn" data-id="${doc.id}" aria-label="Edit Address">Edit</button>
+                  <button class="address-action-btn delete-address-btn" data-id="${doc.id}" aria-label="Delete Address">Delete</button>
+                  ${!address.isDefault ? `<button class="address-action-btn set-default-btn" data-id="${doc.id}" aria-label="Set as Default">Set as Default</button>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+                }).join('');
+
+                listContainer.innerHTML = addressesHTML;
+                addNewAddressBtnFixed.style.display = 'flex';
+                UI.showAddressList();
+            }
+        } catch (error) {
+            console.error("Error rendering addresses:", error);
+            listContainer.innerHTML = '<p style="color: var(--error-color); text-align: center;">Could not load addresses.</p>';
+        }
+    },
+
+    renderOrdersPage: async () => {
+        const ordersPage = document.getElementById('ordersPage');
+        const mainContent = ordersPage.querySelector('main');
+
+        if (!state.currentUser) {
+            mainContent.innerHTML = `
+        <div class="empty-cart" style="flex-grow: 1; min-height: 60vh;">
+          <i class="fas fa-user-lock" style="font-size: 64px; margin-bottom: 24px; color: var(--border-color);"></i>
+          <h3>Login to View Orders</h3>
+          <p>Please log in to see your order history.</p>
+          <button class="empty-cart-btn" id="loginFromOrdersBtn">Login / Sign Up</button>
+        </div>
+      `;
+            document.getElementById('loginFromOrdersBtn').addEventListener('click', () => UI.showLoginModal(null, 'signup'));
+            return;
+        }
+
+        mainContent.innerHTML = '<div class="loading" style="margin: 40px auto;"></div>';
+
+        try {
+            const ordersSnapshot = await state.db.collection('orders')
+                .where('userId', '==', state.currentUser.uid)
+                .orderBy('createdAt', 'desc')
+                .get();
+
+            if (ordersSnapshot.empty) {
+                mainContent.innerHTML = `
+          <div class="empty-cart" style="flex-grow: 1; min-height: 60vh;">
+            <i class="fas fa-box-open" style="font-size: 64px; margin-bottom: 24px; color: var(--border-color);"></i>
+            <h3>No Orders Yet</h3>
+            <p>Your past and current orders will appear here.</p>
+            <button class="empty-cart-btn" id="shopFromOrdersBtn">Start Shopping</button>
+          </div>
+        `;
+                // FIX: Attach event listener only when the button is rendered.
+                const shopBtn = mainContent.querySelector('#shopFromOrdersBtn');
+                if (shopBtn) {
+                    shopBtn.addEventListener('click', () => UI.showPage('home'));
+                }
+                document.getElementById('shopFromOrdersBtn').addEventListener('click', () => UI.showPage('home'));
+            } else {
+                // NEW: Status mapping for better UX
+                 const statusMap = {
+                    'Pending': { text: 'Order Placed', class: 'inprogress', icon: 'fa-solid fa-check' },
+                    'Accepted': { text: 'Preparing', class: 'inprogress', icon: 'fa-solid fa-utensils' },
+                    'Out for Delivery': { text: 'In Transit', class: 'transit', icon: 'fa-solid fa-truck-fast' },
+                    'Completed': { text: 'Delivered', class: 'completed', icon: 'fa-solid fa-house-chimney-user' },
+                    'Cancelled': { text: 'Cancelled', class: 'cancelled', icon: 'fa-solid fa-xmark' }
+                };
+
+                const ordersHTML = ordersSnapshot.docs.map(doc => {
+                    const order = doc.data();
+                    const orderDate = order.createdAt?.toDate ? order.createdAt.toDate() : new Date();
+                    const datePart = orderDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+                    const timePart = orderDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }).toLowerCase();
+                    const formattedDateTime = `${datePart} • ${timePart}`;
+                    const displayStatus = statusMap[order.status] || { text: order.status, class: 'inprogress', icon: 'fa-solid fa-question-circle' };
+
+                    let firstItem = { name: 'Order', image: '' };
+                    let moreItemsText = '';
+                    if (order.items && order.items.length > 0) {
+                        firstItem = order.items[0];
+                        if (order.items.length > 1) {
+                            moreItemsText = `+ ${order.items.length - 1} more item(s)`;
+                        } else if (firstItem.net) {
+                            moreItemsText = `${firstItem.net} Net Wt`;
+                        }
+                    }
+                    const thumbImg = UI.getOptimizedImageUrl(firstItem.image, 80, 80);
+
+                    return `
+                        <div class="order-card" data-order-id="${doc.id}">
+                            <div class="order-card-top">
+                                <div class="order-id-block">
+                                    <div class="order-id">ID: #${order.orderId.slice(-6)}</div>
+                                    <div class="order-meta">${formattedDateTime}</div>
+                                </div>
+                                <div class="order-price">₹${order.total}</div>
+                            </div>
+                            <div class="order-item-summary">
+                                <div class="order-thumb">
+                                    <img src="${thumbImg}" alt="${firstItem.name}" loading="lazy">
+                                </div>
+                                <div class="order-item-meta">
+                                    <div class="order-item-title">${firstItem.name}</div>
+                                    ${moreItemsText ? `<div class="order-item-sub">${moreItemsText}</div>` : ''}
+                                </div>
+                            </div>
+                            <div class="order-card-bottom">
+                                <div class="order-status ${displayStatus.class}"><i class="${displayStatus.icon}"></i> ${displayStatus.text}</div>
+                                <!-- The entire card is clickable to track, so a button is not needed here -->
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                mainContent.innerHTML = `<div class="order-list">${ordersHTML}</div>`;
+            }
+        } catch (error) {
+            console.error("Error fetching orders:", error);
+            mainContent.innerHTML = '<p style="color: var(--error-color); text-align: center;">Could not load your orders.</p>';
+        }
+    },
+
+    openOrderDetailsDrawer: (order) => {
+        try {
+            const drawerOverlay = document.getElementById('orderDetailsDrawerOverlay');
+            const drawer = document.getElementById('orderDetailsDrawer');
+            if (!drawerOverlay || !drawer) return;
+
+            // FIX: Correctly reference `order.orderId` (lowercase 'o')
+            document.getElementById('drawerOrderId').textContent = `#${order.orderId}`;
+            document.getElementById('drawerOrderDate').textContent = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
+            document.getElementById('drawerPaymentMethod').textContent = order.paymentMethod === 'cod' ? 'Cash on Delivery' : order.paymentMethod.toUpperCase();
+
+            // Render all sections
+            UI.renderDrawerStatus(order.status);
+            UI.renderDrawerItems(order.items);
+            UI.renderDrawerBillSummary(order);
+            UI.renderDrawerAddress(order.address);
+
+            document.getElementById('drawerFooter').innerHTML = `
+      <button class="drawer-action-btn" id="drawerCopyIdBtn">Copy ID</button>
+      <button class="drawer-action-btn" id="drawerSupportBtn">Contact Support</button>
+      <button class="drawer-action-btn primary" id="drawerReorderBtn">Reorder</button>
+    `;
+
+            document.getElementById('drawerCopyIdBtn').onclick = () => {
+                navigator.clipboard.writeText(order.orderId).then(() => UI.showToast('Order ID copied!'));
+            };
+            document.getElementById('drawerSupportBtn').onclick = () => Handlers.openWhatsApp('support', order.orderId);
+            document.getElementById('drawerReorderBtn').onclick = () => Handlers.addMultipleToCart(order.items);
+
+            drawerOverlay.style.display = 'flex';
+            setTimeout(() => drawerOverlay.classList.add('active'), 10);
+
+            const closeBtn = drawer.querySelector('.drawer-close-btn');
+            state.previouslyFocusedElement = document.activeElement;
+            setTimeout(() => closeBtn.focus(), 300);
+
+            const closeDrawerHandler = () => UI.closeOrderDetailsDrawer();
+            closeBtn.onclick = closeDrawerHandler;
+            drawerOverlay.onclick = (e) => { if (e.target === drawerOverlay) closeDrawerHandler(); };
+            const escHandler = (e) => { if (e.key === 'Escape') closeDrawerHandler(); };
+            document.addEventListener('keydown', escHandler);
+
+            drawer.cleanup = () => {
+                document.removeEventListener('keydown', escHandler);
+            };
+        } catch (error) {
+            console.error("Error opening order details drawer:", error);
+            UI.showToast("Could not display order details.", true);
+            // Ensure the drawer doesn't get stuck open if an error occurs
+            UI.closeOrderDetailsDrawer();
+        }
+    },
+
+    renderDrawerStatus: (currentStatus) => {
+        const timelineContainer = document.getElementById('drawerStatusTimeline');
+        const statuses = ['Pending', 'Accepted', 'Out for Delivery', 'Completed'];
+        const statusMap = {
+            'Pending': { text: 'Order Placed', icon: 'fa-check' },
+            'Accepted': { text: 'Preparing', icon: 'fa-utensils' },
+            'Out for Delivery': { text: 'In Transit', icon: 'fa-truck-fast' },
+            'Completed': { text: 'Delivered', icon: 'fa-house-chimney-user' },
+            'Cancelled': { text: 'Cancelled', icon: 'fa-xmark' }
+        };
+
+        let currentStatusIndex = statuses.indexOf(currentStatus);
+        if (currentStatus === 'Cancelled') {
+            timelineContainer.innerHTML = `
+                <div class="status-step cancelled">
+                    <div class="status-icon"><i class="fas fa-xmark"></i></div>
+                    <div class="status-label">Order Cancelled</div>
+                </div>
+            `;
+            return;
+        }
+
+        timelineContainer.innerHTML = statuses.map((status, index) => {
+            const isActive = index <= currentStatusIndex;
+            const isCurrent = index === currentStatusIndex;
+            const statusInfo = statusMap[status];
+            return `
+                <div class="status-step ${isActive ? 'active' : ''} ${isCurrent ? 'current' : ''}">
+                    <div class="status-icon"><i class="fas ${statusInfo.icon}"></i></div>
+                    <div class="status-label">${statusInfo.text}</div>
+                </div>
+                ${index < statuses.length - 1 ? '<div class="status-line ' + (isActive ? 'active' : '') + '"></div>' : ''}
+            `;
+        }).join('');
+    },
+
+    renderDrawerItems: (items) => {
+        const container = document.getElementById('drawerItemsList');
+        if (!container || !items) {
+            container.innerHTML = '<p>No items found in this order.</p>';
+            return;
+        }
+        container.innerHTML = items.map(item => `
+            <div class="drawer-item">
+                <img src="${UI.getOptimizedImageUrl(item.image, 96, 96)}" alt="${item.name}" class="drawer-item-thumb">
+                <div class="drawer-item-info">
+                    <div class="drawer-item-name">${item.name}</div>
+                    <div class="drawer-item-qty">Qty: ${item.qty}</div>
+                </div>
+                <div class="drawer-item-price">₹${item.price * item.qty}</div>
+            </div>
+        `).join('');
+    },
+
+    renderDrawerBillSummary: (order) => {
+        const container = document.getElementById('drawerBillDetails');
+        if (!container || !order) return;
+
+        let billHTML = `<div class="drawer-bill-row"><span>Item Total</span><span>₹${order.subtotal.toFixed(2)}</span></div>`;
+
+        if (order.coupon && order.coupon.discount > 0) {
+            billHTML += `
+                <div class="drawer-bill-row discount">
+                    <span>Coupon Discount (${order.coupon.code})</span>
+                    <span>- ₹${order.coupon.discount.toFixed(2)}</span>
+                </div>`;
+        }
+
+        billHTML += `<div class="drawer-bill-row"><span>Delivery Fee</span><span>${order.deliveryFee > 0 ? `₹${order.deliveryFee.toFixed(2)}` : 'FREE'}</span></div>`;
+
+        billHTML += `
+            <div class="drawer-bill-row grand-total">
+                <span>Grand Total</span>
+                <span>₹${order.total.toFixed(2)}</span>
+            </div>`;
+
+        container.innerHTML = billHTML;
+    },
+
+    renderDrawerAddress: (address) => {
+        const nameEl = document.getElementById('drawerAddressName');
+        const fullAddressEl = document.getElementById('drawerAddressFull');
+
+        if (!address || !nameEl || !fullAddressEl) {
+            if (nameEl) nameEl.textContent = 'Address not available.';
+            if (fullAddressEl) fullAddressEl.textContent = '';
+            return;
+        }
+
+        nameEl.textContent = address.fullName;
+        fullAddressEl.innerHTML = `
+            ${address.house}, ${address.street}<br>
+            ${address.city}, ${address.pincode}<br>
+            Phone: ${address.mobile}`;
+    },
+
+    closeOrderDetailsDrawer: () => {
+        const drawerOverlay = document.getElementById('orderDetailsDrawerOverlay');
+        const drawer = document.getElementById('orderDetailsDrawer');
+        if (!drawerOverlay || !drawer) return;
+
+        if (typeof drawer.cleanup === 'function') {
+            drawer.cleanup();
+        }
+
+        drawerOverlay.classList.remove('active');
+        setTimeout(() => {
+            drawerOverlay.style.display = 'none';
+            if (state.previouslyFocusedElement) state.previouslyFocusedElement.focus();
+        }, 300);
+    },
+
+    renderProductSchema: () => {
+        if (!state.products || state.products.length === 0) return;
+
+        const schemaContainer = document.createDocumentFragment();
+
+        state.products.forEach(product => {
+            const script = document.createElement('script');
+            script.type = 'application/ld+json';
+
+            const schema = {
+                "@context": "https://schema.org/",
+                "@type": "Product",
+                "name": product.name,
+                "image": UI.getOptimizedImageUrl(product.image, 1200, 630),
+                "description": product.desc,
+                "sku": `CF-${product.id}`,
+                "brand": { "@type": "Brand", "name": "Coastal Fresh" },
+                "offers": {
+                    "@type": "Offer",
+                    "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`,
+                    "priceCurrency": "INR",
+                    "price": product.finalPrice,
+                    "priceValidUntil": new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0],
+                    "itemCondition": "https://schema.org/NewCondition",
+                    "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+                }
+            };
+
+            // NEW: Dynamically add review and rating data if available
+            const relevantReviews = config.CUSTOMER_REVIEWS.filter(r => r.review.toLowerCase().includes(product.name.split(' ')[0].toLowerCase()));
+            if (relevantReviews.length > 0) {
+                schema.review = relevantReviews.map(r => ({
+                    "@type": "Review",
+                    "author": { "@type": "Person", "name": r.name },
+                    "reviewRating": { "@type": "Rating", "ratingValue": r.rating, "bestRating": "5" },
+                    "reviewBody": r.review
+                }));
+
+                const avgRating = relevantReviews.reduce((sum, r) => sum + r.rating, 0) / relevantReviews.length;
+                schema.aggregateRating = { "@type": "AggregateRating", "ratingValue": avgRating.toFixed(1), "reviewCount": relevantReviews.length };
+            }
+
+            script.textContent = JSON.stringify(schema);
+            schemaContainer.appendChild(script);
+        });
+        document.head.appendChild(schemaContainer);
+    },
+
+    /**
+     * Displays a toast message.
+     * @param {string} text - The message to display.
+     * @param {boolean} isError - If true, shows an error style.
+     */
+    showToast: (text, isError = false) => {
+        const toast = document.getElementById('toast');
+        const toastText = document.getElementById('toastText');
+        if (!toast || !toastText) return;
+
+        toastText.textContent = text;
+        toast.className = 'toast'; // Reset classes
+        toast.classList.add('show');
+        if (isError) {
+            toast.classList.add('error');
+        }
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2500);
+    },
+
+    openModal: (modalElement, elementToFocus) => {
+        state.previouslyFocusedElement = document.activeElement;
+        const appContainer = document.querySelector('.app');
+
+        Array.from(appContainer.children).forEach(child => {
+            if (child !== modalElement && !child.classList.contains('toast')) {
+                child.setAttribute('aria-hidden', 'true');
+            }
+        });
+
+        modalElement.classList.add('active');
+        document.body.classList.add('popup-open');
+
+        const focusableElements = modalElement.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        const firstFocusable = focusableElements[0];
+        const lastFocusable = focusableElements[focusableElements.length - 1];
+
+        const focusTarget = elementToFocus || firstFocusable;
+        if (focusTarget) {
+            setTimeout(() => focusTarget.focus(), 100);
+        }
+
+        modalElement.addEventListener('keydown', (e) => {
+            if (e.key !== 'Tab' || !lastFocusable) return;
+
+            if (e.shiftKey) {
+                if (document.activeElement === firstFocusable) {
+                    lastFocusable.focus();
+                    e.preventDefault();
+                }
+            } else {
+                if (document.activeElement === lastFocusable) {
+                    firstFocusable.focus();
+                    e.preventDefault();
+                }
+            }
+        });
+    },
+
+    closeModal: (modalElement) => {
+        Array.from(document.querySelector('.app').children).forEach(child => {
+            child.removeAttribute('aria-hidden');
+        });
+
+        modalElement.classList.remove('active');
+        document.body.classList.remove('popup-open');
+        if (state.previouslyFocusedElement) state.previouslyFocusedElement.focus();
+    },
+
+    showInstallPrompt: () => {
+        const installPrompt = document.getElementById('installPrompt');
+        if (!installPrompt) return;
+
+        state.previouslyFocusedElement = document.activeElement;
+        installPrompt.classList.add('show');
+
+        window.Analytics.trackEvent('pwa_prompt_shown');
+
+        const installBtn = document.getElementById('installBtn');
+        if (installBtn) {
+            setTimeout(() => installBtn.focus(), 100);
+        }
+
+        installPrompt.addEventListener('keydown', Handlers.trapFocusInInstallPrompt);
+    },
+
+    hideInstallPrompt: () => {
+        const installPrompt = document.getElementById('installPrompt');
+        if (!installPrompt) return;
+
+        installPrompt.classList.remove('show');
+        installPrompt.removeEventListener('keydown', Handlers.trapFocusInInstallPrompt);
+
+        if (state.previouslyFocusedElement) {
+            state.previouslyFocusedElement.focus();
+        }
+
+        const profileInstallBtn = document.getElementById('profileInstallBtn');
+        if (profileInstallBtn && state.installPromptUsed) {
+            profileInstallBtn.style.display = 'none';
+        }
+    },
+
+    // NEW: Moved from handlers.js for better separation of concerns
+    updateUIForAuthState: () => {
+        const userNameEl = document.getElementById('profileUserName');
+        const userStatusEl = document.getElementById('profileUserStatus');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const guestCtaBtn = document.getElementById('guestProfileCta');
+        const referBtn = document.getElementById('referBtn');
+        const avatarEl = document.querySelector('.profile-avatar-small');
+
+        if (state.currentUser) {
+            if (state.currentUser.photoURL) {
+                avatarEl.innerHTML = `<img src="${state.currentUser.photoURL}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+            } else {
+                avatarEl.innerHTML = `<i class="fas fa-user"></i>`;
+            }
+
+            const referralLinkEl = document.getElementById('referralLink');
+            if (referralLinkEl) {
+                // Note: _simpleHash is not in this file, so we call it via Handlers
+                referralLinkEl.textContent = `https://coastalfresh.in?ref=${Handlers.getReferralHash(state.currentUser.uid)}`;
+            }
+
+            let displayName = 'Valued Customer';
+            if (state.currentUser.displayName) {
+                displayName = state.currentUser.displayName;
+            } else if (state.currentUser.email) {
+                const emailName = state.currentUser.email.split('@')[0];
+                const cleanedName = emailName.replace(/[\._-]/g, ' ').split(' ')[0];
+                displayName = cleanedName.charAt(0).toUpperCase() + cleanedName.slice(1);
+            }
+
+            userNameEl.textContent = displayName;
+            userStatusEl.textContent = state.currentUser.email;
+            logoutBtn.style.display = 'flex';
+            if (guestCtaBtn) guestCtaBtn.style.display = 'none';
+            if (referBtn) referBtn.style.display = 'flex';
+        } else {
+            avatarEl.innerHTML = `<i class="fas fa-user"></i>`;
+            userNameEl.textContent = 'Guest User';
+            userStatusEl.textContent = 'You are browsing as a guest.';
+            logoutBtn.style.display = 'none';
+            if (guestCtaBtn) guestCtaBtn.style.display = 'flex';
+            if (referBtn) referBtn.style.display = 'none';
         }
     }
 };

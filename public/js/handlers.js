@@ -1006,44 +1006,38 @@ export const Handlers = {
         });
 
         try {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-            const notificationPrompted = localStorage.getItem('notificationPrompted') === 'true';
-
-            // Only request permission if it's the first launch of the PWA or if permission is currently 'default'.
-            if (Notification.permission === 'default' && (isStandalone && !notificationPrompted)) {
-                const permission = await Notification.requestPermission();
-                localStorage.setItem('notificationPrompted', 'true'); // Mark as prompted regardless of outcome
-                if (permission !== 'granted') {
-                    console.log('Notification permission denied on first launch.');
-                    return; // User denied, so we stop.
-                }
+            // Request permission if it hasn't been granted or denied yet.
+            if (Notification.permission === 'default') {
+                await Notification.requestPermission();
             }
-            
-            // If permission is not granted at this point (either denied now or previously), do not proceed.
+            // If permission is not granted after the prompt (or was already denied), exit.
             if (Notification.permission !== 'granted') {
                 return;
             }
-
-            // If we are here, permission is 'granted'. Proceed to get the token.
+            // NEW: Add the VAPID key, which is required for web push notifications.
+            // This key is generated in your Firebase project settings under Cloud Messaging.
             const vapidKey = "BBVKpOXnP5lq1tVGX0lAhnnsIzt9uET8jzdE98ocBBnO3-vlS7IDLRInG2iJ3COVkK5ycZ-toAE68kZdDpUuH_g";
             const token = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey: vapidKey });
-            
+
             if (token && state.currentUser) {
+                // Save the token to Firestore for the current user.
                 await Handlers.saveFcmToken(token);
             }
 
-            // NEW: Add a listener for token refreshes to keep the user's token up-to-date.
+            // NEW: Handle token refresh. FCM tokens can be updated periodically.
+            // This ensures the user's token in the database is always current.
             messaging.onTokenRefresh(async () => {
                 try {
                     const refreshedToken = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey: vapidKey });
                     if (refreshedToken && state.currentUser) {
-                        console.log('FCM token refreshed, updating in Firestore.');
+                        console.log('FCM token refreshed.');
                         await Handlers.saveFcmToken(refreshedToken);
                     }
                 } catch (err) {
                     console.error('Unable to retrieve refreshed FCM token.', err);
                 }
             });
+
         } catch (err) {
             // This catch block is crucial. It handles errors from `getToken()` if permissions are denied
             // or if the environment doesn't support it (e.g., incognito mode), preventing the unhandled rejection.
