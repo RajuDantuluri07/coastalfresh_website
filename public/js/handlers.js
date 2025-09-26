@@ -808,13 +808,28 @@ export const Handlers = {
     },
 
     copyReferralLink: () => {
-        const referralLink = document.getElementById('referralLink').textContent;
+        const referralLinkContainer = document.getElementById('copyReferralBtn');
+        if (!referralLinkContainer) return;
+
+        const linkSpan = referralLinkContainer.querySelector('.refer-link');
+        const icon = referralLinkContainer.querySelector('i');
+        if (!linkSpan || !icon) return;
+
+        const originalText = linkSpan.textContent;
+        const originalIconClass = icon.className;
+        const referralLink = originalText;
+
         if (navigator.clipboard) {
             navigator.clipboard.writeText(referralLink).then(() => {
-                UI.showToast('Referral link copied!');
+                linkSpan.textContent = 'Copied!';
+                icon.className = 'fas fa-check';
+                setTimeout(() => {
+                    linkSpan.textContent = originalText;
+                    icon.className = originalIconClass;
+                }, 2000);
             }, (err) => {
                 console.error('Could not copy text: ', err);
-                UI.showToast('Failed to copy link.');
+                UI.showToast('Failed to copy link.', true);
             });
         }
     },
