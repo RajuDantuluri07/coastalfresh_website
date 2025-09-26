@@ -1912,11 +1912,13 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
   
   /* REFINED: Style the empty cart button to match the checkout button */
   .cart-cta.empty-cart-btn {
-    background: var(--primary-color);
+    width: 100%; /* NEW: Make button full width */
+    max-width: var(--app-max-width); /* NEW: Constrain to app width */
+    background: var(--accent-color); /* NEW: Use a more vibrant accent color */
     color: white;
-    font-weight: 700; /* Bolder to match checkout */
-    box-shadow: 0 6px 20px rgba(1, 101, 154, 0.2);
-    /* Other styles are inherited from .cart-cta */
+    font-weight: 700;
+    font-size: 16px; /* NEW: Slightly larger font */
+    box-shadow: 0 6px 20px rgba(11, 173, 226, 0.3); /* NEW: Matching shadow for the accent color */
   }
 
 /* FAQ */
