@@ -1801,7 +1801,7 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
 
 .empty-cart {
   text-align: center;
-  padding: 24px 20px; /* REFINED: Reduced vertical padding */
+  padding: 20px; /* REFINED: Use consistent padding */
   color: var(--text-secondary);
   display: flex;
   flex-direction: column;
