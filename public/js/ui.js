@@ -310,6 +310,19 @@ export const UI = {
             if (icon) icon.style.transform = 'rotate(0deg)';
         });
 
+        // NEW: Automatically open the "Product Details" accordion by default
+        const productInfoItem = document.getElementById('productInfoDetailItem');
+        if (productInfoItem) {
+            const content = productInfoItem.querySelector('.detail-content');
+            const icon = productInfoItem.querySelector('.detail-header i');
+
+            productInfoItem.classList.add('active');
+            // Set max-height to its scroll height to animate it open
+            content.style.maxHeight = content.scrollHeight + 'px';
+            content.style.padding = '0 0 16px 0';
+            if (icon) icon.style.transform = 'rotate(180deg)';
+        }
+
         UI.updatePopupCta();
         if (contentWrapper) contentWrapper.scrollTop = 0;
 
@@ -877,6 +890,7 @@ export const UI = {
         }
 
         let timer = null;
+        let restartTimer = null; // To restart auto-play after user interaction
 
         if (dotsContainer) {
             dotsContainer.innerHTML = Array.from({ length: total }, (_, i) =>
@@ -917,11 +931,14 @@ export const UI = {
         }
         function stopTimer() {
             clearInterval(timer);
+            // If the user interacts, clear any pending restart and set a new one
+            clearTimeout(restartTimer);
+            restartTimer = setTimeout(startTimer, 8000); // Restart after 8 seconds of inactivity
         }
 
         carouselContainer.addEventListener('pointerdown', stopTimer);
-        carouselContainer.addEventListener('scroll', stopTimer);
-
+        // Use a debounced scroll handler to avoid stopping/starting the timer too frequently
+        carouselContainer.addEventListener('scroll', () => { clearTimeout(restartTimer); restartTimer = setTimeout(startTimer, 8000); });
         document.addEventListener('visibilitychange', () => {
             document.hidden ? stopTimer() : startTimer();
         });

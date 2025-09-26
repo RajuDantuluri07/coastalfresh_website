@@ -248,7 +248,7 @@ export const Handlers = {
 
         // Tooltip handler
         document.body.addEventListener('click', e => {
-            const infoIcon = e.target.closest('.summary-row .fa-info-circle');
+            const infoIcon = e.target.closest('.cart-bill-row .fa-info-circle');
             if (infoIcon) {
                 e.preventDefault();
                 UI.showSimpleTooltip(infoIcon);

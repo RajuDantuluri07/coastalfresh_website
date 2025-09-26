@@ -1653,7 +1653,13 @@ overflow: hidden;
 }
 .cart-item-thumb { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; background: var(--bg-light); }
 .cart-item-meta { flex: 1; }
-.cart-item-name { font-weight: 600; }
+.cart-item-name {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px; /* Adjust as needed for different screen sizes */
+}
 .cart-item-sub { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
 .cart-item-price { font-weight: 700; margin-top: 8px; }
 .cart-item-mrp {

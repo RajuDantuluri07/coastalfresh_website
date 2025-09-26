@@ -655,10 +655,6 @@
               <span>🚚</span>
               <strong>Next Day Delivery</strong>
             </div>
-            <div class="popup-rating" id="popupRatingContainer" role="img" aria-label="4.2 out of 5 stars">
-              <div class="popup-stars">★★★★☆</div>
-              <span class="popup-rating-text">387 verified buyers</span>
-            </div>
           </div>
         </div>
 
@@ -730,7 +726,12 @@
             <h2 id="billHeading" class="section-title" style="font-size: 18px; margin-bottom: 8px;">Bill Details</h2>
             <div class="cart-bill-row"><div>Item Total</div><div id="cartItemTotal">₹0</div></div>
             <div class="cart-bill-row" id="cartDiscountRow" style="display: none;"><div>Discount</div><div id="cartDiscount" style="color: var(--success-color);">₹0</div></div>
-            <div class="cart-bill-row"><div>Delivery Fee</div><div id="cartDeliveryFee">₹0</div></div>
+            <div class="cart-bill-row">
+              <div>
+                Delivery Fee <i class="fas fa-info-circle" title="Free delivery in Manikonda & surrounding areas." style="color: var(--text-secondary); font-size: 12px; cursor: pointer;"></i>
+              </div>
+              <div id="cartDeliveryFee">₹0</div>
+            </div>
             <div class="cart-bill-row total"><div>To Pay</div><div id="cartToPay">₹0</div></div>
             <div class="cart-saved center" id="cartSavedMsg" style="display:none"></div>
           </section>
