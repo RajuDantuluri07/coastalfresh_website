@@ -998,21 +998,14 @@ export const Handlers = {
         });
 
         try {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-            const notificationPrompted = localStorage.getItem('notificationPrompted') === 'true';
-
-            // Only request permission if it's the first launch of the PWA or if permission is currently 'default'.
-            if (Notification.permission === 'default' && (isStandalone && notificationPrompted)) {
-                const permission = await Notification.requestPermission();
-                if (permission !== 'granted') {
-                    console.log('Notification permission not granted. User will not receive push notifications.');
-                    return;
-                }
-            } else if (Notification.permission !== 'granted') {
-                // Don't re-prompt if already denied or if not in the right context.
-                return; 
+            // Request permission if it hasn't been granted or denied yet.
+            if (Notification.permission === 'default') {
+                await Notification.requestPermission();
             }
-            
+            // If permission is not granted after the prompt (or was already denied), exit.
+            if (Notification.permission !== 'granted') {
+                return;
+            }
             const token = await messaging.getToken({ serviceWorkerRegistration: registration });
 
             if (token && state.currentUser) {
@@ -1236,37 +1229,45 @@ export const Handlers = {
     },
 
     triggerInstallPrompt: async () => {
-        if (!state.deferredInstallPrompt) return;
-
-        window.Analytics.trackEvent('pwa_install_clicked');
-
-        state.deferredInstallPrompt.prompt();
-
-        const { outcome } = await state.deferredInstallPrompt.userChoice;
-        state.installPromptUsed = true;
-        console.log(`User response to the install prompt: ${outcome}`);
-
-        window.Analytics.trackEvent('pwa_install_outcome', { 'outcome': outcome });
-
-        // NEW: Store install event in Firebase
-        if (outcome === 'accepted') {
-            try {
-                state.db.collection('installs').add({
-                    userId: state.currentUser ? state.currentUser.uid : null,
-                    outcome: outcome,
-                    platform: 'web', // Platform is part of the userChoice result, but 'web' is a safe default
-                    userAgent: navigator.userAgent,
-                    installedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                console.log('PWA install event recorded in Firestore.');
-            } catch (error) {
-                console.error('Error recording PWA install event:', error);
-            }
+        if (!state.deferredInstallPrompt) {
+            console.log('Install prompt not available.');
+            return;
         }
-
-        state.deferredInstallPrompt = null;
-
-        UI.hideInstallPrompt();
+    
+        try {
+            window.Analytics.trackEvent('pwa_install_clicked');
+    
+            // Show the browser's installation prompt
+            state.deferredInstallPrompt.prompt();
+    
+            // Wait for the user to respond to the prompt
+            const { outcome } = await state.deferredInstallPrompt.userChoice;
+            state.installPromptUsed = true;
+            console.log(`User response to the install prompt: ${outcome}`);
+    
+            window.Analytics.trackEvent('pwa_install_outcome', { 'outcome': outcome });
+    
+            // Store install event in Firebase if accepted
+            if (outcome === 'accepted') {
+                state.db.collection('installs').add({
+                        userId: state.currentUser ? state.currentUser.uid : null,
+                        outcome: outcome,
+                        platform: 'web',
+                        userAgent: navigator.userAgent,
+                        installedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }).catch(error => {
+                        // This catch is for the Firestore write, not the prompt itself.
+                        console.error('Error recording PWA install event:', error);
+                    });
+            }
+        } catch (error) {
+            // This will catch errors if the prompt cannot be shown or if userChoice rejects.
+            console.error('Error during PWA install prompt:', error);
+        } finally {
+            // Always clean up, regardless of the outcome.
+            state.deferredInstallPrompt = null;
+            UI.hideInstallPrompt();
+        }
     },
 
     trapFocusInInstallPrompt: (e) => {
