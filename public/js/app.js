@@ -205,22 +205,24 @@ async function init() {
       UI.initCarousel('#communicationCarousel');
 
       if ('serviceWorker' in navigator) {
-          window.addEventListener('load', async () => {
-              const registration = await navigator.serviceWorker.register('/service-worker.js');
-              try {
-                  console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                  // NEW: Trigger notification prompt on first launch if permission is 'default'.
-                  if (Notification.permission === 'default' && !localStorage.getItem('notificationPrompted')) {
-                      setTimeout(() => {
-                          UI.showToast('Enable notifications to get order updates!');
-                          Handlers.initFirebaseMessaging(registration);
-                          localStorage.setItem('notificationPrompted', 'true');
-                      }, 5000); // Wait 5 seconds after page load.
-                  }
-              } catch (err) {
-                  console.log('ServiceWorker registration failed: ', err);
-              }
-          });
+        window.addEventListener('load', async () => {
+            try {
+                const registration = await navigator.serviceWorker.register('/service-worker.js');
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+
+                // FIX: The Handlers module is now guaranteed to be initialized.
+                // Trigger notification prompt on first launch if permission is 'default'.
+                if (Notification.permission === 'default' && !localStorage.getItem('notificationPrompted')) {
+                    setTimeout(() => {
+                        UI.showToast('Enable notifications to get order updates!');
+                        Handlers.initFirebaseMessaging(registration);
+                        localStorage.setItem('notificationPrompted', 'true');
+                    }, 5000); // Wait 5 seconds after page load.
+                }
+            } catch (err) {
+                console.log('ServiceWorker registration failed: ', err);
+            }
+        });
       }
 
       window.addEventListener('beforeinstallprompt', (e) => {
