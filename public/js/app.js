@@ -103,7 +103,7 @@ window.addEventListener('error', function(event) {
   }
   // Log the exception to your analytics for tracking.
   if (window.Analytics && typeof window.Analytics.trackEvent === 'function') {
-    Analytics.trackEvent('exception', {
+    window.Analytics.trackEvent('exception', {
       description: event.error.message,
       fatal: false
     });
@@ -117,7 +117,7 @@ window.addEventListener('unhandledrejection', function(event) {
         UI.showToast('A network or server error occurred.');
     }
     if (window.Analytics && typeof window.Analytics.trackEvent === 'function') {
-        Analytics.trackEvent('exception', { description: `Promise Rejection: ${event.reason.message || event.reason}`, fatal: false });
+        window.Analytics.trackEvent('exception', { description: `Promise Rejection: ${event.reason.message || event.reason}`, fatal: false });
     }
 });
 
@@ -207,22 +207,9 @@ async function init() {
           window.addEventListener('load', () => {
               navigator.serviceWorker.register('/service-worker.js').then(registration => {
                   console.log('ServiceWorker registration successful with scope: ', registration.scope);
-
-                  // FIX: Only attempt to get a notification token on the first launch of the installed PWA.
-                  // This prevents an unhandled promise rejection on every page load.
-                  const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-                  const canRequestPermission = 'Notification' in window && Notification.permission === 'default';
-
-                  if (isStandalone && canRequestPermission) {
-                      try {
-                          const notificationPrompted = localStorage.getItem('notificationPrompted');
-                          if (!notificationPrompted) {
-                              console.log('First launch in PWA mode, requesting notification permission.');
-                              localStorage.setItem('notificationPrompted', 'true');
-                              Handlers.initFirebaseMessaging(registration);
-                          }
-                      } catch (e) { console.error('Could not access localStorage for notification prompt.', e); }
-                  }
+                  // The logic to initialize Firebase Messaging is now correctly handled
+                  // in `Handlers.handleProfileButtonClick` when the user clicks the "Notifications" button.
+                  // This avoids unsolicited permission prompts on page load.
               }, err => {
                   console.log('ServiceWorker registration failed: ', err);
               });

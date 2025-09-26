@@ -1227,20 +1227,20 @@ export const Handlers = {
         }
     
         try {
-            window.Analytics.trackEvent('pwa_install_clicked');
+            if (window.Analytics) window.Analytics.trackEvent('pwa_install_clicked');
     
             // Show the browser's installation prompt
             state.deferredInstallPrompt.prompt();
     
             // Wait for the user to respond to the prompt
             const { outcome } = await state.deferredInstallPrompt.userChoice;
-            state.installPromptUsed = true;
             console.log(`User response to the install prompt: ${outcome}`);
     
-            window.Analytics.trackEvent('pwa_install_outcome', { 'outcome': outcome });
+            if (window.Analytics) window.Analytics.trackEvent('pwa_install_outcome', { 'outcome': outcome });
     
             // Store install event in Firebase if accepted
             if (outcome === 'accepted') {
+                state.installPromptUsed = true; // Mark as used only if accepted
                 state.db.collection('installs').add({
                         userId: state.currentUser ? state.currentUser.uid : null,
                         outcome: outcome,
