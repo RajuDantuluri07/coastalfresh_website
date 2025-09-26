@@ -25,7 +25,6 @@ export const config = {
     FLASH_SALE_PRODUCT_IDS: [11, 12, 20, 22],
     FLASH_SALE_DURATION_HOURS: 12,
     FEATURED_PRODUCT_IDS: [17, 13, 21, 1],
-    EMPTY_CART_RECOMMENDATIONS: [17, 20, 1], // NEW: Configurable recommended products for empty cart
     FREE_DELIVERY_THRESHOLD: 1500,
     COUPONS: {
         'FRESH10': { type: 'percent', value: 10, description: '10% off your order' },

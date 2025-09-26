@@ -269,42 +269,6 @@ export const UI = {
         }
     },
 
-    // NEW: Function to render small product cards for recommendations
-    createSmallProductHTML: (product) => {
-        if (!product) return '';
-        const optimizedImage = UI.getOptimizedImageUrl(product.image, 150, 150);
-        const sanitizedName = DOMPurify.sanitize(product.name);
-        return `
-            <div class="small-product-card" data-id="${product.id}">
-                <div class="small-product-image">
-                    <img src="${optimizedImage}" alt="${sanitizedName}" loading="lazy" width="150" height="150">
-                </div>
-                <div class="small-product-info">
-                    <div class="small-product-name">${sanitizedName}</div>
-                    <div class="small-product-footer">
-                        <div class="small-product-price">₹${product.finalPrice}</div>
-                        <button class="add-to-cart-btn add-pill" data-id="${product.id}"><i class="fas fa-plus"></i> Add</button>
-                    </div>
-                </div>
-            </div>
-        `;
-    },
-
-    // NEW: Function to render recommended items in the empty cart
-    renderEmptyCartRecommendations: () => {
-        const container = document.getElementById('emptyCartRecommendations');
-        if (!container) return;
-
-        const recommendedProducts = state.products.filter(p =>
-            config.EMPTY_CART_RECOMMENDATIONS.includes(p.id) && p.available
-        );
-
-        if (recommendedProducts.length > 0) {
-            container.innerHTML = recommendedProducts.map(UI.createSmallProductHTML).join('');
-            container.parentElement.style.display = 'block';
-        }
-    },
-
     generateProductSlug: (product) => {
         if (!product || !product.name) return '';
         const namePart = product.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
@@ -567,8 +531,6 @@ export const UI = {
             if (emptyCartBtn) {
                 emptyCartBtn.addEventListener('click', () => { UI.showPage('catalog'); UI.closeCart(); });
             }
-            // NEW: Render recommended items when cart is empty
-            UI.renderEmptyCartRecommendations();
         } else {
             emptyCartEl.style.display = 'none';
             if (cartFooterEl) cartFooterEl.style.display = 'flex';

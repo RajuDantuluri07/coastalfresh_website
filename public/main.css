@@ -1923,68 +1923,6 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
     box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3);
   }
 
-/* --- NEW: Empty Cart Recommendations --- */
-.empty-cart-recs-container {
-  display: none; /* Hidden by default, shown by JS if items exist */
-  width: 100%;
-  margin-top: 24px; /* REFINED: Reduced top margin */
-  padding-top: 20px; /* REFINED: Reduced top padding */
-  border-top: 1px solid var(--border-color);
-}
-
-.empty-cart-recs-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  text-align: left;
-  margin-bottom: 16px;
-}
-
-.empty-cart-recs-products {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding-bottom: 12px; /* For scrollbar visibility */
-  scrollbar-width: none; /* Firefox */
-}
-
-.empty-cart-recs-products::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
-}
-
-.small-product-card {
-  flex: 0 0 140px; /* Fixed width for each card */
-  background: var(--bg-white);
-  border-radius: var(--radius-card);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  min-height: 210px; /* REFINED: Set a minimum height to ensure all content is visible */
-}
-
-.small-product-image {
-  aspect-ratio: 1 / 1;
-  background: var(--bg-light);
-}
-.small-product-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.small-product-info { padding: 8px; display: flex; flex-direction: column; flex-grow: 1; } /* REFINED: Ensure flex-grow works with min-height */
-.small-product-name {
-  font-size: 13px;
-  font-weight: 500;
-  margin-bottom: 8px;
-  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
-.small-product-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-.small-product-price { font-size: 14px; font-weight: 600; }
-.small-product-card .add-to-cart-btn { height: 28px; padding: 0 10px; font-size: 12px; }
-.small-product-card .add-to-cart-btn .fas { font-size: 10px; }
-
 /* FAQ */
 .faq-wrap {
   padding: 20px;
