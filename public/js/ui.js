@@ -643,7 +643,8 @@ export const UI = {
             couponDiscount = Math.min(couponDiscount, subtotal);
         }
 
-        const deliveryFee = (subtotal - couponDiscount) >= config.FREE_DELIVERY_THRESHOLD ? 0 : 100;
+        // NEW: Delivery is now always free.
+        const deliveryFee = 0;
         const total = subtotal - couponDiscount + deliveryFee;
         const totalSavings = productSavings + couponDiscount + (deliveryFee === 0 ? 100 : 0);
         if (itemTotalEl) itemTotalEl.textContent = `₹${subtotal}`;

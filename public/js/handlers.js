@@ -717,7 +717,8 @@ export const Handlers = {
         const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
         const couponDiscount = state.appliedCoupon ? (state.appliedCoupon.type === 'percent' ? (subtotal * state.appliedCoupon.value) / 100 : state.appliedCoupon.value) : 0;
         const finalSubtotal = subtotal - couponDiscount;
-        const deliveryFee = finalSubtotal >= config.FREE_DELIVERY_THRESHOLD ? 0 : 100;
+        // NEW: Delivery is now always free.
+        const deliveryFee = 0;
         const total = finalSubtotal + deliveryFee;
 
         let message = `Hi! I'd like to place an order (ID: ${orderId}):\n\n`;
