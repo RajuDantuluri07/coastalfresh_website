@@ -1031,6 +1031,19 @@ export const Handlers = {
             if (token && state.currentUser) {
                 await Handlers.saveFcmToken(token);
             }
+
+            // NEW: Add a listener for token refreshes to keep the user's token up-to-date.
+            messaging.onTokenRefresh(async () => {
+                try {
+                    const refreshedToken = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey: vapidKey });
+                    if (refreshedToken && state.currentUser) {
+                        console.log('FCM token refreshed, updating in Firestore.');
+                        await Handlers.saveFcmToken(refreshedToken);
+                    }
+                } catch (err) {
+                    console.error('Unable to retrieve refreshed FCM token.', err);
+                }
+            });
         } catch (err) {
             // This catch block is crucial. It handles errors from `getToken()` if permissions are denied
             // or if the environment doesn't support it (e.g., incognito mode), preventing the unhandled rejection.
