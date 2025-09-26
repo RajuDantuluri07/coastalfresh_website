@@ -981,7 +981,7 @@ export const Handlers = {
         });
     },
 
-    initFirebaseMessaging: async () => {
+    initFirebaseMessaging: async (registration) => {
         if (!('Notification' in window) || !('serviceWorker' in navigator) || !firebase.messaging.isSupported()) {
             console.log('Firebase Messaging is not supported in this browser.');
             return;
@@ -997,7 +997,6 @@ export const Handlers = {
         });
 
         try {
-            const registration = await navigator.serviceWorker.ready;
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
             const notificationPrompted = localStorage.getItem('notificationPrompted') === 'true';
 
@@ -1247,6 +1246,22 @@ export const Handlers = {
         console.log(`User response to the install prompt: ${outcome}`);
 
         window.Analytics.trackEvent('pwa_install_outcome', { 'outcome': outcome });
+
+        // NEW: Store install event in Firebase
+        if (outcome === 'accepted') {
+            try {
+                state.db.collection('installs').add({
+                    userId: state.currentUser ? state.currentUser.uid : null,
+                    outcome: outcome,
+                    platform: 'web', // Platform is part of the userChoice result, but 'web' is a safe default
+                    userAgent: navigator.userAgent,
+                    installedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log('PWA install event recorded in Firestore.');
+            } catch (error) {
+                console.error('Error recording PWA install event:', error);
+            }
+        }
 
         state.deferredInstallPrompt = null;
 

@@ -206,7 +206,19 @@ async function init() {
           window.addEventListener('load', () => {
               navigator.serviceWorker.register('/service-worker.js').then(registration => {
                   console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                  Handlers.initFirebaseMessaging();
+                  // NEW: Prompt for notifications on first launch after PWA installation
+                  const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+                  if (isStandalone) {
+                    try {
+                      const notificationPrompted = localStorage.getItem('notificationPrompted');
+                      if (!notificationPrompted) {
+                        console.log('First launch in PWA mode, setting up notification prompt.');
+                        localStorage.setItem('notificationPrompted', 'true');
+                      }
+                    } catch (e) { console.error('Could not access localStorage for notification prompt.', e); }
+                  }
+                  // Now initialize messaging, which will check the flag we just set.
+                  Handlers.initFirebaseMessaging(registration);
               }, err => {
                   console.log('ServiceWorker registration failed: ', err);
               });
@@ -223,20 +235,6 @@ async function init() {
               profileInstallBtn.style.display = 'flex';
           }
       });
-
-      // NEW: Prompt for notifications on first launch after PWA installation
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-      if (isStandalone) {
-        try {
-          const notificationPrompted = localStorage.getItem('notificationPrompted');
-          if (!notificationPrompted) {
-            console.log('First launch in PWA mode, requesting notification permission.');
-            // The initFirebaseMessaging function will handle the permission request.
-            localStorage.setItem('notificationPrompted', 'true');
-          }
-        } catch (e) { console.error('Could not access localStorage for notification prompt.', e); }
-      }
-
   } catch (e) {
       console.error("A critical error occurred during app initialization:", e);
       document.body.innerHTML = `<div style="padding: 40px; text-align: center; font-family: sans-serif; color: #333;"><h1>Application Error</h1><p>A critical error occurred and the app cannot start. Please try refreshing the page.</p><p style="color: #888; font-size: 12px; margin-top: 20px;">Error: ${e.message}</p></div>`;
