@@ -998,12 +998,21 @@ export const Handlers = {
 
         try {
             const registration = await navigator.serviceWorker.ready;
-            const permission = await Notification.requestPermission();
-            if (permission !== 'granted') {
-                console.log('Notification permission not granted. User will not receive push notifications.');
-                return;
-            }
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            const notificationPrompted = localStorage.getItem('notificationPrompted') === 'true';
 
+            // Only request permission if it's the first launch of the PWA or if permission is currently 'default'.
+            if (Notification.permission === 'default' && (isStandalone && notificationPrompted)) {
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') {
+                    console.log('Notification permission not granted. User will not receive push notifications.');
+                    return;
+                }
+            } else if (Notification.permission !== 'granted') {
+                // Don't re-prompt if already denied or if not in the right context.
+                return; 
+            }
+            
             const token = await messaging.getToken({ serviceWorkerRegistration: registration });
 
             if (token && state.currentUser) {

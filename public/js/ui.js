@@ -927,7 +927,7 @@ export const UI = {
 
         function startTimer() {
             if (timer) clearInterval(timer);
-            timer = setInterval(advanceSlide, 5000);
+            timer = setInterval(advanceSlide, 3000); // Changed from 5s to 3s for faster sliding
         }
         function stopTimer() {
             clearInterval(timer);

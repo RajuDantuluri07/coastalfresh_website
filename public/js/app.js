@@ -223,6 +223,20 @@ async function init() {
               profileInstallBtn.style.display = 'flex';
           }
       });
+
+      // NEW: Prompt for notifications on first launch after PWA installation
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+      if (isStandalone) {
+        try {
+          const notificationPrompted = localStorage.getItem('notificationPrompted');
+          if (!notificationPrompted) {
+            console.log('First launch in PWA mode, requesting notification permission.');
+            // The initFirebaseMessaging function will handle the permission request.
+            localStorage.setItem('notificationPrompted', 'true');
+          }
+        } catch (e) { console.error('Could not access localStorage for notification prompt.', e); }
+      }
+
   } catch (e) {
       console.error("A critical error occurred during app initialization:", e);
       document.body.innerHTML = `<div style="padding: 40px; text-align: center; font-family: sans-serif; color: #333;"><h1>Application Error</h1><p>A critical error occurred and the app cannot start. Please try refreshing the page.</p><p style="color: #888; font-size: 12px; margin-top: 20px;">Error: ${e.message}</p></div>`;
