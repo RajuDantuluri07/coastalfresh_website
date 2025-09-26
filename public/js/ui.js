@@ -270,77 +270,79 @@ export const UI = {
         if (!product) return;
 
         // --- OPTIMIZATION: Prioritize visual updates first ---
-
         state.popupProduct = product;
         state.currentProductQty = state.cart[product.id] || 1;
 
         // Use cached DOM elements for speed
         const { main: popup, title, weight, priceSection, infoContent, mainImage, contentWrapper, backBtn } = state.dom.popup;
 
-        title.textContent = DOMPurify.sanitize(product.name);
-        weight.textContent = `${product.net} Net Weight`;
-
-        if (product.mrp > product.finalPrice) {
-            const savings = product.mrp - product.finalPrice;
-            priceSection.innerHTML = `
-        <span class="popup-price-final">₹${product.finalPrice}</span>
-        <span class="popup-price-mrp">₹${product.mrp}</span>
-        <span class="popup-price-savings-badge">SAVE ₹${savings}</span>
-      `;
-        } else {
-            priceSection.innerHTML = `<span class="popup-price-final">₹${product.finalPrice}</span>`;
-        }
-
-        infoContent.innerHTML = `
-      <p>${DOMPurify.sanitize(product.desc)}</p>
-      <p style="margin-top: 16px;"><strong>Gross Wt:</strong> ${product.gross} | <strong>Net Wt:</strong> ${product.net}<br><small>Net weight is after cleaning. Weight loss varies by product.</small></p>`;
-
-        const optimizedPopupImage = UI.getOptimizedImageUrl(product.image, 600, 600);
-        mainImage.src = optimizedPopupImage;
-        mainImage.alt = `High-quality ${DOMPurify.sanitize(product.name)} from Coastal Fresh India`;
-
-        document.getElementById('popupImageIndicators').style.display = 'none';
-
-        // Reset accordion state
-        document.querySelectorAll('.detail-item.active').forEach(item => {
-            item.classList.remove('active');
-            item.querySelector('.detail-content').style.maxHeight = '0';
-            item.querySelector('.detail-content').style.padding = '0';
-            const icon = item.querySelector('.detail-header i');
-            if (icon) icon.style.transform = 'rotate(0deg)';
-        });
-
-        // NEW: Automatically open the "Product Details" accordion by default
-        const productInfoItem = document.getElementById('productInfoDetailItem');
-        if (productInfoItem) {
-            const content = productInfoItem.querySelector('.detail-content');
-            const icon = productInfoItem.querySelector('.detail-header i');
-
-            productInfoItem.classList.add('active');
-            // Set max-height to its scroll height to animate it open
-            content.style.maxHeight = content.scrollHeight + 'px';
-            content.style.padding = '0 0 16px 0';
-            if (icon) icon.style.transform = 'rotate(180deg)';
-        }
-
-        UI.updatePopupCta();
-        if (contentWrapper) contentWrapper.scrollTop = 0;
 
         // --- Show the modal immediately ---
         state.isPopupOpen = true;
         UI.openModal(popup, backBtn);
 
-        // --- OPTIMIZATION: Defer non-critical tasks to run after the popup is visible ---
-        const runDeferredTasks = () => {
+        // --- OPTIMIZATION: Defer all population and expensive calculations to the next frame ---
+        setTimeout(() => {
+            title.textContent = DOMPurify.sanitize(product.name);
+            weight.textContent = `${product.net} Net Weight`;
+
+            if (product.mrp > product.finalPrice) {
+                const savings = product.mrp - product.finalPrice;
+                priceSection.innerHTML = `
+                    <span class="popup-price-final">₹${product.finalPrice}</span>
+                    <span class="popup-price-mrp">₹${product.mrp}</span>
+                    <span class="popup-price-savings-badge">SAVE ₹${savings}</span>
+                `;
+            } else {
+                priceSection.innerHTML = `<span class="popup-price-final">₹${product.finalPrice}</span>`;
+            }
+
+            infoContent.innerHTML = `
+                <p>${DOMPurify.sanitize(product.desc)}</p>
+                <p style="margin-top: 16px;"><strong>Gross Wt:</strong> ${product.gross} | <strong>Net Wt:</strong> ${product.net}<br><small>Net weight is after cleaning. Weight loss varies by product.</small></p>`;
+
+            const optimizedPopupImage = UI.getOptimizedImageUrl(product.image, 600, 600);
+            mainImage.src = optimizedPopupImage;
+            mainImage.alt = `High-quality ${DOMPurify.sanitize(product.name)} from Coastal Fresh India`;
+
+            document.getElementById('popupImageIndicators').style.display = 'none';
+
+            // Reset accordion state
+            document.querySelectorAll('.detail-item.active').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.detail-content').style.maxHeight = '0';
+                item.querySelector('.detail-content').style.padding = '0';
+                const icon = item.querySelector('.detail-header i');
+                if (icon) icon.style.transform = 'rotate(0deg)';
+            });
+
+            // Automatically open the "Product Details" accordion by default
+            const productInfoItem = document.getElementById('productInfoDetailItem');
+            if (productInfoItem) {
+                const content = productInfoItem.querySelector('.detail-content');
+                const icon = productInfoItem.querySelector('.detail-header i');
+
+                productInfoItem.classList.add('active');
+                // Set max-height to its scroll height to animate it open
+                content.style.maxHeight = content.scrollHeight + 'px';
+                content.style.padding = '0 0 16px 0';
+                if (icon) icon.style.transform = 'rotate(180deg)';
+            }
+
+            UI.updatePopupCta();
+            if (contentWrapper) contentWrapper.scrollTop = 0;
+
+            // Defer non-critical SEO/History tasks to run after the popup is fully rendered
             const productSlug = UI.generateProductSlug(product);
             const productUrl = `/product/${productSlug}`;
             const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
             const productDesc = product.desc;
             const optimizedProductImage = UI.getOptimizedImageUrl(product.image, 1200, 630);
 
-            // Update SEO tags and browser history
-            UI.updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
-            history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
+            const runDeferredSEOTasks = () => {
+                UI.updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
+                history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
+            };
 
             // Inject JSON-LD schema
             const existingJsonLd = document.getElementById('product-breadcrumb-jsonld');
@@ -351,15 +353,14 @@ export const UI = {
             script.id = 'product-breadcrumb-jsonld';
             script.textContent = JSON.stringify(breadcrumb);
             document.head.appendChild(script);
-        };
 
-        // Use requestIdleCallback for modern browsers, fallback to setTimeout
-        if ('requestIdleCallback' in window) {
-            requestIdleCallback(runDeferredTasks, { timeout: 500 });
-        } else {
-            setTimeout(runDeferredTasks, 100);
-        }
-
+            // Use requestIdleCallback for SEO tasks as they are lowest priority
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(runDeferredSEOTasks, { timeout: 500 });
+            } else {
+                setTimeout(runDeferredSEOTasks, 200); // A slightly longer delay
+            }
+        }, 0);
         // Analytics can also be tracked after the initial render
         window.Analytics.trackEvent('view_item', {
             currency: 'INR',

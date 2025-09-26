@@ -38,12 +38,16 @@ export const Handlers = {
             if (productCard && !target.closest('.cart-controls, .add-to-cart-btn')) {
                 e.preventDefault();
                 const productId = productCard.dataset.id;
-                // OPTIMIZATION: Prefetch the large image on mousedown/touchstart for faster popup load
-                const product = state.products.find(p => p.id === parseInt(productId));
-                if (product) {
-                    const img = new Image();
-                    img.src = UI.getOptimizedImageUrl(product.image, 600, 600);
-                }
+
+                // NEW: Prefetch the large image on mousedown/touchstart for faster popup load
+                // We do this on a separate event listener to avoid blocking the 'click' event.
+                productCard.addEventListener('mousedown', () => {
+                    const product = state.products.find(p => p.id === parseInt(productId));
+                    if (product) {
+                        const img = new Image();
+                        img.src = UI.getOptimizedImageUrl(product.image, 600, 600);
+                    }
+                }, { once: true });
 
                 if (productId) UI.showProductPopup(parseInt(productId));
             }
@@ -241,6 +245,12 @@ export const Handlers = {
             // NEW: Handle click on the "Explore Today's Fresh Catch" button on the About Us page
             if (target.id === 'aboutPageCtaBtn') {
                 UI.showPage('catalog');
+            }
+
+            // NEW: Handle "Share on WhatsApp" button on the refer page
+            if (target.id === 'shareOnWhatsAppBtn') {
+                e.preventDefault();
+                Handlers.openWhatsApp('refer');
             }
         });
 
@@ -1005,27 +1015,28 @@ export const Handlers = {
             }
         });
 
+        // Request permission if it hasn't been granted or denied yet.
+        if (Notification.permission === 'default') {
+            await Notification.requestPermission();
+        }
+        // If permission is not granted after the prompt (or was already denied), exit.
+        if (Notification.permission !== 'granted') {
+            console.log('Notification permission not granted.');
+            return;
+        }
+
+        // NEW: Add the VAPID key, which is required for web push notifications.
+        // This key is generated in your Firebase project settings under Cloud Messaging.
+        const vapidKey = "BBVKpOXnP5lq1tVGX0lAhnnsIzt9uET8jzdE98ocBBnO3-vlS7IDLRInG2iJ3COVkK5ycZ-toAE68kZdDpUuH_g";
+
         try {
-            // Request permission if it hasn't been granted or denied yet.
-            if (Notification.permission === 'default') {
-                await Notification.requestPermission();
-            }
-            // If permission is not granted after the prompt (or was already denied), exit.
-            if (Notification.permission !== 'granted') {
-                return;
-            }
-            // NEW: Add the VAPID key, which is required for web push notifications.
-            // This key is generated in your Firebase project settings under Cloud Messaging.
-            const vapidKey = "BBVKpOXnP5lq1tVGX0lAhnnsIzt9uET8jzdE98ocBBnO3-vlS7IDLRInG2iJ3COVkK5ycZ-toAE68kZdDpUuH_g";
             const token = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey: vapidKey });
 
             if (token && state.currentUser) {
-                // Save the token to Firestore for the current user.
                 await Handlers.saveFcmToken(token);
             }
 
-            // NEW: Handle token refresh. FCM tokens can be updated periodically.
-            // This ensures the user's token in the database is always current.
+            // Handle token refresh. FCM tokens can be updated periodically.
             messaging.onTokenRefresh(async () => {
                 try {
                     const refreshedToken = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey: vapidKey });
@@ -1033,15 +1044,13 @@ export const Handlers = {
                         console.log('FCM token refreshed.');
                         await Handlers.saveFcmToken(refreshedToken);
                     }
-                } catch (err) {
-                    console.error('Unable to retrieve refreshed FCM token.', err);
+                } catch (refreshErr) {
+                    console.error('Unable to retrieve refreshed FCM token.', refreshErr);
                 }
             });
 
         } catch (err) {
-            // This catch block is crucial. It handles errors from `getToken()` if permissions are denied
-            // or if the environment doesn't support it (e.g., incognito mode), preventing the unhandled rejection.
-            console.warn('Could not get FCM token:', err.message);
+            console.warn('Could not get FCM token, likely due to permissions or environment:', err.message);
         }
     },
 
