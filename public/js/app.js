@@ -155,9 +155,7 @@ async function init() {
       state.dom.popup.mainImage = document.getElementById('popupMainImage');
       state.dom.popup.cta = document.getElementById('popupStickyCta');
       state.dom.popup.contentWrapper = document.getElementById('popupContentWrapper');
-      if (state.dom.popup.main) {
-        state.dom.popup.backBtn = state.dom.popup.main.querySelector('.popup-back-btn');
-      }
+      state.dom.popup.backBtn = state.dom.popup.main.querySelector('.popup-back-btn');
 
 
 
@@ -209,7 +207,9 @@ async function init() {
           window.addEventListener('load', () => {
               navigator.serviceWorker.register('/service-worker.js').then(registration => {
                   console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                  // Notification permission is now requested after a user logs in.
+                  // The initFirebaseMessaging handler now contains all the logic to determine
+                  // if it should prompt for notification permissions.
+                  Handlers.initFirebaseMessaging(registration);
               }, err => {
                   console.log('ServiceWorker registration failed: ', err);
               });

@@ -467,9 +467,9 @@ export const Handlers = {
                 UI.showLoginModal();
                 return;
             }
-            // Manually trigger the permission flow.
+            // Directly trigger the permission flow.
+            navigator.serviceWorker.ready.then(Handlers.initFirebaseMessaging);
             UI.showToast('Please check your browser for a permission pop-up.');
-            navigator.serviceWorker.ready.then(registration => Handlers.initFirebaseMessaging(registration, true));
         }
     },
 
@@ -990,7 +990,7 @@ export const Handlers = {
         });
     },
 
-    initFirebaseMessaging: async (registration, forcePrompt = false) => {
+    initFirebaseMessaging: async (registration) => {
         if (!('Notification' in window) || !('serviceWorker' in navigator) || !firebase.messaging.isSupported()) {
             console.log('Firebase Messaging is not supported in this browser.');
             return;
@@ -998,17 +998,19 @@ export const Handlers = {
 
         const messaging = firebase.messaging();
 
+        messaging.onMessage(payload => {
+            console.log('Message received. ', payload);
+            if (payload.notification) {
+                UI.showToast(`${payload.notification.title}: ${payload.notification.body}`);
+            }
+        });
+
         try {
             const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
             const notificationPrompted = localStorage.getItem('notificationPrompted') === 'true';
 
-            // Determine if we should show the prompt.
-            // Condition 1: It's the first launch of the installed PWA.
-            const isFirstPwaLaunch = isStandalone && !notificationPrompted;
-            // Condition 2: The user manually clicked the button in their profile.
-            const isManualRequest = forcePrompt;
-
-            if (Notification.permission === 'default' && (isFirstPwaLaunch || isManualRequest)) {
+            // Only request permission if it's the first launch of the PWA or if permission is currently 'default'.
+            if (Notification.permission === 'default' && (isStandalone && !notificationPrompted)) {
                 const permission = await Notification.requestPermission();
                 localStorage.setItem('notificationPrompted', 'true'); // Mark as prompted regardless of outcome
                 if (permission !== 'granted') {
@@ -1047,14 +1049,6 @@ export const Handlers = {
             // or if the environment doesn't support it (e.g., incognito mode), preventing the unhandled rejection.
             console.warn('Could not get FCM token:', err.message);
         }
-
-        // Listen for foreground messages
-        messaging.onMessage(payload => {
-            console.log('Message received. ', payload);
-            if (payload.notification) {
-                UI.showToast(`${payload.notification.title}: ${payload.notification.body}`);
-            }
-        }
     },
 
     /**
@@ -1086,13 +1080,6 @@ export const Handlers = {
         UI.updateUIForAuthState();
 
         if (user) {
-            // NEW: On new login, check if we should prompt for notifications.
-            if (isNewLogin) {
-                navigator.serviceWorker.ready.then(registration => {
-                    Handlers.initFirebaseMessaging(registration);
-                });
-            }
-
             // Update the user's last seen timestamp for active user tracking.
             // Use { merge: true } to avoid overwriting other user data like 'createdAt'.
             state.db.collection('users').doc(user.uid).set({
