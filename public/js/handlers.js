@@ -1006,40 +1006,31 @@ export const Handlers = {
         });
 
         try {
-            // The logic to decide *when* to call this function is in app.js.
-            // This function's only job is to request permission if needed and get the token.
-            if (Notification.permission === 'default') {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+            const notificationPrompted = localStorage.getItem('notificationPrompted') === 'true';
+
+            // Only request permission if it's the first launch of the PWA or if permission is currently 'default'.
+            if (Notification.permission === 'default' && (isStandalone && !notificationPrompted)) {
                 const permission = await Notification.requestPermission();
-                // If the user denies permission, we simply stop here.
+                localStorage.setItem('notificationPrompted', 'true'); // Mark as prompted regardless of outcome
                 if (permission !== 'granted') {
-                    console.log('Notification permission was not granted.');
-                    return;
+                    console.log('Notification permission denied on first launch.');
+                    return; // User denied, so we stop.
                 }
             }
             
-            // If permission is already denied, we also stop.
+            // If permission is not granted at this point (either denied now or previously), do not proceed.
             if (Notification.permission !== 'granted') {
-                console.log('Notification permission is not granted.');
                 return;
             }
 
             // If we are here, permission is 'granted'. Proceed to get the token.
             const vapidKey = "BBVKpOXnP5lq1tVGX0lAhnnsIzt9uET8jzdE98ocBBnO3-vlS7IDLRInG2iJ3COVkK5ycZ-toAE68kZdDpUuH_g";
             const token = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey: vapidKey });
-            if (token && state.currentUser) await Handlers.saveFcmToken(token);
-
-            // NEW: Add a listener for token refreshes to keep the user's token up-to-date.
-            messaging.onTokenRefresh(async () => {
-                try {
-                    const refreshedToken = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey: vapidKey });
-                    if (refreshedToken && state.currentUser) {
-                        console.log('FCM token refreshed, updating in Firestore.');
-                        await Handlers.saveFcmToken(refreshedToken);
-                    }
-                } catch (err) {
-                    console.error('Unable to retrieve refreshed FCM token.', err);
-                }
-            });
+            
+            if (token && state.currentUser) {
+                await Handlers.saveFcmToken(token);
+            }
         } catch (err) {
             // This catch block is crucial. It handles errors from `getToken()` if permissions are denied
             // or if the environment doesn't support it (e.g., incognito mode), preventing the unhandled rejection.
