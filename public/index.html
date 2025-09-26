@@ -383,66 +383,71 @@
       </main>
     </div>
 
-    <!-- UPDATED: Refer a Friend Page -->
+    <!-- ENHANCED: Refer a Friend Page -->
     <div class="page" id="referPage">
       <header class="header">
         <div class="header-top">
           <button class="back-btn" aria-label="Go Back">
             <i class="fas fa-arrow-left"></i>
           </button>
-          <h1 class="logo">Refer a friend & earn upto ₹100</h1>
+          <h1 class="logo">Refer & Earn</h1>
           <div></div>
         </div>
       </header>
 
-      <main class="section" style="padding-top: 16px; background-color: #fff;">
-        <!-- Steps -->
-        <section class="steps">
-          <h3>More friends. More earnings!</h3>
-          <div class="step-box">
-            <div class="step">
-              <img src="https://img.icons8.com/ios-filled/50/FF69B4/share.png" alt="invite" />
-              Invite your friends using your referral code
-            </div>
-            <div class="step">
-              <img src="https://img.icons8.com/ios-filled/50/1E90FF/shopping-cart.png" alt="order" />
-              Your friend places his 1st order
-            </div>
-            <div class="step">
-              <img src="https://img.icons8.com/ios-filled/50/FFD700/coins.png" alt="cashback" />
-              You get ₹200 cashback once their 1st order
+      <main class="section" style="padding-top: 16px; background-color: var(--bg-light);">
+        <!-- Hero Section -->
+        <div class="refer-hero">
+          <div class="refer-hero-icon"><i class="fas fa-gift"></i></div>
+          <h2 class="refer-title">Share the Freshness, Get Rewards!</h2>
+          <p class="refer-subtitle">
+            Give your friends <strong>10% OFF</strong> their first order, and you'll get a <strong>10% discount coupon</strong> for your next purchase once they order. It's a win-win!
+          </p>
+        </div>
+
+        <!-- How It Works Section -->
+        <div class="refer-steps-section">
+          <div class="refer-steps-header">
+            <h3>How It Works</h3>
+            <button class="refer-terms-btn" id="showTermsBtn">Terms</button>
+          </div>
+          <div class="refer-step">
+            <div class="refer-step-num">1</div>
+            <div class="refer-step-text">
+              <div class="refer-step-desc">Share your unique link</div>
+              <div class="refer-step-muted">Send it via WhatsApp or any other app.</div>
             </div>
           </div>
-        </section>
-
-        <!-- Referral Code -->
-        <div class="referral">
-          Referral Code: <span id="refCode">GUEST123</span>
+          <div class="refer-step">
+            <div class="refer-step-num">2</div>
+            <div class="refer-step-text">
+              <div class="refer-step-desc">Your friend gets 10% off</div>
+              <div class="refer-step-muted">They must be a new customer and use your link to order.</div>
+            </div>
+          </div>
+          <div class="refer-step">
+            <div class="refer-step-num">3</div>
+            <div class="refer-step-text">
+              <div class="refer-step-desc">You get a 10% discount</div>
+              <div class="refer-step-muted">Your coupon is unlocked after their first successful delivery.</div>
+            </div>
+          </div>
         </div>
 
-        <!-- Share Buttons -->
-        <div class="buttons">
-          <button class="btn btn-share" id="shareOnOtherAppsBtn">Share</button>
-          <button class="btn btn-whatsapp" id="shareOnWhatsAppBtn">Whatsapp</button>
+        <div class="refer-influencer-card">
+          <div class="refer-influencer-text">Are you an influencer? <span>Let's collaborate!</span></div>
+          <a href="https://wa.me/919985125678?text=Hi%20Coastal%20Fresh,%20I'm%20an%20influencer%20and%20would%20like%20to%20collaborate." target="_blank" class="refer-influencer-contact">Contact Us</a>
         </div>
 
-        <!-- Earnings Summary -->
-        <div class="summary">
-          Gautam had earned ₹12000 from 20 friends. <br />
-          Get your friends and earn more.
-        </div>
-
-        <!-- Influencer -->
-        <div class="influencer">
-          Are you an influencer? <br />
-          <a href="mailto:raju@winx.com">Email us at raju@winx.com</a>
-        </div>
-
-        <!-- Terms Modal (re-using existing modal) -->
-        <div class="refer-steps-section" style="margin-top: 20px; border-style: solid;">
-          <div class="refer-steps-header">
-            <h3>How It Works & Terms</h3>
-            <button class="refer-terms-btn" id="showTermsBtn">View</button>
+        <!-- Sticky Footer for Share Actions -->
+        <div class="refer-sticky-footer">
+          <div class="refer-link-container">
+            <span id="referralLink" class="refer-link">https://coastalfresh.in?ref=GUEST123</span>
+            <button id="copyReferralBtn" class="copy-link-btn" aria-label="Copy referral link"><i class="far fa-copy"></i> Copy</button>
+          </div>
+          <div class="share-buttons">
+            <button id="shareOnWhatsAppBtn" class="share-btn whatsapp"><i class="fab fa-whatsapp"></i> Share via WhatsApp</button>
+            <button id="shareOnOtherAppsBtn" class="share-btn other-apps"><i class="fas fa-share-alt"></i> Share via Other Apps</button>
           </div>
         </div>
       </main>
