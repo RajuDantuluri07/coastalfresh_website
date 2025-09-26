@@ -1010,12 +1010,11 @@ export const Handlers = {
             return;
         }
 
-        // NEW: Add the VAPID key, which is required for web push notifications.
-        // This key is generated in your Firebase project settings under Cloud Messaging.
-        const vapidKey = "BBVKpOXnP5lq1tVGX0lAhnnsIzt9uET8jzdE98ocBBnO3-vlS7IDLRInG2iJ3COVkK5ycZ-toAE68kZdDpUuH_g";
-
         try {
-            const token = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey: vapidKey });
+            // FIX: Add the VAPID key, which is required for web push notifications.
+            // This key is generated in your Firebase project settings under Cloud Messaging.
+            const vapidKey = "BBVKpOXnP5lq1tVGX0lAhnnsIzt9uET8jzdE98ocBBnO3-vlS7IDLRInG2iJ3COVkK5ycZ-toAE68kZdDpUuH_g";
+            const token = await messaging.getToken({ serviceWorkerRegistration: registration, vapidKey });
 
             if (token && state.currentUser) {
                 await Handlers.saveFcmToken(token);
