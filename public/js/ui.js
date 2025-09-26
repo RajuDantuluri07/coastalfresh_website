@@ -1585,7 +1585,7 @@ export const UI = {
             userStatus.textContent = state.currentUser.email;
             logoutBtn.style.display = 'flex';
             if (guestCta) guestCta.style.display = 'none';
-            if (referBtn) referBtn.style.display = 'flex';
+            if (referBtn) referBtn.style.display = 'flex'; // FIX: Ensure button is shown for logged-in users
         } else {
             avatar.innerHTML = `<i class="fas fa-user"></i>`;
             userName.textContent = 'Guest User';

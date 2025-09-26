@@ -254,6 +254,12 @@ export const Handlers = {
             }
         });
 
+        // --- NEW: Event listener for the enhanced Refer a Friend page ---
+        const referPage = document.getElementById('referPage');
+        if (referPage) {
+            referPage.addEventListener('click', (e) => { if (e.target.closest('#copyReferralBtn')) Handlers.copyReferralLink(); });
+        }
+
         // Typewriter focus/blur handlers
         const catalogSearchInput = document.getElementById('catalogSearch');
         catalogSearchInput.addEventListener('focus', UI.stopTypewriter);
