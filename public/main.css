@@ -2129,19 +2129,22 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
 /* --- NEW: Centered Share Actions Container --- */
 .refer-actions-container {
   display: flex;
+  flex-direction: column; /* NEW: Stack items vertically */
   gap: 12px;
   align-items: center;
   margin: 0 16px 16px;
   padding: 12px;
-  background: var(--bg-white);
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.07);
 }
 
 .refer-link-container {
   flex-grow: 1; display: flex; align-items: center; gap: 10px;
   background: var(--bg-light); border: 1px dashed var(--border-color);
   border-radius: 10px; padding: 10px 12px; cursor: pointer;
+}
+/* NEW: Ensure link container takes full width */
+.refer-actions-container .refer-link-container {
+  width: 100%;
 }
 
 .refer-link { font-weight: 600; color: var(--primary-color); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2154,13 +2157,17 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
 .share-btn.whatsapp { background: #25D366; color: white; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); }
 .share-btn.other-apps { background: var(--primary-color); color: white; box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3); }
 .share-btn:active { transform: scale(0.98); }
-/* NEW: Compact square buttons for the new layout */
-.refer-actions-container .share-btn {
-  flex-shrink: 0;
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  font-size: 20px;
+
+/* NEW: Container for the two share buttons */
+.refer-share-buttons {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+/* NEW: Make each button take 50% width */
+.refer-share-buttons .share-btn {
+  flex: 1 1 50%;
 }
 
 /* How it Works Section */
