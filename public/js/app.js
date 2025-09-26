@@ -207,9 +207,7 @@ async function init() {
           window.addEventListener('load', () => {
               navigator.serviceWorker.register('/service-worker.js').then(registration => {
                   console.log('ServiceWorker registration successful with scope: ', registration.scope);
-                  // The initFirebaseMessaging handler now contains all the logic to determine
-                  // if it should prompt for notification permissions.
-                  Handlers.initFirebaseMessaging(registration);
+                  // Notification permission is now requested after a user logs in.
               }, err => {
                   console.log('ServiceWorker registration failed: ', err);
               });
