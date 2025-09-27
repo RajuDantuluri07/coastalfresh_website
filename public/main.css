@@ -1057,22 +1057,6 @@ z-index: 2;                 /* sits above input content */
   font-size: 13px;
 }
 
-/* Overrides for flash sale to keep old design */
-.flash-sale-item .product-image {
-  background: #f7f9fa;
-}
-.flash-sale-item .product-image img {
-  object-fit: contain;
-  padding: 8px;
-}
-.flash-sale-item .offer-badge {
-  background: var(--success-color);
-  font-size: 12px;
-  font-weight: 700;
-  padding: 5px 10px;
-  border-radius: 16px;
-}
-
 /* Product-popup this ENTIRE block */
 .product-popup {
 position: fixed;
