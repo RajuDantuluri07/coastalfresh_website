@@ -1026,7 +1026,7 @@ z-index: 2;                 /* sits above input content */
   color: var(--text-primary);
   text-align: left;
   line-height: 1.4;
-  height: 2.8em; /* FIX: Set a fixed height for 2 lines to ensure uniform card size. */
+  min-height: 2.8em; /* Use min-height to ensure consistent card height for 1 or 2 lines */
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 4px;
