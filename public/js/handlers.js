@@ -249,6 +249,17 @@ export const Handlers = {
             if (target.id === 'closeTermsBtn') {
                 UI.closeModal(document.getElementById('referralTermsModal'));
             }
+
+            // --- FIX: Cart quantity controls ---
+            const cartQtyBtn = target.closest('.cart-item-qty .qty-btn');
+            if (cartQtyBtn) {
+                e.stopPropagation();
+                const productId = cartQtyBtn.dataset.id;
+                if (productId) {
+                    const change = cartQtyBtn.classList.contains('inc') ? 1 : -1;
+                    Handlers.updateQty(parseInt(productId), change, 'cart');
+                }
+            }
         });
 
         // --- NEW: Event listener for the enhanced Refer a Friend page ---

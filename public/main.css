@@ -1019,7 +1019,7 @@ z-index: 2;                 /* sits above input content */
   margin-top: 8px;
   display: flex;
   flex-direction: column;
-  /* REMOVED: flex-grow: 1 was causing extra space */
+  flex-grow: 1; /* Allow this container to fill the remaining vertical space */
 }
 .product-name {
   font-size: 14px;
@@ -1034,13 +1034,14 @@ z-index: 2;                 /* sits above input content */
   /* FIX: Use display property to vertically align text and remove gap for single-line names. */
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2; /* Add standard property for cross-browser compatibility */
   -webkit-box-orient: vertical;
 }
 .price-section {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 8px;
+  margin-top: auto; /* FIX: Push the price section to the bottom of the card */
 }
 .product-price {
   font-size: 16px;
