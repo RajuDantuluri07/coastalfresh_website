@@ -273,7 +273,7 @@ export const UI = {
 
                     <div class="product-info">
                         <h3 class="product-name">${sanitizedName}</h3>
-                        <div> <!-- NEW: Wrapper for price info -->
+                        <div> <!-- Wrapper for price info -->
                             <div class="product-price-row">
                                 <div class="product-price">₹${product.finalPrice}</div>
                                 ${hasOffer ? `<div class="product-old-price">₹${product.mrp}</div>` : ''}

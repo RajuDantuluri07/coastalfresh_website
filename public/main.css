@@ -984,7 +984,7 @@ z-index: 2;                 /* sits above input content */
   position: absolute;
   left: 50%;
   bottom: 0;
-  transform: translate(-50%, 0); /* Center horizontally at the bottom edge */
+  transform: translate(-50%, 50%); /* Center and overlap bottom edge */
   background: white;
   border-radius: 12px;
   padding: 8px 24px;
@@ -1011,7 +1011,7 @@ z-index: 2;                 /* sits above input content */
   position: absolute;
   left: 50%;
   bottom: 0;
-  transform: translate(-50%, 0); /* Center horizontally at the bottom edge */
+  transform: translate(-50%, 50%); /* Center and overlap bottom edge */
   z-index: 9;
   display: flex;
   align-items: center;
@@ -1050,8 +1050,8 @@ z-index: 2;                 /* sits above input content */
   font-size: 14px;
 }
 .product-info {
-  padding: 12px; /* Consistent padding */
-  margin-top: 0; /* Remove the extra space */
+  padding: 12px 12px 16px;
+  margin-top: 24px; /* Space for the overlapping button */
   display: flex;
   flex-direction: column;
   flex-grow: 1; /* Allow info to fill remaining space */
