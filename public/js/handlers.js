@@ -49,7 +49,7 @@ export const Handlers = {
             // Quantity controls on product cards
             const productQtyBtn = target.closest('.product-image-container .cart-controls .qty-btn');
             if (productQtyBtn) {
-                e.stopPropagation();
+                e.stopPropagation(); // Prevent card click
                 const controls = productQtyBtn.closest('.cart-controls');
                 const productId = controls.dataset.id;
                 if (productId) {
