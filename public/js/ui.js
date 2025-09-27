@@ -245,29 +245,30 @@ export const UI = {
             const sanitizedName = DOMPurify.sanitize(product.name);
 
             return `
-        <div class="product ${isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}">
+        <article class="product ${isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" aria-label="Product: ${sanitizedName}">
           <div class="product-image">
             <img src="${optimizedImage}" srcset="${highResImage} 2x" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
-            <button class="wishlist" aria-label="Add to wishlist">♥</button>
+            <button class="wishlist" aria-label="Add to wishlist">♡</button>
             ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
             ${product.available ? (isInCart ?
                 `<div class="cart-controls" data-id="${product.id}">
                     <button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button>
                     <span class="qty" aria-live="polite">${isInCart}</span>
                     <button class="qty-btn inc" aria-label="Increase quantity">+</button>
-                </div>` :
+                </div>`
+                :
                 `<button class="add-btn" data-id="${product.id}" aria-label="Add ${sanitizedName} to cart">ADD</button>`
             ) : ''}
           </div>
           <div class="product-info">
-            <p class="product-name">${sanitizedName}</p>
+            <div class="product-name">${sanitizedName}</div>
             <div class="price-section">
               <span class="product-price">₹${product.finalPrice}</span>
               ${hasOffer ? `<span class="product-mrp">₹${product.mrp}</span>` : ''}
             </div>
-            ${hasOffer && savings > 0 ? `<p class="product-save">SAVE ₹${savings}</p>` : ''}
+            ${hasOffer && savings > 0 ? `<div class="product-save">SAVE ₹${savings}</div>` : ''}
           </div>
-        </div>
+        </article>
       `;
         } catch (error) {
             console.error(`Error rendering product card for product ID ${product?.id}:`, error);
