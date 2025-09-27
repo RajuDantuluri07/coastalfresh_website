@@ -232,33 +232,33 @@ export const UI = {
 
             const hasOffer = product.mrp > product.finalPrice;
             const isInCart = state.cart[product.id];
-            const optimizedImage = UI.getOptimizedImageUrl(product.image, 300, 300);
+            const optimizedImage = UI.getOptimizedImageUrl(product.image, 400, 400); // Increased for better quality
             const sanitizedName = DOMPurify.sanitize(product.name);
             return `
           <div class="product" data-id="${product.id}">
-            <div class="product-image">
-              ${hasOffer ? `<div class="offer-badge">${product.offer}% OFF</div>` : ''}
-              ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
-              <img src="${optimizedImage}" alt="Fresh ${sanitizedName} delivery in Hyderabad by Coastal Fresh India" loading="lazy" width="300" height="300">
+            <div class="product-image-container">
+              <div class="product-image">
+                ${hasOffer ? `<div class="offer-badge">${product.offer}% OFF</div>` : ''}
+                ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
+                <img src="${optimizedImage}" alt="Fresh ${sanitizedName} delivery in Hyderabad by Coastal Fresh India" loading="lazy" width="400" height="400">
+              </div>
             </div>
             <div class="product-info">
               <div class="product-name">${sanitizedName}</div>
-              <div class="product-weight">${product.net} Net</div>
+              <div class="product-weight">${product.net} Net Weight</div>
               <div class="product-footer">
                 <div class="product-price">
                   <span class="price">₹${product.finalPrice}</span>
                   ${hasOffer ? `<span class="old-price">₹${product.mrp}</span>` : ''}
                 </div>
-                ${product.available ?
-                    (isInCart ?
-                        `<div class="cart-controls" data-id="${product.id}">
-                      <button class="qty-btn dec">-</button>
-                      <span class="qty">${isInCart}</span>
-                      <button class="qty-btn inc">+</button>
-                    </div>`
-                        : `<button class="add-to-cart-btn add-pill" data-id="${product.id}"><i class="fas fa-plus"></i> Add</button>`)
-                    : ''}
               </div>
+              ${product.available ? (isInCart ?
+                `<div class="cart-controls" data-id="${product.id}">
+                    <button class="qty-btn dec" aria-label="Decrease quantity">-</button>
+                    <span class="qty" aria-live="polite">${isInCart}</span>
+                    <button class="qty-btn inc" aria-label="Increase quantity">+</button>
+                </div>` :
+                `<button class="add-to-cart-btn" data-id="${product.id}" aria-label="Add to cart"><i class="fas fa-plus"></i></button>`) : ''}
             </div>
           </div>
         `;

@@ -987,11 +987,11 @@ z-index: 2;                 /* sits above input content */
 }
 
 .product-info {
-  padding: 10px;
+  padding: 8px; /* REFINED: Reduced padding for a tighter layout */
   /* NEW: Allow this section to grow and push the footer down */
   flex-grow: 1;
   /* NEW: Prevent product name from pushing footer content */
-  display: flex; flex-direction: column;
+  display: flex; flex-direction: column; position: relative; /* REFINED: Added relative positioning for the new button */
 }
 
 .product-name {
@@ -1008,12 +1008,12 @@ z-index: 2;                 /* sits above input content */
 }
 
 .product-weight {
-  font-size: 12px; /* Caption */
+  font-size: 11px; /* REFINED: Made weight text slightly smaller */
   color: var(--text-secondary);
   /* NEW: Allow this element to shrink if needed */
   flex-shrink: 0;
   font-weight: 400; /* Regular */
-  margin-bottom: 6px;
+  margin-bottom: 4px; /* REFINED: Reduced margin */
 }
 
 .product-footer {
@@ -1022,7 +1022,7 @@ z-index: 2;                 /* sits above input content */
   align-items: flex-end; /* Align price and button to the bottom */
   /* NEW: Ensure footer doesn't get pushed by content above it */
   margin-top: auto;
-  margin-top: 8px;
+  margin-top: 4px; /* REFINED: Reduced top margin */
 }
 
 .product-price {
@@ -1086,26 +1086,29 @@ z-index: 2;                 /* sits above input content */
 }
 
 .add-to-cart-btn {
-  flex-shrink: 0;
-  height: 30px;
-  border-radius: 16px;
-  background: var(--primary-color); /* Use main blue for Add to Cart */
+  /* REFINED: Zepto-style compact add button */
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px 0 12px 0; /* REFINED: Interesting corner radius */
+  background: var(--primary-color);
   color: white;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 12px;
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(1, 101, 154, 0.4); /* Shadow to match new color */
+  box-shadow: 0 4px 10px rgba(1, 101, 154, 0.3);
   transition: all 0.2s;
   z-index: 2;
-  font-size: var(--add-pill-font-size); /* UPDATED */
-  font-weight: 500; /* UPDATED */
+  font-size: 18px; /* Larger plus icon */
 }
 
 .add-to-cart-btn:active {
-  transform: scale(0.9);
+  transform: scale(0.95);
+  background-color: var(--primary-dark);
 }
 
 .add-to-cart-btn .fas {
