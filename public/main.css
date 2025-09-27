@@ -952,9 +952,9 @@ z-index: 2;                 /* sits above input content */
  }
  
  .product-fav-btn {
-   position: absolute;
-   top: 10px;
-   right: 10px;
+   position: absolute; /* Now positioned relative to the image container */
+   top: 8px;
+   right: 8px;
    width: 36px;
    height: 36px;
    border-radius: 50%;
@@ -971,12 +971,12 @@ z-index: 2;                 /* sits above input content */
    width: 18px;
    height: 18px;
    fill: none;
-   stroke: var(--pink);
+   stroke: var(--error-color); /* Reverted to main red for favorites */
    stroke-width: 2;
  }
  .product-fav-btn.active svg {
-   fill: var(--pink);
-   stroke: var(--pink-dark);
+   fill: var(--error-color);
+   stroke: var(--error-color);
  }
  
  .product-add-btn {
@@ -986,13 +986,13 @@ z-index: 2;                 /* sits above input content */
   background: white;
   border-radius: 18px;
   padding: 6px 16px;
-  border: 2px solid var(--pink);
-  color: var(--pink);
+  border: 2px solid var(--primary-color); /* Reverted to primary blue */
+  color: var(--primary-color);
   font-weight: 700;
   font-size: 13px;
   letter-spacing: 0.4px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(226,31,109,0.12);
+  box-shadow: 0 4px 12px rgba(1, 101, 154, 0.12); /* Reverted to blue shadow */
   z-index: 9;
   transition: all 0.2s ease;
 }
@@ -1007,12 +1007,18 @@ z-index: 2;                 /* sits above input content */
 }
 
 .cart-controls {
+  /* NEW: Position controls inside the image container */
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 9;
   display: flex;
   align-items: center;
   gap: 4px;
   background: var(--primary-color); /* Use main blue for consistency */
   border-radius: 18px;
   padding: 4px;
+  box-shadow: 0 4px 12px rgba(1, 101, 154, 0.2); /* Add shadow for visibility */
 }
 
 .cart-controls .qty-btn {
@@ -1027,7 +1033,7 @@ z-index: 2;                 /* sits above input content */
   cursor: pointer;
   font-size: 18px;
   font-weight: 700;
-  color: var(--pink);
+  color: var(--primary-color); /* Reverted to primary blue */
   transition: all 0.2s;
 }
 

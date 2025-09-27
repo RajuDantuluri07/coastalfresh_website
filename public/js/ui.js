@@ -239,13 +239,12 @@ export const UI = {
 
             return `
                 <div class="product" data-id="${product.id}">
-                    <div class="product-fav-btn" role="button" aria-label="Add to Favorites" title="Save for later">
-                        <svg viewBox="0 0 24 24" aria-hidden="true">
-                            <path d="M12 21s-6.716-4.614-9.222-7.08C.9 11.675 2.1 6.5 6 5.5c2.503-.666 3.8.8 6 3.5 2.2-2.7 3.497-4.166 6-3.5 3.9 1 5.1 6.174 3.222 8.42C18.716 16.386 12 21 12 21z" />
-                        </svg>
-                    </div>
-
                     <div class="product-image-container">
+                        <div class="product-fav-btn" role="button" aria-label="Add to Favorites" title="Save for later">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M12 21s-6.716-4.614-9.222-7.08C.9 11.675 2.1 6.5 6 5.5c2.503-.666 3.8.8 6 3.5 2.2-2.7 3.497-4.166 6-3.5 3.9 1 5.1 6.174 3.222 8.42C18.716 16.386 12 21 12 21z" />
+                            </svg>
+                        </div>
                         <img src="${optimizedImage}" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
                         ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
                         
