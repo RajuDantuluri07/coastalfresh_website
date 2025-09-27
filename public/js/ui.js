@@ -237,52 +237,38 @@ export const UI = {
                 return ''; // Return an empty string to not break the .join('')
             }
 
-            // The new design logic
+            const isFlashSale = options.isFlashSale;
             const isInCart = state.cart[product.id];
             const hasOffer = product.mrp > product.finalPrice;
             const savings = Math.round(product.mrp - product.finalPrice);
-            const { baseUrl: optimizedImage, highResUrl: highResImage } = UI.getOptimizedImageUrl(product.image, 400, 400);
+            const { baseUrl: optimizedImage, highResUrl: highResImage } = UI.getOptimizedImageUrl(product.image, 300, 300);
             const sanitizedName = DOMPurify.sanitize(product.name);
 
             return `
-                <div class="product" data-id="${product.id}">
-                    <div class="product-image-container">
-                        <img 
-                            src="${optimizedImage}" 
-                            srcset="${highResImage} 2x"
-                            alt="Fresh ${sanitizedName} from Coastal Fresh India" 
-                            loading="lazy" 
-                            width="400" height="400">
-
-                        <div class="product-fav-btn" role="button" aria-label="Add to Favorites" title="Save for later">
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M12 21s-6.716-4.614-9.222-7.08C.9 11.675 2.1 6.5 6 5.5c2.503-.666 3.8.8 6 3.5 2.2-2.7 3.497-4.166 6-3.5 3.9 1 5.1 6.174 3.222 8.42C18.716 16.386 12 21 12 21z" />
-                            </svg>
-                        </div>
-                        ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
-                        
-                        ${product.available ? (isInCart ?
-                            `<div class="cart-controls" data-id="${product.id}">
-                                <button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button>
-                                <span class="qty" aria-live="polite">${isInCart}</span>
-                                <button class="qty-btn inc" aria-label="Increase quantity">+</button>
-                            </div>` :
-                            `<button class="product-add-btn" data-id="${product.id}" aria-label="Add ${sanitizedName} to cart">ADD</button>`
-                        ) : ''}
-                    </div>
-
-                    <div class="product-info">
-                        <h3 class="product-name">${sanitizedName}</h3>
-                        <div> <!-- Wrapper for price info -->
-                            <div class="product-price-row">
-                                <div class="product-price">₹${product.finalPrice}</div>
-                                ${hasOffer ? `<div class="product-old-price">₹${product.mrp}</div>` : ''}
-                            </div>
-                            ${hasOffer && savings > 0 ? `<div class="product-save">SAVE ₹${savings}</div>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
+        <div class="product ${isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}">
+          <div class="product-image">
+            <img src="${optimizedImage}" srcset="${highResImage} 2x" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
+            <button class="wishlist" aria-label="Add to wishlist">♥</button>
+            ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
+            ${product.available ? (isInCart ?
+                `<div class="cart-controls" data-id="${product.id}">
+                    <button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button>
+                    <span class="qty" aria-live="polite">${isInCart}</span>
+                    <button class="qty-btn inc" aria-label="Increase quantity">+</button>
+                </div>` :
+                `<button class="add-btn" data-id="${product.id}" aria-label="Add ${sanitizedName} to cart">ADD</button>`
+            ) : ''}
+          </div>
+          <div class="product-info">
+            <p class="product-name">${sanitizedName}</p>
+            <div class="price-section">
+              <span class="product-price">₹${product.finalPrice}</span>
+              ${hasOffer ? `<span class="product-mrp">₹${product.mrp}</span>` : ''}
+            </div>
+            ${hasOffer && savings > 0 ? `<p class="product-save">SAVE ₹${savings}</p>` : ''}
+          </div>
+        </div>
+      `;
         } catch (error) {
             console.error(`Error rendering product card for product ID ${product?.id}:`, error);
             // Return an empty string so the rest of the products can render.
@@ -504,27 +490,28 @@ export const UI = {
         if (!product) return;
 
         productCards.forEach(card => {
-            const isInCart = state.cart[product.id];
-            const imageContainer = card.querySelector('.product-image-container');
-            if (!imageContainer) return;
+            const isInCartQty = state.cart[product.id];
+            const imageContainer = card.querySelector('.product-image');
+            if (!imageContainer) return; // Ensure the main container exists
 
             // Remove existing controls before adding new ones
-            const existingControls = imageContainer.querySelector('.cart-controls, .product-add-btn');
+            const existingControls = imageContainer.querySelector('.cart-controls, .add-btn');
             if (existingControls) existingControls.remove();
 
             let newControlHTML = '';
             if (product.available) {
                 const sanitizedName = DOMPurify.sanitize(product.name);
-                if (isInCart) {
+                if (isInCartQty) {
                     newControlHTML = `<div class="cart-controls" data-id="${product.id}">
                         <button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button>
-                        <span class="qty" aria-live="polite">${isInCart}</span>
+                        <span class="qty" aria-live="polite">${isInCartQty}</span>
                         <button class="qty-btn inc" aria-label="Increase quantity">+</button>
                     </div>`;
                 } else {
-                    newControlHTML = `<button class="product-add-btn" data-id="${product.id}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
+                    newControlHTML = `<button class="add-btn" data-id="${product.id}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
                 }
             }
+            // Append the new controls into the image container
             imageContainer.insertAdjacentHTML('beforeend', newControlHTML);
         });
     },

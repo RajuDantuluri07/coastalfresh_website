@@ -21,7 +21,7 @@ export const Handlers = {
 
             // Product card click (but not on buttons)
             const productCard = target.closest('.product');
-            if (productCard && !target.closest('.cart-controls, .product-add-btn, .product-fav-btn')) {
+            if (productCard && !target.closest('.cart-controls, .add-btn, .wishlist')) {
                 e.preventDefault();
                 const productId = productCard.dataset.id;
 
@@ -39,7 +39,7 @@ export const Handlers = {
             }
 
             // Add to cart button on product cards
-            const addBtn = target.closest('.product-add-btn');
+            const addBtn = target.closest('.add-btn');
             if (addBtn && !addBtn.disabled) {
                 e.stopPropagation();
                 const productId = addBtn.dataset.id;
@@ -47,19 +47,19 @@ export const Handlers = {
             }
 
             // Quantity controls on product cards
-            const productQtyBtn = target.closest('.product-image-container .cart-controls .qty-btn');
+            const productQtyBtn = target.closest('.product-image .cart-controls .qty-btn');
             if (productQtyBtn) {
                 e.stopPropagation(); // Prevent card click
                 const controls = productQtyBtn.closest('.cart-controls');
                 const productId = controls.dataset.id;
                 if (productId) {
                     const change = productQtyBtn.classList.contains('inc') ? 1 : -1;
-                    Handlers.updateQty(parseInt(productId), change);
+                    Handlers.updateQty(parseInt(productId), change, 'card');
                 }
             }
 
             // Favorite button on product card
-            const favBtn = target.closest('.product-fav-btn');
+            const favBtn = target.closest('.wishlist');
             if (favBtn) {
                 e.stopPropagation(); // Prevent popup from opening
                 favBtn.classList.toggle('active');
@@ -611,7 +611,7 @@ export const Handlers = {
         UI.showToast(`${product.name} added to cart!`);
 
         // Animate the "ADD" button to "ADDED" temporarily
-        const addBtn = document.querySelector(`.product[data-id='${id}'] .product-add-btn`);
+        const addBtn = document.querySelector(`.product[data-id='${id}'] .add-btn`);
         if (addBtn) {
             addBtn.disabled = true;
             addBtn.textContent = 'ADDED';
@@ -633,7 +633,7 @@ export const Handlers = {
         if (addedProduct) window.Analytics.trackAddToCart(addedProduct, qty);
     },
 
-    updateQty: (id, change) => {
+    updateQty: (id, change, source = 'cart') => {
         if (!state.cart[id]) return;
 
         const product = state.products.find(p => p.id === parseInt(id));
@@ -662,7 +662,6 @@ export const Handlers = {
 
         if (document.getElementById('cartModal').classList.contains('active')) {
             const itemEl = document.querySelector(`.cart-item-card[data-id="${id}"]`);
-            UI.updatePopupCta();
             if (itemEl) {
                 if (state.cart[id]) {
                     const qtyEl = itemEl.querySelector('.cart-qty');
@@ -679,6 +678,10 @@ export const Handlers = {
             UI.updateCartBadges();
         } else {
             UI.updateCartUI();
+        }
+        // Also update the popup if it's open
+        if (state.isPopupOpen && state.popupProduct?.id === id) {
+            UI.updatePopupCta();
         }
         UI.updateProductCardState(id);
     },
