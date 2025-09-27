@@ -1018,7 +1018,8 @@ z-index: 2;                 /* sits above input content */
 .product-info {
   margin-top: 8px;
   display: flex;
-  flex-direction: column; /* REMOVED flex-grow which caused the issue */
+  flex-direction: column;
+  flex-grow: 1; /* Allow this container to fill the remaining vertical space */
 }
 .product-name {
   font-size: 14px;
@@ -1039,7 +1040,8 @@ z-index: 2;                 /* sits above input content */
 .price-section {
   display: flex;
   align-items: center;
-  gap: 8px; /* REMOVED margin-top: auto which caused the issue */
+  gap: 8px;
+  margin-top: auto; /* FIX: Push the price section to the bottom of the card */
 }
 .product-price {
   font-size: 16px;
