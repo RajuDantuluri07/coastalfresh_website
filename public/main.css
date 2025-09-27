@@ -978,7 +978,7 @@ z-index: 2;                 /* sits above input content */
   position: absolute;
   bottom: 8px;
   right: 8px;
-  background: #FF007A; /* Coastal Fresh Pink */
+  background: var(--success-color); /* Use brand's green for CTAs */
   color: #fff;
   padding: 6px 10px;
   border: none;
@@ -987,11 +987,11 @@ z-index: 2;                 /* sits above input content */
   font-weight: 700;
   font-size: 13px;
   line-height: 1;
-  box-shadow: 0 6px 14px rgba(255,0,122,0.2);
+  box-shadow: 0 6px 14px rgba(56, 142, 60, 0.2);
   transition: background 0.2s;
 }
 .add-btn:hover {
-  background: #E6006E;
+  background: #2e7d32; /* Darker green for hover */
 }
 
 /* Quantity controls that replace the ADD button */
@@ -1000,9 +1000,9 @@ z-index: 2;                 /* sits above input content */
   bottom: 8px;
   right: 8px;
   display: flex; align-items: center;
-  background: #FF007A;
+  background: var(--success-color);
   border-radius: 8px;
-  box-shadow: 0 6px 14px rgba(255,0,122,0.2);
+  box-shadow: 0 6px 14px rgba(56, 142, 60, 0.2);
   color: white;
   font-weight: 700;
   overflow: hidden;
