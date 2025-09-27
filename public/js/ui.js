@@ -230,38 +230,45 @@ export const UI = {
                 return ''; // Return an empty string to not break the .join('')
             }
 
-            const hasOffer = product.mrp > product.finalPrice;
+            // The new design logic
             const isInCart = state.cart[product.id];
-            const optimizedImage = UI.getOptimizedImageUrl(product.image, 400, 400); // Increased for better quality
+            const hasOffer = product.mrp > product.finalPrice;
+            const savings = product.mrp - product.finalPrice;
+            const optimizedImage = UI.getOptimizedImageUrl(product.image, 400, 400);
             const sanitizedName = DOMPurify.sanitize(product.name);
+
             return `
-          <div class="product" data-id="${product.id}">
-            <div class="product-image-container">
-              <div class="product-image">
-                ${hasOffer ? `<div class="offer-badge">${product.offer}% OFF</div>` : ''}
-                ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
-                <img src="${optimizedImage}" alt="Fresh ${sanitizedName} delivery in Hyderabad by Coastal Fresh India" loading="lazy" width="400" height="400">
-              </div>
-            </div>
-            <div class="product-info">
-              <div class="product-name">${sanitizedName}</div>
-              <div class="product-weight">${product.net} Net Weight</div>
-              <div class="product-footer">
-                <div class="product-price">
-                  <span class="price">₹${product.finalPrice}</span>
-                  ${hasOffer ? `<span class="old-price">₹${product.mrp}</span>` : ''}
+                <div class="product" data-id="${product.id}">
+                    <div class="product-fav-btn" role="button" aria-label="Add to Favorites" title="Save for later">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M12 21s-6.716-4.614-9.222-7.08C.9 11.675 2.1 6.5 6 5.5c2.503-.666 3.8.8 6 3.5 2.2-2.7 3.497-4.166 6-3.5 3.9 1 5.1 6.174 3.222 8.42C18.716 16.386 12 21 12 21z"></path>
+                        </svg>
+                    </div>
+
+                    <div class="product-image-container">
+                        <img src="${optimizedImage}" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy">
+                        ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
+                        
+                        ${product.available ? (isInCart ?
+                            `<div class="cart-controls" data-id="${product.id}">
+                                <button class="qty-btn dec" aria-label="Decrease quantity">-</button>
+                                <span class="qty" aria-live="polite">${isInCart}</span>
+                                <button class="qty-btn inc" aria-label="Increase quantity">+</button>
+                            </div>` :
+                            `<button class="product-add-btn" data-id="${product.id}" aria-label="Add ${sanitizedName} to cart">ADD</button>`
+                        ) : ''}
+                    </div>
+
+                    <div class="product-info">
+                        <div class="product-name">${sanitizedName}</div>
+                        <div class="product-price-row">
+                            <div class="product-price">₹${product.finalPrice}</div>
+                            ${hasOffer ? `<div class="product-old-price">₹${product.mrp}</div>` : ''}
+                        </div>
+                        ${hasOffer && savings > 0 ? `<div class="product-save">SAVE ₹${savings}</div>` : ''}
+                    </div>
                 </div>
-              </div>
-              ${product.available ? (isInCart ?
-                `<div class="cart-controls" data-id="${product.id}">
-                    <button class="qty-btn dec" aria-label="Decrease quantity">-</button>
-                    <span class="qty" aria-live="polite">${isInCart}</span>
-                    <button class="qty-btn inc" aria-label="Increase quantity">+</button>
-                </div>` :
-                `<button class="add-to-cart-btn" data-id="${product.id}" aria-label="Add to cart"><i class="fas fa-plus"></i></button>`) : ''}
-            </div>
-          </div>
-        `;
+            `;
         } catch (error) {
             console.error(`Error rendering product card for product ID ${product?.id}:`, error);
             // Return an empty string so the rest of the products can render.
@@ -483,29 +490,28 @@ export const UI = {
         if (!product) return;
 
         productCards.forEach(card => {
-            const footer = card.querySelector('.product-footer');
-            if (!footer) return;
-
             const isInCart = state.cart[product.id];
+            const imageContainer = card.querySelector('.product-image-container');
+            if (!imageContainer) return;
 
-            // Generate only the new footer HTML
-            const newFooterHTML = `
-                <div class="product-price">
-                  <span class="price">₹${product.finalPrice}</span>
-                  ${product.mrp > product.finalPrice ? `<span class="old-price">₹${product.mrp}</span>` : ''}
-                </div>
-                ${product.available ?
-                    (isInCart ?
-                        `<div class="cart-controls" data-id="${product.id}">
-                      <button class="qty-btn dec">-</button>
-                      <span class="qty">${isInCart}</span>
-                      <button class="qty-btn inc">+</button>
-                    </div>`
-                        : `<button class="add-to-cart-btn add-pill" data-id="${product.id}"><i class="fas fa-plus"></i> Add</button>`)
-                    : ''}
-            `;
+            // Remove existing controls before adding new ones
+            const existingControls = imageContainer.querySelector('.cart-controls, .product-add-btn');
+            if (existingControls) existingControls.remove();
 
-            footer.innerHTML = newFooterHTML;
+            let newControlHTML = '';
+            if (product.available) {
+                const sanitizedName = DOMPurify.sanitize(product.name);
+                if (isInCart) {
+                    newControlHTML = `<div class="cart-controls" data-id="${product.id}">
+                        <button class="qty-btn dec" aria-label="Decrease quantity">-</button>
+                        <span class="qty" aria-live="polite">${isInCart}</span>
+                        <button class="qty-btn inc" aria-label="Increase quantity">+</button>
+                    </div>`;
+                } else {
+                    newControlHTML = `<button class="product-add-btn" data-id="${product.id}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
+                }
+            }
+            imageContainer.insertAdjacentHTML('beforeend', newControlHTML);
         });
     },
 

@@ -21,7 +21,7 @@ export const Handlers = {
 
             // Product card click (but not on buttons)
             const productCard = target.closest('.product');
-            if (productCard && !target.closest('.cart-controls, .add-to-cart-btn')) {
+            if (productCard && !target.closest('.cart-controls, .product-add-btn, .product-fav-btn')) {
                 e.preventDefault();
                 const productId = productCard.dataset.id;
 
@@ -39,15 +39,15 @@ export const Handlers = {
             }
 
             // Add to cart button on product cards
-            const addBtn = target.closest('.add-to-cart-btn');
-            if (addBtn) {
+            const addBtn = target.closest('.product-add-btn');
+            if (addBtn && !addBtn.disabled) {
                 e.stopPropagation();
                 const productId = addBtn.dataset.id;
                 if (productId) Handlers.addToCart(parseInt(productId));
             }
 
             // Quantity controls on product cards
-            const productQtyBtn = target.closest('.product .cart-controls .qty-btn');
+            const productQtyBtn = target.closest('.product-image-container .cart-controls .qty-btn');
             if (productQtyBtn) {
                 e.stopPropagation();
                 const controls = productQtyBtn.closest('.cart-controls');
@@ -58,14 +58,11 @@ export const Handlers = {
                 }
             }
 
-            // Quantity controls in the cart
-            const cartQtyBtn = target.closest('.cart-item-card .qty-controls .cart-qty-btn');
-            if (cartQtyBtn) {
-                const productId = cartQtyBtn.dataset.id;
-                if (productId) {
-                    const change = cartQtyBtn.classList.contains('inc') ? 1 : -1;
-                    Handlers.updateQty(parseInt(productId), change);
-                }
+            // Favorite button on product card
+            const favBtn = target.closest('.product-fav-btn');
+            if (favBtn) {
+                e.stopPropagation(); // Prevent popup from opening
+                favBtn.classList.toggle('active');
             }
 
             // FAQ toggle
@@ -612,6 +609,19 @@ export const Handlers = {
         UI.updatePopupCta();
         UI.updateProductCardState(id);
         UI.showToast(`${product.name} added to cart!`);
+
+        // Animate the "ADD" button to "ADDED" temporarily
+        const addBtn = document.querySelector(`.product[data-id='${id}'] .product-add-btn`);
+        if (addBtn) {
+            addBtn.disabled = true;
+            addBtn.textContent = 'ADDED';
+            const card = addBtn.closest('.product');
+            if (card) {
+                card.animate([ {transform:'translateY(0)'}, {transform:'translateY(-6px)'}, {transform:'translateY(0)'} ], {duration:360, easing:'cubic-bezier(.2,.8,.2,1)'});
+            }
+            // The button will be replaced by the quantity controls by updateProductCardState,
+            // so no need for a timeout to revert it.
+        }
 
         // NEW: If the cart is currently open, re-render it to show the newly added item.
         // This is crucial for adding items from the "You might also like" section on the empty cart.

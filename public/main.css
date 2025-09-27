@@ -1,6 +1,9 @@
 /* CSS Variables for consistency */
 :root {
   /* === NEW: Brand Logo Color Palette === */
+  --pink: #ff2d86; /* primary CTA border from new card design */
+  --pink-dark: #e21f6d; /* active state for pink */
+
   --primary-dark: #00486d;  /* Deepest Blue from Logo */
   --primary-color: #01659a; /* Main Blue from Logo */
   --accent-color: #0bade2;  /* Bright Cyan from Logo */
@@ -915,139 +918,94 @@ z-index: 2;                 /* sits above input content */
   gap: var(--grid-gap);
 }
 
-.products::-webkit-scrollbar {
-  display: none;
-}
+/* --- REVAMPED: Product Card Styles (based on new design) --- */
 .product {
   background: var(--bg-white);
   border-radius: var(--radius-card);
-  overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.07); /* Enhanced shadow */
-  cursor: pointer;
-  transition: all 0.3s ease;
-  /* NEW: Ensure cards have a consistent layout */
-  display: flex;
-  flex-direction: column;
+  box-shadow: 0 2px 8px rgba(20,20,20,0.06);
+  padding: 14px 14px 18px;
   position: relative;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
-.product:hover { /* NEW: Add hover effect for all product cards */
-  transform: translateY(-4px);
+.product:hover {
+  transform: translateY(-5px);
   box-shadow: 0 8px 25px rgba(0,0,0,0.1);
 }
 
-.product:active {
-  transform: scale(0.98);
-}
-
-.product-image {
+.product-image-container {
+  background: linear-gradient(180deg, #fafafa, #fff);
+  border-radius: 12px;
+  padding: 10px;
   position: relative;
-  background: var(--bg-light);
-  overflow: hidden;
-  aspect-ratio: 1 / 1; /* FIX: Force a square container for all images */
-}
-
-.product-image img {
-  width: 100%;
-  height: 100%; /* FIX: Make image fill the container height */
-  object-fit: cover; /* FIX: Ensure the server-cropped image fills the container perfectly. */
-  transition: transform 0.3s;
-}
-
-.product:hover .product-image img:not(.flash-sale-item .product-image img) { /* Prevent double-zoom on flash sale */
-  transform: scale(1.05);
-}
-
-.offer-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: var(--success-color); /* Changed for distinction from flash sale timer */
-  color: white;
-  padding: 4px 8px;
-  border-radius: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  z-index: 2;
-}
-
-.out-of-stock {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255,255,255,0.8);
+  height: 170px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  color: var(--error-color);
-  z-index: 1;
-}
-
-.product-info {
-  padding: 8px; /* REFINED: Reduced padding for a tighter layout */
-  /* NEW: Allow this section to grow and push the footer down */
-  flex-grow: 1;
-  /* NEW: Prevent product name from pushing footer content */
-  display: flex; flex-direction: column; position: relative; /* REFINED: Added relative positioning for the new button */
-}
-
-.product-name {
-  font-size: 16px; /* H2 Product Name */
-  font-weight: 500; /* UPDATED */
-  margin-bottom: 4px;
-  color: var(--text-primary);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
+}
+.product-image-container img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
-.product-weight {
-  font-size: 11px; /* REFINED: Made weight text slightly smaller */
-  color: var(--text-secondary);
-  /* NEW: Allow this element to shrink if needed */
-  flex-shrink: 0;
-  font-weight: 400; /* Regular */
-  margin-bottom: 4px; /* REFINED: Reduced margin */
-}
-
-.product-footer {
+.product-fav-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end; /* Align price and button to the bottom */
-  /* NEW: Ensure footer doesn't get pushed by content above it */
-  margin-top: auto;
-  margin-top: 4px; /* REFINED: Reduced top margin */
+  align-items: center;
+  justify-content: center;
+  z-index: 8;
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  cursor: pointer;
+  border: 2px solid rgba(0,0,0,0.04);
+}
+.product-fav-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: var(--error-color);
+  stroke-width: 2;
+}
+.product-fav-btn.active svg {
+  fill: var(--error-color);
+  stroke: var(--error-color);
 }
 
-.product-price {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px; /* Tighter gap */
+.product-add-btn {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  background: white;
+  border-radius: 18px;
+  padding: 6px 16px;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(1, 101, 154, 0.12);
+  z-index: 9;
+  transition: all 0.2s ease;
+}
+.product-add-btn:active {
+  transform: scale(0.95);
+  background: var(--primary-light);
+}
+.product-add-btn:disabled {
+  background: var(--primary-color);
+  color: white;
+  cursor: default;
 }
 
-/* Default product pricing */
-.product:not(.flash-sale-item) .product-price .price {
-  font-size: 15px; /* More prominent */
-  font-weight: 600; /* Bolder */
-  color: var(--text-primary);
-}
-
-/* Default old price */
-.product:not(.flash-sale-item) .product-price .old-price {
-  font-size: 11px;
-  color: var(--text-secondary);
-  font-weight: 500;
-  text-decoration: line-through;
-}
-
-/* Cart quantity controls on product card */
 .cart-controls {
   display: flex;
   align-items: center;
@@ -1055,7 +1013,6 @@ z-index: 2;                 /* sits above input content */
   background: var(--primary-color); /* Use main blue for consistency */
   border-radius: 18px;
   padding: 4px;
-  z-index: 2;
 }
 
 .cart-controls .qty-btn {
@@ -1070,7 +1027,7 @@ z-index: 2;                 /* sits above input content */
   cursor: pointer;
   font-size: 18px;
   font-weight: 700;
-  color: var(--primary-color);
+  color: var(--pink);
   transition: all 0.2s;
 }
 
@@ -1084,36 +1041,51 @@ z-index: 2;                 /* sits above input content */
   min-width: 20px;
   text-align: center;
 }
-
-.add-to-cart-btn {
-  /* REFINED: Zepto-style compact add button */
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: 12px 0 12px 0; /* REFINED: Interesting corner radius */
-  background: var(--primary-color);
-  color: white;
-  border: none;
+.product-info {
+  padding-top: 12px;
+}
+.product-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-align: left;
+}
+.product-price-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(1, 101, 154, 0.3);
-  transition: all 0.2s;
-  z-index: 2;
-  font-size: 18px; /* Larger plus icon */
+  gap: 10px;
+}
+.product-price {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+.product-old-price {
+  color: var(--text-secondary);
+  text-decoration: line-through;
+  font-weight: 600;
+}
+.product-save {
+  color: var(--success-color);
+  font-weight: 700;
+  margin-top: 8px;
+  font-size: 14px;
 }
 
-.add-to-cart-btn:active {
-  transform: scale(0.95);
-  background-color: var(--primary-dark);
+/* Overrides for flash sale to keep old design */
+.flash-sale-item .product-image {
+  background: #f7f9fa;
 }
-
-.add-to-cart-btn .fas {
+.flash-sale-item .product-image img {
+  object-fit: contain;
+  padding: 8px;
+}
+.flash-sale-item .offer-badge {
+  background: var(--success-color);
   font-size: 12px;
-  margin-right: 4px;
+  font-weight: 700;
+  padding: 5px 10px;
+  border-radius: 16px;
 }
 
 /* Product-popup this ENTIRE block */
