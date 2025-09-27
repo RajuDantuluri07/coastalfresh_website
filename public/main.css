@@ -1026,7 +1026,7 @@ z-index: 2;                 /* sits above input content */
   gap: 6px;
 }
 .product-name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #1A1A1A;
   text-align: left;
@@ -1041,7 +1041,7 @@ z-index: 2;                 /* sits above input content */
   gap: 8px;
 }
 .product-price {
-  font-size: 16px; /* 16-18px range */
+  font-size: 14px;
   font-weight: 600;
   color: #1A1A1A;
   line-height: 1;
@@ -1055,7 +1055,7 @@ z-index: 2;                 /* sits above input content */
 .product-save {
   color: #06A759;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 11px;
   line-height: 1;
 }
 
