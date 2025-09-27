@@ -320,7 +320,8 @@ export const UI = {
                 <p>${DOMPurify.sanitize(product.desc)}</p>
                 <p style="margin-top: 16px;"><strong>Gross Wt:</strong> ${product.gross} | <strong>Net Wt:</strong> ${product.net}<br><small>Net weight is after cleaning. Weight loss varies by product.</small></p>`;
 
-            const optimizedPopupImage = UI.getOptimizedImageUrl(product.image, 600, 600);
+            // FIX: getOptimizedImageUrl returns an object. We need to use the `baseUrl` property.
+            const { baseUrl: optimizedPopupImage, highResUrl: highResPopupImage } = UI.getOptimizedImageUrl(product.image, 600, 600);
             mainImage.src = optimizedPopupImage;
             mainImage.alt = `High-quality ${DOMPurify.sanitize(product.name)} from Coastal Fresh India`;
 

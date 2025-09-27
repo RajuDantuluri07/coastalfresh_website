@@ -46,7 +46,7 @@ export const Handlers = {
                 if (productId) Handlers.addToCart(parseInt(productId));
             }
 
-            // Quantity controls on product cards
+            // Quantity controls on product cards (scoped to image container)
             const productQtyBtn = target.closest('.product-image .cart-controls .qty-btn');
             if (productQtyBtn) {
                 e.stopPropagation(); // Prevent card click
