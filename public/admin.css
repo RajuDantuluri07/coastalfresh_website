@@ -101,6 +101,19 @@ header.app-header {
   z-index: 40;
   box-shadow: 0 4px 8px rgba(2, 6, 23, 0.06);
 }
+
+/* NEW: Menu Button */
+.menu-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  margin-left: -0.5rem; /* Align with edge */
+  cursor: pointer;
+  border-radius: 50%;
+  width: 44px; height: 44px;
+}
 .brand {
   display: flex;
   gap: .6rem;
@@ -339,37 +352,83 @@ header.app-header {
   background: var(--danger);
   color: white;
 }
-/* Bottom navigation for mobile */
-nav.bottom-nav {
-  display: flex;
-  gap: 0;
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: white;
-  border-top: 1px solid #eef2f6;
-  padding: .35rem .25rem;
-  justify-content: space-around;
-  z-index: 50;
-  box-shadow: 0 -6px 18px rgba(2, 6, 23, 0.04);
+
+/* NEW: Drawer Menu Styles */
+.drawer-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
 }
-nav.bottom-nav button {
-  background: transparent;
-  border: 0;
-  padding: .5rem .6rem;
-  border-radius: 10px;
-  font-weight: 700;
-  color: var(--muted);
+.drawer-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer-menu {
+  position: fixed;
+  top: 0; left: 0;
+  width: 280px;
+  height: 100%;
+  background: var(--surface);
+  z-index: 1001;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
+  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+}
+.drawer-menu.active {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  padding: .8rem 1rem;
+  background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+  color: white;
+}
+.drawer-header .brand {
+  font-size: 1rem;
+}
+
+.drawer-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem;
+  gap: 0.25rem;
+}
+.drawer-nav button {
+  display: flex;
   align-items: center;
-  gap: .25rem;
-  font-size: .85rem;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
 }
-nav.bottom-nav button.active {
-  color: var(--primary);
+.drawer-nav button i {
+  font-size: 1.1rem;
+  width: 24px;
+  text-align: center;
+  color: var(--muted);
 }
+.drawer-nav button.active {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+.drawer-nav button.active i {
+  color: var(--primary-dark);
+}
+
 /* Empty / loading */
 .empty {
   text-align: center;
@@ -401,22 +460,6 @@ nav.bottom-nav button.active {
   }
   .orders {
     padding: 1.5rem 2rem;
-  }
-  /* REPURPOSED: Move bottom-nav to the top on desktop */
-  nav.bottom-nav {
-    position: static; /* Un-stick it from the bottom */
-    display: flex;
-    justify-content: flex-start; /* Align to the left */
-    gap: .5rem;
-    padding: .5rem 1rem;
-    border-top: none;
-    border-bottom: 1px solid #eef2f6;
-    box-shadow: none;
-    background: var(--surface);
-  }
-  nav.bottom-nav button.active {
-    background: var(--primary-light);
-    color: var(--primary-dark);
   }
   header.app-header {
     border-radius: 0 0 12px 12px;

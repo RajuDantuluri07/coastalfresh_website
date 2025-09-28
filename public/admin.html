@@ -37,6 +37,10 @@
     <!-- Dashboard -->
     <div id="dashboard-view" class="app" style="display:none">
       <header class="app-header">
+        <button class="menu-btn" id="menu-btn" aria-label="Open Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+
         <div class="brand">
           <div class="logo" style="padding: 4px; background: #fff;">
             <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" alt="Coastal Fresh Logo" style="width: 100%; height: 100%; object-fit: contain;">
@@ -140,13 +144,23 @@
         </form>
       </div>
 
-      <!-- Bottom nav -->
-      <nav class="bottom-nav" role="navigation" aria-label="Main">
-        <button data-page="dashboard" class="active"><i class="fa-solid fa-house"></i><span>Home</span></button>
-        <button data-page="customers"><i class="fa-solid fa-users"></i><span>Customers</span></button>
-        <button data-page="products"><i class="fa-solid fa-box-archive"></i><span>Products</span></button>
-        <button id="refresh-btn"><i class="fa-solid fa-arrows-rotate"></i><span>Refresh</span></button>
-      </nav>
+      <!-- NEW: Slide-out Drawer Menu -->
+      <div class="drawer-overlay" id="drawer-overlay"></div>
+      <div class="drawer-menu" id="drawer-menu">
+        <div class="drawer-header">
+          <div class="brand">
+            <div class="logo" style="padding: 4px; background: #fff;"><img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" alt="Coastal Fresh Logo" style="width: 100%; height: 100%; object-fit: contain;"></div>
+            <div><div style="font-size:0.95rem">Coastal Fresh</div><div style="font-size:.76rem;opacity:.9">Admin Panel</div></div>
+          </div>
+        </div>
+        <nav class="drawer-nav">
+          <button data-page="dashboard" class="active"><i class="fa-solid fa-house"></i><span>Dashboard</span></button>
+          <button data-page="products"><i class="fa-solid fa-box-archive"></i><span>Products</span></button>
+          <button data-page="customers"><i class="fa-solid fa-users"></i><span>Customers</span></button>
+          <button data-page="reports"><i class="fa-solid fa-chart-line"></i><span>Reports</span></button>
+          <button id="refresh-btn"><i class="fa-solid fa-arrows-rotate"></i><span>Refresh</span></button>
+        </nav>
+      </div>
     </div>
   </div>
 

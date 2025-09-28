@@ -20,7 +20,6 @@ const newSignupsTodayEl = document.getElementById('new-signups-today');
 const activeUsersTodayEl = document.getElementById('active-users-today');
 const ordersContainerEl = document.getElementById('orders-container');
 const segmented = document.querySelector('.segmented');
-const bottomNav = document.querySelector('.bottom-nav');
 
 // List of authorized admin User IDs.
 const ADMIN_UIDS = [
@@ -307,24 +306,41 @@ function confirmAndUpdate(orderId, newStatus) {
 
 // ---------- NEW: Customer/User Management ----------
 
-function handleNavClick(ev) {
+const menuBtn = document.getElementById('menu-btn');
+const drawerMenu = document.getElementById('drawer-menu');
+const drawerOverlay = document.getElementById('drawer-overlay');
+const drawerNav = document.querySelector('.drawer-nav');
+
+function openDrawer() {
+    drawerMenu.classList.add('active');
+    drawerOverlay.classList.add('active');
+}
+
+function closeDrawer() {
+    drawerMenu.classList.remove('active');
+    drawerOverlay.classList.remove('active');
+}
+
+menuBtn.addEventListener('click', openDrawer);
+drawerOverlay.addEventListener('click', closeDrawer);
+
+drawerNav.addEventListener('click', (ev) => {
     const btn = ev.target.closest('button[data-page]');
     if (!btn || btn.id === 'refresh-btn') return;
     const page = btn.dataset.page;
     showMainView(page);
-}
-
-bottomNav.addEventListener('click', handleNavClick);
+    closeDrawer();
+});
 
 
 function showMainView(page) {
-    bottomNav.querySelectorAll('button[data-page]').forEach(b => b.classList.remove('active'));
-    bottomNav.querySelector(`button[data-page="${page}"]`)?.classList.add('active');
+    // Update active state in the drawer menu
+    drawerNav.querySelectorAll('button[data-page]').forEach(b => b.classList.remove('active'));
+    drawerNav.querySelector(`button[data-page="${page}"]`)?.classList.add('active');
 
     const dashboardContent = [document.querySelector('.stats-scroll'), document.querySelector('.segmented'), document.getElementById('orders-container')];
     const customersView = document.getElementById('customers-view');
 
-    // NEW: Product views
     const productsView = document.getElementById('products-view');
     const productFormView = document.getElementById('product-form-view');
 
@@ -340,6 +356,9 @@ function showMainView(page) {
     } else if (page === 'products') {
         productsView.style.display = 'flex';
         renderProductsPage();
+    } else if (page === 'reports') {
+        // Placeholder for future reports page
+        toast('Reports page is not yet implemented.');
     } else { // Default to dashboard
         dashboardContent.forEach(el => el.style.display = 'flex');
     }
