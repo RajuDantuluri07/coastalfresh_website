@@ -218,38 +218,48 @@ export const UI = {
                 return ''; // Return an empty string to not break the .join('')
             }
 
-            const hasOffer = product.mrp > product.finalPrice;
-            const isInCart = state.cart[product.id];
+            const primaryVariant = (product.variants && product.variants.length > 0) ? product.variants[0] : {};
+            const hasOffer = primaryVariant.mrp > primaryVariant.finalPrice;
+            const savings = hasOffer ? Math.round(primaryVariant.mrp - primaryVariant.finalPrice) : 0;
+            const isInCart = Object.keys(state.cart).some(key => key.startsWith(`${product.id}-`));
             const optimizedImage = UI.getOptimizedImageUrl(product.image, 300, 300);
             const sanitizedName = DOMPurify.sanitize(product.name);
+
+            let ctaButton = '';
+            // FIX: Check availability of the specific variant for single-variant products.
+            if (product.variants && product.variants.length > 1) {
+                // For multi-variant products, the 'Options' button is always shown if the product is generally available.
+                if (product.available) {
+                    ctaButton = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">OPTIONS</button>`;
+                }
+            } else if (primaryVariant && primaryVariant.available) {
+                // For single-variant products, only show CTA if that variant is available.
+                const variantId = `${product.id}-0`;
+                const qtyInCart = state.cart[variantId] || 0;
+                ctaButton = qtyInCart ?
+                    `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>` :
+                    `<button class="add-btn add-pill" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart"><i class="fas fa-plus"></i> ADD</button>`;
+            }
+
             return `
-          <div class="product" data-id="${product.id}">
-            <div class="product-image">
-              ${hasOffer ? `<div class="offer-badge">${product.offer}% OFF</div>` : ''}
-              ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
-              <img src="${optimizedImage}" alt="Fresh ${sanitizedName} delivery in Hyderabad by Coastal Fresh India" loading="lazy" width="300" height="300">
-            </div>
-            <div class="product-info">
-              <div class="product-name">${sanitizedName}</div>
-              <div class="product-weight">${product.net} Net Weight</div>
-              <div class="product-footer">
+        <article class="product ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" aria-label="Product: ${sanitizedName}">
+          <div class="product-image"> 
+            <img src="${optimizedImage}" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
+            <button class="wishlist" aria-label="Add to wishlist"><i class="far fa-heart"></i></button>
+            ${!product.available ? `<div class="out-of-stock-badge">Out of Stock</div>` : ctaButton}
+          </div>
+          <div class="product-info">
+            <h3 class="product-name">${sanitizedName}</h3>
+            <div class="product-weight">${primaryVariant.net || ''}</div>
+            <div class="product-footer">
                 <div class="product-price">
-                  <span class="price">₹${product.finalPrice}</span>
-                  ${hasOffer ? `<span class="old-price">₹${product.mrp}</span>` : ''}
+                    <span class="price">₹${primaryVariant.finalPrice || 'N/A'}</span>
+                    ${hasOffer ? `<span class="old-price">₹${primaryVariant.mrp}</span>` : ''}
                 </div>
-                ${product.available ?
-                    (isInCart ?
-                        `<div class="cart-controls" data-id="${product.id}">
-                      <button class="qty-btn dec">-</button>
-                      <span class="qty">${isInCart}</span>
-                      <button class="qty-btn inc">+</button>
-                    </div>`
-                        : `<button class="add-to-cart-btn add-pill" data-id="${product.id}"><i class="fas fa-plus"></i> Add</button>`)
-                    : ''}
-              </div>
             </div>
           </div>
-        `;
+        </article>
+      `;
         } catch (error) {
             console.error(`Error rendering product card for product ID ${product?.id}:`, error);
             // Return an empty string so the rest of the products can render.
