@@ -255,9 +255,8 @@ export const UI = {
             if (product.available) {
               if (variantCount > 1) {
                 // Multi-option product (like the demo)
-                const optionsText = `${variantCount} options`;
                 ctaButton = `
-                    <div class="options-badge">${optionsText}</div>
+                    <!-- The options badge is now moved to the info section -->
                     <button class="add-btn small variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">ADD</button>
                 `;
               } else {
@@ -273,19 +272,26 @@ export const UI = {
             }
 
             const priceOrStockHTML = product.available ? `
-                <div class="price-row">
-                    <div>
-                        <div class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</div>
-                        ${hasOffer ? `<div class="old-price">₹${primaryVariant.mrp}</div>` : ''}
-                    </div>
-                    ${hasOffer && savings > 0 ? `<div style="margin-left:auto;text-align:right"><div class="save">SAVE ₹${savings}</div></div>` : ''}
+                <div class="price-row"> 
+                    <span class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</span>
+                    ${hasOffer ? `<span class="old-price">₹${primaryVariant.mrp}</span>` : ''}
+                    ${hasOffer && savings > 0 ? `<span class="save">SAVE ₹${savings}</span>` : ''}
                 </div>
             ` : '';
 
-            const subInfoHTML = product.available ? `
-                <div class="sub-info">
-                    <span class="pill">${primaryVariant.net || primaryVariant.gross || ''}</span>
+            // NEW: Group name and sub-info together
+            const nameAndSubInfoHTML = `
+                <div class="name-group">
+                    <h3 class="name">${sanitizedName}</h3>
+                    <div class="sub-info">
+                        <span class="pill">${primaryVariant.net || primaryVariant.gross || ''}</span>
+                        ${variantCount > 1 ? `<span class="options-text">${variantCount} options</span>` : ''}
+                    </div>
                 </div>
+            `;
+
+            const subInfoHTML = product.available ? `
+                ${nameAndSubInfoHTML}
             ` : '<div class="out-of-stock-text">Out of Stock</div>';
 
             return `
@@ -299,7 +305,6 @@ export const UI = {
           </div>
           <div class="info">
             ${priceOrStockHTML}
-            <h3 class="name">${sanitizedName}</h3>
             ${subInfoHTML}
           </div>
         </div>

@@ -963,7 +963,7 @@ z-index: 2;                 /* sits above input content */
   box-shadow: 0 6px 12px rgba(16,24,40,0.06);
   border: 1px solid rgba(0,0,0,0.04);
   cursor: pointer;
-  color: var(--pink); /* Use pink for the heart icon */
+  color: var(--success-color); /* Use green for the heart icon */
 }
 
 /* ADD button on image */
@@ -974,9 +974,9 @@ z-index: 2;                 /* sits above input content */
   padding: 8px 16px;
   border-radius: 14px;
   background: var(--bg-white);
-  border: 2px solid var(--pink);
+  border: 2px solid var(--success-color);
   font-weight: 700;
-  color: var(--pink);
+  color: var(--success-color);
   cursor: pointer;
   box-shadow: 0 4px 8px rgba(0,0,0,0.06);
   display: inline-flex;
@@ -1012,11 +1012,11 @@ z-index: 2;                 /* sits above input content */
   bottom: 12px;
   display: flex;
   align-items: center;
-  background: var(--pink);
+  background: var(--success-color);
   color: white;
   font-weight: 700;
   border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(255, 46, 106, 0.25);
+  box-shadow: 0 4px 12px rgba(56, 142, 60, 0.3); /* Green shadow */
   z-index: 2;
 }
 
@@ -1035,25 +1035,29 @@ z-index: 2;                 /* sits above input content */
   text-align: center;
 }
 
+.name-group {
+  margin-top: 6px;
+}
+
 .info {
   padding-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
   flex-grow: 1; /* Make info section fill available space */
 }
 .name {
-  font-size: 13px; /* Compact font size */
+  font-size: 14px; /* Compact font size */
   color: #111;
-  min-height: 36px; /* For 2 lines of text */
   margin: 0;
   font-weight: 500;
   line-height: 1.3;
+  /* No min-height needed, will flow naturally */
 }
 .price-row {
   display: flex;
-  align-items: flex-end;
-  gap: 10px;
+  align-items: baseline; /* Align text baselines */
+  gap: 8px;
+  flex-wrap: wrap; /* Allow wrapping if needed */
 }
 .final-price {
   font-weight: 700;
@@ -1068,11 +1072,20 @@ z-index: 2;                 /* sits above input content */
   color: var(--success-color);
   font-weight: 700;
   font-size: 13px;
+  margin-left: auto; /* Push to the right */
 }
 .sub-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 13px;
   color: var(--muted);
-  margin-top: 6px;
+  margin-top: 4px; /* Reduced space between name and sub-info */
+}
+.options-text {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 500;
 }
 .pill {
   display: inline-block;
