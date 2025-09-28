@@ -249,6 +249,7 @@ export const UI = {
             const sanitizedName = DOMPurify.sanitize(product.name);
 
             let ctaButton = '';
+            let stockOverlay = ''; // NEW: For the out-of-stock overlay
             const variantCount = product.variants?.length || 0;
 
             if (product.available) {
@@ -268,6 +269,9 @@ export const UI = {
                     ctaButton = `<button class="add-btn" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
                 }
               }
+            } else {
+              // NEW: If not available, create the overlay
+              stockOverlay = `<div class="out-of-stock-overlay"><div class="out-of-stock-text">Out of Stock</div></div>`;
             }
 
             const priceOrStockHTML = product.available ? `
@@ -284,7 +288,7 @@ export const UI = {
                 <div class="sub-info">
                     <span class="pill">${primaryVariant.net || primaryVariant.gross || ''}</span>
                 </div>
-            ` : '<div class="out-of-stock-text">Out of Stock</div>';
+            ` : ''; // Out of stock text is now in the overlay
 
             return `
         <div class="card product ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" role="article" aria-label="Product: ${sanitizedName}">
@@ -293,7 +297,8 @@ export const UI = {
             <button class="wish" aria-label="Add to wishlist" aria-pressed="false">
                 <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 21s-7.5-4.9-9.2-8.1C1.6 9.9 4 6 8 6c2.2 0 3.6 1.5 4 2.2.4-.7 1.8-2.2 4-2.2 4 0 6.4 3.9 5.2 6.9C19.5 16.1 12 21 12 21z"></path></svg>
             </button>
-             ${product.available ? ctaButton : ''}
+             ${ctaButton}
+             ${stockOverlay}
           </div>
           <div class="info">
             ${priceOrStockHTML}
