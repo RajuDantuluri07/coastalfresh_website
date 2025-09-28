@@ -245,16 +245,15 @@ export const Handlers = {
             }
 
             // --- FIX: Cart quantity controls ---
-            const cartQtyBtn = target.closest('.cart-item-qty .qty-btn');
+            const cartQtyBtn = target.closest('.cart-item-qty .qty-btn'); // This selector is specific to the cart items
             if (cartQtyBtn) {
-                // FIX: The selector for cartControls was incorrect. It should just find the closest '.qty-controls'.
-                const cartControls = target.closest('.qty-controls');
                 e.stopPropagation();
+                // FIX: The data-id is on the parent '.cart-item-qty' or '.cart-item-card'
+                const cartControls = target.closest('[data-id]');
                 const variantId = cartControls.dataset.id;
-                if (variantId) {
-                    const change = cartQtyBtn.classList.contains('inc') ? 1 : -1;
-                    Handlers.updateQty(variantId, change, 'cart');
-                }
+                const change = cartQtyBtn.classList.contains('inc') ? 1 : -1;
+                // The check for variantId happens inside updateQty
+                Handlers.updateQty(variantId, change, 'cart');
             }
         });
 
@@ -396,13 +395,12 @@ export const Handlers = {
         document.getElementById('popupStickyCta').addEventListener('click', (e) => {
             const addBtn = e.target.closest('.popup-cta-add-btn');
             const qtyBtn = e.target.closest('.qty-btn');
-            const variantId = `${state.popupProduct?.id}-${state.selectedVariantIndex}`;
-            if (addBtn) Handlers.addPopupToCart();
-            if (qtyBtn) {
-                const isInCart = state.cart[variantId] > 0;
+            if (addBtn) {
+                Handlers.addPopupToCart();
+            } else if (qtyBtn) {
+                const variantId = `${state.popupProduct?.id}-${state.selectedVariantIndex}`;
                 const change = qtyBtn.classList.contains('inc') ? 1 : -1;
-                if (isInCart) Handlers.updateQty(variantId, change);
-                else Handlers.changePopupQty(change);
+                Handlers.updateQty(variantId, change, 'popup');
             }
         });
 
