@@ -991,12 +991,11 @@ z-index: 2;                 /* sits above input content */
 
 /* --- NEW: Compact Add/Options Button --- */
 .compact-add-btn {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  width: 90px;
-  height: 68px;
-  background: var(--bg-white);
+  position: static; /* Change from absolute to static */
+  width: 100%; /* Make it full width of the info container */
+  height: 40px; /* Reduce height significantly */
+  margin-top: 8px; /* Add space above the button */
+  background: transparent; /* Background is not needed, border is enough */
   border: 1.5px solid var(--success-color);
   border-radius: 16px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.06);
@@ -1005,7 +1004,6 @@ z-index: 2;                 /* sits above input content */
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0;
   overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   z-index: 2;
@@ -1017,17 +1015,18 @@ z-index: 2;                 /* sits above input content */
 }
 
 .compact-add-btn .add-text {
-  font-size: 16px;
+  font-size: 14px; /* Reduce font size for smaller button */
   font-weight: 700;
   color: var(--success-color);
   line-height: 1;
 }
 
 .compact-add-btn .options-text {
-  font-size: 11px;
+  font-size: 10px; /* Reduce font size */
   font-weight: 500;
   color: var(--success-color);
-  margin-top: 4px;
+  margin-top: 2px; /* Reduce margin */
+  line-height: 1;
 }
 
 .add-btn.add-pill {

@@ -249,13 +249,13 @@ export const UI = {
             const sanitizedName = DOMPurify.sanitize(product.name);
 
             let ctaButton = '';
-            const variantCount = product.variants?.length || 0;
+            const variantCount = product.variants?.length || 1;
 
             if (variantCount > 1 && product.available) {
                 // Multi-variant product: Show compact button with options text.
                 const optionsText = `${variantCount} options`;
                 ctaButton = `
-                    <button class="compact-add-btn variant-btn" data-id="${product.id}" aria-label="Add, ${optionsText}" title="Add, ${optionsText}">
+                    <button class="compact-add-btn variant-btn" data-id="${product.id}" aria-label="View Options, ${optionsText}" title="View Options, ${optionsText}">
                         <span class="add-text">+ ADD</span>
                         <span class="options-text">${optionsText}</span>
                     </button>`;
@@ -264,7 +264,7 @@ export const UI = {
                 const variantId = `${product.id}-0`;
                 const qtyInCart = state.cart[variantId] || 0;
                 if (qtyInCart > 0) {
-                    ctaButton = `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>`;
+                    ctaButton = `<div class="cart-controls" data-id="${variantId}" style="position: static; width: 100%; height: 40px; margin-top: 8px;"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>`;
                 } else {
                     ctaButton = `
                         <button class="compact-add-btn" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart" title="Add to cart">
@@ -288,12 +288,11 @@ export const UI = {
           <div class="product-image"> 
             <img src="${optimizedImage}" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
             <button class="wish" aria-label="Add to wishlist">♡</button>
-            <!-- FIX: The out-of-stock badge here is redundant. The text is shown below. -->
-            ${product.available ? ctaButton : ''}
           </div>
           <div class="info">
             <h3 class="name">${sanitizedName}</h3>
              ${priceOrStockHTML}
+             ${product.available ? ctaButton : ''}
           </div>
         </div>
       `;
