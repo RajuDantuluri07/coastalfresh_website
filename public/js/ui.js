@@ -253,7 +253,17 @@ export const UI = {
                     `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>` :
                     `<button class="add-btn add-pill" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart"><i class="fas fa-plus"></i> ADD</button>`;
             }
-
+ const priceOrStockHTML = product.available
+    ? `
+        <div class="price-container">
+            <div class="price-row">
+                <span class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</span>
+                ${hasOffer ? `<span class="old-price">₹${primaryVariant.mrp}</span>` : ''}
+            </div>
+            ${hasOffer && savings > 0 ? `<div class="save-row"><span class="save">SAVE ₹${savings}</span></div>` : ''}
+        </div>
+      `
+    : '<div class="out-of-stock-text">Out of Stock</div>';
             return `
         <div class="card product ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" role="article" aria-label="Product: ${sanitizedName}">
           <div class="product-image"> 
@@ -263,13 +273,7 @@ export const UI = {
           </div>
           <div class="info">
             <h3 class="name">${sanitizedName}</h3>
-            <div class="price-container">
-              <div class="price-row">
-                <span class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</span>
-                ${hasOffer ? `<span class="old-price">₹${primaryVariant.mrp}</span>` : ''}
-              </div>
-              ${hasOffer && savings > 0 ? `<div class="save-row"><span class="save">SAVE ₹${savings}</span></div>` : ''}
-            </div>
+             ${priceOrStockHTML}
           </div>
         </div>
       `;
@@ -480,6 +484,8 @@ export const UI = {
         const product = state.products.find(p => p.id === productId);
         if (!product || !product.variants) return;
 
+        state.variantDrawerProduct = product;
+
         document.getElementById('variantDrawerTitle').textContent = `Select variant for ${product.name}`;
         const content = document.getElementById('variantDrawerContent');
         content.innerHTML = product.variants.map((variant, index) => {
@@ -507,6 +513,33 @@ export const UI = {
     closeVariantDrawer: () => {
         document.getElementById('variantDrawerOverlay').classList.remove('active');
         document.getElementById('variantDrawer').classList.remove('active');
+        state.variantDrawerProduct = null;
+    },
+
+    updateVariantDrawer: () => {
+        const drawer = document.getElementById('variantDrawer');
+        if (!drawer || !drawer.classList.contains('active') || !state.variantDrawerProduct) return;
+
+        const product = state.variantDrawerProduct;
+
+        const content = document.getElementById('variantDrawerContent');
+        content.innerHTML = product.variants.map((variant, index) => {
+            const variantId = `${product.id}-${index}`;
+            const qtyInCart = state.cart[variantId] || 0;
+            return `
+                <div class="variant-option" data-id="${variantId}">
+                    <div class="variant-info">
+                        <strong>${variant.name}</strong> (${variant.net}) - ₹${variant.finalPrice}
+                    </div>
+                    <div class="variant-cta">
+                    ${qtyInCart > 0 ?
+                        `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec">-</button><span class="qty">${qtyInCart}</span><button class="qty-btn inc">+</button></div>` :
+                        `<button class="add-btn" data-id="${variantId}">ADD</button>`
+                    }
+                    </div>
+                </div>
+            `;
+        }).join('');
     },
 
     toggleProductDescription: () => {
@@ -551,6 +584,7 @@ export const UI = {
         UI.updateCartBadges();
         // If the cart is currently open, re-render its contents.
         if (document.getElementById('cartModal')?.classList.contains('active')) UI.showCart();
+        UI.updateVariantDrawer(); // NEW: Refresh variant drawer if open
     },
 
     updateCartBadges: () => {

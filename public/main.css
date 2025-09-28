@@ -3364,3 +3364,10 @@ body.popup-open .bottom-bar {
 @keyframes tick {
   50% { transform: scale(1.05); }
 }
+
+.out-of-stock-text {
+  color: var(--error-color);
+  font-weight: 600;
+  font-size: 14px;
+  margin-top: auto;
+}
