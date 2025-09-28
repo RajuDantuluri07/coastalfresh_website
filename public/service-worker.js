@@ -98,25 +98,24 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Use a "Network first, then Cache" strategy for the main HTML page.
-  // This ensures users always get the latest version of the app shell if they are online.
+  // FIX: Use a "Network first, then Cache" strategy for the main HTML page.
+  // This ensures users always get the latest version of the app shell if online.
   if (event.request.mode === 'navigate') {
     event.respondWith(
       (async () => {
         try {
           // First, try to fetch from the network.
           const networkResponse = await fetch(event.request);
-          
+
           // If successful, clone the response and put it in the cache.
           const cache = await caches.open(CACHE_NAME);
           cache.put(event.request, networkResponse.clone());
-          
+
           return networkResponse;
         } catch (error) {
           // If the network fails (e.g., offline), try to serve from the cache.
           console.log('Network request for navigation failed, falling back to cache.');
-          const cache = await caches.open(CACHE_NAME);
-          return await cache.match(event.request);
+          return caches.match(event.request);
         }
       })()
     );

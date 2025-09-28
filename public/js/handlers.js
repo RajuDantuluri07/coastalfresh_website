@@ -531,14 +531,15 @@ export const Handlers = {
     addMultipleToCart: (items) => {
         if (!items || items.length === 0) return;
 
+        // FIX: The 'items' from an order have {id, name, qty, price, image}. The 'id' is the variantId.
         let itemsAddedCount = 0;
         items.forEach(item => {
-            const [productId, variantIndex] = item.id.split('-').map(Number);
+            const [productId, variantIndex] = item.id.split('-').map(Number); // item.id is the variantId
             const product = state.products.find(p => p.id === productId);
             const qtyToAdd = (typeof item.qty === 'number' && item.qty > 0) ? item.qty : 1;
             if (product && product.variants[variantIndex]?.available) {
                 state.cart[item.id] = (state.cart[item.id] || 0) + qtyToAdd;
-                itemsAddedCount++;
+                itemsAddedCount++; // Use a separate counter for analytics tracking
                 window.Analytics.trackAddToCart(product, qtyToAdd);
             }
         });
@@ -546,7 +547,7 @@ export const Handlers = {
         if (itemsAddedCount > 0) {
             Handlers.saveCart();
             UI.updateCartUI();
-            UI.showToast(`${itemsAddedCount} item(s) from your previous order have been added to the cart!`);
+            UI.showToast(`${itemsAddedCount} item(s) from your order have been added to the cart!`);
             UI.showCart();
         }
     },
@@ -631,7 +632,7 @@ export const Handlers = {
 
         Handlers.saveCart();
         UI.updateCartUI();
-        UI.updateProductCardState(variantId);
+        UI.updateProductCardState(productId); // FIX: Pass productId to update all cards for that product.
         UI.showToast(`${product.name} (${variant.name}) added to cart!`);
 
         // Animate the "ADD" button to "ADDED" temporarily
@@ -652,7 +653,8 @@ export const Handlers = {
     updateQty: (variantId, change, source = 'cart') => {
         if (!state.cart[variantId]) return;
 
-        const [productId, variantIndexStr] = variantId.split('-');
+        const [productIdStr, variantIndexStr] = variantId.split('-');
+        const productId = parseInt(productIdStr, 10);
         const variantIndex = parseInt(variantIndexStr, 10);
         const product = state.products.find(p => p.id === productId);
         const variant = product?.variants[variantIndex];
@@ -687,7 +689,7 @@ export const Handlers = {
         if (state.isPopupOpen && state.popupProduct?.id === productId) {
             UI.updatePopupCta();
         }
-        UI.updateProductCardState(variantId);
+        UI.updateProductCardState(productId); // FIX: Pass productId to update all cards for that product.
     },
 
     checkout: async () => {

@@ -498,7 +498,7 @@ export const UI = {
 
     closePopup: () => {
         const popup = document.getElementById('productPopup');
-        if (!popup || !state.popupProduct) return;
+        if (!popup || !state.isPopupOpen) return; // FIX: Check isPopupOpen to prevent errors on rapid clicks
 
         UI.closeModal(popup);
         state.isPopupOpen = false;
@@ -540,27 +540,34 @@ export const UI = {
         });
     },
 
-    updateProductCardState: (productId) => {
+    updateProductCardState: (productId) => { // FIX: Now takes productId
         const productCards = document.querySelectorAll(`.product[data-id="${productId}"]`);
         if (productCards.length === 0) return;
     
         const product = state.products.find(p => p.id === productId);
         if (!product) return;
 
+        // FIX: Correctly determine if any variant of this product is in the cart.
+        const variantsInCart = Object.keys(state.cart).filter(key => key.startsWith(`${productId}-`));
+
         productCards.forEach(card => {
-            const isInCartQty = state.cart[product.id];
-            const imageContainer = card.querySelector('.product-image');
-            if (!imageContainer) return; // Ensure the main container exists
+            const ctaContainer = card.querySelector('.product-cta-container');
+            if (!ctaContainer) return;
     
             // Remove existing controls before adding new ones
-            const existingControls = imageContainer.querySelector('.cart-controls, .add-btn');
-            if (existingControls) existingControls.remove();
+            ctaContainer.innerHTML = '';
     
             let newControlHTML = '';
-            if (product.available) {
-                const sanitizedName = product.name;
-                if (isInCartQty) {
-                    newControlHTML = `<div class="cart-controls" data-id="${product.id}">
+            const sanitizedName = product.name;
+
+            if (product.variants && product.variants.length > 1) {
+                if (product.available) newControlHTML = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">Options</button>`;
+            } else if (product.variants && product.variants.length === 1) {
+                const variantId = `${product.id}-0`;
+                const isInCartQty = state.cart[variantId] || 0;
+                if (product.variants[0].available) {
+                    if (isInCartQty > 0) {
+                        newControlHTML = `<div class="cart-controls" data-id="${variantId}">
                         <button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button>
                         <span class="qty" aria-live="polite">${isInCartQty}</span>
                         <button class="qty-btn inc" aria-label="Increase quantity">+</button>
@@ -569,8 +576,7 @@ export const UI = {
                     newControlHTML = `<button class="add-btn" data-id="${product.id}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
                 }
             }
-            // Append the new controls into the image container
-            imageContainer.insertAdjacentHTML('beforeend', newControlHTML);
+            ctaContainer.innerHTML = newControlHTML; // Append the new controls into the correct container.
         });
     },    
 

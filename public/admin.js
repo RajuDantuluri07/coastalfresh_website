@@ -513,11 +513,13 @@ document.getElementById('products-container').addEventListener('click', (e) => {
 function toggleVariantSection() {
     const categorySelect = document.getElementById('product-category');
     const variantSection = document.getElementById('variant-management-section');
+    const addVariantBtn = document.getElementById('add-variant-btn');
     const selectedCategory = categorySelect.value;
 
     if (selectedCategory === 'Prawns' || selectedCategory === 'Pickles') {
         variantSection.style.display = 'block';
     } else {
+        // FIX: Ensure the "Add Variant" button is also hidden for single-variant categories.
         variantSection.style.display = 'none';
     }
 }
@@ -583,7 +585,7 @@ function createVariantForm(variant, index) {
             <button type="button" class="remove-variant-btn" data-index="${index}">&times;</button>
         </div>
         <div class="field-row">
-            <div class="field"><label>Name</label><input type="text" class="variant-name" value="${escapeHtml(variant.name || '')}" placeholder="e.g., Small, 500g" required></div>
+            <div class="field"><label>Name</label><input type="text" class="variant-name" value="${escapeHtml(variant.name || '')}" placeholder="Optional for single variant"></div>
             <div class="field"><label>Gross Wt.</label><input type="text" class="variant-gross" value="${escapeHtml(variant.gross || '')}" placeholder="e.g., 1kg"></div>
             <div class="field"><label>Net Wt.</label><input type="text" class="variant-net" value="${escapeHtml(variant.net || '')}" placeholder="e.g., 500g"></div>
         </div>
@@ -666,13 +668,26 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
             throw new Error("Product image is required. Please upload an image or provide a URL.");
         }
 
+        // FIX: For single-variant categories, ensure there is exactly one variant.
+        const selectedCategory = document.getElementById('product-category').value;
+        if (selectedCategory === 'Fish' || selectedCategory === 'Crabs') {
+            if (document.querySelectorAll('.variant-card').length > 1) {
+                throw new Error(`${selectedCategory} can only have one variant. Please remove extra variants.`);
+            }
+        }
+
+        const productName = document.getElementById('product-name').value;
+
         // NEW: Collect variant data
         const variants = [];
-        document.querySelectorAll('.variant-card').forEach(card => {
+        const variantCards = document.querySelectorAll('.variant-card');
+        variantCards.forEach(card => {
             const mrp = parseFloat(card.querySelector('.variant-mrp').value);
             const finalPrice = parseFloat(card.querySelector('.variant-finalPrice').value);
+            let variantName = card.querySelector('.variant-name').value;
+
             variants.push({
-                name: card.querySelector('.variant-name').value,
+                name: variantName || productName, // Default to product name if variant name is empty
                 gross: card.querySelector('.variant-gross').value,
                 net: card.querySelector('.variant-net').value,
                 mrp: mrp,
@@ -682,12 +697,19 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
             });
         });
 
+        // Validate variant names only if there are multiple variants
+        if (variantCards.length > 1) {
+            if (variants.some(v => !v.name)) {
+                throw new Error("Variant names are required when you have more than one variant.");
+            }
+        }
+
         if (variants.length === 0) {
             throw new Error("At least one product variant is required.");
         }
 
         const productData = {
-            name: document.getElementById('product-name').value,
+            name: productName,
             desc: document.getElementById('product-desc').value,
             category: document.getElementById('product-category').value,
             image: imageUrl, // Use the new or existing URL
@@ -698,9 +720,11 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
             available: variants.some(v => v.available) // Product is available if at least one variant is.
         };
         const productId = document.getElementById('product-id-input').value;
+        const docId = document.getElementById('delete-product-btn').dataset.docId; // Use the stored docId
+
         if (productId) { // Editing existing product
             productData.id = parseInt(productId, 10);
-            const docRef = db.collection('products').doc(String(productId));
+            const docRef = db.collection('products').doc(docId); // FIX: Use the actual document ID for updates.
             await docRef.set(productData, { merge: true });
             toast('Product updated successfully!');
         } else { // Creating new product
@@ -722,7 +746,7 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
 });
 
 document.getElementById('delete-product-btn').addEventListener('click', async (e) => {
-    const docId = e.target.dataset.docId;
+    const docId = e.target.dataset.docId; // This is the Firestore document ID
     const productToDelete = allProducts.find(p => p.docId === docId);
     if (!productToDelete) return toast('Error: Product ID not found.');
 
