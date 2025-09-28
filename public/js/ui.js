@@ -249,16 +249,15 @@ export const UI = {
             const sanitizedName = DOMPurify.sanitize(product.name);
 
             let ctaButton = '';
-            const variants = product.variants || [];
-            const variantCount = variants.length;
+            const variantCount = product.variants?.length || 0;
 
             if (product.available) {
               if (variantCount > 1) {
                 // Multi-option product (like the demo)
+                const optionsText = `${variantCount} options`;
                 ctaButton = `
-                    <!-- The options badge is now moved to the info section -->
-                    <button class="add-btn small variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">ADD</button>
-                `;
+                    <div class="options-badge">${optionsText}</div>
+                    <button class="add-btn small variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">ADD</button>`;
               } else {
                 // Single-option product
                 const variantId = `${product.id}-0`;
@@ -272,39 +271,33 @@ export const UI = {
             }
 
             const priceOrStockHTML = product.available ? `
-                <div class="price-row"> 
-                    <span class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</span>
-                    ${hasOffer ? `<span class="old-price">₹${primaryVariant.mrp}</span>` : ''}
-                    ${hasOffer && savings > 0 ? `<span class="save">SAVE ₹${savings}</span>` : ''}
+                <div class="price-row">
+                    <div>
+                        <div class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</div>
+                        ${hasOffer ? `<div class="old-price">₹${primaryVariant.mrp}</div>` : ''}
+                    </div>
+                    ${hasOffer && savings > 0 ? `<div style="margin-left:auto;text-align:right"><div class="save">SAVE ₹${savings}</div></div>` : ''}
                 </div>
             ` : '';
 
-            // NEW: Group name and sub-info together
-            const nameAndSubInfoHTML = `
-                <div class="name-group">
-                    <h3 class="name">${sanitizedName}</h3>
-                    <div class="sub-info">
-                        <span class="pill">${primaryVariant.net || primaryVariant.gross || ''}</span>
-                        ${variantCount > 1 ? `<span class="options-text">${variantCount} options</span>` : ''}
-                    </div>
-                </div>
-            `;
-
             const subInfoHTML = product.available ? `
-                ${nameAndSubInfoHTML}
+                <div class="sub-info">
+                    <span class="pill">${primaryVariant.net || primaryVariant.gross || ''}</span>
+                </div>
             ` : '<div class="out-of-stock-text">Out of Stock</div>';
 
             return `
         <div class="card product ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" role="article" aria-label="Product: ${sanitizedName}">
           <div class="product-image">
             <img src="${optimizedImage}" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
-            <button class="wish" aria-label="Add to wishlist">
+            <button class="wish" aria-label="Add to wishlist" aria-pressed="false">
                 <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 21s-7.5-4.9-9.2-8.1C1.6 9.9 4 6 8 6c2.2 0 3.6 1.5 4 2.2.4-.7 1.8-2.2 4-2.2 4 0 6.4 3.9 5.2 6.9C19.5 16.1 12 21 12 21z"></path></svg>
             </button>
              ${product.available ? ctaButton : ''}
           </div>
           <div class="info">
             ${priceOrStockHTML}
+            <h3 class="name">${sanitizedName}</h3>
             ${subInfoHTML}
           </div>
         </div>
