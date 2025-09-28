@@ -168,7 +168,16 @@ async function init() {
           if (productsSnapshot.empty) {
               throw new Error("No products found in the database.");
           }
-          state.products = productsSnapshot.docs.map(doc => doc.data());
+          // FIX: Process raw product data to include a primary variant for display purposes.
+          // This ensures compatibility with components that expect a single price/mrp.
+          state.products = productsSnapshot.docs.map(doc => {
+              const product = doc.data();
+              if (product.variants && product.variants.length > 0) {
+                  product.finalPrice = product.variants[0].finalPrice;
+                  product.mrp = product.variants[0].mrp;
+              }
+              return product;
+          });
           
           // The rest of the logic remains the same as it operates on state.products
           UI.renderFeaturedProducts();

@@ -230,19 +230,19 @@ export const UI = {
                 return ''; // Return an empty string to not break the .join('')
             }
 
-            const primaryVariant = product.variants && product.variants.length > 0 ? product.variants[0] : {};
+            const primaryVariant = (product.variants && product.variants.length > 0) ? product.variants[0] : {};
             const hasOffer = primaryVariant.mrp > primaryVariant.finalPrice;
-            const savings = Math.round(primaryVariant.mrp - primaryVariant.finalPrice);
+            const savings = hasOffer ? Math.round(primaryVariant.mrp - primaryVariant.finalPrice) : 0;
             const isInCart = Object.keys(state.cart).some(key => key.startsWith(`${product.id}-`));
             const optimizedImage = UI.getOptimizedImageUrl(product.image, 300, 300);
-            const sanitizedName = product.name; // Assuming names from DB are safe
+            const sanitizedName = DOMPurify.sanitize(product.name);
 
             let ctaButton = '';
             // FIX: Check availability of the specific variant for single-variant products.
             if (product.variants && product.variants.length > 1) {
                 // For multi-variant products, the 'Options' button is always shown if the product is generally available.
                 if (product.available) {
-                    ctaButton = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">Options</button>`;
+                    ctaButton = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">OPTIONS</button>`;
                 }
             } else if (primaryVariant && primaryVariant.available) {
                 // For single-variant products, only show CTA if that variant is available.
@@ -250,7 +250,7 @@ export const UI = {
                 const qtyInCart = state.cart[variantId] || 0;
                 ctaButton = qtyInCart ?
                     `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>` :
-                    `<button class="add-btn" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
+                    `<button class="add-btn add-pill" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart"><i class="fas fa-plus"></i> ADD</button>`;
             }
 
             return `
@@ -258,16 +258,17 @@ export const UI = {
           <div class="product-image"> 
             <img src="${optimizedImage}" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
             <button class="wishlist" aria-label="Add to wishlist"><i class="far fa-heart"></i></button>
-            ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
-            <div class="product-cta-container">${ctaButton}</div>
+            ${!product.available ? `<div class="out-of-stock-badge">Out of Stock</div>` : ctaButton}
           </div>
           <div class="product-info">
-            <div class="product-name">${sanitizedName}</div>
-            <div class="price-section">
-              <span class="product-price">₹${primaryVariant.finalPrice}</span>
-              ${hasOffer ? `<span class="product-mrp">₹${primaryVariant.mrp}</span>` : ''}
+            <h3 class="product-name">${sanitizedName}</h3>
+            <div class="product-weight">${primaryVariant.net || ''}</div>
+            <div class="product-footer">
+                <div class="product-price">
+                    <span class="price">₹${primaryVariant.finalPrice || 'N/A'}</span>
+                    ${hasOffer ? `<span class="old-price">₹${primaryVariant.mrp}</span>` : ''}
+                </div>
             </div>
-            ${hasOffer && savings > 0 ? `<div class="product-save">SAVE ₹${savings}</div>` : ''}
           </div>
         </article>
       `;
