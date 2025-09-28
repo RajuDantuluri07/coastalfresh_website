@@ -81,40 +81,47 @@ self.addEventListener('install', event => {
 
 // Cache and return requests
 self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-
-  // Ignore non-GET requests and requests to third-party services that shouldn't be cached.
-  if (
-    event.request.method !== 'GET' ||
-    url.hostname.includes('firestore.googleapis.com') ||
-    url.hostname.includes('google-analytics.com') ||
-    url.hostname.includes('googletagmanager.com') ||
-    url.hostname.includes('hotjar.com')
-  ) {
-    // Let the browser handle these requests without interception.
+  // Use a "Network first, then Cache" strategy for the main HTML page.
+  // This ensures users always get the latest version of the app shell if they are online.
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      (async () => {
+        try {
+          // First, try to fetch from the network.
+          const networkResponse = await fetch(event.request);
+          
+          // If successful, clone the response and put it in the cache.
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(event.request, networkResponse.clone());
+          
+          return networkResponse;
+        } catch (error) {
+          // If the network fails (e.g., offline), try to serve from the cache.
+          console.log('Network request for navigation failed, falling back to cache.');
+          const cache = await caches.open(CACHE_NAME);
+          return await cache.match(event.request);
+        }
+      })()
+    );
     return;
   }
 
-  // For all other GET requests, use a "Cache first, then Network" strategy.
+  // For all other assets (CSS, JS, images), use a "Cache first" strategy for speed.
   event.respondWith(
     (async () => {
       const cache = await caches.open(CACHE_NAME);
       const cachedResponse = await cache.match(event.request);
-
       if (cachedResponse) {
         return cachedResponse;
       }
 
-      // Not in cache, fetch from network.
-      const networkResponse = await fetch(event.request);
-
-      // IMPORTANT: Check for a valid response before caching to avoid caching errors.
-      if (networkResponse && networkResponse.status === 200) {
-        const responseToCache = networkResponse.clone();
-        cache.put(event.request, responseToCache);
+      try {
+        const networkResponse = await fetch(event.request);
+        cache.put(event.request, networkResponse.clone());
+        return networkResponse;
+      } catch (error) {
+        console.log('Fetch failed for:', event.request.url);
       }
-
-      return networkResponse;
     })()
   );
 });

@@ -54,17 +54,14 @@ auth.onAuthStateChanged(user => {
     }
 });
 // ---------- Login ----------
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('login-form');
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        loginError.textContent = '';
-        const email = e.target.email.value.trim();
-        const password = e.target.password.value;
-        auth.signInWithEmailAndPassword(email, password).catch(err => {
-            console.error('Login failed', err);
-            loginError.textContent = err.message || 'Login failed';
-        });
+loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    loginError.textContent = '';
+    const email = e.target.email.value.trim();
+    const password = e.target.password.value;
+    auth.signInWithEmailAndPassword(email, password).catch(err => {
+        console.error('Login failed', err);
+        loginError.textContent = err.message || 'Login failed';
     });
 });
 logoutBtn.addEventListener('click', () => auth.signOut());
@@ -193,16 +190,6 @@ function orderCardHTML(order) {
       `;
 }
 
-// FIX: Add the missing statusOptionsFor function.
-// This function defines the valid status transitions for an order.
-function statusOptionsFor(status) {
-    const validTransitions = {
-        'Pending': ['Pending', 'Accepted', 'Cancelled'],
-        'Accepted': ['Accepted', 'Out for Delivery', 'Cancelled'],
-        'Out for Delivery': ['Out for Delivery', 'Completed', 'Cancelled'],
-    };
-    return validTransitions[status] || [status];
-}
 // delegated click handler for toggles + buttons
 document.addEventListener('click', (ev) => {
     const toggle = ev.target.closest('[data-action="toggle"]');
