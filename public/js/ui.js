@@ -301,18 +301,22 @@ export const UI = {
         const populatePopup = () => {
             title.textContent = product.name;
 
-            // NEW: Render variant options
-            if (product.variants && product.variants.length > 1) {
+            // FIX: Only show variant selector for specific categories with multiple variants.
+            const showVariantSelector = (product.category === 'Prawns' || product.category === 'Pickles') && product.variants && product.variants.length > 1;
+
+            if (showVariantSelector) {
                 weight.innerHTML = product.variants.map((v, index) => {
                     const isSelected = index === state.selectedVariantIndex;
+                    // FIX: Display variant name intelligently to avoid duplication.
+                    const variantDisplayName = (v.name && v.name !== product.name) ? `${v.name} (${v.net})` : v.net;
                     return `
                         <div class="variant-card ${isSelected ? 'active' : ''}" data-variant-index="${index}" role="radio" aria-checked="${isSelected}" tabindex="0">
-                            <div class="variant-name">${v.name} (${v.net})</div>
+                            <div class="variant-name">${variantDisplayName}</div>
                         </div>`;
                 }).join('');
             } else if (product.variants && product.variants.length === 1) {
-                // Handle single-variant products gracefully
-                weight.innerHTML = `<div class="variant-card active"><div class="variant-name">${product.variants[0]?.name || ''} (${product.variants[0]?.net || ''})</div></div>`;
+                // For single-variant products, just show the net weight without a selector.
+                weight.innerHTML = `<div class="variant-card active"><div class="variant-name">${product.variants[0]?.net || ''}</div></div>`;
             } else {
                 // Fallback if no variants exist
                 weight.innerHTML = '';
