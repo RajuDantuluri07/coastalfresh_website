@@ -270,9 +270,11 @@ export const Handlers = {
             }
             const qtyBtn = e.target.closest('.qty-btn');
             if (qtyBtn) {
-                const variantId = qtyBtn.closest('.cart-controls').dataset.id;
+                // FIX: Ensure we are targeting the correct container for the variant ID.
+                const controls = qtyBtn.closest('[data-id]');
+                const variantId = controls.dataset.id;
                 const change = qtyBtn.classList.contains('inc') ? 1 : -1;
-                Handlers.updateQty(variantId, change);
+                Handlers.updateQty(variantId, change, 'drawer');
             }
         });
 

@@ -98,28 +98,43 @@ export const UI = {
         }).join('');
     },
 
+    /**
+     * NEW: A generic and reusable function to render a grid of products into a specified container.
+     * @param {string} containerId - The ID of the container element.
+     * @param {Array<object>} productsToRender - An array of product objects to display.
+     * @param {object} [options={}] - Rendering options, e.g., { isFlashSale: true }.
+     * @param {string} [emptyMessage=''] - HTML string to show if productsToRender is empty.
+     */
+    renderProductGrid: (containerId, productsToRender, options = {}, emptyMessage = '') => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (productsToRender.length > 0) {
+            container.innerHTML = productsToRender.map(p => UI.createProductHTML(p, options)).join('');
+        } else {
+            container.innerHTML = emptyMessage;
+        }
+    },
+
     renderFlashSale: () => {
         const section = document.getElementById('flashSaleSection');
         if (!config.ENABLE_FLASH_SALE) {
             if (section) section.style.display = 'none';
             return;
         }
-
-        const container = document.getElementById('flashSaleProducts');
-        if (!container) return;
-
+    
         let skeletonHTML = '';
         for (let i = 0; i < config.FLASH_SALE_PRODUCT_IDS.length; i++) {
             skeletonHTML += UI.createSkeletonProductHTML();
         }
-        container.innerHTML = skeletonHTML;
-
+        UI.renderProductGrid('flashSaleProducts', [], {}, skeletonHTML);
+    
         const flashSaleProducts = state.products.filter(p => config.FLASH_SALE_PRODUCT_IDS.includes(p.id));
         if (flashSaleProducts.length === 0) {
             if (section) section.style.display = 'none';
             return;
         }
-        container.innerHTML = flashSaleProducts.map(p => UI.createProductHTML(p, { isFlashSale: true })).join('');
+        UI.renderProductGrid('flashSaleProducts', flashSaleProducts, { isFlashSale: true });
     },
 
     createSkeletonProductHTML: () => {
@@ -179,7 +194,7 @@ export const UI = {
         if (!container) return;
 
         const featured = state.products.filter(p => config.FEATURED_PRODUCT_IDS.includes(p.id));
-        container.innerHTML = featured.map(UI.createProductHTML).join('');
+        UI.renderProductGrid('featuredProducts', featured);
     },
 
     renderCatalogProducts: () => {
@@ -214,12 +229,8 @@ export const UI = {
             return matchCategory && matchSearch;
         });
 
-        if (filtered.length === 0) {
-            container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #8E8E93;">No products found</div>';
-            return;
-        }
-
-        container.innerHTML = filtered.map(UI.createProductHTML).join('');
+        const emptyMessage = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #8E8E93;">No products found</div>';
+        UI.renderProductGrid('catalogProducts', filtered, {}, emptyMessage);
     },
 
     createProductHTML: (product, options = {}) => {
@@ -862,7 +873,8 @@ export const UI = {
         }
 
         if (savedMsgEl) {
-            const totalSavings = productSavings + couponDiscount + (deliveryFee === 0 ? 100 : 0);
+            // FIX: The delivery fee is already accounted for. Do not add an arbitrary amount to savings.
+            const totalSavings = productSavings + couponDiscount;
             if (totalSavings > 0) {
                 savedMsgEl.style.display = 'block';
                 savedMsgEl.textContent = `You saved ₹${Math.round(totalSavings)} on this order 🎉`;
