@@ -1,7 +1,7 @@
 /* CSS Variables for consistency */
 :root {
   /* === NEW: Brand Logo Color Palette === */
-  --pink: #ff2d86; /* primary CTA border from new card design */
+  --pink: #ef4444; /* A classic red for the favorite heart icon. Was #ff2d86 */
   --pink-dark: #e21f6d; /* active state for pink */
 
   --primary-dark: #00486d;  /* Deepest Blue from Logo */

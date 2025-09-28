@@ -245,6 +245,7 @@ export const UI = {
             const hasOffer = primaryVariant.mrp > primaryVariant.finalPrice;
             const savings = hasOffer ? Math.round(primaryVariant.mrp - primaryVariant.finalPrice) : 0;
             const isInCart = Object.keys(state.cart).some(key => key.startsWith(`${product.id}-`));
+            const isFavorite = state.favorites.has(product.id);
             const optimizedImage = UI.getOptimizedImageUrl(product.image, 300, 300);
             const sanitizedName = DOMPurify.sanitize(product.name);
 
@@ -252,15 +253,29 @@ export const UI = {
             let stockOverlay = '';
 
             if (product.available) {
-                const variantId = `${product.id}-0`; // Default to first variant for CTA
-                const qtyInCart = state.cart[variantId] || 0;
-                // For multi-variant, the button will open the variant selector. For single, it adds to cart.
-                const buttonActionId = product.variants?.length > 1 ? product.id : variantId;
-                const buttonClass = product.variants?.length > 1 ? 'add-btn variant-btn' : 'add-btn';
+                const variants = product.variants || [];
+                const variantCount = variants.length;
+                const isSpecialCategory = product.category === 'Prawns' || product.category === 'Pickles';
+                const useSizesCta = variantCount >= 3 || (variantCount > 1 && isSpecialCategory);
 
-                if (qtyInCart > 0) {
+                // Check if any variant of this product is in the cart
+                const qtyInCart = Object.keys(state.cart)
+                    .filter(key => key.startsWith(`${product.id}-`))
+                    .reduce((sum, key) => sum + state.cart[key], 0);
+
+                if (qtyInCart > 0 && variantCount === 1) {
+                    // For single-variant products, show quantity controls if in cart
+                    const variantId = `${product.id}-0`;
                     ctaButton = `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">-</button><span class="qty">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>`;
+                } else if (useSizesCta) {
+                    // Show "{n} Sizes" CTA which opens the product popup
+                    const ctaText = `${variantCount} Sizes`;
+                    ctaButton = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="${ctaText}" aria-haspopup="dialog">${ctaText}</button>`;
                 } else {
+                    // Default "ADD" button for single variant or simple multi-variant products
+                    const variantId = `${product.id}-0`;
+                    const buttonActionId = variantCount > 1 ? product.id : variantId;
+                    const buttonClass = variantCount > 1 ? 'add-btn variant-btn' : 'add-btn';
                     ctaButton = `<button class="${buttonClass}" data-id="${buttonActionId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
                 }
             } else {
@@ -279,7 +294,7 @@ export const UI = {
         <div class="card product ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" role="article" aria-label="Product: ${sanitizedName}">
           <div class="product-image">
             <img src="${optimizedImage}" alt="${sanitizedName}" loading="lazy">
-            <button class="wish" aria-label="Add to wishlist">♥</button>
+            <button class="wish" data-id="${product.id}" aria-label="Add to wishlist" aria-pressed="${isFavorite}">${isFavorite ? '♥' : '♡'}</button>
              ${ctaButton}
              ${stockOverlay}
           </div>
@@ -314,6 +329,13 @@ export const UI = {
 
         // Use cached DOM elements for speed
         const { main: popup, title, weight, priceSection, infoContent, mainImage, contentWrapper, backBtn } = state.dom.popup;
+
+        // Update favorite button state in popup
+        const favoriteBtn = popup.querySelector('.popup-action-btn.favorite');
+        const isFavorite = state.favorites.has(product.id);
+        favoriteBtn.setAttribute('aria-pressed', isFavorite);
+        favoriteBtn.innerHTML = `<i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>`;
+        favoriteBtn.style.color = isFavorite ? 'var(--pink)' : 'var(--primary-color)';
 
         const populatePopup = () => {
             title.textContent = product.name;
@@ -940,6 +962,25 @@ export const UI = {
         UI.showPage('home');
     },
 
+    renderFavoritesPage: () => {
+        const favoritedProducts = state.products.filter(p => state.favorites.has(p.id));
+        const emptyMessage = `
+            <div class="empty-cart" style="min-height: 60vh;">
+                <div class="illustration" aria-hidden="true">
+                    <svg width="160" height="140" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Empty favorites illustration">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="none" stroke="var(--border-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <h2 class="empty-cart-title">No Favorites Yet</h2>
+                <p class="empty-cart-lead">Tap the heart on any product to save it here for later.</p>
+                <button class="cart-cta empty-cart-btn" onclick="document.querySelector('.nav-item[data-page=\'catalog\']').click()">
+                    Find Products
+                </button>
+            </div>
+        `;
+        UI.renderProductGrid('favoriteProducts', favoritedProducts, {}, emptyMessage);
+    },
+
     showPage: (page, fromHistory = false) => {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(page).classList.add('active');
@@ -967,6 +1008,11 @@ export const UI = {
             pagePath = '/refer';
         } else if (page === 'ordersPage') {
             UI.renderOrdersPage(); // This was a bug, now fixed
+        } else if (page === 'favoritesPage') {
+            pageTitle = 'My Favorites | Coastal Fresh India';
+            pageDesc = 'View and manage your list of favorite fresh seafood products at Coastal Fresh India.';
+            pagePath = '/favorites';
+            UI.renderFavoritesPage();
         } else if (page === 'profilePage' || page === 'addressPage' || page === 'ordersPage') {
             pageTitle = 'Your Account | Coastal Fresh India';
             pageDesc = 'Manage your orders, addresses, and profile settings at Coastal Fresh India.';
@@ -1809,3 +1855,13 @@ export const UI = {
         }
     }
 };
+
+document.querySelectorAll('.wish').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const productId = parseInt(btn.dataset.id, 10);
+        if (!isNaN(productId)) {
+            Handlers.toggleFavorite(productId);
+        }
+    });
+});

@@ -39,6 +39,7 @@ export const config = {
 export const state = {
     products: [],
     cart: {},
+    favorites: new Set(),
     currentPage: 'home',
     pageHistory: ['home'],
     currentCategory: 'All',
@@ -138,6 +139,7 @@ async function init() {
       // Firebase Auth Listener
       firebase.auth().onAuthStateChanged(Handlers.handleAuthStateChange);
       state.db = firebase.firestore();
+      await Handlers.loadFavorites(); // Load favorites on init
 
       // NEW: Cache profile page DOM elements for performance
       state.dom.profile.userName = document.getElementById('profileUserName');
@@ -185,6 +187,7 @@ async function init() {
           UI.renderFlashSale();
           UI.initFlashSaleTimer();
           UI.renderProductSchema();
+          // Load cart after products are loaded to ensure data integrity
           Handlers.loadCart();
 
           const path = window.location.pathname;

@@ -24,24 +24,35 @@ export const Handlers = {
             const productCard = target.closest('.product');
             if (productCard && !target.closest('.cart-controls, .add-btn, .wishlist, .variant-btn')) {
                 e.preventDefault();
-                const productId = productCard.dataset.id;
-                if (productId) UI.showProductPopup(parseInt(productId));
+                const productId = parseInt(productCard.dataset.id, 10);
+                if (productId) UI.showProductPopup(productId);
             }
 
-            // Add to cart button on product cards (for single-variant products)
+            // CTA button on product cards
             const addBtn = target.closest('.add-btn');
             if (addBtn) {
                 e.stopPropagation();
-                const variantId = addBtn.dataset.id;
-                if (variantId) Handlers.addToCart(variantId);
-            }
-            
-            // FIX: The "OPTIONS" button should now open the product details page instead of the variant drawer.
-            const variantBtn = target.closest('.variant-btn');
-            if (variantBtn && !variantBtn.classList.contains('add-btn')) { // Ensure it's not the new add-btn
-                e.stopPropagation();
-                const productId = parseInt(variantBtn.dataset.id, 10);
-                UI.showProductPopup(productId);
+                const buttonId = addBtn.dataset.id;
+                const isVariantAction = addBtn.classList.contains('variant-btn');
+                const productId = isVariantAction ? parseInt(buttonId, 10) : parseInt(buttonId.split('-')[0], 10);
+                const product = state.products.find(p => p.id === productId);
+
+                // Analytics
+                window.Analytics.trackEvent('product_card_cta_click', {
+                    cta_type: addBtn.textContent,
+                    product_id: productId,
+                    variant_count: product?.variants?.length || 1
+                });
+
+                if (isVariantAction) {
+                    // This is a multi-variant button ("{n} Sizes" or "ADD" for 2 variants)
+                    // It should always open the product popup.
+                    window.Analytics.trackEvent('variant_picker_opened_from_card', { product_id: productId });
+                    UI.showProductPopup(productId);
+                } else {
+                    // This is a direct "ADD" for a single-variant product.
+                    Handlers.addToCart(buttonId);
+                }
             }
 
             // Quantity controls on product cards (scoped to image container)
@@ -57,10 +68,11 @@ export const Handlers = {
             }
 
             // Favorite button on product card
-            const favBtn = target.closest('.wishlist');
+            const favBtn = target.closest('.wish');
             if (favBtn) {
                 e.stopPropagation(); // Prevent popup from opening
-                favBtn.classList.toggle('active');
+                const productId = parseInt(favBtn.dataset.id, 10);
+                if (!isNaN(productId)) Handlers.toggleFavorite(productId);
             }
 
             // FAQ toggle
@@ -661,48 +673,6 @@ export const Handlers = {
         window.Analytics.trackAddToCart({ ...product, ...variant }, qty);
     },
 
-    updateQty: (variantId, change, source = 'cart') => {
-        if (!state.cart[variantId]) return;
-
-        const [productIdStr, variantIndexStr] = variantId.split('-'); // Parse variantId
-        const productId = parseInt(productIdStr, 10);
-        const variantIndex = parseInt(variantIndexStr, 10);
-        const product = state.products.find(p => p.id === productId);
-        const variant = product?.variants[variantIndex];
-        const originalQty = state.cart[variantId];
-
-        state.cart[variantId] += change;
-        if (state.cart[variantId] <= 0) {
-            delete state.cart[variantId];
-            if (product && variant) {
-                window.Analytics.trackEvent('remove_from_cart', {
-                    currency: 'INR',
-                    value: variant.finalPrice * originalQty,
-                    items: [{
-                        item_id: variantId,
-                        item_name: `${product.name} (${variant.name || ''})`,
-                        price: variant.finalPrice,
-                        quantity: originalQty
-                    }]
-                });
-            }
-        } else {
-            if (product) window.Analytics.trackChangeQty({ ...product, ...variant }, change, state.cart[variantId]);
-        }
-        Handlers.saveCart();
-
-        if (document.getElementById('cartModal').classList.contains('active')) {
-            UI.showCart(); // Re-render the whole cart for simplicity
-        } else {
-            UI.updateCartUI();
-        }
-        // Also update the popup if it's open
-        if (state.isPopupOpen && state.popupProduct?.id === productId) {
-            UI.updatePopupCta();
-        }
-        UI.updateProductCardState(productId); // FIX: Pass productId to update all cards for that product.
-    },
-
     checkout: async () => {
         const cartFooter = document.getElementById('cartFooter');
         const checkoutBtn = document.getElementById('cartPlaceOrderBtn');
@@ -821,6 +791,102 @@ export const Handlers = {
                     checkoutBtn.textContent = 'Place Order';
                 }
             });
+    },
+
+    toggleFavorite: (productId) => {
+        if (isNaN(productId)) return;
+
+        const isFavorited = state.favorites.has(productId);
+        const product = state.products.find(p => p.id === productId);
+
+        if (isFavorited) {
+            state.favorites.delete(productId);
+            UI.showToast(`${product.name} removed from favorites`);
+            if (product) window.Analytics.trackEvent('remove_from_wishlist', {
+                currency: 'INR', value: product.finalPrice, items: [{ item_id: product.id, item_name: product.name }]
+            });
+        } else {
+            state.favorites.add(productId);
+            UI.showToast(`${product.name} added to favorites!`);
+            if (product) window.Analytics.trackEvent('add_to_wishlist', {
+                currency: 'INR', value: product.finalPrice, items: [{ item_id: product.id, item_name: product.name }]
+            });
+        }
+
+        Handlers.saveFavorites();
+        Handlers.updateFavoriteButtons(productId);
+    },
+
+    updateFavoriteButtons: (productId) => {
+        const isFavorited = state.favorites.has(productId);
+
+        // Update all product cards for this product
+        document.querySelectorAll(`.wish[data-id="${productId}"]`).forEach(btn => {
+            btn.innerHTML = isFavorited ? '♥' : '♡';
+            btn.setAttribute('aria-pressed', isFavorited);
+            btn.style.color = isFavorited ? 'var(--pink)' : '#444';
+        });
+
+        // Update popup if it's open for this product
+        if (state.isPopupOpen && state.popupProduct?.id === productId) {
+            const favoriteBtn = document.querySelector('.popup-action-btn.favorite');
+            favoriteBtn.setAttribute('aria-pressed', isFavorited);
+            favoriteBtn.innerHTML = `<i class="${isFavorited ? 'fas' : 'far'} fa-heart"></i>`;
+            favoriteBtn.style.color = isFavorited ? 'var(--pink)' : 'var(--primary-color)';
+        }
+    },
+
+    loadFavorites: async () => {
+        if (state.currentUser) {
+            try {
+                const doc = await state.db.collection('users').doc(state.currentUser.uid).get();
+                if (doc.exists && doc.data().favorites) {
+                    state.favorites = new Set(doc.data().favorites);
+                }
+            } catch (error) {
+                console.error("Error loading favorites from Firestore:", error);
+            }
+        } else {
+            try {
+                const saved = localStorage.getItem('guestFavorites');
+                if (saved) {
+                    state.favorites = new Set(JSON.parse(saved));
+                }
+            } catch (e) {
+                console.error('Error loading favorites from localStorage:', e);
+            }
+        }
+    },
+
+    saveFavorites: () => {
+        if (state.currentUser) {
+            state.db.collection('users').doc(state.currentUser.uid).set({
+                favorites: Array.from(state.favorites)
+            }, { merge: true }).catch(error => {
+                console.error("Error saving favorites to Firestore:", error);
+            });
+        } else {
+            try {
+                localStorage.setItem('guestFavorites', JSON.stringify(Array.from(state.favorites)));
+            } catch (e) {
+                console.error('Error saving favorites to localStorage:', e);
+            }
+        }
+    },
+
+    handleAuthStateChange: async (user) => {
+        const isNewLogin = !state.currentUser && user;
+        state.currentUser = user;
+
+        // Load user-specific data
+        await Handlers.loadFavorites();
+        Handlers.loadCart(); // Reload cart which might have been saved from a previous session
+
+        UI.updateUIForAuthState();
+        // Re-render visible products to reflect new favorite status
+        UI.renderCatalogProducts();
+        UI.renderFeaturedProducts();
+        if (state.currentPage === 'favoritesPage') UI.renderFavoritesPage();
     },
 
     handleTrackOrder: () => {
@@ -1133,39 +1199,6 @@ export const Handlers = {
         } catch (error) {
             console.error('Error saving FCM token:', error);
             UI.showToast('Could not save notification preferences.', true);
-        }
-    },
-
-    handleAuthStateChange: (user) => {
-        const isNewLogin = !state.currentUser && user;
-        state.currentUser = user;
-        UI.updateUIForAuthState();
-
-        if (user) {
-            // Update the user's last seen timestamp for active user tracking.
-            // Use { merge: true } to avoid overwriting other user data like 'createdAt'.
-            state.db.collection('users').doc(user.uid).set({
-                lastSeen: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
-            window.Analytics.identifyUser(user);
-            if (typeof state.afterLoginAction === 'function') {
-                setTimeout(state.afterLoginAction, 100);
-                state.afterLoginAction = null;
-            }
-
-            // NEW: If this is a new login session and notifications are not yet set,
-            // prompt the user to enable them. This is the PWA equivalent of the runtime permission.
-            if (state.isNewLogin && Notification.permission === 'default') {
-                setTimeout(() => {
-                    UI.showToast('Enable notifications to get order updates!');
-                    navigator.serviceWorker.ready.then(Handlers.initFirebaseMessaging);
-                }, 3000); // Wait a few seconds after login.
-            }
-            // Reset the flag after checking.
-            state.isNewLogin = false;
-
-        } else { // User is logged out
-            if (window.Analytics) window.Analytics.anonymizeUser();
         }
     },
 
