@@ -170,15 +170,8 @@ export const UI = {
         if (!url || !url.includes('res.cloudinary.com')) {
             return url;
         }
-        // Base transformation for 1x displays
-        const baseTransform = `f_auto,q_auto,c_fill,w_${width},h_${height}`;
-        const baseUrl = url.replace('/image/upload/', `/image/upload/${baseTransform}/`);
-
-        // 2x transformation for high-res displays
-        const highResTransform = `f_auto,q_auto,c_fill,w_${width * 2},h_${height * 2}`;
-        const highResUrl = url.replace('/image/upload/', `/image/upload/${highResTransform}/`);
-
-        return { baseUrl, highResUrl };
+        const transformations = `f_auto,q_auto,c_fill,w_${width},h_${height}`;
+        return url.replace('/image/upload/', `/image/upload/${transformations}/`);
     },
 
     renderFeaturedProducts: () => {
@@ -237,34 +230,43 @@ export const UI = {
                 return ''; // Return an empty string to not break the .join('')
             }
 
-            const isFlashSale = options.isFlashSale;
-            const isInCart = state.cart[product.id];
-            const hasOffer = product.mrp > product.finalPrice;
-            const savings = Math.round(product.mrp - product.finalPrice);
-            const { baseUrl: optimizedImage, highResUrl: highResImage } = UI.getOptimizedImageUrl(product.image, 300, 300);
+            const firstVariant = product.variants && product.variants.length > 0 ? product.variants[0] : {};
+            const hasOffer = firstVariant.mrp > firstVariant.finalPrice;
+            const savings = Math.round(firstVariant.mrp - firstVariant.finalPrice);
+            const isInCart = Object.keys(state.cart).some(key => key.startsWith(`${product.id}-`));
+            const optimizedImage = UI.getOptimizedImageUrl(product.image, 300, 300);
             const sanitizedName = DOMPurify.sanitize(product.name);
 
+            let ctaButton = '';
+            if (product.available) {
+                if (product.variants && product.variants.length > 1) {
+                    ctaButton = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">Options</button>`;
+                } else {
+                    const variantId = `${product.id}-0`;
+                    const qtyInCart = state.cart[variantId];
+                    ctaButton = qtyInCart ?
+                        `<div class="cart-controls" data-id="${variantId}">
+                            <button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button>
+                            <span class="qty" aria-live="polite">${qtyInCart}</span>
+                            <button class="qty-btn inc" aria-label="Increase quantity">+</button>
+                        </div>` :
+                        `<button class="add-btn" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
+                }
+            }
+
             return `
-        <article class="product ${isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" aria-label="Product: ${sanitizedName}">
-          <div class="product-image">
-            <img src="${optimizedImage}" srcset="${highResImage} 2x" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
+        <article class="product ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" aria-label="Product: ${sanitizedName}">
+          <div class="product-image"> 
+            <img src="${optimizedImage}" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
             <button class="wishlist" aria-label="Add to wishlist">♡</button>
             ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
-            ${product.available ? (isInCart ?
-                `<div class="cart-controls" data-id="${product.id}">
-                    <button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button>
-                    <span class="qty" aria-live="polite">${isInCart}</span>
-                    <button class="qty-btn inc" aria-label="Increase quantity">+</button>
-                </div>`
-                :
-                `<button class="add-btn" data-id="${product.id}" aria-label="Add ${sanitizedName} to cart">ADD</button>`
-            ) : ''}
+            ${ctaButton}
           </div>
           <div class="product-info">
             <div class="product-name">${sanitizedName}</div>
             <div class="price-section">
-              <span class="product-price">₹${product.finalPrice}</span>
-              ${hasOffer ? `<span class="product-mrp">₹${product.mrp}</span>` : ''}
+              <span class="product-price">₹${firstVariant.finalPrice}</span>
+              ${hasOffer ? `<span class="product-mrp">₹${firstVariant.mrp}</span>` : ''}
             </div>
             ${hasOffer && savings > 0 ? `<div class="product-save">SAVE ₹${savings}</div>` : ''}
           </div>
@@ -291,38 +293,35 @@ export const UI = {
 
         // --- OPTIMIZATION: Prioritize visual updates first ---
         state.popupProduct = product;
-        state.currentProductQty = state.cart[product.id] || 1;
+        state.selectedVariantIndex = 0; // Default to the first variant
+        state.currentProductQty = 1;
 
         // Use cached DOM elements for speed
         const { main: popup, title, weight, priceSection, infoContent, mainImage, contentWrapper, backBtn } = state.dom.popup;
 
-
-        // --- Show the modal immediately ---
-        state.isPopupOpen = true;
-        UI.openModal(popup, backBtn);
-
-        // --- OPTIMIZATION: Defer all population and expensive calculations to run after the modal is visible ---
-        const populateAndDefer = () => {
+        const populatePopup = () => {
             title.textContent = DOMPurify.sanitize(product.name);
-            weight.textContent = `${product.net} Net Weight`;
 
-            if (product.mrp > product.finalPrice) {
-                const savings = product.mrp - product.finalPrice;
-                priceSection.innerHTML = `
-                    <span class="popup-price-final">₹${product.finalPrice}</span>
-                    <span class="popup-price-mrp">₹${product.mrp}</span>
-                    <span class="popup-price-savings-badge">SAVE ₹${savings}</span>
-                `;
+            // NEW: Render variant options
+            if (product.variants && product.variants.length > 1) {
+                weight.innerHTML = product.variants.map((v, index) => `
+                    <label class="variant-radio">
+                        <input type="radio" name="product-variant" value="${index}" ${index === state.selectedVariantIndex ? 'checked' : ''}>
+                        <span class="variant-radio-label">${v.name} - ${v.net}</span>
+                    </label>
+                `).join('');
             } else {
-                priceSection.innerHTML = `<span class="popup-price-final">₹${product.finalPrice}</span>`;
+                weight.textContent = product.variants[0].net ? `${product.variants[0].net} Net Weight` : '';
             }
 
+            UI.updatePopupPrice();
+
+            const selectedVariant = product.variants[state.selectedVariantIndex];
             infoContent.innerHTML = `
                 <p>${DOMPurify.sanitize(product.desc)}</p>
-                <p style="margin-top: 16px;"><strong>Gross Wt:</strong> ${product.gross} | <strong>Net Wt:</strong> ${product.net}<br><small>Net weight is after cleaning. Weight loss varies by product.</small></p>`;
+                <p style="margin-top: 16px;"><strong>Gross Wt:</strong> ${selectedVariant.gross} | <strong>Net Wt:</strong> ${selectedVariant.net}<br><small>Net weight is after cleaning. Weight loss varies by product.</small></p>`;
 
-            // FIX: getOptimizedImageUrl returns an object. We need to use the `baseUrl` property.
-            const { baseUrl: optimizedPopupImage, highResUrl: highResPopupImage } = UI.getOptimizedImageUrl(product.image, 600, 600);
+            const optimizedPopupImage = UI.getOptimizedImageUrl(product.image, 600, 600);
             mainImage.src = optimizedPopupImage;
             mainImage.alt = `High-quality ${DOMPurify.sanitize(product.name)} from Coastal Fresh India`;
 
@@ -352,8 +351,8 @@ export const UI = {
             UI.updatePopupCta();
             if (contentWrapper) contentWrapper.scrollTop = 0;
 
-            // Defer non-critical SEO/History tasks to run after the popup is fully rendered
-            const runLowestPriorityTasks = () => {
+            // Defer non-critical tasks to run after the popup is visible
+            const runDeferredTasks = () => {
                 const productSlug = UI.generateProductSlug(product);
                 const productUrl = `/product/${productSlug}`;
                 const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
@@ -374,57 +373,109 @@ export const UI = {
                 document.head.appendChild(script);
             };
 
-            // Use requestIdleCallback for lowest priority tasks
+            // Use requestIdleCallback for modern browsers, fallback to setTimeout
             if ('requestIdleCallback' in window) {
-                requestIdleCallback(runLowestPriorityTasks, { timeout: 500 });
+                requestIdleCallback(runDeferredTasks, { timeout: 500 });
             } else {
-                setTimeout(runLowestPriorityTasks, 200);
+                setTimeout(runDeferredTasks, 100);
             }
         };
 
-        // Use requestAnimationFrame to ensure the modal is visible before we populate it
-        requestAnimationFrame(populateAndDefer);
-
+        populatePopup();
+        state.isPopupOpen = true;
+        UI.openModal(popup, backBtn);
+        
         // Analytics can also be tracked after the initial render
         window.Analytics.trackEvent('view_item', {
             currency: 'INR',
-            value: product.finalPrice,
+            value: product.variants[0].finalPrice,
             items: [{
                 item_id: product.id,
                 item_name: product.name,
                 item_category: product.category,
-                price: product.finalPrice
+                price: product.variants[0].finalPrice
             }]
         });
+    },
+
+    updatePopupPrice: () => {
+        const product = state.popupProduct;
+        if (!product) return;
+
+        const selectedVariant = product.variants[state.selectedVariantIndex];
+        if (!selectedVariant) return;
+
+        const priceSection = state.dom.popup.priceSection;
+
+        if (selectedVariant.mrp > selectedVariant.finalPrice) {
+            const savings = selectedVariant.mrp - selectedVariant.finalPrice;
+            priceSection.innerHTML = `
+                <span class="popup-price-final">₹${selectedVariant.finalPrice}</span>
+                <span class="popup-price-mrp">₹${selectedVariant.mrp}</span>
+                <span class="popup-price-savings-badge">SAVE ₹${savings}</span>
+            `;
+        } else {
+            priceSection.innerHTML = `<span class="popup-price-final">₹${selectedVariant.finalPrice}</span>`;
+        }
     },
 
     updatePopupCta: () => {
         const ctaContainer = document.getElementById('popupStickyCta');
         if (!state.popupProduct || !ctaContainer) return;
 
-        const qtyInCart = state.cart[state.popupProduct.id] || 0;
+        const variantId = `${state.popupProduct.id}-${state.selectedVariantIndex}`;
+        const qtyInCart = state.cart[variantId] || 0;
         const isInCart = qtyInCart > 0;
 
         if (isInCart) {
             ctaContainer.innerHTML = `
         <div class="popup-sticky-cta-inner">
-          <div class="cart-controls" data-id="${state.popupProduct.id}" style="margin-left: auto;">
+          <div class="cart-controls" data-id="${variantId}" style="margin-left: auto;">
             <button class="qty-btn dec">-</button>
             <span class="qty">${qtyInCart}</span>
             <button class="qty-btn inc">+</button>
           </div>
         </div>`;
         } else {
+            const selectedVariant = state.popupProduct.variants[state.selectedVariantIndex];
             ctaContainer.innerHTML = `
         <div class="popup-sticky-cta-inner">
-          <div class="popup-cta-qty-selector">
-            <button class="qty-btn dec" aria-label="Decrease quantity">-</button>
-            <span class="qty" aria-label="Current quantity">${state.currentProductQty}</span>
-            <button class="qty-btn inc" aria-label="Increase quantity">+</button>
-          </div>
+          <span class="popup-cta-price">₹${selectedVariant.finalPrice}</span>
           <button class="popup-cta-add-btn">Add to Cart</button>
         </div>`;
         }
+    },
+
+    // NEW: Variant Drawer functions
+    openVariantDrawer: (productId) => {
+        const product = state.products.find(p => p.id === productId);
+        if (!product || !product.variants) return;
+
+        document.getElementById('variantDrawerTitle').textContent = `Select variant for ${product.name}`;
+        const content = document.getElementById('variantDrawerContent');
+        content.innerHTML = product.variants.map((variant, index) => {
+            const variantId = `${product.id}-${index}`;
+            const qtyInCart = state.cart[variantId] || 0;
+            return `
+                <div class="variant-option" data-id="${variantId}">
+                    <div>
+                        <strong>${variant.name}</strong> (${variant.net}) - ₹${variant.finalPrice}
+                    </div>
+                    ${qtyInCart > 0 ?
+                        `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec">-</button><span class="qty">${qtyInCart}</span><button class="qty-btn inc">+</button></div>` :
+                        `<button class="add-btn" data-id="${variantId}">ADD</button>`
+                    }
+                </div>
+            `;
+        }).join('');
+
+        document.getElementById('variantDrawerOverlay').classList.add('active');
+        document.getElementById('variantDrawer').classList.add('active');
+    },
+
+    closeVariantDrawer: () => {
+        document.getElementById('variantDrawerOverlay').classList.remove('active');
+        document.getElementById('variantDrawer').classList.remove('active');
     },
 
     toggleProductDescription: () => {
@@ -445,11 +496,11 @@ export const UI = {
 
     closePopup: () => {
         const popup = document.getElementById('productPopup');
-        if (!popup) return;
+        if (!popup || !state.popupProduct) return;
 
         UI.closeModal(popup);
         state.isPopupOpen = false;
-        UI.updateProductCardState(state.popupProduct.id);
+        // UI.updateProductCardState(state.popupProduct.id); // This is now more complex, handled differently
         state.popupProduct = null;
 
         const underlyingPage = state.pageHistory[state.pageHistory.length - 1] || 'home';
@@ -469,7 +520,10 @@ export const UI = {
     },
 
     updateCartBadges: () => {
-        const totalQty = Object.values(state.cart).reduce((sum, qty) => sum + qty, 0);
+        const totalQty = Object.values(state.cart).reduce((sum, qty) => {
+            const numQty = Number(qty);
+            return sum + (isNaN(numQty) ? 0 : numQty);
+        }, 0);
 
         ['cartCount', 'cartCountCatalog', 'navBadge'].forEach(id => {
             const el = document.getElementById(id);
@@ -520,16 +574,23 @@ export const UI = {
 
     showCart: () => {
         state.couponError = null;
-        const items = Object.keys(state.cart).map(id => {
-            const product = state.products.find(p => p.id === parseInt(id));
-            return { ...product, qty: state.cart[id] };
-        });
-
         const cartItemsEl = document.getElementById('cartItems');
         const emptyCartEl = document.getElementById('emptyCart');
         const cartFooterEl = document.getElementById('cartFooter');
         const emptyCartFooterEl = document.getElementById('emptyCartFooter'); // NEW
         const cartSummaryContainerEl = document.getElementById('cartSummaryContainer');
+        const items = Object.entries(state.cart).map(([variantId, qty]) => {
+            const [productId, variantIndex] = variantId.split('-').map(Number);
+            const product = state.products.find(p => p.id === productId);
+            if (!product || !product.variants[variantIndex]) return null;
+            const variant = product.variants[variantIndex];
+            return {
+                ...product, // base product info
+                ...variant, // variant specific info (price, name, etc.)
+                variantId: variantId,
+                qty: qty
+            };
+        }).filter(Boolean);
 
         if (items.length === 0) {
             emptyCartEl.style.display = 'flex';
@@ -551,24 +612,24 @@ export const UI = {
             if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'block';
 
             cartItemsEl.innerHTML = items.map(item => {
-                const hasOffer = item.mrp > item.finalPrice;
-                const optimizedCartImage = UI.getOptimizedImageUrl(item.image, 128, 128);
+                const hasOffer = item.mrp > item.finalPrice; // Now using variant's price
+                const { baseUrl: optimizedCartImage } = UI.getOptimizedImageUrl(item.image, 128, 128) || {};
 
                 return `
-          <article class="cart-item-card" data-id="${item.id}">
+          <article class="cart-item-card" data-id="${item.variantId}">
             <img src="${optimizedCartImage}" alt="${item.name}" class="cart-item-thumb">
             <div class="cart-item-meta">
-              <div class="cart-item-name">${item.name}</div>
+              <div class="cart-item-name">${item.name} (${item.name})</div>
               <div class="cart-item-sub">${item.net} net</div>
               <div class="cart-item-price">
                 ₹${item.finalPrice}
                 ${hasOffer ? `<span class="cart-item-mrp">₹${item.mrp}</span>` : ''}
               </div>
             </div>
-            <div class="cart-item-qty qty-controls">
-              <button class="qty-btn cart-qty-btn dec" data-id="${item.id}" aria-label="decrease quantity">−</button>
+            <div class="cart-item-qty qty-controls" data-id="${item.variantId}">
+              <button class="qty-btn cart-qty-btn dec" aria-label="decrease quantity">−</button>
               <div class="count cart-qty" aria-live="polite">${item.qty}</div>
-              <button class="qty-btn cart-qty-btn inc" data-id="${item.id}" aria-label="increase quantity">+</button>
+              <button class="qty-btn cart-qty-btn inc" aria-label="increase quantity">+</button>
             </div>
           </article>
         `;
@@ -586,7 +647,7 @@ export const UI = {
             currency: 'INR',
             value: subtotal,
             items: items.map(item => ({
-                item_id: item.id,
+                item_id: item.variantId, // Use variantId for tracking
                 item_name: item.name,
                 item_category: item.category,
                 price: item.finalPrice,
@@ -627,11 +688,18 @@ export const UI = {
     },
 
     updateCartSummary: () => {
-        const items = Object.keys(state.cart).map(id => {
-            const product = state.products.find(p => p.id === parseInt(id));
-            return { ...product, qty: state.cart[id] };
-        });
-
+        const cartItems = Object.entries(state.cart).map(([variantId, qty]) => {
+            const [productId, variantIndex] = variantId.split('-').map(Number);
+            const product = state.products.find(p => p.id === productId);
+            if (!product || !product.variants[variantIndex]) return null;
+            const variant = product.variants[variantIndex];
+            return {
+                ...product,
+                ...variant,
+                variantId: variantId,
+                qty: qty
+            };
+        }).filter(Boolean);
         const itemTotalEl = document.getElementById('cartItemTotal');
         const deliveryFeeEl = document.getElementById('cartDeliveryFee');
         const toPayEl = document.getElementById('cartToPay');
@@ -643,7 +711,7 @@ export const UI = {
         const progressBarEl = document.getElementById('cartProgressBar');
         const paymentOptionsEl = document.getElementById('paymentOptions');
 
-        if (items.length === 0) {
+        if (cartItems.length === 0) {
             const emptyCartEl = document.getElementById('emptyCart');
             const cartFooterEl = document.getElementById('cartFooter');
             const couponSectionEl = document.getElementById('cartCouponSection');
@@ -659,8 +727,8 @@ export const UI = {
             return;
         }
 
-        const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
-        const originalTotal = items.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
+        const subtotal = cartItems.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
+        const originalTotal = cartItems.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
         const productSavings = originalTotal - subtotal;
 
         let couponDiscount = 0;
@@ -674,7 +742,7 @@ export const UI = {
         }
 
         // NEW: Delivery is now always free.
-        const deliveryFee = 0;
+        const deliveryFee = 0; 
         const total = subtotal - couponDiscount + deliveryFee;
         const totalSavings = productSavings + couponDiscount + (deliveryFee === 0 ? 100 : 0);
         if (itemTotalEl) itemTotalEl.textContent = `₹${subtotal}`;
@@ -1150,30 +1218,30 @@ export const UI = {
 
     renderOrdersPage: async () => {
         const ordersPage = document.getElementById('ordersPage');
-        const mainContent = ordersPage.querySelector('main');
+        const mainContent = document.getElementById('ordersMainContent');
 
         if (!state.currentUser) {
             mainContent.innerHTML = `
-        <div class="logged-out-prompt">
-          <div class="illustration">
-            <svg width="140" height="140" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of a locked document">
-              <g fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M65 170H45c-8.284 0-15-6.716-15-15V45c0-8.284 6.716-15 15-15h80c8.284 0 15 6.716 15 15v40" stroke="var(--primary-color)" stroke-width="8"/>
-                <path d="M50 60h80M50 85h50" stroke="var(--primary-color)" stroke-width="6" opacity="0.5"/>
-                <rect x="110" y="110" width="80" height="60" rx="10" fill="var(--primary-light)" stroke="var(--primary-color)" stroke-width="8"/>
-                <circle cx="150" cy="145" r="8" fill="var(--primary-dark)"/>
-                <path d="M135 110v-10c0-8.284 6.716-15 15-15s15 6.716 15 15v10" stroke="var(--primary-color)" stroke-width="8"/>
-              </g>
-            </svg>
-          </div>
-          <h2 class="logged-out-title">Login to view orders</h2>
-          <p class="logged-out-lead">Sign in to see your order history, track deliveries and reorder favourites.</p>
-          <div class="logged-out-actions">
-            <button class="primary-cta" id="loginFromOrdersBtn">Login / Sign Up</button>
-            <button class="secondary-action" id="continueAsGuestBtn">Continue as guest</button>
-          </div>
-        </div>
-      `;
+                <div class="logged-out-prompt">
+                    <div class="illustration">
+                        <svg width="140" height="140" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of a locked document">
+                            <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M65 170H45c-8.284 0-15-6.716-15-15V45c0-8.284 6.716-15 15-15h80c8.284 0 15 6.716 15 15v40" stroke="var(--primary-color)" stroke-width="8"/>
+                                <path d="M50 60h80M50 85h50" stroke="var(--primary-color)" stroke-width="6" opacity="0.5"/>
+                                <rect x="110" y="110" width="80" height="60" rx="10" fill="var(--primary-light)" stroke="var(--primary-color)" stroke-width="8"/>
+                                <circle cx="150" cy="145" r="8" fill="var(--primary-dark)"/>
+                                <path d="M135 110v-10c0-8.284 6.716-15 15-15s15 6.716 15 15v10" stroke="var(--primary-color)" stroke-width="8"/>
+                            </g>
+                        </svg>
+                    </div>
+                    <h2 class="logged-out-title">Login to view orders</h2>
+                    <p class="logged-out-lead">Sign in to see your order history, track deliveries and reorder favourites.</p>
+                    <div class="logged-out-actions">
+                        <button class="primary-cta" id="loginFromOrdersBtn">Login / Sign Up</button>
+                        <button class="secondary-action" id="continueAsGuestBtn">Continue as guest</button>
+                    </div>
+                </div>
+            `;
             document.getElementById('loginFromOrdersBtn').addEventListener('click', () => UI.showLoginModal(null, 'signup'));
             document.getElementById('continueAsGuestBtn').addEventListener('click', () => UI.showPage('catalog'));
             return;
@@ -1229,7 +1297,7 @@ export const UI = {
                             moreItemsText = `${firstItem.net} Net Wt`;
                         }
                     }
-                    const thumbImg = UI.getOptimizedImageUrl(firstItem.image, 80, 80);
+                    const { baseUrl: thumbImg } = UI.getOptimizedImageUrl(firstItem.image, 80, 80) || {};
 
                     return `
                         <div class="order-card" data-order-id="${doc.id}">
@@ -1270,15 +1338,13 @@ export const UI = {
             const drawer = document.getElementById('orderDetailsDrawer');
             if (!drawerOverlay || !drawer) return;
 
-            // FIX: Correctly reference `order.orderId` (lowercase 'o')
             document.getElementById('drawerOrderId').textContent = `#${order.orderId}`;
             document.getElementById('drawerOrderDate').textContent = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
             document.getElementById('drawerPaymentMethod').textContent = order.paymentMethod === 'cod' ? 'Cash on Delivery' : order.paymentMethod.toUpperCase();
 
-            // Render all sections
             UI.renderDrawerStatus(order.status);
             UI.renderDrawerItems(order.items);
-            UI.renderDrawerBillSummary(order);
+            UI.renderDrawerBillSummary(order); 
             UI.renderDrawerAddress(order.address);
 
             document.getElementById('drawerFooter').innerHTML = `
@@ -1360,7 +1426,7 @@ export const UI = {
             return;
         }
         container.innerHTML = items.map(item => {
-            const { baseUrl: itemImage } = UI.getOptimizedImageUrl(item.image, 96, 96);
+            const itemImage = UI.getOptimizedImageUrl(item.image, 96, 96);
             return `
             <div class="drawer-item">
                 <img src="${itemImage}" alt="${item.name}" class="drawer-item-thumb" loading="lazy">
@@ -1445,7 +1511,7 @@ export const UI = {
                 "@context": "https://schema.org/",
                 "@type": "Product",
                 "name": product.name,
-                "image": UI.getOptimizedImageUrl(product.image, 1200, 630),
+                "image": UI.getOptimizedImageUrl(product.image, 1200, 630), // This was a bug, now fixed
                 "description": product.desc,
                 "sku": `CF-${product.id}`,
                 "brand": { "@type": "Brand", "name": "Coastal Fresh" },
@@ -1453,7 +1519,7 @@ export const UI = {
                     "@type": "Offer",
                     "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`,
                     "priceCurrency": "INR",
-                    "price": product.finalPrice,
+                    "price": product.variants[0].finalPrice,
                     "priceValidUntil": new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0],
                     "itemCondition": "https://schema.org/NewCondition",
                     "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"

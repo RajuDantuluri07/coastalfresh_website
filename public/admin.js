@@ -489,12 +489,8 @@ function populateProductForm(product) {
     const imagePreview = document.getElementById('product-image-preview');
     imagePreview.src = product ? product.image : '';
     imagePreview.style.display = (product && product.image) ? 'block' : 'none';
-    document.getElementById('product-image-url').value = product ? product.image : ''; // Store existing URL
-    document.getElementById('product-mrp').value = product ? product.mrp : '';
-    document.getElementById('product-finalPrice').value = product ? product.finalPrice : '';
-    document.getElementById('product-gross').value = product ? product.gross : '';
-    document.getElementById('product-net').value = product ? product.net : '';
-    document.getElementById('product-available').value = product ? String(product.available) : 'true';
+    document.getElementById('product-image-url').value = product ? product.image : '';
+    renderVariantForms(product ? product.variants : [{ name: 'Medium', gross: '1kg', net: '500g', mrp: 0, finalPrice: 0, available: true }]);
 
     const deleteBtn = document.getElementById('delete-product-btn');
     if (product) {
@@ -504,6 +500,43 @@ function populateProductForm(product) {
         deleteBtn.style.display = 'none';
     }
 }
+
+// NEW: Render variant forms
+function renderVariantForms(variants = []) {
+    const container = document.getElementById('variants-container');
+    container.innerHTML = '';
+    if (variants.length === 0) {
+        // Add a default empty variant if none exist
+        variants.push({ name: '', gross: '', net: '', mrp: 0, finalPrice: 0, available: true });
+    }
+    variants.forEach((variant, index) => {
+        container.appendChild(createVariantForm(variant, index));
+    });
+}
+
+// NEW: Create a single variant form group
+function createVariantForm(variant, index) {
+    const div = document.createElement('div');
+    div.className = 'variant-card';
+    div.innerHTML = `
+        <div class="variant-header">
+            <strong>Variant ${index + 1}</strong>
+            <button type="button" class="remove-variant-btn" data-index="${index}">&times;</button>
+        </div>
+        <div class="field-row">
+            <div class="field"><label>Name</label><input type="text" class="variant-name" value="${escapeHtml(variant.name || '')}" placeholder="e.g., Small, 500g" required></div>
+            <div class="field"><label>Gross Wt.</label><input type="text" class="variant-gross" value="${escapeHtml(variant.gross || '')}" placeholder="e.g., 1kg"></div>
+            <div class="field"><label>Net Wt.</label><input type="text" class="variant-net" value="${escapeHtml(variant.net || '')}" placeholder="e.g., 500g"></div>
+        </div>
+        <div class="field-row">
+            <div class="field"><label>MRP (₹)</label><input type="number" step="0.01" class="variant-mrp" value="${variant.mrp || 0}" required></div>
+            <div class="field"><label>Final Price (₹)</label><input type="number" step="0.01" class="variant-finalPrice" value="${variant.finalPrice || 0}" required></div>
+            <div class="field"><label>Available</label><select class="variant-available"><option value="true" ${variant.available ? 'selected' : ''}>Yes</option><option value="false" ${!variant.available ? 'selected' : ''}>No</option></select></div>
+        </div>
+    `;
+    return div;
+}
+
 
 // NEW: Handle file input change for image preview
 document.getElementById('product-image-upload').addEventListener('change', (e) => {
@@ -519,16 +552,22 @@ document.getElementById('product-image-upload').addEventListener('change', (e) =
     }
 });
 
+// NEW: Add/Remove Variant Buttons
+document.getElementById('add-variant-btn').addEventListener('click', () => {
+    const container = document.getElementById('variants-container');
+    container.appendChild(createVariantForm({}, container.children.length));
+});
+
+document.getElementById('variants-container').addEventListener('click', (e) => {
+    if (e.target.classList.contains('remove-variant-btn')) {
+        e.target.closest('.variant-card').remove();
+    }
+});
 
 document.getElementById('product-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const submitBtn = e.target.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
-
-    const productId = document.getElementById('product-id-input').value;
-    const mrp = parseFloat(document.getElementById('product-mrp').value);
-    const finalPrice = parseFloat(document.getElementById('product-finalPrice').value);
-    const offer = mrp > finalPrice ? Math.round(((mrp - finalPrice) / mrp) * 100) : 0;
 
     try {
         // Prioritize URL field, but it will be overwritten by file upload if a file is selected.
@@ -568,19 +607,38 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
             throw new Error("Product image is required. Please upload an image or provide a URL.");
         }
 
+        // NEW: Collect variant data
+        const variants = [];
+        document.querySelectorAll('.variant-card').forEach(card => {
+            const mrp = parseFloat(card.querySelector('.variant-mrp').value);
+            const finalPrice = parseFloat(card.querySelector('.variant-finalPrice').value);
+            variants.push({
+                name: card.querySelector('.variant-name').value,
+                gross: card.querySelector('.variant-gross').value,
+                net: card.querySelector('.variant-net').value,
+                mrp: mrp,
+                finalPrice: finalPrice,
+                offer: mrp > finalPrice ? Math.round(((mrp - finalPrice) / mrp) * 100) : 0,
+                available: card.querySelector('.variant-available').value === 'true',
+            });
+        });
+
+        if (variants.length === 0) {
+            throw new Error("At least one product variant is required.");
+        }
+
         const productData = {
             name: document.getElementById('product-name').value,
             desc: document.getElementById('product-desc').value,
             category: document.getElementById('product-category').value,
             image: imageUrl, // Use the new or existing URL
-            mrp: mrp,
-            finalPrice: finalPrice,
-            offer: offer,
-            gross: document.getElementById('product-gross').value,
-            net: document.getElementById('product-net').value,
-            available: document.getElementById('product-available').value === 'true',
+            variants: variants,
+            // Aggregate fields for filtering/display. Use the first variant as the primary.
+            finalPrice: variants[0].finalPrice,
+            mrp: variants[0].mrp,
+            available: variants.some(v => v.available) // Product is available if at least one variant is.
         };
-
+        const productId = document.getElementById('product-id-input').value;
         if (productId) { // Editing existing product
             productData.id = parseInt(productId, 10);
             const docRef = db.collection('products').doc(String(productId));

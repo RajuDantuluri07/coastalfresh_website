@@ -19,31 +19,27 @@ export const Handlers = {
         document.body.addEventListener('click', (e) => {
             const target = e.target;
 
-            // Product card click (but not on buttons)
+            // Product card click (but not on buttons that have their own handlers)
             const productCard = target.closest('.product');
-            if (productCard && !target.closest('.cart-controls, .add-btn, .wishlist')) {
+            if (productCard && !target.closest('.cart-controls, .add-btn, .wishlist, .variant-btn')) {
                 e.preventDefault();
                 const productId = productCard.dataset.id;
-
-                // NEW: Prefetch the large image on mousedown/touchstart for faster popup load
-                // We do this on a separate event listener to avoid blocking the 'click' event.
-                productCard.addEventListener('mousedown', () => {
-                    const product = state.products.find(p => p.id === parseInt(productId));
-                    if (product) {
-                        const img = new Image();
-                        img.src = UI.getOptimizedImageUrl(product.image, 600, 600);
-                    }
-                }, { once: true });
-
                 if (productId) UI.showProductPopup(parseInt(productId));
             }
 
-            // Add to cart button on product cards
-            const addBtn = target.closest('.add-btn');
+            // Add to cart button on product cards (for single-variant products)
+            const addBtn = target.closest('.add-btn:not(.variant-btn)');
             if (addBtn && !addBtn.disabled) {
                 e.stopPropagation();
-                const productId = addBtn.dataset.id;
-                if (productId) Handlers.addToCart(parseInt(productId));
+                const variantId = addBtn.dataset.id;
+                if (variantId) Handlers.addToCart(variantId);
+            }
+            
+            const variantBtn = target.closest('.variant-btn');
+            if (variantBtn) {
+                e.stopPropagation();
+                const productId = parseInt(variantBtn.dataset.id, 10);
+                UI.openVariantDrawer(productId);
             }
 
             // Quantity controls on product cards (scoped to image container)
@@ -51,10 +47,10 @@ export const Handlers = {
             if (productQtyBtn) {
                 e.stopPropagation(); // Prevent card click
                 const controls = productQtyBtn.closest('.cart-controls');
-                const productId = controls.dataset.id;
-                if (productId) {
+                const variantId = controls.dataset.id;
+                if (variantId) {
                     const change = productQtyBtn.classList.contains('inc') ? 1 : -1;
-                    Handlers.updateQty(parseInt(productId), change, 'card');
+                    Handlers.updateQty(variantId, change, 'card');
                 }
             }
 
@@ -186,9 +182,6 @@ export const Handlers = {
                 actionBtn.closest('.address-dropdown-content').classList.remove('active');
                 return;
             }
-            if (!target.closest('.address-options-menu')) {
-                document.querySelectorAll('.address-dropdown-content.active').forEach(d => d.classList.remove('active'));
-            }
 
             // Confirmation modal buttons
             if (target.id === 'cancelDeleteBtn') document.getElementById('confirmDeleteModal').classList.remove('active');
@@ -252,13 +245,32 @@ export const Handlers = {
 
             // --- FIX: Cart quantity controls ---
             const cartQtyBtn = target.closest('.cart-item-qty .qty-btn');
-            if (cartQtyBtn) {
+            const cartControls = target.closest('.cart-item-card .qty-controls');
+            if (cartControls && cartQtyBtn) {
                 e.stopPropagation();
-                const productId = cartQtyBtn.dataset.id;
-                if (productId) {
+                const variantId = cartControls.dataset.id;
+                if (variantId) {
                     const change = cartQtyBtn.classList.contains('inc') ? 1 : -1;
-                    Handlers.updateQty(parseInt(productId), change, 'cart');
+                    Handlers.updateQty(variantId, change, 'cart');
                 }
+            }
+        });
+
+        // Variant Drawer events
+        document.getElementById('variantDrawerClose').addEventListener('click', UI.closeVariantDrawer);
+        document.getElementById('variantDrawerOverlay').addEventListener('click', UI.closeVariantDrawer);
+        document.getElementById('variantDrawerContent').addEventListener('click', (e) => {
+            const addBtn = e.target.closest('.add-btn');
+            if (addBtn) {
+                Handlers.addToCart(addBtn.dataset.id);
+                UI.openVariantDrawer(parseInt(addBtn.dataset.id.split('-')[0])); // Re-render drawer
+            }
+            const qtyBtn = e.target.closest('.qty-btn');
+            if (qtyBtn) {
+                const variantId = qtyBtn.closest('.cart-controls').dataset.id;
+                const change = qtyBtn.classList.contains('inc') ? 1 : -1;
+                Handlers.updateQty(variantId, change);
+                UI.openVariantDrawer(parseInt(variantId.split('-')[0])); // Re-render drawer
             }
         });
 
@@ -380,11 +392,12 @@ export const Handlers = {
         document.getElementById('popupStickyCta').addEventListener('click', (e) => {
             const addBtn = e.target.closest('.popup-cta-add-btn');
             const qtyBtn = e.target.closest('.qty-btn');
+            const variantId = `${state.popupProduct?.id}-${state.selectedVariantIndex}`;
             if (addBtn) Handlers.addPopupToCart();
             if (qtyBtn) {
-                const isInCart = state.cart[state.popupProduct?.id] > 0;
+                const isInCart = state.cart[variantId] > 0;
                 const change = qtyBtn.classList.contains('inc') ? 1 : -1;
-                if (isInCart) Handlers.updateQty(state.popupProduct.id, change);
+                if (isInCart) Handlers.updateQty(variantId, change);
                 else Handlers.changePopupQty(change);
             }
         });
@@ -494,22 +507,10 @@ export const Handlers = {
     },
 
     addPopupToCart: () => {
-        if (!state.popupProduct || !state.popupProduct.available) return;
-
-        const qty = state.currentProductQty;
-
-        if (state.cart[state.popupProduct.id]) {
-            state.cart[state.popupProduct.id] = Math.min(99, state.cart[state.popupProduct.id] + qty);
-        } else {
-            state.cart[state.popupProduct.id] = qty;
-        }
-
-        Handlers.saveCart();
-        UI.updateCartUI();
-        UI.showToast(`${DOMPurify.sanitize(state.popupProduct.name)} added to cart!`);
-        UI.closePopup();
-
-        window.Analytics.trackAddToCart(state.popupProduct, qty);
+        if (!state.popupProduct) return;
+        const variantId = `${state.popupProduct.id}-${state.selectedVariantIndex}`;
+        Handlers.addToCart(variantId, state.currentProductQty);
+        UI.updatePopupCta();
     },
 
     /**
@@ -522,12 +523,12 @@ export const Handlers = {
 
         let itemsAddedCount = 0;
         items.forEach(item => {
-            const product = state.products.find(p => p.id === parseInt(item.id));
+            const [productId, variantIndex] = item.id.split('-').map(Number);
+            const product = state.products.find(p => p.id === productId);
             const qtyToAdd = (typeof item.qty === 'number' && item.qty > 0) ? item.qty : 1;
-            if (product && product.available) {
+            if (product && product.variants[variantIndex]?.available) {
                 state.cart[item.id] = (state.cart[item.id] || 0) + qtyToAdd;
                 itemsAddedCount++;
-                // FIX: Add analytics tracking for each reordered item
                 window.Analytics.trackAddToCart(product, qtyToAdd);
             }
         });
@@ -605,121 +606,105 @@ export const Handlers = {
         }
     },
 
-    addToCart: (id, qty = 1) => {
-        const product = state.products.find(p => p.id === id);
-        if (!product || !product.available) return;
+    addToCart: (variantId, qty = 1) => {
+        const [productId, variantIndex] = variantId.split('-').map(Number);
+        const product = state.products.find(p => p.id === productId);
+        if (!product || !product.variants[variantIndex] || !product.variants[variantIndex].available) return;
 
-        if (state.cart[id]) {
-            state.cart[id] = Math.min(99, state.cart[id] + qty);
+        const variant = product.variants[variantIndex];
+
+        if (state.cart[variantId]) {
+            state.cart[variantId] = Math.min(99, state.cart[variantId] + qty);
         } else {
-            state.cart[id] = qty;
+            state.cart[variantId] = qty;
         }
 
         Handlers.saveCart();
         UI.updateCartUI();
-        UI.updatePopupCta();
-        UI.updateProductCardState(id);
-        UI.showToast(`${product.name} added to cart!`);
+        UI.updateProductCardState(variantId);
+        UI.showToast(`${product.name} (${variant.name}) added to cart!`);
 
         // Animate the "ADD" button to "ADDED" temporarily
-        const addBtn = document.querySelector(`.product[data-id='${id}'] .add-btn`);
+        const addBtn = document.querySelector(`.add-btn[data-id='${variantId}']`);
         if (addBtn) {
             addBtn.disabled = true;
-            addBtn.textContent = 'ADDED';
-            const card = addBtn.closest('.product');
-            if (card) {
-                card.animate([ {transform:'translateY(0)'}, {transform:'translateY(-6px)'}, {transform:'translateY(0)'} ], {duration:360, easing:'cubic-bezier(.2,.8,.2,1)'});
-            }
-            // The button will be replaced by the quantity controls by updateProductCardState,
-            // so no need for a timeout to revert it.
         }
 
         // NEW: If the cart is currently open, re-render it to show the newly added item.
-        // This is crucial for adding items from the "You might also like" section on the empty cart.
         if (document.getElementById('cartModal')?.classList.contains('active')) {
             UI.showCart();
         }
 
-        const addedProduct = state.products.find(p => p.id === parseInt(id));
-        if (addedProduct) window.Analytics.trackAddToCart(addedProduct, qty);
+        // Analytics
+        window.Analytics.trackAddToCart({ ...product, ...variant }, qty);
     },
 
-    updateQty: (id, change, source = 'cart') => {
-        if (!state.cart[id]) return;
+    updateQty: (variantId, change, source = 'cart') => {
+        if (!state.cart[variantId]) return;
 
-        const product = state.products.find(p => p.id === parseInt(id));
-        const originalQty = state.cart[id];
+        const [productId, variantIndexStr] = variantId.split('-');
+        const variantIndex = parseInt(variantIndexStr, 10);
+        const product = state.products.find(p => p.id === productId);
+        const variant = product?.variants[variantIndex];
+        const originalQty = state.cart[variantId];
 
-        state.cart[id] += change;
-        if (state.cart[id] <= 0) {
-            delete state.cart[id];
-            if (product) {
+        state.cart[variantId] += change;
+        if (state.cart[variantId] <= 0) {
+            delete state.cart[variantId];
+            if (product && variant) {
                 window.Analytics.trackEvent('remove_from_cart', {
                     currency: 'INR',
-                    value: product.finalPrice * originalQty,
+                    value: variant.finalPrice * originalQty,
                     items: [{
-                        item_id: product.id,
-                        item_name: product.name,
-                        item_category: product.category,
-                        price: product.finalPrice,
+                        item_id: variantId,
+                        item_name: `${product.name} (${variant.name || ''})`,
+                        price: variant.finalPrice,
                         quantity: originalQty
                     }]
                 });
             }
         } else {
-            if (product) window.Analytics.trackChangeQty(product, change, state.cart[id]);
+            if (product) window.Analytics.trackChangeQty({ ...product, ...variant }, change, state.cart[variantId]);
         }
         Handlers.saveCart();
 
         if (document.getElementById('cartModal').classList.contains('active')) {
-            const itemEl = document.querySelector(`.cart-item-card[data-id="${id}"]`);
-            if (itemEl) {
-                if (state.cart[id]) {
-                    const qtyEl = itemEl.querySelector('.cart-qty');
-                    qtyEl.textContent = state.cart[id];
-                } else {
-                    itemEl.classList.add('removing');
-                    // Instead of re-rendering the whole cart, just remove the element
-                    itemEl.addEventListener('transitionend', () => {
-                        itemEl.remove();
-                    }, { once: true });
-                }
-            }
-            UI.updateCartSummary();
-            UI.updateCartBadges();
+            UI.showCart(); // Re-render the whole cart for simplicity
         } else {
             UI.updateCartUI();
         }
         // Also update the popup if it's open
-        if (state.isPopupOpen && state.popupProduct?.id === id) {
+        if (state.isPopupOpen && state.popupProduct?.id === productId) {
             UI.updatePopupCta();
         }
-        UI.updateProductCardState(id);
+        UI.updateProductCardState(variantId);
     },
 
     checkout: async () => {
         const cartFooter = document.getElementById('cartFooter');
         const checkoutBtn = document.getElementById('cartPlaceOrderBtn');
-        const rawItems = Object.keys(state.cart).map(id => {
-            const product = state.products.find(p => p.id === parseInt(id));
-            if (!product) {
-                console.warn(`Product ID ${id} from cart not found in products data. It will be removed.`);
+        const rawItems = Object.entries(state.cart).map(([variantId, qty]) => {
+            const [productId, variantIndex] = variantId.split('-').map(Number);
+            const product = state.products.find(p => p.id === productId);
+            const variant = product?.variants[variantIndex];
+            if (!product || !variant) {
+                console.warn(`Variant ID ${variantId} from cart not found. It will be removed.`);
                 return null;
             }
-            return { ...product, qty: state.cart[id] };
+            return { ...product, ...variant, variantId, qty };
         });
 
         const items = rawItems.filter(Boolean);
 
         if (items.length !== rawItems.length) {
             state.cart = items.reduce((acc, item) => {
-                acc[item.id] = item.qty;
+                acc[item.variantId] = item.qty;
                 return acc;
             }, {});
             Handlers.saveCart();
             UI.updateCartUI();
             UI.showToast("Some items were removed as they are no longer available. Please review your cart.");
-            return; // FIX: Stop checkout if cart was modified to allow user review.
+            return;
         }
 
         if (items.length === 0) return;
@@ -731,9 +716,7 @@ export const Handlers = {
 
         if (!state.currentUser) {
             document.getElementById('cartModal').classList.remove('active');
-            UI.showToast('Please log in to continue checkout.');
-            // FIX: Instead of re-running checkout, just show the cart again after login.
-            // This allows the user to review their cart before placing the order.
+            UI.showToast('Please log in to continue checkout.'); 
             state.afterLoginAction = UI.showCart;
 
             UI.showLoginModal(null, 'signup');
@@ -771,14 +754,13 @@ export const Handlers = {
         const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
         const couponDiscount = state.appliedCoupon ? (state.appliedCoupon.type === 'percent' ? (subtotal * state.appliedCoupon.value) / 100 : state.appliedCoupon.value) : 0;
 
-        // FIX: Delivery is now always free. Match UI logic.
         const deliveryFee = 0;
         const total = subtotal - couponDiscount + deliveryFee;
 
         const orderData = {
             orderId: orderId,
             userId: state.currentUser.uid,
-            items: items.map(item => ({ id: item.id, name: item.name, qty: item.qty, price: item.finalPrice, image: item.image })),
+            items: items.map(item => ({ id: item.variantId, name: `${item.name} (${item.name})`, qty: item.qty, price: item.finalPrice, image: item.image })),
             subtotal: Math.round(subtotal),
             coupon: state.appliedCoupon ? { code: state.appliedCoupon.code, discount: Math.round(couponDiscount) } : null,
             deliveryFee: Math.round(deliveryFee),
@@ -811,9 +793,8 @@ export const Handlers = {
             })
             .finally(() => {
                 // NEW: Re-enable the button after the process is complete
-                if (checkoutBtn) {
+                if (checkoutBtn) { 
                     checkoutBtn.disabled = false;
-                    // The text will be updated by updateCartSummary if the cart is still open
                     checkoutBtn.textContent = 'Place Order';
                 }
             });
