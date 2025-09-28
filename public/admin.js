@@ -4,6 +4,7 @@ import { firebaseConfig } from './js/firebase-config.js';
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
+const storage = firebase.storage(); // NEW: Initialize Firebase Storage
 // DOM Elements
 const loginView = document.getElementById('login-view');
 const dashboardView = document.getElementById('dashboard-view');
@@ -452,7 +453,12 @@ function populateProductForm(product) {
     document.getElementById('product-name').value = product ? product.name : '';
     document.getElementById('product-desc').value = product ? product.desc : '';
     document.getElementById('product-category').value = product ? product.category : '';
-    document.getElementById('product-image').value = product ? product.image : '';
+    
+    // NEW: Handle image preview
+    const imagePreview = document.getElementById('product-image-preview');
+    imagePreview.src = product ? product.image : '';
+    imagePreview.style.display = product ? 'block' : 'none';
+    document.getElementById('product-image').value = product ? product.image : ''; // Store existing URL
     document.getElementById('product-mrp').value = product ? product.mrp : '';
     document.getElementById('product-finalPrice').value = product ? product.finalPrice : '';
     document.getElementById('product-gross').value = product ? product.gross : '';
@@ -468,6 +474,21 @@ function populateProductForm(product) {
     }
 }
 
+// NEW: Handle file input change for image preview
+document.getElementById('product-image-upload').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const preview = document.getElementById('product-image-preview');
+            preview.src = event.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+
 document.getElementById('product-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const submitBtn = e.target.querySelector('button[type="submit"]');
@@ -478,20 +499,56 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     const finalPrice = parseFloat(document.getElementById('product-finalPrice').value);
     const offer = mrp > finalPrice ? Math.round(((mrp - finalPrice) / mrp) * 100) : 0;
 
-    const productData = {
-        name: document.getElementById('product-name').value,
-        desc: document.getElementById('product-desc').value,
-        category: document.getElementById('product-category').value,
-        image: document.getElementById('product-image').value,
-        mrp: mrp,
-        finalPrice: finalPrice,
-        offer: offer,
-        gross: document.getElementById('product-gross').value,
-        net: document.getElementById('product-net').value,
-        available: document.getElementById('product-available').value === 'true',
-    };
-
     try {
+        let imageUrl = document.getElementById('product-image').value;
+        const imageFile = document.getElementById('product-image-upload').files[0];
+
+        // If a new image file is selected, upload it
+        if (imageFile) {
+            const progressEl = document.getElementById('upload-progress');
+            progressEl.style.display = 'block';
+            progressEl.value = 0;
+
+            const filePath = `products/${Date.now()}-${imageFile.name}`;
+            const storageRef = storage.ref(filePath);
+            const uploadTask = storageRef.put(imageFile);
+
+            // Wait for the upload to complete
+            imageUrl = await new Promise((resolve, reject) => {
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        progressEl.value = progress;
+                    },
+                    (error) => {
+                        reject(error);
+                    },
+                    async () => {
+                        const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                        resolve(downloadURL);
+                    }
+                );
+            });
+            progressEl.style.display = 'none';
+        }
+
+        if (!imageUrl) {
+            throw new Error("Product image is required. Please upload an image or provide a URL.");
+        }
+
+        const productData = {
+            name: document.getElementById('product-name').value,
+            desc: document.getElementById('product-desc').value,
+            category: document.getElementById('product-category').value,
+            image: imageUrl, // Use the new or existing URL
+            mrp: mrp,
+            finalPrice: finalPrice,
+            offer: offer,
+            gross: document.getElementById('product-gross').value,
+            net: document.getElementById('product-net').value,
+            available: document.getElementById('product-available').value === 'true',
+        };
+
         if (productId) { // Editing existing product
             productData.id = parseInt(productId, 10);
             const docRef = db.collection('products').doc(String(productId));
@@ -499,7 +556,6 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
             toast('Product updated successfully!');
         } else { // Creating new product
             const productsRef = db.collection('products');
-            // Get the highest ID and increment
             const lastProductQuery = await productsRef.orderBy('id', 'desc').limit(1).get();
             const newId = lastProductQuery.empty ? 1 : lastProductQuery.docs[0].data().id + 1;
             productData.id = newId;
@@ -510,7 +566,7 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
         showMainView('products');
     } catch (err) {
         console.error("Error saving product:", err);
-        toast('Failed to save product. Check console.');
+        toast(err.message || 'Failed to save product. Check console.');
     } finally {
         submitBtn.disabled = false;
     }

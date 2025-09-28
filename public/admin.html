@@ -125,7 +125,13 @@
           <div class="field"><label for="product-name">Name</label><input id="product-name" type="text" required></div>
           <div class="field"><label for="product-desc">Description</label><textarea id="product-desc" rows="3" required></textarea></div>
           <div class="field"><label for="product-category">Category</label><input id="product-category" type="text" required placeholder="e.g., Fish, Prawns, Crabs, Pickles"></div>
-          <div class="field"><label for="product-image">Image URL</label><input id="product-image" type="url" required></div>
+          <div class="field">
+            <label for="product-image-upload">Product Image</label>
+            <img id="product-image-preview" src="" alt="Image Preview" style="max-width: 100px; max-height: 100px; display: none; margin-bottom: 10px; border-radius: 8px; object-fit: cover;">
+            <input id="product-image-upload" type="file" accept="image/*">
+            <input id="product-image" type="hidden"> <!-- This will hold the final image URL -->
+            <progress id="upload-progress" value="0" max="100" style="width: 100%; display: none; margin-top: 10px;"></progress>
+          </div>
           <div class="field-row"><div class="field"><label for="product-mrp">MRP (₹)</label><input id="product-mrp" type="number" step="0.01" required></div><div class="field"><label for="product-finalPrice">Final Price (₹)</label><input id="product-finalPrice" type="number" step="0.01" required></div></div>
           <div class="field-row"><div class="field"><label for="product-gross">Gross Wt.</label><input id="product-gross" type="text" required></div><div class="field"><label for="product-net">Net Wt.</label><input id="product-net" type="text" required></div></div>
           <div class="field"><label for="product-available">Available</label><select id="product-available"><option value="true">Yes</option><option value="false">No</option></select></div>
