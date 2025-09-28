@@ -266,7 +266,7 @@ export const UI = {
             <div class="product-footer">
                 <div class="product-price">
                     <span class="price">₹${primaryVariant.finalPrice || 'N/A'}</span>
-                    ${hasOffer ? `<span class="old-price">₹${primaryVariant.mrp}</span>` : ''}
+                    ${hasOffer ? `<span class="product-mrp">₹${primaryVariant.mrp}</span>` : ''}
                 </div>
             </div>
           </div>
@@ -311,8 +311,12 @@ export const UI = {
                             <div class="variant-name">${v.name} (${v.net})</div>
                         </div>`;
                 }).join('');
+            } else if (product.variants && product.variants.length === 1) {
+                // Handle single-variant products gracefully
+                weight.innerHTML = `<div class="variant-card active"><div class="variant-name">${product.variants[0]?.name || ''} (${product.variants[0]?.net || ''})</div></div>`;
             } else {
-                weight.innerHTML = `<div class="variant-card active"><div class="variant-name">${product.variants[0].name} (${product.variants[0].net})</div></div>`;
+                // Fallback if no variants exist
+                weight.innerHTML = '';
             }
 
             UI.updatePopupPrice();
@@ -320,11 +324,11 @@ export const UI = {
             const selectedVariant = product.variants[state.selectedVariantIndex];
             infoContent.innerHTML = `
                 <p>${product.desc}</p>
-                <p style="margin-top: 16px;"><strong>Gross Wt:</strong> ${selectedVariant.gross} | <strong>Net Wt:</strong> ${selectedVariant.net}<br><small>Net weight is after cleaning. Weight loss varies by product.</small></p>`;
+                <p style="margin-top: 16px;"><strong>Gross Wt:</strong> ${selectedVariant?.gross || ''} | <strong>Net Wt:</strong> ${selectedVariant?.net || ''}<br><small>Net weight is after cleaning. Weight loss varies by product.</small></p>`;
 
             const optimizedPopupImage = UI.getOptimizedImageUrl(product.image, 600, 600);
             mainImage.src = optimizedPopupImage;
-            mainImage.alt = `High-quality ${product.name} from Coastal Fresh India`;
+            mainImage.alt = `High-quality ${DOMPurify.sanitize(product.name)} from Coastal Fresh India`;
 
             document.getElementById('popupImageIndicators').style.display = 'none';
 
@@ -389,12 +393,12 @@ export const UI = {
         // Analytics can also be tracked after the initial render
         window.Analytics.trackEvent('view_item', {
             currency: 'INR',
-            value: product.variants[0].finalPrice,
+            value: product.variants?.[0]?.finalPrice || 0,
             items: [{
                 item_id: product.id,
                 item_name: product.name,
                 item_category: product.category,
-                price: product.variants[0].finalPrice
+                price: product.variants?.[0]?.finalPrice || 0
             }]
         });
     },
@@ -1537,7 +1541,7 @@ export const UI = {
                     "@type": "Offer",
                     "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`,
                     "priceCurrency": "INR",
-                    "price": product.variants[0]?.finalPrice || 0,
+                    "price": product.variants?.[0]?.finalPrice || product.finalPrice || 0,
                     "priceValidUntil": new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0],
                     "itemCondition": "https://schema.org/NewCondition",
                     "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
