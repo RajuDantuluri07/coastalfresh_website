@@ -993,15 +993,15 @@ z-index: 2;                 /* sits above input content */
 .compact-add-btn {
   position: static; /* Change from absolute to static */
   width: 100%; /* Make it full width of the info container */
-  height: 40px; /* Reduce height significantly */
+  height: 44px; /* Standard touch-friendly height */
   margin-top: 8px; /* Add space above the button */
-  background: transparent; /* Background is not needed, border is enough */
-  border: 1.5px solid var(--success-color);
+  background: var(--success-color); /* Use solid green for high conversion */
+  border: none; /* Remove border, background is enough */
   border-radius: 16px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 12px rgba(56, 142, 60, 0.3); /* Softer shadow for green */
   cursor: pointer;
   display: flex;
-  flex-direction: column;
+  flex-direction: row; /* Align text horizontally */
   align-items: center;
   justify-content: center;
   overflow: hidden;
@@ -1011,22 +1011,24 @@ z-index: 2;                 /* sits above input content */
 
 .compact-add-btn:active {
   transform: scale(0.97);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(56, 142, 60, 0.3);
 }
 
 .compact-add-btn .add-text {
   font-size: 14px; /* Reduce font size for smaller button */
   font-weight: 700;
-  color: var(--success-color);
+  color: var(--bg-white); /* White text on green background */
   line-height: 1;
+  margin-right: 6px; /* Space between ADD and options text */
 }
 
 .compact-add-btn .options-text {
   font-size: 10px; /* Reduce font size */
   font-weight: 500;
-  color: var(--success-color);
-  margin-top: 2px; /* Reduce margin */
+  color: var(--bg-white); /* White text on green background */
+  opacity: 0.8; /* Make it slightly less prominent */
   line-height: 1;
+  margin-top: 1px; /* Align baseline */
 }
 
 .add-btn.add-pill {
@@ -1038,16 +1040,20 @@ z-index: 2;                 /* sits above input content */
 
 /* Quantity controls that replace the ADD button */
 .cart-controls {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  display: flex; align-items: center;
-  background: var(--accent-color);
-  border-radius: 8px;
-  box-shadow: 0 6px 12px rgba(0,168,232,0.18);
+  position: static; /* Match the add button */
+  width: 100%; /* Match the add button */
+  height: 44px; /* Match the add button */
+  margin-top: 8px; /* Match the add button */
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Space out buttons and quantity */
+  background: var(--success-color); /* Match the add button */
+  border-radius: 16px; /* Match the add button */
+  box-shadow: 0 4px 12px rgba(56, 142, 60, 0.3); /* Match the add button */
   color: white;
   font-weight: 700;
   overflow: hidden;
+  padding: 0 4px; /* Small padding for buttons */
 }
 
 .cart-controls .qty-btn {
@@ -1055,11 +1061,14 @@ z-index: 2;                 /* sits above input content */
   border: none;
   color: white;
   font-size: 16px; font-weight: 700; cursor: pointer;
-  padding: 6px 10px;
+  width: 36px; /* Make buttons circular */
+  height: 36px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
 }
 .cart-controls .qty {
-  font-size: 13px; min-width: 16px; text-align: center;
-  padding: 6px 0;
+  font-size: 15px;
+  min-width: 24px; text-align: center;
 }
 
 .info {
