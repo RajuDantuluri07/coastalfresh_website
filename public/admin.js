@@ -494,7 +494,12 @@ function productCardHTML(product) {
               </li>`).join('') || '<li>No variants defined.</li>'}
           </ul>
         </div>
-        <div class="order-section"><button class="btn-small btn-primary" data-action="edit-product" data-product-id="${product.id}">Edit Product</button></div>
+        <div class="order-section management">
+          <button class="btn-small btn-primary" data-action="edit-product" data-product-id="${product.id}">
+            <i class="fa-solid fa-pencil"></i> Edit
+          </button>
+          <button class="btn-small btn-danger" data-action="delete-product" data-doc-id="${product.docId}" data-product-id="${product.id}"><i class="fa-solid fa-trash"></i> Delete</button>
+        </div>
       </div>
     </div>`;
 }
@@ -507,6 +512,12 @@ document.getElementById('products-container').addEventListener('click', (e) => {
         if (product) {
             showProductForm(product);
         }
+    }
+    // NEW: Handle delete button click on product card
+    const deleteBtn = e.target.closest('[data-action="delete-product"]');
+    if (deleteBtn) {
+        const docId = deleteBtn.dataset.docId;
+        handleDeleteProduct(docId);
     }
 });
 
@@ -796,14 +807,12 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     }
 });
 
-document.getElementById('delete-product-btn').addEventListener('click', async (e) => {
-    const docId = e.target.dataset.docId; // This is the Firestore document ID
+async function handleDeleteProduct(docId) {
     const productToDelete = allProducts.find(p => p.docId === docId);
     if (!productToDelete) return toast('Error: Product ID not found.');
 
     if (confirm(`Are you sure you want to delete product ID ${productToDelete.id}? This cannot be undone.`)) {
         try {
-            // FIX #7: Use the Firestore document ID (docId) for deletion, not the numerical product ID.
             await db.collection('products').doc(docId).delete();
             toast('Product deleted.');
             showMainView('products');
@@ -812,6 +821,11 @@ document.getElementById('delete-product-btn').addEventListener('click', async (e
             toast('Failed to delete product.');
         }
     }
+}
+
+document.getElementById('delete-product-btn').addEventListener('click', async (e) => {
+    const docId = e.target.dataset.docId; // This is the Firestore document ID
+    handleDeleteProduct(docId);
 });
 
 function fetchDailySummary() {
