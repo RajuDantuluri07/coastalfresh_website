@@ -1548,6 +1548,45 @@ overflow: hidden;
   flex-grow: 1;
   box-shadow: 0 4px 12px rgba(56, 142, 60, 0.4);
 }
+.popup-cta-add-btn:active {
+  transform: scale(0.98);
+  filter: brightness(1.1);
+}
+
+/* NEW: Styles for the "View Cart" button and layout in the sticky CTA */
+.popup-cta-left {
+  flex-grow: 1;
+}
+.popup-cta-right {
+  flex-shrink: 0;
+}
+.popup-cta-view-cart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--primary-color);
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3);
+  position: relative; /* For badge positioning */
+}
+.popup-cta-view-cart .cart-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: var(--error-color);
+  border-radius: 50%;
+  width: 22px; height: 22px; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--bg-white);
+}
 
 .popup-cta-add-btn:active {
   transform: scale(0.98);

@@ -460,15 +460,27 @@ export const UI = {
         const qtyInCart = state.cart[variantId] || 0;
         const isInCart = qtyInCart > 0;
 
+        const totalQtyInCart = Object.values(state.cart).reduce((sum, qty) => sum + Number(qty), 0);
+
         if (isInCart) {
             ctaContainer.innerHTML = `
-        <div class="popup-sticky-cta-inner">
-          <div class="cart-controls" data-id="${variantId}" style="margin-left: auto;">
-            <button class="qty-btn dec">-</button>
-            <span class="qty">${qtyInCart}</span>
-            <button class="qty-btn inc">+</button>
-          </div>
-        </div>`;
+            <div class="popup-sticky-cta-inner">
+              <div class="popup-cta-left">
+                <button class="popup-cta-view-cart" id="popupViewCartBtn">
+                  <i class="fas fa-shopping-bag"></i>
+                  <span>View Cart</span>
+                  <span class="cart-badge">${totalQtyInCart}</span>
+                </button>
+              </div>
+              <div class="popup-cta-right">
+                <div class="popup-cta-qty-selector" data-id="${variantId}">
+                  <button class="qty-btn dec" aria-label="Decrease quantity">-</button>
+                  <span class="qty" aria-live="polite">${qtyInCart}</span>
+                  <button class="qty-btn inc" aria-label="Increase quantity">+</button>
+                </div>
+              </div>
+            </div>`;
+            document.getElementById('popupViewCartBtn').addEventListener('click', () => UI.showCart());
         } else {
             const selectedVariant = state.popupProduct.variants[state.selectedVariantIndex];
             ctaContainer.innerHTML = `

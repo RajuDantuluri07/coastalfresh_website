@@ -264,15 +264,15 @@ export const Handlers = {
         document.getElementById('variantDrawerContent').addEventListener('click', (e) => {
             const addBtn = e.target.closest('.add-btn');
             if (addBtn) {
+                // FIX: Call updateVariantDrawer instead of re-rendering the whole thing.
                 Handlers.addToCart(addBtn.dataset.id);
-                UI.openVariantDrawer(parseInt(addBtn.dataset.id.split('-')[0])); // Re-render drawer
+                UI.updateVariantDrawer();
             }
             const qtyBtn = e.target.closest('.qty-btn');
             if (qtyBtn) {
                 const variantId = qtyBtn.closest('.cart-controls').dataset.id;
                 const change = qtyBtn.classList.contains('inc') ? 1 : -1;
                 Handlers.updateQty(variantId, change);
-                UI.openVariantDrawer(parseInt(variantId.split('-')[0])); // Re-render drawer
             }
         });
 
