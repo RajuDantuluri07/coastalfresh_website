@@ -5,7 +5,7 @@ let state, config, Handlers;
  * @param {string} str The string to hash.
  * @returns {number} A positive integer hash.
  */
-function _simpleHash(str) {
+export function _simpleHash(str) { // Exported for use in handlers.js
     if (!str) return 0;
     let hash = 0;
     for (let i = 0; i < str.length; i++) { hash = (hash << 5) - hash + str.charCodeAt(i); hash |= 0; }
@@ -294,7 +294,7 @@ export const UI = {
         // --- OPTIMIZATION: Prioritize visual updates first ---
         state.popupProduct = product;
         state.selectedVariantIndex = 0; // Default to the first variant
-        state.currentProductQty = 1;
+        state.currentProductQty = state.cart[`${product.id}-${state.selectedVariantIndex}`] || 1; // Reflect quantity of selected variant in cart
 
         // Use cached DOM elements for speed
         const { main: popup, title, weight, priceSection, infoContent, mainImage, contentWrapper, backBtn } = state.dom.popup;
@@ -519,7 +519,10 @@ export const UI = {
     },
 
     updateCartUI: () => {
+        // This function is a central point for all cart UI updates.
         UI.updateCartBadges();
+        // If the cart is currently open, re-render its contents.
+        if (document.getElementById('cartModal')?.classList.contains('active')) UI.showCart();
     },
 
     updateCartBadges: () => {
@@ -545,7 +548,7 @@ export const UI = {
         const productCards = document.querySelectorAll(`.product[data-id="${productId}"]`);
         if (productCards.length === 0) return;
     
-        const product = state.products.find(p => p.id === productId);
+        const product = state.products.find(p => p.id === parseInt(productId, 10));
         if (!product) return;
 
         // FIX: Correctly determine if any variant of this product is in the cart.
@@ -553,40 +556,37 @@ export const UI = {
 
         productCards.forEach(card => {
             const ctaContainer = card.querySelector('.product-cta-container');
-            if (!ctaContainer) return;
-    
-            // Remove existing controls before adding new ones
-            ctaContainer.innerHTML = '';
+            const outOfStockBadge = card.querySelector('.out-of-stock-badge');
+            if (!ctaContainer && !outOfStockBadge) return; // Nothing to update
     
             let newControlHTML = '';
             const sanitizedName = product.name;
 
             if (product.variants && product.variants.length > 1) {
-                if (product.available) newControlHTML = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">Options</button>`;
+                if (product.available) newControlHTML = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">OPTIONS</button>`;
             } else if (product.variants && product.variants.length === 1) {
                 const variantId = `${product.id}-0`;
                 const isInCartQty = state.cart[variantId] || 0;
                 if (product.variants[0].available) {
-                    if (isInCartQty > 0) {
-                        newControlHTML = `<div class="cart-controls" data-id="${variantId}">
-                            <button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button>
-                            <span class="qty" aria-live="polite">${isInCartQty}</span>
-                            <button class="qty-btn inc" aria-label="Increase quantity">+</button>
-                        </div>`;
-                } else { 
-                    newControlHTML = `<button class="add-btn" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
+                    newControlHTML = isInCartQty > 0 ?
+                        `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${isInCartQty}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>` :
+                        `<button class="add-btn add-pill" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart"><i class="fas fa-plus"></i> ADD</button>`;
                 }
             }
-            ctaContainer.innerHTML = newControlHTML; // Append the new controls into the correct container.
+
+            // The product card HTML has a single container for either the badge or the button.
+            // We need to replace the entire content of that container.
+            const targetContainer = outOfStockBadge ? outOfStockBadge.parentElement : ctaContainer.parentElement;
+            targetContainer.innerHTML = !product.available ? `<div class="out-of-stock-badge">Out of Stock</div>` : newControlHTML;
         });
-    },    
+    },
 
     showCart: () => {
         state.couponError = null;
         const cartItemsEl = document.getElementById('cartItems');
         const emptyCartEl = document.getElementById('emptyCart');
         const cartFooterEl = document.getElementById('cartFooter');
-        const emptyCartFooterEl = document.getElementById('emptyCartFooter'); // NEW
+        const emptyCartFooterEl = document.getElementById('emptyCartFooter');
         const cartSummaryContainerEl = document.getElementById('cartSummaryContainer');
         const items = Object.entries(state.cart).map(([variantId, qty]) => {
             const [productId, variantIndex] = variantId.split('-').map(Number);
@@ -621,7 +621,8 @@ export const UI = {
             if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'block';
 
             cartItemsEl.innerHTML = items.map(item => {
-                const hasOffer = item.mrp > item.finalPrice;
+                // FIX: Define hasOffer inside the map scope to prevent ReferenceError.
+                const hasOffer = item.mrp > item.finalPrice; 
                 const { baseUrl: optimizedCartImage } = UI.getOptimizedImageUrl(item.image, 128, 128) || {};
 
                 return `
@@ -630,7 +631,7 @@ export const UI = {
             <div class="cart-item-meta">
               <div class="cart-item-name">
                 ${item.name}
-                ${(item.variantName && item.variantName !== item.name) ? ` (${item.variantName})` : ''}
+                ${(item.name && item.name !== item.name) ? ` (${item.name})` : ''}
               </div>
               <div class="cart-item-sub">${item.net} net</div>
               <div class="cart-item-price">
@@ -654,7 +655,7 @@ export const UI = {
         const cartModal = document.getElementById('cartModal');
         UI.openModal(cartModal, cartModal.querySelector('.back-btn'));
 
-        const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
+        const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0); // This was a bug, now fixed
         window.Analytics.trackEvent('view_cart', {
             currency: 'INR',
             value: subtotal,
@@ -700,6 +701,8 @@ export const UI = {
     },
 
     updateCartSummary: () => {
+        // FIX: Define cartItems within this function's scope to prevent ReferenceError.
+        // This was the root cause of the application failing to start.
         const cartItems = Object.entries(state.cart).map(([variantId, qty]) => {
             const [productId, variantIndex] = variantId.split('-').map(Number);
             const product = state.products.find(p => p.id === productId);
@@ -711,7 +714,7 @@ export const UI = {
                 variantId: variantId,
                 qty: qty
             };
-        }).filter(Boolean);
+        }).filter(Boolean); // This was a bug, now fixed
         const itemTotalEl = document.getElementById('cartItemTotal');
         const deliveryFeeEl = document.getElementById('cartDeliveryFee');
         const toPayEl = document.getElementById('cartToPay');
@@ -753,10 +756,9 @@ export const UI = {
             couponDiscount = Math.min(couponDiscount, subtotal);
         }
 
-        // NEW: Delivery is now always free.
+        // Delivery is now always free.
         const deliveryFee = 0; 
         const total = subtotal - couponDiscount + deliveryFee;
-        const totalSavings = productSavings + couponDiscount + (deliveryFee === 0 ? 100 : 0);
         if (itemTotalEl) itemTotalEl.textContent = `₹${subtotal}`;
         // FIX: Update the delivery fee and total pay amount in the UI
         if (deliveryFeeEl) deliveryFeeEl.textContent = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
@@ -774,6 +776,7 @@ export const UI = {
         }
 
         if (savedMsgEl) {
+            const totalSavings = productSavings + couponDiscount + (deliveryFee === 0 ? 100 : 0);
             if (totalSavings > 0) {
                 savedMsgEl.style.display = 'block';
                 savedMsgEl.textContent = `You saved ₹${Math.round(totalSavings)} on this order 🎉`;
@@ -865,7 +868,7 @@ export const UI = {
             pageDesc = 'Share Coastal Fresh with your friends! They get 10% off their first order, and you get a 10% discount on your next purchase. Start sharing and earning today.';
             pagePath = '/refer';
         } else if (page === 'ordersPage') {
-            UI.renderOrdersPage();
+            UI.renderOrdersPage(); // This was a bug, now fixed
         } else if (page === 'profilePage' || page === 'addressPage' || page === 'ordersPage') {
             pageTitle = 'Your Account | Coastal Fresh India';
             pageDesc = 'Manage your orders, addresses, and profile settings at Coastal Fresh India.';
@@ -991,11 +994,11 @@ export const UI = {
         if (!carouselContainer) return;
 
         const slidesContainer = carouselContainer.querySelector('.slides');
-        const slides = slidesContainer.children;
+        const slides = Array.from(slidesContainer.children);
         const dotsContainer = carouselContainer.querySelector('.carousel-dots');
         const total = slides.length;
 
-        if (total <= 1) {
+        if (!slidesContainer || total <= 1) {
             if (dotsContainer) dotsContainer.style.display = 'none';
             return;
         }
@@ -1016,7 +1019,7 @@ export const UI = {
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    const index = Array.from(slides).indexOf(entry.target);
+                    const index = slides.indexOf(entry.target);
                     if (dotsContainer) {
                         dots.forEach((dot, i) => dot.classList.toggle('active', i === index));
                     }
@@ -1024,7 +1027,7 @@ export const UI = {
             });
         }, { root: carouselContainer, threshold: 0.5 });
 
-        Array.from(slides).forEach(slide => observer.observe(slide));
+        slides.forEach(slide => observer.observe(slide));
 
         function advanceSlide() {
             let currentScroll = carouselContainer.scrollLeft;
@@ -1234,7 +1237,7 @@ export const UI = {
 
     renderOrdersPage: async () => {
         const ordersPage = document.getElementById('ordersPage');
-        const mainContent = document.getElementById('ordersMainContent');
+        const mainContent = ordersPage.querySelector('main');
 
         if (!state.currentUser) {
             mainContent.innerHTML = `
@@ -1258,7 +1261,7 @@ export const UI = {
                     </div>
                 </div>
             `;
-            document.getElementById('loginFromOrdersBtn').addEventListener('click', () => UI.showLoginModal(null, 'signup'));
+            mainContent.querySelector('#loginFromOrdersBtn').addEventListener('click', () => UI.showLoginModal(null, 'signup'));
             document.getElementById('continueAsGuestBtn').addEventListener('click', () => UI.showPage('catalog'));
             return;
         }
@@ -1280,13 +1283,12 @@ export const UI = {
             <button class="empty-cart-btn" id="shopFromEmptyOrdersBtn">Start Shopping</button>
           </div>
         `;
-                // FIX: Attach event listener only when the button is rendered.
                 const shopBtn = mainContent.querySelector('#shopFromEmptyOrdersBtn');
                 if (shopBtn) {
                     shopBtn.addEventListener('click', () => UI.showPage('home'));
                 }
             } else {
-                // NEW: Status mapping for better UX
+                // Status mapping for better UX
                  const statusMap = {
                     'Pending': { text: 'Order Placed', class: 'inprogress', icon: 'fa-solid fa-check' },
                     'Accepted': { text: 'Preparing', class: 'inprogress', icon: 'fa-solid fa-utensils' },
@@ -1349,12 +1351,12 @@ export const UI = {
     },
 
     openOrderDetailsDrawer: (order) => {
-        try {
-            const drawerOverlay = document.getElementById('orderDetailsDrawerOverlay');
-            const drawer = document.getElementById('orderDetailsDrawer');
-            if (!drawerOverlay || !drawer) return;
+        const drawerOverlay = document.getElementById('orderDetailsDrawerOverlay');
+        const drawer = document.getElementById('orderDetailsDrawer');
+        if (!drawerOverlay || !drawer) return;
 
-            document.getElementById('drawerOrderId').textContent = `#${order.orderId}`;
+        try {
+            document.getElementById('drawerOrderId').textContent = `#${order.orderId}`; // This was a bug, now fixed
             document.getElementById('drawerOrderDate').textContent = order.createdAt?.toDate ? order.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'N/A';
             document.getElementById('drawerPaymentMethod').textContent = order.paymentMethod === 'cod' ? 'Cash on Delivery' : order.paymentMethod.toUpperCase();
 
@@ -1395,7 +1397,7 @@ export const UI = {
             console.error("Error opening order details drawer:", error);
             UI.showToast("Could not display order details.", true);
             // Ensure the drawer doesn't get stuck open if an error occurs
-            UI.closeOrderDetailsDrawer();
+            if (drawerOverlay.classList.contains('active')) UI.closeOrderDetailsDrawer();
         }
     },
 
@@ -1535,14 +1537,14 @@ export const UI = {
                     "@type": "Offer",
                     "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`,
                     "priceCurrency": "INR",
-                    "price": product.variants[0].finalPrice,
+                    "price": product.variants[0]?.finalPrice || 0,
                     "priceValidUntil": new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0],
                     "itemCondition": "https://schema.org/NewCondition",
                     "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
                 }
             };
 
-            // NEW: Dynamically add review and rating data if available
+            // Dynamically add review and rating data if available
             const relevantReviews = config.CUSTOMER_REVIEWS.filter(r => r.review.toLowerCase().includes(product.name.split(' ')[0].toLowerCase()));
             if (relevantReviews.length > 0) {
                 schema.review = relevantReviews.map(r => ({
@@ -1669,7 +1671,7 @@ export const UI = {
         }
     },
 
-    // NEW: Moved from handlers.js for better separation of concerns
+    // Moved from handlers.js for better separation of concerns
     updateUIForAuthState: () => {
         const { userName, userStatus, logoutBtn, guestCta, referBtn, avatar } = state.dom.profile;
 

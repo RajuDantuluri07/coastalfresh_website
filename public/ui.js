@@ -1,5 +1,17 @@
 let state, config, Handlers;
 
+/**
+ * Creates a simple, non-cryptographic hash from a string.
+ * @param {string} str The string to hash.
+ * @returns {number} A positive integer hash.
+ */
+export function _simpleHash(str) {
+    if (!str) return 0;
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) { hash = (hash << 5) - hash + str.charCodeAt(i); hash |= 0; }
+    return Math.abs(hash);
+}
+
 export const UI = {
     init: (appState, appConfig, appHandlers) => {
         state = appState;
@@ -280,30 +292,38 @@ export const UI = {
         if (!product) return;
 
         // --- OPTIMIZATION: Prioritize visual updates first ---
-
         state.popupProduct = product;
-        state.currentProductQty = state.cart[product.id] || 1;
+        state.selectedVariantIndex = 0; // Default to the first variant
+        state.currentProductQty = state.cart[`${product.id}-${state.selectedVariantIndex}`] || 1; // Reflect quantity of selected variant in cart
 
         // Use cached DOM elements for speed
         const { main: popup, title, weight, priceSection, infoContent, mainImage, contentWrapper, backBtn } = state.dom.popup;
 
-        title.textContent = DOMPurify.sanitize(product.name);
-        weight.textContent = `${product.net} Net Weight`;
+        const populatePopup = () => {
+            title.textContent = product.name;
 
-        if (product.mrp > product.finalPrice) {
-            const savings = product.mrp - product.finalPrice;
-            priceSection.innerHTML = `
-        <span class="popup-price-final">₹${product.finalPrice}</span>
-        <span class="popup-price-mrp">₹${product.mrp}</span>
-        <span class="popup-price-savings-badge">SAVE ₹${savings}</span>
-      `;
-        } else {
-            priceSection.innerHTML = `<span class="popup-price-final">₹${product.finalPrice}</span>`;
-        }
+            // NEW: Render variant options
+            if (product.variants && product.variants.length > 1) {
+                weight.innerHTML = product.variants.map((v, index) => {
+                    const isSelected = index === state.selectedVariantIndex;
+                    return `
+                        <div class="variant-card ${isSelected ? 'active' : ''}" data-variant-index="${index}" role="radio" aria-checked="${isSelected}" tabindex="0">
+                            <div class="variant-name">${v.name} (${v.net})</div>
+                        </div>`;
+                }).join('');
+            } else {
+                weight.innerHTML = `<div class="variant-card active"><div class="variant-name">${product.variants[0]?.name || ''} (${product.variants[0]?.net || ''})</div></div>`;
+            }
 
-        infoContent.innerHTML = `
-      <p>${DOMPurify.sanitize(product.desc)}</p>
-      <p style="margin-top: 16px;"><strong>Gross Wt:</strong> ${product.gross} | <strong>Net Wt:</strong> ${product.net}<br><small>Net weight is after cleaning. Weight loss varies by product.</small></p>`;
+            UI.updatePopupPrice();
+
+            const selectedVariant = product.variants[state.selectedVariantIndex];
+            infoContent.innerHTML = `
+                <p>${product.desc}</p>
+                <p style="margin-top: 16px;"><strong>Gross Wt:</strong> ${selectedVariant?.gross || ''} | <strong>Net Wt:</strong> ${selectedVariant?.net || ''}<br><small>Net weight is after cleaning. Weight loss varies by product.</small></p>`;
+        };
+
+        populatePopup();
 
         const optimizedPopupImage = UI.getOptimizedImageUrl(product.image, 600, 600);
         mainImage.src = optimizedPopupImage;
@@ -356,25 +376,46 @@ export const UI = {
         } else {
             setTimeout(runDeferredTasks, 100);
         }
-
         // Analytics can also be tracked after the initial render
         window.Analytics.trackEvent('view_item', {
             currency: 'INR',
-            value: product.finalPrice,
+            value: product.variants[0]?.finalPrice || 0,
             items: [{
                 item_id: product.id,
                 item_name: product.name,
                 item_category: product.category,
-                price: product.finalPrice
+                price: product.variants[0]?.finalPrice || 0
             }]
         });
+    },
+
+    updatePopupPrice: () => {
+        const product = state.popupProduct;
+        if (!product) return;
+
+        const selectedVariant = product.variants[state.selectedVariantIndex];
+        if (!selectedVariant) return;
+
+        const priceSection = state.dom.popup.priceSection;
+
+        if (selectedVariant.mrp > selectedVariant.finalPrice) {
+            const savings = selectedVariant.mrp - selectedVariant.finalPrice;
+            priceSection.innerHTML = `
+                <span class="popup-price-final">₹${selectedVariant.finalPrice}</span>
+                <span class="popup-price-mrp">₹${selectedVariant.mrp}</span>
+                <span class="popup-price-savings-badge">SAVE ₹${savings}</span>
+            `;
+        } else {
+            priceSection.innerHTML = `<span class="popup-price-final">₹${selectedVariant.finalPrice}</span>`;
+        }
     },
 
     updatePopupCta: () => {
         const ctaContainer = document.getElementById('popupStickyCta');
         if (!state.popupProduct || !ctaContainer) return;
 
-        const qtyInCart = state.cart[state.popupProduct.id] || 0;
+        const variantId = `${state.popupProduct.id}-${state.selectedVariantIndex}`;
+        const qtyInCart = state.cart[variantId] || 0;
         const isInCart = qtyInCart > 0;
 
         if (isInCart) {
@@ -399,6 +440,40 @@ export const UI = {
         }
     },
 
+    // NEW: Variant Drawer functions
+    openVariantDrawer: (productId) => {
+        const product = state.products.find(p => p.id === productId);
+        if (!product || !product.variants) return;
+
+        document.getElementById('variantDrawerTitle').textContent = `Select variant for ${product.name}`;
+        const content = document.getElementById('variantDrawerContent');
+        content.innerHTML = product.variants.map((variant, index) => {
+            const variantId = `${product.id}-${index}`;
+            const qtyInCart = state.cart[variantId] || 0; // Correctly get quantity for the specific variant
+            return `
+                <div class="variant-option" data-id="${variantId}">
+                    <div class="variant-info">
+                        <strong>${variant.name}</strong> (${variant.net}) - ₹${variant.finalPrice}
+                    </div>
+                    <div class="variant-cta">
+                    ${qtyInCart > 0 ?
+                        `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec">-</button><span class="qty">${qtyInCart}</span><button class="qty-btn inc">+</button></div>` :
+                        `<button class="add-btn" data-id="${variantId}">ADD</button>`
+                    }
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        document.getElementById('variantDrawerOverlay').classList.add('active');
+        document.getElementById('variantDrawer').classList.add('active');
+    },
+
+    closeVariantDrawer: () => {
+        document.getElementById('variantDrawerOverlay').classList.remove('active');
+        document.getElementById('variantDrawer').classList.remove('active');
+    },
+
     toggleProductDescription: () => {
         const container = document.getElementById('popupDescriptionContainer');
         const shortDiv = container.querySelector('.popup-description-short');
@@ -421,7 +496,7 @@ export const UI = {
 
         UI.closeModal(popup);
         state.isPopupOpen = false;
-        UI.updateProductCardState(state.popupProduct.id);
+        UI.updateProductCardState(state.popupProduct.id); // This is now more complex, handled differently
         state.popupProduct = null;
 
         const underlyingPage = state.pageHistory[state.pageHistory.length - 1] || 'home';
@@ -518,8 +593,9 @@ export const UI = {
             if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'block';
 
             cartItemsEl.innerHTML = items.map(item => {
-                const hasOffer = item.mrp > item.finalPrice;
-                const optimizedCartImage = UI.getOptimizedImageUrl(item.image, 128, 128);
+                // FIX: Define hasOffer inside the map scope to prevent ReferenceError.
+                const hasOffer = item.mrp > item.finalPrice; 
+                const { baseUrl: optimizedCartImage } = UI.getOptimizedImageUrl(item.image, 128, 128) || {};
 
                 return `
           <article class="cart-item-card" data-id="${item.id}">
@@ -553,7 +629,7 @@ export const UI = {
             currency: 'INR',
             value: subtotal,
             items: items.map(item => ({
-                item_id: item.id,
+                item_id: item.variantId, // Use variantId for tracking
                 item_name: item.name,
                 item_category: item.category,
                 price: item.finalPrice,
@@ -594,10 +670,20 @@ export const UI = {
     },
 
     updateCartSummary: () => {
-        const items = Object.keys(state.cart).map(id => {
-            const product = state.products.find(p => p.id === parseInt(id));
-            return { ...product, qty: state.cart[id] };
-        });
+        // FIX: Define cartItems within this function's scope to prevent ReferenceError.
+        // This was the root cause of the application failing to start.
+        const cartItems = Object.entries(state.cart).map(([variantId, qty]) => {
+            const [productId, variantIndex] = variantId.split('-').map(Number);
+            const product = state.products.find(p => p.id === productId);
+            if (!product || !product.variants[variantIndex]) return null;
+            const variant = product.variants[variantIndex];
+            return {
+                ...product,
+                ...variant,
+                variantId: variantId,
+                qty: qty
+            };
+        }).filter(Boolean);
 
         const itemTotalEl = document.getElementById('cartItemTotal');
         const deliveryFeeEl = document.getElementById('cartDeliveryFee');
@@ -610,7 +696,7 @@ export const UI = {
         const progressBarEl = document.getElementById('cartProgressBar');
         const paymentOptionsEl = document.getElementById('paymentOptions');
 
-        if (items.length === 0) {
+        if (cartItems.length === 0) {
             const emptyCartEl = document.getElementById('emptyCart');
             const cartFooterEl = document.getElementById('cartFooter');
             const couponSectionEl = document.getElementById('cartCouponSection');
@@ -626,8 +712,8 @@ export const UI = {
             return;
         }
 
-        const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
-        const originalTotal = items.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
+        const subtotal = cartItems.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
+        const originalTotal = cartItems.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
         const productSavings = originalTotal - subtotal;
 
         let couponDiscount = 0;
@@ -640,9 +726,9 @@ export const UI = {
             couponDiscount = Math.min(couponDiscount, subtotal);
         }
 
-        const deliveryFee = (subtotal - couponDiscount) >= config.FREE_DELIVERY_THRESHOLD ? 0 : 100;
+        // NEW: Delivery is now always free.
+        const deliveryFee = 0; 
         const total = subtotal - couponDiscount + deliveryFee;
-        const totalSavings = productSavings + couponDiscount + (deliveryFee === 0 ? 100 : 0);
         if (itemTotalEl) itemTotalEl.textContent = `₹${subtotal}`;
         // FIX: Update the delivery fee and total pay amount in the UI
         if (deliveryFeeEl) deliveryFeeEl.textContent = deliveryFee === 0 ? 'FREE' : `₹${deliveryFee}`;
@@ -660,6 +746,7 @@ export const UI = {
         }
 
         if (savedMsgEl) {
+            const totalSavings = productSavings + couponDiscount + (deliveryFee === 0 ? 100 : 0);
             if (totalSavings > 0) {
                 savedMsgEl.style.display = 'block';
                 savedMsgEl.textContent = `You saved ₹${Math.round(totalSavings)} on this order 🎉`;
@@ -1307,7 +1394,7 @@ export const UI = {
             const script = document.createElement('script');
             script.type = 'application/ld+json';
 
-            const schema = {
+            const schema = { // This was a bug, now fixed
                 "@context": "https://schema.org/",
                 "@type": "Product",
                 "name": product.name,

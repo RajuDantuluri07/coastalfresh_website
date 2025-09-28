@@ -1,4 +1,5 @@
-let state, config, UI;
+import { _simpleHash } from './ui.js'; // Import _simpleHash
+let state, config, UI; // UI is passed in init, so no need to import directly here
 
 export const Handlers = {
     init: (appState, appConfig, uiModule) => {
@@ -575,7 +576,7 @@ export const Handlers = {
 
     shareProduct: async () => {
         let referralLink = 'https://coastalfresh.in?ref=GUEST123';
-        if (state.currentUser && state.currentUser.uid) {
+        if (state.currentUser && state.currentUser.uid && typeof _simpleHash === 'function') { // Check if _simpleHash is available
             referralLink = `https://coastalfresh.in?ref=${_simpleHash(state.currentUser.uid)}`;
         }
         // The text message is the most important part, as it contains the referral link.
@@ -618,13 +619,15 @@ export const Handlers = {
     },
 
     addToCart: (variantId, qty = 1) => {
-        const [productId, variantIndex] = variantId.split('-').map(Number);
+        const [productIdStr, variantIndexStr] = variantId.split('-');
+        const productId = parseInt(productIdStr, 10);
+        const variantIndex = parseInt(variantIndexStr, 10);
         const product = state.products.find(p => p.id === productId);
         if (!product || !product.variants[variantIndex] || !product.variants[variantIndex].available) return;
 
         const variant = product.variants[variantIndex];
 
-        if (state.cart[variantId]) {
+        if (state.cart.hasOwnProperty(variantId)) { // Use hasOwnProperty for safer check
             state.cart[variantId] = Math.min(99, state.cart[variantId] + qty);
         } else {
             state.cart[variantId] = qty;
@@ -653,7 +656,7 @@ export const Handlers = {
     updateQty: (variantId, change, source = 'cart') => {
         if (!state.cart[variantId]) return;
 
-        const [productIdStr, variantIndexStr] = variantId.split('-');
+        const [productIdStr, variantIndexStr] = variantId.split('-'); // Parse variantId
         const productId = parseInt(productIdStr, 10);
         const variantIndex = parseInt(variantIndexStr, 10);
         const product = state.products.find(p => p.id === productId);
@@ -772,7 +775,7 @@ export const Handlers = {
         const orderData = {
             orderId: orderId,
             userId: state.currentUser.uid,
-            items: items.map(item => ({ id: item.variantId, name: `${item.name} (${item.name})`, qty: item.qty, price: item.finalPrice, image: item.image })),
+            items: items.map(item => ({ id: item.variantId, name: `${item.name} (${item.variantName || item.net})`, qty: item.qty, price: item.finalPrice, image: item.image })), // Use variantName or net
             subtotal: Math.round(subtotal),
             coupon: state.appliedCoupon ? { code: state.appliedCoupon.code, discount: Math.round(couponDiscount) } : null,
             deliveryFee: Math.round(deliveryFee),
@@ -903,16 +906,19 @@ export const Handlers = {
         if (!cartData || typeof cartData !== 'object') return {};
         const sanitized = {};
 
-        for (const [id, qty] of Object.entries(cartData)) {
-            const product = state.products.find(p => p.id === parseInt(id));
-            if (!product) continue;
+        for (const [variantId, qty] of Object.entries(cartData)) { // Iterate over variantId
+            const [productIdStr, variantIndexStr] = variantId.split('-');
+            const productId = parseInt(productIdStr, 10);
+            const variantIndex = parseInt(variantIndexStr, 10);
+            const product = state.products.find(p => p.id === productId);
+            if (!product || !product.variants[variantIndex]) continue; // Check if product and variant exist
 
             const numericQty = parseInt(qty);
             if (isNaN(numericQty)) continue;
 
             const clampedQty = Math.max(0, Math.min(99, numericQty));
             if (clampedQty > 0) {
-                sanitized[id] = clampedQty;
+                sanitized[variantId] = clampedQty;
             }
         }
 
