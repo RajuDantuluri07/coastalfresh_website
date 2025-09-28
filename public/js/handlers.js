@@ -823,8 +823,7 @@ export const Handlers = {
         if (state.isPopupOpen && state.popupProduct?.id === productId) {
             UI.updatePopupCta();
         }
-        // This function needs to be implemented or verified
-        // UI.updateProductCardState(productId); 
+        UI.updateProductCardState(productId);
     },
 
     toggleFavorite: (productId) => {

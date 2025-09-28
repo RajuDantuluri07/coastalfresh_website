@@ -663,29 +663,46 @@ export const UI = {
             const imageContainer = card.querySelector('.product-image');
             if (!imageContainer) return;
     
-            let newControlHTML = '';
-            const sanitizedName = product.name;
-
-            if (product.variants && product.variants.length > 1) {
-                newControlHTML = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">OPTIONS</button>`;
-            } else if (product.variants && product.variants.length === 1) {
-                const variantId = `${product.id}-0`;
-                const isInCartQty = state.cart[variantId] || 0;
-                newControlHTML = isInCartQty > 0
-                    ? `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${isInCartQty}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>`
-                    : `<button class="add-btn add-pill" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart"><i class="fas fa-plus"></i> ADD</button>`;
-            }
-
             // Find and remove the old control (add button, qty selector, or out of stock badge).
             // This is more robust than assuming the structure.
-            const oldControls = imageContainer.querySelector('.add-btn, .cart-controls, .out-of-stock-badge');
+            const oldControls = imageContainer.querySelector('.add-btn, .cart-controls, .out-of-stock-overlay, .variant-btn');
             if (oldControls) {
                 oldControls.remove();
             }
 
+            let newControlHTML = '';
+            const sanitizedName = product.name;
+
+            if (product.available) {
+                const variants = product.variants || [];
+                const variantCount = variants.length;
+                const isSpecialCategory = product.category === 'Prawns' || product.category === 'Pickles';
+                const useSizesCta = variantCount >= 3 || (variantCount > 1 && isSpecialCategory);
+
+                const qtyInCart = Object.keys(state.cart)
+                    .filter(key => key.startsWith(`${product.id}-`))
+                    .reduce((sum, key) => sum + state.cart[key], 0);
+
+                if (qtyInCart > 0 && variantCount === 1) {
+                    const variantId = `${product.id}-0`;
+                    newControlHTML = `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">-</button><span class="qty">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>`;
+                } else if (useSizesCta) {
+                    const ctaText = `${variantCount} Sizes`;
+                    newControlHTML = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="${ctaText}" aria-haspopup="dialog">${ctaText}</button>`;
+                } else {
+                    const variantId = `${product.id}-0`;
+                    const buttonActionId = variantCount > 1 ? product.id : variantId;
+                    const buttonClass = variantCount > 1 ? 'add-btn variant-btn' : 'add-btn';
+                    newControlHTML = `<button class="${buttonClass}" data-id="${buttonActionId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
+                }
+            } else {
+                newControlHTML = `<div class="out-of-stock-overlay">Out of Stock</div>`;
+            }
+
             // Insert the new, correct control into the image container.
-            const finalHTML = !product.available ? `<div class="out-of-stock-badge">Out of Stock</div>` : newControlHTML;
-            imageContainer.insertAdjacentHTML('beforeend', finalHTML);
+            if (newControlHTML) {
+                imageContainer.insertAdjacentHTML('beforeend', newControlHTML);
+            }
         });
     },
 
