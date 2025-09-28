@@ -525,6 +525,21 @@ function toggleVariantUI() {
     }
 }
 
+/**
+ * NEW: Checks the number of variants in the multi-variant container
+ * and ensures the single-variant fields are shown as a fallback if it's empty.
+ * This is only for multi-variant categories.
+ */
+function checkMultiVariantState() {
+    const selectedCategory = document.getElementById('product-category').value;
+    if (selectedCategory !== 'Prawns' && selectedCategory !== 'Pickles') return;
+
+    const variantContainer = document.getElementById('variants-container');
+    const singleVariantSection = document.getElementById('single-variant-fields');
+
+    singleVariantSection.style.display = variantContainer.children.length === 0 ? 'flex' : 'none';
+}
+
 function populateProductForm(product) {
     const form = document.getElementById('product-form');
     form.reset();
@@ -637,6 +652,8 @@ document.getElementById('add-variant-btn').addEventListener('click', () => {
 document.getElementById('variants-container').addEventListener('click', (e) => {
     if (e.target.classList.contains('remove-variant-btn')) {
         e.target.closest('.variant-card').remove();
+        // FIX: After removing a variant, check if we need to show the single-variant fields.
+        checkMultiVariantState();
     }
 });
 
@@ -712,6 +729,11 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
                     available: card.querySelector('.variant-available').value === 'true',
                 });
             });
+        } else if (document.querySelectorAll('.variant-card').length === 0) {
+            // FIX: If no multi-variant cards exist, but the category IS multi-variant,
+            // it means the user removed them all. Read from the single-variant fallback fields.
+            const mrp = parseFloat(document.getElementById('single-variant-mrp').value);
+            const finalPrice = parseFloat(document.getElementById('single-variant-finalPrice').value);
         } else {
             // Single-variant logic
             const mrp = parseFloat(document.getElementById('single-variant-mrp').value);
