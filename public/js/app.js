@@ -21,7 +21,7 @@ export const config = {
         { key: 'Crabs',  label: 'Crabs',  icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/crab_n5ukwx.png' },
         { key: 'Pickles',label: 'Pickles',icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005242/mason-jar_a5mtg4.png' }
     ],
-    ENABLE_FLASH_SALE: true,
+    ENABLE_FLASH_SALE: false,
     FLASH_SALE_PRODUCT_IDS: [16, 29, 31, 33, 32],
     FLASH_SALE_DURATION_HOURS: 12,
     FEATURED_PRODUCT_IDS: [20, 15, 25, 19, 23],
