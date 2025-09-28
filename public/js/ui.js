@@ -249,56 +249,63 @@ export const UI = {
             const sanitizedName = DOMPurify.sanitize(product.name);
 
             let ctaButton = '';
-            const variantCount = product.variants?.length || 1;
+            const variants = product.variants || [];
+            const variantCount = variants.length;
 
-            if (variantCount > 1 && product.available) {
-                // Multi-variant product: Show compact button with options text.
+            if (product.available) {
+              if (variantCount > 1) {
+                // Multi-option product (like the demo)
                 const optionsText = `${variantCount} options`;
                 ctaButton = `
-                    <button class="compact-add-btn variant-btn" data-id="${product.id}" aria-label="View Options, ${optionsText}" title="View Options, ${optionsText}">
-                        <span class="add-text">ADD</span>
-                        <span class="options-text">${optionsText}</span>
-                    </button>`;
-            } else if (variantCount === 1 && primaryVariant.available) {
-                // Single-variant product: Show either compact "ADD" button or quantity controls.
+                    <div class="options-badge">${optionsText}</div>
+                    <button class="add-btn small variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">ADD</button>
+                `;
+              } else {
+                // Single-option product
                 const variantId = `${product.id}-0`;
                 const qtyInCart = state.cart[variantId] || 0;
                 if (qtyInCart > 0) {
-                    ctaButton = `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>`;
+                    ctaButton = `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">-</button><span class="qty">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>`;
                 } else {
-                    ctaButton = `
-                        <button class="compact-add-btn" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart" title="Add to cart">
-                            <span class="add-text">ADD</span>
-                        </button>`;
+                    ctaButton = `<button class="add-btn" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
                 }
+              }
             }
- const priceOrStockHTML = product.available
-    ? `
-        <div class="price-container">
-            <div class="price-row">
-                <span class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</span>
-                ${hasOffer ? `<span class="old-price">₹${primaryVariant.mrp}</span>` : ''}
-            </div>
-            ${hasOffer && savings > 0 ? `<div class="save-row"><span class="save">SAVE ₹${savings}</span></div>` : ''}
-        </div>
-      `
-    : '<div class="out-of-stock-text">Out of Stock</div>';
+
+            const priceOrStockHTML = product.available ? `
+                <div class="price-row">
+                    <div>
+                        <div class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</div>
+                        ${hasOffer ? `<div class="old-price">₹${primaryVariant.mrp}</div>` : ''}
+                    </div>
+                    ${hasOffer && savings > 0 ? `<div style="margin-left:auto;text-align:right"><div class="save">SAVE ₹${savings}</div></div>` : ''}
+                </div>
+            ` : '';
+
+            const subInfoHTML = product.available ? `
+                <div class="sub-info">
+                    <span class="pill">${primaryVariant.net || primaryVariant.gross || ''}</span>
+                </div>
+            ` : '<div class="out-of-stock-text">Out of Stock</div>';
+
             return `
         <div class="card product ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" role="article" aria-label="Product: ${sanitizedName}">
-          <div class="product-image"> 
+          <div class="product-image">
             <img src="${optimizedImage}" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
-            <button class="wish" aria-label="Add to wishlist">♡</button>
+            <button class="wish" aria-label="Add to wishlist">
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 21s-7.5-4.9-9.2-8.1C1.6 9.9 4 6 8 6c2.2 0 3.6 1.5 4 2.2.4-.7 1.8-2.2 4-2.2 4 0 6.4 3.9 5.2 6.9C19.5 16.1 12 21 12 21z"></path></svg>
+            </button>
              ${product.available ? ctaButton : ''}
           </div>
           <div class="info">
+            ${priceOrStockHTML}
             <h3 class="name">${sanitizedName}</h3>
-             ${priceOrStockHTML}
+            ${subInfoHTML}
           </div>
         </div>
       `;
         } catch (error) {
             console.error(`Error rendering product card for product ID ${product?.id}:`, error);
-            // Return an empty string so the rest of the products can render.
             return '';
         }
     },
