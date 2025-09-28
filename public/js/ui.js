@@ -568,12 +568,12 @@ export const UI = {
                 if (product.variants[0].available) {
                     if (isInCartQty > 0) {
                         newControlHTML = `<div class="cart-controls" data-id="${variantId}">
-                        <button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button>
-                        <span class="qty" aria-live="polite">${isInCartQty}</span>
-                        <button class="qty-btn inc" aria-label="Increase quantity">+</button>
-                    </div>`;
+                            <button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button>
+                            <span class="qty" aria-live="polite">${isInCartQty}</span>
+                            <button class="qty-btn inc" aria-label="Increase quantity">+</button>
+                        </div>`;
                 } else { 
-                    newControlHTML = `<button class="add-btn" data-id="${product.id}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
+                    newControlHTML = `<button class="add-btn" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
                 }
             }
             ctaContainer.innerHTML = newControlHTML; // Append the new controls into the correct container.
@@ -999,12 +999,14 @@ export const UI = {
             return;
         }
 
-        let timer = null;
-        let restartTimer = null; // To restart auto-play after user interaction
+        // Use a property on the element itself to store the timer, avoiding global state issues.
+        if (carouselContainer.carouselTimer) clearInterval(carouselContainer.carouselTimer);
+        if (carouselContainer.restartTimer) clearTimeout(carouselContainer.restartTimer);
 
         if (dotsContainer) {
-            dotsContainer.innerHTML = Array.from({ length: total }, (_, i) =>
-                `<div class="dot ${i === 0 ? 'active' : ''}"></div>`
+            dotsContainer.innerHTML = Array.from(
+                { length: total },
+                (_, i) => `<div class="dot ${i === 0 ? 'active' : ''}"></div>`
             ).join('');
         }
 
@@ -1036,18 +1038,20 @@ export const UI = {
         }
 
         function startTimer() {
-            if (timer) clearInterval(timer);
-            timer = setInterval(advanceSlide, 5000);
+            if (carouselContainer.carouselTimer) clearInterval(carouselContainer.carouselTimer);
+            carouselContainer.carouselTimer = setInterval(advanceSlide, 5000);
         }
         function stopTimer() {
-            clearInterval(timer);
+            clearInterval(carouselContainer.carouselTimer);
             // If the user interacts, clear any pending restart and set a new one
-            clearTimeout(restartTimer);
-            restartTimer = setTimeout(startTimer, 8000); // Restart after 8 seconds of inactivity
+            clearTimeout(carouselContainer.restartTimer);
+            carouselContainer.restartTimer = setTimeout(startTimer, 8000); // Restart after 8 seconds of inactivity
         }
 
         carouselContainer.addEventListener('pointerdown', stopTimer);
-        carouselContainer.addEventListener('scroll', stopTimer, { passive: true });
+        // Use a debounced scroll handler to avoid stopping the timer on every tiny scroll event
+        let scrollTimeout;
+        carouselContainer.addEventListener('scroll', () => { clearTimeout(scrollTimeout); scrollTimeout = setTimeout(stopTimer, 150); }, { passive: true });
         document.addEventListener('visibilitychange', () => {
             document.hidden ? stopTimer() : startTimer();
         });
@@ -1308,7 +1312,7 @@ export const UI = {
                             moreItemsText = `${firstItem.net} Net Wt`;
                         }
                     }
-                    const { baseUrl: thumbImg } = UI.getOptimizedImageUrl(firstItem.image, 80, 80) || {};
+                    const thumbImg = UI.getOptimizedImageUrl(firstItem.image, 80, 80);
 
                     return `
                         <div class="order-card" data-order-id="${doc.id}">

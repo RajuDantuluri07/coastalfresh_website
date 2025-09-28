@@ -729,11 +729,20 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
                     available: card.querySelector('.variant-available').value === 'true',
                 });
             });
-        } else if (document.querySelectorAll('.variant-card').length === 0) {
-            // FIX: If no multi-variant cards exist, but the category IS multi-variant,
-            // it means the user removed them all. Read from the single-variant fallback fields.
+        } else if ((selectedCategory === 'Prawns' || selectedCategory === 'Pickles') && document.querySelectorAll('.variant-card').length === 0) {
+            // FIX: If a multi-variant category has no variant cards (they were all removed),
+            // read from the single-variant fallback fields to create one variant.
             const mrp = parseFloat(document.getElementById('single-variant-mrp').value);
             const finalPrice = parseFloat(document.getElementById('single-variant-finalPrice').value);
+            variants.push({
+                name: productName,
+                gross: document.getElementById('single-variant-gross').value,
+                net: document.getElementById('single-variant-net').value,
+                mrp: mrp,
+                finalPrice: finalPrice,
+                offer: mrp > finalPrice ? Math.round(((mrp - finalPrice) / mrp) * 100) : 0,
+                available: document.getElementById('single-variant-available').value === 'true',
+            });
         } else {
             // Single-variant logic
             const mrp = parseFloat(document.getElementById('single-variant-mrp').value);
@@ -797,7 +806,7 @@ document.getElementById('delete-product-btn').addEventListener('click', async (e
 
     if (confirm(`Are you sure you want to delete product ID ${productToDelete.id}? This cannot be undone.`)) {
         try {
-            await db.collection('products').doc(String(productToDelete.id)).delete();
+            await db.collection('products').doc(docId).delete();
             toast('Product deleted.');
             showMainView('products');
         } catch (err) {
