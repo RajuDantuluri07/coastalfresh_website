@@ -940,6 +940,19 @@ z-index: 2;                 /* sits above input content */
   padding-top: 100%; /* 1:1 aspect ratio */
   background: linear-gradient(180deg, #f8f8f8, #ffffff);
 }
+
+/* FIX: Add styles for the actual product image to ensure it fits correctly. */
+.image-wrap img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 86%; /* Leave padding for buttons */
+  height: 86%;
+  transform: translate(-50%, -50%);
+  object-fit: contain; /* Ensure the whole image is visible */
+  display: block;
+  pointer-events: none; /* Clicks should go to the underlying card or buttons */
+}
 .product-image img {
   position: absolute;
   top: 8px;
