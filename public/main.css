@@ -1256,9 +1256,19 @@ overflow: hidden;
 /* NEW: Card-style variant selector */
 .popup-weight { /* This container now holds the variant cards */
   display: flex;
-  flex-wrap: wrap;
+  /* FIX: Ensure variants stay in a single row with horizontal scrolling on mobile */
+  flex-wrap: nowrap;
+  overflow-x: auto;
   gap: 10px;
   margin-bottom: 16px;
+  /* Add some padding to avoid scrollbar cutting off content */
+  padding-bottom: 8px;
+  /* Hide the scrollbar for a cleaner look */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+.popup-weight::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
 }
 
 .variant-card {
