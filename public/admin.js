@@ -54,14 +54,17 @@ auth.onAuthStateChanged(user => {
     }
 });
 // ---------- Login ----------
-loginForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    loginError.textContent = '';
-    const email = e.target.email.value.trim();
-    const password = e.target.password.value;
-    auth.signInWithEmailAndPassword(email, password).catch(err => {
-        console.error('Login failed', err);
-        loginError.textContent = err.message || 'Login failed';
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('login-form');
+    loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        loginError.textContent = '';
+        const email = e.target.email.value.trim();
+        const password = e.target.password.value;
+        auth.signInWithEmailAndPassword(email, password).catch(err => {
+            console.error('Login failed', err);
+            loginError.textContent = err.message || 'Login failed';
+        });
     });
 });
 logoutBtn.addEventListener('click', () => auth.signOut());
