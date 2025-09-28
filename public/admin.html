@@ -55,6 +55,14 @@
         </div>
       </header>
 
+      <!-- NEW: Desktop Navigation -->
+      <nav class="desktop-nav" role="navigation" aria-label="Main">
+        <button data-page="dashboard" class="active"><i class="fa-solid fa-house"></i><span>Home</span></button>
+        <button data-page="customers"><i class="fa-solid fa-users"></i><span>Customers</span></button>
+        <button data-page="products"><i class="fa-solid fa-box-archive"></i><span>Products</span></button>
+        <button id="desktop-refresh-btn"><i class="fa-solid fa-arrows-rotate"></i><span>Refresh</span></button>
+      </nav>
+
       <!-- Stats scroller -->
       <div class="stats-scroll" role="region" aria-label="Quick stats">
         <div class="stat">
@@ -126,10 +134,11 @@
           <div class="field"><label for="product-desc">Description</label><textarea id="product-desc" rows="3" required></textarea></div>
           <div class="field"><label for="product-category">Category</label><input id="product-category" type="text" required placeholder="e.g., Fish, Prawns, Crabs, Pickles"></div>
           <div class="field">
-            <label for="product-image-upload">Product Image</label>
+            <label>Product Image</label>
             <img id="product-image-preview" src="" alt="Image Preview" style="max-width: 100px; max-height: 100px; display: none; margin-bottom: 10px; border-radius: 8px; object-fit: cover;">
-            <input id="product-image-upload" type="file" accept="image/*">
-            <input id="product-image" type="hidden"> <!-- This will hold the final image URL -->
+            <input id="product-image-upload" type="file" accept="image/*" style="margin-bottom: 8px;">
+            <label for="product-image-url" style="font-size: .8rem; color: var(--muted); margin-top: 8px;">Or enter Image URL</label>
+            <input id="product-image-url" type="url" placeholder="https://example.com/image.png">
             <progress id="upload-progress" value="0" max="100" style="width: 100%; display: none; margin-top: 10px;"></progress>
           </div>
           <div class="field-row"><div class="field"><label for="product-mrp">MRP (₹)</label><input id="product-mrp" type="number" step="0.01" required></div><div class="field"><label for="product-finalPrice">Final Price (₹)</label><input id="product-finalPrice" type="number" step="0.01" required></div></div>

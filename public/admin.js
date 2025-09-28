@@ -318,6 +318,19 @@ bottomNav.addEventListener('click', (ev) => {
     showMainView(page);
 });
 
+const desktopNav = document.querySelector('.desktop-nav');
+desktopNav.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('button[data-page]');
+    if (!btn) return;
+
+    desktopNav.querySelectorAll('button[data-page]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const page = btn.dataset.page;
+    showMainView(page);
+});
+
+
 function showMainView(page) {
     const dashboardContent = [document.querySelector('.stats-scroll'), document.querySelector('.segmented'), document.getElementById('orders-container')];
     const customersView = document.getElementById('customers-view');
@@ -457,8 +470,8 @@ function populateProductForm(product) {
     // NEW: Handle image preview
     const imagePreview = document.getElementById('product-image-preview');
     imagePreview.src = product ? product.image : '';
-    imagePreview.style.display = product ? 'block' : 'none';
-    document.getElementById('product-image').value = product ? product.image : ''; // Store existing URL
+    imagePreview.style.display = product && product.image ? 'block' : 'none';
+    document.getElementById('product-image-url').value = product ? product.image : ''; // Store existing URL
     document.getElementById('product-mrp').value = product ? product.mrp : '';
     document.getElementById('product-finalPrice').value = product ? product.finalPrice : '';
     document.getElementById('product-gross').value = product ? product.gross : '';
@@ -500,7 +513,8 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
     const offer = mrp > finalPrice ? Math.round(((mrp - finalPrice) / mrp) * 100) : 0;
 
     try {
-        let imageUrl = document.getElementById('product-image').value;
+        // Prioritize URL field, but it will be overwritten by file upload if a file is selected.
+        let imageUrl = document.getElementById('product-image-url').value;
         const imageFile = document.getElementById('product-image-upload').files[0];
 
         // If a new image file is selected, upload it
@@ -649,12 +663,16 @@ async function fetchAggregateCounts() {
     }
 }
 // refresh button in bottom nav
-document.getElementById('refresh-btn').addEventListener('click', () => {
+function handleRefresh() {
     toast('Refreshing...');
     fetchAndListenOrders();
     fetchAggregateCounts();
     fetchDailySummary();
-});
+}
+
+document.getElementById('refresh-btn').addEventListener('click', handleRefresh);
+document.getElementById('desktop-refresh-btn').addEventListener('click', handleRefresh);
+
 // small toast implement
 function toast(msg) {
     // tiny accessible toast using alert role

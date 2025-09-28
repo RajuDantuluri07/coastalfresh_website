@@ -132,6 +132,29 @@ header.app-header {
   font-weight: 700;
   font-size: .95rem;
 }
+
+/* NEW: Desktop Navigation (hidden on mobile) */
+.desktop-nav {
+  display: none;
+  background: var(--surface);
+  padding: .5rem 1rem;
+  border-bottom: 1px solid #eef2f6;
+  gap: .5rem;
+}
+.desktop-nav button {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: .5rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: .9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  color: var(--muted);
+}
+
 /* Stats: horizontal scroller for mobile */
 .stats-scroll {
   display: flex;
@@ -399,6 +422,13 @@ nav.bottom-nav button.active {
   }
   .orders {
     padding: 1.5rem 2rem;
+  }
+  .desktop-nav {
+    display: flex;
+  }
+  .desktop-nav button.active {
+    background: var(--primary-light);
+    color: var(--primary-dark);
   }
   nav.bottom-nav {
     display: none
