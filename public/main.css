@@ -2971,6 +2971,54 @@ body.popup-open .bottom-bar {
 /* Status: Cancelled */
 .order-status.cancelled { background-color: #FFEBEE; color: #D32F2F; }
 
+/* --- NEW: Logged-out Empty State Styles --- */
+.logged-out-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 28px 20px;
+  flex-grow: 1;
+  min-height: 60vh;
+  gap: 18px;
+}
+
+.logged-out-prompt .illustration {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(1,101,154,0.06), rgba(1,101,154,0.02));
+  box-shadow: 0 6px 18px rgba(2,6,23,0.08);
+  padding: 18px;
+}
+
+.logged-out-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.1px;
+}
+
+.logged-out-lead {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.45;
+  max-width: 360px;
+}
+
+.logged-out-actions {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
 /* --- REVAMPED: Order Details Drawer --- */
 .drawer-overlay {
   position: fixed; top: 0; left: 0; width: 100%; height: 100%;

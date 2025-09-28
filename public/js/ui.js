@@ -1154,14 +1154,28 @@ export const UI = {
 
         if (!state.currentUser) {
             mainContent.innerHTML = `
-        <div class="empty-cart" style="flex-grow: 1; min-height: 60vh;">
-          <i class="fas fa-user-lock" style="font-size: 64px; margin-bottom: 24px; color: var(--border-color);"></i>
-          <h3>Login to View Orders</h3>
-          <p>Please log in to see your order history.</p>
-          <button class="empty-cart-btn" id="loginFromOrdersBtn">Login / Sign Up</button>
+        <div class="logged-out-prompt">
+          <div class="illustration">
+            <svg width="140" height="140" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of a locked document">
+              <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M65 170H45c-8.284 0-15-6.716-15-15V45c0-8.284 6.716-15 15-15h80c8.284 0 15 6.716 15 15v40" stroke="var(--primary-color)" stroke-width="8"/>
+                <path d="M50 60h80M50 85h50" stroke="var(--primary-color)" stroke-width="6" opacity="0.5"/>
+                <rect x="110" y="110" width="80" height="60" rx="10" fill="var(--primary-light)" stroke="var(--primary-color)" stroke-width="8"/>
+                <circle cx="150" cy="145" r="8" fill="var(--primary-dark)"/>
+                <path d="M135 110v-10c0-8.284 6.716-15 15-15s15 6.716 15 15v10" stroke="var(--primary-color)" stroke-width="8"/>
+              </g>
+            </svg>
+          </div>
+          <h2 class="logged-out-title">Login to view orders</h2>
+          <p class="logged-out-lead">Sign in to see your order history, track deliveries and reorder favourites.</p>
+          <div class="logged-out-actions">
+            <button class="primary-cta" id="loginFromOrdersBtn">Login / Sign Up</button>
+            <button class="secondary-action" id="continueAsGuestBtn">Continue as guest</button>
+          </div>
         </div>
       `;
             document.getElementById('loginFromOrdersBtn').addEventListener('click', () => UI.showLoginModal(null, 'signup'));
+            document.getElementById('continueAsGuestBtn').addEventListener('click', () => UI.showPage('catalog'));
             return;
         }
 
@@ -1345,16 +1359,19 @@ export const UI = {
             container.innerHTML = '<p>No items found in this order.</p>';
             return;
         }
-        container.innerHTML = items.map(item => `
+        container.innerHTML = items.map(item => {
+            const { baseUrl: itemImage } = UI.getOptimizedImageUrl(item.image, 96, 96);
+            return `
             <div class="drawer-item">
-                <img src="${UI.getOptimizedImageUrl(item.image, 96, 96)}" alt="${item.name}" class="drawer-item-thumb">
+                <img src="${itemImage}" alt="${item.name}" class="drawer-item-thumb" loading="lazy">
                 <div class="drawer-item-info">
                     <div class="drawer-item-name">${item.name}</div>
                     <div class="drawer-item-qty">Qty: ${item.qty}</div>
                 </div>
                 <div class="drawer-item-price">₹${item.price * item.qty}</div>
             </div>
-        `).join('');
+        `;
+        }).join('');
     },
 
     renderDrawerBillSummary: (order) => {
