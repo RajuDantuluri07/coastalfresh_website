@@ -288,11 +288,11 @@ export const UI = {
           <div class="product-image"> 
             <img src="${optimizedImage}" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
             <button class="wish" aria-label="Add to wishlist">♡</button>
+             ${product.available ? ctaButton : ''}
           </div>
           <div class="info">
             <h3 class="name">${sanitizedName}</h3>
              ${priceOrStockHTML}
-             ${product.available ? ctaButton : ''}
           </div>
         </div>
       `;

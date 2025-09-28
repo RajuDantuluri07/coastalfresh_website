@@ -991,10 +991,11 @@ z-index: 2;                 /* sits above input content */
 
 /* --- NEW: Compact Add/Options Button --- */
 .compact-add-btn {
-  position: static; /* Change from absolute to static */
-  width: 100%; /* Make it full width of the info container */
-  height: 44px; /* Standard touch-friendly height */
-  margin-top: 8px; /* Add space above the button */
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 90px;
+  height: 44px;
   background: var(--success-color); /* Use solid green for high conversion */
   border: none; /* Remove border, background is enough */
   border-radius: 16px;
@@ -1040,10 +1041,11 @@ z-index: 2;                 /* sits above input content */
 
 /* Quantity controls that replace the ADD button */
 .cart-controls {
-  position: static; /* Match the add button */
-  width: 100%; /* Match the add button */
-  height: 44px; /* Match the add button */
-  margin-top: 8px; /* Match the add button */
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 90px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: space-between; /* Space out buttons and quantity */
