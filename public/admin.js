@@ -307,31 +307,24 @@ function confirmAndUpdate(orderId, newStatus) {
 
 // ---------- NEW: Customer/User Management ----------
 
-bottomNav.addEventListener('click', (ev) => {
+function handleNavClick(ev) {
     const btn = ev.target.closest('button[data-page]');
     if (!btn || btn.id === 'refresh-btn') return;
-
-    bottomNav.querySelectorAll('button[data-page]').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
     const page = btn.dataset.page;
     showMainView(page);
-});
+}
 
-const desktopNav = document.querySelector('.desktop-nav');
-desktopNav.addEventListener('click', (ev) => {
-    const btn = ev.target.closest('button[data-page]');
-    if (!btn) return;
-
-    desktopNav.querySelectorAll('button[data-page]').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    const page = btn.dataset.page;
-    showMainView(page);
-});
+bottomNav.addEventListener('click', handleNavClick);
+desktopNav.addEventListener('click', handleNavClick);
 
 
 function showMainView(page) {
+    // FIX: Update both navigation bars to keep them in sync
+    [bottomNav, desktopNav].forEach(nav => {
+        nav.querySelectorAll('button[data-page]').forEach(b => b.classList.remove('active'));
+        nav.querySelector(`button[data-page="${page}"]`)?.classList.add('active');
+    });
+
     const dashboardContent = [document.querySelector('.stats-scroll'), document.querySelector('.segmented'), document.getElementById('orders-container')];
     const customersView = document.getElementById('customers-view');
 
@@ -470,7 +463,7 @@ function populateProductForm(product) {
     // NEW: Handle image preview
     const imagePreview = document.getElementById('product-image-preview');
     imagePreview.src = product ? product.image : '';
-    imagePreview.style.display = product && product.image ? 'block' : 'none';
+    imagePreview.style.display = (product && product.image) ? 'block' : 'none';
     document.getElementById('product-image-url').value = product ? product.image : ''; // Store existing URL
     document.getElementById('product-mrp').value = product ? product.mrp : '';
     document.getElementById('product-finalPrice').value = product ? product.finalPrice : '';

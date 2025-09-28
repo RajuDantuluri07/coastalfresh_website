@@ -4,6 +4,7 @@
 :root {
   --primary:#0ea5e9;
   --primary-dark:#0284c7;
+  --primary-light: #e0f2fe; /* FIX: Added missing variable for active states */
   --success:#16a34a;
   --warning:#f59e0b;
   --danger:#ef4444;
