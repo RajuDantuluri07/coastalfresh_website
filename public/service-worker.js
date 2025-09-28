@@ -53,11 +53,19 @@ self.addEventListener('notificationclick', event => {
   );
 });
 
-const CACHE_NAME = 'coastal-fresh-v1';
+const CACHE_NAME = 'coastal-fresh-v2'; // Increment CACHE_NAME to force a new service worker installation
 const urlsToCache = [
   '/',
   '/index.html',
   '/main.css',
+  // Admin files should generally not be cached by the service worker
+  // or should use a network-only strategy to ensure freshness.
+  // They are not explicitly listed here, which is good, but we need
+  // to ensure they are not caught by the generic "Cache first" strategy.
+  // We will add a specific bypass for them in the fetch event.
+  // If admin.html/css/js were ever added here, they should be removed.
+  // For now, they are not here, which is good.
+
   '/js/app.js',
   '/js/ui.js',
   '/js/handlers.js',
@@ -81,6 +89,15 @@ self.addEventListener('install', event => {
 
 // Cache and return requests
 self.addEventListener('fetch', event => {
+  const url = new URL(event.request.url);
+
+  // Bypass caching for admin pages and their associated scripts/styles
+  // Always fetch these directly from the network to ensure the latest version.
+  if (url.pathname.startsWith('/admin.html') || url.pathname.startsWith('/admin.js') || url.pathname.startsWith('/admin.css')) {
+    event.respondWith(fetch(event.request)); // Go straight to network
+    return;
+  }
+
   // Use a "Network first, then Cache" strategy for the main HTML page.
   // This ensures users always get the latest version of the app shell if they are online.
   if (event.request.mode === 'navigate') {

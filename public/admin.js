@@ -190,6 +190,16 @@ function orderCardHTML(order) {
       `;
 }
 
+function statusOptionsFor(status) {
+    const validTransitions = {
+        'Pending': ['Pending', 'Accepted', 'Cancelled'],
+        'Accepted': ['Accepted', 'Out for Delivery', 'Cancelled'],
+        'Out for Delivery': ['Out for Delivery', 'Completed', 'Cancelled'],
+        'Completed': ['Completed'],
+        'Cancelled': ['Cancelled']
+    };
+    return validTransitions[status] || [status];
+}
 // delegated click handler for toggles + buttons
 document.addEventListener('click', (ev) => {
     const toggle = ev.target.closest('[data-action="toggle"]');
