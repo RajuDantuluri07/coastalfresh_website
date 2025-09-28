@@ -22,9 +22,9 @@ export const config = {
         { key: 'Pickles',label: 'Pickles',icon: 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005242/mason-jar_a5mtg4.png' }
     ],
     ENABLE_FLASH_SALE: true,
-    FLASH_SALE_PRODUCT_IDS: [11, 12, 20, 22],
+    FLASH_SALE_PRODUCT_IDS: [16, 29, 31, 33, 32],
     FLASH_SALE_DURATION_HOURS: 12,
-    FEATURED_PRODUCT_IDS: [17, 13, 21, 1],
+    FEATURED_PRODUCT_IDS: [20, 15, 25, 19, 23],
     FREE_DELIVERY_THRESHOLD: 1500,
     COUPONS: {
         'FRESH10': { type: 'percent', value: 10, description: '10% off your order' },
