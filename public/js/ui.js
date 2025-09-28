@@ -255,9 +255,7 @@ export const UI = {
             if (product.available) {
               if (variantCount > 1) {
                 // Multi-option product (like the demo)
-                const optionsText = `${variantCount} options`;
                 ctaButton = `
-                    <div class="options-badge">${optionsText}</div>
                     <button class="add-btn small variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">ADD</button>`;
               } else {
                 // Single-option product
@@ -276,17 +274,16 @@ export const UI = {
 
             const priceOrStockHTML = product.available ? `
                 <div class="price-row">
-                    <div>
-                        <div class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</div>
-                        ${hasOffer ? `<div class="old-price">₹${primaryVariant.mrp}</div>` : ''}
-                    </div>
-                    ${hasOffer && savings > 0 ? `<div style="margin-left:auto;text-align:right"><div class="save">SAVE ₹${savings}</div></div>` : ''}
+                    <span class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</span>
+                    ${hasOffer ? `<span class="old-price">₹${primaryVariant.mrp}</span>` : ''}
+                    ${hasOffer && savings > 0 ? `<span class="save">SAVE ₹${savings}</span>` : ''}
                 </div>
             ` : '';
 
             const subInfoHTML = product.available ? `
                 <div class="sub-info">
                     <span class="pill">${primaryVariant.net || primaryVariant.gross || ''}</span>
+                    ${variantCount > 1 ? `<span class="options-text">${variantCount} options</span>` : ''}
                 </div>
             ` : ''; // Out of stock text is now in the overlay
 

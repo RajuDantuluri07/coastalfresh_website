@@ -1066,8 +1066,7 @@ z-index: 2;                 /* sits above input content */
 }
 .price-row {
   display: flex;
-  align-items: flex-end;
-  gap: 10px;
+  align-items: ap;
 }
 .final-price {
   font-weight: 700;
@@ -1082,10 +1081,20 @@ z-index: 2;                 /* sits above input content */
   color: var(--success-color);
   font-weight: 700;
   font-size: 13px;
+  margin-left: auto;
 }
 .sub-info { /* .sub from demo */
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 13px;
   color: #6b7280; /* --muted from demo */
+}
+.options-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  padding: 2px 0;
 }
 .pill {
   display: inline-block;
