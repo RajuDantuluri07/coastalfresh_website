@@ -26,6 +26,15 @@ const ADMIN_UIDS = [
     "p4uS2H3JFXNvmhkQWftUH721a2n2",
     "pel0OXjpAva5fe9367PgIHsRaak1" // Add the new admin's UID here
 ];
+
+// NEW: Define product categories to prevent typos.
+const PRODUCT_CATEGORIES = [
+    "Fish",
+    "Prawns",
+    "Crabs",
+    "Pickles"
+];
+
 // Local cache & helpers
 let allOrders = [];
 let unsubscribeOrders = null;
@@ -442,27 +451,52 @@ async function renderProductsPage() {
         }
 
         allProducts = productsSnapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
-        const productsHTML = allProducts.map(product => `
-            <div class="order-card" data-product-id="${product.id}" data-action="edit-product">
-                <div class="order-head">
-                    <div class="order-meta">
-                        <div class="id">ID: ${product.id}</div>
-                        <div class="time">${escapeHtml(product.name)}</div>
-                        <div style="font-size:.85rem;color:var(--muted)">${escapeHtml(product.category)}</div>
-                    </div>
-                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem">
-                        <div class="order-total">₹${product.finalPrice}</div>
-                        <div class="status-badge" style="font-size:.78rem;color:var(--muted)">${product.available ? 'Available' : 'Unavailable'}</div>
-                    </div>
-                </div>
-            </div>
-        `).join('');
+        const productsHTML = allProducts.map(product => productCardHTML(product)).join('');
         container.innerHTML = productsHTML;
 
     } catch (err) {
         console.error("Error fetching products:", err);
         container.innerHTML = '<div class="empty">Could not load products.</div>';
     }
+}
+
+function productCardHTML(product) {
+    const variants = product.variants || [];
+    const primaryVariant = variants[0] || {};
+
+    return `
+    <div class="order-card product-card" data-product-id="${product.id}">
+      <div class="order-head" role="button" tabindex="0" aria-expanded="false" data-action="toggle">
+        <img src="${product.image}" alt="${escapeHtml(product.name)}" class="product-thumb-admin" loading="lazy">
+        <div class="order-meta">
+          <div class="id">ID: ${product.id}</div>
+          <div class="time">${escapeHtml(product.name)}</div>
+          <div style="font-size:.85rem;color:var(--muted)">${escapeHtml(product.category)}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem">
+          <div class="order-total">₹${primaryVariant.finalPrice || 'N/A'}</div>
+          <div class="status-badge" style="font-size:.78rem;color:var(--muted)">${product.available ? 'Available' : 'Unavailable'}</div>
+        </div>
+      </div>
+      <div class="order-body" aria-hidden="true">
+        <div class="order-section">
+          <strong>Description</strong>
+          <p style="font-size:.9rem;color:var(--muted);">${escapeHtml(product.desc)}</p>
+        </div>
+        <div class="order-section">
+          <strong>Variants (${variants.length})</strong>
+          <ul class="variant-list">
+            ${variants.map(v => `
+              <li>
+                <span>${escapeHtml(v.name)} (${escapeHtml(v.net)})</span>
+                <span>MRP: ₹${v.mrp} / Price: ₹${v.finalPrice}</span>
+                <span class="status-badge ${v.available ? 'available' : 'unavailable'}">${v.available ? 'Yes' : 'No'}</span>
+              </li>`).join('') || '<li>No variants defined.</li>'}
+          </ul>
+        </div>
+        <div class="order-section"><button class="btn-small btn-primary" data-action="edit-product" data-product-id="${product.id}">Edit Product</button></div>
+      </div>
+    </div>`;
 }
 
 document.getElementById('products-container').addEventListener('click', (e) => {
@@ -483,7 +517,14 @@ function populateProductForm(product) {
     document.getElementById('product-id-input').value = product ? product.id : '';
     document.getElementById('product-name').value = product ? product.name : '';
     document.getElementById('product-desc').value = product ? product.desc : '';
-    document.getElementById('product-category').value = product ? product.category : '';
+
+    // NEW: Populate category dropdown
+    const categorySelect = document.getElementById('product-category');
+    categorySelect.innerHTML = PRODUCT_CATEGORIES.map(cat =>
+        `<option value="${cat}" ${product && product.category === cat ? 'selected' : ''}>${cat}</option>`
+    ).join('');
+    // Set a default if it's a new product
+    if (!product) categorySelect.value = PRODUCT_CATEGORIES[0];
     
     // NEW: Handle image preview
     const imagePreview = document.getElementById('product-image-preview');

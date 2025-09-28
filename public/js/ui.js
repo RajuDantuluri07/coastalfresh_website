@@ -230,12 +230,12 @@ export const UI = {
                 return ''; // Return an empty string to not break the .join('')
             }
 
-            const firstVariant = product.variants && product.variants.length > 0 ? product.variants[0] : {};
-            const hasOffer = firstVariant.mrp > firstVariant.finalPrice;
-            const savings = Math.round(firstVariant.mrp - firstVariant.finalPrice);
+            const primaryVariant = product.variants && product.variants.length > 0 ? product.variants[0] : {};
+            const hasOffer = primaryVariant.mrp > primaryVariant.finalPrice;
+            const savings = Math.round(primaryVariant.mrp - primaryVariant.finalPrice);
             const isInCart = Object.keys(state.cart).some(key => key.startsWith(`${product.id}-`));
             const optimizedImage = UI.getOptimizedImageUrl(product.image, 300, 300);
-            const sanitizedName = DOMPurify.sanitize(product.name);
+            const sanitizedName = product.name; // Assuming names from DB are safe
 
             let ctaButton = '';
             if (product.available) {
@@ -243,13 +243,13 @@ export const UI = {
                     ctaButton = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">Options</button>`;
                 } else {
                     const variantId = `${product.id}-0`;
-                    const qtyInCart = state.cart[variantId];
+                    const qtyInCart = state.cart[variantId] || 0;
                     ctaButton = qtyInCart ?
                         `<div class="cart-controls" data-id="${variantId}">
                             <button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button>
                             <span class="qty" aria-live="polite">${qtyInCart}</span>
                             <button class="qty-btn inc" aria-label="Increase quantity">+</button>
-                        </div>` :
+                        </div>` : 
                         `<button class="add-btn" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
                 }
             }
@@ -258,15 +258,15 @@ export const UI = {
         <article class="product ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" aria-label="Product: ${sanitizedName}">
           <div class="product-image"> 
             <img src="${optimizedImage}" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
-            <button class="wishlist" aria-label="Add to wishlist">♡</button>
+            <button class="wishlist" aria-label="Add to wishlist"><i class="far fa-heart"></i></button>
             ${!product.available ? `<div class="out-of-stock">Out of Stock</div>` : ''}
-            ${ctaButton}
+            <div class="product-cta-container">${ctaButton}</div>
           </div>
           <div class="product-info">
             <div class="product-name">${sanitizedName}</div>
             <div class="price-section">
-              <span class="product-price">₹${firstVariant.finalPrice}</span>
-              ${hasOffer ? `<span class="product-mrp">₹${firstVariant.mrp}</span>` : ''}
+              <span class="product-price">₹${primaryVariant.finalPrice}</span>
+              ${hasOffer ? `<span class="product-mrp">₹${primaryVariant.mrp}</span>` : ''}
             </div>
             ${hasOffer && savings > 0 ? `<div class="product-save">SAVE ₹${savings}</div>` : ''}
           </div>
@@ -300,7 +300,7 @@ export const UI = {
         const { main: popup, title, weight, priceSection, infoContent, mainImage, contentWrapper, backBtn } = state.dom.popup;
 
         const populatePopup = () => {
-            title.textContent = DOMPurify.sanitize(product.name);
+            title.textContent = product.name;
 
             // NEW: Render variant options
             if (product.variants && product.variants.length > 1) {
@@ -318,12 +318,12 @@ export const UI = {
 
             const selectedVariant = product.variants[state.selectedVariantIndex];
             infoContent.innerHTML = `
-                <p>${DOMPurify.sanitize(product.desc)}</p>
+                <p>${product.desc}</p>
                 <p style="margin-top: 16px;"><strong>Gross Wt:</strong> ${selectedVariant.gross} | <strong>Net Wt:</strong> ${selectedVariant.net}<br><small>Net weight is after cleaning. Weight loss varies by product.</small></p>`;
 
             const optimizedPopupImage = UI.getOptimizedImageUrl(product.image, 600, 600);
             mainImage.src = optimizedPopupImage;
-            mainImage.alt = `High-quality ${DOMPurify.sanitize(product.name)} from Coastal Fresh India`;
+            mainImage.alt = `High-quality ${product.name} from Coastal Fresh India`;
 
             document.getElementById('popupImageIndicators').style.display = 'none';
 
@@ -541,7 +541,7 @@ export const UI = {
     updateProductCardState: (productId) => {
         const productCards = document.querySelectorAll(`.product[data-id="${productId}"]`);
         if (productCards.length === 0) return;
-
+    
         const product = state.products.find(p => p.id === productId);
         if (!product) return;
 
@@ -549,28 +549,28 @@ export const UI = {
             const isInCartQty = state.cart[product.id];
             const imageContainer = card.querySelector('.product-image');
             if (!imageContainer) return; // Ensure the main container exists
-
+    
             // Remove existing controls before adding new ones
             const existingControls = imageContainer.querySelector('.cart-controls, .add-btn');
             if (existingControls) existingControls.remove();
-
+    
             let newControlHTML = '';
             if (product.available) {
-                const sanitizedName = DOMPurify.sanitize(product.name);
+                const sanitizedName = product.name;
                 if (isInCartQty) {
                     newControlHTML = `<div class="cart-controls" data-id="${product.id}">
                         <button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button>
                         <span class="qty" aria-live="polite">${isInCartQty}</span>
                         <button class="qty-btn inc" aria-label="Increase quantity">+</button>
                     </div>`;
-                } else {
+                } else { 
                     newControlHTML = `<button class="add-btn" data-id="${product.id}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
                 }
             }
             // Append the new controls into the image container
             imageContainer.insertAdjacentHTML('beforeend', newControlHTML);
         });
-    },
+    },    
 
     showCart: () => {
         state.couponError = null;
@@ -612,14 +612,14 @@ export const UI = {
             if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'block';
 
             cartItemsEl.innerHTML = items.map(item => {
-                const hasOffer = item.mrp > item.finalPrice; // Now using variant's price
+                const hasOffer = item.mrp > item.finalPrice;
                 const { baseUrl: optimizedCartImage } = UI.getOptimizedImageUrl(item.image, 128, 128) || {};
 
                 return `
           <article class="cart-item-card" data-id="${item.variantId}">
             <img src="${optimizedCartImage}" alt="${item.name}" class="cart-item-thumb">
             <div class="cart-item-meta">
-              <div class="cart-item-name">${item.name} (${item.name})</div>
+              <div class="cart-item-name">${item.name} (${item.variantName || item.name})</div>
               <div class="cart-item-sub">${item.net} net</div>
               <div class="cart-item-price">
                 ₹${item.finalPrice}
@@ -1165,11 +1165,11 @@ export const UI = {
             if (snapshot.empty) {
                 listContainer.innerHTML = `
           <div class="empty-state-address">
-            <i class="fas fa-map-marker-alt"></i>
+            <i class="fas fa-map-marker-alt"></i> 
             <h3>No Saved Addresses</h3>
             <p>Add an address for faster checkout.</p>
             <button class="empty-cart-btn" id="addFirstAddressBtn">+ Add New Address</button>
-          </div>
+          </div> 
         `;
                 const addBtn = listContainer.querySelector('#addFirstAddressBtn');
                 if (addBtn) {
@@ -1183,11 +1183,11 @@ export const UI = {
               <div class="address-main-content">
                 <i class="fas fa-map-marker-alt address-pin-icon"></i>
                 <div class="address-text-content">
-                  <div class="address-name-line">
-                    <span class="address-name">${DOMPurify.sanitize(address.fullName)}</span>
+                  <div class="address-name-line"> 
+                    <span class="address-name">${address.fullName}</span>
                     ${address.isDefault ? '<span class="default-badge" aria-label="Default Address">Default</span>' : ''}
                   </div>
-                  <p class="address-full-text">${DOMPurify.sanitize(address.house)}, ${DOMPurify.sanitize(address.street)}<br>${DOMPurify.sanitize(address.city)}, ${DOMPurify.sanitize(address.pincode)}</p>
+                  <p class="address-full-text">${address.house}, ${address.street}<br>${address.city}, ${address.pincode}</p>
                   <div class="address-mobile-line">
                     <i class="fas fa-mobile-alt"></i>
                     <span>${DOMPurify.sanitize(address.mobile)}</span>
@@ -1202,7 +1202,7 @@ export const UI = {
                   ${!address.isDefault ? `<button class="address-action-btn set-default-btn" data-id="${doc.id}" aria-label="Set as Default">Set as Default</button>` : ''}
                 </div>
               </div>
-            </div>
+            </div> 
           `;
                 }).join('');
 
