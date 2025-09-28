@@ -636,7 +636,10 @@ export const Handlers = {
         Handlers.saveCart();
         UI.updateCartUI();
         UI.updateProductCardState(productId); // FIX: Pass productId to update all cards for that product.
-        UI.showToast(`${product.name} (${variant.name}) added to cart!`);
+        
+        // FIX: Construct toast message correctly to avoid duplicate names.
+        const toastMessage = (variant.name && variant.name !== product.name) ? `${product.name} (${variant.name})` : product.name;
+        UI.showToast(`${toastMessage} added to cart!`);
 
         // Animate the "ADD" button to "ADDED" temporarily
         const addBtn = document.querySelector(`.add-btn[data-id='${variantId}']`);

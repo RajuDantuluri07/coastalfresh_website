@@ -559,9 +559,9 @@ export const UI = {
         const variantsInCart = Object.keys(state.cart).filter(key => key.startsWith(`${productId}-`));
 
         productCards.forEach(card => {
-            const ctaContainer = card.querySelector('.product-cta-container');
-            const outOfStockBadge = card.querySelector('.out-of-stock-badge');
-            if (!ctaContainer && !outOfStockBadge) return; // Nothing to update
+            // FIX: The CTA button or out-of-stock badge is directly inside the .product-image container.
+            const imageContainer = card.querySelector('.product-image');
+            if (!imageContainer) return;
     
             let newControlHTML = '';
             const sanitizedName = product.name;
@@ -572,16 +572,18 @@ export const UI = {
                 const variantId = `${product.id}-0`;
                 const isInCartQty = state.cart[variantId] || 0;
                 if (product.variants[0].available) {
-                    newControlHTML = isInCartQty > 0 ?
-                        `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${isInCartQty}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>` :
-                        `<button class="add-btn add-pill" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart"><i class="fas fa-plus"></i> ADD</button>`;
+                    newControlHTML = isInCartQty > 0
+                        ? `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${isInCartQty}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>`
+                        : `<button class="add-btn add-pill" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart"><i class="fas fa-plus"></i> ADD</button>`;
                 }
             }
 
-            // The product card HTML has a single container for either the badge or the button.
-            // We need to replace the entire content of that container.
-            const targetContainer = outOfStockBadge ? outOfStockBadge.parentElement : ctaContainer.parentElement;
-            targetContainer.innerHTML = !product.available ? `<div class="out-of-stock-badge">Out of Stock</div>` : newControlHTML;
+            // Find and remove the old controls (either a button or a div) before adding the new ones.
+            const oldControls = imageContainer.querySelector('.add-btn, .cart-controls, .out-of-stock-badge');
+            if (oldControls) oldControls.remove();
+
+            // Add the new controls (or the out-of-stock badge).
+            imageContainer.insertAdjacentHTML('beforeend', !product.available ? `<div class="out-of-stock-badge">Out of Stock</div>` : newControlHTML);
         });
     },
 
