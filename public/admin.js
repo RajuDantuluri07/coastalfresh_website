@@ -69,6 +69,41 @@ function startDashboard() {
     fetchAndListenOrders();
     fetchDailySummary();
     fetchAggregateCounts();
+
+    // FIX: Move menu setup here to ensure elements exist.
+    const menuBtn = document.getElementById('menu-btn');
+    const drawerMenu = document.getElementById('drawer-menu');
+    const drawerOverlay = document.getElementById('drawer-overlay');
+    const drawerNav = document.querySelector('.drawer-nav');
+
+    function openDrawer() {
+        drawerMenu.classList.add('active');
+        drawerOverlay.classList.add('active');
+    }
+
+    function closeDrawer() {
+        drawerMenu.classList.remove('active');
+        drawerOverlay.classList.remove('active');
+    }
+
+    // Centralized navigation handler
+    menuBtn.addEventListener('click', openDrawer);
+    drawerOverlay.addEventListener('click', closeDrawer);
+
+    drawerNav.addEventListener('click', (ev) => {
+        const btn = ev.target.closest('button[data-page]');
+        if (btn) {
+            const page = btn.dataset.page;
+            showMainView(page);
+            closeDrawer();
+        } else if (ev.target.closest('#refresh-btn')) {
+            // Handle refresh button click
+            handleRefresh();
+            closeDrawer();
+        } else {
+            closeDrawer(); // Close drawer on any other click inside
+        }
+    });
 }
 function stopDashboard() {
     if (unsubscribeOrders) unsubscribeOrders();
@@ -306,34 +341,9 @@ function confirmAndUpdate(orderId, newStatus) {
 
 // ---------- NEW: Customer/User Management ----------
 
-const menuBtn = document.getElementById('menu-btn');
-const drawerMenu = document.getElementById('drawer-menu');
-const drawerOverlay = document.getElementById('drawer-overlay');
-const drawerNav = document.querySelector('.drawer-nav');
-
-function openDrawer() {
-    drawerMenu.classList.add('active');
-    drawerOverlay.classList.add('active');
-}
-
-function closeDrawer() {
-    drawerMenu.classList.remove('active');
-    drawerOverlay.classList.remove('active');
-}
-
-menuBtn.addEventListener('click', openDrawer);
-drawerOverlay.addEventListener('click', closeDrawer);
-
-drawerNav.addEventListener('click', (ev) => {
-    const btn = ev.target.closest('button[data-page]');
-    if (!btn || btn.id === 'refresh-btn') return;
-    const page = btn.dataset.page;
-    showMainView(page);
-    closeDrawer();
-});
-
 
 function showMainView(page) {
+    const drawerNav = document.querySelector('.drawer-nav'); // FIX: Get reference to the drawer nav
     // Update active state in the drawer menu
     drawerNav.querySelectorAll('button[data-page]').forEach(b => b.classList.remove('active'));
     drawerNav.querySelector(`button[data-page="${page}"]`)?.classList.add('active');
