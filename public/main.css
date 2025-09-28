@@ -924,36 +924,152 @@ z-index: 2;                 /* sits above input content */
 
 /* --- DEFINITIVE FIX: Product Card Styles from Demo (Blinkit/Zepto style) --- */
 .card.product {
-  background: var(--bg-white);
   border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   padding: 12px;
-  box-shadow: 0 6px 18px rgba(15,23,42,0.06);
-  overflow: hidden;
-  cursor: pointer;
+  background: #fff;
+  position: relative;
+  transition: transform 0.2s ease-in-out;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+}
+
+.card.product:hover {
+  transform: translateY(-4px);
 }
 
 /* Image area */
 .product-image {
   position: relative;
-  border-radius: 12px;
-  overflow: hidden;
-  height: 150px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(180deg, #fafafa, #fff);
+  text-align: center;
 }
 
 .product-image img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: 120px;
+  object-fit: contain;
+  border-radius: 8px;
   display: block;
 }
 
-/* NEW: Out of Stock Overlay */
+/* Wishlist button */
+.wish {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ADD button inside image bottom-right */
+.add-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: var(--success-color); /* Using theme green */
+  color: #fff;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: background 0.2s;
+  z-index: 2;
+}
+
+.add-btn:hover {
+  filter: brightness(1.1);
+}
+
+/* Quantity controls that replace the ADD button */
+.cart-controls {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  background: var(--success-color);
+  color: white;
+  font-weight: 600;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 2;
+  height: 29px; /* Match add-btn height */
+}
+
+.cart-controls .qty-btn {
+  background: none;
+  border: none;
+  width: 28px;
+  height: 29px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+.cart-controls .qty {
+  font-size: 13px;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Product Info */
+.info {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px; /* Small gap between elements */
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111;
+  margin: 0;
+}
+
+.price-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.final-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111;
+}
+
+.old-price {
+  text-decoration: line-through;
+  font-size: 13px;
+  color: #999;
+}
+
+.save {
+  font-size: 13px;
+  color: green;
+  font-weight: 500;
+}
+
+.out-of-stock-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--error-color);
+  margin-top: 8px;
+}
+
+/* Out of Stock Overlay on image */
 .out-of-stock-overlay {
   position: absolute;
   inset: 0;
@@ -961,168 +1077,11 @@ z-index: 2;                 /* sits above input content */
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(2px);
-}
-
-/* Wishlist button */
-.wish {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.95);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 12px rgba(16,24,40,0.06);
-  border: 1px solid rgba(0,0,0,0.04);
-  cursor: pointer;
-  color: var(--pink); /* Matching demo's heart color */
-}
-
-/* ADD button on image */
-.add-btn, .compact-add-btn {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  padding: 8px 16px;
-  border-radius: 14px;
-  background: var(--bg-white);
-  border: 2px solid var(--success-color);
-  font-weight: 700;
-  color: var(--success-color);
-  cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.06);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 2;
-}
-
-/* Smaller ADD button for multi-option products */
-.add-btn.small {
-  padding: 6px 12px;
-  border-radius: 12px;
-  font-size: 13px;
-}
-
-/* Badge for multi-option products */
-.options-badge {
-  position: absolute;
-  left: 12px;
-  bottom: 12px;
-  padding: 6px 10px;
-  border-radius: 12px;
-  background: rgba(0,0,0,0.06);
-  font-size: 13px;
-  color: #333;
-  z-index: 1;
-}
-
-/* Quantity controls that replace the ADD button */
-.cart-controls {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  display: flex;
-  align-items: center;
-  background: var(--success-color);
-  color: white;
-  font-weight: 700;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
-  z-index: 2;
-}
-
-.cart-controls .qty-btn {
-  background: none;
-  border: none;
-  width: 32px;
-  height: 38px; /* Match add button height */
-  color: white;
-  font-size: 18px;
-  cursor: pointer;
-}
-.cart-controls .qty {
-  font-size: 15px;
-  min-width: 24px; /* More space for quantity */
-  text-align: center;
-}
-
-.name-group {
-  margin-top: 6px;
-}
-
-.info {
-  padding-top: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px; /* From demo */
-}
-.name {
-  font-size: 14px; /* Compact font size */
-  color: #111;
-  min-height: 42px; /* For 2 lines of text to prevent layout shift */
-  margin: 0;
-  font-weight: 500;
-  line-height: 1.4;
-}
-.price-row {
-  display: flex;
-  align-items: ap;
-}
-.final-price {
-  font-weight: 700;
-  font-size: 18px;
-}
-.old-price {
-  font-size: 13px;
-  color: #6b7280; /* --muted from demo */
-  text-decoration: line-through;
-}
-.save {
-  color: var(--success-color);
-  font-weight: 700;
-  font-size: 13px;
-  margin-left: auto;
-}
-.sub-info { /* .sub from demo */
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #6b7280; /* --muted from demo */
-}
-.options-text {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--muted);
-  padding: 2px 0;
-}
-.pill {
-  display: inline-block;
-  padding: 6px 10px;
-  border-radius: 18px;
-  background: #eef2f7;
-  font-size: 13px;
-  color: #374151;
-  font-weight: 500;
-}
-
-/* Responsive tweak from demo */
-@media (max-width: 420px) {
-  .product-image { height: 140px; }
-  .add-btn, .cart-controls { right: 10px; bottom: 10px; }
-}
-/* --- END OF DEFINITIVE FIX --- */
-
-/* --- Out of Stock Text (inside overlay) --- */
-.out-of-stock-text {
+  border-radius: 8px;
   color: var(--error-color);
   font-weight: 700;
   font-size: 14px;
+  backdrop-filter: blur(1px);
 }
 
 /* Product-popup this ENTIRE block */

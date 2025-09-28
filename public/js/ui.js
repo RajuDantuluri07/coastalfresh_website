@@ -249,25 +249,22 @@ export const UI = {
             const sanitizedName = DOMPurify.sanitize(product.name);
 
             let ctaButton = '';
-            const variantCount = product.variants?.length || 0;
+            let stockOverlay = '';
 
             if (product.available) {
-              if (variantCount > 1) {
-                // Multi-option product (like the demo)
-                const optionsText = `${variantCount} options`;
-                ctaButton = `
-                    <div class="options-badge">${optionsText}</div>
-                    <button class="add-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">ADD</button>`;
-              } else {
-                // Single-option product
-                const variantId = `${product.id}-0`;
+                const variantId = `${product.id}-0`; // Default to first variant for CTA
                 const qtyInCart = state.cart[variantId] || 0;
+                // For multi-variant, the button will open the variant selector. For single, it adds to cart.
+                const buttonActionId = product.variants?.length > 1 ? product.id : variantId;
+                const buttonClass = product.variants?.length > 1 ? 'add-btn variant-btn' : 'add-btn';
+
                 if (qtyInCart > 0) {
                     ctaButton = `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">-</button><span class="qty">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>`;
                 } else {
-                    ctaButton = `<button class="add-btn" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
+                    ctaButton = `<button class="${buttonClass}" data-id="${buttonActionId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
                 }
-              }
+            } else {
+                stockOverlay = `<div class="out-of-stock-overlay">Out of Stock</div>`;
             }
 
             const priceOrStockHTML = product.available ? `
@@ -276,28 +273,19 @@ export const UI = {
                     ${hasOffer ? `<span class="old-price">₹${primaryVariant.mrp}</span>` : ''}
                 </div>
                 ${hasOffer && savings > 0 ? `<div class="save">SAVE ₹${savings}</div>` : ''}
-            ` : '';
-
-            const subHTML = product.available ? `
-                <div class="sub">
-                    <span class="pill">${primaryVariant.net || primaryVariant.gross || ''}</span>
-                    &nbsp; • &nbsp; <span>23 mins</span>
-                </div>
-            ` : `<div class="out-of-stock-text">Out of Stock</div>`; // Out of stock text below info
+            ` : `<div class="out-of-stock-text">Out of Stock</div>`;
 
             return `
         <div class="card product ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" role="article" aria-label="Product: ${sanitizedName}">
           <div class="product-image">
             <img src="${optimizedImage}" alt="${sanitizedName}" loading="lazy">
-            <button class="wish" aria-label="Add to wishlist">♡</button>
+            <button class="wish" aria-label="Add to wishlist">♥</button>
              ${ctaButton}
-             ${!product.available ? `<div class="out-of-stock-overlay"><div class="out-of-stock-text">Out of Stock</div></div>` : ''}
-            </button>
+             ${stockOverlay}
           </div>
           <div class="info">
-            <h3 class="name">${sanitizedName}</h3>
+            <p class="name">${sanitizedName}</p>
             ${priceOrStockHTML}
-            ${subHTML}
           </div>
         </div>
       `;
