@@ -548,7 +548,11 @@ function populateProductForm(product) {
     imagePreview.src = product ? product.image : '';
     imagePreview.style.display = (product && product.image) ? 'block' : 'none';
     document.getElementById('product-image-url').value = product ? product.image : '';
-    renderVariantForms(product ? product.variants : [{ name: 'Medium', gross: '1kg', net: '500g', mrp: 0, finalPrice: 0, available: true }]);
+
+    // FIX: Provide a sensible default for new products.
+    // For single-variant categories, the name is optional and will default to the product name.
+    const defaultVariant = { name: '', gross: '1kg', net: '500g', mrp: 0, finalPrice: 0, available: true };
+    renderVariantForms(product ? product.variants : [defaultVariant]);
 
     const deleteBtn = document.getElementById('delete-product-btn');
     if (product) {

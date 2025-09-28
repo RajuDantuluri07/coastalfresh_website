@@ -627,7 +627,10 @@ export const UI = {
           <article class="cart-item-card" data-id="${item.variantId}">
             <img src="${optimizedCartImage}" alt="${item.name}" class="cart-item-thumb">
             <div class="cart-item-meta">
-              <div class="cart-item-name">${item.name} (${item.variantName || item.name})</div>
+              <div class="cart-item-name">
+                ${item.name}
+                ${(item.variantName && item.variantName !== item.name) ? ` (${item.variantName})` : ''}
+              </div>
               <div class="cart-item-sub">${item.net} net</div>
               <div class="cart-item-price">
                 ₹${item.finalPrice}
