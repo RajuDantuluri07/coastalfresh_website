@@ -163,10 +163,14 @@ async function init() {
       UI.showInitialSkeletons();
 
       try {
-          const response = await fetch('/products.json');
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          state.products = await response.json();
-
+          // NEW: Fetch products from Firestore instead of JSON file.
+          const productsSnapshot = await state.db.collection('products').orderBy('id').get();
+          if (productsSnapshot.empty) {
+              throw new Error("No products found in the database.");
+          }
+          state.products = productsSnapshot.docs.map(doc => doc.data());
+          
+          // The rest of the logic remains the same as it operates on state.products
           UI.renderFeaturedProducts();
           UI.renderCatalogProducts();
           UI.renderFlashSale();

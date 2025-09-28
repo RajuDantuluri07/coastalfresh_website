@@ -20,6 +20,7 @@ const activeUsersTodayEl = document.getElementById('active-users-today');
 const ordersContainerEl = document.getElementById('orders-container');
 const segmented = document.querySelector('.segmented');
 const bottomNav = document.querySelector('.bottom-nav');
+
 // List of authorized admin User IDs.
 const ADMIN_UIDS = [
     "p4uS2H3JFXNvmhkQWftUH721a2n2",
@@ -28,6 +29,7 @@ const ADMIN_UIDS = [
 // Local cache & helpers
 let allOrders = [];
 let unsubscribeOrders = null;
+let allProducts = []; // NEW: Cache for products
 let pendingUpdate = {}; // debounced updates
 // ---------- Auth state ----------
 auth.onAuthStateChanged(user => {
@@ -319,17 +321,34 @@ function showMainView(page) {
     const dashboardContent = [document.querySelector('.stats-scroll'), document.querySelector('.segmented'), document.getElementById('orders-container')];
     const customersView = document.getElementById('customers-view');
 
+    // NEW: Product views
+    const productsView = document.getElementById('products-view');
+    const productFormView = document.getElementById('product-form-view');
+
+    // Hide all main views first
+    dashboardContent.forEach(el => el.style.display = 'none');
+    customersView.style.display = 'none';
+    productsView.style.display = 'none';
+    productFormView.style.display = 'none';
+
     if (page === 'customers') {
-        dashboardContent.forEach(el => el.style.display = 'none');
         customersView.style.display = 'flex';
         renderCustomersPage();
+    } else if (page === 'products') {
+        productsView.style.display = 'flex';
+        renderProductsPage();
     } else { // Default to dashboard
         dashboardContent.forEach(el => el.style.display = 'flex');
-        customersView.style.display = 'none';
     }
 }
 
-async function renderCustomersPage() {
+function showProductForm(product = null) {
+    document.getElementById('products-view').style.display = 'none';
+    document.getElementById('product-form-view').style.display = 'flex';
+    populateProductForm(product);
+}
+
+async function renderCustomersPage() { // This function is now async
     const container = document.getElementById('customers-container');
     container.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
 
@@ -372,6 +391,148 @@ async function updateUserRole(userId, newRole) {
     renderCustomersPage(); // Re-render to show the change
 }
 // ---------- Fetch summaries & counts ----------
+
+// ---------- NEW: Product Management Functions ----------
+
+document.getElementById('add-new-product-btn').addEventListener('click', () => showProductForm(null));
+document.getElementById('back-to-products-btn').addEventListener('click', () => showMainView('products'));
+
+async function renderProductsPage() {
+    const container = document.getElementById('products-container');
+    container.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+
+    try {
+        const productsSnapshot = await db.collection('products').orderBy('id').get();
+        if (productsSnapshot.empty) {
+            container.innerHTML = '<div class="empty">No products found. Click "Add Product" to start.</div>';
+            allProducts = [];
+            return;
+        }
+
+        allProducts = productsSnapshot.docs.map(doc => ({ docId: doc.id, ...doc.data() }));
+        const productsHTML = allProducts.map(product => `
+            <div class="order-card" data-product-id="${product.id}" data-action="edit-product">
+                <div class="order-head">
+                    <div class="order-meta">
+                        <div class="id">ID: ${product.id}</div>
+                        <div class="time">${escapeHtml(product.name)}</div>
+                        <div style="font-size:.85rem;color:var(--muted)">${escapeHtml(product.category)}</div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem">
+                        <div class="order-total">₹${product.finalPrice}</div>
+                        <div class="status-badge" style="font-size:.78rem;color:var(--muted)">${product.available ? 'Available' : 'Unavailable'}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        container.innerHTML = productsHTML;
+
+    } catch (err) {
+        console.error("Error fetching products:", err);
+        container.innerHTML = '<div class="empty">Could not load products.</div>';
+    }
+}
+
+document.getElementById('products-container').addEventListener('click', (e) => {
+    const card = e.target.closest('[data-action="edit-product"]');
+    if (card) {
+        const productId = parseInt(card.dataset.productId, 10);
+        const product = allProducts.find(p => p.id === productId);
+        if (product) {
+            showProductForm(product);
+        }
+    }
+});
+
+function populateProductForm(product) {
+    const form = document.getElementById('product-form');
+    form.reset();
+    document.getElementById('product-form-title').textContent = product ? `Edit Product (ID: ${product.id})` : 'Add New Product';
+    document.getElementById('product-id-input').value = product ? product.id : '';
+    document.getElementById('product-name').value = product ? product.name : '';
+    document.getElementById('product-desc').value = product ? product.desc : '';
+    document.getElementById('product-category').value = product ? product.category : '';
+    document.getElementById('product-image').value = product ? product.image : '';
+    document.getElementById('product-mrp').value = product ? product.mrp : '';
+    document.getElementById('product-finalPrice').value = product ? product.finalPrice : '';
+    document.getElementById('product-gross').value = product ? product.gross : '';
+    document.getElementById('product-net').value = product ? product.net : '';
+    document.getElementById('product-available').value = product ? String(product.available) : 'true';
+
+    const deleteBtn = document.getElementById('delete-product-btn');
+    if (product) {
+        deleteBtn.style.display = 'block';
+        deleteBtn.dataset.docId = product.docId;
+    } else {
+        deleteBtn.style.display = 'none';
+    }
+}
+
+document.getElementById('product-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+
+    const productId = document.getElementById('product-id-input').value;
+    const mrp = parseFloat(document.getElementById('product-mrp').value);
+    const finalPrice = parseFloat(document.getElementById('product-finalPrice').value);
+    const offer = mrp > finalPrice ? Math.round(((mrp - finalPrice) / mrp) * 100) : 0;
+
+    const productData = {
+        name: document.getElementById('product-name').value,
+        desc: document.getElementById('product-desc').value,
+        category: document.getElementById('product-category').value,
+        image: document.getElementById('product-image').value,
+        mrp: mrp,
+        finalPrice: finalPrice,
+        offer: offer,
+        gross: document.getElementById('product-gross').value,
+        net: document.getElementById('product-net').value,
+        available: document.getElementById('product-available').value === 'true',
+    };
+
+    try {
+        if (productId) { // Editing existing product
+            productData.id = parseInt(productId, 10);
+            const docRef = db.collection('products').doc(String(productId));
+            await docRef.set(productData, { merge: true });
+            toast('Product updated successfully!');
+        } else { // Creating new product
+            const productsRef = db.collection('products');
+            // Get the highest ID and increment
+            const lastProductQuery = await productsRef.orderBy('id', 'desc').limit(1).get();
+            const newId = lastProductQuery.empty ? 1 : lastProductQuery.docs[0].data().id + 1;
+            productData.id = newId;
+            const docRef = db.collection('products').doc(String(newId));
+            await docRef.set(productData);
+            toast('Product created successfully!');
+        }
+        showMainView('products');
+    } catch (err) {
+        console.error("Error saving product:", err);
+        toast('Failed to save product. Check console.');
+    } finally {
+        submitBtn.disabled = false;
+    }
+});
+
+document.getElementById('delete-product-btn').addEventListener('click', async (e) => {
+    const docId = e.target.dataset.docId;
+    const productToDelete = allProducts.find(p => p.docId === docId);
+    if (!productToDelete) return toast('Error: Product ID not found.');
+
+    if (confirm(`Are you sure you want to delete product ID ${productToDelete.id}? This cannot be undone.`)) {
+        try {
+            await db.collection('products').doc(String(productToDelete.id)).delete();
+            toast('Product deleted.');
+            showMainView('products');
+        } catch (err) {
+            console.error("Error deleting product:", err);
+            toast('Failed to delete product.');
+        }
+    }
+});
+
 function fetchDailySummary() {
     const today = new Date();
     const dateString = today.toISOString().split('T')[0]; // YYYY-MM-DD

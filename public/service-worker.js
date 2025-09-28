@@ -61,7 +61,6 @@ const urlsToCache = [
   '/js/app.js',
   '/js/ui.js',
   '/js/handlers.js',
-  '/products.json',
   '/favicon.ico',
   'https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',

@@ -104,10 +104,40 @@
         <div id="customers-container" class="orders" style="padding: 0;"></div>
       </div>
 
+      <!-- NEW: Products View (initially hidden) -->
+      <div id="products-view" style="display:none; padding: 1rem; flex-direction: column; gap: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 .5rem;">
+          <h2 style="font-size: 1.25rem; font-weight: 700;">Manage Products</h2>
+          <button id="add-new-product-btn" class="btn-small btn-primary"><i class="fa-solid fa-plus"></i> Add Product</button>
+        </div>
+        <div id="products-container" class="orders" style="padding: 0;"></div>
+      </div>
+
+      <!-- NEW: Product Edit/Add Form (initially hidden) -->
+      <div id="product-form-view" style="display:none; padding: 1rem; flex-direction: column; gap: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 .5rem;">
+          <h2 id="product-form-title" style="font-size: 1.25rem; font-weight: 700;">Add New Product</h2>
+          <button id="back-to-products-btn" class="btn-small"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        </div>
+        <form id="product-form" class="card" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+          <!-- Fields will be added here by JS for structure, but the form tag is important -->
+          <input type="hidden" id="product-id-input">
+          <div class="field"><label for="product-name">Name</label><input id="product-name" type="text" required></div>
+          <div class="field"><label for="product-desc">Description</label><textarea id="product-desc" rows="3" required></textarea></div>
+          <div class="field"><label for="product-category">Category</label><input id="product-category" type="text" required placeholder="e.g., Fish, Prawns, Crabs, Pickles"></div>
+          <div class="field"><label for="product-image">Image URL</label><input id="product-image" type="url" required></div>
+          <div class="field-row"><div class="field"><label for="product-mrp">MRP (₹)</label><input id="product-mrp" type="number" step="0.01" required></div><div class="field"><label for="product-finalPrice">Final Price (₹)</label><input id="product-finalPrice" type="number" step="0.01" required></div></div>
+          <div class="field-row"><div class="field"><label for="product-gross">Gross Wt.</label><input id="product-gross" type="text" required></div><div class="field"><label for="product-net">Net Wt.</label><input id="product-net" type="text" required></div></div>
+          <div class="field"><label for="product-available">Available</label><select id="product-available"><option value="true">Yes</option><option value="false">No</option></select></div>
+          <div class="form-actions"><button id="delete-product-btn" type="button" class="btn btn-danger" style="display:none;">Delete</button><button type="submit" class="btn btn-primary">Save Product</button></div>
+        </form>
+      </div>
+
       <!-- Bottom nav -->
       <nav class="bottom-nav" role="navigation" aria-label="Main">
         <button data-page="dashboard" class="active"><i class="fa-solid fa-house"></i><span>Home</span></button>
         <button data-page="customers"><i class="fa-solid fa-users"></i><span>Customers</span></button>
+        <button data-page="products"><i class="fa-solid fa-box-archive"></i><span>Products</span></button>
         <button id="refresh-btn"><i class="fa-solid fa-arrows-rotate"></i><span>Refresh</span></button>
       </nav>
     </div>
