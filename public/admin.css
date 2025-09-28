@@ -134,28 +134,6 @@ header.app-header {
   font-size: .95rem;
 }
 
-/* NEW: Desktop Navigation (hidden on mobile) */
-.desktop-nav {
-  display: none;
-  background: var(--surface);
-  padding: .5rem 1rem;
-  border-bottom: 1px solid #eef2f6;
-  gap: .5rem;
-}
-.desktop-nav button {
-  background: transparent;
-  border: 1px solid transparent;
-  padding: .5rem 1rem;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: .9rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  color: var(--muted);
-}
-
 /* Stats: horizontal scroller for mobile */
 .stats-scroll {
   display: flex;
@@ -424,15 +402,21 @@ nav.bottom-nav button.active {
   .orders {
     padding: 1.5rem 2rem;
   }
-  .desktop-nav {
+  /* REPURPOSED: Move bottom-nav to the top on desktop */
+  nav.bottom-nav {
+    position: static; /* Un-stick it from the bottom */
     display: flex;
+    justify-content: flex-start; /* Align to the left */
+    gap: .5rem;
+    padding: .5rem 1rem;
+    border-top: none;
+    border-bottom: 1px solid #eef2f6;
+    box-shadow: none;
+    background: var(--surface);
   }
-  .desktop-nav button.active {
+  nav.bottom-nav button.active {
     background: var(--primary-light);
     color: var(--primary-dark);
-  }
-  nav.bottom-nav {
-    display: none
   }
   header.app-header {
     border-radius: 0 0 12px 12px;

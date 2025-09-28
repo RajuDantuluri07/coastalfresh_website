@@ -315,15 +315,11 @@ function handleNavClick(ev) {
 }
 
 bottomNav.addEventListener('click', handleNavClick);
-desktopNav.addEventListener('click', handleNavClick);
 
 
 function showMainView(page) {
-    // FIX: Update both navigation bars to keep them in sync
-    [bottomNav, desktopNav].forEach(nav => {
-        nav.querySelectorAll('button[data-page]').forEach(b => b.classList.remove('active'));
-        nav.querySelector(`button[data-page="${page}"]`)?.classList.add('active');
-    });
+    bottomNav.querySelectorAll('button[data-page]').forEach(b => b.classList.remove('active'));
+    bottomNav.querySelector(`button[data-page="${page}"]`)?.classList.add('active');
 
     const dashboardContent = [document.querySelector('.stats-scroll'), document.querySelector('.segmented'), document.getElementById('orders-container')];
     const customersView = document.getElementById('customers-view');
@@ -664,8 +660,6 @@ function handleRefresh() {
 }
 
 document.getElementById('refresh-btn').addEventListener('click', handleRefresh);
-document.getElementById('desktop-refresh-btn').addEventListener('click', handleRefresh);
-
 // small toast implement
 function toast(msg) {
     // tiny accessible toast using alert role
