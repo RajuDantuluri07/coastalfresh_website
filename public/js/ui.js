@@ -264,9 +264,11 @@ export const UI = {
           <div class="info">
             <h3 class="name">${sanitizedName}</h3>
             <div class="price-container">
-              <span class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</span>
-              ${hasOffer ? `<span class="old-price">₹${primaryVariant.mrp}</span>` : ''}
-              ${hasOffer && savings > 0 ? `<span class="save">SAVE ₹${savings}</span>` : ''}
+              <div class="price-row">
+                <span class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</span>
+                ${hasOffer ? `<span class="old-price">₹${primaryVariant.mrp}</span>` : ''}
+              </div>
+              ${hasOffer && savings > 0 ? `<div class="save-row"><span class="save">SAVE ₹${savings}</span></div>` : ''}
             </div>
           </div>
         </div>
