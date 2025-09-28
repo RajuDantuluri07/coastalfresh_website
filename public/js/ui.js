@@ -249,20 +249,28 @@ export const UI = {
             const sanitizedName = DOMPurify.sanitize(product.name);
 
             let ctaButton = '';
-            // FIX: Check availability of the specific variant for single-variant products.
-            // FIX #4: Ensure out-of-stock for single variant products is based on the variant's availability.
-            if (product.variants && product.variants.length > 1) {
-                // For multi-variant products, the 'Options' button is always shown if the product is generally available.
-                if (product.available) {
-                    ctaButton = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">OPTIONS</button>`;
-                }
-            } else if (primaryVariant && primaryVariant.available) {
-                // For single-variant products, only show CTA if that variant is available.
+            const variantCount = product.variants?.length || 0;
+
+            if (variantCount > 1 && product.available) {
+                // Multi-variant product: Show compact button with options text.
+                const optionsText = `${variantCount} options`;
+                ctaButton = `
+                    <button class="compact-add-btn variant-btn" data-id="${product.id}" aria-label="Add, ${optionsText}" title="Add, ${optionsText}">
+                        <span class="add-text">+ ADD</span>
+                        <span class="options-text">${optionsText}</span>
+                    </button>`;
+            } else if (variantCount === 1 && primaryVariant.available) {
+                // Single-variant product: Show either compact "ADD" button or quantity controls.
                 const variantId = `${product.id}-0`;
                 const qtyInCart = state.cart[variantId] || 0;
-                ctaButton = qtyInCart ?
-                    `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>` :
-                    `<button class="add-btn add-pill" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart"><i class="fas fa-plus"></i> ADD</button>`;
+                if (qtyInCart > 0) {
+                    ctaButton = `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>`;
+                } else {
+                    ctaButton = `
+                        <button class="compact-add-btn" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart" title="Add to cart">
+                            <span class="add-text">+ ADD</span>
+                        </button>`;
+                }
             }
  const priceOrStockHTML = product.available
     ? `

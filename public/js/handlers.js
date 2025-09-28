@@ -29,8 +29,8 @@ export const Handlers = {
             }
 
             // Add to cart button on product cards (for single-variant products)
-            const addBtn = target.closest('.add-btn:not(.variant-btn)');
-            if (addBtn && !addBtn.disabled) {
+            const addBtn = target.closest('.compact-add-btn:not(.variant-btn), .add-btn:not(.variant-btn)');
+            if (addBtn) {
                 e.stopPropagation();
                 const variantId = addBtn.dataset.id;
                 if (variantId) Handlers.addToCart(variantId);
