@@ -594,7 +594,7 @@ export const UI = {
                     : `<button class="add-btn add-pill" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart"><i class="fas fa-plus"></i> ADD</button>`;
             }
 
-            // FIX #2: Instead of replacing the whole container, just replace the control itself.
+            // FIX #7: Instead of replacing the whole container, just replace the control itself.
             const oldControls = imageContainer.querySelector('.add-btn, .cart-controls, .out-of-stock-badge');
             if (oldControls) oldControls.remove();
 

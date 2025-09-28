@@ -917,65 +917,74 @@ z-index: 2;                 /* sits above input content */
   gap: var(--grid-gap);
 }
 
-/* --- FINAL FIX: Product Card Styles based on user-provided reference --- */
-.product {
+/* --- DEFINITIVE FIX: Product Card Styles based on user-provided compact design --- */
+.card.product {
   background: var(--bg-white);
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(15,20,25,0.06);
   overflow: hidden;
-  position: relative;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-}
-.product:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  padding: 12px;
+  width: 100%; /* Let the grid control the width */
 }
 
-/* Image area with fixed aspect ratio (1:1) to avoid layout shifts */
-.image-wrap {
+/* Image area */
+.product-image {
   position: relative;
   width: 100%;
-  padding-top: 100%; /* 1:1 aspect ratio */
-  background: linear-gradient(180deg, #f8f8f8, #ffffff);
+  height: 120px; /* fixed image area to avoid shifting */
+  border-radius: 8px;
+  background: #f7fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 10px; /* small gap between image and info */
 }
 
-/* FIX: Add styles for the actual product image to ensure it fits correctly. */
-.image-wrap img {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 86%; /* Leave padding for buttons */
-  height: 86%;
-  transform: translate(-50%, -50%);
-  object-fit: contain; /* Ensure the whole image is visible */
+.product-image img {
+  max-width: 82%;
+  max-height: 82%;
+  object-fit: contain; /* ensures no empty extra vertical space */
   display: block;
-  pointer-events: none; /* Clicks should go to the underlying card or buttons */
 }
-.wishlist.active {
-  color: var(--error-color);
+
+/* Wishlist button */
+.wish {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
 
 /* ADD button inside image bottom-right */
 .add-btn {
   position: absolute;
-  bottom: 8px;
   right: 8px;
-  background: var(--success-color); /* Use brand's green for CTAs */
+  bottom: 8px;
+  background: var(--accent-color); /* Use brand's cyan for CTAs */
   color: #fff;
   padding: 6px 10px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 13px;
   line-height: 1;
-  box-shadow: 0 6px 14px rgba(56, 142, 60, 0.2);
-  transition: background 0.2s;
-}
-.add-btn:hover {
-  background: #2e7d32; /* Darker green for hover */
+  box-shadow: 0 6px 12px rgba(0,168,232,0.18);
 }
 
 /* Quantity controls that replace the ADD button */
@@ -984,13 +993,14 @@ z-index: 2;                 /* sits above input content */
   bottom: 8px;
   right: 8px;
   display: flex; align-items: center;
-  background: var(--success-color);
+  background: var(--accent-color);
   border-radius: 8px;
-  box-shadow: 0 6px 14px rgba(56, 142, 60, 0.2);
+  box-shadow: 0 6px 12px rgba(0,168,232,0.18);
   color: white;
   font-weight: 700;
   overflow: hidden;
 }
+
 .cart-controls .qty-btn {
   background: transparent;
   border: none;
@@ -1003,47 +1013,52 @@ z-index: 2;                 /* sits above input content */
   padding: 6px 0;
 }
 
-.product-details {
-  padding: 10px 12px 14px 12px;
+.info {
   display: flex;
   flex-direction: column;
-  /* FIX: Set a minimum height and use flexbox to align content consistently. */
-  min-height: 70px; /* Adjust as needed to fit all content */
-  justify-content: space-between; /* Pushes name to top, price/save to bottom */
+  gap: 6px;
+  margin-top: auto; /* Pushes this block to the bottom of the card */
 }
-.product-name {
+.name {
   font-size: 15px;
   font-weight: 600;
-  color: #222;
-  text-align: left;
+  color: #162029;
   line-height: 1.1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin: 0;
 }
-.price-block {
+.price-row {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 8px;
 }
 .final-price {
   font-size: 16px;
   font-weight: 700;
-  color: #111;
   line-height: 1;
 }
 .old-price {
-  color: #6b6b6b;
+  color: #7b8794;
   text-decoration: line-through;
   font-size: 13px;
   line-height: 1;
 }
 .save {
-  color: #11813a;
+  color: #0aa14a;
   font-weight: 700;
   font-size: 13px;
   line-height: 1;
+  margin-top: 2px;
 }
+
+/* Responsive tweak from demo */
+@media (max-width: 420px) {
+  .card.product { width: 150px; }
+  .product-image { height: 110px; }
+}
+/* --- END OF DEFINITIVE FIX --- */
 
 /* Product-popup this ENTIRE block */
 .product-popup {
@@ -3202,15 +3217,15 @@ body.popup-open .bottom-bar {
     font-size: 11px;
   }
   
-  .product-name {
+  .name {
     font-size: 14px;
   }
   
-  .price {
+  .final-price {
     font-size: 16px;
   }
   
-  .add-to-cart-btn, .cart-controls {
+  .add-btn, .cart-controls {
     width: 32px;
     height: 32px;
   }
