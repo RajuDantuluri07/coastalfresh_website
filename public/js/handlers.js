@@ -36,11 +36,12 @@ export const Handlers = {
                 if (variantId) Handlers.addToCart(variantId);
             }
             
+            // FIX: The "OPTIONS" button should now open the product details page instead of the variant drawer.
             const variantBtn = target.closest('.variant-btn');
             if (variantBtn) {
                 e.stopPropagation();
                 const productId = parseInt(variantBtn.dataset.id, 10);
-                UI.openVariantDrawer(productId);
+                UI.showProductPopup(productId);
             }
 
             // Quantity controls on product cards (scoped to image container)
