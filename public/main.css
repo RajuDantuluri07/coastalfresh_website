@@ -956,13 +956,6 @@ z-index: 2;                 /* sits above input content */
 .wishlist.active {
   color: var(--error-color);
 }
-/* FIX #3: The wishlist button class was wrong (.wishlist vs .wish) and had no active state. */
-.wish.active {
-  color: #e33; /* Red color for active state */
-  font-weight: 900; /* Make the heart solid */
-  /* The .wish class itself is already styled correctly in the compact design section */
-}
-
 
 /* ADD button inside image bottom-right */
 .add-btn {
