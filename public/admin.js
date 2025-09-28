@@ -510,6 +510,18 @@ document.getElementById('products-container').addEventListener('click', (e) => {
     }
 });
 
+function toggleVariantSection() {
+    const categorySelect = document.getElementById('product-category');
+    const variantSection = document.getElementById('variant-management-section');
+    const selectedCategory = categorySelect.value;
+
+    if (selectedCategory === 'Prawns' || selectedCategory === 'Pickles') {
+        variantSection.style.display = 'block';
+    } else {
+        variantSection.style.display = 'none';
+    }
+}
+
 function populateProductForm(product) {
     const form = document.getElementById('product-form');
     form.reset();
@@ -525,6 +537,9 @@ function populateProductForm(product) {
     ).join('');
     // Set a default if it's a new product
     if (!product) categorySelect.value = PRODUCT_CATEGORIES[0];
+
+    // Show/hide variant section based on the initial category
+    toggleVariantSection();
     
     // NEW: Handle image preview
     const imagePreview = document.getElementById('product-image-preview');
@@ -541,6 +556,9 @@ function populateProductForm(product) {
         deleteBtn.style.display = 'none';
     }
 }
+
+// Listen for category changes to toggle the variant section
+document.getElementById('product-category').addEventListener('change', toggleVariantSection);
 
 // NEW: Render variant forms
 function renderVariantForms(variants = []) {

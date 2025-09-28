@@ -238,20 +238,19 @@ export const UI = {
             const sanitizedName = product.name; // Assuming names from DB are safe
 
             let ctaButton = '';
-            if (product.available) {
-                if (product.variants && product.variants.length > 1) {
+            // FIX: Check availability of the specific variant for single-variant products.
+            if (product.variants && product.variants.length > 1) {
+                // For multi-variant products, the 'Options' button is always shown if the product is generally available.
+                if (product.available) {
                     ctaButton = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">Options</button>`;
-                } else {
-                    const variantId = `${product.id}-0`;
-                    const qtyInCart = state.cart[variantId] || 0;
-                    ctaButton = qtyInCart ?
-                        `<div class="cart-controls" data-id="${variantId}">
-                            <button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button>
-                            <span class="qty" aria-live="polite">${qtyInCart}</span>
-                            <button class="qty-btn inc" aria-label="Increase quantity">+</button>
-                        </div>` : 
-                        `<button class="add-btn" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
                 }
+            } else if (primaryVariant && primaryVariant.available) {
+                // For single-variant products, only show CTA if that variant is available.
+                const variantId = `${product.id}-0`;
+                const qtyInCart = state.cart[variantId] || 0;
+                ctaButton = qtyInCart ?
+                    `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>` :
+                    `<button class="add-btn" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
             }
 
             return `
