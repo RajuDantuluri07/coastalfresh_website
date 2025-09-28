@@ -1744,128 +1744,65 @@ padding: 10px 16px; /* REFINED: Adjusted padding */
 padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted padding */
 }
 
+/* --- REVAMPED: Empty Cart Styles --- */
 .empty-cart {
   text-align: center;
-  padding: 20px; /* REFINED: Use consistent padding */
+  padding: 28px 20px 120px; /* Padding for content and sticky footer */
   color: var(--text-secondary);
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   flex-grow: 1;
+  gap: 18px;
 }
 
-/* --- NEW: Simple & Clean Empty Cart Animation --- */
-.empty-cart-animation {
-  position: relative;
-  width: 160px; /* REFINED: Smaller width */
-  height: 110px; /* REFINED: Reduced height */
-  margin-bottom: 16px; /* REFINED: Reduced margin */
-  overflow: hidden;
-  background: linear-gradient(to bottom, #e0f7ff, #a3daff);
-  border-radius: 16px;
-  border: 2px solid #cce7ff;
+.empty-cart .illustration {
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(1,101,154,0.06), rgba(1,101,154,0.02));
+  box-shadow: 0 6px 18px rgba(2,6,23,0.08);
+  padding: 18px;
 }
 
-.water {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 50%;
-  background: linear-gradient(to bottom, #1e90ff, #0077be); /* Ocean blue */
-  overflow: hidden;
-}
-
-.wave {
-  position: absolute;
-  top: -10px;
-  left: -100px;
-  width: 400px;
-  height: 20px;
-  background: #fff;
-  border-radius: 50%;
-  opacity: 0.2;
-  animation: wave-move 5s ease-in-out infinite;
-}
-
-.wave:nth-child(2) {
-  animation-duration: 7s;
-  animation-direction: reverse;
-  opacity: 0.3;
-}
-
-.jumping-fish {
-  position: absolute;
-  font-size: 28px;
-  bottom: 30px;
-  left: 25%;
-  transform-origin: bottom center;
-  animation: jump 3s ease-in-out infinite;
-}
-
-.jumping-prawn {
-  position: absolute;
-  font-size: 24px;
-  bottom: 30px;
-  left: 60%;
-  transform-origin: bottom center;
-  animation: jump 3s ease-in-out infinite 1s; /* Staggered animation */
-}
-
-.bubble {
-  position: absolute;
-  bottom: -10px;
-  width: 5px;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 50%;
-  animation: bubble-up 4s linear infinite;
-}
-.bubble.b1 { left: 15%; animation-duration: 5s; animation-delay: 0.2s; }
-.bubble.b2 { left: 50%; animation-duration: 3s; animation-delay: 1s; width: 3px; height: 3px; }
-.bubble.b3 { left: 80%; animation-duration: 4.5s; animation-delay: 0.5s; }
-
-@keyframes wave-move {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(20px); }
-}
-
-@keyframes bubble-up {
-  to {
-    transform: translateY(-80px);
-    opacity: 0;
-  }
-}
-
-@keyframes jump {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-60px) rotate(15deg); }
-  55% { transform: translateY(-60px) rotate(-15deg); } /* Wiggle at the top */
-}
-/* --- End of New Animation --- */
-
-.empty-cart h3 {
+.empty-cart-title {
   font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.1px;
   margin-bottom: 8px;
-  color: var(--text-secondary);
 }
 
-.empty-cart p {
-  margin-bottom: 24px; /* REFINED: Reduced margin */
-  }
-  
-  /* REFINED: Style the empty cart button to match the checkout button */
-  .cart-cta.empty-cart-btn {
-    width: 100%;
-    max-width: var(--app-max-width);
-    background: var(--success-color); /* REFINED: Match product detail page 'Add to Cart' button */
-    color: white;
-    font-weight: 700;
-    font-size: 16px;
-    padding: 14px 24px; /* REFINED: Match product detail page 'Add to Cart' button */
-    box-shadow: 0 4px 12px rgba(56, 142, 60, 0.4); /* REFINED: Match product detail page 'Add to Cart' button */
-  }
+.empty-cart-lead {
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1.45;
+  max-width: 360px;
+}
+
+.cart-cta.empty-cart-btn {
+  width: 100%;
+  max-width: var(--app-max-width);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: var(--primary-color);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  border: 0;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(1,101,154,0.18);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+/* --- End of Revamped Styles --- */
 
 /* FAQ */
 .faq-wrap {

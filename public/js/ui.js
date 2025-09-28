@@ -537,11 +537,12 @@ export const UI = {
             if (cartFooterEl) cartFooterEl.style.display = 'none';
             if (emptyCartFooterEl) emptyCartFooterEl.style.display = 'flex'; // NEW
             if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'none';
-            
+
             // NEW: Attach event listener to the new sticky button
             const emptyCartBtn = document.getElementById('emptyCartBrowseBtn');
             if (emptyCartBtn) {
-                emptyCartBtn.addEventListener('click', () => { UI.showPage('catalog'); UI.closeCart(); });
+                // Use a one-time listener to avoid duplicates
+                emptyCartBtn.onclick = () => { UI.showPage('catalog'); UI.closeCart(); };
             }
         } else {
             emptyCartEl.style.display = 'none';

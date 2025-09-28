@@ -732,16 +732,34 @@
         <section class="cart-products" id="cartItems"></section>
     
         <!-- Empty Cart State -->
-        <div id="emptyCart" class="empty-cart" style="display: none; padding: 20px;">
-          <div class="empty-cart-animation">
-            <div class="water">
-              <div class="wave"></div><div class="wave"></div>
-              <div class="bubble b1"></div><div class="bubble b2"></div><div class="bubble b3"></div>
-            </div>
-            <div class="jumping-fish">🐟</div><div class="jumping-prawn">🦐</div>
+        <div id="emptyCart" class="empty-cart" style="display: none;">
+          <div class="illustration" aria-hidden="true">
+            <!-- Inline SVG: seafood cart / basket illustration (simple, stylized) -->
+            <svg width="160" height="140" viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cart illustration">
+              <defs>
+                <linearGradient id="g1" x1="0" x2="1">
+                  <stop offset="0" stop-color="#e6fbff" />
+                  <stop offset="1" stop-color="#dff6fb" />
+                </linearGradient>
+              </defs>
+              <path d="M0 220 Q80 190 160 210 T320 200 L320 260 L0 260 Z" fill="#E9F8FB"/>
+              <rect x="36" y="40" rx="14" ry="14" width="220" height="120" fill="url(#g1)" stroke="#CEEFF6" stroke-width="2" />
+              <path d="M48 52 C20 20, 60 12, 90 36" stroke="#A7D7E3" stroke-width="8" stroke-linecap="round" fill="none" />
+              <g transform="translate(50,58)">
+                <ellipse cx="50" cy="28" rx="40" ry="18" fill="#58B4CC"/>
+                <polygon points="15,28 -6,20 -6,36" fill="#58B4CC"/>
+                <circle cx="78" cy="22" r="4" fill="#062A33"/>
+                <g transform="translate(120,28) scale(0.9)">
+                  <path d="M36 16c0 8-10 20-22 20-6 0-12-4-14-8" stroke="#F07A36" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                  <circle cx="36" cy="16" r="6" fill="#F07A36"/>
+                </g>
+              </g>
+              <circle cx="240" cy="170" r="16" fill="#0F1724" opacity="0.08" />
+              <circle cx="68" cy="170" r="16" fill="#0F1724" opacity="0.08" />
+            </svg>
           </div>
-          <h3>Your cart is empty</h3>
-          <p>Add some fresh seafood to get started</p>
+          <h2 class="empty-cart-title">Your cart is empty</h2>
+          <p class="empty-cart-lead">Add some fresh seafood to get started — choose from fish, prawns, crabs and more. We'll keep it fresh and fast.</p>
         </div>
     
         <div id="cartSummaryContainer" style="display: none; padding: 0 16px;">
@@ -785,7 +803,14 @@
 
       <!-- NEW: Sticky CTA for Empty Cart -->
       <div class="cart-sticky-ctawrap" id="emptyCartFooter" style="display: none;">
-        <button class="cart-cta empty-cart-btn" id="emptyCartBrowseBtn">Browse Products</button>
+        <button class="cart-cta empty-cart-btn" id="emptyCartBrowseBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M3 3h2l.4 2M7 13h10l3-8H6.4" stroke="white" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="10" cy="20" r="1.6" fill="white"/>
+            <circle cx="18" cy="20" r="1.6" fill="white"/>
+          </svg>
+          <span>Browse Fresh Seafood</span>
+        </button>
       </div>
     </div>
 
