@@ -1294,6 +1294,8 @@ export const Handlers = {
         const removedCode = state.appliedCoupon.code;
         state.appliedCoupon = null;
         state.couponError = null;
+        // FIX: Re-render the coupon section *before* updating the summary to prevent race conditions.
+        UI.renderCouponSection();
         UI.showToast('Coupon removed.');
         UI.updateCartSummary();
         window.Analytics.trackEvent('remove_coupon', { coupon: removedCode });

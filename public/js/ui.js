@@ -625,9 +625,6 @@ export const UI = {
         const product = state.products.find(p => p.id === parseInt(productId, 10));
         if (!product) return;
 
-        // FIX: Correctly determine if any variant of this product is in the cart.
-        const variantsInCart = Object.keys(state.cart).filter(key => key.startsWith(`${productId}-`));
-
         productCards.forEach(card => {
             // FIX: The CTA button or out-of-stock badge is directly inside the .product-image container.
             const imageContainer = card.querySelector('.product-image');
@@ -646,13 +643,29 @@ export const UI = {
                     : `<button class="add-btn add-pill" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart"><i class="fas fa-plus"></i> ADD</button>`;
             }
 
-            // FIX #7: Instead of replacing the whole container, just replace the control itself.
+            // Find and remove the old control (add button, qty selector, or out of stock badge).
+            // This is more robust than assuming the structure.
             const oldControls = imageContainer.querySelector('.add-btn, .cart-controls, .out-of-stock-badge');
-            if (oldControls) oldControls.remove();
+            if (oldControls) {
+                oldControls.remove();
+            }
 
-            // Add the new controls (or the out-of-stock badge).
-            imageContainer.insertAdjacentHTML('beforeend', !product.available ? `<div class="out-of-stock-badge">Out of Stock</div>` : newControlHTML);
+            // Insert the new, correct control into the image container.
+            const finalHTML = !product.available ? `<div class="out-of-stock-badge">Out of Stock</div>` : newControlHTML;
+            imageContainer.insertAdjacentHTML('beforeend', finalHTML);
         });
+    },
+
+    /**
+     * NEW: Helper to generate a clean, user-friendly display name for a variant.
+     * @param {object} item - The merged product/variant item object.
+     * @returns {string} A sanitized display name.
+     */
+    getVariantDisplayName: (item) => {
+        // Use the variant's specific name if it's different from the product's name.
+        const namePart = (item.variantName && item.variantName !== item.name) ? `${item.name} (${item.variantName})` : item.name;
+        // Append the net weight if it exists, for clarity.
+        return item.net ? `${namePart} - ${item.net}` : namePart;
     },
 
     showCart: () => {
@@ -697,24 +710,22 @@ export const UI = {
             cartItemsEl.innerHTML = items.map(item => {
                 // FIX: Define hasOffer inside the map scope to prevent ReferenceError.
                 const hasOffer = item.mrp > item.finalPrice; 
-                const { baseUrl: optimizedCartImage } = UI.getOptimizedImageUrl(item.image, 128, 128) || {};
+                // FIX: Provide a fallback image and an onerror handler for robustness.
+                const placeholderImg = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/food_yircgb.png';
+                const optimizedCartImage = UI.getOptimizedImageUrl(item.image, 128, 128) || placeholderImg;
+                const displayName = UI.getVariantDisplayName(item);
 
                 return `
           <article class="cart-item-card" data-id="${item.variantId}">
-            <img src="${optimizedCartImage}" alt="${item.name}" class="cart-item-thumb">
+            <img src="${optimizedCartImage}" alt="${displayName}" class="cart-item-thumb" onerror="this.onerror=null;this.src='${placeholderImg}';">
             <div class="cart-item-meta">
-              <div class="cart-item-name">
-                ${item.name}
-                {/* FIX #4: Correctly check if variant name is different from product name. */}
-                ${(item.variantName && item.variantName !== item.name) ? ` (${item.variantName})` : ''}
-              </div>
-              <div class="cart-item-sub">${item.net} net</div>
+              <div class="cart-item-name">${displayName}</div>
               <div class="cart-item-price">
                 ₹${item.finalPrice}
                 ${hasOffer ? `<span class="cart-item-mrp">₹${item.mrp}</span>` : ''}
               </div>
             </div>
-            <div class="cart-item-qty qty-controls" data-id="${item.variantId}">
+            <div class="cart-item-qty" data-id="${item.variantId}">
               <button class="qty-btn cart-qty-btn dec" aria-label="decrease quantity">−</button>
               <div class="count cart-qty" aria-live="polite">${item.qty}</div>
               <button class="qty-btn cart-qty-btn inc" aria-label="increase quantity">+</button>

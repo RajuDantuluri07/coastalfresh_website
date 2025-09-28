@@ -583,6 +583,8 @@ function populateProductForm(product) {
     const deleteBtn = document.getElementById('delete-product-btn');
     if (product) {
         deleteBtn.style.display = 'block';
+        // FIX: Ensure docId is correctly set on the delete button.
+        // This was missing, causing deletes to fail.
         deleteBtn.dataset.docId = product.docId;
     } else {
         deleteBtn.style.display = 'none';
@@ -590,7 +592,11 @@ function populateProductForm(product) {
 }
 
 // Listen for category changes to toggle the variant section
-document.getElementById('product-category').addEventListener('change', toggleVariantUI);
+document.getElementById('product-category').addEventListener('change', () => {
+    // FIX: After toggling the UI, we must also check the state of multi-variant fields.
+    toggleVariantUI();
+    checkMultiVariantState();
+});
 
 // NEW: Render variant forms
 function renderVariantForms(variants = []) {
@@ -603,6 +609,8 @@ function renderVariantForms(variants = []) {
     variants.forEach((variant, index) => {
         container.appendChild(createVariantForm(variant, index));
     });
+    // FIX: After rendering, check if we need to show the single-variant fallback.
+    checkMultiVariantState();
 }
 
 // NEW: Create a single variant form group
@@ -730,20 +738,6 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
                     available: card.querySelector('.variant-available').value === 'true',
                 });
             });
-        } else if ((selectedCategory === 'Prawns' || selectedCategory === 'Pickles') && document.querySelectorAll('.variant-card').length === 0) {
-            // FIX: If a multi-variant category has no variant cards (they were all removed),
-            // read from the single-variant fallback fields to create one variant.
-            const mrp = parseFloat(document.getElementById('single-variant-mrp').value);
-            const finalPrice = parseFloat(document.getElementById('single-variant-finalPrice').value);
-            variants.push({
-                name: productName,
-                gross: document.getElementById('single-variant-gross').value,
-                net: document.getElementById('single-variant-net').value,
-                mrp: mrp,
-                finalPrice: finalPrice,
-                offer: mrp > finalPrice ? Math.round(((mrp - finalPrice) / mrp) * 100) : 0,
-                available: document.getElementById('single-variant-available').value === 'true',
-            });
         } else {
             // Single-variant logic
             const mrp = parseFloat(document.getElementById('single-variant-mrp').value);
@@ -775,11 +769,12 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
             available: variants.some(v => v.available) // Product is available if at least one variant is.
         };
         const productId = document.getElementById('product-id-input').value;
-        const docId = document.getElementById('delete-product-btn').dataset.docId; // Use the stored docId
 
         if (productId) { // Editing existing product
+            // FIX: Get docId from the delete button, which is populated when the form loads.
+            const docId = document.getElementById('delete-product-btn').dataset.docId;
             productData.id = parseInt(productId, 10);
-            const docRef = db.collection('products').doc(docId); // FIX: Use the actual document ID for updates.
+            const docRef = db.collection('products').doc(docId);
             await docRef.set(productData, { merge: true });
             toast('Product updated successfully!');
         } else { // Creating new product
