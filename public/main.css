@@ -934,11 +934,11 @@ z-index: 2;                 /* sits above input content */
 }
 
 /* Image area with fixed aspect ratio (1:1) to avoid layout shifts */
-.product-image {
+.image-wrap {
   position: relative;
   width: 100%;
   padding-top: 100%; /* 1:1 aspect ratio */
-  background: linear-gradient(180deg,#f8f8f8,#ffffff);
+  background: linear-gradient(180deg, #f8f8f8, #ffffff);
 }
 .product-image img {
   position: absolute;
@@ -1018,43 +1018,43 @@ z-index: 2;                 /* sits above input content */
   padding: 6px 0;
 }
 
-.product-info {
+.product-details {
   padding: 10px 12px 14px 12px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 .product-name {
-  font-size: 13px;
-  font-weight: 500;
-  color: #1A1A1A;
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
   text-align: left;
   line-height: 1.1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.price-section {
+.price-block {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.product-price {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1A1A1A;
+.final-price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111;
   line-height: 1;
 }
-.product-mrp {
-  color: #6C6C6C;
+.old-price {
+  color: #6b6b6b;
   text-decoration: line-through;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1;
 }
-.product-save {
-  color: #06A759;
-  font-weight: 600;
-  font-size: 11px;
+.save {
+  color: #11813a;
+  font-weight: 700;
+  font-size: 13px;
   line-height: 1;
 }
 

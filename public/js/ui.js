@@ -255,20 +255,18 @@ export const UI = {
 
             return `
         <article class="product ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" aria-label="Product: ${sanitizedName}">
-          <div class="product-image"> 
+          <div class="image-wrap"> 
             <img src="${optimizedImage}" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
             <button class="wishlist" aria-label="Add to wishlist"><i class="far fa-heart"></i></button>
             ${!product.available ? `<div class="out-of-stock-badge">Out of Stock</div>` : ctaButton}
           </div>
-          <div class="product-info">
-            <h3 class="product-name">${sanitizedName}</h3>
-            <div class="product-weight">${primaryVariant.net || ''}</div>
-            <div class="product-footer">
-                <div class="product-price">
-                    <span class="price">₹${primaryVariant.finalPrice || 'N/A'}</span>
-                    ${hasOffer ? `<span class="product-mrp">₹${primaryVariant.mrp}</span>` : ''}
-                </div>
+          <div class="product-details">
+            <div class="product-name">${sanitizedName}</div>
+            <div class="price-block">
+              <div class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</div>
+              ${hasOffer ? `<div class="old-price">₹${primaryVariant.mrp}</div>` : ''}
             </div>
+            ${hasOffer && savings > 0 ? `<div class="save">SAVE ₹${savings}</div>` : ''}
           </div>
         </article>
       `;
