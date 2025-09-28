@@ -304,14 +304,15 @@ export const UI = {
 
             // NEW: Render variant options
             if (product.variants && product.variants.length > 1) {
-                weight.innerHTML = product.variants.map((v, index) => `
-                    <label class="variant-radio">
-                        <input type="radio" name="product-variant" value="${index}" ${index === state.selectedVariantIndex ? 'checked' : ''}>
-                        <span class="variant-radio-label">${v.name} - ${v.net}</span>
-                    </label>
-                `).join('');
+                weight.innerHTML = product.variants.map((v, index) => {
+                    const isSelected = index === state.selectedVariantIndex;
+                    return `
+                        <div class="variant-card ${isSelected ? 'active' : ''}" data-variant-index="${index}" role="radio" aria-checked="${isSelected}" tabindex="0">
+                            <div class="variant-name">${v.name} (${v.net})</div>
+                        </div>`;
+                }).join('');
             } else {
-                weight.textContent = product.variants[0].net ? `${product.variants[0].net} Net Weight` : '';
+                weight.innerHTML = `<div class="variant-card active"><div class="variant-name">${product.variants[0].name} (${product.variants[0].net})</div></div>`;
             }
 
             UI.updatePopupPrice();
@@ -455,16 +456,18 @@ export const UI = {
         const content = document.getElementById('variantDrawerContent');
         content.innerHTML = product.variants.map((variant, index) => {
             const variantId = `${product.id}-${index}`;
-            const qtyInCart = state.cart[variantId] || 0;
+            const qtyInCart = state.cart[variantId] || 0; // Correctly get quantity for the specific variant
             return `
                 <div class="variant-option" data-id="${variantId}">
-                    <div>
+                    <div class="variant-info">
                         <strong>${variant.name}</strong> (${variant.net}) - ₹${variant.finalPrice}
                     </div>
+                    <div class="variant-cta">
                     ${qtyInCart > 0 ?
                         `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec">-</button><span class="qty">${qtyInCart}</span><button class="qty-btn inc">+</button></div>` :
                         `<button class="add-btn" data-id="${variantId}">ADD</button>`
                     }
+                    </div>
                 </div>
             `;
         }).join('');

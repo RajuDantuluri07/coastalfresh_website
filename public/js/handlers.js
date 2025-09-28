@@ -402,6 +402,16 @@ export const Handlers = {
             }
         });
 
+        // Product Popup Variant Selection
+        document.getElementById('popupProductWeight').addEventListener('click', (e) => {
+            const variantCard = e.target.closest('.variant-card');
+            if (variantCard && !variantCard.classList.contains('active')) {
+                const newIndex = parseInt(variantCard.dataset.variantIndex, 10);
+                state.selectedVariantIndex = newIndex;
+                UI.showProductPopup(state.popupProduct.id); // Re-render the popup with the new selection
+            }
+        });
+
         // Coupon section
         document.getElementById('cartCouponSection').addEventListener('click', e => {
             if (e.target.id === 'applyCouponBtn') {

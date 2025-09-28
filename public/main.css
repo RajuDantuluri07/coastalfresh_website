@@ -1241,13 +1241,37 @@ overflow: hidden;
   color: var(--text-primary);
 }
 
-.popup-weight {
-  font-size: 12px; /* Caption */
-  color: var(--text-secondary);
-  font-weight: 400; /* Regular */
+/* NEW: Card-style variant selector */
+.popup-weight { /* This container now holds the variant cards */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-bottom: 16px;
 }
 
+.variant-card {
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background-color: var(--bg-white);
+}
+
+.variant-card .variant-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.variant-card.active {
+  border-color: var(--primary-color);
+  background-color: var(--primary-light);
+}
+.variant-card.active .variant-name {
+  color: var(--primary-dark);
+  font-weight: 700;
+}
 /* NEW: Description with toggle */
 .popup-description-container {
   font-size: 14px;
@@ -3292,6 +3316,17 @@ body.popup-open .bottom-bar {
   padding: 12px;
   border: 1px solid var(--border-color);
   border-radius: 12px;
+}
+.variant-option .variant-info {
+  flex-grow: 1;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+.variant-option .variant-cta {
+  flex-shrink: 0;
+}
+.variant-option .add-btn {
+  position: static; /* Override absolute positioning from product card */
 }
 
 @keyframes shimmer {
