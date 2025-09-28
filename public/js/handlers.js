@@ -793,6 +793,40 @@ export const Handlers = {
             });
     },
 
+    updateQty: (variantId, change, source = 'card') => {
+        if (!state.cart[variantId] && change < 1) return;
+
+        const [productIdStr, variantIndexStr] = variantId.split('-');
+        const productId = parseInt(productIdStr, 10);
+        const variantIndex = parseInt(variantIndexStr, 10);
+        const product = state.products.find(p => p.id === productId);
+        const variant = product?.variants[variantIndex];
+        const originalQty = state.cart[variantId] || 0;
+
+        state.cart[variantId] = (state.cart[variantId] || 0) + change;
+
+        if (state.cart[variantId] <= 0) {
+            delete state.cart[variantId];
+            if (product && variant) {
+                window.Analytics.trackEvent('remove_from_cart', {
+                    currency: 'INR',
+                    value: variant.finalPrice * originalQty,
+                    items: [{ item_id: variantId, item_name: `${product.name} (${variant.name || ''})`, price: variant.finalPrice, quantity: originalQty }]
+                });
+            }
+        } else {
+            if (product) window.Analytics.trackChangeQty({ ...product, ...variant }, change, state.cart[variantId]);
+        }
+        Handlers.saveCart();
+        UI.updateCartUI();
+
+        if (state.isPopupOpen && state.popupProduct?.id === productId) {
+            UI.updatePopupCta();
+        }
+        // This function needs to be implemented or verified
+        // UI.updateProductCardState(productId); 
+    },
+
     toggleFavorite: (productId) => {
         if (isNaN(productId)) return;
 
