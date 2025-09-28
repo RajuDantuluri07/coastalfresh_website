@@ -29,7 +29,7 @@ export const Handlers = {
             }
 
             // Add to cart button on product cards (for single-variant products)
-            const addBtn = target.closest('.compact-add-btn:not(.variant-btn), .add-btn:not(.variant-btn)');
+            const addBtn = target.closest('.add-btn');
             if (addBtn) {
                 e.stopPropagation();
                 const variantId = addBtn.dataset.id;
@@ -38,7 +38,7 @@ export const Handlers = {
             
             // FIX: The "OPTIONS" button should now open the product details page instead of the variant drawer.
             const variantBtn = target.closest('.variant-btn');
-            if (variantBtn) {
+            if (variantBtn && !variantBtn.classList.contains('add-btn')) { // Ensure it's not the new add-btn
                 e.stopPropagation();
                 const productId = parseInt(variantBtn.dataset.id, 10);
                 UI.showProductPopup(productId);

@@ -9,12 +9,17 @@
   --accent-color: #0bade2;  /* Bright Cyan from Logo */
   --primary-light: #e6f0f5; /* Light tint of primary blue */
   --text-primary: #263238;  /* Blue Grey 900 */
+  --text-dark: #162029; /* For product name */
   --text-secondary: #546E7A;/* Blue Grey 600 */
   --border-color: #CFD8DC;  /* Blue Grey 100 */
   --bg-light: #ECEFF1;      /* Blue Grey 50 */
   --bg-white: #FFFFFF;
   --success-color: #388E3C; /* Green 700 */
   --error-color: #D32F2F;   /* Red 700 */
+
+  /* NEW: Demo specific variables */
+  --card-shadow: 0 6px 18px rgba(7,20,25,0.06);
+  --card-radius: 12px;
 
   /* === Sizing & Layout === */
   --app-max-width: 480px;

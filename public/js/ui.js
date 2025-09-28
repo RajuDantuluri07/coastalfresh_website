@@ -249,14 +249,15 @@ export const UI = {
             const sanitizedName = DOMPurify.sanitize(product.name);
 
             let ctaButton = '';
-            let stockOverlay = ''; // NEW: For the out-of-stock overlay
             const variantCount = product.variants?.length || 0;
 
             if (product.available) {
               if (variantCount > 1) {
                 // Multi-option product (like the demo)
+                const optionsText = `${variantCount} options`;
                 ctaButton = `
-                    <button class="add-btn small variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">ADD</button>`;
+                    <div class="options-badge">${optionsText}</div>
+                    <button class="add-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">ADD</button>`;
               } else {
                 // Single-option product
                 const variantId = `${product.id}-0`;
@@ -267,40 +268,36 @@ export const UI = {
                     ctaButton = `<button class="add-btn" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
                 }
               }
-            } else {
-              // NEW: If not available, create the overlay
-              stockOverlay = `<div class="out-of-stock-overlay"><div class="out-of-stock-text">Out of Stock</div></div>`;
             }
 
             const priceOrStockHTML = product.available ? `
                 <div class="price-row">
                     <span class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</span>
                     ${hasOffer ? `<span class="old-price">₹${primaryVariant.mrp}</span>` : ''}
-                    ${hasOffer && savings > 0 ? `<span class="save">SAVE ₹${savings}</span>` : ''}
                 </div>
+                ${hasOffer && savings > 0 ? `<div class="save">SAVE ₹${savings}</div>` : ''}
             ` : '';
 
-            const subInfoHTML = product.available ? `
-                <div class="sub-info">
+            const subHTML = product.available ? `
+                <div class="sub">
                     <span class="pill">${primaryVariant.net || primaryVariant.gross || ''}</span>
-                    ${variantCount > 1 ? `<span class="options-text">${variantCount} options</span>` : ''}
+                    &nbsp; • &nbsp; <span>23 mins</span>
                 </div>
-            ` : ''; // Out of stock text is now in the overlay
+            ` : `<div class="out-of-stock-text">Out of Stock</div>`; // Out of stock text below info
 
             return `
         <div class="card product ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" role="article" aria-label="Product: ${sanitizedName}">
           <div class="product-image">
-            <img src="${optimizedImage}" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
-            <button class="wish" aria-label="Add to wishlist" aria-pressed="false">
-                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 21s-7.5-4.9-9.2-8.1C1.6 9.9 4 6 8 6c2.2 0 3.6 1.5 4 2.2.4-.7 1.8-2.2 4-2.2 4 0 6.4 3.9 5.2 6.9C19.5 16.1 12 21 12 21z"></path></svg>
-            </button>
+            <img src="${optimizedImage}" alt="${sanitizedName}" loading="lazy">
+            <button class="wish" aria-label="Add to wishlist">♡</button>
              ${ctaButton}
-             ${stockOverlay}
+             ${!product.available ? `<div class="out-of-stock-overlay"><div class="out-of-stock-text">Out of Stock</div></div>` : ''}
+            </button>
           </div>
           <div class="info">
-            ${priceOrStockHTML}
             <h3 class="name">${sanitizedName}</h3>
-            ${subInfoHTML}
+            ${priceOrStockHTML}
+            ${subHTML}
           </div>
         </div>
       `;
