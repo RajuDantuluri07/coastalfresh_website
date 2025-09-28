@@ -98,7 +98,7 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // FIX: Use a "Network first, then Cache" strategy for the main HTML page.
+  // FIX #9: Use a "Network first, then Cache" strategy for the main HTML page.
   // This ensures users always get the latest version of the app shell if online.
   if (event.request.mode === 'navigate') {
     event.respondWith(

@@ -953,26 +953,16 @@ z-index: 2;                 /* sits above input content */
   display: block;
   pointer-events: none; /* Clicks should go to the underlying card or buttons */
 }
-.product-image img {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(255,255,255,0.95);
-  border: none;
-  border-radius: 50%;
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  font-size: 14px;
-  color: #444;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
-}
 .wishlist.active {
   color: var(--error-color);
 }
+/* FIX #3: The wishlist button class was wrong (.wishlist vs .wish) and had no active state. */
+.wish.active {
+  color: #e33; /* Red color for active state */
+  font-weight: 900; /* Make the heart solid */
+  /* The .wish class itself is already styled correctly in the compact design section */
+}
+
 
 /* ADD button inside image bottom-right */
 .add-btn {

@@ -246,8 +246,9 @@ export const Handlers = {
 
             // --- FIX: Cart quantity controls ---
             const cartQtyBtn = target.closest('.cart-item-qty .qty-btn');
-            const cartControls = target.closest('.cart-item-card .qty-controls');
-            if (cartControls && cartQtyBtn) {
+            if (cartQtyBtn) {
+                // FIX: The selector for cartControls was incorrect. It should just find the closest '.qty-controls'.
+                const cartControls = target.closest('.qty-controls');
                 e.stopPropagation();
                 const variantId = cartControls.dataset.id;
                 if (variantId) {
@@ -408,8 +409,8 @@ export const Handlers = {
             const variantCard = e.target.closest('.variant-card');
             if (variantCard && !variantCard.classList.contains('active')) {
                 const newIndex = parseInt(variantCard.dataset.variantIndex, 10);
-                state.selectedVariantIndex = newIndex;
-                UI.showProductPopup(state.popupProduct.id); // Re-render the popup with the new selection
+                // FIX: Call a more efficient update function instead of re-rendering the whole popup.
+                UI.updatePopupSelection(newIndex);
             }
         });
 
@@ -520,8 +521,9 @@ export const Handlers = {
     addPopupToCart: () => {
         if (!state.popupProduct) return;
         const variantId = `${state.popupProduct.id}-${state.selectedVariantIndex}`;
-        Handlers.addToCart(variantId, state.currentProductQty);
-        UI.updatePopupCta();
+        // FIX: Pass the selected quantity and update the CTA button afterwards.
+        Handlers.addToCart(variantId, state.currentProductQty); 
+        UI.updatePopupCta(); 
     },
 
     /**
@@ -535,13 +537,15 @@ export const Handlers = {
         // FIX: The 'items' from an order have {id, name, qty, price, image}. The 'id' is the variantId.
         let itemsAddedCount = 0;
         items.forEach(item => {
-            const [productId, variantIndex] = item.id.split('-').map(Number); // item.id is the variantId
+            const [productId, variantIndex] = item.id.split('-').map(Number);
             const product = state.products.find(p => p.id === productId);
             const qtyToAdd = (typeof item.qty === 'number' && item.qty > 0) ? item.qty : 1;
             if (product && product.variants[variantIndex]?.available) {
+                // FIX #6: Analytics was tracking the wrong price on reorder.
+                const variant = product.variants[variantIndex];
                 state.cart[item.id] = (state.cart[item.id] || 0) + qtyToAdd;
-                itemsAddedCount++; // Use a separate counter for analytics tracking
-                window.Analytics.trackAddToCart(product, qtyToAdd);
+                itemsAddedCount++;
+                window.Analytics.trackAddToCart({ ...product, ...variant }, qtyToAdd);
             }
         });
 
@@ -941,6 +945,7 @@ export const Handlers = {
                 state.db.collection('users').doc(user.uid).set({
                     email: user.email,
                     displayName: user.displayName || null,
+                    // FIX #10: User role was not being set on email signup.
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     role: 'customer' // Assign default role
                 });

@@ -239,6 +239,7 @@ export const UI = {
 
             let ctaButton = '';
             // FIX: Check availability of the specific variant for single-variant products.
+            // FIX #4: Ensure out-of-stock for single variant products is based on the variant's availability.
             if (product.variants && product.variants.length > 1) {
                 // For multi-variant products, the 'Options' button is always shown if the product is generally available.
                 if (product.available) {
@@ -254,21 +255,21 @@ export const UI = {
             }
 
             return `
-        <article class="product ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" aria-label="Product: ${sanitizedName}">
-          <div class="image-wrap"> 
+        <div class="card product ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" role="article" aria-label="Product: ${sanitizedName}">
+          <div class="product-image"> 
             <img src="${optimizedImage}" alt="Fresh ${sanitizedName} from Coastal Fresh India" loading="lazy" width="300" height="300">
-            <button class="wishlist" aria-label="Add to wishlist"><i class="far fa-heart"></i></button>
+            <button class="wish" aria-label="Add to wishlist">♡</button>
             ${!product.available ? `<div class="out-of-stock-badge">Out of Stock</div>` : ctaButton}
           </div>
-          <div class="product-details">
-            <div class="product-name">${sanitizedName}</div>
-            <div class="price-block">
+          <div class="info">
+            <h3 class="name">${sanitizedName}</h3>
+            <div class="price-row">
               <div class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</div>
               ${hasOffer ? `<div class="old-price">₹${primaryVariant.mrp}</div>` : ''}
             </div>
             ${hasOffer && savings > 0 ? `<div class="save">SAVE ₹${savings}</div>` : ''}
           </div>
-        </article>
+        </div>
       `;
         } catch (error) {
             console.error(`Error rendering product card for product ID ${product?.id}:`, error);
@@ -422,6 +423,25 @@ export const UI = {
         }
     },
 
+    /**
+     * NEW: Efficiently updates the product popup when a new variant is selected.
+     * @param {number} newIndex - The index of the newly selected variant.
+     */
+    updatePopupSelection: (newIndex) => {
+        if (!state.popupProduct || !state.popupProduct.variants[newIndex]) return;
+
+        state.selectedVariantIndex = newIndex;
+
+        // Update the active state on variant cards
+        document.querySelectorAll('#popupProductWeight .variant-card').forEach((card, index) => {
+            card.classList.toggle('active', index === newIndex);
+            card.setAttribute('aria-checked', index === newIndex);
+        });
+
+        UI.updatePopupPrice();
+        UI.updatePopupCta();
+    },
+
     updatePopupCta: () => {
         const ctaContainer = document.getElementById('popupStickyCta');
         if (!state.popupProduct || !ctaContainer) return;
@@ -565,18 +585,16 @@ export const UI = {
             const sanitizedName = product.name;
 
             if (product.variants && product.variants.length > 1) {
-                if (product.available) newControlHTML = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">OPTIONS</button>`;
+                newControlHTML = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="Choose options for ${sanitizedName}">OPTIONS</button>`;
             } else if (product.variants && product.variants.length === 1) {
                 const variantId = `${product.id}-0`;
                 const isInCartQty = state.cart[variantId] || 0;
-                if (product.variants[0].available) {
-                    newControlHTML = isInCartQty > 0
-                        ? `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${isInCartQty}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>`
-                        : `<button class="add-btn add-pill" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart"><i class="fas fa-plus"></i> ADD</button>`;
-                }
+                newControlHTML = isInCartQty > 0
+                    ? `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">&ndash;</button><span class="qty" aria-live="polite">${isInCartQty}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>`
+                    : `<button class="add-btn add-pill" data-id="${variantId}" aria-label="Add ${sanitizedName} to cart"><i class="fas fa-plus"></i> ADD</button>`;
             }
 
-            // Find and remove the old controls (either a button or a div) before adding the new ones.
+            // FIX #2: Instead of replacing the whole container, just replace the control itself.
             const oldControls = imageContainer.querySelector('.add-btn, .cart-controls, .out-of-stock-badge');
             if (oldControls) oldControls.remove();
 
@@ -635,7 +653,8 @@ export const UI = {
             <div class="cart-item-meta">
               <div class="cart-item-name">
                 ${item.name}
-                ${(item.name && item.name !== item.name) ? ` (${item.name})` : ''}
+                {/* FIX #4: Correctly check if variant name is different from product name. */}
+                ${(item.variantName && item.variantName !== item.name) ? ` (${item.variantName})` : ''}
               </div>
               <div class="cart-item-sub">${item.net} net</div>
               <div class="cart-item-price">

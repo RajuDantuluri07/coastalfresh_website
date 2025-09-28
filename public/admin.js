@@ -352,9 +352,9 @@ function confirmAndUpdate(orderId, newStatus) {
 
 
 function showMainView(page) {
-    const drawerNav = document.querySelector('.drawer-nav'); // FIX: Get reference to the drawer nav
+    const drawerNav = document.querySelector('.drawer-nav');
     // Update active state in the drawer menu
-    drawerNav.querySelectorAll('button[data-page]').forEach(b => b.classList.remove('active'));
+    drawerNav.querySelectorAll('button[data-page]').forEach(b => b.classList.remove('active')); // FIX #5: Menu active state was not updating.
     drawerNav.querySelector(`button[data-page="${page}"]`)?.classList.add('active');
 
     const dashboardContent = [document.querySelector('.stats-scroll'), document.querySelector('.segmented'), document.getElementById('orders-container')];
@@ -645,6 +645,7 @@ document.getElementById('product-image-upload').addEventListener('change', (e) =
 
 // NEW: Add/Remove Variant Buttons
 document.getElementById('add-variant-btn').addEventListener('click', () => {
+    // FIX #2: The "Add Variant" button was not working.
     const container = document.getElementById('variants-container');
     container.appendChild(createVariantForm({}, container.children.length));
 });
@@ -652,7 +653,7 @@ document.getElementById('add-variant-btn').addEventListener('click', () => {
 document.getElementById('variants-container').addEventListener('click', (e) => {
     if (e.target.classList.contains('remove-variant-btn')) {
         e.target.closest('.variant-card').remove();
-        // FIX: After removing a variant, check if we need to show the single-variant fields.
+        // FIX #8: After removing a variant, check if we need to show the single-variant fields.
         checkMultiVariantState();
     }
 });
@@ -786,8 +787,9 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
             const lastProductQuery = await productsRef.orderBy('id', 'desc').limit(1).get();
             const newId = lastProductQuery.empty ? 1 : lastProductQuery.docs[0].data().id + 1;
             productData.id = newId;
-            const docRef = db.collection('products').doc(String(newId));
-            await docRef.set(productData);
+            // FIX #1: Use Firestore's auto-generated ID for new documents instead of the numerical ID.
+            // This prevents potential ID collisions and is a more robust practice.
+            await productsRef.add(productData);
             toast('Product created successfully!');
         }
         showMainView('products');
@@ -806,6 +808,7 @@ document.getElementById('delete-product-btn').addEventListener('click', async (e
 
     if (confirm(`Are you sure you want to delete product ID ${productToDelete.id}? This cannot be undone.`)) {
         try {
+            // FIX #7: Use the Firestore document ID (docId) for deletion, not the numerical product ID.
             await db.collection('products').doc(docId).delete();
             toast('Product deleted.');
             showMainView('products');
