@@ -510,17 +510,18 @@ document.getElementById('products-container').addEventListener('click', (e) => {
     }
 });
 
-function toggleVariantSection() {
+function toggleVariantUI() {
     const categorySelect = document.getElementById('product-category');
-    const variantSection = document.getElementById('variant-management-section');
-    const addVariantBtn = document.getElementById('add-variant-btn');
+    const multiVariantSection = document.getElementById('variant-management-section');
+    const singleVariantSection = document.getElementById('single-variant-fields');
     const selectedCategory = categorySelect.value;
 
     if (selectedCategory === 'Prawns' || selectedCategory === 'Pickles') {
-        variantSection.style.display = 'block';
+        multiVariantSection.style.display = 'block';
+        singleVariantSection.style.display = 'none';
     } else {
-        // FIX: Ensure the "Add Variant" button is also hidden for single-variant categories.
-        variantSection.style.display = 'none';
+        multiVariantSection.style.display = 'none';
+        singleVariantSection.style.display = 'flex';
     }
 }
 
@@ -540,8 +541,8 @@ function populateProductForm(product) {
     // Set a default if it's a new product
     if (!product) categorySelect.value = PRODUCT_CATEGORIES[0];
 
-    // Show/hide variant section based on the initial category
-    toggleVariantSection();
+    // Show/hide the correct variant UI based on the initial category
+    toggleVariantUI();
     
     // NEW: Handle image preview
     const imagePreview = document.getElementById('product-image-preview');
@@ -549,10 +550,20 @@ function populateProductForm(product) {
     imagePreview.style.display = (product && product.image) ? 'block' : 'none';
     document.getElementById('product-image-url').value = product ? product.image : '';
 
-    // FIX: Provide a sensible default for new products.
-    // For single-variant categories, the name is optional and will default to the product name.
-    const defaultVariant = { name: '', gross: '1kg', net: '500g', mrp: 0, finalPrice: 0, available: true };
-    renderVariantForms(product ? product.variants : [defaultVariant]);
+    // Populate the correct variant fields
+    const variants = product ? product.variants : [{ name: '', gross: '1kg', net: '500g', mrp: 0, finalPrice: 0, available: true }];
+    const primaryVariant = variants[0] || {};
+
+    // Populate single-variant fields
+    document.getElementById('single-variant-gross').value = primaryVariant.gross || '';
+    document.getElementById('single-variant-net').value = primaryVariant.net || '';
+    document.getElementById('single-variant-mrp').value = primaryVariant.mrp || 0;
+    document.getElementById('single-variant-finalPrice').value = primaryVariant.finalPrice || 0;
+    document.getElementById('single-variant-available').value = primaryVariant.available === false ? 'false' : 'true';
+
+    // Populate multi-variant fields
+    renderVariantForms(variants);
+
 
     const deleteBtn = document.getElementById('delete-product-btn');
     if (product) {
@@ -564,7 +575,7 @@ function populateProductForm(product) {
 }
 
 // Listen for category changes to toggle the variant section
-document.getElementById('product-category').addEventListener('change', toggleVariantSection);
+document.getElementById('product-category').addEventListener('change', toggleVariantUI);
 
 // NEW: Render variant forms
 function renderVariantForms(variants = []) {
@@ -672,40 +683,48 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
             throw new Error("Product image is required. Please upload an image or provide a URL.");
         }
 
-        // FIX: For single-variant categories, ensure there is exactly one variant.
-        const selectedCategory = document.getElementById('product-category').value;
-        if (selectedCategory === 'Fish' || selectedCategory === 'Crabs') {
-            if (document.querySelectorAll('.variant-card').length > 1) {
-                throw new Error(`${selectedCategory} can only have one variant. Please remove extra variants.`);
-            }
-        }
-
         const productName = document.getElementById('product-name').value;
+        const selectedCategory = document.getElementById('product-category').value;
 
         // NEW: Collect variant data
-        const variants = [];
-        const variantCards = document.querySelectorAll('.variant-card');
-        variantCards.forEach(card => {
-            const mrp = parseFloat(card.querySelector('.variant-mrp').value);
-            const finalPrice = parseFloat(card.querySelector('.variant-finalPrice').value);
-            let variantName = card.querySelector('.variant-name').value;
+        let variants = [];
+        if (selectedCategory === 'Prawns' || selectedCategory === 'Pickles') {
+            // Multi-variant logic
+            const variantCards = document.querySelectorAll('.variant-card');
+            if (variantCards.length === 0) throw new Error("At least one product variant is required.");
 
+            variantCards.forEach(card => {
+                const mrp = parseFloat(card.querySelector('.variant-mrp').value);
+                const finalPrice = parseFloat(card.querySelector('.variant-finalPrice').value);
+                let variantName = card.querySelector('.variant-name').value.trim();
+
+                if (variantCards.length > 1 && !variantName) {
+                    throw new Error("Variant names are required when you have more than one variant.");
+                }
+
+                variants.push({
+                    name: variantName || productName,
+                    gross: card.querySelector('.variant-gross').value,
+                    net: card.querySelector('.variant-net').value,
+                    mrp: mrp,
+                    finalPrice: finalPrice,
+                    offer: mrp > finalPrice ? Math.round(((mrp - finalPrice) / mrp) * 100) : 0,
+                    available: card.querySelector('.variant-available').value === 'true',
+                });
+            });
+        } else {
+            // Single-variant logic
+            const mrp = parseFloat(document.getElementById('single-variant-mrp').value);
+            const finalPrice = parseFloat(document.getElementById('single-variant-finalPrice').value);
             variants.push({
-                name: variantName || productName, // Default to product name if variant name is empty
-                gross: card.querySelector('.variant-gross').value,
-                net: card.querySelector('.variant-net').value,
+                name: productName, // Name is always the product name
+                gross: document.getElementById('single-variant-gross').value,
+                net: document.getElementById('single-variant-net').value,
                 mrp: mrp,
                 finalPrice: finalPrice,
                 offer: mrp > finalPrice ? Math.round(((mrp - finalPrice) / mrp) * 100) : 0,
-                available: card.querySelector('.variant-available').value === 'true',
+                available: document.getElementById('single-variant-available').value === 'true',
             });
-        });
-
-        // Validate variant names only if there are multiple variants
-        if (variantCards.length > 1) {
-            if (variants.some(v => !v.name)) {
-                throw new Error("Variant names are required when you have more than one variant.");
-            }
         }
 
         if (variants.length === 0) {
