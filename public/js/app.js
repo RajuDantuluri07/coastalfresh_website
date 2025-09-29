@@ -185,25 +185,29 @@ async function init() {
           UI.renderFeaturedProducts();
           UI.renderCatalogProducts();
           UI.renderFlashSale();
-          UI.initFlashSaleTimer();
+          UI.initFlashSaleTimer();          
 
+          // --- CRITICAL FIX: Move routing logic inside the .then() block ---
+          // This ensures that we only try to render a page AFTER the product data is loaded.
+          // This fixes the race condition causing blank product/category pages.
           const path = window.location.pathname;
           const productMatch = path.match(/^\/product\/(.+)-(\d+)$/);
+          const categoryMatch = path.match(/^\/category\/(.+)/);
           const urlParams = new URLSearchParams(window.location.search);
 
-          if (productMatch) {
+          if (productMatch || categoryMatch) {
             const slug = window.location.pathname.substring(1); // e.g., "product/white-pomfret-1"
             // The showPage function will now handle rendering the product page
             UI.showPage(slug);
-          }
-
-          const searchQuery = urlParams.get('q');
-          if (searchQuery) {
-              UI.showPage('catalog');
-              const searchInput = document.getElementById('catalogSearch');
-              if (searchInput) {
-                  searchInput.value = searchQuery;
-                  Handlers.handleCatalogSearch({ target: searchInput });
+          } else {
+              const searchQuery = urlParams.get('q');
+              if (searchQuery) {
+                  UI.showPage('catalog');
+                  const searchInput = document.getElementById('catalogSearch');
+                  if (searchInput) {
+                      searchInput.value = searchQuery;
+                      Handlers.handleCatalogSearch({ target: searchInput });
+                  }
               }
           }
 
