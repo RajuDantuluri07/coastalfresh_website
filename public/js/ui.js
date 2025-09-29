@@ -980,22 +980,32 @@ export const UI = {
     },
 
     renderFavoritesPage: () => {
+        // NEW: Get containers for both the product grid and the empty state
+        const favoritesContainer = document.getElementById('favoriteProducts');
+        const emptyStateContainer = document.getElementById('favoritesEmptyState');
+        if (!favoritesContainer || !emptyStateContainer) return;
+
         const favoritedProducts = state.products.filter(p => state.favorites.has(p.id));
-        const emptyMessage = `
-            <div class="empty-cart" style="min-height: 60vh;">
-                <div class="illustration" aria-hidden="true">
-                    <svg width="160" height="140" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Empty favorites illustration">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="none" stroke="var(--border-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <h2 class="empty-cart-title">No Favorites Yet</h2>
-                <p class="empty-cart-lead">Tap the heart on any product to save it here for later.</p>
-                <button class="cart-cta empty-cart-btn" onclick="document.querySelector('.nav-item[data-page=\'catalog\']').click()">
-                    Find Products
-                </button>
-            </div>
-        `;
-        UI.renderProductGrid('favoriteProducts', favoritedProducts, {}, emptyMessage);
+
+        if (favoritedProducts.length > 0) {
+            // If there are favorites, show the product grid and hide the empty state
+            favoritesContainer.style.display = 'grid';
+            emptyStateContainer.style.display = 'none';
+            favoritesContainer.innerHTML = favoritedProducts.map(p => UI.createProductHTML(p)).join('');
+        } else {
+            // If there are no favorites, hide the product grid and show the empty state
+            favoritesContainer.style.display = 'none';
+            emptyStateContainer.style.display = 'flex'; // Use flex to center the content
+            emptyStateContainer.innerHTML = `
+                <div class="empty-cart">
+                    <div class="illustration" aria-hidden="true">
+                        <svg width="160" height="140" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Empty favorites illustration"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="none" stroke="var(--border-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                    <h2 class="empty-cart-title">No Favorites Yet</h2>
+                    <p class="empty-cart-lead">Tap the heart on any product to save it here for later.</p>
+                    <button class="cart-cta empty-cart-btn prominent" id="findProductsFromFavorites">Find Products</button>
+                </div>`;
+        }
     },
 
     showPage: (page, fromHistory = false) => {
@@ -1417,8 +1427,8 @@ export const UI = {
                     <h2 class="logged-out-title">Login to view orders</h2>
                     <p class="logged-out-lead">Sign in to see your order history, track deliveries and reorder favourites.</p>
                     <div class="logged-out-actions">
-                        <button class="primary-cta" id="loginFromOrdersBtn">Login / Sign Up</button>
-                        <button class="secondary-action" id="continueAsGuestBtn">Continue as guest</button>
+                        <button class="cart-cta checkout-btn" id="loginFromOrdersBtn">Login / Sign Up</button>
+                        <button class="text-link-cta" id="continueAsGuestBtn">Continue as Guest</button>
                     </div>
                 </div>
             `;
@@ -1835,6 +1845,11 @@ export const UI = {
     // Moved from handlers.js for better separation of concerns
     updateUIForAuthState: () => {
         const { userName, userStatus, logoutBtn, guestCta, referBtn, avatar } = state.dom.profile;
+        // NEW: Get elements for the refer page
+        const referralShareContainer = document.getElementById('referralShareContainer');
+        const referralLoginPrompt = document.getElementById('referralLoginPrompt');
+        const referralLinkEl = document.getElementById('referralLink');
+
 
         if (state.currentUser) {
             if (state.currentUser.photoURL) {
@@ -1843,7 +1858,6 @@ export const UI = {
                 avatar.innerHTML = `<i class="fas fa-user"></i>`;
             }
 
-            const referralLinkEl = document.getElementById('referralLink');
             if (referralLinkEl) {
                 referralLinkEl.textContent = `https://coastalfresh.in?ref=${_simpleHash(state.currentUser.uid)}`;
             }
@@ -1862,6 +1876,10 @@ export const UI = {
             logoutBtn.style.display = 'flex';
             if (guestCta) guestCta.style.display = 'none';
             if (referBtn) referBtn.style.display = 'flex'; // FIX: Ensure button is shown for logged-in users
+
+            // NEW: Show referral controls for logged-in users
+            if (referralShareContainer) referralShareContainer.style.display = 'flex';
+            if (referralLoginPrompt) referralLoginPrompt.style.display = 'none';
         } else {
             avatar.innerHTML = `<i class="fas fa-user"></i>`;
             userName.textContent = 'Guest User';
@@ -1869,6 +1887,11 @@ export const UI = {
             logoutBtn.style.display = 'none';
             if (guestCta) guestCta.style.display = 'flex';
             if (referBtn) referBtn.style.display = 'none';
+
+            // NEW: Show login prompt for guest users on refer page
+            if (referralLinkEl) referralLinkEl.textContent = 'Login to get your code';
+            if (referralShareContainer) referralShareContainer.style.display = 'none';
+            if (referralLoginPrompt) referralLoginPrompt.style.display = 'flex';
         }
     }
 };

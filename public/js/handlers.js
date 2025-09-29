@@ -22,10 +22,16 @@ export const Handlers = {
 
             // Product card click (but not on buttons that have their own handlers)
             const productCard = target.closest('.product');
-            if (productCard && !target.closest('.cart-controls, .add-btn, .wishlist, .variant-btn')) {
+            if (productCard && !target.closest('.cart-controls, .add-btn, .wish, .variant-btn')) {
                 e.preventDefault();
                 const productId = parseInt(productCard.dataset.id, 10);
                 if (productId) UI.showProductPopup(productId);
+            }
+
+            // NEW: Handle "Find Products" button on empty favorites page
+            const findProductsBtn = target.closest('#findProductsFromFavorites');
+            if (findProductsBtn) {
+                UI.showPage('catalog');
             }
 
             // CTA button on product cards
@@ -292,8 +298,12 @@ export const Handlers = {
 
         // --- NEW: Event listener for the enhanced Refer a Friend page ---
         const referPage = document.getElementById('referPage');
-        if (referPage) {
-            referPage.addEventListener('click', (e) => { if (e.target.closest('#copyReferralBtn')) Handlers.copyReferralLink(); });
+        if (referPage) { // FIX: Add listener for the new login button
+            referPage.addEventListener('click', (e) => {
+                if (e.target.closest('#copyReferralBtn')) Handlers.copyReferralLink();
+                // NEW: Handle click on the login button on the refer page
+                if (e.target.closest('#referralLoginBtn')) UI.showLoginModal(null, 'signup');
+            });
         }
 
         // Typewriter focus/blur handlers

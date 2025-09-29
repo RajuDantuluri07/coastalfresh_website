@@ -262,9 +262,16 @@
         </div>
       </header>
       <main class="section">
-        <div class="products" id="favoriteProducts">
-          <!-- Favorite products will be injected here -->
+        <!-- Container for the grid of favorite products -->
+        <div class="products" id="favoriteProducts"></div>
+
+        <!-- NEW: Dedicated container for the empty state message -->
+        <div id="favoritesEmptyState" style="display: none;">
+          <!-- The empty message HTML will be injected here by ui.js -->
         </div>
+
+        <!-- FIX: Add padding at the bottom to avoid being obscured by the nav bar -->
+        <div style="height: 80px;"></div>
       </main>
     </div>
 
@@ -397,6 +404,18 @@
               <i class="fas fa-arrow-right"></i>
             </button>
           </div>
+
+          <!-- NEW: Social Media Section with Title -->
+          <div class="about-socials-section">
+            <h4 class="social-title">Follow us on</h4>
+            <div class="social-bar">
+              <a href="https://www.instagram.com/coastalfresh.in" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+              <a href="https://www.facebook.com/CoastalFresh.in/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+              <a href="https://wa.me/919985125678" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+              <a href="https://www.youtube.com/@CoastalFresh" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+              <a href="https://t.me/coastalfreshseafoods" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+            </div>
+          </div>
         </div>
       </main>
     </div>
@@ -424,7 +443,7 @@
         </div>
 
         <!-- Share Actions (Moved from footer) -->
-        <div class="refer-actions-container">
+        <div class="refer-actions-container" id="referralShareContainer">
           <div class="refer-link-container" id="copyReferralBtn" role="button" tabindex="0" aria-label="Copy referral link">
             <span id="referralLink" class="refer-link">https://coastalfresh.in?ref=GUEST123</span>
             <i class="far fa-copy"></i>
@@ -433,6 +452,15 @@
             <button id="shareOnWhatsAppBtn" class="share-btn whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</button>
             <button id="shareOnOtherAppsBtn" class="share-btn other-apps"><i class="fas fa-share-alt"></i> Share</button>
           </div>
+        </div>
+
+        <!-- NEW: Login prompt for guest users -->
+        <div class="refer-login-prompt" id="referralLoginPrompt" style="display: none;">
+          <div class="refer-login-text">
+            <i class="fas fa-lock"></i>
+            <span>Login to get your unique referral code</span>
+          </div>
+          <button class="refer-login-btn" id="referralLoginBtn">Login / Sign Up</button>
         </div>
 
         <!-- How It Works Section -->
@@ -525,15 +553,6 @@
         </div>
 
         <div class="profile-footer">
-          <!-- NEW: Social Bar -->
-          <div class="social-bar">
-            <a href="https://www.instagram.com/coastalfresh.in" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="https://www.facebook.com/CoastalFresh.in/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-            <a href="https://wa.me/919985125678" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-            <a href="https://www.youtube.com/@CoastalFresh" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-            <a href="https://t.me/coastalfreshseafoods" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
-          </div>
-
           <div class="app-version">
             Coastal Fresh v1.0.0
           </div>
