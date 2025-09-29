@@ -279,6 +279,8 @@ export const UI = {
                     ctaButton = `<button class="${buttonClass}" data-id="${buttonActionId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
                 }
             } else {
+                // NEW: Add a notify me button for unavailable products
+                ctaButton = `<button class="notify-btn" data-id="${product.id}" aria-label="Notify me when back in stock"><i class="fas fa-bell"></i></button>`;
                 stockOverlay = `<div class="out-of-stock-overlay">Out of Stock</div>`;
             }
 
@@ -291,7 +293,7 @@ export const UI = {
             ` : `<div class="out-of-stock-text">Out of Stock</div>`;
 
             return `
-        <div class="card product ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" role="article" aria-label="Product: ${sanitizedName}">
+        <div class="card product ${!product.available ? 'unavailable' : ''} ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" role="article" aria-label="Product: ${sanitizedName}">
           <div class="product-image">
             <img src="${optimizedImage}" alt="${sanitizedName}" loading="lazy">
             <button class="wish" data-id="${product.id}" aria-label="Add to wishlist" aria-pressed="${isFavorite}">${isFavorite ? '♥' : '♡'}</button>

@@ -21,8 +21,8 @@ export const Handlers = {
             const target = e.target;
 
             // Product card click (but not on buttons that have their own handlers)
-            const productCard = target.closest('.product');
-            if (productCard && !target.closest('.cart-controls, .add-btn, .wish, .variant-btn')) {
+            const productCard = target.closest('.product:not(.unavailable)'); // FIX: Only select available product cards
+            if (productCard && !target.closest('.cart-controls, .add-btn, .wish, .variant-btn, .notify-btn')) {
                 e.preventDefault();
                 const productId = parseInt(productCard.dataset.id, 10);
                 if (productId) UI.showProductPopup(productId);
@@ -79,6 +79,13 @@ export const Handlers = {
                 e.stopPropagation(); // Prevent popup from opening
                 const productId = parseInt(favBtn.dataset.id, 10);
                 if (!isNaN(productId)) Handlers.toggleFavorite(productId);
+            }
+
+            // NEW: Handle notify me button click
+            const notifyBtn = target.closest('.notify-btn');
+            if (notifyBtn) {
+                e.stopPropagation();
+                UI.showToast('Notify me feature coming soon!');
             }
 
             // FAQ toggle
