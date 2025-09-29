@@ -388,6 +388,20 @@ export const UI = {
         const product = state.products.find(p => p.id === numericId);
         if (!product) return;
 
+        // --- SEO CRITICAL FIX: Execute SEO tasks immediately, not in a deferred callback. ---
+        // This ensures that when Googlebot crawls a direct product URL, the schema and meta tags are present.
+        const productSlug = UI.generateProductSlug(product);
+        const productUrl = `/product/${productSlug}`;
+        const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
+        const productDesc = product.desc;
+        const optimizedProductImage = UI.getOptimizedImageUrl(product.image, 1200, 630);
+
+        // 1. Inject the specific Product schema for this page immediately.
+        UI.injectProductSchema(product);
+
+        // 2. Update meta tags and canonical URL.
+        UI.updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
+
         // --- OPTIMIZATION: Prioritize visual updates first ---
         state.popupProduct = product;
         state.selectedVariantIndex = 0; // Default to the first variant
@@ -465,20 +479,8 @@ export const UI = {
             if (contentWrapper) contentWrapper.scrollTop = 0;
 
             // Defer non-critical tasks to run after the popup is visible
-            const runDeferredTasks = () => {
-                const productSlug = UI.generateProductSlug(product);
-                const productUrl = `/product/${productSlug}`;
-                const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
-                const productDesc = product.desc;
-                const optimizedProductImage = UI.getOptimizedImageUrl(product.image, 1200, 630);
-
-                // NEW: Inject the specific Product schema for this page.
-                UI.injectProductSchema(product);
-
-                UI.updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
+            const runDeferredSEOTasks = () => {
                 history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
-
-                // Inject JSON-LD schema
                 const existingJsonLd = document.getElementById('product-breadcrumb-jsonld');
                 if (existingJsonLd) existingJsonLd.remove();
                 const breadcrumb = { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" }, { "@type": "ListItem", "position": 2, "name": "All Products", "item": "https://www.coastalfresh.in/catalog" }, { "@type": "ListItem", "position": 3, "name": product.name, "item": `https://www.coastalfresh.in${productUrl}` }] };
@@ -491,9 +493,9 @@ export const UI = {
 
             // Use requestIdleCallback for modern browsers, fallback to setTimeout
             if ('requestIdleCallback' in window) {
-                requestIdleCallback(runDeferredTasks, { timeout: 500 });
+                requestIdleCallback(runDeferredSEOTasks, { timeout: 500 });
             } else {
-                setTimeout(runDeferredTasks, 100);
+                setTimeout(runDeferredSEOTasks, 100);
             }
         };
 
