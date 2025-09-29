@@ -1694,7 +1694,20 @@ export const UI = {
                 "description": product.desc,
                 "sku": `CF-${product.id}`,
                 "brand": { "@type": "Brand", "name": "Coastal Fresh" },
-                "offers": {
+            };
+
+            // Use AggregateOffer for multi-variant products, and a single Offer for single-variant products.
+            if (product.variants && product.variants.length > 1) {
+                schema.offers = {
+                    "@type": "AggregateOffer",
+                    "priceCurrency": "INR",
+                    "lowPrice": Math.min(...product.variants.map(v => v.finalPrice)),
+                    "highPrice": Math.max(...product.variants.map(v => v.finalPrice)),
+                    "offerCount": product.variants.length,
+                    "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`
+                };
+            } else {
+                schema.offers = {
                     "@type": "Offer",
                     "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`,
                     "priceCurrency": "INR",
@@ -1702,8 +1715,8 @@ export const UI = {
                     "priceValidUntil": new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0],
                     "itemCondition": "https://schema.org/NewCondition",
                     "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-                }
-            };
+                };
+            }
 
             // Dynamically add review and rating data if available
             const relevantReviews = config.CUSTOMER_REVIEWS.filter(r => r.review.toLowerCase().includes(product.name.split(' ')[0].toLowerCase()));
