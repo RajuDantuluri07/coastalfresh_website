@@ -185,8 +185,7 @@ async function init() {
           UI.renderFeaturedProducts();
           UI.renderCatalogProducts();
           UI.renderFlashSale();
-          UI.initFlashSaleTimer();
-          UI.renderProductSchema();
+          UI.initFlashSaleTimer();          
           // Load cart after products are loaded to ensure data integrity
           Handlers.loadCart();
 
