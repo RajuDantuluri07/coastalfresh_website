@@ -1172,7 +1172,16 @@ export const UI = {
 
     showPage: (page, fromHistory = false) => {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(page).classList.add('active');
+
+        // FIX: Handle dynamic page routes like categories and products.
+        // Instead of finding an element with id="category/fish", find the correct container.
+        if (page.startsWith('category/')) {
+            document.getElementById('categoryPage').classList.add('active');
+        } else if (page.startsWith('product/')) {
+            document.getElementById('productDetailPage').classList.add('active');
+        } else {
+            document.getElementById(page).classList.add('active');
+        }
 
         if (!fromHistory && page !== 'cart' && page !== state.pageHistory[state.pageHistory.length - 1]) {
             state.pageHistory.push(page);
@@ -1202,9 +1211,7 @@ export const UI = {
             pageDesc = 'View and manage your list of favorite fresh seafood products at Coastal Fresh India.';
             pagePath = '/favorites';
             UI.renderFavoritesPage();
-        } else if (page.startsWith('category/')) {
-            // FIX: Show the generic 'categoryPage' container.
-            document.getElementById('categoryPage').classList.add('active');
+        } else if (page.startsWith('category/')) { // FIX: This block must come before the product/ block.
             const categoryKey = page.split('/')[1];
             const categoryData = config.CATEGORIES_DATA.find(c => c.key.toLowerCase() === categoryKey.toLowerCase());
             if (categoryData) {
@@ -1213,10 +1220,7 @@ export const UI = {
                 pagePath = `/${page}`;
                 UI.renderCategoryPage(categoryData.key);
             }
-            // FIX: Return here to prevent fall-through to the next else-if block.
-            return;
         } else if (page.startsWith('product/')) {
-            document.getElementById('productDetailPage').classList.add('active');
             const product = state.products.find(p => UI.generateProductSlug(p) === page);
             if (product) UI.renderProductPage(product);
         } else if (page === 'profilePage' || page === 'addressPage' || page === 'ordersPage') {
