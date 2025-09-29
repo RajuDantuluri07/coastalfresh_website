@@ -195,8 +195,16 @@ async function init() {
           const urlParams = new URLSearchParams(window.location.search);
 
           if (productMatch) {
-              const productId = parseInt(productMatch[2], 10);
-              UI.showProductPopup(productId);
+            // FIX: When a product URL is loaded directly, inject its schema immediately for SEO.
+            // This ensures Googlebot sees the schema without needing to open the popup.
+            const slug = window.location.pathname.substring(1); // e.g., "product/white-pomfret-1"
+            const product = state.products.find(p => UI.generateProductSlug(p) === slug);
+            if (product) {
+                UI.injectProductSchema(product);
+            }
+            // Also, open the popup for human users.
+            const productId = parseInt(productMatch[2], 10);
+            UI.showProductPopup(productId);
           }
 
           const searchQuery = urlParams.get('q');
