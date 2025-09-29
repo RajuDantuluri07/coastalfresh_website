@@ -310,6 +310,54 @@ export const UI = {
         }
     },
 
+    /**
+     * NEW: Injects or updates the JSON-LD schema for the currently viewed product.
+     * This is critical for product page SEO.
+     * @param {object} product - The product object to generate schema for.
+     */
+    injectProductSchema: (product) => {
+        if (!product) return;
+
+        // Remove any existing product schema to avoid duplicates
+        const existingSchema = document.getElementById('product-schema-ld');
+        if (existingSchema) {
+            existingSchema.remove();
+        }
+
+        const schema = {
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": product.name,
+            "image": UI.getOptimizedImageUrl(product.image, 1200, 630),
+            "description": product.desc,
+            "sku": `CF-${product.id}`,
+            "brand": { "@type": "Brand", "name": "Coastal Fresh" },
+            "offers": {
+                "@type": "AggregateOffer",
+                "priceCurrency": "INR",
+                "lowPrice": Math.min(...product.variants.map(v => v.finalPrice)),
+                "highPrice": Math.max(...product.variants.map(v => v.finalPrice)),
+                "offerCount": product.variants.length,
+                "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                "offers": product.variants.map(variant => ({
+                    "@type": "Offer",
+                    "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`,
+                    "price": variant.finalPrice,
+                    "priceCurrency": "INR",
+                    "availability": variant.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                    "itemCondition": "https://schema.org/NewCondition"
+                }))
+            }
+        };
+
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.id = 'product-schema-ld'; // Add an ID for easy removal
+        script.textContent = JSON.stringify(schema);
+
+        document.head.appendChild(script);
+    },
+
     generateProductSlug: (product) => {
         if (!product || !product.name) return '';
         const namePart = product.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
@@ -405,6 +453,9 @@ export const UI = {
                 const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
                 const productDesc = product.desc;
                 const optimizedProductImage = UI.getOptimizedImageUrl(product.image, 1200, 630);
+
+                // NEW: Inject the specific Product schema for this page.
+                UI.injectProductSchema(product);
 
                 UI.updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
                 history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
@@ -606,6 +657,12 @@ export const UI = {
     closePopup: () => {
         const popup = document.getElementById('productPopup');
         if (!popup || !state.isPopupOpen) return; // FIX: Check isPopupOpen to prevent errors on rapid clicks
+
+        // NEW: Clean up the dynamically injected schema when the popup closes.
+        const productSchema = document.getElementById('product-schema-ld');
+        if (productSchema) {
+            productSchema.remove();
+        }
 
         UI.closeModal(popup);
         state.isPopupOpen = false;
