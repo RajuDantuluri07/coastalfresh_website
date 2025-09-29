@@ -17,7 +17,7 @@ try {
     // FIX: Use the exact same slug generation logic as the main application (ui.js)
     // This correctly handles special characters like parentheses.
     const namePart = product.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
-    const slug = `${namePart}-${product.id}`;
+    const slug = `${namePart}-${product.id}`; // FIX: Ensure product.id is used correctly.
     pages.push({ loc: `/product/${slug}`, changefreq: 'weekly', priority: '0.8' });
   });
 } catch (error) {

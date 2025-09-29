@@ -688,7 +688,7 @@ export const Handlers = {
         UI.updateProductCardState(productId); // FIX: Pass productId to update all cards for that product.
         
         // FIX: Construct toast message correctly to avoid duplicate names.
-        const toastMessage = (variant.name && variant.name !== product.name) ? `${product.name} (${variant.name})` : product.name;
+        const toastMessage = (variant.name && variant.name !== product.name) ? `${product.name} (${variant.name})` : (product.name || 'Item');
         UI.showToast(`${toastMessage} added to cart!`);
 
         // Animate the "ADD" button to "ADDED" temporarily

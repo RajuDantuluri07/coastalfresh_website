@@ -1212,10 +1212,13 @@ export const UI = {
             pagePath = '/favorites';
             UI.renderFavoritesPage();
         } else if (page.startsWith('product/')) {
+            // This is a dynamic product page. The rendering function handles SEO tags.
             const product = state.products.find(p => UI.generateProductSlug(p) === page);
             if (product) UI.renderProductPage(product);
+            // We return here because renderProductPage sets its own SEO tags.
+            return;
         } else if (page.startsWith('category/')) {
-            const categoryKey = page.split('/')[1].toLowerCase();
+            const categoryKey = page.split('/')[1];
             const categoryData = config.CATEGORIES_DATA.find(c => c.key.toLowerCase() === categoryKey.toLowerCase());
             if (categoryData) {
                 pageTitle = `Fresh ${categoryData.label} | Coastal Fresh India`;
@@ -1223,10 +1226,8 @@ export const UI = {
                 pagePath = `/${page}`;
                 UI.renderCategoryPage(categoryData.key);
             }
-        } else if (page === 'profilePage' || page === 'addressPage' || page === 'ordersPage') {
-            pageTitle = 'Your Account | Coastal Fresh India';
-            pageDesc = 'Manage your orders, addresses, and profile settings at Coastal Fresh India.';
-            pagePath = '/profile';
+            // We return here to prevent fall-through.
+            return;
         } else {
             pageTitle = null; pageDesc = null; pagePath = '/';
         }
