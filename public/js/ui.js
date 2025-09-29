@@ -1211,8 +1211,11 @@ export const UI = {
             pageDesc = 'View and manage your list of favorite fresh seafood products at Coastal Fresh India.';
             pagePath = '/favorites';
             UI.renderFavoritesPage();
-        } else if (page.startsWith('category/')) { // FIX: This block must come before the product/ block.
-            const categoryKey = page.split('/')[1];
+        } else if (page.startsWith('product/')) {
+            const product = state.products.find(p => UI.generateProductSlug(p) === page);
+            if (product) UI.renderProductPage(product);
+        } else if (page.startsWith('category/')) {
+            const categoryKey = page.split('/')[1].toLowerCase();
             const categoryData = config.CATEGORIES_DATA.find(c => c.key.toLowerCase() === categoryKey.toLowerCase());
             if (categoryData) {
                 pageTitle = `Fresh ${categoryData.label} | Coastal Fresh India`;
@@ -1220,9 +1223,6 @@ export const UI = {
                 pagePath = `/${page}`;
                 UI.renderCategoryPage(categoryData.key);
             }
-        } else if (page.startsWith('product/')) {
-            const product = state.products.find(p => UI.generateProductSlug(p) === page);
-            if (product) UI.renderProductPage(product);
         } else if (page === 'profilePage' || page === 'addressPage' || page === 'ordersPage') {
             pageTitle = 'Your Account | Coastal Fresh India';
             pageDesc = 'Manage your orders, addresses, and profile settings at Coastal Fresh India.';
