@@ -310,171 +310,10 @@ export const UI = {
         }
     },
 
-    /**
-     * Injects or updates the JSON-LD schema for the currently viewed product.
-     * This is critical for product page SEO.
-     * This is a more robust version based on your excellent suggestion.
-     * @param {object} product - The product object to generate schema for.
-     */
-    injectProductSchema: (product) => {
-        if (!product) return;
-
-        // Remove existing schema if present
-        const existing = document.getElementById('product-schema-ld');
-        if (existing) existing.remove();
-
-        // Defensive checks for variants/prices
-        const variants = Array.isArray(product.variants) ? product.variants : [];
-        const prices = variants
-            .map(v => {
-                // ensure numeric
-                const p = Number(v.finalPrice ?? v.price ?? 0);
-                return isNaN(p) ? 0 : p;
-            })
-            .filter(p => p > 0);
-
-        // build offers array (per-variant) if available
-        const offersArray = variants.map(variant => ({
-            "@type": "Offer",
-            "url": `https://coastalfresh.in/product/${UI.generateProductSlug(product)}`,
-            "price": Number(variant.finalPrice ?? variant.price ?? 0),
-            "priceCurrency": "INR",
-            "availability": variant.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-            "itemCondition": "https://schema.org/NewCondition"
-        }));
-
-        // minimal schema object
-        const schema = {
-            "@context": "https://schema.org/",
-            "@type": "Product",
-            "name": product.name || "Coastal Fresh product",
-            "image": UI.getOptimizedImageUrl ? UI.getOptimizedImageUrl(product.image, 1200, 630) : (product.image || ""),
-            "description": product.desc || "",
-            "sku": product.sku || `CF-${product.id || ''}`,
-            "brand": { "@type": "Brand", "name": "Coastal Fresh" },
-            // prefer AggregateOffer if multiple variants/prices
-            "offers": (offersArray.length > 1) ? {
-                "@type": "AggregateOffer",
-                "priceCurrency": "INR",
-                "lowPrice": prices.length ? Math.min(...prices) : undefined,
-                "highPrice": prices.length ? Math.max(...prices) : undefined,
-                "offerCount": offersArray.length,
-                "offers": offersArray
-            } : (offersArray[0] || undefined)
-        };
-
-        if (product.priceValidUntil) {
-            if (!schema.offers) schema.offers = {};
-            schema.offers.priceValidUntil = product.priceValidUntil;
-        }
-
-        const script = document.createElement('script');
-        script.type = 'application/ld+json';
-        script.id = 'product-schema-ld'; // Add an ID for easy removal
-        script.textContent = JSON.stringify(schema);
-
-        document.head.appendChild(script);
-    },
-
     generateProductSlug: (product) => {
         if (!product || !product.name) return '';
         const namePart = product.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
         return `${namePart}-${product.id}`;
-    },
-
-    /**
-     * NEW: Renders a full page for a single product.
-     * @param {object} product - The product to render.
-     */
-    renderProductPage: (product) => {
-        if (!product) return;
-
-        // Set the header title
-        document.getElementById('productPageTitle').textContent = product.name;
-
-        const contentContainer = document.getElementById('productDetailContent');
-        const primaryVariant = product.variants[0] || {};
-
-        let priceHTML = '';
-        if (primaryVariant.mrp > primaryVariant.finalPrice) {
-            const savings = primaryVariant.mrp - primaryVariant.finalPrice;
-            priceHTML = `
-                <span class="popup-price-final">₹${primaryVariant.finalPrice}</span>
-                <span class="popup-price-mrp">₹${primaryVariant.mrp}</span>
-                <span class="popup-price-savings-badge">SAVE ₹${savings}</span>
-            `;
-        } else {
-            priceHTML = `<span class="popup-price-final">₹${primaryVariant.finalPrice}</span>`;
-        }
-
-        // Build the HTML for the product page
-        contentContainer.innerHTML = `
-            <div class="product-detail-image-section">
-                <div class="product-detail-image-container">
-                    <img src="${UI.getOptimizedImageUrl(product.image, 600, 600)}" alt="${product.name}" class="product-detail-image">
-                </div>
-            </div>
-            <div class="product-detail-info">
-                <h1 class="product-detail-title">${product.name}</h1>
-                <div class="product-detail-weight">
-                    ${product.variants.map((v, index) => `
-                        <div class="variant-card ${index === 0 ? 'active' : ''}" data-variant-index="${index}">
-                            <div class="variant-name">${v.net}</div>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="product-detail-price-section">
-                    ${priceHTML}
-                </div>
-            </div>
-            <div class="popup-details-section">
-                <div class="detail-item" id="productInfoDetailItem">
-                    <button class="detail-header">
-                        <span>Product Details</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </button>
-                    <div class="detail-content">
-                        <p>${product.desc}</p>
-                    </div>
-                </div>
-            </div>
-            <!-- Sticky CTA will be injected here -->
-            <div class="popup-sticky-cta" id="popupStickyCta"></div>
-        `;
-
-        // --- Handle SEO and State ---
-        state.popupProduct = product; // Reuse the popupProduct state for the current page
-        state.selectedVariantIndex = 0;
-
-        const productSlug = UI.generateProductSlug(product);
-        const productUrl = `/product/${productSlug}`;
-        const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
-
-        // Inject schema and update meta tags
-        UI.injectProductSchema(product);
-        UI.updateSEOTags({ title: productTitle, description: product.desc, canonicalPath: productUrl, imageUrl: UI.getOptimizedImageUrl(product.image, 1200, 630) });
-
-        // Update the CTA button
-        UI.updatePopupCta();
-
-        // Open the details accordion by default
-        const detailItem = contentContainer.querySelector('#productInfoDetailItem');
-        if (detailItem) {
-            const content = detailItem.querySelector('.detail-content');
-            const icon = detailItem.querySelector('.detail-header i');
-            detailItem.classList.add('active');
-            content.style.maxHeight = content.scrollHeight + 'px';
-            content.style.padding = '0 0 16px 0';
-            if (icon) icon.style.transform = 'rotate(180deg)';
-        }
-
-        // Add event listeners for the new page content
-        document.getElementById('popupStickyCta').addEventListener('click', (e) => {
-            const addBtn = e.target.closest('.popup-cta-add-btn');
-            const qtyBtn = e.target.closest('.qty-btn');
-            if (addBtn) Handlers.addPopupToCart();
-            else if (qtyBtn) Handlers.updateQty(`${product.id}-${state.selectedVariantIndex}`, e.target.classList.contains('inc') ? 1 : -1, 'page');
-        });
     },
 
     showProductPopup: (id) => {
@@ -482,20 +321,6 @@ export const UI = {
         if (isNaN(numericId)) return;
         const product = state.products.find(p => p.id === numericId);
         if (!product) return;
-
-        // --- SEO CRITICAL FIX: Execute SEO tasks immediately, not in a deferred callback. ---
-        // This ensures that when Googlebot crawls a direct product URL, the schema and meta tags are present.
-        const productSlug = UI.generateProductSlug(product);
-        const productUrl = `/product/${productSlug}`;
-        const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
-        const productDesc = product.desc;
-        const optimizedProductImage = UI.getOptimizedImageUrl(product.image, 1200, 630);
-
-        // 1. Inject the specific Product schema for this page immediately.
-        UI.injectProductSchema(product);
-
-        // 2. Update meta tags and canonical URL.
-        UI.updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
 
         // --- OPTIMIZATION: Prioritize visual updates first ---
         state.popupProduct = product;
@@ -574,8 +399,17 @@ export const UI = {
             if (contentWrapper) contentWrapper.scrollTop = 0;
 
             // Defer non-critical tasks to run after the popup is visible
-            const runDeferredSEOTasks = () => {
+            const runDeferredTasks = () => {
+                const productSlug = UI.generateProductSlug(product);
+                const productUrl = `/product/${productSlug}`;
+                const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
+                const productDesc = product.desc;
+                const optimizedProductImage = UI.getOptimizedImageUrl(product.image, 1200, 630);
+
+                UI.updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
                 history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
+
+                // Inject JSON-LD schema
                 const existingJsonLd = document.getElementById('product-breadcrumb-jsonld');
                 if (existingJsonLd) existingJsonLd.remove();
                 const breadcrumb = { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" }, { "@type": "ListItem", "position": 2, "name": "All Products", "item": "https://www.coastalfresh.in/catalog" }, { "@type": "ListItem", "position": 3, "name": product.name, "item": `https://www.coastalfresh.in${productUrl}` }] };
@@ -588,9 +422,9 @@ export const UI = {
 
             // Use requestIdleCallback for modern browsers, fallback to setTimeout
             if ('requestIdleCallback' in window) {
-                requestIdleCallback(runDeferredSEOTasks, { timeout: 500 });
+                requestIdleCallback(runDeferredTasks, { timeout: 500 });
             } else {
-                setTimeout(runDeferredSEOTasks, 100);
+                setTimeout(runDeferredTasks, 100);
             }
         };
 
@@ -772,12 +606,6 @@ export const UI = {
     closePopup: () => {
         const popup = document.getElementById('productPopup');
         if (!popup || !state.isPopupOpen) return; // FIX: Check isPopupOpen to prevent errors on rapid clicks
-
-        // NEW: Clean up the dynamically injected schema when the popup closes.
-        const productSchema = document.getElementById('product-schema-ld');
-        if (productSchema) {
-            productSchema.remove();
-        }
 
         UI.closeModal(popup);
         state.isPopupOpen = false;
@@ -1009,9 +837,9 @@ export const UI = {
     },
 
     updateCartSummary: () => {
-        // FIX: Define `items` within this function's scope to prevent a ReferenceError on app start.
-        // This was the root cause of the application failing to start if a cart was saved in localStorage.
-        const items = Object.entries(state.cart).map(([variantId, qty]) => {
+        // FIX: Define cartItems within this function's scope to prevent ReferenceError.
+        // This was the root cause of the application failing to start.
+        const cartItems = Object.entries(state.cart).map(([variantId, qty]) => {
             const [productId, variantIndex] = variantId.split('-').map(Number);
             const product = state.products.find(p => p.id === productId);
             if (!product || !product.variants[variantIndex]) return null;
@@ -1022,7 +850,7 @@ export const UI = {
                 variantId: variantId,
                 qty: qty
             };
-        }).filter(Boolean);
+        }).filter(Boolean); // This was a bug, now fixed
         const itemTotalEl = document.getElementById('cartItemTotal');
         const deliveryFeeEl = document.getElementById('cartDeliveryFee');
         const toPayEl = document.getElementById('cartToPay');
@@ -1034,7 +862,7 @@ export const UI = {
         const progressBarEl = document.getElementById('cartProgressBar');
         const paymentOptionsEl = document.getElementById('paymentOptions');
 
-        if (items.length === 0) {
+        if (cartItems.length === 0) {
             const emptyCartEl = document.getElementById('emptyCart');
             const cartFooterEl = document.getElementById('cartFooter');
             const couponSectionEl = document.getElementById('cartCouponSection');
@@ -1050,8 +878,8 @@ export const UI = {
             return;
         }
 
-        const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
-        const originalTotal = items.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
+        const subtotal = cartItems.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
+        const originalTotal = cartItems.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
         const productSavings = originalTotal - subtotal;
 
         let couponDiscount = 0;
@@ -1172,16 +1000,7 @@ export const UI = {
 
     showPage: (page, fromHistory = false) => {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-
-        // FIX: Handle dynamic page routes like categories and products.
-        // Instead of finding an element with id="category/fish", find the correct container.
-        if (page.startsWith('category/')) {
-            document.getElementById('categoryPage').classList.add('active');
-        } else if (page.startsWith('product/')) {
-            document.getElementById('productDetailPage').classList.add('active');
-        } else {
-            document.getElementById(page).classList.add('active');
-        }
+        document.getElementById(page).classList.add('active');
 
         if (!fromHistory && page !== 'cart' && page !== state.pageHistory[state.pageHistory.length - 1]) {
             state.pageHistory.push(page);
@@ -1211,23 +1030,10 @@ export const UI = {
             pageDesc = 'View and manage your list of favorite fresh seafood products at Coastal Fresh India.';
             pagePath = '/favorites';
             UI.renderFavoritesPage();
-        } else if (page.startsWith('product/')) {
-            // This is a dynamic product page. The rendering function handles SEO tags.
-            const product = state.products.find(p => UI.generateProductSlug(p) === page);
-            if (product) UI.renderProductPage(product);
-            // We return here because renderProductPage sets its own SEO tags.
-            return;
-        } else if (page.startsWith('category/')) {
-            const categoryKey = page.split('/')[1];
-            const categoryData = config.CATEGORIES_DATA.find(c => c.key.toLowerCase() === categoryKey.toLowerCase());
-            if (categoryData) {
-                pageTitle = `Fresh ${categoryData.label} | Coastal Fresh India`;
-                pageDesc = `Order the freshest ${categoryData.label.toLowerCase()} online in Hyderabad. Cleaned, packed, and delivered to your door.`;
-                pagePath = `/${page}`;
-                UI.renderCategoryPage(categoryData.key);
-            }
-            // We return here to prevent fall-through.
-            return;
+        } else if (page === 'profilePage' || page === 'addressPage' || page === 'ordersPage') {
+            pageTitle = 'Your Account | Coastal Fresh India';
+            pageDesc = 'Manage your orders, addresses, and profile settings at Coastal Fresh India.';
+            pagePath = '/profile';
         } else {
             pageTitle = null; pageDesc = null; pagePath = '/';
         }
@@ -1888,6 +1694,15 @@ export const UI = {
                 "description": product.desc,
                 "sku": `CF-${product.id}`,
                 "brand": { "@type": "Brand", "name": "Coastal Fresh" },
+                "offers": {
+                    "@type": "Offer",
+                    "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`,
+                    "priceCurrency": "INR",
+                    "price": product.variants?.[0]?.finalPrice || product.finalPrice || 0,
+                    "priceValidUntil": new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0],
+                    "itemCondition": "https://schema.org/NewCondition",
+                    "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+                }
             };
 
             // Dynamically add review and rating data if available
@@ -1902,31 +1717,6 @@ export const UI = {
 
                 const avgRating = relevantReviews.reduce((sum, r) => sum + r.rating, 0) / relevantReviews.length;
                 schema.aggregateRating = { "@type": "AggregateRating", "ratingValue": avgRating.toFixed(1), "reviewCount": relevantReviews.length };
-            }
-
-            if (product.variants && product.variants.length > 1) {
-                schema.offers = {
-                    "@type": "AggregateOffer",
-                    "priceCurrency": "INR",
-                    "lowPrice": Math.min(...product.variants.map(v => v.finalPrice)),
-                    "highPrice": Math.max(...product.variants.map(v => v.finalPrice)),
-                    "availability": product.variants.some(v => v.available) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-                    "offers": product.variants.map(variant => ({
-                        "@type": "Offer",
-                        "price": variant.finalPrice,
-                        "availability": variant.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-                    }))
-                };
-            } else {
-                schema.offers = {
-                    "@type": "Offer",
-                    "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`,
-                    "priceCurrency": "INR",
-                    "price": product.variants?.[0]?.finalPrice || product.finalPrice || 0,
-                    "priceValidUntil": new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0],
-                    "itemCondition": "https://schema.org/NewCondition",
-                    "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-                };
             }
 
             script.textContent = JSON.stringify(schema);

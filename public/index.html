@@ -1,13 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Immediately run script to detect JS and hide noscript content for better UX -->
-  <script>
-    document.documentElement.className = 'js-enabled';
-  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Coastal Fresh | Fresh Fish, Prawns & Crabs Delivery in Hyderabad</title>
+  <title>Coastal Fresh India: Buy Fresh Fish & Seafood Online in Hyderabad</title>
 
   <!-- Preconnects -->
   <link rel="preconnect" href="https://res.cloudinary.com">
@@ -18,21 +14,12 @@
 
   <!-- Google Fonts - Inter (as per new typography guidelines) -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- OPTIMIZATION: Load only the required Font Awesome styles instead of the entire library -->
-  <!-- FIX: Add the core Font Awesome CSS file, which is required when loading individual styles. -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/fontawesome.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/solid.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/regular.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/brands.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <!-- Preload critical assets -->
-  <link rel="preload" href="/main.css" as="style">
-  <link rel="preload" href="/js/app.js" as="script">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <!-- SEO -->
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-  <meta name="description" content="Coastal Fresh delivers fresh fish, prawns, crabs & seafood across Hyderabad. Free cleaning & cutting, fast delivery, order online now." />
-  <link rel="canonical" href="https://coastalfresh.in/" />
+  <meta name="description" content="The best place to buy fresh fish and seafood online in Hyderabad, India! Coastal Fresh offers a wide variety of hygienically cleaned fish, prawns, crabs, and authentic Andhra pickles with next-day delivery. Order now for the freshest catch." />
+  <link rel="canonical" href="https://www.coastalfresh.in" />
   <meta name="theme-color" content="#01659a" />
   <meta name="keywords" content="buy fresh fish online hyderabad, seafood delivery hyderabad, online fish delivery, prawns online hyderabad, buy crabs online, coastal fresh hyderabad, andhra pickles online, pomfret online, seer fish hyderabad" />
   <!-- Hreflang for regional targeting -->
@@ -168,7 +155,7 @@
       </header>
 
       <!-- The H1 for SEO - visually hidden but accessible to crawlers -->
-      <h1 class="visually-hidden">Coastal Fresh: Fresh Seafood Delivery in Hyderabad - Order Fish, Prawns &amp; Crabs Online</h1>
+      <h1 class="visually-hidden">Fresh Seafood Delivery in Hyderabad: Order Fish, Prawns & Crabs Online</h1>
 
       <!-- Carousel -->
       <div class="carousel">
@@ -201,47 +188,13 @@
       <div class="section-divider"></div>
 
       <main class="section featured-section">
-        <h2 class="section-title">
+        <h1 class="section-title">
           <div class="section-title-main">
             ✨ Featured Products
           </div>
           <span class="view-all" role="button">View All</span>
-        </h2>
-        <div class="featured-products" id="featuredProducts">
-          <!--
-            STATIC FALLBACK FOR SEO:
-            This content is visible to search engine crawlers immediately, solving "Soft 404" issues.
-            It is automatically replaced by the dynamic product grid when app.js runs.
-          -->
-          <div class="card product">
-            <div class="product-image"><img src="https://res.cloudinary.com/dpyniai9l/image/upload/f_auto,q_auto,c_fill,w_300,h_300/v1756722096/Prawns_-_Banner_cyzx5z.png" alt="Freshwater Prawns" loading="lazy"></div>
-            <div class="info">
-              <p class="name">Freshwater Prawns</p>
-              <div class="price-row"><span class="final-price">₹399</span></div>
-            </div>
-          </div>
-          <div class="card product">
-            <div class="product-image"><img src="https://res.cloudinary.com/dpyniai9l/image/upload/f_auto,q_auto,c_fill,w_300,h_300/v1756722095/Sea_Tiger_Prawns_-_Large_Size_vjefag.png" alt="Sea Tiger Prawns (L)" loading="lazy"></div>
-            <div class="info">
-              <p class="name">Sea Tiger Prawns (L)</p>
-              <div class="price-row"><span class="final-price">₹799</span></div>
-            </div>
-          </div>
-          <div class="card product">
-            <div class="product-image"><img src="https://res.cloudinary.com/dpyniai9l/image/upload/f_auto,q_auto,c_fill,w_300,h_300/v1756722093/Live_Crab_-_Banner_2_q1k28h.png" alt="Live Crab" loading="lazy"></div>
-            <div class="info">
-              <p class="name">Live Crab</p>
-              <div class="price-row"><span class="final-price">₹649</span></div>
-            </div>
-          </div>
-          <div class="card product">
-            <div class="product-image"><img src="https://res.cloudinary.com/dpyniai9l/image/upload/f_auto,q_auto,c_fill,w_300,h_300/v1756722094/Pickle_-_Banner_2_kkh04c.png" alt="Prawns Pickle" loading="lazy"></div>
-            <div class="info">
-              <p class="name">Prawns Pickle</p>
-              <div class="price-row"><span class="final-price">₹449</span></div>
-            </div>
-          </div>
-        </div>
+        </h1>
+        <div class="featured-products" id="featuredProducts"></div>
       </main>
 
       <!-- NEW: Customer Reviews Section -->
@@ -251,55 +204,6 @@
           <!-- Reviews will be injected here by JS -->
         </div>
       </section>
-
-      <!-- NEW: Static SEO Content Section -->
-      <section class="section seo-content-section">
-        <h2 class="section-title">Your Trusted Source for Fresh Seafood in Hyderabad</h2>
-        <div class="seo-text">
-          <p>At <strong>Coastal Fresh – Hyderabad</strong>, we are dedicated to bringing the freshest catch from the coast directly to your kitchen. We specialize in home delivery of high-quality, hygienically cleaned fish, prawns, and crabs. Forget frozen and experience the true taste of the sea, delivered overnight from the source.</p>
-          <p>Our mission is simple: to make premium seafood accessible to everyone in Hyderabad. We partner with trusted fishermen and manage our own farms to ensure every product meets our rigorous standards for freshness and quality. From the moment it's caught to the time it reaches your door, your order is handled with care in a temperature-controlled supply chain.</p>
-        </div>
-
-        <!-- NEW: Crawlable internal links to categories -->
-        <div class="seo-links-container">
-          <a href="/catalog" class="seo-category-link" data-page="catalog" data-category="Fish">
-            <i class="fas fa-fish"></i><span>Explore Fresh Fish</span>
-          </a>
-          <a href="/catalog" class="seo-category-link" data-page="catalog" data-category="Prawns">
-            <i class="fas fa-shrimp"></i><span>Discover Juicy Prawns</span>
-          </a>
-          <a href="/catalog" class="seo-category-link" data-page="catalog" data-category="Crabs">
-            <i class="fas fa-crab"></i><span>Find Live & Sea Crabs</span>
-          </a>
-          <a href="/catalog" class="seo-category-link" data-page="catalog" data-category="Pickles">
-            <i class="fas fa-jar"></i><span>Taste Our Pickles</span>
-          </a>
-        </div>
-
-        <div class="seo-categories">
-          <div class="seo-category-item">
-            <h3><i class="fas fa-fish"></i> Fresh Fish</h3>
-            <p>Order a variety of sea and freshwater fish like Pomfret, Seer Fish (Vanjaram), and Sea Bass, all expertly cleaned and cut for your convenience.</p>
-          </div>
-          <div class="seo-category-item">
-            <h3><i class="fas fa-shrimp"></i> Juicy Prawns</h3>
-            <p>From large Tiger Prawns to sweet freshwater varieties, our prawns are perfect for curries, biryanis, and fries. Delivered fresh, never frozen.</p>
-          </div>
-          <div class="seo-category-item">
-            <h3><i class="fas fa-crab"></i> Live & Sea Crabs</h3>
-            <p>Experience the taste of succulent sea crabs, including Mud Crabs and Blue Crabs, sourced for their freshness and flavor.</p>
-          </div>
-        </div>
-        <div class="seo-contact-info">
-          <h3>Contact Us</h3>
-          <p>
-            <strong>Order Online:</strong> Place your order easily through our website. <br>
-            <strong>WhatsApp/Phone:</strong> <a href="https://wa.me/919985125678">+91-9985125678</a> <br>
-            <strong>Address:</strong> Panchavati Colony, Manikonda, Hyderabad, Telangana 500089
-          </p>
-        </div>
-      </section>
-      <div class="section-divider"></div>
 
       <!-- NEW: Combined Refer Banner & Tagline Section -->
       <section class="section" style="padding-top: 32px; padding-bottom: 24px; text-align: center;">
@@ -494,42 +398,6 @@
             </button>
           </div>
         </div>
-      </main>
-    </div>
-
-    <!-- NEW: Product Detail Page -->
-    <div class="page" id="productDetailPage">
-      <header class="header">
-        <div class="header-top modal-header-main">
-          <button class="back-btn" aria-label="Go Back">
-            <i class="fas fa-arrow-left"></i>
-          </button>
-          <h1 class="logo" id="productPageTitle">Product Details</h1>
-          <button class="cart-btn" aria-label="Open Cart">
-            <i class="fas fa-shopping-bag"></i>
-            <span class="cart-count">0</span>
-          </button>
-        </div>
-      </header>
-      <main id="productDetailContent" class="product-detail-content"></main>
-    </div>
-
-    <!-- NEW: Category Landing Page -->
-    <div class="page" id="categoryPage">
-      <header class="header">
-        <div class="header-top modal-header-main">
-          <button class="back-btn" aria-label="Go Back">
-            <i class="fas fa-arrow-left"></i>
-          </button>
-          <h1 class="logo" id="categoryPageTitle">Category</h1>
-          <button class="cart-btn" aria-label="Open Cart">
-            <i class="fas fa-shopping-bag"></i>
-            <span class="cart-count">0</span>
-          </button>
-        </div>
-      </header>
-      <main class="section">
-        <div class="products" id="categoryPageProducts"></div>
       </main>
     </div>
 
@@ -1128,9 +996,8 @@
     "@type": "LocalBusiness",
     "name": "Coastal Fresh India",
     "url": "https://coastalfresh.in",
-    "logo": "https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png",
-    "image": "https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png",
-    "priceRange": "₹₹",
+    "logo": "https://res.cloudinary.com/dpyniai9l/image/upload/v1758244909/Coastal_Fresh_India_Logo_uqd6bk.png",
+    "image": "https://res.cloudinary.com/dpyniai9l/image/upload/v1757139649/refer_eran_whats_app_ryhhmi.png",
     "description": "Fresh seafood delivery in Hyderabad & India. Order fish, prawns, crabs & more online.",
     "address": {
       "@type": "PostalAddress",

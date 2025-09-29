@@ -185,34 +185,29 @@ async function init() {
           UI.renderFeaturedProducts();
           UI.renderCatalogProducts();
           UI.renderFlashSale();
-          UI.initFlashSaleTimer();          
-
-          // --- CRITICAL FIX: Move routing logic inside the .then() block ---
-          // This ensures that we only try to render a page AFTER the product data is loaded.
-          // This fixes the race condition causing blank product/category pages.
-          const path = window.location.pathname;
-          const productMatch = path.match(/^\/product\/(.+)-(\d+)$/);
-          const categoryMatch = path.match(/^\/category\/(.+)/);
-          const urlParams = new URLSearchParams(window.location.search);
-
-          if (productMatch || categoryMatch) {
-            const slug = window.location.pathname.substring(1); // e.g., "product/white-pomfret-1"
-            // The showPage function will now handle rendering the product page
-            UI.showPage(slug);
-          } else {
-              const searchQuery = urlParams.get('q');
-              if (searchQuery) {
-                  UI.showPage('catalog');
-                  const searchInput = document.getElementById('catalogSearch');
-                  if (searchInput) {
-                      searchInput.value = searchQuery;
-                      Handlers.handleCatalogSearch({ target: searchInput });
-                  }
-              }
-          }
-
+          UI.initFlashSaleTimer();
+          UI.renderProductSchema();
           // Load cart after products are loaded to ensure data integrity
           Handlers.loadCart();
+
+          const path = window.location.pathname;
+          const productMatch = path.match(/^\/product\/(.+)-(\d+)$/);
+          const urlParams = new URLSearchParams(window.location.search);
+
+          if (productMatch) {
+              const productId = parseInt(productMatch[2], 10);
+              UI.showProductPopup(productId);
+          }
+
+          const searchQuery = urlParams.get('q');
+          if (searchQuery) {
+              UI.showPage('catalog');
+              const searchInput = document.getElementById('catalogSearch');
+              if (searchInput) {
+                  searchInput.value = searchQuery;
+                  Handlers.handleCatalogSearch({ target: searchInput });
+              }
+          }
       } catch (error) {
           console.error("Could not load product data:", error);
           UI.showToast('Could not load products. Please check your connection.');

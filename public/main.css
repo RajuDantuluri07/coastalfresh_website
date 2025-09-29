@@ -863,12 +863,6 @@ z-index: 2;                 /* sits above input content */
   scrollbar-width: none; /* Firefox */
 }
 
-/* Hide the static SEO content if JavaScript is enabled, as it will be replaced dynamically. */
-.js-enabled .featured-products > noscript {
-  display: none;
-}
-
-
 .featured-products .product { flex: 0 0 45%; max-width: 180px; }
 
 /* Categories for Catalog */
@@ -3443,98 +3437,4 @@ body.popup-open .bottom-bar {
 
 @keyframes tick {
   50% { transform: scale(1.05); }
-}
-.variant-option .variant-cta {
-  flex-shrink: 0;
-}
-.variant-option .add-btn {
-  position: static; /* Override absolute positioning from product card */
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes tick {
-  50% { transform: scale(1.05); }
-}
-
-/* --- NEW: Static SEO Content Section Styles --- */
-.seo-content-section {
-  background-color: var(--bg-light);
-  text-align: left;
-}
-.seo-text {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-  margin-bottom: 24px;
-}
-
-/* NEW: Wrapper for multiple paragraphs */
-.seo-text {
-  display: flex;
-  flex-direction: column;
-  gap: 12px; /* Space between paragraphs */
-  margin-bottom: 24px;
-}
-
-/* NEW: Container for the category link grid */
-.seo-links-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.seo-category-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 16px;
-  background: var(--bg-white);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  text-decoration: none;
-  color: var(--text-primary);
-  font-weight: 600;
-  font-size: 14px;
-  text-align: center;
-}
-
-.seo-categories {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin-bottom: 24px;
-}
-.seo-category-item h3 {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.seo-category-item p, .seo-contact-info p {
-  font-size: 14px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-.seo-contact-info {
-  border-top: 1px solid var(--border-color);
-  padding-top: 20px;
-}
-.seo-contact-info h3 {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-.seo-contact-info a {
-  color: var(--primary-color);
-  text-decoration: none;
-  font-weight: 500;
 }

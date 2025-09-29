@@ -667,8 +667,6 @@ document.getElementById('add-variant-btn').addEventListener('click', () => {
     // FIX #2: The "Add Variant" button was not working.
     const container = document.getElementById('variants-container');
     container.appendChild(createVariantForm({}, container.children.length));
-    // FIX: After adding a variant, re-check the state to hide the single-variant fallback if needed.
-    checkMultiVariantState();
 });
 
 document.getElementById('variants-container').addEventListener('click', (e) => {
@@ -784,7 +782,7 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
         const productId = document.getElementById('product-id-input').value;
 
         if (productId) { // Editing existing product
-            // FIX: Get docId from the form's hidden input or delete button.
+            // FIX: Get docId from the delete button, which is populated when the form loads.
             const docId = document.getElementById('delete-product-btn').dataset.docId;
             productData.id = parseInt(productId, 10);
             const docRef = db.collection('products').doc(docId);
@@ -792,11 +790,12 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
             toast('Product updated successfully!');
         } else { // Creating new product
             const productsRef = db.collection('products');
-            // Let Firestore generate a unique document ID. This is the robust way to create new documents.
-            const newDocRef = await productsRef.add(productData);
-            // Now, save this unique ID back into the document itself for easy reference.
-            // We will use this `docId` as the primary identifier throughout the app.
-            await newDocRef.update({ docId: newDocRef.id });
+            const lastProductQuery = await productsRef.orderBy('id', 'desc').limit(1).get();
+            const newId = lastProductQuery.empty ? 1 : lastProductQuery.docs[0].data().id + 1;
+            productData.id = newId;
+            // FIX #1: Use Firestore's auto-generated ID for new documents instead of the numerical ID.
+            // This prevents potential ID collisions and is a more robust practice.
+            await productsRef.add(productData);
             toast('Product created successfully!');
         }
         showMainView('products');
