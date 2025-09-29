@@ -1427,7 +1427,7 @@ export const UI = {
                     <h2 class="logged-out-title">Login to view orders</h2>
                     <p class="logged-out-lead">Sign in to see your order history, track deliveries and reorder favourites.</p>
                     <div class="logged-out-actions">
-                        <button class="cart-cta checkout-btn" id="loginFromOrdersBtn">Login / Sign Up</button>
+                        <button class="about-cta-btn" id="loginFromOrdersBtn" style="width: 100%;">Login / Sign Up</button>
                         <button class="text-link-cta" id="continueAsGuestBtn">Continue as Guest</button>
                     </div>
                 </div>
