@@ -3465,6 +3465,40 @@ body.popup-open .bottom-bar {
   line-height: 1.6;
   margin-bottom: 24px;
 }
+
+/* NEW: Wrapper for multiple paragraphs */
+.seo-text {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Space between paragraphs */
+  margin-bottom: 24px;
+}
+
+/* NEW: Container for the category link grid */
+.seo-links-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.seo-category-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: var(--bg-white);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 14px;
+  text-align: center;
+}
+
 .seo-categories {
   display: flex;
   flex-direction: column;
