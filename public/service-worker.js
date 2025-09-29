@@ -98,6 +98,23 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Strategy: Stale-while-revalidate for Google Fonts
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(cache => {
+        return cache.match(event.request).then(cachedResponse => {
+          const fetchPromise = fetch(event.request).then(networkResponse => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+          // Return cached response immediately, and update cache in background
+          return cachedResponse || fetchPromise;
+        });
+      })
+    );
+    return;
+  }
+
   // FIX #9: Use a "Network first, then Cache" strategy for the main HTML page.
   // This ensures users always get the latest version of the app shell if online.
   if (event.request.mode === 'navigate') {
