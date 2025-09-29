@@ -53,7 +53,7 @@ self.addEventListener('notificationclick', event => {
   );
 });
 
-const CACHE_NAME = 'coastal-fresh-v2'; // Increment CACHE_NAME to force a new service worker installation
+const CACHE_NAME = 'coastal-fresh-v3'; // Increment CACHE_NAME to force a new service worker installation
 const urlsToCache = [
   '/',
   '/index.html',
@@ -70,7 +70,7 @@ const urlsToCache = [
   '/js/ui.js',
   '/js/handlers.js',
   '/favicon.ico',
-  'https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png',
+  // NEW: Cloudinary images will now be cached dynamically, so we remove the single logo from precache.
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'
 ];
@@ -84,77 +84,7 @@ self.addEventListener('install', event => {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
-  );
-});
-
-// Cache and return requests
-self.addEventListener('fetch', event => {
-  const url = new URL(event.request.url);
-
-  // Bypass caching for admin pages and their associated scripts/styles
-  // Always fetch these directly from the network to ensure the latest version.
-  if (url.pathname.startsWith('/admin.html') || url.pathname.startsWith('/admin.js') || url.pathname.startsWith('/admin.css')) {
-    event.respondWith(fetch(event.request)); // Go straight to network
-    return;
-  }
-
-  // Strategy: Stale-while-revalidate for Google Fonts
-  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-    event.respondWith(
-      caches.open(CACHE_NAME).then(cache => {
-        return cache.match(event.request).then(cachedResponse => {
-          const fetchPromise = fetch(event.request).then(networkResponse => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-          // Return cached response immediately, and update cache in background
-          return cachedResponse || fetchPromise;
-        });
-      })
-    );
-    return;
-  }
-
-  // FIX: Use a "Network first, then Cache" strategy for the main HTML page.
-  // This ensures users always get the latest version of the app shell if online.
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .then(networkResponse => {
-          // If the network request is successful, cache it and return it.
-          return caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-        })
-        .catch(() => {
-          // If the network request fails (e.g., offline), serve the cached version.
-          console.log('Network request for navigation failed, falling back to cache.');
-          return caches.match(event.request).then(cachedResponse => {
-            return cachedResponse || caches.match('/index.html'); // Fallback to the root index.html
-          });
-        })
-    );
-    return;
-  }
-
-  // For all other assets (CSS, JS, images), use a "Cache first" strategy for speed.
-  event.respondWith(
-    (async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const cachedResponse = await cache.match(event.request);
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      try {
-        const networkResponse = await fetch(event.request);
-        cache.put(event.request, networkResponse.clone());
-        return networkResponse;
-      } catch (error) {
-        console.log('Fetch failed for:', event.request.url);
-      }
-    })()
+      .then(() => self.skipWaiting()) // NEW: Force the new service worker to activate immediately
   );
 });
 
@@ -169,7 +99,91 @@ self.addEventListener('activate', event => {
             return caches.delete(cacheName);
           }
         })
-      );
-    })
+      ).then(() => self.clients.claim()); // NEW: Take control of all open clients
+    }) 
   );
 });
+
+// --- NEW: Refactored Fetch Event Listener ---
+
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Bypass for admin pages and Firebase auth
+  if (url.pathname.startsWith('/admin') || url.hostname.includes('firebase')) {
+    event.respondWith(networkOnly(request));
+    return;
+  }
+
+  // Stale-while-revalidate for fonts and external CSS
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com' || url.hostname === 'cdnjs.cloudflare.com') {
+    event.respondWith(staleWhileRevalidate(request));
+    return;
+  }
+
+  // NEW: Cache-first strategy for Cloudinary images
+  if (url.hostname === 'res.cloudinary.com') {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
+
+  // Network-first for navigation requests (HTML pages)
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+
+  // Cache-first for all other local assets (JS, CSS, etc.)
+  event.respondWith(cacheFirst(request));
+});
+
+// --- NEW: Caching Strategy Functions ---
+
+async function cacheFirst(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const cachedResponse = await cache.match(request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+  try {
+    const networkResponse = await fetch(request);
+    // Only cache successful responses
+    if (networkResponse.ok) {
+      await cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    console.error('Fetch failed; returning offline page instead.', error);
+    // Optional: return a fallback offline image/page
+  }
+}
+
+async function networkFirst(request) {
+  try {
+    const networkResponse = await fetch(request);
+    const cache = await caches.open(CACHE_NAME);
+    await cache.put(request, networkResponse.clone());
+    return networkResponse;
+  } catch (error) {
+    console.log('Network request failed, falling back to cache for:', request.url);
+    const cachedResponse = await caches.match(request);
+    return cachedResponse || caches.match('/index.html');
+  }
+}
+
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const cachedResponse = await cache.match(request);
+
+  const fetchPromise = fetch(request).then(async (networkResponse) => {
+    await cache.put(request, networkResponse.clone());
+return networkResponse;
+  });
+
+  return cachedResponse || fetchPromise;
+}
+
+function networkOnly(request) {
+  return fetch(request);
+}

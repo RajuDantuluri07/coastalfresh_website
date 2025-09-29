@@ -409,15 +409,67 @@ export const UI = {
                 UI.updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
                 history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
 
-                // Inject JSON-LD schema
-                const existingJsonLd = document.getElementById('product-breadcrumb-jsonld');
-                if (existingJsonLd) existingJsonLd.remove();
-                const breadcrumb = { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{ "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" }, { "@type": "ListItem", "position": 2, "name": "All Products", "item": "https://www.coastalfresh.in/catalog" }, { "@type": "ListItem", "position": 3, "name": product.name, "item": `https://www.coastalfresh.in${productUrl}` }] };
-                const script = document.createElement('script');
-                script.type = 'application/ld+json';
-                script.id = 'product-breadcrumb-jsonld';
-                script.textContent = JSON.stringify(breadcrumb);
-                document.head.appendChild(script);
+                // --- SEO ENHANCEMENT: Inject rich, dynamic JSON-LD schema for the product and breadcrumbs ---
+                document.getElementById('dynamic-product-schema')?.remove();
+                document.getElementById('dynamic-breadcrumb-schema')?.remove();
+
+                const schemaScript = document.createElement('script');
+                schemaScript.type = 'application/ld+json';
+                schemaScript.id = 'dynamic-product-schema';
+
+                const breadcrumbScript = document.createElement('script');
+                breadcrumbScript.type = 'application/ld+json';
+                breadcrumbScript.id = 'dynamic-breadcrumb-schema';
+
+                const productSchema = {
+                    "@context": "https://schema.org/",
+                    "@type": "Product",
+                    "name": product.name,
+                    "image": optimizedProductImage,
+                    "description": product.desc,
+                    "sku": `CF-${product.id}`,
+                    "brand": { "@type": "Brand", "name": "Coastal Fresh" },
+                    // Create an offer for each variant
+                    "offers": product.variants.map((variant, index) => ({
+                        "@type": "Offer",
+                        "url": `https://www.coastalfresh.in${productUrl}`,
+                        "priceCurrency": "INR",
+                        "price": variant.finalPrice,
+                        "sku": `CF-${product.id}-${index}`,
+                        "itemCondition": "https://schema.org/NewCondition",
+                        "availability": variant.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+                    }))
+                };
+
+                // Dynamically add review and rating data if available
+                const relevantReviews = config.CUSTOMER_REVIEWS.filter(r => r.review.toLowerCase().includes(product.name.split(' ')[0].toLowerCase()));
+                if (relevantReviews.length > 0) {
+                    productSchema.review = relevantReviews.map(r => ({
+                        "@type": "Review",
+                        "author": { "@type": "Person", "name": r.name },
+                        "reviewRating": { "@type": "Rating", "ratingValue": r.rating, "bestRating": "5" },
+                        "reviewBody": r.review
+                    }));
+
+                    const avgRating = relevantReviews.reduce((sum, r) => sum + r.rating, 0) / relevantReviews.length;
+                    productSchema.aggregateRating = { "@type": "AggregateRating", "ratingValue": avgRating.toFixed(1), "reviewCount": relevantReviews.length };
+                }
+
+                const breadcrumbSchema = {
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [
+                        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" },
+                        { "@type": "ListItem", "position": 2, "name": "Catalog", "item": "https://www.coastalfresh.in/catalog" },
+                        { "@type": "ListItem", "position": 3, "name": product.name }
+                    ]
+                };
+
+                schemaScript.textContent = JSON.stringify(productSchema);
+                breadcrumbScript.textContent = JSON.stringify(breadcrumbSchema);
+
+                document.head.appendChild(schemaScript);
+                document.head.appendChild(breadcrumbScript);
             };
 
             // Use requestIdleCallback for modern browsers, fallback to setTimeout
@@ -1685,54 +1737,6 @@ export const UI = {
             drawerOverlay.style.display = 'none';
             if (state.previouslyFocusedElement) state.previouslyFocusedElement.focus();
         }, 300);
-    },
-
-    renderProductSchema: () => {
-        if (!state.products || state.products.length === 0) return;
-
-        const schemaContainer = document.createDocumentFragment();
-
-        state.products.forEach(product => {
-            const script = document.createElement('script');
-            script.type = 'application/ld+json';
-
-            const schema = {
-                "@context": "https://schema.org/",
-                "@type": "Product",
-                "name": product.name,
-                "image": UI.getOptimizedImageUrl(product.image, 1200, 630), // This was a bug, now fixed
-                "description": product.desc,
-                "sku": `CF-${product.id}`,
-                "brand": { "@type": "Brand", "name": "Coastal Fresh" },
-                "offers": {
-                    "@type": "Offer",
-                    "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`,
-                    "priceCurrency": "INR",
-                    "price": product.variants?.[0]?.finalPrice || product.finalPrice || 0,
-                    "priceValidUntil": new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0],
-                    "itemCondition": "https://schema.org/NewCondition",
-                    "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-                }
-            };
-
-            // Dynamically add review and rating data if available
-            const relevantReviews = config.CUSTOMER_REVIEWS.filter(r => r.review.toLowerCase().includes(product.name.split(' ')[0].toLowerCase()));
-            if (relevantReviews.length > 0) {
-                schema.review = relevantReviews.map(r => ({
-                    "@type": "Review",
-                    "author": { "@type": "Person", "name": r.name },
-                    "reviewRating": { "@type": "Rating", "ratingValue": r.rating, "bestRating": "5" },
-                    "reviewBody": r.review
-                }));
-
-                const avgRating = relevantReviews.reduce((sum, r) => sum + r.rating, 0) / relevantReviews.length;
-                schema.aggregateRating = { "@type": "AggregateRating", "ratingValue": avgRating.toFixed(1), "reviewCount": relevantReviews.length };
-            }
-
-            script.textContent = JSON.stringify(schema);
-            schemaContainer.appendChild(script);
-        });
-        document.head.appendChild(schemaContainer);
     },
 
     /**
