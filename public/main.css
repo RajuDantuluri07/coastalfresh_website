@@ -3438,3 +3438,63 @@ body.popup-open .bottom-bar {
 @keyframes tick {
   50% { transform: scale(1.05); }
 }
+.variant-option .variant-cta {
+  flex-shrink: 0;
+}
+.variant-option .add-btn {
+  position: static; /* Override absolute positioning from product card */
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes tick {
+  50% { transform: scale(1.05); }
+}
+
+/* --- NEW: Static SEO Content Section Styles --- */
+.seo-content-section {
+  background-color: var(--bg-light);
+  text-align: left;
+}
+.seo-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+.seo-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+.seo-category-item h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.seo-category-item p, .seo-contact-info p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.seo-contact-info {
+  border-top: 1px solid var(--border-color);
+  padding-top: 20px;
+}
+.seo-contact-info h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.seo-contact-info a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+}
