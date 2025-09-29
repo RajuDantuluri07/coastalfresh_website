@@ -1696,28 +1696,6 @@ export const UI = {
                 "brand": { "@type": "Brand", "name": "Coastal Fresh" },
             };
 
-            // Use AggregateOffer for multi-variant products, and a single Offer for single-variant products.
-            if (product.variants && product.variants.length > 1) {
-                schema.offers = {
-                    "@type": "AggregateOffer",
-                    "priceCurrency": "INR",
-                    "lowPrice": Math.min(...product.variants.map(v => v.finalPrice)),
-                    "highPrice": Math.max(...product.variants.map(v => v.finalPrice)),
-                    "offerCount": product.variants.length,
-                    "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`
-                };
-            } else {
-                schema.offers = {
-                    "@type": "Offer",
-                    "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`,
-                    "priceCurrency": "INR",
-                    "price": product.variants?.[0]?.finalPrice || product.finalPrice || 0,
-                    "priceValidUntil": new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0],
-                    "itemCondition": "https://schema.org/NewCondition",
-                    "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-                };
-            }
-
             // Dynamically add review and rating data if available
             const relevantReviews = config.CUSTOMER_REVIEWS.filter(r => r.review.toLowerCase().includes(product.name.split(' ')[0].toLowerCase()));
             if (relevantReviews.length > 0) {
@@ -1730,6 +1708,31 @@ export const UI = {
 
                 const avgRating = relevantReviews.reduce((sum, r) => sum + r.rating, 0) / relevantReviews.length;
                 schema.aggregateRating = { "@type": "AggregateRating", "ratingValue": avgRating.toFixed(1), "reviewCount": relevantReviews.length };
+            }
+
+            if (product.variants && product.variants.length > 1) {
+                schema.offers = {
+                    "@type": "AggregateOffer",
+                    "priceCurrency": "INR",
+                    "lowPrice": Math.min(...product.variants.map(v => v.finalPrice)),
+                    "highPrice": Math.max(...product.variants.map(v => v.finalPrice)),
+                    "availability": product.variants.some(v => v.available) ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                    "offers": product.variants.map(variant => ({
+                        "@type": "Offer",
+                        "price": variant.finalPrice,
+                        "availability": variant.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+                    }))
+                };
+            } else {
+                schema.offers = {
+                    "@type": "Offer",
+                    "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`,
+                    "priceCurrency": "INR",
+                    "price": product.variants?.[0]?.finalPrice || product.finalPrice || 0,
+                    "priceValidUntil": new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0],
+                    "itemCondition": "https://schema.org/NewCondition",
+                    "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+                };
             }
 
             script.textContent = JSON.stringify(schema);
