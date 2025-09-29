@@ -185,25 +185,16 @@ async function init() {
           UI.renderFeaturedProducts();
           UI.renderCatalogProducts();
           UI.renderFlashSale();
-          UI.initFlashSaleTimer();          
-          // Load cart after products are loaded to ensure data integrity
-          Handlers.loadCart();
+          UI.initFlashSaleTimer();
 
           const path = window.location.pathname;
           const productMatch = path.match(/^\/product\/(.+)-(\d+)$/);
           const urlParams = new URLSearchParams(window.location.search);
 
           if (productMatch) {
-            // FIX: When a product URL is loaded directly, inject its schema immediately for SEO.
-            // This ensures Googlebot sees the schema without needing to open the popup.
             const slug = window.location.pathname.substring(1); // e.g., "product/white-pomfret-1"
-            const product = state.products.find(p => UI.generateProductSlug(p) === slug);
-            if (product) {
-                UI.injectProductSchema(product);
-            }
-            // Also, open the popup for human users.
-            const productId = parseInt(productMatch[2], 10);
-            UI.showProductPopup(productId);
+            // The showPage function will now handle rendering the product page
+            UI.showPage(slug);
           }
 
           const searchQuery = urlParams.get('q');
@@ -215,6 +206,9 @@ async function init() {
                   Handlers.handleCatalogSearch({ target: searchInput });
               }
           }
+
+          // Load cart after products are loaded to ensure data integrity
+          Handlers.loadCart();
       } catch (error) {
           console.error("Could not load product data:", error);
           UI.showToast('Could not load products. Please check your connection.');

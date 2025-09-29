@@ -25,7 +25,9 @@ export const Handlers = {
             if (productCard && !target.closest('.cart-controls, .add-btn, .wishlist, .variant-btn')) {
                 e.preventDefault();
                 const productId = parseInt(productCard.dataset.id, 10);
-                if (productId) UI.showProductPopup(productId);
+                if (productId) {
+                    Handlers.navigateToProductPage(productId);
+                }
             }
 
             // CTA button on product cards
@@ -48,7 +50,7 @@ export const Handlers = {
                     // This is a multi-variant button ("{n} Sizes" or "ADD" for 2 variants)
                     // It should always open the product popup.
                     window.Analytics.trackEvent('variant_picker_opened_from_card', { product_id: productId });
-                    UI.showProductPopup(productId);
+                    Handlers.navigateToProductPage(productId);
                 } else {
                     // This is a direct "ADD" for a single-variant product.
                     Handlers.addToCart(buttonId);
@@ -88,10 +90,7 @@ export const Handlers = {
                 if (action === 'showPage' && typeof UI.showPage === 'function') {
                     UI.showPage(slideTarget);
                 } else if (action === 'showProductPopup' && typeof UI.showProductPopup === 'function') {
-                    const productId = parseInt(slideTarget, 10);
-                    if (!isNaN(productId)) {
-                        UI.showProductPopup(productId);
-                    }
+                    Handlers.navigateToProductPage(parseInt(slideTarget, 10));
                 } else if (action === 'openWhatsApp' && typeof Handlers.openWhatsApp === 'function') {
                     Handlers.openWhatsApp(slideTarget);
                 }
@@ -194,6 +193,15 @@ export const Handlers = {
                 else if (actionBtn.classList.contains('set-default-btn')) Handlers.setDefaultAddress(addressId);
                 else if (actionBtn.classList.contains('edit-address-btn')) Handlers.editAddress(addressId);
                 actionBtn.closest('.address-dropdown-content').classList.remove('active');
+                return;
+            }
+
+            // NEW: Handle clicks on the static SEO category links on the homepage
+            const seoCategoryLink = target.closest('.seo-category-link');
+            if (seoCategoryLink) {
+                e.preventDefault();
+                const category = seoCategoryLink.dataset.category;
+                Handlers.navigateToCategoryPage(category);
                 return;
             }
 
@@ -625,6 +633,31 @@ export const Handlers = {
         });
     },
 
+    /**
+     * NEW: Navigates to a product's dedicated page.
+     * @param {number} productId The ID of the product to navigate to.
+     */
+    navigateToProductPage: (productId) => {
+        const product = state.products.find(p => p.id === productId);
+        if (!product) return;
+        const slug = UI.generateProductSlug(product);
+        const url = `/product/${slug}`;
+        history.pushState({ page: `product/${slug}` }, product.name, url);
+        UI.showPage(`product/${slug}`);
+    },
+
+    /**
+     * NEW: Navigates to a dedicated category page.
+     * @param {string} categoryKey - The key of the category (e.g., "Fish").
+     */
+    navigateToCategoryPage: (categoryKey) => {
+        if (!categoryKey) return;
+        const category = config.CATEGORIES_DATA.find(c => c.key === categoryKey);
+        if (!category) return;
+        const url = `/category/${category.key.toLowerCase()}`;
+        history.pushState({ page: `category/${category.key.toLowerCase()}` }, category.label, url);
+        UI.showPage(`category/${category.key.toLowerCase()}`);
+    },
     goBack: () => {
         if (state.pageHistory.length > 1) {
             state.pageHistory.pop();

@@ -382,6 +382,101 @@ export const UI = {
         return `${namePart}-${product.id}`;
     },
 
+    /**
+     * NEW: Renders a full page for a single product.
+     * @param {object} product - The product to render.
+     */
+    renderProductPage: (product) => {
+        if (!product) return;
+
+        // Set the header title
+        document.getElementById('productPageTitle').textContent = product.name;
+
+        const contentContainer = document.getElementById('productDetailContent');
+        const primaryVariant = product.variants[0] || {};
+
+        let priceHTML = '';
+        if (primaryVariant.mrp > primaryVariant.finalPrice) {
+            const savings = primaryVariant.mrp - primaryVariant.finalPrice;
+            priceHTML = `
+                <span class="popup-price-final">₹${primaryVariant.finalPrice}</span>
+                <span class="popup-price-mrp">₹${primaryVariant.mrp}</span>
+                <span class="popup-price-savings-badge">SAVE ₹${savings}</span>
+            `;
+        } else {
+            priceHTML = `<span class="popup-price-final">₹${primaryVariant.finalPrice}</span>`;
+        }
+
+        // Build the HTML for the product page
+        contentContainer.innerHTML = `
+            <div class="product-detail-image-section">
+                <div class="product-detail-image-container">
+                    <img src="${UI.getOptimizedImageUrl(product.image, 600, 600)}" alt="${product.name}" class="product-detail-image">
+                </div>
+            </div>
+            <div class="product-detail-info">
+                <h1 class="product-detail-title">${product.name}</h1>
+                <div class="product-detail-weight">
+                    ${product.variants.map((v, index) => `
+                        <div class="variant-card ${index === 0 ? 'active' : ''}" data-variant-index="${index}">
+                            <div class="variant-name">${v.net}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="product-detail-price-section">
+                    ${priceHTML}
+                </div>
+            </div>
+            <div class="popup-details-section">
+                <div class="detail-item" id="productInfoDetailItem">
+                    <button class="detail-header">
+                        <span>Product Details</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="detail-content">
+                        <p>${product.desc}</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Sticky CTA will be injected here -->
+            <div class="popup-sticky-cta" id="popupStickyCta"></div>
+        `;
+
+        // --- Handle SEO and State ---
+        state.popupProduct = product; // Reuse the popupProduct state for the current page
+        state.selectedVariantIndex = 0;
+
+        const productSlug = UI.generateProductSlug(product);
+        const productUrl = `/product/${productSlug}`;
+        const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
+
+        // Inject schema and update meta tags
+        UI.injectProductSchema(product);
+        UI.updateSEOTags({ title: productTitle, description: product.desc, canonicalPath: productUrl, imageUrl: UI.getOptimizedImageUrl(product.image, 1200, 630) });
+
+        // Update the CTA button
+        UI.updatePopupCta();
+
+        // Open the details accordion by default
+        const detailItem = contentContainer.querySelector('#productInfoDetailItem');
+        if (detailItem) {
+            const content = detailItem.querySelector('.detail-content');
+            const icon = detailItem.querySelector('.detail-header i');
+            detailItem.classList.add('active');
+            content.style.maxHeight = content.scrollHeight + 'px';
+            content.style.padding = '0 0 16px 0';
+            if (icon) icon.style.transform = 'rotate(180deg)';
+        }
+
+        // Add event listeners for the new page content
+        document.getElementById('popupStickyCta').addEventListener('click', (e) => {
+            const addBtn = e.target.closest('.popup-cta-add-btn');
+            const qtyBtn = e.target.closest('.qty-btn');
+            if (addBtn) Handlers.addPopupToCart();
+            else if (qtyBtn) Handlers.updateQty(`${product.id}-${state.selectedVariantIndex}`, e.target.classList.contains('inc') ? 1 : -1, 'page');
+        });
+    },
+
     showProductPopup: (id) => {
         const numericId = parseInt(id);
         if (isNaN(numericId)) return;
@@ -914,9 +1009,9 @@ export const UI = {
     },
 
     updateCartSummary: () => {
-        // FIX: Define cartItems within this function's scope to prevent ReferenceError.
-        // This was the root cause of the application failing to start.
-        const cartItems = Object.entries(state.cart).map(([variantId, qty]) => {
+        // FIX: Define `items` within this function's scope to prevent a ReferenceError on app start.
+        // This was the root cause of the application failing to start if a cart was saved in localStorage.
+        const items = Object.entries(state.cart).map(([variantId, qty]) => {
             const [productId, variantIndex] = variantId.split('-').map(Number);
             const product = state.products.find(p => p.id === productId);
             if (!product || !product.variants[variantIndex]) return null;
@@ -927,7 +1022,7 @@ export const UI = {
                 variantId: variantId,
                 qty: qty
             };
-        }).filter(Boolean); // This was a bug, now fixed
+        }).filter(Boolean);
         const itemTotalEl = document.getElementById('cartItemTotal');
         const deliveryFeeEl = document.getElementById('cartDeliveryFee');
         const toPayEl = document.getElementById('cartToPay');
@@ -939,7 +1034,7 @@ export const UI = {
         const progressBarEl = document.getElementById('cartProgressBar');
         const paymentOptionsEl = document.getElementById('paymentOptions');
 
-        if (cartItems.length === 0) {
+        if (items.length === 0) {
             const emptyCartEl = document.getElementById('emptyCart');
             const cartFooterEl = document.getElementById('cartFooter');
             const couponSectionEl = document.getElementById('cartCouponSection');
@@ -955,8 +1050,8 @@ export const UI = {
             return;
         }
 
-        const subtotal = cartItems.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
-        const originalTotal = cartItems.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
+        const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
+        const originalTotal = items.reduce((sum, item) => sum + ((item.mrp || item.finalPrice) * item.qty), 0);
         const productSavings = originalTotal - subtotal;
 
         let couponDiscount = 0;
@@ -1107,7 +1202,24 @@ export const UI = {
             pageDesc = 'View and manage your list of favorite fresh seafood products at Coastal Fresh India.';
             pagePath = '/favorites';
             UI.renderFavoritesPage();
+        } else if (page.startsWith('product/')) {
+            // This is a product page request
+            const product = state.products.find(p => UI.generateProductSlug(p) === page);
+            if (product) {
+                UI.showPage('productDetailPage', fromHistory); // Show the container
+                UI.renderProductPage(product); // Render the content
+            }
+            return; // Exit early as rendering is handled
         } else if (page === 'profilePage' || page === 'addressPage' || page === 'ordersPage') {
+        } else if (page.startsWith('category/')) {
+            const categoryKey = page.split('/')[1];
+            const categoryData = config.CATEGORIES_DATA.find(c => c.key.toLowerCase() === categoryKey.toLowerCase());
+            if (categoryData) {
+                pageTitle = `Fresh ${categoryData.label} | Coastal Fresh India`;
+                pageDesc = `Order the freshest ${categoryData.label.toLowerCase()} online in Hyderabad. Cleaned, packed, and delivered to your door.`;
+                pagePath = `/${page}`;
+                UI.renderCategoryPage(categoryData.key);
+            }
             pageTitle = 'Your Account | Coastal Fresh India';
             pageDesc = 'Manage your orders, addresses, and profile settings at Coastal Fresh India.';
             pagePath = '/profile';
