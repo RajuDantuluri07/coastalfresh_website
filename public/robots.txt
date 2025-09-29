@@ -8,6 +8,6 @@ Disallow: /admin.css
 Disallow: /admin.js
 
 # Disallow internal search result pages specifically
-Disallow: /?q=
+Disallow: /*?q=
 
 Sitemap: https://coastalfresh.in/sitemap.xml

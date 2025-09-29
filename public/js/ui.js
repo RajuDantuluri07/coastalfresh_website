@@ -1695,13 +1695,19 @@ export const UI = {
                 "sku": `CF-${product.id}`,
                 "brand": { "@type": "Brand", "name": "Coastal Fresh" },
                 "offers": {
-                    "@type": "Offer",
-                    "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`,
+                    "@type": "AggregateOffer",
                     "priceCurrency": "INR",
-                    "price": product.variants?.[0]?.finalPrice || product.finalPrice || 0,
-                    "priceValidUntil": new Date(new Date().getFullYear() + 1, 11, 31).toISOString().split('T')[0],
-                    "itemCondition": "https://schema.org/NewCondition",
-                    "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+                    "lowPrice": Math.min(...product.variants.map(v => v.finalPrice)),
+                    "highPrice": Math.max(...product.variants.map(v => v.finalPrice)),
+                    "offerCount": product.variants.length,
+                    "offers": product.variants.map(variant => ({
+                        "@type": "Offer",
+                        "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`,
+                        "price": variant.finalPrice,
+                        "priceCurrency": "INR",
+                        "availability": variant.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                        "itemCondition": "https://schema.org/NewCondition"
+                    }))
                 }
             };
 
