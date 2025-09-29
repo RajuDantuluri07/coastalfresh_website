@@ -311,44 +311,62 @@ export const UI = {
     },
 
     /**
-     * NEW: Injects or updates the JSON-LD schema for the currently viewed product.
+     * Injects or updates the JSON-LD schema for the currently viewed product.
      * This is critical for product page SEO.
+     * This is a more robust version based on your excellent suggestion.
      * @param {object} product - The product object to generate schema for.
      */
     injectProductSchema: (product) => {
         if (!product) return;
 
-        // Remove any existing product schema to avoid duplicates
-        const existingSchema = document.getElementById('product-schema-ld');
-        if (existingSchema) {
-            existingSchema.remove();
-        }
+        // Remove existing schema if present
+        const existing = document.getElementById('product-schema-ld');
+        if (existing) existing.remove();
 
+        // Defensive checks for variants/prices
+        const variants = Array.isArray(product.variants) ? product.variants : [];
+        const prices = variants
+            .map(v => {
+                // ensure numeric
+                const p = Number(v.finalPrice ?? v.price ?? 0);
+                return isNaN(p) ? 0 : p;
+            })
+            .filter(p => p > 0);
+
+        // build offers array (per-variant) if available
+        const offersArray = variants.map(variant => ({
+            "@type": "Offer",
+            "url": `https://coastalfresh.in/product/${UI.generateProductSlug(product)}`,
+            "price": Number(variant.finalPrice ?? variant.price ?? 0),
+            "priceCurrency": "INR",
+            "availability": variant.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            "itemCondition": "https://schema.org/NewCondition"
+        }));
+
+        // minimal schema object
         const schema = {
             "@context": "https://schema.org/",
             "@type": "Product",
-            "name": product.name,
-            "image": UI.getOptimizedImageUrl(product.image, 1200, 630),
-            "description": product.desc,
-            "sku": `CF-${product.id}`,
+            "name": product.name || "Coastal Fresh product",
+            "image": UI.getOptimizedImageUrl ? UI.getOptimizedImageUrl(product.image, 1200, 630) : (product.image || ""),
+            "description": product.desc || "",
+            "sku": product.sku || `CF-${product.id || ''}`,
             "brand": { "@type": "Brand", "name": "Coastal Fresh" },
-            "offers": {
+            // prefer AggregateOffer if multiple variants/prices
+            "offers": (offersArray.length > 1) ? {
                 "@type": "AggregateOffer",
                 "priceCurrency": "INR",
-                "lowPrice": Math.min(...product.variants.map(v => v.finalPrice)),
-                "highPrice": Math.max(...product.variants.map(v => v.finalPrice)),
-                "offerCount": product.variants.length,
-                "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-                "offers": product.variants.map(variant => ({
-                    "@type": "Offer",
-                    "url": `https://www.coastalfresh.in/product/${UI.generateProductSlug(product)}`,
-                    "price": variant.finalPrice,
-                    "priceCurrency": "INR",
-                    "availability": variant.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-                    "itemCondition": "https://schema.org/NewCondition"
-                }))
-            }
+                "lowPrice": prices.length ? Math.min(...prices) : undefined,
+                "highPrice": prices.length ? Math.max(...prices) : undefined,
+                "offerCount": offersArray.length,
+                "offers": offersArray
+            } : (offersArray[0] || undefined)
         };
+
+        if (product.priceValidUntil) {
+            if (!schema.offers) schema.offers = {};
+            schema.offers.priceValidUntil = product.priceValidUntil;
+        }
 
         const script = document.createElement('script');
         script.type = 'application/ld+json';
