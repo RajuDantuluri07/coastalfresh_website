@@ -863,6 +863,12 @@ z-index: 2;                 /* sits above input content */
   scrollbar-width: none; /* Firefox */
 }
 
+/* Hide the static SEO content if JavaScript is enabled, as it will be replaced dynamically. */
+.js-enabled .featured-products > noscript {
+  display: none;
+}
+
+
 .featured-products .product { flex: 0 0 45%; max-width: 180px; }
 
 /* Categories for Catalog */
