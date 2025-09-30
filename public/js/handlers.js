@@ -543,8 +543,8 @@ export const Handlers = {
             UI.showPage('faqPage');
         } else if (button.classList.contains('about')) {
             UI.showPage('aboutPage');
-        } else if (button.classList.contains('support')) {
-            Handlers.openWhatsApp('support');
+        } else if (button.classList.contains('support')) { // MODIFIED: Redirect to contact page
+            UI.showPage('contactPage');
         }
     },
 

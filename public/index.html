@@ -188,7 +188,7 @@
       <section class="flash-sale-section" id="flashSaleSection">
         <div class="flash-sale-header">
           <h2 class="section-title">🔥 Best Deals</h2>
-          <span class="view-all" role="button" tabindex="0" aria-label="View all deals">View All</span>
+          <a href="/catalog" class="view-all" aria-label="View all deals">View All</a>
         </div>
         <div class="flash-sale-products" id="flashSaleProducts"></div>
       </section>
@@ -201,7 +201,7 @@
           <div class="section-title-main">
             ✨ Featured Products
           </div>
-          <span class="view-all" role="button">View All</span>
+          <a href="/catalog" class="view-all" aria-label="View all featured products">View All</a>
         </h2>
         <div class="featured-products" id="featuredProducts"></div>
       </main>
@@ -504,6 +504,46 @@
         <div class="refer-influencer-card">
           <div class="refer-influencer-text">Are you an influencer? <span>Let's collaborate!</span></div>
           <a href="https://wa.me/919985125678?text=Hi%20Coastal%20Fresh,%20I'm%20an%20influencer%20and%20would%20like%20to%20collaborate." target="_blank" class="refer-influencer-contact">Contact Us</a>
+        </div>
+      </main>
+    </div>
+
+    <!-- NEW: Contact Us Page -->
+    <div class="page" id="contactPage">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="logo">Contact Us</h1>
+          <div></div>
+        </div>
+      </header>
+
+      <main class="section">
+        <div class="contact-page-content">
+          <div class="contact-hero">
+            <i class="fas fa-headset"></i>
+            <h2>Get in Touch</h2>
+            <p>Have a question or need help with your order? We're here to assist you!</p>
+          </div>
+
+          <div class="contact-options">
+            <a href="mailto:coastalfreshseafoods@gmail.com" class="contact-card email">
+              <i class="fas fa-envelope"></i>
+              <div class="contact-card-text">
+                <strong>Email Us</strong>
+                <span>coastalfreshseafoods@gmail.com</span>
+              </div>
+            </a>
+            <a href="https://wa.me/919985125678?text=Hi%20Coastal%20Fresh,%20I%20need%20some%20assistance." target="_blank" rel="noopener noreferrer" class="contact-card whatsapp">
+              <i class="fab fa-whatsapp"></i>
+              <div class="contact-card-text">
+                <strong>Chat on WhatsApp</strong>
+                <span>Typically replies in a few minutes</span>
+              </div>
+            </a>
+          </div>
         </div>
       </main>
     </div>
@@ -980,6 +1020,16 @@
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" },
       { "@type": "ListItem", "position": 2, "name": "Refer & Earn" }
+    ]
+  }
+  </script>
+  <script type="application/ld+json" id="breadcrumb-contact">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" },
+      { "@type": "ListItem", "position": 2, "name": "Contact Us" }
     ]
   }
   </script>

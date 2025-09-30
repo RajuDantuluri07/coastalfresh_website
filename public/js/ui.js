@@ -1094,6 +1094,10 @@ export const UI = {
             pageTitle = 'Refer a Friend & Earn Rewards | Coastal Fresh India';
             pageDesc = 'Share Coastal Fresh with your friends! They get 10% off their first order, and you get a 10% discount on your next purchase. Start sharing and earning today.';
             pagePath = '/refer';
+        } else if (page === 'contactPage') {
+            pageTitle = 'Contact Us | Coastal Fresh India';
+            pageDesc = 'Get in touch with Coastal Fresh India for support, inquiries, or feedback. Contact us via email or WhatsApp for quick assistance with your fresh seafood orders in Hyderabad.';
+            pagePath = '/contact';
         } else if (page === 'ordersPage') {
             UI.renderOrdersPage(); // This was a bug, now fixed
         } else if (page === 'favoritesPage') {

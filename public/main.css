@@ -3566,6 +3566,62 @@ body.popup-open .bottom-bar {
   box-shadow: 0 2px 6px rgba(56, 142, 60, 0.3);
 }
 
+/* --- NEW: Contact Us Page Styles --- */
+.contact-page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.contact-hero {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.contact-hero i {
+  font-size: 48px;
+  color: var(--primary-color);
+  margin-bottom: 16px;
+}
+
+.contact-hero h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.contact-hero p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.contact-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--bg-white);
+  box-shadow: var(--card-shadow);
+  text-decoration: none;
+  color: var(--text-primary);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.contact-card:active { transform: scale(0.98); }
+.contact-card i { font-size: 24px; }
+.contact-card.email i { color: var(--primary-color); }
+.contact-card.whatsapp i { color: #25D366; }
+.contact-card-text strong { display: block; font-size: 16px; font-weight: 600; }
+.contact-card-text span { font-size: 13px; color: var(--text-secondary); }
+
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
