@@ -1104,7 +1104,7 @@ export const UI = {
         container.innerHTML = `
       <label class="cart-pay-item payment-btn ${state.selectedPaymentMethod === 'cod' ? 'active' : ''}" data-method="cod">
         <input type="radio" name="pay" value="cod" ${state.selectedPaymentMethod === 'cod' ? 'checked' : ''}>
-        <div>
+        <div> 
           <div class="cart-pay-label">💵 Cash on Delivery</div>
           <div class="cart-pay-sub">Pay with cash at delivery</div>
         </div>
@@ -1112,7 +1112,7 @@ export const UI = {
       <label class="cart-pay-item payment-btn ${state.selectedPaymentMethod === 'online' ? 'active' : ''}" data-method="online">
         <input type="radio" name="pay" value="online" ${state.selectedPaymentMethod === 'online' ? 'checked' : ''}>
         <div>
-          <div class="cart-pay-label">💳 UPI / Card</div>
+          <div class="cart-pay-label">💳 UPI / Card</div> 
           <div class="cart-pay-sub">Fast, secure online payment (Coming Soon)</div>
         </div>
       </label>

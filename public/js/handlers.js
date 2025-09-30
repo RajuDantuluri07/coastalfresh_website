@@ -7,14 +7,23 @@ export const Handlers = {
         config = appConfig;
         UI = uiModule;
     },
+  
+  /**
+  * A helper function to safely add event listeners.
+  * It checks if the element exists before adding the listener.
+  * @param {string} selector - The CSS selector for the element.
+  * @param {string} event - The event type (e.g., 'click').
+  * @param {Function} handler - The event handler function.
+  */
+  _safeAddListener: (selector, event, handler) => {
+    const element = document.querySelector(selector);
+    if (element) {
+      element.addEventListener(event, handler);
+    } else {
+      console.warn(`Could not find element with selector "${selector}" to attach event listener.`);
+    }
+  },
 
-    /**
-     * A helper function to safely add event listeners.
-     * It checks if the element exists before adding the listener.
-     * @param {string} selector - The CSS selector for the element.
-     * @param {string} event - The event type (e.g., 'click').
-     * @param {Function} handler - The event handler function.
-     */
     setupEvents: () => {
         // --- Event Delegation on the Body for Dynamic/Repeated Elements ---
         document.body.addEventListener('click', (e) => {
