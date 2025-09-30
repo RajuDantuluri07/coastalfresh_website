@@ -3579,6 +3579,11 @@ body.popup-open .bottom-bar {
   .variant-drawer-overlay {
     position: absolute; /* Change from fixed to absolute */
     border-radius: 20px; /* Match app container's border radius */
+    /* FIX: Make the overlay cover the entire app container */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
   }
 
   .variant-drawer {
