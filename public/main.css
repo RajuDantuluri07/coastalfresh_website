@@ -234,10 +234,9 @@
 html { height: 100%; }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   background: var(--bg-light);
   color: var(--text-primary);
-  font-weight: 400; /* Default to Regular */
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   height: 100%;
@@ -248,7 +247,6 @@ body {
   max-width: var(--app-max-width);
   margin: 0 auto;
   background: var(--bg-white);
-  /* FIX: Use 100% instead of 100vh to avoid mobile browser viewport issues */
   min-height: 100%;
   box-shadow: 0 0 50px rgba(0,0,0,0.1);
   position: relative;
@@ -257,7 +255,6 @@ body {
 
 .page {
   display: none;
-  min-height: 100vh;
   padding-bottom: 120px;
 }
 

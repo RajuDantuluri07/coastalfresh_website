@@ -1,11 +1,25 @@
-﻿﻿const fs = require('fs');
+﻿﻿﻿﻿const fs = require('fs');
 const path = require('path');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 
-// --- IMPORTANT: Create this file for your service account credentials ---
-// See instructions below on how to get this file.
-const serviceAccount = require('./serviceAccountKey.json');
+// --- SECURITY FIX: Load credentials securely from environment variables ---
+// In your deployment environment (like Vercel, Netlify, etc.), create an
+// environment variable named `GOOGLE_APPLICATION_CREDENTIALS_JSON` and
+// paste the entire content of your `serviceAccountKey.json` file as its value.
+let serviceAccount;
+if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+  try {
+    serviceAccount = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+  } catch (e) {
+    console.error('Error parsing GOOGLE_APPLICATION_CREDENTIALS_JSON:', e);
+    process.exit(1);
+  }
+} else {
+  // Fallback for local development (ensure serviceAccountKey.json is in .gitignore)
+  console.warn("Using local 'serviceAccountKey.json'. For production, use environment variables.");
+  serviceAccount = require('./serviceAccountKey.json');
+}
 
 initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
@@ -57,7 +71,7 @@ async function generateSitemap() {
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-${pages.map(page => {
+${pages.map(page => { // eslint-disable-line
       const today = new Date().toISOString().split("T")[0];
       const imageTag = page.image ? `
     <image:image>
