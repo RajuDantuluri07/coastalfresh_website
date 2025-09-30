@@ -3565,6 +3565,25 @@ body.popup-open .bottom-bar {
   box-shadow: 0 2px 6px rgba(56, 142, 60, 0.3);
 }
 
+/* --- DESKTOP FIX: Constrain variant drawer to the app container --- */
+@media (min-width: 481px) {
+  .variant-drawer-overlay {
+    position: absolute; /* Change from fixed to absolute */
+    border-radius: 20px; /* Match app container's border radius */
+  }
+
+  .variant-drawer {
+    position: absolute; /* Change from fixed to absolute */
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    width: 100%;
+    max-width: var(--app-max-width);
+  }
+  .variant-drawer.active {
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 /* --- NEW: Contact Us Page Styles --- */
 .contact-page-content {
   display: flex;
