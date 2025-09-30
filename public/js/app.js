@@ -213,7 +213,6 @@ async function init() {
 
       UI.renderTrustIcons();
       UI.renderCategories();
-      UI.renderCustomerReviews();
       Handlers.setupEvents();
       UI.initCarousel('#home .carousel');
       UI.initCarousel('#communicationCarousel');
