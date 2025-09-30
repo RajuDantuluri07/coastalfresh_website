@@ -167,8 +167,9 @@ async function init() {
 
       try {
           // --- PERFORMANCE: Fetch ALL products initially. This is a trade-off for simplicity.
-          // For larger stores, this should be paginated. For now, we fetch all to keep search and filter simple.
-          const productsSnapshot = await state.db.collection('products').where('available', '==', true).orderBy('id').get();
+          // FIX: Removed orderBy('id') to prevent a missing-index error. Products will be fetched in Firestore's default order.
+          // For long-term, create the composite index in your Firebase console as suggested by the browser error log.
+          const productsSnapshot = await state.db.collection('products').where('available', '==', true).get();
           state.products = productsSnapshot.docs.map(doc => doc.data());
           
           // Process products to add helper properties
