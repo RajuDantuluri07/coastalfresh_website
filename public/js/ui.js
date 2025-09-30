@@ -52,8 +52,8 @@ export const UI = {
         if (!container) return;
 
         container.innerHTML = config.CATEGORIES_DATA.map((cat, index) => `
-      <button class="category ${index === 0 ? 'active' : ''}" data-category="${cat.key}">
-        ${cat.icon ? `<img src="${cat.icon}" alt="${cat.label}" class="category-icon" loading="lazy">` : ''}
+      <button class="category ${index === 0 ? 'active' : ''}" data-category="${cat.key}" aria-label="Filter by ${cat.label}">
+        ${cat.icon ? `<img src="${cat.icon}" alt="" class="category-icon" loading="lazy" aria-hidden="true">` : ''}
         <span>${cat.label}</span>
       </button>
     `).join('');
@@ -153,12 +153,13 @@ export const UI = {
     `;
     },
 
-    updateSEOTags: ({ title, description, canonicalPath, imageUrl }) => {
+    updateSEOTags: ({ title, ogTitle, description, canonicalPath, imageUrl }) => {
         const defaultTitle = 'Coastal Fresh India: Buy Fresh Fish & Seafood Online in Hyderabad';
         const defaultDesc = 'The best place to buy fresh fish and seafood online in Hyderabad, India! Coastal Fresh offers a wide variety of hygienically cleaned fish, prawns, crabs, and authentic Andhra pickles with next-day delivery. Order now for the freshest catch.';
         const defaultImage = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png';
         const baseUrl = 'https://www.coastalfresh.in';
 
+        const finalOgTitle = ogTitle || title || defaultTitle;
         const finalTitle = title || defaultTitle;
         const finalDesc = description || defaultDesc;
         const finalCanonical = baseUrl + (canonicalPath || '/');
@@ -172,11 +173,11 @@ export const UI = {
         const canonicalTag = document.querySelector('link[rel="canonical"]');
         if (canonicalTag) canonicalTag.setAttribute('href', finalCanonical);
 
-        document.querySelector('meta[property="og:title"]').setAttribute('content', finalTitle);
+        document.querySelector('meta[property="og:title"]').setAttribute('content', finalOgTitle);
         document.querySelector('meta[property="og:description"]').setAttribute('content', finalDesc);
         document.querySelector('meta[property="og:url"]').setAttribute('content', finalCanonical);
         document.querySelector('meta[property="og:image"]').setAttribute('content', finalImage);
-        document.querySelector('meta[name="twitter:title"]').setAttribute('content', finalTitle);
+        document.querySelector('meta[name="twitter:title"]').setAttribute('content', finalOgTitle);
         document.querySelector('meta[name="twitter:description"]').setAttribute('content', finalDesc);
         document.querySelector('meta[name="twitter:image"]').setAttribute('content', finalImage);
     },
@@ -384,11 +385,12 @@ export const UI = {
             const runDeferredTasks = () => {
                 const productSlug = UI.generateProductSlug(product);
                 const productUrl = `/product/${productSlug}`;
-                const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh India`;
+                const productTitle = `Buy Fresh ${product.name} Online in Hyderabad | Coastal Fresh`;
+                const ogProductTitle = `Get Fresh ${product.name} Delivered to Your Doorstep! | Coastal Fresh`;
                 const productDesc = product.desc;
                 const optimizedProductImage = UI.getOptimizedImageUrl(product.image, 1200, 630);
 
-                UI.updateSEOTags({ title: productTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
+                UI.updateSEOTags({ title: productTitle, ogTitle: ogProductTitle, description: productDesc, canonicalPath: productUrl, imageUrl: optimizedProductImage });
                 history.pushState({ page: 'product', productId: product.id }, productTitle, productUrl);
 
                 // --- SEO ENHANCEMENT: Inject rich, dynamic JSON-LD schema for the product and breadcrumbs ---
