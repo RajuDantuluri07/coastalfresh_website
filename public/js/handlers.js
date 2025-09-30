@@ -7,23 +7,14 @@ export const Handlers = {
         config = appConfig;
         UI = uiModule;
     },
-  
-  /**
-  * A helper function to safely add event listeners.
-  * It checks if the element exists before adding the listener.
-  * @param {string} selector - The CSS selector for the element.
-  * @param {string} event - The event type (e.g., 'click').
-  * @param {Function} handler - The event handler function.
-  */
-  _safeAddListener: (selector, event, handler) => {
-    const element = document.querySelector(selector);
-    if (element) {
-      element.addEventListener(event, handler);
-    } else {
-      console.warn(`Could not find element with selector "${selector}" to attach event listener.`);
-    }
-  },
 
+    /**
+     * A helper function to safely add event listeners.
+     * It checks if the element exists before adding the listener.
+     * @param {string} selector - The CSS selector for the element.
+     * @param {string} event - The event type (e.g., 'click').
+     * @param {Function} handler - The event handler function.
+     */
     setupEvents: () => {
         // --- Event Delegation on the Body for Dynamic/Repeated Elements ---
         document.body.addEventListener('click', (e) => {
@@ -40,7 +31,7 @@ export const Handlers = {
             // NEW: Handle "Find Products" button on empty favorites page
             const findProductsBtn = target.closest('#findProductsFromFavorites');
             if (findProductsBtn) {
-                UI.showPage('categoriesPage');
+                UI.showPage('catalog');
             }
 
             // CTA button on product cards
@@ -174,17 +165,17 @@ export const Handlers = {
                 categoryButton.classList.add('active');
                 state.currentCategory = categoryButton.dataset.category;
                 state.currentPageNumber = 1;
-                const searchInput = document.getElementById('categoriesSearch');
+                const searchInput = document.getElementById('catalogSearch');
                 if (searchInput) searchInput.value = '';
                 state.currentSearch = '';
-                UI.renderCategoryProducts();
+                UI.renderCatalogProducts();
                 window.Analytics.trackEvent('select_category', { category: state.currentCategory });
             }
 
             // Header buttons and View All
             if (target.closest('#home .view-all')) {
                 e.preventDefault();
-                UI.showPage('categoriesPage');
+                UI.showPage('catalog');
             }
 
             // Back buttons
@@ -256,7 +247,7 @@ export const Handlers = {
 
             // NEW: Handle click on the "Explore Today's Fresh Catch" button on the About Us page
             if (target.id === 'aboutPageCtaBtn') {
-                UI.showPage('categoriesPage');
+                UI.showPage('catalog');
             }
 
             // NEW: Handle "Share on WhatsApp" button on the refer page
@@ -282,9 +273,9 @@ export const Handlers = {
             // --- FIX: Cart quantity controls ---
             const cartQtyBtn = target.closest('.cart-item-qty .qty-btn'); // This selector is specific to the cart items
             if (cartQtyBtn) {
-                e.stopPropagation(); // Prevent any other clicks
-                // FIX: The data-id is on the parent '.cart-item-card'
-                const cartControls = target.closest('.cart-item-card');
+                e.stopPropagation();
+                // FIX: The data-id is on the parent '.cart-item-qty' or '.cart-item-card'
+                const cartControls = target.closest('[data-id]');
                 const variantId = cartControls.dataset.id;
                 const change = cartQtyBtn.classList.contains('inc') ? 1 : -1;
                 // The check for variantId happens inside updateQty
@@ -323,10 +314,10 @@ export const Handlers = {
         }
 
         // Typewriter focus/blur handlers
-        const categoriesSearchInput = document.getElementById('categoriesSearch');
-        categoriesSearchInput.addEventListener('focus', UI.stopTypewriter);
-        categoriesSearchInput.addEventListener('blur', () => {
-            if (!categoriesSearchInput.value) UI.startTypewriter();
+        const catalogSearchInput = document.getElementById('catalogSearch');
+        catalogSearchInput.addEventListener('focus', UI.stopTypewriter);
+        catalogSearchInput.addEventListener('blur', () => {
+            if (!catalogSearchInput.value) UI.startTypewriter();
         });
 
         // Tooltip handler
@@ -348,9 +339,9 @@ export const Handlers = {
         document.getElementById('forgotPassword').addEventListener('click', Handlers.handlePasswordReset);
 
         // Header search inputs
-        document.getElementById('categoriesSearch').addEventListener('input', (e) => {
+        document.getElementById('catalogSearch').addEventListener('input', (e) => {
             clearTimeout(state.searchDebounceTimer);
-            state.searchDebounceTimer = setTimeout(() => Handlers.handleCategorySearch(e), 300);
+            state.searchDebounceTimer = setTimeout(() => Handlers.handleCatalogSearch(e), 300);
         });
 
         // Address form submission
@@ -486,7 +477,7 @@ export const Handlers = {
             const page = navItem.dataset.page;
             if (page === 'cart') {
                 UI.showCart();
-            } else if (page && page !== state.currentPage) {
+            } else if (page) {
                 if (page === 'profilePage' && !state.currentUser) {
                     UI.showPage(page);
                 } else {
@@ -548,7 +539,7 @@ export const Handlers = {
         } else if (button.classList.contains('about')) {
             UI.showPage('aboutPage');
         } else if (button.classList.contains('support')) {
-            UI.showPage('contactPage');
+            Handlers.openWhatsApp('support');
         }
     },
 
@@ -953,10 +944,10 @@ export const Handlers = {
         UI.showPage('ordersPage');
     },
 
-    handleCategorySearch: (e) => {
+    handleCatalogSearch: (e) => {
         state.currentSearch = e.target.value;
         state.currentPageNumber = 1;
-        UI.renderCategoryProducts();
+        UI.renderCatalogProducts();
 
         if (state.currentSearch) {
             window.Analytics.trackEvent('view_search_results', {

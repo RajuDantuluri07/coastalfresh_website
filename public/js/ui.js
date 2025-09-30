@@ -116,40 +116,6 @@ export const UI = {
         }
     },
 
-    /**
-     * NEW: Sets up an IntersectionObserver to lazy-load images.
-     * This is more robust than relying solely on `loading="lazy"`.
-     */
-    setupLazyLoader: () => {
-        const lazyImages = document.querySelectorAll('img.lazy-image');
-
-        if ('IntersectionObserver' in window) {
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        const src = img.getAttribute('data-src');
-                        if (!src) return;
-
-                        img.src = src;
-                        img.onload = () => {
-                            img.classList.remove('lazy-image');
-                            img.classList.add('lazy-loaded');
-                        };
-                        observer.unobserve(img);
-                    }
-                });
-            }, { rootMargin: '0px 0px 200px 0px' }); // Start loading 200px before it enters viewport
-
-            lazyImages.forEach(img => observer.observe(img));
-        } else {
-            // Fallback for very old browsers without IntersectionObserver
-            lazyImages.forEach(img => {
-                img.src = img.getAttribute('data-src');
-            });
-        }
-    },
-
     renderFlashSale: () => {
         const section = document.getElementById('flashSaleSection');
         if (!config.ENABLE_FLASH_SALE) {
@@ -169,7 +135,6 @@ export const UI = {
             return;
         }
         UI.renderProductGrid('flashSaleProducts', flashSaleProducts, { isFlashSale: true });
-        UI.setupLazyLoader(); // Observe new images
     },
 
     createSkeletonProductHTML: () => {
@@ -230,11 +195,10 @@ export const UI = {
 
         const featured = state.products.filter(p => config.FEATURED_PRODUCT_IDS.includes(p.id));
         UI.renderProductGrid('featuredProducts', featured);
-        UI.setupLazyLoader(); // Observe new images
     },
 
-    renderCategoryProducts: () => {
-        const container = document.getElementById('categoriesProducts');
+    renderCatalogProducts: () => {
+        const container = document.getElementById('catalogProducts');
         if (!container) return;
 
         if (state.currentPageNumber === 1) {
@@ -251,11 +215,11 @@ export const UI = {
             }
         }
 
-        UI.populateCategoryProducts();
+        UI.populateCatalogProducts();
     },
 
-    populateCategoryProducts: () => {
-        const container = document.getElementById('categoriesProducts');
+    populateCatalogProducts: () => {
+        const container = document.getElementById('catalogProducts');
         if (!container) return;
 
         let filtered = state.products.filter(p => {
@@ -266,17 +230,7 @@ export const UI = {
         });
 
         const emptyMessage = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #8E8E93;">No products found</div>';
-
-        // --- REMOVED: "Show More" Logic ---
-        // The logic to limit products and show a "Show More" button has been removed.
-        // Now, all filtered products will be rendered directly.
-
-        // Clean up any stray "Show More" button that might exist from previous versions.
-        document.querySelector('.show-more-cta')?.remove();
-
-        // Render all products for the selected category/search.
-        UI.renderProductGrid('categoriesProducts', filtered, {}, emptyMessage);
-        UI.setupLazyLoader(); // Observe new images
+        UI.renderProductGrid('catalogProducts', filtered, {}, emptyMessage);
     },
 
     createProductHTML: (product, options = {}) => {
@@ -294,9 +248,6 @@ export const UI = {
             const isFavorite = state.favorites.has(product.id);
             const optimizedImage = UI.getOptimizedImageUrl(product.image, 300, 300);
             const sanitizedName = DOMPurify.sanitize(product.name);
-
-            // For lazy loading, use a placeholder
-            const placeholderSrc = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
 
             let ctaButton = '';
             let stockOverlay = '';
@@ -344,7 +295,7 @@ export const UI = {
             return `
         <div class="card product ${!product.available ? 'unavailable' : ''} ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" role="article" aria-label="Product: ${sanitizedName}">
           <div class="product-image">
-            <img data-src="${optimizedImage}" src="${placeholderSrc}" alt="${sanitizedName}" class="lazy-image" loading="lazy">
+            <img src="${optimizedImage}" alt="${sanitizedName}" loading="lazy">
             <button class="wish" data-id="${product.id}" aria-label="Add to wishlist" aria-pressed="${isFavorite}">${isFavorite ? '♥' : '♡'}</button>
              ${ctaButton}
              ${stockOverlay}
@@ -370,37 +321,16 @@ export const UI = {
     showProductPopup: (id) => {
         const numericId = parseInt(id);
         if (isNaN(numericId)) return;
-
-        // Use cached DOM elements for speed
-        const { main: popup, title, weight, priceSection, infoContent, mainImage, contentWrapper, backBtn, cta } = state.dom.popup;
-
         const product = state.products.find(p => p.id === numericId);
-
-        // --- FIX: Handle Soft 404 by showing a "Not Found" state in the popup ---
-        if (!product) {
-            state.popupProduct = null;
-            title.textContent = 'Product Not Found';
-            mainImage.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // Transparent pixel
-            mainImage.alt = 'Product not found';
-            weight.innerHTML = '';
-            priceSection.innerHTML = '';
-            infoContent.innerHTML = `<p style="text-align: center; padding: 20px 0;">We couldn't find the product you're looking for. It might have been removed or the link is incorrect.</p>`;
-            cta.innerHTML = `<button class="popup-cta-add-btn" id="popupNotFoundBtn">Browse All Products</button>`;
-            document.getElementById('popupNotFoundBtn').onclick = () => { UI.closePopup(); UI.showPage('categoriesPage'); };
-            
-            // Hide elements that are not needed
-            popup.querySelector('.popup-header-actions').style.display = 'none';
-            document.getElementById('productDetailsAccordion').style.display = 'none';
-
-            state.isPopupOpen = true;
-            UI.openModal(popup, backBtn);
-            return;
-        } 
+        if (!product) return;
 
         // --- OPTIMIZATION: Prioritize visual updates first ---
         state.popupProduct = product;
         state.selectedVariantIndex = 0; // Default to the first variant
         state.currentProductQty = state.cart[`${product.id}-${state.selectedVariantIndex}`] || 1; // Reflect quantity of selected variant in cart
+
+        // Use cached DOM elements for speed
+        const { main: popup, title, weight, priceSection, infoContent, mainImage, contentWrapper, backBtn } = state.dom.popup;
 
         // Update favorite button state in popup
         const favoriteBtn = popup.querySelector('.popup-action-btn.favorite');
@@ -408,10 +338,6 @@ export const UI = {
         favoriteBtn.setAttribute('aria-pressed', isFavorite);
         favoriteBtn.innerHTML = `<i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>`;
         favoriteBtn.style.color = isFavorite ? 'var(--pink)' : 'var(--primary-color)';
-
-        // Restore visibility of elements that might be hidden by the "not found" state
-        popup.querySelector('.popup-header-actions').style.display = 'flex';
-        document.getElementById('productDetailsAccordion').style.display = 'block';
 
         const populatePopup = () => {
             title.textContent = product.name;
@@ -505,13 +431,8 @@ export const UI = {
                     "description": product.desc,
                     "sku": `CF-${product.id}`,
                     "brand": { "@type": "Brand", "name": "Coastal Fresh" },
-                };
-
-                // --- ENHANCEMENT: Handle offers more robustly ---
-                // If there are variants, map them to individual offers.
-                // Otherwise, create a single top-level offer for the product itself.
-                if (product.variants && product.variants.length > 0) {
-                    productSchema.offers = product.variants.map((variant, index) => ({
+                    // Create an offer for each variant
+                    "offers": product.variants.map((variant, index) => ({
                         "@type": "Offer",
                         "url": `https://www.coastalfresh.in${productUrl}`,
                         "priceCurrency": "INR",
@@ -519,17 +440,9 @@ export const UI = {
                         "sku": `CF-${product.id}-${index}`,
                         "itemCondition": "https://schema.org/NewCondition",
                         "availability": variant.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-                    }));
-                } else {
-                    // Fallback for products without a variants array but with price info.
-                    productSchema.offers = {
-                        "@type": "Offer",
-                        "url": `https://www.coastalfresh.in${productUrl}`,
-                        "priceCurrency": "INR",
-                        "price": product.finalPrice, // Assumes product.finalPrice exists
-                        "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-                    };
-                }
+                    }))
+                };
+
                 // Dynamically add review and rating data if available
                 const relevantReviews = config.CUSTOMER_REVIEWS.filter(r => r.review.toLowerCase().includes(product.name.split(' ')[0].toLowerCase()));
                 if (relevantReviews.length > 0) {
@@ -549,7 +462,7 @@ export const UI = {
                     "@type": "BreadcrumbList",
                     "itemListElement": [
                         { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" },
-                        { "@type": "ListItem", "position": 2, "name": "Categories", "item": "https://www.coastalfresh.in/categories" },
+                        { "@type": "ListItem", "position": 2, "name": "Catalog", "item": "https://www.coastalfresh.in/catalog" },
                         { "@type": "ListItem", "position": 3, "name": product.name }
                     ]
                 };
@@ -755,8 +668,8 @@ export const UI = {
 
         const underlyingPage = state.pageHistory[state.pageHistory.length - 1] || 'home';
         let pageInfo = { path: '/', title: 'Coastal Fresh India' };
-        if (underlyingPage === 'categoriesPage') {
-            pageInfo = { path: '/categories', title: 'All Products | Coastal Fresh India' };
+        if (underlyingPage === 'catalog') {
+            pageInfo = { path: '/catalog', title: 'All Products | Coastal Fresh India' };
         } else if (underlyingPage === 'faqPage') {
             pageInfo = { path: '/faq', title: 'FAQs | Coastal Fresh India' };
         }
@@ -775,7 +688,7 @@ export const UI = {
 
     updateCartBadges: () => {
         const totalQty = Object.values(state.cart).reduce((sum, qty) => {
-            const numQty = Number(qty); 
+            const numQty = Number(qty);
             return sum + (isNaN(numQty) ? 0 : numQty);
         }, 0);
 
@@ -783,7 +696,7 @@ export const UI = {
             const el = document.getElementById(id);
             if (el) {
                 if (totalQty > 0) {
-                    el.style.display = 'flex'; 
+                    el.style.display = 'flex';
                     el.textContent = totalQty > 9 ? '9+' : totalQty;
                 } else {
                     el.style.display = 'none';
@@ -980,21 +893,10 @@ export const UI = {
     updateCartSummary: () => {
         // FIX: Define cartItems within this function's scope to prevent ReferenceError.
         // This was the root cause of the application failing to start.
-        
-        // --- NEW FIX: Prevent race condition on initial load ---
-        // Do not attempt to update the summary if products haven't been loaded yet.
-        if (!state.products || state.products.length === 0) {
-            return; 
-        }
         const cartItems = Object.entries(state.cart).map(([variantId, qty]) => {
             const [productId, variantIndex] = variantId.split('-').map(Number);
             const product = state.products.find(p => p.id === productId);
-            // --- CRITICAL FIX: Add robust checks to prevent crashes ---
-            // 1. Check if the product exists in the current state.
-            // 2. Check if the product has a variants array.
-            // 3. Check if the specific variant index is valid.
-            // If any of these fail, the item is invalid and should be skipped.
-            if (!product || !Array.isArray(product.variants) || !product.variants[variantIndex]) return null;
+            if (!product || !product.variants[variantIndex]) return null;
             const variant = product.variants[variantIndex];
             return {
                 ...product,
@@ -1097,7 +999,7 @@ export const UI = {
         container.innerHTML = `
       <label class="cart-pay-item payment-btn ${state.selectedPaymentMethod === 'cod' ? 'active' : ''}" data-method="cod">
         <input type="radio" name="pay" value="cod" ${state.selectedPaymentMethod === 'cod' ? 'checked' : ''}>
-        <div> 
+        <div>
           <div class="cart-pay-label">💵 Cash on Delivery</div>
           <div class="cart-pay-sub">Pay with cash at delivery</div>
         </div>
@@ -1105,7 +1007,7 @@ export const UI = {
       <label class="cart-pay-item payment-btn ${state.selectedPaymentMethod === 'online' ? 'active' : ''}" data-method="online">
         <input type="radio" name="pay" value="online" ${state.selectedPaymentMethod === 'online' ? 'checked' : ''}>
         <div>
-          <div class="cart-pay-label">💳 UPI / Card</div> 
+          <div class="cart-pay-label">💳 UPI / Card</div>
           <div class="cart-pay-sub">Fast, secure online payment (Coming Soon)</div>
         </div>
       </label>
@@ -1169,22 +1071,18 @@ export const UI = {
         }
 
         let pageTitle, pageDesc, pagePath;
-        if (page === 'categoriesPage') {
+        if (page === 'catalog') {
             if (state.afterAddressAction) {
                 state.afterAddressAction = null;
                 console.log('Cleared pending address action due to navigation.');
             }
             pageTitle = 'All Products - Fish, Prawns, Crabs & More | Coastal Fresh India';
             pageDesc = 'Browse our entire collection of fresh seafood, including Pomfret, Prawns, Crabs, and authentic Andhra pickles. Order online for next-day delivery in Hyderabad.';
-            pagePath = '/categories';
+            pagePath = '/catalog';
         } else if (page === 'faqPage') {
             pageTitle = 'Frequently Asked Questions | Coastal Fresh India';
             pageDesc = 'Find answers to common questions about our delivery, sourcing, freshness, and payment for fresh seafood in Hyderabad.';
             pagePath = '/faq';
-        } else if (page === 'contactPage') {
-            pageTitle = 'Contact Us | Coastal Fresh India';
-            pageDesc = 'Get in touch with Coastal Fresh for support with your seafood orders, delivery questions, or any other inquiries. Contact us via WhatsApp or Email.';
-            pagePath = '/contact';
         } else if (page === 'referPage') {
             pageTitle = 'Refer a Friend & Earn Rewards | Coastal Fresh India';
             pageDesc = 'Share Coastal Fresh with your friends! They get 10% off their first order, and you get a 10% discount on your next purchase. Start sharing and earning today.';
@@ -1214,7 +1112,7 @@ export const UI = {
 
         const ticker = document.querySelector('.ticker-container');
         const headers = document.querySelectorAll('.header');
-        if (page === 'home' || page === 'categoriesPage') {
+        if (page === 'home' || page === 'catalog') {
             if (ticker) ticker.style.display = 'block';
             headers.forEach(h => h.style.top = '30px');
         } else {
@@ -1222,7 +1120,7 @@ export const UI = {
             headers.forEach(h => h.style.top = '0px');
         }
 
-        if (page === 'categoriesPage') {
+        if (page === 'catalog') {
             UI.startTypewriter();
         } else {
             UI.stopTypewriter();
@@ -1236,7 +1134,7 @@ export const UI = {
         const names = ['Prawns', 'Rohu', 'Sea Bass', 'Crab', 'Pickle'];
         let i = 0, pos = 0, dir = 1, pause = 0;
 
-        const inputs = [document.getElementById('categoriesSearch')].filter(Boolean);
+        const inputs = [document.getElementById('catalogSearch')].filter(Boolean);
 
         function tick() {
             const shouldAnimate = inputs.every(input => document.activeElement !== input && !input.value);
@@ -1264,7 +1162,7 @@ export const UI = {
 
     stopTypewriter: () => {
         if (state.typewriterTimer) clearTimeout(state.typewriterTimer);
-        const input = document.getElementById('categoriesSearch');
+        const input = document.getElementById('catalogSearch');
         if (input) input.setAttribute('placeholder', 'Search products...');
     },
 
@@ -1278,13 +1176,13 @@ export const UI = {
             featuredContainer.innerHTML = skeletonHTML;
         }
 
-        const categoriesContainer = document.getElementById('categoriesProducts');
-        if (categoriesContainer) {
+        const catalogContainer = document.getElementById('catalogProducts');
+        if (catalogContainer) {
             let skeletonHTML = '';
             for (let i = 0; i < config.ITEMS_PER_PAGE; i++) {
                 skeletonHTML += UI.createSkeletonProductHTML();
             }
-            categoriesContainer.innerHTML = skeletonHTML;
+            catalogContainer.innerHTML = skeletonHTML;
         }
     },
 
@@ -1983,7 +1881,7 @@ export const UI = {
             userStatus.textContent = state.currentUser.email;
             logoutBtn.style.display = 'flex';
             if (guestCta) guestCta.style.display = 'none';
-            if (referBtn) referBtn.style.display = 'flex';
+            if (referBtn) referBtn.style.display = 'flex'; // FIX: Ensure button is shown for logged-in users
 
             // NEW: Show referral controls for logged-in users
             if (referralShareContainer) referralShareContainer.style.display = 'flex';
