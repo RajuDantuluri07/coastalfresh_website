@@ -756,6 +756,72 @@ z-index: 2;                 /* sits above input content */
   color: var(--error-color);
 }
 
+/* --- NEW: Customer Reviews Section --- */
+.reviews-section {
+  background: var(--bg-light); /* Subtle grey background */
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.reviews-carousel {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 4px 20px 20px 20px; /* Padding to show shadow and for scrollbar */
+  margin: 0 -20px; /* Negative margin to allow full-width scroll */
+  scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none; /* For IE/Edge */
+}
+
+.reviews-carousel::-webkit-scrollbar {
+  display: none; /* For Chrome, Safari, and Opera */
+}
+
+.review-card {
+  flex: 0 0 80%; /* Each card takes up 80% of the viewport width */
+  max-width: 300px; /* Max width on larger screens */
+  background: var(--bg-white);
+  border-radius: var(--radius-card);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.08); /* Enhanced shadow */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  scroll-snap-align: start;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.review-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.review-avatar-initials {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: var(--bg-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 500;
+}
+
 .review-name {
   font-weight: 600; /* UPDATED */
   font-size: 15px;
@@ -776,6 +842,7 @@ z-index: 2;                 /* sits above input content */
   line-height: 1.5; /* UPDATED */
   color: var(--text-secondary);
   font-style: italic;
+}
 
 /* Home Featured Products */
 .featured-section {
@@ -3586,7 +3653,6 @@ body.popup-open .bottom-bar {
 .contact-card.whatsapp i { color: #25D366; }
 .contact-card-text strong { display: block; font-size: 16px; font-weight: 600; }
 .contact-card-text span { font-size: 13px; color: var(--text-secondary); }
-}
 
 @keyframes shimmer {
   0% { background-position: -200% 0; }

@@ -59,6 +59,45 @@ export const UI = {
     `).join('');
     },
 
+    renderCustomerReviews: () => {
+        const container = document.getElementById('reviewsCarousel');
+        if (!container) return;
+
+        container.innerHTML = config.CUSTOMER_REVIEWS.map(review => {
+            const firstName = review.name.split(' ')[0];
+            const safeName = DOMPurify.sanitize(firstName);
+            const safeLocation = DOMPurify.sanitize(review.location);
+            const safeReview = DOMPurify.sanitize(review.review);
+
+            const rating = (typeof review.rating === 'number' && review.rating >= 0 && review.rating <= 5)
+                ? review.rating
+                : 0;
+
+            const avatar = review.image
+                ? `<img src="${review.image}" alt="Avatar of ${safeName}" class="review-avatar" loading="lazy">`
+                : `<div class="review-avatar-initials">${review.name.charAt(0)}</div>`;
+
+            let stars = '';
+            for (let i = 0; i < 5; i++) {
+                stars += `<i class="fas fa-star ${i < rating ? '' : 'far'}"></i>`;
+            }
+
+            return `
+        <div class="review-card">
+          <div class="review-header">
+            ${avatar}
+            <div class="review-customer">
+              <div class="review-name">${safeName}</div>
+              <div class="review-location">${safeLocation}</div>
+            </div>
+          </div>
+          <div class="review-rating" role="img" aria-label="Rating: ${rating} out of 5 stars">${stars}</div>
+          <p class="review-body">“${safeReview}”</p>
+        </div>
+      `;
+        }).join('');
+    },
+
     /**
      * NEW: A generic and reusable function to render a grid of products into a specified container.
      * @param {string} containerId - The ID of the container element.
