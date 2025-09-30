@@ -242,19 +242,20 @@ body {
   -webkit-font-smoothing: antialiased;
   height: 100%;
 }
-
 /* App wrapper with max-width constraint */
 .app {
   max-width: var(--app-max-width);
   margin: 0 auto;
   background: var(--bg-white);
-  /* FIX: Use 100% instead of 100vh to avoid mobile browser viewport issues */
-  min-height: 100%;
+  /* FIX: Ensure the app container takes at least the full viewport height */
+  min-height: 100vh;
   box-shadow: 0 0 50px rgba(0,0,0,0.1);
   position: relative;
   overflow-x: hidden;
+  /* NEW: Ensure the app itself is a flex container to manage page heights */
+  display: flex;
+  flex-direction: column;
 }
-
 .page {
   display: none;
   min-height: 100vh;
@@ -263,6 +264,8 @@ body {
 
 .page.active {
   display: block;
+  /* NEW: Allow the active page to grow and fill the app container */
+  flex-grow: 1;
 }
 
 /* Desktop background */
@@ -272,6 +275,8 @@ body {
     background-size: cover;
     background-attachment: fixed;
     background-position: center;
+    /* FIX: Ensure body can grow with content on desktop */
+    min-height: 100vh;
   }
   
   .app {

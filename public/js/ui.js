@@ -267,34 +267,16 @@ export const UI = {
 
         const emptyMessage = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #8E8E93;">No products found</div>';
 
-        // --- NEW: "Show More" Logic for Categories ---
-        const SHOW_MORE_LIMIT = 6;
-        const isSpecificCategory = state.currentCategory !== 'All';
-        const needsShowMore = isSpecificCategory && filtered.length > SHOW_MORE_LIMIT;
+        // --- REMOVED: "Show More" Logic ---
+        // The logic to limit products and show a "Show More" button has been removed.
+        // Now, all filtered products will be rendered directly.
 
-        // Remove any existing "Show More" button before re-rendering
-        const existingBtn = container.querySelector('.show-more-cta');
-        if (existingBtn) existingBtn.remove();
+        // Clean up any stray "Show More" button that might exist from previous versions.
+        document.querySelector('.show-more-cta')?.remove();
 
-        if (needsShowMore && !state.isShowingAllInCategory) {
-            // Show only the first 6 products
-            const limitedProducts = filtered.slice(0, SHOW_MORE_LIMIT);
-            UI.renderProductGrid('categoriesProducts', limitedProducts, {}, emptyMessage);
-
-            // Add the "Show More" button
-            const showMoreBtn = document.createElement('button');
-            showMoreBtn.className = 'show-more-cta';
-            showMoreBtn.textContent = `Show All ${filtered.length} Products`;
-            showMoreBtn.onclick = () => {
-                state.isShowingAllInCategory = true;
-                UI.populateCategoryProducts(); // Re-render with all products
-            };
-            container.insertAdjacentElement('afterend', showMoreBtn);
-        } else {
-            // Show all products for the category
-            UI.renderProductGrid('categoriesProducts', filtered, {}, emptyMessage);
-            UI.setupLazyLoader(); // Observe new images
-        }
+        // Render all products for the selected category/search.
+        UI.renderProductGrid('categoriesProducts', filtered, {}, emptyMessage);
+        UI.setupLazyLoader(); // Observe new images
     },
 
     createProductHTML: (product, options = {}) => {
@@ -407,7 +389,7 @@ export const UI = {
             document.getElementById('popupNotFoundBtn').onclick = () => { UI.closePopup(); UI.showPage('categoriesPage'); };
             
             // Hide elements that are not needed
-            popup.querySelector('.popup-actions').style.display = 'none';
+            popup.querySelector('.popup-header-actions').style.display = 'none';
             document.getElementById('productDetailsAccordion').style.display = 'none';
 
             state.isPopupOpen = true;
@@ -998,10 +980,21 @@ export const UI = {
     updateCartSummary: () => {
         // FIX: Define cartItems within this function's scope to prevent ReferenceError.
         // This was the root cause of the application failing to start.
+        
+        // --- NEW FIX: Prevent race condition on initial load ---
+        // Do not attempt to update the summary if products haven't been loaded yet.
+        if (!state.products || state.products.length === 0) {
+            return; 
+        }
         const cartItems = Object.entries(state.cart).map(([variantId, qty]) => {
             const [productId, variantIndex] = variantId.split('-').map(Number);
             const product = state.products.find(p => p.id === productId);
-            if (!product || !product.variants[variantIndex]) return null;
+            // --- CRITICAL FIX: Add robust checks to prevent crashes ---
+            // 1. Check if the product exists in the current state.
+            // 2. Check if the product has a variants array.
+            // 3. Check if the specific variant index is valid.
+            // If any of these fail, the item is invalid and should be skipped.
+            if (!product || !Array.isArray(product.variants) || !product.variants[variantIndex]) return null;
             const variant = product.variants[variantIndex];
             return {
                 ...product,
@@ -1990,7 +1983,7 @@ export const UI = {
             userStatus.textContent = state.currentUser.email;
             logoutBtn.style.display = 'flex';
             if (guestCta) guestCta.style.display = 'none';
-            if (referBtn) referBtn.style.display = 'flex'; // FIX: Ensure button is shown for logged-in users
+            if (referBtn) referBtn.style.display = 'flex';
 
             // NEW: Show referral controls for logged-in users
             if (referralShareContainer) referralShareContainer.style.display = 'flex';

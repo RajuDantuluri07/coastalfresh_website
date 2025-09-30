@@ -77,7 +77,7 @@ export const state = {
             userStatus: null,
             logoutBtn: null,
             guestCta: null,
-            referBtn: null,
+            referBtn: null, // This was missing
             avatar: null
         },
         // NEW: Cache popup elements for performance
