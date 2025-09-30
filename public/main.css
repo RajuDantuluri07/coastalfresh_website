@@ -553,14 +553,13 @@ z-index: 2;                 /* sits above input content */
 }
 
 .carousel-dots {
-  position: absolute;
-  bottom: -20px; /* Position it below the carousel container */
-  left: 0;
-  right: 0;
+  position: absolute; /* Position relative to the .carousel container */
+  bottom: 10px; /* Position it inside the carousel */
+  left: 50%;
+  transform: translateX(-50%); /* Center the dots horizontally */
   display: flex;
   justify-content: center;
   gap: 6px;
-  z-index: 5; /* Ensure it's on top of other elements */
 }
 
 .dot {
