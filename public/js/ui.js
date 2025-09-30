@@ -1295,47 +1295,6 @@ export const UI = {
         startTimer();
     },
 
-    initFlashSaleTimer: () => {
-        if (!config.ENABLE_FLASH_SALE) return;
-
-        const timerContainer = document.getElementById('flashSaleTimer');
-        if (!timerContainer) return;
-
-        let endTime = localStorage.getItem('flashSaleEndTime');
-
-        if (!endTime || new Date().getTime() > endTime) {
-            endTime = new Date().getTime() + config.FLASH_SALE_DURATION_HOURS * 60 * 60 * 1000;
-            localStorage.setItem('flashSaleEndTime', endTime);
-        }
-
-        const hoursEl = document.getElementById('timer-h');
-        const minutesEl = document.getElementById('timer-m');
-        const secondsEl = document.getElementById('timer-s');
-
-        function updateTimer() {
-            const now = new Date().getTime();
-            const distance = endTime - now;
-
-            if (distance < 0) {
-                clearInterval(state.flashSaleTimerInterval);
-                timerContainer.innerHTML = '<div class="timer-ended">Sale Ended!</div>';
-                return;
-            }
-
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-            hoursEl.textContent = String(hours).padStart(2, '0');
-            minutesEl.textContent = String(minutes).padStart(2, '0');
-            secondsEl.textContent = String(seconds).padStart(2, '0');
-        }
-
-        if (state.flashSaleTimerInterval) clearInterval(state.flashSaleTimerInterval);
-        updateTimer();
-        state.flashSaleTimerInterval = setInterval(updateTimer, 1000);
-    },
-
     toggleFAQ: (button) => {
         const faq = button.closest('.faq');
         if (!faq) return;
