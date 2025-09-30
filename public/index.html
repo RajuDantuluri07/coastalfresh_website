@@ -47,15 +47,6 @@
     function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-GSHMPRYPW1');
-
-    try {
-      if (!localStorage.getItem('firstVisit')) {
-        localStorage.setItem('firstVisit', new Date().toISOString());
-        gtag('set', 'user_properties', { user_type: 'new' });
-      } else {
-        gtag('set', 'user_properties', { user_type: 'returning' });
-      }
-    } catch (_) {}
   </script>
 
   <script>
@@ -67,46 +58,6 @@
       r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
       a.appendChild(r);
     })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-  </script>
-
-  <script>
-    (function () {
-      const utm = 'utm_source=website&utm_medium=whatsapp&utm_campaign=order_intent';
-      function withUTM(url) {
-        try {
-          const u = new URL(url, location.origin);
-          if (u.hostname.includes('wa.me') || u.hostname.includes('api.whatsapp.com')) {
-            if (u.search) { u.search += '&' + utm; } else { u.search = '?' + utm; }
-          }
-          return u.toString();
-        } catch(e) { return url; }
-      }
-      document.addEventListener('DOMContentLoaded', function() {
-        const waLinks = Array.from(document.querySelectorAll('a[href*="wa.me/"], a[href*="api.whatsapp.com/"]'));
-        waLinks.forEach(a => { a.href = withUTM(a.href); });
-
-        function track(eventName, extra) {
-          if (typeof gtag === 'function') gtag('event', eventName, extra || {});
-        }
-        function onClick(e) {
-          const a = e.currentTarget;
-          track('click', {
-            link_text: (a.getAttribute('aria-label') || a.textContent || '').trim(),
-            link_url: a.href,
-            link_target: a.target || '_self',
-            location: a.dataset.trackLocation || 'link',
-            outbound: a.host && a.host !== location.host
-          });
-        }
-        waLinks.forEach(a => a.addEventListener('click', onClick));
-        const oldOpenWA = window.openWhatsApp;
-        window.openWhatsApp = function() {
-          track('click', { location: 'floating_button', link_text: 'WhatsApp CTA', link_url: 'https://wa.me' });
-          if (typeof oldOpenWA === 'function') return oldOpenWA();
-        };
-        window.withUTM = withUTM;
-      });
-    })();
   </script>
 
   <link rel="icon" href="/favicon.ico" />
