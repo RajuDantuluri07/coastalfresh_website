@@ -3458,7 +3458,6 @@ body.popup-open .bottom-bar {
   pointer-events: none;
 }
 .variant-drawer-overlay.active {
-  display: block; /* FIX: Ensure it's visible when active */
   opacity: 1;
   pointer-events: auto;
 }
@@ -3478,12 +3477,17 @@ body.popup-open .bottom-bar {
   max-height: 80vh;
   padding-bottom: env(safe-area-inset-bottom);
 }
-.variant-drawer-overlay, .variant-drawer {
-  display: none; /* FIX: Hide elements by default */
+.variant-drawer-overlay,
+.variant-drawer {
+  display: none; /* Hide elements by default */
 }
 
 .variant-drawer.active {
+  display: flex; /* FIX: Show the drawer when active */
   transform: translateY(0);
+}
+.variant-drawer-overlay.active {
+  display: block; /* FIX: Show the overlay when active */
 }
 
 .variant-drawer-header {
