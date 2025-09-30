@@ -53,6 +53,7 @@ export const state = {
     isPopupOpen: false,
     searchDebounceTimer: null,
     typewriterTimer: null,
+    isShowingAllInCategory: false, // NEW: For category "Show More"
     db: null,
     currentUser: null,
     editingAddressId: null,
@@ -165,25 +166,22 @@ async function init() {
       UI.showInitialSkeletons();
 
       try {
-          // NEW: Fetch products from Firestore instead of JSON file.
-          const productsSnapshot = await state.db.collection('products').orderBy('id').get();
-          if (productsSnapshot.empty) {
-              throw new Error("No products found in the database.");
-          }
-          // FIX: Process raw product data to include a primary variant for display purposes.
-          // This ensures compatibility with components that expect a single price/mrp.
-          state.products = productsSnapshot.docs.map(doc => {
-              const product = doc.data();
-              if (product.variants && product.variants.length > 0) {
-                  product.finalPrice = product.variants[0].finalPrice;
-                  product.mrp = product.variants[0].mrp;
-              }
-              return product;
-          });
+          // --- PERFORMANCE: Fetch ALL products initially. This is a trade-off for simplicity.
+          // For larger stores, this should be paginated. For now, we fetch all to keep search and filter simple.
+          const productsSnapshot = await state.db.collection('products').where('available', '==', true).orderBy('id').get();
+          state.products = productsSnapshot.docs.map(doc => doc.data());
           
-          // The rest of the logic remains the same as it operates on state.products
+          // Process products to add helper properties
+          state.products.forEach(p => {
+            if (p.variants && p.variants.length > 0) {
+              p.finalPrice = p.variants[0].finalPrice;
+              p.mrp = p.variants[0].mrp;
+            }
+          });
+
+          // Initial Renders
           UI.renderFeaturedProducts();
-          UI.renderCatalogProducts();
+          UI.renderCategoryProducts();
           UI.renderFlashSale();
           UI.initFlashSaleTimer(); // renderProductSchema() is now removed from here
           // Load cart after products are loaded to ensure data integrity
@@ -200,11 +198,11 @@ async function init() {
 
           const searchQuery = urlParams.get('q');
           if (searchQuery) {
-              UI.showPage('catalog');
-              const searchInput = document.getElementById('catalogSearch');
+              UI.showPage('categoriesPage');
+              const searchInput = document.getElementById('categoriesSearch');
               if (searchInput) {
                   searchInput.value = searchQuery;
-                  Handlers.handleCatalogSearch({ target: searchInput });
+                  Handlers.handleCategorySearch({ target: searchInput });
               }
           }
       } catch (error) {

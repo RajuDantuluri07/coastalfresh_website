@@ -197,8 +197,8 @@ export const UI = {
         UI.renderProductGrid('featuredProducts', featured);
     },
 
-    renderCatalogProducts: () => {
-        const container = document.getElementById('catalogProducts');
+    renderCategoryProducts: () => {
+        const container = document.getElementById('categoriesProducts');
         if (!container) return;
 
         if (state.currentPageNumber === 1) {
@@ -215,11 +215,11 @@ export const UI = {
             }
         }
 
-        UI.populateCatalogProducts();
+        UI.populateCategoryProducts();
     },
 
-    populateCatalogProducts: () => {
-        const container = document.getElementById('catalogProducts');
+    populateCategoryProducts: () => {
+        const container = document.getElementById('categoriesProducts');
         if (!container) return;
 
         let filtered = state.products.filter(p => {
@@ -230,7 +230,34 @@ export const UI = {
         });
 
         const emptyMessage = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #8E8E93;">No products found</div>';
-        UI.renderProductGrid('catalogProducts', filtered, {}, emptyMessage);
+
+        // --- NEW: "Show More" Logic for Categories ---
+        const SHOW_MORE_LIMIT = 6;
+        const isSpecificCategory = state.currentCategory !== 'All';
+        const needsShowMore = isSpecificCategory && filtered.length > SHOW_MORE_LIMIT;
+
+        // Remove any existing "Show More" button before re-rendering
+        const existingBtn = container.querySelector('.show-more-cta');
+        if (existingBtn) existingBtn.remove();
+
+        if (needsShowMore && !state.isShowingAllInCategory) {
+            // Show only the first 6 products
+            const limitedProducts = filtered.slice(0, SHOW_MORE_LIMIT);
+            UI.renderProductGrid('categoriesProducts', limitedProducts, {}, emptyMessage);
+
+            // Add the "Show More" button
+            const showMoreBtn = document.createElement('button');
+            showMoreBtn.className = 'show-more-cta';
+            showMoreBtn.textContent = `Show All ${filtered.length} Products`;
+            showMoreBtn.onclick = () => {
+                state.isShowingAllInCategory = true;
+                UI.populateCategoryProducts(); // Re-render with all products
+            };
+            container.insertAdjacentElement('afterend', showMoreBtn);
+        } else {
+            // Show all products for the category
+            UI.renderProductGrid('categoriesProducts', filtered, {}, emptyMessage);
+        }
     },
 
     createProductHTML: (product, options = {}) => {
@@ -321,16 +348,37 @@ export const UI = {
     showProductPopup: (id) => {
         const numericId = parseInt(id);
         if (isNaN(numericId)) return;
+
+        // Use cached DOM elements for speed
+        const { main: popup, title, weight, priceSection, infoContent, mainImage, contentWrapper, backBtn, cta } = state.dom.popup;
+
         const product = state.products.find(p => p.id === numericId);
-        if (!product) return;
+
+        // --- FIX: Handle Soft 404 by showing a "Not Found" state in the popup ---
+        if (!product) {
+            state.popupProduct = null;
+            title.textContent = 'Product Not Found';
+            mainImage.src = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs='; // Transparent pixel
+            mainImage.alt = 'Product not found';
+            weight.innerHTML = '';
+            priceSection.innerHTML = '';
+            infoContent.innerHTML = `<p style="text-align: center; padding: 20px 0;">We couldn't find the product you're looking for. It might have been removed or the link is incorrect.</p>`;
+            cta.innerHTML = `<button class="popup-cta-add-btn" id="popupNotFoundBtn">Browse All Products</button>`;
+            document.getElementById('popupNotFoundBtn').onclick = () => { UI.closePopup(); UI.showPage('categoriesPage'); };
+            
+            // Hide elements that are not needed
+            popup.querySelector('.popup-actions').style.display = 'none';
+            document.getElementById('productDetailsAccordion').style.display = 'none';
+
+            state.isPopupOpen = true;
+            UI.openModal(popup, backBtn);
+            return;
+        } 
 
         // --- OPTIMIZATION: Prioritize visual updates first ---
         state.popupProduct = product;
         state.selectedVariantIndex = 0; // Default to the first variant
         state.currentProductQty = state.cart[`${product.id}-${state.selectedVariantIndex}`] || 1; // Reflect quantity of selected variant in cart
-
-        // Use cached DOM elements for speed
-        const { main: popup, title, weight, priceSection, infoContent, mainImage, contentWrapper, backBtn } = state.dom.popup;
 
         // Update favorite button state in popup
         const favoriteBtn = popup.querySelector('.popup-action-btn.favorite');
@@ -338,6 +386,10 @@ export const UI = {
         favoriteBtn.setAttribute('aria-pressed', isFavorite);
         favoriteBtn.innerHTML = `<i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>`;
         favoriteBtn.style.color = isFavorite ? 'var(--pink)' : 'var(--primary-color)';
+
+        // Restore visibility of elements that might be hidden by the "not found" state
+        popup.querySelector('.popup-header-actions').style.display = 'flex';
+        document.getElementById('productDetailsAccordion').style.display = 'block';
 
         const populatePopup = () => {
             title.textContent = product.name;
@@ -431,8 +483,13 @@ export const UI = {
                     "description": product.desc,
                     "sku": `CF-${product.id}`,
                     "brand": { "@type": "Brand", "name": "Coastal Fresh" },
-                    // Create an offer for each variant
-                    "offers": product.variants.map((variant, index) => ({
+                };
+
+                // --- ENHANCEMENT: Handle offers more robustly ---
+                // If there are variants, map them to individual offers.
+                // Otherwise, create a single top-level offer for the product itself.
+                if (product.variants && product.variants.length > 0) {
+                    productSchema.offers = product.variants.map((variant, index) => ({
                         "@type": "Offer",
                         "url": `https://www.coastalfresh.in${productUrl}`,
                         "priceCurrency": "INR",
@@ -440,9 +497,17 @@ export const UI = {
                         "sku": `CF-${product.id}-${index}`,
                         "itemCondition": "https://schema.org/NewCondition",
                         "availability": variant.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
-                    }))
-                };
-
+                    }));
+                } else {
+                    // Fallback for products without a variants array but with price info.
+                    productSchema.offers = {
+                        "@type": "Offer",
+                        "url": `https://www.coastalfresh.in${productUrl}`,
+                        "priceCurrency": "INR",
+                        "price": product.finalPrice, // Assumes product.finalPrice exists
+                        "availability": product.available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock"
+                    };
+                }
                 // Dynamically add review and rating data if available
                 const relevantReviews = config.CUSTOMER_REVIEWS.filter(r => r.review.toLowerCase().includes(product.name.split(' ')[0].toLowerCase()));
                 if (relevantReviews.length > 0) {
@@ -462,7 +527,7 @@ export const UI = {
                     "@type": "BreadcrumbList",
                     "itemListElement": [
                         { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" },
-                        { "@type": "ListItem", "position": 2, "name": "Catalog", "item": "https://www.coastalfresh.in/catalog" },
+                        { "@type": "ListItem", "position": 2, "name": "Categories", "item": "https://www.coastalfresh.in/categories" },
                         { "@type": "ListItem", "position": 3, "name": product.name }
                     ]
                 };
@@ -668,8 +733,8 @@ export const UI = {
 
         const underlyingPage = state.pageHistory[state.pageHistory.length - 1] || 'home';
         let pageInfo = { path: '/', title: 'Coastal Fresh India' };
-        if (underlyingPage === 'catalog') {
-            pageInfo = { path: '/catalog', title: 'All Products | Coastal Fresh India' };
+        if (underlyingPage === 'categoriesPage') {
+            pageInfo = { path: '/categories', title: 'All Products | Coastal Fresh India' };
         } else if (underlyingPage === 'faqPage') {
             pageInfo = { path: '/faq', title: 'FAQs | Coastal Fresh India' };
         }
@@ -688,7 +753,7 @@ export const UI = {
 
     updateCartBadges: () => {
         const totalQty = Object.values(state.cart).reduce((sum, qty) => {
-            const numQty = Number(qty);
+            const numQty = Number(qty); 
             return sum + (isNaN(numQty) ? 0 : numQty);
         }, 0);
 
@@ -696,7 +761,7 @@ export const UI = {
             const el = document.getElementById(id);
             if (el) {
                 if (totalQty > 0) {
-                    el.style.display = 'flex';
+                    el.style.display = 'flex'; 
                     el.textContent = totalQty > 9 ? '9+' : totalQty;
                 } else {
                     el.style.display = 'none';
@@ -1071,18 +1136,22 @@ export const UI = {
         }
 
         let pageTitle, pageDesc, pagePath;
-        if (page === 'catalog') {
+        if (page === 'categoriesPage') {
             if (state.afterAddressAction) {
                 state.afterAddressAction = null;
                 console.log('Cleared pending address action due to navigation.');
             }
             pageTitle = 'All Products - Fish, Prawns, Crabs & More | Coastal Fresh India';
             pageDesc = 'Browse our entire collection of fresh seafood, including Pomfret, Prawns, Crabs, and authentic Andhra pickles. Order online for next-day delivery in Hyderabad.';
-            pagePath = '/catalog';
+            pagePath = '/categories';
         } else if (page === 'faqPage') {
             pageTitle = 'Frequently Asked Questions | Coastal Fresh India';
             pageDesc = 'Find answers to common questions about our delivery, sourcing, freshness, and payment for fresh seafood in Hyderabad.';
             pagePath = '/faq';
+        } else if (page === 'contactPage') {
+            pageTitle = 'Contact Us | Coastal Fresh India';
+            pageDesc = 'Get in touch with Coastal Fresh for support with your seafood orders, delivery questions, or any other inquiries. Contact us via WhatsApp or Email.';
+            pagePath = '/contact';
         } else if (page === 'referPage') {
             pageTitle = 'Refer a Friend & Earn Rewards | Coastal Fresh India';
             pageDesc = 'Share Coastal Fresh with your friends! They get 10% off their first order, and you get a 10% discount on your next purchase. Start sharing and earning today.';
@@ -1112,7 +1181,7 @@ export const UI = {
 
         const ticker = document.querySelector('.ticker-container');
         const headers = document.querySelectorAll('.header');
-        if (page === 'home' || page === 'catalog') {
+        if (page === 'home' || page === 'categoriesPage') {
             if (ticker) ticker.style.display = 'block';
             headers.forEach(h => h.style.top = '30px');
         } else {
@@ -1120,7 +1189,7 @@ export const UI = {
             headers.forEach(h => h.style.top = '0px');
         }
 
-        if (page === 'catalog') {
+        if (page === 'categoriesPage') {
             UI.startTypewriter();
         } else {
             UI.stopTypewriter();
@@ -1134,7 +1203,7 @@ export const UI = {
         const names = ['Prawns', 'Rohu', 'Sea Bass', 'Crab', 'Pickle'];
         let i = 0, pos = 0, dir = 1, pause = 0;
 
-        const inputs = [document.getElementById('catalogSearch')].filter(Boolean);
+        const inputs = [document.getElementById('categoriesSearch')].filter(Boolean);
 
         function tick() {
             const shouldAnimate = inputs.every(input => document.activeElement !== input && !input.value);
@@ -1162,7 +1231,7 @@ export const UI = {
 
     stopTypewriter: () => {
         if (state.typewriterTimer) clearTimeout(state.typewriterTimer);
-        const input = document.getElementById('catalogSearch');
+        const input = document.getElementById('categoriesSearch');
         if (input) input.setAttribute('placeholder', 'Search products...');
     },
 
@@ -1176,13 +1245,13 @@ export const UI = {
             featuredContainer.innerHTML = skeletonHTML;
         }
 
-        const catalogContainer = document.getElementById('catalogProducts');
-        if (catalogContainer) {
+        const categoriesContainer = document.getElementById('categoriesProducts');
+        if (categoriesContainer) {
             let skeletonHTML = '';
             for (let i = 0; i < config.ITEMS_PER_PAGE; i++) {
                 skeletonHTML += UI.createSkeletonProductHTML();
             }
-            catalogContainer.innerHTML = skeletonHTML;
+            categoriesContainer.innerHTML = skeletonHTML;
         }
     },
 

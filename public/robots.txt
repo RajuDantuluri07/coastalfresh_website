@@ -1,13 +1,11 @@
+# Allow all friendly crawlers to access the site.
 User-agent: *
-# Allow all crawlers to access the site by default
 Allow: /
 
-# Disallow admin pages
+# Disallow access to admin pages or other private areas.
 Disallow: /admin.html
 Disallow: /admin.css
 Disallow: /admin.js
 
-# Disallow internal search result pages specifically
-Disallow: /?q=
-
-Sitemap: https://coastalfresh.in/sitemap.xml
+# Point crawlers to the sitemap for a list of all important pages.
+Sitemap: https://www.coastalfresh.in/sitemap.xml

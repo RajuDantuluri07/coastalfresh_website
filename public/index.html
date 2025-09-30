@@ -124,8 +124,12 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js"></script>
 
-  <!-- External CSS -->
-  <link rel="stylesheet" href="/main.css">
+  <!-- PERFORMANCE: Inline critical CSS for initial render -->
+  <style>
+    /* critical.css content will be inlined here during build, for now we can link it for development */
+    @import url('/critical.css');
+  </style>
+  <link rel="stylesheet" href="/main.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="/main.css"></noscript>
 </head>
 <body>
   <!-- NOSCRIPT FALLBACK FOR SEO -->
@@ -237,7 +241,7 @@
     </div>
 
     <!-- Catalog Page -->
-    <div class="page" id="catalog">
+    <div class="page" id="categoriesPage">
       <header class="header">
         <div class="header-top modal-header-main">
           <button class="back-btn" aria-label="Go Back">
@@ -246,13 +250,13 @@
           <h1 class="logo">All Products</h1>
           <button class="cart-btn" aria-label="Open Cart">
             <i class="fas fa-shopping-bag"></i>
-            <span class="cart-count" id="cartCountCatalog">0</span>
+            <span class="cart-count" id="cartCountCategories">0</span>
           </button>
         </div>
         <div class="search-container">
-          <label for="catalogSearch" class="visually-hidden">Search for products</label>
+          <label for="categoriesSearch" class="visually-hidden">Search for products</label>
           <i class="fas fa-search search-icon"></i>
-          <input type="text" class="search" placeholder="Search products..." id="catalogSearch" aria-label="Search for products">
+          <input type="text" class="search" placeholder="Search products..." id="categoriesSearch" aria-label="Search for products">
         </div>
       </header>
 
@@ -260,7 +264,7 @@
         <div class="categories" id="categories">
           <!-- Categories will be injected here by JS -->
         </div>
-        <div class="products" id="catalogProducts"></div>
+        <div class="products" id="categoriesProducts"></div>
       </main>
     </div>
 
@@ -509,6 +513,43 @@
         <div class="refer-influencer-card">
           <div class="refer-influencer-text">Are you an influencer? <span>Let's collaborate!</span></div>
           <a href="https://wa.me/919985125678?text=Hi%20Coastal%20Fresh,%20I'm%20an%20influencer%20and%20would%20like%20to%20collaborate." target="_blank" class="refer-influencer-contact">Contact Us</a>
+        </div>
+      </main>
+    </div>
+
+    <!-- NEW: Contact Us Page -->
+    <div class="page" id="contactPage">
+      <header class="header">
+        <div class="header-top modal-header-main">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="logo">Contact Us</h1>
+          <div style="width: 36px;"></div> <!-- Spacer -->
+        </div>
+      </header>
+      <main class="section">
+        <div class="contact-info-card">
+          <h2 class="contact-title">Get in Touch</h2>
+          <p class="contact-subtitle">We're here to help with any questions about your order, our products, or delivery.</p>
+          
+          <div class="contact-method">
+            <i class="fab fa-whatsapp"></i>
+            <div class="contact-method-details">
+              <strong>WhatsApp (Recommended)</strong>
+              <span>Fastest way to get a response.</span>
+            </div>
+            <a href="https://wa.me/919985125678?text=Hi%20Coastal%20Fresh,%20I%20need%20some%20assistance." target="_blank" class="contact-cta-btn">Chat Now</a>
+          </div>
+
+          <div class="contact-method">
+            <i class="fas fa-envelope"></i>
+            <div class="contact-method-details">
+              <strong>Email Support</strong>
+              <span>For non-urgent inquiries.</span>
+            </div>
+            <a href="mailto:support@coastalfresh.in" class="contact-cta-btn">Email Us</a>
+          </div>
         </div>
       </main>
     </div>
@@ -886,7 +927,7 @@
         <i class="fas fa-home"></i>
         <span>Home</span>
       </div>
-      <div class="nav-item" data-page="catalog">
+      <div class="nav-item" data-page="categoriesPage">
         <i class="fas fa-layer-group"></i>
         <span>Categories</span>
       </div>

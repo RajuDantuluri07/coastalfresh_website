@@ -31,7 +31,7 @@ export const Handlers = {
             // NEW: Handle "Find Products" button on empty favorites page
             const findProductsBtn = target.closest('#findProductsFromFavorites');
             if (findProductsBtn) {
-                UI.showPage('catalog');
+                UI.showPage('categoriesPage');
             }
 
             // CTA button on product cards
@@ -165,17 +165,17 @@ export const Handlers = {
                 categoryButton.classList.add('active');
                 state.currentCategory = categoryButton.dataset.category;
                 state.currentPageNumber = 1;
-                const searchInput = document.getElementById('catalogSearch');
+                const searchInput = document.getElementById('categoriesSearch');
                 if (searchInput) searchInput.value = '';
                 state.currentSearch = '';
-                UI.renderCatalogProducts();
+                UI.renderCategoryProducts();
                 window.Analytics.trackEvent('select_category', { category: state.currentCategory });
             }
 
             // Header buttons and View All
             if (target.closest('#home .view-all')) {
                 e.preventDefault();
-                UI.showPage('catalog');
+                UI.showPage('categoriesPage');
             }
 
             // Back buttons
@@ -247,7 +247,7 @@ export const Handlers = {
 
             // NEW: Handle click on the "Explore Today's Fresh Catch" button on the About Us page
             if (target.id === 'aboutPageCtaBtn') {
-                UI.showPage('catalog');
+                UI.showPage('categoriesPage');
             }
 
             // NEW: Handle "Share on WhatsApp" button on the refer page
@@ -477,7 +477,7 @@ export const Handlers = {
             const page = navItem.dataset.page;
             if (page === 'cart') {
                 UI.showCart();
-            } else if (page) {
+            } else if (page && page !== state.currentPage) {
                 if (page === 'profilePage' && !state.currentUser) {
                     UI.showPage(page);
                 } else {
@@ -539,7 +539,7 @@ export const Handlers = {
         } else if (button.classList.contains('about')) {
             UI.showPage('aboutPage');
         } else if (button.classList.contains('support')) {
-            Handlers.openWhatsApp('support');
+            UI.showPage('contactPage');
         }
     },
 
@@ -944,10 +944,10 @@ export const Handlers = {
         UI.showPage('ordersPage');
     },
 
-    handleCatalogSearch: (e) => {
+    handleCategorySearch: (e) => {
         state.currentSearch = e.target.value;
         state.currentPageNumber = 1;
-        UI.renderCatalogProducts();
+        UI.populateCategoryProducts(); // Use populate to re-filter and render
 
         if (state.currentSearch) {
             window.Analytics.trackEvent('view_search_results', {
