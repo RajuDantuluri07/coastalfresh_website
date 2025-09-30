@@ -592,7 +592,7 @@ export const UI = {
             const variantId = `${product.id}-${index}`;
             const qtyInCart = state.cart[variantId] || 0;
             const hasOffer = variant.mrp > variant.finalPrice;
-            const discount = hasOffer ? Math.round(((variant.mrp - variant.finalPrice) / variant.mrp) * 100) : 0;
+            const savings = hasOffer ? Math.round(variant.mrp - variant.finalPrice) : 0;
 
             return `
                 <div class="variant-option" data-id="${variantId}">
@@ -601,7 +601,7 @@ export const UI = {
                         <div class="variant-info-price">
                             <span class="final-price">₹${variant.finalPrice}</span>
                             ${hasOffer ? `<span class="old-price">₹${variant.mrp}</span>` : ''}
-                            ${discount > 0 ? `<span class="discount-badge">${discount}% OFF</span>` : ''}
+                            ${savings > 0 ? `<span class="discount-badge">SAVE ₹${savings}</span>` : ''}
                         </div>
                     </div>
                     <div class="variant-cta">
@@ -639,15 +639,27 @@ export const UI = {
         content.innerHTML = product.variants.map((variant, index) => {
             const variantId = `${product.id}-${index}`;
             const qtyInCart = state.cart[variantId] || 0;
+            const hasOffer = variant.mrp > variant.finalPrice;
+            const savings = hasOffer ? Math.round(variant.mrp - variant.finalPrice) : 0;
+
             return `
                 <div class="variant-option" data-id="${variantId}">
                     <div class="variant-info">
-                        <strong>${variant.name}</strong> (${variant.net}) - ₹${variant.finalPrice}
+                        <div class="variant-info-name">${variant.name} (${variant.net})</div>
+                        <div class="variant-info-price">
+                            <span class="final-price">₹${variant.finalPrice}</span>
+                            ${hasOffer ? `<span class="old-price">₹${variant.mrp}</span>` : ''}
+                            ${savings > 0 ? `<span class="discount-badge">SAVE ₹${savings}</span>` : ''}
+                        </div>
                     </div>
                     <div class="variant-cta">
                     ${qtyInCart > 0 ?
-                        `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec">-</button><span class="qty">${qtyInCart}</span><button class="qty-btn inc">+</button></div>` :
-                        `<button class="add-btn" data-id="${variantId}">ADD</button>`
+                        `<div class="cart-controls" data-id="${variantId}">
+                                <button class="qty-btn dec" aria-label="Decrease quantity">-</button>
+                                <span class="qty">${qtyInCart}</span>
+                                <button class="qty-btn inc" aria-label="Increase quantity">+</button>
+                            </div>` :
+                        `<button class="add-btn" data-id="${variantId}" aria-label="Add ${variant.name} to cart">ADD</button>`
                     }
                     </div>
                 </div>
