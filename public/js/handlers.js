@@ -52,9 +52,9 @@ export const Handlers = {
 
                 if (isVariantAction) {
                     // This is a multi-variant button ("{n} Sizes" or "ADD" for 2 variants)
-                    // It should always open the product popup.
+                    // It should open the new variant drawer.
                     window.Analytics.trackEvent('variant_picker_opened_from_card', { product_id: productId });
-                    UI.showProductPopup(productId);
+                    UI.openVariantDrawer(productId);
                 } else {
                     // This is a direct "ADD" for a single-variant product.
                     Handlers.addToCart(buttonId);

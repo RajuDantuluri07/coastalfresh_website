@@ -269,8 +269,9 @@ export const UI = {
                     ctaButton = `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">-</button><span class="qty">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>`;
                 } else if (useSizesCta) {
                     // Show "{n} Sizes" CTA which opens the product popup
-                    const ctaText = `${variantCount} Sizes`;
-                    ctaButton = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="${ctaText}" aria-haspopup="dialog">${ctaText}</button>`;
+                    // MODIFICATION: Change CTA text to "SELECT" for a cleaner look on multi-variant products.
+                    const ctaText = 'SELECT';
+                    ctaButton = `<button class="add-btn variant-btn select-btn" data-id="${product.id}" aria-label="Select variant for ${sanitizedName}" aria-haspopup="dialog">${ctaText}</button>`;
                 } else {
                     // Default "ADD" button for single variant or simple multi-variant products
                     const variantId = `${product.id}-0`;
@@ -585,26 +586,39 @@ export const UI = {
 
         state.variantDrawerProduct = product;
 
-        document.getElementById('variantDrawerTitle').textContent = `Select variant for ${product.name}`;
+        document.getElementById('variantDrawerTitle').textContent = `Select Size: ${product.name}`;
         const content = document.getElementById('variantDrawerContent');
         content.innerHTML = product.variants.map((variant, index) => {
             const variantId = `${product.id}-${index}`;
-            const qtyInCart = state.cart[variantId] || 0; // Correctly get quantity for the specific variant
+            const qtyInCart = state.cart[variantId] || 0;
+            const hasOffer = variant.mrp > variant.finalPrice;
+            const discount = hasOffer ? Math.round(((variant.mrp - variant.finalPrice) / variant.mrp) * 100) : 0;
+
             return `
                 <div class="variant-option" data-id="${variantId}">
                     <div class="variant-info">
-                        <strong>${variant.name}</strong> (${variant.net}) - ₹${variant.finalPrice}
+                        <div class="variant-info-name">${variant.name} (${variant.net})</div>
+                        <div class="variant-info-price">
+                            <span class="final-price">₹${variant.finalPrice}</span>
+                            ${hasOffer ? `<span class="old-price">₹${variant.mrp}</span>` : ''}
+                            ${discount > 0 ? `<span class="discount-badge">${discount}% OFF</span>` : ''}
+                        </div>
                     </div>
                     <div class="variant-cta">
-                    ${qtyInCart > 0 ?
-                        `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec">-</button><span class="qty">${qtyInCart}</span><button class="qty-btn inc">+</button></div>` :
-                        `<button class="add-btn" data-id="${variantId}">ADD</button>`
-                    }
+                        ${qtyInCart > 0 ?
+                            `<div class="cart-controls" data-id="${variantId}">
+                                <button class="qty-btn dec" aria-label="Decrease quantity">-</button>
+                                <span class="qty">${qtyInCart}</span>
+                                <button class="qty-btn inc" aria-label="Increase quantity">+</button>
+                            </div>` :
+                            `<button class="add-btn" data-id="${variantId}" aria-label="Add ${variant.name} to cart">ADD</button>`
+                        }
                     </div>
                 </div>
             `;
         }).join('');
 
+        // Open the drawer
         document.getElementById('variantDrawerOverlay').classList.add('active');
         document.getElementById('variantDrawer').classList.add('active');
     },

@@ -1014,6 +1014,13 @@ z-index: 2;                 /* sits above input content */
   filter: brightness(1.1);
 }
 
+/* NEW: Style for the "SELECT" button on multi-variant products */
+.select-btn {
+  font-size: 12px; /* Smaller font size as requested */
+  padding: 6px 10px; /* Adjust padding to be more compact */
+  background: var(--primary-color); /* Use primary color for consistency */
+}
+
 /* Quantity controls that replace the ADD button */
 .cart-controls {
   position: absolute;
@@ -3511,15 +3518,49 @@ body.popup-open .bottom-bar {
   border-radius: 12px;
 }
 .variant-option .variant-info {
-  flex-grow: 1;
-  font-size: 15px;
-  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 .variant-option .variant-cta {
   flex-shrink: 0;
 }
+.variant-option .variant-info-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+.variant-option .variant-info-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.variant-option .final-price {
+  font-weight: 700;
+  font-size: 16px;
+}
+.variant-option .old-price {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-decoration: line-through;
+}
+.variant-option .discount-badge {
+  background: #e8f5e9;
+  color: var(--success-color);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 6px;
+}
+
 .variant-option .add-btn {
   position: static; /* Override absolute positioning from product card */
+  background: var(--success-color);
+  box-shadow: 0 2px 6px rgba(56, 142, 60, 0.3);
+}
+.variant-option .cart-controls {
+  position: static; /* Override absolute positioning */
+  background: var(--success-color);
+  box-shadow: 0 2px 6px rgba(56, 142, 60, 0.3);
 }
 
 @keyframes shimmer {
