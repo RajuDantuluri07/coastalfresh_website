@@ -289,12 +289,14 @@ export const Handlers = {
         document.getElementById('variantDrawerContent').addEventListener('click', (e) => {
             const addBtn = e.target.closest('.add-btn');
             if (addBtn) {
+                e.stopPropagation(); // FIX: Stop the event from bubbling up to the body handler.
                 // FIX: Call updateVariantDrawer instead of re-rendering the whole thing.
                 Handlers.addToCart(addBtn.dataset.id);
                 UI.updateVariantDrawer();
             }
             const qtyBtn = e.target.closest('.qty-btn');
             if (qtyBtn) {
+                e.stopPropagation(); // FIX: Also stop quantity button events from bubbling.
                 // FIX: Ensure we are targeting the correct container for the variant ID.
                 const controls = qtyBtn.closest('[data-id]');
                 const variantId = controls.dataset.id;
