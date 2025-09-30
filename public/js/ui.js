@@ -116,6 +116,40 @@ export const UI = {
         }
     },
 
+    /**
+     * NEW: Sets up an IntersectionObserver to lazy-load images.
+     * This is more robust than relying solely on `loading="lazy"`.
+     */
+    setupLazyLoader: () => {
+        const lazyImages = document.querySelectorAll('img.lazy-image');
+
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        const src = img.getAttribute('data-src');
+                        if (!src) return;
+
+                        img.src = src;
+                        img.onload = () => {
+                            img.classList.remove('lazy-image');
+                            img.classList.add('lazy-loaded');
+                        };
+                        observer.unobserve(img);
+                    }
+                });
+            }, { rootMargin: '0px 0px 200px 0px' }); // Start loading 200px before it enters viewport
+
+            lazyImages.forEach(img => observer.observe(img));
+        } else {
+            // Fallback for very old browsers without IntersectionObserver
+            lazyImages.forEach(img => {
+                img.src = img.getAttribute('data-src');
+            });
+        }
+    },
+
     renderFlashSale: () => {
         const section = document.getElementById('flashSaleSection');
         if (!config.ENABLE_FLASH_SALE) {
@@ -135,6 +169,7 @@ export const UI = {
             return;
         }
         UI.renderProductGrid('flashSaleProducts', flashSaleProducts, { isFlashSale: true });
+        UI.setupLazyLoader(); // Observe new images
     },
 
     createSkeletonProductHTML: () => {
@@ -195,6 +230,7 @@ export const UI = {
 
         const featured = state.products.filter(p => config.FEATURED_PRODUCT_IDS.includes(p.id));
         UI.renderProductGrid('featuredProducts', featured);
+        UI.setupLazyLoader(); // Observe new images
     },
 
     renderCategoryProducts: () => {
@@ -257,6 +293,7 @@ export const UI = {
         } else {
             // Show all products for the category
             UI.renderProductGrid('categoriesProducts', filtered, {}, emptyMessage);
+            UI.setupLazyLoader(); // Observe new images
         }
     },
 
@@ -275,6 +312,9 @@ export const UI = {
             const isFavorite = state.favorites.has(product.id);
             const optimizedImage = UI.getOptimizedImageUrl(product.image, 300, 300);
             const sanitizedName = DOMPurify.sanitize(product.name);
+
+            // For lazy loading, use a placeholder
+            const placeholderSrc = 'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
 
             let ctaButton = '';
             let stockOverlay = '';
@@ -322,7 +362,7 @@ export const UI = {
             return `
         <div class="card product ${!product.available ? 'unavailable' : ''} ${options.isFlashSale ? 'flash-sale-item' : ''}" data-id="${product.id}" role="article" aria-label="Product: ${sanitizedName}">
           <div class="product-image">
-            <img src="${optimizedImage}" alt="${sanitizedName}" loading="lazy">
+            <img data-src="${optimizedImage}" src="${placeholderSrc}" alt="${sanitizedName}" class="lazy-image" loading="lazy">
             <button class="wish" data-id="${product.id}" aria-label="Add to wishlist" aria-pressed="${isFavorite}">${isFavorite ? '♥' : '♡'}</button>
              ${ctaButton}
              ${stockOverlay}

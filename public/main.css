@@ -3573,6 +3573,17 @@ body.popup-open .bottom-bar {
   box-shadow: 0 6px 16px rgba(1, 101, 154, 0.15);
 }
 
+/* --- NEW: Lazy Loading Image Styles --- */
+.lazy-image {
+  opacity: 0;
+  transition: opacity 0.4s ease-in-out;
+}
+
+.lazy-loaded {
+  opacity: 1;
+}
+
+
 /* --- NEW: Contact Us Page Styles --- */
 .contact-info-card {
   background: var(--bg-white);

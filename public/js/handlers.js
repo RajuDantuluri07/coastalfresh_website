@@ -314,10 +314,10 @@ export const Handlers = {
         }
 
         // Typewriter focus/blur handlers
-        const catalogSearchInput = document.getElementById('catalogSearch');
-        catalogSearchInput.addEventListener('focus', UI.stopTypewriter);
-        catalogSearchInput.addEventListener('blur', () => {
-            if (!catalogSearchInput.value) UI.startTypewriter();
+        const categoriesSearchInput = document.getElementById('categoriesSearch');
+        categoriesSearchInput.addEventListener('focus', UI.stopTypewriter);
+        categoriesSearchInput.addEventListener('blur', () => {
+            if (!categoriesSearchInput.value) UI.startTypewriter();
         });
 
         // Tooltip handler
@@ -339,9 +339,9 @@ export const Handlers = {
         document.getElementById('forgotPassword').addEventListener('click', Handlers.handlePasswordReset);
 
         // Header search inputs
-        document.getElementById('catalogSearch').addEventListener('input', (e) => {
+        document.getElementById('categoriesSearch').addEventListener('input', (e) => {
             clearTimeout(state.searchDebounceTimer);
-            state.searchDebounceTimer = setTimeout(() => Handlers.handleCatalogSearch(e), 300);
+            state.searchDebounceTimer = setTimeout(() => Handlers.handleCategorySearch(e), 300);
         });
 
         // Address form submission
@@ -947,7 +947,7 @@ export const Handlers = {
     handleCategorySearch: (e) => {
         state.currentSearch = e.target.value;
         state.currentPageNumber = 1;
-        UI.populateCategoryProducts(); // Use populate to re-filter and render
+        UI.renderCategoryProducts();
 
         if (state.currentSearch) {
             window.Analytics.trackEvent('view_search_results', {
