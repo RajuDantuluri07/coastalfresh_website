@@ -377,27 +377,6 @@ export const UI = {
 
             document.getElementById('popupImageIndicators').style.display = 'none';
 
-            // Reset accordion state
-            document.querySelectorAll('.detail-item.active').forEach(item => {
-                item.classList.remove('active');
-                item.querySelector('.detail-content').style.maxHeight = '0';
-                item.querySelector('.detail-content').style.padding = '0';
-                const icon = item.querySelector('.detail-header i');
-                if (icon) icon.style.transform = 'rotate(0deg)';
-            });
-
-            // Automatically open the "Product Details" accordion by default
-            const productInfoItem = document.getElementById('productInfoDetailItem');
-            if (productInfoItem) {
-                const content = productInfoItem.querySelector('.detail-content');
-                const icon = productInfoItem.querySelector('.detail-header i');
-
-                productInfoItem.classList.add('active');
-                content.style.maxHeight = content.scrollHeight + 'px';
-                content.style.padding = '0 0 16px 0';
-                if (icon) icon.style.transform = 'rotate(180deg)';
-            }
-
             UI.updatePopupCta();
             if (contentWrapper) contentWrapper.scrollTop = 0;
 

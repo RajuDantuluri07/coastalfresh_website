@@ -120,20 +120,23 @@ export const Handlers = {
             const detailHeader = target.closest('.detail-header');
             if (detailHeader) {
                 const detailItem = detailHeader.closest('.detail-item');
-                if (detailItem) {
-                    if (detailItem.id === 'productInfoDetailItem') {
-                        window.Analytics.trackEvent('view_item_details', {
-                            item_id: state.popupProduct?.id,
-                            item_name: state.popupProduct?.name
-                        });
-                    }
-                    const content = detailItem.querySelector('.detail-content');
-                    const icon = detailHeader.querySelector('i');
-                    const isOpen = detailItem.classList.toggle('active');
+                if (detailItem) { // Ensure it's a detail item
+                    // Track analytics for any detail item click
+                    window.Analytics.trackEvent('view_item_details', {
+                        item_id: state.popupProduct?.id,
+                        item_name: state.popupProduct?.name,
+                        detail_section: detailItem.id // Track which section was clicked
+                    });
 
-                    content.style.maxHeight = isOpen ? content.scrollHeight + 'px' : '0';
-                    content.style.padding = isOpen ? '0 0 16px 0' : '0';
-                    if (icon) icon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+                    // Only toggle if it's NOT the productInfoDetailItem
+                    if (detailItem.id !== 'productInfoDetailItem') {
+                        const content = detailItem.querySelector('.detail-content');
+                        const icon = detailHeader.querySelector('i');
+                        const isOpen = detailItem.classList.toggle('active');
+                        content.style.maxHeight = isOpen ? content.scrollHeight + 'px' : '0';
+                        content.style.padding = isOpen ? '0 0 16px 0' : '0';
+                        if (icon) icon.style.transform = isOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+                    }
                 }
             }
 

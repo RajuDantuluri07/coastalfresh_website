@@ -1467,10 +1467,6 @@ overflow: hidden;
   color: var(--text-primary);
 }
 
-.detail-header i {
-  transition: transform 0.3s ease;
-}
-
 .detail-content {
   max-height: 0;
   overflow: hidden;
@@ -1479,6 +1475,13 @@ overflow: hidden;
   line-height: 1.6;
   color: var(--text-secondary);
   padding: 0;
+}
+
+/* Ensure Product Details content is always visible */
+#productInfoDetailItem .detail-content {
+  max-height: none !important; /* Override max-height transition */
+  overflow: visible !important; /* Ensure content is not hidden */
+  padding: 0 0 16px 0 !important; /* Always show padding */
 }
 
 /* Highlights Section */
