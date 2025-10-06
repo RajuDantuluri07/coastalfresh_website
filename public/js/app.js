@@ -195,15 +195,17 @@ async function init() {
           if (productMatch) {
               const productId = parseInt(productMatch[2], 10);
               UI.showProductPopup(productId);
-          }
-
-          const searchQuery = urlParams.get('q');
-          if (searchQuery) {
-              UI.showPage('catalog');
-              const searchInput = document.getElementById('catalogSearch');
-              if (searchInput) {
-                  searchInput.value = searchQuery;
-                  Handlers.handleCatalogSearch({ target: searchInput });
+          } else {
+              const searchQuery = urlParams.get('q');
+              if (searchQuery) {
+                  UI.showPage('catalog');
+                  const searchInput = document.getElementById('catalogSearch');
+                  if (searchInput) {
+                      searchInput.value = searchQuery;
+                      Handlers.handleCatalogSearch({ target: searchInput });
+                  }
+              } else if (path === '/' || path === '/index.html' || path === '') {
+                  UI.showPage('home');
               }
           }
       } catch (error) {
