@@ -348,13 +348,6 @@ export const Handlers = {
             clearTimeout(state.searchDebounceTimer);
             state.searchDebounceTimer = setTimeout(() => Handlers.handleCatalogSearch(e), 300);
         });
-        // NEW: Connect desktop search bar
-        const desktopSearchInput = document.getElementById('desktopSearch');
-        if (desktopSearchInput) {
-            desktopSearchInput.addEventListener('input', (e) => {
-                Handlers.handleDesktopSearch(e.target.value);
-            });
-        }
 
         // Address form submission
         document.getElementById('addressForm').addEventListener('submit', async (e) => {
@@ -570,8 +563,10 @@ export const Handlers = {
                 // FIX #6: Analytics was tracking the wrong price on reorder.
                 const variant = product.variants[variantIndex];
                 state.cart[item.id] = (state.cart[item.id] || 0) + qtyToAdd;
-                itemsAddedCount++;
-                window.Analytics.trackAddToCart({ ...product, ...variant }, qtyToAdd);
+                if (variant) { // Ensure variant exists before tracking
+                    itemsAddedCount++;
+                    window.Analytics.trackAddToCart({ ...product, ...variant }, qtyToAdd);
+                }
             }
         });
 
@@ -1057,7 +1052,6 @@ export const Handlers = {
                 state.db.collection('users').doc(user.uid).set({
                     email: user.email,
                     displayName: user.displayName || null,
-                    // FIX #10: User role was not being set on email signup.
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     role: 'customer' // Assign default role
                 });

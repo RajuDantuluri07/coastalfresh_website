@@ -339,24 +339,24 @@ body {
 
 /* Desktop background */
 @media (min-width: 481px) {
+  body {
+    background-image: url('https://res.cloudinary.com/dpyniai9l/image/upload/v1758106311/Coastalfresh_website_Background_nkpuzo.png');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
+  }
   .app {
-    max-width: none; /* Allow app to expand to full width */
-    margin: 0; /* Remove auto margin */
-    border-radius: 0; /* Remove rounded corners */
-    box-shadow: none; /* Remove shadow */
-    overflow: visible; /* Restore default overflow */
+    max-width: var(--app-max-width); /* Re-constrain to mobile width */
+    margin: 20px auto; /* Center the app */
+    border-radius: 20px; /* Add rounded corners for the frame effect */
+    box-shadow: 0 0 50px rgba(0,0,0,0.1); /* Restore shadow */
+    overflow: hidden; /* Hide anything that spills out */
   }
 }
 
 /* --- NEW: Desktop Layout Adjustments --- */
 @media (min-width: 768px) {
-  .desktop-header { display: block; } /* Show the dedicated desktop header */
-  .app .header, /* Hide the mobile header */
-  .bottom-bar, /* Hide the mobile bottom navigation bar */
-  .mobile-drawer, /* Hide the mobile slide-out drawer */
-  .mobile-drawer-overlay { /* Hide the drawer's overlay */
-    display: none !important;
-  }
+  /* All desktop-specific layout overrides are removed to ensure mobile view is shown */
 }
 
 /* Ticker - Now above header */
@@ -999,12 +999,7 @@ z-index: 2;                 /* sits above input content */
 }
 
 /* --- NEW: Desktop Grid Enhancements --- */
-@media (min-width: 768px) {
-  /* Show 4 products per row on the catalog page */
-  .products {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
+/* REMOVED: Desktop grid override is not needed for the mobile-first view. */
 /* --- DEFINITIVE FIX: Product Card Styles from Demo (Blinkit/Zepto style) --- */
 .card.product {
   border-radius: 12px;
@@ -2809,8 +2804,8 @@ body.popup-open .bottom-bar {
 /* Catalog page sticky elements */
 #catalog .categories {
   position: sticky;
-  /* Ticker (30px) + Header (107px) */
-  top: 137px;
+  /* Ticker (30px) + Header (variable, typically ~65px) */
+  top: 95px;
   background: var(--bg-white);
   z-index: 100;
   /* Use margin to break out of section padding and padding to restore it */
