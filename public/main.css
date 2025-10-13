@@ -339,24 +339,25 @@ body {
 
 /* Desktop background */
 @media (min-width: 481px) {
-  body {
-    background-image: url('https://res.cloudinary.com/dpyniai9l/image/upload/v1758106311/Coastalfresh_website_Background_nkpuzo.png');
-    background-size: cover;
-    background-attachment: fixed;
-    background-position: center;
-  }
   .app {
-    max-width: var(--app-max-width); /* Re-constrain to mobile width */
-    margin: 20px auto; /* Center the app */
-    border-radius: 20px; /* Add rounded corners for the frame effect */
-    box-shadow: 0 0 50px rgba(0,0,0,0.1); /* Restore shadow */
-    overflow: hidden; /* Hide anything that spills out */
+    max-width: 1280px; /* Set a max-width for desktop */
+    margin: 0 auto; /* Center the app container */
+    box-shadow: none; /* Remove the mobile frame shadow */
+    border-radius: 0; /* Remove rounded corners */
+    overflow: visible; /* Allow content like popups to show correctly */
   }
 }
 
 /* --- NEW: Desktop Layout Adjustments --- */
 @media (min-width: 768px) {
-  /* All desktop-specific layout overrides are removed to ensure mobile view is shown */
+  .desktop-header { display: block; } /* Show desktop header */
+  .desktop-footer { display: block; } /* Show desktop footer */
+
+  .app .header, /* Hide mobile header */
+  .bottom-bar { /* Hide mobile bottom nav */
+    display: none;
+  }
+  .ticker-container { display: none; } /* Hide mobile ticker */
 }
 
 /* Ticker - Now above header */
@@ -3813,6 +3814,69 @@ body.popup-open .bottom-bar {
 
 @keyframes tick {
   50% { transform: scale(1.05); }
+}
+
+/* --- NEW: Desktop Footer Styles --- */
+.desktop-footer {
+  display: none; /* Hidden on mobile by default */
+  background: var(--primary-dark);
+  color: #e0f2f5;
+  padding: 40px 24px;
+}
+
+.desktop-footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 32px;
+}
+
+.footer-column h4 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--bg-white);
+  margin-bottom: 16px;
+}
+
+.footer-column p {
+  font-size: 14px;
+  line-height: 1.6;
+  opacity: 0.8;
+  max-width: 300px;
+}
+
+.footer-column.links a {
+  display: block;
+  color: #e0f2f5;
+  text-decoration: none;
+  margin-bottom: 10px;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+
+.footer-column.links a:hover {
+  color: var(--accent-color);
+}
+
+.footer-socials {
+  display: flex;
+  gap: 16px;
+}
+
+.footer-socials a {
+  color: #e0f2f5;
+  font-size: 22px;
+  transition: color 0.2s;
+}
+
+.footer-socials a:hover {
+  color: var(--accent-color);
+}
+
+/* Responsive adjustments for the footer */
+@media (max-width: 900px) {
+  .desktop-footer-inner { grid-template-columns: 1fr; }
 }
 .variant-option .variant-cta {
   flex-shrink: 0;
