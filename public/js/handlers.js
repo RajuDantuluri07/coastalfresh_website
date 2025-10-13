@@ -348,7 +348,7 @@ export const Handlers = {
             clearTimeout(state.searchDebounceTimer);
             state.searchDebounceTimer = setTimeout(() => Handlers.handleCatalogSearch(e), 300);
         });
-
+lo
         // Address form submission
         document.getElementById('addressForm').addEventListener('submit', async (e) => {
             e.preventDefault();

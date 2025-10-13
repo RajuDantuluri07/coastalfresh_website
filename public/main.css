@@ -1,3 +1,78 @@
+/* --- NEW: Desktop Header Styles --- */
+.desktop-header {
+  display: none; /* Hidden on mobile by default */
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.desktop-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.desktop-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary-color);
+  cursor: pointer;
+}
+
+.desktop-nav {
+  display: flex;
+  gap: 16px;
+}
+
+.desktop-nav-link {
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.desktop-nav-link:hover {
+  background-color: var(--bg-light);
+  color: var(--primary-color);
+}
+
+.desktop-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.desktop-search-container {
+  position: relative;
+}
+
+.desktop-search-container .fa-search {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.desktop-search-container input {
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 8px 12px 8px 36px;
+  width: 220px;
+}
 /* CSS Variables for consistency */
 :root {
   /* === NEW: Brand Logo Color Palette === */
@@ -270,14 +345,16 @@ body {
     background-attachment: fixed;
     background-position: center;
   }
-  
   .app {
-    border-radius: 20px;
-    overflow: hidden;
-    /* FIX: Move padding from body to .app to avoid affecting fixed elements */
-    margin: 20px auto;
+    max-width: var(--app-max-width); /* Re-constrain to mobile width */
+    margin: 20px auto; /* Center the app */
+    border-radius: 20px; /* Add rounded corners for the frame effect */
+    box-shadow: 0 0 50px rgba(0,0,0,0.1); /* Restore shadow */
+    overflow: hidden; /* Hide anything that spills out */
   }
 }
+
+/* --- NEW: Desktop Layout Adjustments --- */
 
 /* Ticker - Now above header */
 .ticker-container {
@@ -918,6 +995,8 @@ z-index: 2;                 /* sits above input content */
   gap: var(--grid-gap);
 }
 
+/* --- NEW: Desktop Grid Enhancements --- */
+/* REMOVED: Desktop grid override is not needed for the mobile-first view. */
 /* --- DEFINITIVE FIX: Product Card Styles from Demo (Blinkit/Zepto style) --- */
 .card.product {
   border-radius: 12px;
@@ -2446,7 +2525,7 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
   color: var(--primary-color);
 }
 
-/* Bottom Navigation - FIXED: Properly constrained to mobile container */
+/* Bottom Navigation */
 .bottom-bar {
   position: fixed;
   bottom: 0;
@@ -2455,7 +2534,6 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
   background: var(--bg-white);
   border-top: 1px solid var(--border-color);
   padding: 12px 20px;
-  /* FIX: Use calc() to add safe-area padding to the bottom */
   padding-bottom: calc(12px + env(safe-area-inset-bottom));
   display: flex;
   justify-content: space-around;
@@ -2463,18 +2541,17 @@ padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* REFINED: Adjusted p
   box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
   width: 100%;
   max-width: var(--app-max-width);
-  /* FIX: Use min-height to prevent content from being cut off */
   min-height: var(--bottom-nav-height);
 }
 
-/* NEW: Hide bottom nav when any modal/popup is open */
+/* Hide bottom nav when any modal/popup is open */
 body.popup-open .bottom-bar {
   display: none;
 }
 
 @media (min-width: 481px) {
   .bottom-bar {
-    border-radius: 0 0 20px 20px;
+    max-width: none; /* Allow nav to expand with .app */
   }
 }
 
@@ -2483,7 +2560,6 @@ body.popup-open .bottom-bar {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  /* FIX: Increase contrast for inactive labels for better accessibility */
   color: var(--text-primary);
   font-size: 12px;
   cursor: pointer;
@@ -2503,6 +2579,12 @@ body.popup-open .bottom-bar {
 
 .nav-item i {
   font-size: var(--bottom-nav-icon-size);
+}
+
+.nav-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
 }
 
 .nav-badge {
@@ -2719,8 +2801,8 @@ body.popup-open .bottom-bar {
 /* Catalog page sticky elements */
 #catalog .categories {
   position: sticky;
-  /* Ticker (30px) + Header (107px) */
-  top: 137px;
+  /* Ticker (30px) + Header (variable, typically ~65px) */
+  top: 95px;
   background: var(--bg-white);
   z-index: 100;
   /* Use margin to break out of section padding and padding to restore it */
@@ -3572,6 +3654,73 @@ body.popup-open .bottom-bar {
   position: static; /* Override absolute positioning */
   background: var(--success-color);
   box-shadow: 0 2px 6px rgba(56, 142, 60, 0.3);
+}
+
+/* --- NEW: Mobile Drawer Styles --- */
+.mobile-drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1300;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.mobile-drawer-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 80%;
+  max-width: 300px;
+  height: 100%;
+  background: var(--bg-light);
+  z-index: 1301;
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+.mobile-drawer.active {
+  transform: translateX(0);
+}
+
+.mobile-drawer-header {
+  padding: 16px;
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border-color);
+  position: relative;
+}
+.mobile-drawer-header .profile-header-simple {
+  padding: 0; /* Override default padding */
+}
+.mobile-drawer-header .drawer-close-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+
+.mobile-drawer-nav {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+.mobile-drawer-nav .profile-button {
+  border-radius: 8px;
+  border-bottom: none;
+  margin-bottom: 4px;
+}
+
+.mobile-drawer-footer {
+  padding: 16px;
+  text-align: center;
 }
 
 /* --- DESKTOP FIX: Constrain variant drawer to the app container --- */
