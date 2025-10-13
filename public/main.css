@@ -350,7 +350,7 @@ body {
 
 /* --- NEW: Desktop Layout Adjustments --- */
 @media (min-width: 768px) {
-  .desktop-header { display: block; } /* Show desktop header */
+  .desktop-header { display: block; } /* Show desktop header */ 
   .desktop-footer { display: block; } /* Show desktop footer */
 
   .app .header, /* Hide mobile header */
