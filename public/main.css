@@ -1,3 +1,78 @@
+/* --- NEW: Desktop Header Styles --- */
+.desktop-header {
+  display: none; /* Hidden on mobile by default */
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.desktop-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.desktop-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary-color);
+  cursor: pointer;
+}
+
+.desktop-nav {
+  display: flex;
+  gap: 16px;
+}
+
+.desktop-nav-link {
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.desktop-nav-link:hover {
+  background-color: var(--bg-light);
+  color: var(--primary-color);
+}
+
+.desktop-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.desktop-search-container {
+  position: relative;
+}
+
+.desktop-search-container .fa-search {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.desktop-search-container input {
+  background: var(--bg-light);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 8px 12px 8px 36px;
+  width: 220px;
+}
 /* CSS Variables for consistency */
 :root {
   /* === NEW: Brand Logo Color Palette === */
@@ -264,18 +339,23 @@ body {
 
 /* Desktop background */
 @media (min-width: 481px) {
-  body {
-    background-image: url('https://res.cloudinary.com/dpyniai9l/image/upload/v1758106311/Coastalfresh_website_Background_nkpuzo.png');
-    background-size: cover;
-    background-attachment: fixed;
-    background-position: center;
-  }
-  
   .app {
-    border-radius: 20px;
-    overflow: hidden;
-    /* FIX: Move padding from body to .app to avoid affecting fixed elements */
-    margin: 20px auto;
+    max-width: none; /* Allow app to expand */
+    margin: 0; /* Remove margin */
+    border-radius: 0; /* Remove rounded corners */
+    box-shadow: none; /* Remove shadow */
+  }
+}
+
+/* --- NEW: Desktop Layout Adjustments --- */
+@media (min-width: 768px) {
+  .desktop-header { display: block; }
+  .app .header, /* Hide mobile header */
+  .bottom-bar { /* Hide mobile bottom nav */
+    display: none;
+  }
+  .app {
+    padding-top: 0; /* Remove any top padding that might exist */
   }
 }
 
@@ -918,6 +998,19 @@ z-index: 2;                 /* sits above input content */
   gap: var(--grid-gap);
 }
 
+/* --- NEW: Desktop Grid Enhancements --- */
+@media (min-width: 768px) {
+  /* Show 4 products per row on the catalog page */
+  .products {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Convert featured products from a scroller to a 4-column grid */
+  .featured-products {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
 /* --- DEFINITIVE FIX: Product Card Styles from Demo (Blinkit/Zepto style) --- */
 .card.product {
   border-radius: 12px;
@@ -2474,7 +2567,7 @@ body.popup-open .bottom-bar {
 
 @media (min-width: 481px) {
   .bottom-bar {
-    border-radius: 0 0 20px 20px;
+    max-width: none; /* Allow nav to expand with .app */
   }
 }
 
