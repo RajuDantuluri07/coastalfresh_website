@@ -228,12 +228,6 @@ export const Handlers = {
             if (target.closest('#cartModal .back-btn')) UI.closeCart();
             if (target.closest('.cart-btn')) UI.showCart();
 
-            // NEW: Hamburger menu and drawer controls
-            if (target.closest('#hamburgerBtn')) UI.openMobileDrawer();
-            if (target.closest('#mobileDrawerCloseBtn')) UI.closeMobileDrawer();
-            if (target.id === 'mobileDrawerOverlay') UI.closeMobileDrawer();
-            if (target.closest('.mobile-drawer-nav .profile-button')) Handlers.handleProfileButtonClick(target.closest('.profile-button'), true);
-
             // Profile page buttons
             const profileBtn = target.closest('.profile-button');
             if (profileBtn) Handlers.handleProfileButtonClick(profileBtn);
@@ -354,6 +348,13 @@ export const Handlers = {
             clearTimeout(state.searchDebounceTimer);
             state.searchDebounceTimer = setTimeout(() => Handlers.handleCatalogSearch(e), 300);
         });
+        // NEW: Connect desktop search bar
+        const desktopSearchInput = document.getElementById('desktopSearch');
+        if (desktopSearchInput) {
+            desktopSearchInput.addEventListener('input', (e) => {
+                Handlers.handleDesktopSearch(e.target.value);
+            });
+        }
 
         // Address form submission
         document.getElementById('addressForm').addEventListener('submit', async (e) => {
@@ -510,12 +511,11 @@ export const Handlers = {
         Handlers.setupInstallPromptEvents();
     },
 
-    handleProfileButtonClick: async (button, fromDrawer = false) => {
+    handleProfileButtonClick: async (button) => {
         if (button.id === 'guestProfileCta') {
             UI.showLoginModal(null, 'signup');
         } else if (button.id === 'logoutBtn') {
             Handlers.handleLogout();
-        // NEW: Handle navigation from drawer
         } else if (button.id === 'referBtn') {
             UI.showPage('referPage');
         } else if (button.id === 'profileInstallBtn') {
@@ -536,15 +536,6 @@ export const Handlers = {
             UI.showPage('aboutPage');
         } else if (button.classList.contains('support')) { // MODIFIED: Redirect to contact page
             UI.showPage('contactPage');
-        }
-        // NEW: Close drawer after navigation
-        if (fromDrawer) {
-            // Special cases that are not "pages"
-            if (button.id === 'logoutBtn' || button.id === 'guestProfileCta' || button.id === 'profileInstallBtn') {
-                // Don't close for these, as they open modals or do other actions
-            } else {
-                UI.closeMobileDrawer();
-            }
         }
     },
 

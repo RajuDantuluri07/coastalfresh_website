@@ -1818,55 +1818,6 @@ export const UI = {
         }
     },
 
-    // NEW: Mobile Drawer Functions
-    openMobileDrawer: () => {
-        const drawer = document.getElementById('mobileDrawer');
-        const overlay = document.getElementById('mobileDrawerOverlay');
-        if (!drawer || !overlay) return;
-
-        UI.renderMobileDrawerNav();
-        overlay.classList.add('active');
-        drawer.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Prevent background scroll
-    },
-
-    closeMobileDrawer: () => {
-        const drawer = document.getElementById('mobileDrawer');
-        const overlay = document.getElementById('mobileDrawerOverlay');
-        if (!drawer || !overlay) return;
-
-        overlay.classList.remove('active');
-        drawer.classList.remove('active');
-        document.body.style.overflow = ''; // Restore scroll
-    },
-
-    renderMobileDrawerNav: () => {
-        const navContainer = document.querySelector('.mobile-drawer-nav');
-        if (!navContainer) return;
-
-        // Define the navigation items
-        const navItems = [
-            { page: 'home', icon: 'fa-home', label: 'Home' },
-            { page: 'catalog', icon: 'fa-layer-group', label: 'Catalog' },
-            { page: 'ordersPage', icon: 'fa-box-open', label: 'My Orders' },
-            { page: 'favoritesPage', icon: 'fa-heart', label: 'My Favorites' },
-            { page: 'addressPage', icon: 'fa-map-marker-alt', label: 'My Address' },
-            { page: 'referPage', icon: 'fa-share-alt', label: 'Refer & Earn' },
-            { page: 'aboutPage', icon: 'fa-info-circle', label: 'About Us' },
-            { page: 'contactPage', icon: 'fa-headset', label: 'Contact Us' },
-        ];
-
-        let navHTML = navItems.map(item => `
-            <button class="profile-button" data-page="${item.page}">
-                <i class="fas ${item.icon}"></i> ${item.label}
-            </button>
-        `).join('');
-
-        // Add login/logout button
-        navHTML += state.currentUser ? `<button class="profile-button" id="logoutBtn" style="color: var(--error-color);"><i class="fas fa-sign-out-alt"></i> Logout</button>` : `<button class="profile-button login-cta" id="guestProfileCta">Login / Sign Up</button>`;
-        navContainer.innerHTML = navHTML;
-    },
-
     // Moved from handlers.js for better separation of concerns
     updateUIForAuthState: () => {
         const { userName, userStatus, logoutBtn, guestCta, referBtn, avatar } = state.dom.profile;
@@ -1874,10 +1825,6 @@ export const UI = {
         const referralShareContainer = document.getElementById('referralShareContainer');
         const referralLoginPrompt = document.getElementById('referralLoginPrompt');
         const referralLinkEl = document.getElementById('referralLink');
-        // NEW: Drawer profile elements
-        const drawerUserName = document.getElementById('drawerProfileUserName');
-        const drawerUserStatus = document.getElementById('drawerProfileUserStatus');
-        const drawerAvatar = document.querySelector('.mobile-drawer .profile-avatar-small');
 
 
         if (state.currentUser) {
@@ -1885,9 +1832,6 @@ export const UI = {
                 avatar.innerHTML = `<img src="${state.currentUser.photoURL}" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
             } else {
                 avatar.innerHTML = `<i class="fas fa-user"></i>`;
-            }
-            if (drawerAvatar) {
-                drawerAvatar.innerHTML = avatar.innerHTML;
             }
 
             if (referralLinkEl) {
@@ -1905,10 +1849,6 @@ export const UI = {
 
             userName.textContent = displayName;
             userStatus.textContent = state.currentUser.email;
-            if (drawerUserName) drawerUserName.textContent = displayName;
-            if (drawerUserStatus) {
-                drawerUserStatus.textContent = state.currentUser.email;
-            }
 
             logoutBtn.style.display = 'flex';
             if (guestCta) guestCta.style.display = 'none';
@@ -1919,14 +1859,9 @@ export const UI = {
             if (referralLoginPrompt) referralLoginPrompt.style.display = 'none';
         } else {
             avatar.innerHTML = `<i class="fas fa-user"></i>`;
-            if (drawerAvatar) drawerAvatar.innerHTML = `<i class="fas fa-user"></i>`;
 
             userName.textContent = 'Guest User';
             userStatus.textContent = 'You are browsing as a guest.';
-            if (drawerUserName) drawerUserName.textContent = 'Guest User';
-            if (drawerUserStatus) {
-                drawerUserStatus.textContent = 'Login to sync your data';
-            }
             logoutBtn.style.display = 'none';
             if (guestCta) guestCta.style.display = 'flex';
             if (referBtn) referBtn.style.display = 'none';
