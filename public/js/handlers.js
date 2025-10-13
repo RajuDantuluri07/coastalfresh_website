@@ -475,6 +475,22 @@ export const Handlers = {
             }
         });
 
+        // Bottom Navigation
+        document.getElementById('bottomNav').addEventListener('click', e => {
+            const navItem = e.target.closest('.nav-item');
+            if (!navItem) return;
+            const page = navItem.dataset.page;
+            if (page === 'cart') {
+                UI.showCart();
+            } else if (page) {
+                if (page === 'profilePage' && !state.currentUser) {
+                    UI.showPage(page);
+                } else {
+                    UI.showPage(page);
+                }
+            }
+        });
+
         // Dynamic Padding & Keyboard Handling for Product Popup
         const popupStickyCta = document.getElementById('popupStickyCta');
         const popupContentWrapper = document.getElementById('popupContentWrapper');
