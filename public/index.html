@@ -93,30 +93,6 @@
       </ul>
     </div>
   </noscript>
-
-  <!-- NEW: Desktop-only Header -->
-  <header class="desktop-header" id="desktopHeader">
-    <div class="desktop-header-inner">
-      <div class="desktop-logo" data-page="home">
-        <img class="logo-img" src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" alt="Coastal Fresh India">
-        <span>COASTAL FRESH</span>
-      </div>
-      <nav class="desktop-nav">
-        <a href="#" class="desktop-nav-link" data-page="home">Home</a>
-        <a href="#" class="desktop-nav-link" data-page="catalog">Catalog</a>
-        <a href="#" class="desktop-nav-link" data-page="aboutPage">About Us</a>
-        <a href="#" class="desktop-nav-link" data-page="contactPage">Contact</a>
-      </nav>
-      <div class="desktop-header-actions">
-        <div class="desktop-search-container">
-          <i class="fas fa-search"></i>
-          <input type="text" id="desktopSearch" placeholder="Search for products...">
-        </div>
-        <button class="desktop-action-btn" data-page="cart"><i class="fas fa-shopping-bag"></i></button>
-      </div>
-    </div>
-  </header>
-
   <div class="app">
     <!-- Ticker - Now above header -->
     <div class="ticker-container">
@@ -138,7 +114,6 @@
           </div>
           <button class="cart-btn" aria-label="Open Cart">
             <i class="fas fa-shopping-bag"></i>
-            <!-- FIX: Ensure cart count is visible on home page header -->
             <span class="cart-count" id="cartCount">0</span>
           </button>
         </div>
@@ -889,7 +864,7 @@
       </div>
     </div>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation - FIXED: Properly constrained to mobile container -->
     <nav class="bottom-bar" id="bottomNav">
       <div class="nav-item active" data-page="home">
         <i class="fas fa-home"></i>
@@ -966,30 +941,6 @@
       </div>
     </div>
   </div>
-
-  <!-- NEW: Desktop-only Footer -->
-  <footer class="desktop-footer">
-    <div class="desktop-footer-inner">
-      <div class="footer-column">
-        <h4>COASTAL FRESH</h4>
-        <p>From the Coast to Your Kitchen. The freshest seafood, delivered to your doorstep in Hyderabad.</p>
-      </div>
-      <div class="footer-column links">
-        <h4>Quick Links</h4>
-        <a href="#" data-page="aboutPage">About Us</a>
-        <a href="#" data-page="contactPage">Contact Us</a>
-        <a href="#" data-page="faqPage">FAQs</a>
-      </div>
-      <div class="footer-column">
-        <h4>Follow Us</h4>
-        <div class="footer-socials">
-          <a href="https://www.instagram.com/coastalfresh.in" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-          <a href="https://www.facebook.com/CoastalFresh.in/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-          <a href="https://wa.me/919985125678" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
-        </div>
-      </div>
-    </div>
-  </footer>
 
   <!-- NEW: Static Breadcrumb Schemas for SEO -->
   <script type="application/ld+json" id="breadcrumb-about">

@@ -1849,7 +1849,6 @@ export const UI = {
 
             userName.textContent = displayName;
             userStatus.textContent = state.currentUser.email;
-
             logoutBtn.style.display = 'flex';
             if (guestCta) guestCta.style.display = 'none';
             if (referBtn) referBtn.style.display = 'flex'; // FIX: Ensure button is shown for logged-in users
@@ -1859,7 +1858,6 @@ export const UI = {
             if (referralLoginPrompt) referralLoginPrompt.style.display = 'none';
         } else {
             avatar.innerHTML = `<i class="fas fa-user"></i>`;
-
             userName.textContent = 'Guest User';
             userStatus.textContent = 'You are browsing as a guest.';
             logoutBtn.style.display = 'none';

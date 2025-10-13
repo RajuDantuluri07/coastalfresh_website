@@ -475,6 +475,22 @@ export const Handlers = {
             }
         });
 
+        // Bottom Navigation
+        document.getElementById('bottomNav').addEventListener('click', e => {
+            const navItem = e.target.closest('.nav-item');
+            if (!navItem) return;
+            const page = navItem.dataset.page;
+            if (page === 'cart') {
+                UI.showCart();
+            } else if (page) {
+                if (page === 'profilePage' && !state.currentUser) {
+                    UI.showPage(page);
+                } else {
+                    UI.showPage(page);
+                }
+            }
+        });
+
         // Dynamic Padding & Keyboard Handling for Product Popup
         const popupStickyCta = document.getElementById('popupStickyCta');
         const popupContentWrapper = document.getElementById('popupContentWrapper');
@@ -563,10 +579,8 @@ export const Handlers = {
                 // FIX #6: Analytics was tracking the wrong price on reorder.
                 const variant = product.variants[variantIndex];
                 state.cart[item.id] = (state.cart[item.id] || 0) + qtyToAdd;
-                if (variant) { // Ensure variant exists before tracking
-                    itemsAddedCount++;
-                    window.Analytics.trackAddToCart({ ...product, ...variant }, qtyToAdd);
-                }
+                itemsAddedCount++;
+                window.Analytics.trackAddToCart({ ...product, ...variant }, qtyToAdd);
             }
         });
 
@@ -1052,6 +1066,7 @@ export const Handlers = {
                 state.db.collection('users').doc(user.uid).set({
                     email: user.email,
                     displayName: user.displayName || null,
+                    // FIX #10: User role was not being set on email signup.
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     role: 'customer' // Assign default role
                 });
