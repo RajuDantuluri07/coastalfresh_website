@@ -348,7 +348,7 @@ export const Handlers = {
             clearTimeout(state.searchDebounceTimer);
             state.searchDebounceTimer = setTimeout(() => Handlers.handleCatalogSearch(e), 300);
         });
-lo
+
         // Address form submission
         document.getElementById('addressForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -471,22 +471,6 @@ lo
 
                 if (state.selectedPaymentMethod === 'online') {
                     UI.showToast('Online payment is coming soon!');
-                }
-            }
-        });
-
-        // Bottom Navigation
-        document.getElementById('bottomNav').addEventListener('click', e => {
-            const navItem = e.target.closest('.nav-item');
-            if (!navItem) return;
-            const page = navItem.dataset.page;
-            if (page === 'cart') {
-                UI.showCart();
-            } else if (page) {
-                if (page === 'profilePage' && !state.currentUser) {
-                    UI.showPage(page);
-                } else {
-                    UI.showPage(page);
                 }
             }
         });
