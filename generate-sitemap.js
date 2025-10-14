@@ -28,9 +28,10 @@ const db = getFirestore();
 const pages = [
   { loc: '/', changefreq: 'daily', priority: '1.0' },
   { loc: '/catalog', changefreq: 'weekly', priority: '0.9' },
-  { loc: '/about-us', changefreq: 'monthly', priority: '0.7' },
-  { loc: '/contact-us', changefreq: 'monthly', priority: '0.7' },
-  { loc: '/profile', changefreq: 'monthly', priority: '0.5' },
+  { loc: '/about-us', changefreq: 'monthly', priority: '0.7' }, // Corrected from /about
+  { loc: '/contact-us', changefreq: 'monthly', priority: '0.7' }, // Corrected from /contact
+  { loc: '/profile', changefreq: 'monthly', priority: '0.5' }, // This is the "Customer Login" page
+  { loc: '/faq', changefreq: 'monthly', priority: '0.6' },
   { loc: '/refer', changefreq: 'monthly', priority: '0.5' },
 ];
 
