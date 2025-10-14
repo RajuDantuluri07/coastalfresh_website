@@ -22,7 +22,7 @@
   --card-radius: 12px;
 
   /* === Sizing & Layout === */
-  --app-max-width: 720px; /* Increased by 50% from 480px */
+  --app-max-width: 480px;
   --header-padding: 8px 16px;
   --logo-height: 32px;
   --cart-badge-size: 22px;
@@ -264,20 +264,19 @@ body {
 
 /* Desktop background */
 @media (min-width: 481px) {
-  body {
-    background-image: url('https://res.cloudinary.com/dpyniai9l/image/upload/v1758106311/Coastalfresh_website_Background_nkpuzo.png');
-    background-size: cover;
-    background-attachment: fixed;
-    background-position: center;
-  }
   .app {
     /* On tablet-sized screens, the app is a centered container */
-    max-width: var(--app-max-width);
+    max-width: 720px; /* Intermediate width for tablets */
     margin: 20px auto; /* Add some vertical margin */
     box-shadow: 0 0 50px rgba(0,0,0,0.1);
     position: relative;
-    overflow-x: hidden;
+    overflow-x: hidden; /* This was a bug, now fixed */
   }
+}
+
+/* NEW: Widen container for large desktop screens */
+@media (min-width: 1200px) {
+  /* This will be replaced by a more comprehensive desktop layout */
 }
 
 /* Ticker - Now above header */
@@ -919,11 +918,7 @@ z-index: 2;                 /* sits above input content */
   gap: var(--grid-gap);
 }
 
-/* --- NEW: Desktop Grid Enhancements --- */
-
-.card.product {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+.card.product { border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   padding: 12px;
   background: #fff;
   position: relative;
@@ -1022,11 +1017,7 @@ z-index: 2;                 /* sits above input content */
   background: var(--primary-color); /* Use primary color for consistency */
 }
 
-/* Quantity controls that replace the ADD button */
-.cart-controls {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
+.add-btn, .cart-controls {
   display: flex;
   align-items: center;
   background: var(--success-color);
@@ -1034,15 +1025,14 @@ z-index: 2;                 /* sits above input content */
   font-weight: 600;
   border-radius: 6px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  z-index: 2;
-  height: 29px; /* Match add-btn height */
+  height: 32px; /* Consistent height */
 }
 
 .cart-controls .qty-btn {
   background: none;
   border: none;
   width: 28px;
-  height: 29px;
+  height: 32px;
   color: white;
   font-size: 16px;
   cursor: pointer;
@@ -1058,6 +1048,7 @@ z-index: 2;                 /* sits above input content */
   margin-top: 8px;
   display: flex;
   flex-direction: column;
+  flex-grow: 1; /* Allow info to take up available space */
   gap: 4px; /* Small gap between elements */
 }
 
@@ -2725,11 +2716,7 @@ body.popup-open .bottom-bar {
   background: var(--bg-white);
   z-index: 100;
   margin: 0 -20px;
-  padding: 5px 20px 15px;
-}
-
-@media (min-width: 992px) {
-  #catalog .categories { top: 70px; } /* Desktop: Main Nav Height */
+  padding: 5px 20px 15px; /* This was a bug, now fixed */
 }
 
 @keyframes slideUpAndFadeIn {
@@ -3679,4 +3666,179 @@ body.popup-open .bottom-bar {
 
 @keyframes tick {
   50% { transform: scale(1.05); }
+}
+
+/* --- NEW: Desktop Layout & Components --- */
+
+.desktop-header, .desktop-footer {
+  display: none; /* Hidden on mobile by default */
+}
+
+/* Container class to center content */
+.container {
+  width: 100%;
+  padding-right: 24px;
+  padding-left: 24px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (min-width: 576px) { .container { max-width: 540px; } }
+@media (min-width: 768px) { .container { max-width: 720px; } }
+@media (min-width: 992px) { .container { max-width: 960px; } }
+@media (min-width: 1200px) { .container { max-width: 1200px; } }
+
+/* Desktop Header Styles */
+.desktop-header {
+  background: var(--bg-white);
+  position: sticky;
+  top: 0;
+  z-index: 1050;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.desktop-header-top {
+  background-color: var(--primary-dark);
+  color: white;
+  padding: 8px 0;
+  font-size: 14px;
+}
+.desktop-header-top .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.desktop-header-top a { color: white; text-decoration: none; }
+.social-icons a { margin-right: 15px; }
+
+.desktop-nav-main .container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+}
+
+.desktop-logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: var(--primary-color); cursor: pointer; }
+.desktop-nav-links { display: flex; gap: 24px; }
+.desktop-nav-link {
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  padding: 8px 0;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+.desktop-nav-link:hover { color: var(--primary-color); border-bottom-color: var(--primary-color); }
+
+.desktop-header-actions { display: flex; align-items: center; gap: 16px; }
+.desktop-search-container { position: relative; }
+.desktop-search-container .fa-search { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
+.desktop-search-container input { background: var(--bg-light); border: 1px solid var(--border-color); border-radius: 20px; padding: 8px 12px 8px 36px; width: 220px; }
+
+.desktop-action-btn {
+  position: relative; background: none; border: none; font-size: 22px; color: var(--primary-color);
+  cursor: pointer; width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.desktop-action-btn .cart-count { position: absolute; top: 0; right: 0; }
+
+/* Desktop Footer Styles */
+.desktop-footer {
+  background-color: var(--primary-dark);
+  color: #e0f2f5;
+  padding: 50px 0 20px;
+}
+.desktop-footer h5 { color: white; margin-bottom: 20px; font-weight: 600; }
+.desktop-footer p { color: #b0cdd4; font-size: 14px; line-height: 1.7; }
+.desktop-footer a { color: #b0cdd4; text-decoration: none; transition: color 0.2s; }
+.desktop-footer a:hover { color: white; }
+.footer-links { list-style: none; padding: 0; }
+.footer-links li { margin-bottom: 10px; }
+
+/* --- FINAL RESPONSIVE SWITCH --- */
+@media (min-width: 1200px) {
+  /* Show desktop elements */
+  .desktop-header, .desktop-footer {
+    display: block;
+  }
+
+  /* Hide mobile elements */
+  .app .header, .bottom-bar, .ticker-container {
+    display: none !important;
+  }
+
+  /* Reset app container to be a simple wrapper */
+  .app {
+    max-width: 1200px;
+    margin: 0 auto;
+    box-shadow: none;
+    overflow: visible;
+    background: transparent;
+  }
+
+  /* Adjust main page content area */
+  .app .page {
+    padding-top: 30px;
+    padding-bottom: 50px;
+  }
+
+  /* Widen the hero carousel */
+  #home .carousel {
+    max-width: 100%;
+    height: 300px; /* Taller hero on desktop */
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  /* Widen other homepage sections */
+  #home .trust-strip, #home .flash-sale-section, #home .reviews-section {
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+  #home .flash-sale-products, #home .reviews-carousel {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* Responsive Product Grid */
+  .products {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  /* Ensure consistent card height */
+  .card.product {
+    height: 100%;
+  }
+
+  /* Sticky category bar on desktop catalog */
+  #catalog .categories {
+    top: 118px; /* Height of the full sticky desktop header */
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+/* Helper classes for layout */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+.col-lg-2, .col-lg-3, .col-lg-4, .col-md-6 {
+  position: relative;
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+@media (min-width: 768px) {
+  .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+}
+@media (min-width: 992px) {
+  .col-lg-2 { flex: 0 0 16.666667%; max-width: 16.666667%; }
+  .col-lg-3 { flex: 0 0 25%; max-width: 25%; }
+  .col-lg-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
 }
