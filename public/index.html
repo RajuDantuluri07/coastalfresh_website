@@ -179,6 +179,16 @@
           <p class="subtitle" style="margin-bottom: 8px;">From the Coast to Your Kitchen</p>
         </div>
       </section>
+
+      <!-- NEW: SEO-only footer for internal linking -->
+      <section class="visually-hidden" aria-label="Footer links">
+        <footer>
+          <a href="/contact-us">Contact Us</a>
+          <a href="/profile">Customer Login</a>
+          <a href="/about-us">About Us</a>
+          <a href="/catalog">All Products</a>
+        </footer>
+      </section>
     </div>
 
     <!-- Catalog Page -->
@@ -1052,6 +1062,36 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Coastal Fresh",
+    "url": "https://www.coastalfresh.in",
+    "logo": "https://res.cloudinary.com/dpyniai9l/image/upload/v1758244909/Coastal_Fresh_India_Logo_uqd6bk.png",
+    "sameAs": [
+      "https://www.facebook.com/CoastalFresh.in",
+      "https://www.instagram.com/coastalfresh.in"
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+91-9985125678",
+      "contactType": "Customer Support"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "url": "https://www.coastalfresh.in/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://www.coastalfresh.in/catalog?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
     "@type": "LocalBusiness",
     "name": "Coastal Fresh India",
     "url": "https://coastalfresh.in",
@@ -1071,23 +1111,6 @@
       "https://www.facebook.com/CoastalFresh.in",
       "https://www.instagram.com/coastalfresh.in"
     ]
-  }
-  </script>
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Coastal Fresh",
-    "url": "https://www.coastalfresh.in",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": {
-        "@type": "EntryPoint",
-        "urlTemplate": "https://www.coastalfresh.in/?q={search_term_string}"
-      },
-      "query-input": "required name=search_term_string"
-    }
   }
   </script>
 

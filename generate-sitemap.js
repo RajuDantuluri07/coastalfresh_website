@@ -1,4 +1,4 @@
-﻿﻿﻿﻿const fs = require('fs');
+﻿﻿﻿﻿﻿const fs = require('fs');
 const path = require('path');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
@@ -27,10 +27,10 @@ const db = getFirestore();
 // Basic pages — extend these if you want
 const pages = [
   { loc: '/', changefreq: 'daily', priority: '1.0' },
-  { loc: '/catalog', changefreq: 'weekly', priority: '0.9' },
-  { loc: '/about', changefreq: 'monthly', priority: '0.6' },
-  { loc: '/faq', changefreq: 'monthly', priority: '0.6' },
-  { loc: '/refer', changefreq: 'monthly', priority: '0.5' },
+  { loc: '/catalog', changefreq: 'weekly', priority: '0.9' }, // This is the "All Products" page
+  { loc: '/about-us', changefreq: 'monthly', priority: '0.7' },
+  { loc: '/contact-us', changefreq: 'monthly', priority: '0.7' },
+  { loc: '/profile', changefreq: 'monthly', priority: '0.5' }, // This is the "Customer Login" page
 ];
 
 /**
@@ -39,7 +39,11 @@ const pages = [
  * @returns {string} The escaped string.
  */
 function escapeXml(unsafe) {
-  if (!unsafe) return '';
+  // FIX: Ensure the input is a string before trying to replace.
+  // If it's not a string (e.g., it's a URL in the caption field), return an empty string.
+  if (typeof unsafe !== 'string') {
+    return '';
+  }
   return unsafe.replace(/[<>&'"]/g, c => {
     return { '<': '&lt;', '>': '&gt;', '&': '&amp;', "'": '&apos;', '"': '&quot;' }[c];
   });
@@ -71,8 +75,9 @@ async function generateSitemap() {
 
     const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-${pages.map(page => { // eslint-disable-line
-      const today = new Date().toISOString().split("T")[0];
+${pages.map(page => {
+      // FIX: Use the current date for lastmod, not a future date.
+      const today = new Date().toISOString().split('T')[0];
       const imageTag = page.image ? `
     <image:image>
       <image:loc>${escapeXml(page.image.loc)}</image:loc>

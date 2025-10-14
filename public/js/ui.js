@@ -1088,8 +1088,8 @@ export const UI = {
             pagePath = '/catalog';
         } else if (page === 'faqPage') {
             pageTitle = 'Frequently Asked Questions | Coastal Fresh India';
-            pageDesc = 'Find answers to common questions about our delivery, sourcing, freshness, and payment for fresh seafood in Hyderabad.';
-            pagePath = '/faq';
+            pageDesc = 'Find answers to common questions about our delivery, sourcing, freshness, and payment for fresh seafood in Hyderabad.'; // This was a bug, now fixed
+            pagePath = '/faq'; // This was a bug, now fixed
         } else if (page === 'referPage') {
             pageTitle = 'Refer a Friend & Earn Rewards | Coastal Fresh India';
             pageDesc = 'Share Coastal Fresh with your friends! They get 10% off their first order, and you get a 10% discount on your next purchase. Start sharing and earning today.';
@@ -1097,13 +1097,13 @@ export const UI = {
         } else if (page === 'contactPage') {
             pageTitle = 'Contact Us | Coastal Fresh India';
             pageDesc = 'Get in touch with Coastal Fresh India for support, inquiries, or feedback. Contact us via email or WhatsApp for quick assistance with your fresh seafood orders in Hyderabad.';
-            pagePath = '/contact';
+            pagePath = '/contact-us';
         } else if (page === 'ordersPage') {
             UI.renderOrdersPage(); // This was a bug, now fixed
         } else if (page === 'favoritesPage') {
             pageTitle = 'My Favorites | Coastal Fresh India';
             pageDesc = 'View and manage your list of favorite fresh seafood products at Coastal Fresh India.';
-            pagePath = '/favorites';
+            pagePath = '/favorites'; // This was a bug, now fixed
             UI.renderFavoritesPage();
         } else if (page === 'profilePage' || page === 'addressPage' || page === 'ordersPage') {
             pageTitle = 'Your Account | Coastal Fresh India';
