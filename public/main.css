@@ -261,14 +261,19 @@ body {
 
 /* Desktop background */
 @media (min-width: 481px) {
-  /* On tablet-sized screens, the app is a centered container */
   .app {
-    max-width: 720px;
-    margin: 20px auto;
+    /* On tablet-sized screens, the app is a centered container */
+    max-width: 720px; /* Intermediate width for tablets */
+    margin: 20px auto; /* Add some vertical margin */
     box-shadow: 0 0 50px rgba(0,0,0,0.1);
-    border-radius: 20px;
-    overflow: hidden;
+    position: relative;
+    overflow-x: hidden; /* This was a bug, now fixed */
   }
+}
+
+/* NEW: Widen container for large desktop screens */
+@media (min-width: 1200px) {
+  /* This will be replaced by a more comprehensive desktop layout */
 }
 
 /* Ticker - Now above header */
@@ -910,7 +915,11 @@ z-index: 2;                 /* sits above input content */
   gap: var(--grid-gap);
 }
 
-.card.product {
+.card.product { border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 12px;
+  background: #fff;
+  position: relative;
+  transition: transform 0.2s ease-in-out;
   display: flex;
   flex-direction: column;
   cursor: pointer;

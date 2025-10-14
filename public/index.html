@@ -1633,6 +1633,218 @@
     </div>
   </div>
 
+  <!-- Login/Signup Modal -->
+  <div class="login-modal" id="loginModal">
+    <div class="login-card">
+      <button class="back-btn" aria-label="Close Login"><i class="fas fa-times"></i></button>
+      <div class="title" id="authTitle">Get Started</div>
+      <div class="subtitle" id="authSubtitle">Sign up to order the freshest coastal seafood</div>
+
+      <!-- Login Form -->
+      <form id="loginForm" class="login-form">
+        <div class="form-group">
+          <label for="loginEmail">Email Address</label>
+          <input id="loginEmail" class="input" type="email" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" class="input" type="password" required>
+        </div>
+        <button class="cta" type="submit">Login</button>
+        <div class="row" style="display: flex; justify-content: space-between;">
+          <a href="#" id="showSignup">Create Account</a>
+          <a href="#" id="forgotPassword">Forgot Password?</a>
+        </div>
+      </form>
+
+      <!-- Signup Form -->
+      <form id="signupForm" class="login-form active">
+        <div class="form-group">
+          <label for="signupEmail">Email Address</label>
+          <input id="signupEmail" class="input" type="email" placeholder="you@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="signupPassword">Create Password</label>
+          <input id="signupPassword" class="input" type="password" placeholder="At least 8 characters" required>
+        </div>
+        <button class="cta" type="submit">Sign Up</button>
+        <div class="row" style="margin-top:12px;">
+          Already have an account? <a href="#" id="showLogin">Login</a>
+        </div>
+      </form>
+
+      <div class="or">
+        <div class="hr"></div>OR<div class="hr"></div>
+      </div>
+
+      <div class="socials">
+        <button id="googleLoginBtn" type="button" class="social-btn google"><i class="fab fa-google"></i> Google</button>
+        <button id="facebookLoginBtn" type="button" class="social-btn facebook" style="display: none;"><i class="fab fa-facebook-f"></i> Facebook</button>
+      </div>
+      <p id="authError" style="color: var(--error-color); text-align: center; margin-top: 16px; font-size: 14px;"></p>
+    </div>
+  </div>
+
+
+  <!-- NEW: Updated Product Popup with new design -->
+  <div class="product-popup" id="productPopup">
+    <div class="popup-header">
+      <button class="popup-back-btn popup-action-btn" aria-label="Close Product View"><i class="fas fa-arrow-left"></i></button>
+      <div class="popup-header-actions">
+        <button class="popup-action-btn favorite" aria-label="Add to Favorites" aria-pressed="false"><i class="far fa-heart"></i></button>
+        <button class="popup-action-btn share" aria-label="Share Product"><i class="fas fa-share-alt"></i></button>
+      </div>
+    </div>
+
+    <div class="popup-content-wrapper" id="popupContentWrapper">
+      <!-- Product Image Section -->
+      <div class="popup-image-section">
+        <div class="popup-image-container">
+          <img src="" alt="" class="popup-image" id="popupMainImage" loading="lazy">
+        </div>
+       <div class="popup-image-indicators" id="popupImageIndicators"></div>
+      </div>
+
+      <!-- Product Info -->
+      <div class="popup-info">
+        <h1 class="popup-title" id="popupProductTitle"></h1>
+        <div class="popup-weight" id="popupProductWeight"></div>
+
+        <div class="popup-price-section" id="popupPriceSection">
+          <!-- Price will be injected here -->
+        </div>
+
+        <!-- NEW: Grouped meta info -->
+        <div class="popup-meta-info" id="popupMetaInfo">
+          <div class="popup-delivery-time">
+            <span>🚚</span>
+            <strong>Next Day Delivery</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEW: Product Highlights Section -->
+      <div class="popup-highlights">
+        <div class="highlight-item">🐟 Freshly cleaned</div>
+        <div class="highlight-item">💧 Hygienically processed</div>
+        <div class="highlight-item">🍲 Ready to cook</div>
+      </div>
+
+      <!-- Collapsible Details Section -->
+      <div class="popup-details-section">
+        <div class="detail-item" id="productInfoDetailItem">
+          <div class="detail-header">
+            <span>Product Details</span>
+          </div>
+          <div class="detail-content" id="productInfoContent">
+            <!-- Description and Weight content will be injected here by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- NEW: Sticky CTA will be placed here, outside the scrollable wrapper -->
+    <div class="popup-sticky-cta" id="popupStickyCta"></div>
+  </div>
+
+  <!-- Cart Page as Modal -->
+  <div class="cart-modal" id="cartModal" style="--accent: #137a3a; --accent-600: #167a3b;">
+    <header class="header">
+      <div class="header-top">
+        <button class="back-btn" aria-label="Close Cart">
+          <i class="fas fa-times"></i>
+        </button>
+        <h1 class="logo">Your Cart</h1>
+        <div style="width: 36px;"></div>
+      </div>
+    </header>
+  
+    <div class="cart-content-wrapper" id="cartContentWrapper">
+      <!-- Product list -->
+      <section class="cart-products" id="cartItems"></section>
+  
+      <!-- Empty Cart State -->
+      <div id="emptyCart" class="empty-cart" style="display: none;">
+        <div class="illustration" aria-hidden="true">
+          <!-- Inline SVG: seafood cart / basket illustration (simple, stylized) -->
+          <svg width="160" height="140" viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cart illustration">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1">
+                <stop offset="0" stop-color="#e6fbff" />
+                <stop offset="1" stop-color="#dff6fb" />
+              </linearGradient>
+            </defs>
+            <path d="M0 220 Q80 190 160 210 T320 200 L320 260 L0 260 Z" fill="#E9F8FB"/>
+            <rect x="36" y="40" rx="14" ry="14" width="220" height="120" fill="url(#g1)" stroke="#CEEFF6" stroke-width="2" />
+            <path d="M48 52 C20 20, 60 12, 90 36" stroke="#A7D7E3" stroke-width="8" stroke-linecap="round" fill="none" />
+            <g transform="translate(50,58)">
+              <ellipse cx="50" cy="28" rx="40" ry="18" fill="#58B4CC"/>
+              <polygon points="15,28 -6,20 -6,36" fill="#58B4CC"/>
+              <circle cx="78" cy="22" r="4" fill="#062A33"/>
+              <g transform="translate(120,28) scale(0.9)">
+                <path d="M36 16c0 8-10 20-22 20-6 0-12-4-14-8" stroke="#F07A36" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                <circle cx="36" cy="16" r="6" fill="#F07A36"/>
+              </g>
+            </g>
+            <circle cx="240" cy="170" r="16" fill="#0F1724" opacity="0.08" />
+            <circle cx="68" cy="170" r="16" fill="#0F1724" opacity="0.08" />
+          </svg>
+        </div>
+        <h2 class="empty-cart-title">Your cart is empty</h2>
+        <p class="empty-cart-lead">Add some fresh seafood to get started — choose from fish, prawns, crabs and more. We'll keep it fresh and fast.</p>
+      </div>
+  
+      <div id="cartSummaryContainer" style="display: none; padding: 0 16px;">
+        <!-- Progress bar -->
+        <div class="cart-progress-wrap">
+          <div class="cart-progress-card">
+            <div class="cart-progress-text" id="cartProgressText"></div>
+            <div class="cart-bar" aria-hidden="true"><div class="cart-bar-inner" id="cartProgressBar"></div></div>
+          </div>
+        </div>
+  
+        <!-- Bill details -->
+        <section class="cart-bill" aria-labelledby="billHeading">
+          <h2 id="billHeading" class="section-title" style="font-size: 18px; margin-bottom: 8px;">Bill Details</h2>
+          <div class="cart-bill-row"><div>Item Total</div><div id="cartItemTotal">₹0</div></div>
+          <div class="cart-bill-row" id="cartDiscountRow" style="display: none;"><div>Discount</div><div id="cartDiscount" style="color: var(--success-color);">₹0</div></div>
+          <div class="cart-bill-row">
+            <div>
+              Delivery Fee <i class="fas fa-info-circle" title="Free delivery in Manikonda & surrounding areas." style="color: var(--text-secondary); font-size: 12px; cursor: pointer;"></i>
+            </div>
+            <div id="cartDeliveryFee">₹0</div>
+          </div>
+          <div class="cart-bill-row total"><div>To Pay</div><div id="cartToPay">₹0</div></div>
+          <div class="cart-saved center" id="cartSavedMsg" style="display:none"></div>
+        </section>
+  
+        <!-- Coupon -->
+        <div id="cartCouponSection"></div>
+  
+        <!-- Payment options -->
+        <div class="cart-payments" id="paymentOptions" role="radiogroup" aria-label="Payment methods"></div>
+      </div>
+  
+      <!-- bottom CTA is sticky so keep some space at the end of content -->
+      <div style="height:86px"></div>
+    </div>
+  
+    <div class="cart-sticky-ctawrap" id="cartFooter" style="display: none;">
+      <button class="cart-cta checkout-btn" id="cartPlaceOrderBtn">Place Order</button>
+    </div>
+
+    <!-- NEW: Sticky CTA for Empty Cart -->
+    <div class="cart-sticky-ctawrap" id="emptyCartFooter" style="display: none;">
+      <button class="cart-cta empty-cart-btn" id="emptyCartBrowseBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M3 3h2l.4 2M7 13h10l3-8H6.4" stroke="white" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="10" cy="20" r="1.6" fill="white"/>
+          <circle cx="18" cy="20" r="1.6" fill="white"/>
+        </svg>
+        <span>Browse Fresh Seafood</span>
+      </button>
+    </div>
+  </div>
+
   <!-- NEW: Static Breadcrumb Schemas for SEO -->
   <script type="application/ld+json" id="breadcrumb-about">
   {
