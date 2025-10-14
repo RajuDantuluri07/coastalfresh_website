@@ -62,12 +62,10 @@
 
 /* --- REVAMPED: Login Modal Styles (based on new design) --- */
 .login-modal {
-  position: fixed; /* Changed from absolute to fixed */
+  position: fixed;
   top: 0;
-  left: 0; /* Changed from 50% to 0 */
-  transform: none; /* Removed transform */
+  left: 0;
   width: 100%;
-  max-width: var(--app-max-width);
   height: 100%;
   background: var(--bg-light);
   z-index: 1000;
@@ -1107,32 +1105,16 @@ z-index: 2;                 /* sits above input content */
 
 /* Product-popup this ENTIRE block */
 .product-popup {
-position: fixed; /* Changed from absolute to fixed */
+position: fixed;
 top: 0;
-left: 0; /* Changed from 50% to 0 */
-transform: none; /* Removed transform */
+left: 0;
 width: 100%;
-max-width: var(--app-max-width);
 height: 100%; /* FIX: Use 100% instead of 100vh to respect mobile browser UI */
 background: var(--bg-white);
 z-index: 1000;
 display: none; /* Changed from flex to allow self-scrolling */
 flex-direction: column;
 overflow: hidden;
-}
-
-/* For desktop - keep it centered and constrained */
-@media (min-width: 481px) {
-.product-popup {
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  height: 100vh;
-  max-width: var(--app-max-width);
-  border-radius: 0;
-  box-shadow: 0 0 50px rgba(0,0,0,0.2);
-}
 }
 
 
@@ -1687,12 +1669,10 @@ overflow: hidden;
 
 /* --- REVAMPED CART PAGE STYLES --- */
 .cart-modal {
-  position: fixed; /* Changed from absolute to fixed */
+  position: fixed;
   top: 0;
-  left: 0; /* Changed from 50% to 0 */
-  transform: none; /* Removed transform */
+  left: 0;
   width: 100%;
-  max-width: var(--app-max-width);
   height: 100%;
   background: var(--bg-light);
   z-index: 1000;
