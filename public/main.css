@@ -22,7 +22,7 @@
   --card-radius: 12px;
 
   /* === Sizing & Layout === */
-  --app-max-width: 480px;
+  --app-max-width: 720px; /* Increased by 50% from 480px */
   --header-padding: 8px 16px;
   --logo-height: 32px;
   --cart-badge-size: 22px;
