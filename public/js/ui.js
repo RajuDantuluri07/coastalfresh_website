@@ -699,7 +699,7 @@ export const UI = {
             return sum + (isNaN(numQty) ? 0 : numQty);
         }, 0);
 
-        ['cartCount', 'cartCountCatalog', 'navBadge'].forEach(id => {
+        ['cartCount', 'cartCountCatalog', 'navBadge', 'cartCountDesktop'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 if (totalQty > 0) {
