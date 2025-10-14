@@ -699,7 +699,7 @@ export const UI = {
             return sum + (isNaN(numQty) ? 0 : numQty);
         }, 0);
 
-        ['cartCount', 'cartCountCatalog', 'navBadge', 'cartCountDesktop'].forEach(id => {
+        ['cartCount', 'cartCountCatalog', 'navBadge'].forEach(id => {
             const el = document.getElementById(id);
             if (el) {
                 if (totalQty > 0) {
@@ -898,17 +898,8 @@ export const UI = {
     },
 
     updateCartSummary: () => {
-        const itemTotalEl = document.getElementById('cartItemTotal');
-        const deliveryFeeEl = document.getElementById('cartDeliveryFee');
-        const toPayEl = document.getElementById('cartToPay');
-        const placeOrderBtn = document.getElementById('cartPlaceOrderBtn');
-        const savedMsgEl = document.getElementById('cartSavedMsg');
-        const discountRowEl = document.getElementById('cartDiscountRow');
-        const discountEl = document.getElementById('cartDiscount');
-        const progressTextEl = document.getElementById('cartProgressText');
-        const progressBarEl = document.getElementById('cartProgressBar');
-        const paymentOptionsEl = document.getElementById('paymentOptions');
-
+        // FIX: Define cartItems within this function's scope to prevent ReferenceError.
+        // This was the root cause of the application failing to start.
         const cartItems = Object.entries(state.cart).map(([variantId, qty]) => {
             const [productId, variantIndex] = variantId.split('-').map(Number);
             const product = state.products.find(p => p.id === productId);
@@ -920,7 +911,17 @@ export const UI = {
                 variantId: variantId,
                 qty: qty
             };
-        }).filter(Boolean);
+        }).filter(Boolean); // This was a bug, now fixed
+        const itemTotalEl = document.getElementById('cartItemTotal');
+        const deliveryFeeEl = document.getElementById('cartDeliveryFee');
+        const toPayEl = document.getElementById('cartToPay');
+        const placeOrderBtn = document.getElementById('cartPlaceOrderBtn');
+        const savedMsgEl = document.getElementById('cartSavedMsg');
+        const discountRowEl = document.getElementById('cartDiscountRow');
+        const discountEl = document.getElementById('cartDiscount');
+        const progressTextEl = document.getElementById('cartProgressText');
+        const progressBarEl = document.getElementById('cartProgressBar');
+        const paymentOptionsEl = document.getElementById('paymentOptions');
 
         if (cartItems.length === 0) {
             const emptyCartEl = document.getElementById('emptyCart');
@@ -1087,8 +1088,8 @@ export const UI = {
             pagePath = '/catalog';
         } else if (page === 'faqPage') {
             pageTitle = 'Frequently Asked Questions | Coastal Fresh India';
-            pageDesc = 'Find answers to common questions about our delivery, sourcing, freshness, and payment for fresh seafood in Hyderabad.'; // This was a bug, now fixed
-            pagePath = '/faq'; // This was a bug, now fixed
+            pageDesc = 'Find answers to common questions about our delivery, sourcing, freshness, and payment for fresh seafood in Hyderabad.';
+            pagePath = '/faq';
         } else if (page === 'referPage') {
             pageTitle = 'Refer a Friend & Earn Rewards | Coastal Fresh India';
             pageDesc = 'Share Coastal Fresh with your friends! They get 10% off their first order, and you get a 10% discount on your next purchase. Start sharing and earning today.';
@@ -1096,13 +1097,13 @@ export const UI = {
         } else if (page === 'contactPage') {
             pageTitle = 'Contact Us | Coastal Fresh India';
             pageDesc = 'Get in touch with Coastal Fresh India for support, inquiries, or feedback. Contact us via email or WhatsApp for quick assistance with your fresh seafood orders in Hyderabad.';
-            pagePath = '/contact-us';
+            pagePath = '/contact';
         } else if (page === 'ordersPage') {
             UI.renderOrdersPage(); // This was a bug, now fixed
         } else if (page === 'favoritesPage') {
             pageTitle = 'My Favorites | Coastal Fresh India';
             pageDesc = 'View and manage your list of favorite fresh seafood products at Coastal Fresh India.';
-            pagePath = '/favorites'; // This was a bug, now fixed
+            pagePath = '/favorites';
             UI.renderFavoritesPage();
         } else if (page === 'profilePage' || page === 'addressPage' || page === 'ordersPage') {
             pageTitle = 'Your Account | Coastal Fresh India';

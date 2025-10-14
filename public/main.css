@@ -64,8 +64,10 @@
 .login-modal {
   position: fixed;
   top: 0;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
+  max-width: var(--app-max-width);
   height: 100%;
   background: var(--bg-light);
   z-index: 1000;
@@ -262,19 +264,19 @@ body {
 
 /* Desktop background */
 @media (min-width: 481px) {
-  .app {
-    /* On tablet-sized screens, the app is a centered container */
-    max-width: 720px; /* Intermediate width for tablets */
-    margin: 20px auto; /* Add some vertical margin */
-    box-shadow: 0 0 50px rgba(0,0,0,0.1);
-    position: relative;
-    overflow-x: hidden; /* This was a bug, now fixed */
+  body {
+    background-image: url('https://res.cloudinary.com/dpyniai9l/image/upload/v1758106311/Coastalfresh_website_Background_nkpuzo.png');
+    background-size: cover;
+    background-attachment: fixed;
+    background-position: center;
   }
-}
-
-/* NEW: Widen container for large desktop screens */
-@media (min-width: 1200px) {
-  /* This will be replaced by a more comprehensive desktop layout */
+  
+  .app {
+    border-radius: 20px;
+    overflow: hidden;
+    /* FIX: Move padding from body to .app to avoid affecting fixed elements */
+    margin: 20px auto;
+  }
 }
 
 /* Ticker - Now above header */
@@ -916,7 +918,10 @@ z-index: 2;                 /* sits above input content */
   gap: var(--grid-gap);
 }
 
-.card.product { border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+/* --- DEFINITIVE FIX: Product Card Styles from Demo (Blinkit/Zepto style) --- */
+.card.product {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   padding: 12px;
   background: #fff;
   position: relative;
@@ -1015,7 +1020,11 @@ z-index: 2;                 /* sits above input content */
   background: var(--primary-color); /* Use primary color for consistency */
 }
 
-.add-btn, .cart-controls {
+/* Quantity controls that replace the ADD button */
+.cart-controls {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
   display: flex;
   align-items: center;
   background: var(--success-color);
@@ -1023,14 +1032,15 @@ z-index: 2;                 /* sits above input content */
   font-weight: 600;
   border-radius: 6px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  height: 32px; /* Consistent height */
+  z-index: 2;
+  height: 29px; /* Match add-btn height */
 }
 
 .cart-controls .qty-btn {
   background: none;
   border: none;
   width: 28px;
-  height: 32px;
+  height: 29px;
   color: white;
   font-size: 16px;
   cursor: pointer;
@@ -1046,7 +1056,6 @@ z-index: 2;                 /* sits above input content */
   margin-top: 8px;
   display: flex;
   flex-direction: column;
-  flex-grow: 1; /* Allow info to take up available space */
   gap: 4px; /* Small gap between elements */
 }
 
@@ -1107,14 +1116,30 @@ z-index: 2;                 /* sits above input content */
 .product-popup {
 position: fixed;
 top: 0;
-left: 0;
+left: 50%;
+transform: translateX(-50%);
 width: 100%;
+max-width: var(--app-max-width);
 height: 100%; /* FIX: Use 100% instead of 100vh to respect mobile browser UI */
 background: var(--bg-white);
 z-index: 1000;
 display: none; /* Changed from flex to allow self-scrolling */
 flex-direction: column;
 overflow: hidden;
+}
+
+/* For desktop - keep it centered and constrained */
+@media (min-width: 481px) {
+.product-popup {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  height: 100vh;
+  max-width: var(--app-max-width);
+  border-radius: 0;
+  box-shadow: 0 0 50px rgba(0,0,0,0.2);
+}
 }
 
 
@@ -1671,8 +1696,10 @@ overflow: hidden;
 .cart-modal {
   position: fixed;
   top: 0;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
+  max-width: var(--app-max-width);
   height: 100%;
   background: var(--bg-light);
   z-index: 1000;
@@ -2692,12 +2719,15 @@ body.popup-open .bottom-bar {
 /* Catalog page sticky elements */
 #catalog .categories {
   position: sticky;
-  top: 95px; /* Mobile: Ticker (30px) + Header (~65px) */
+  /* Ticker (30px) + Header (107px) */
+  top: 137px;
   background: var(--bg-white);
   z-index: 100;
+  /* Use margin to break out of section padding and padding to restore it */
   margin: 0 -20px;
-  padding: 5px 20px 15px; /* This was a bug, now fixed */
+  padding: 5px 20px 15px;
 }
+/* Adjust for desktop */
 
 @keyframes slideUpAndFadeIn {
   from {
