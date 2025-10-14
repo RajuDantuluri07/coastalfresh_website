@@ -898,8 +898,17 @@ export const UI = {
     },
 
     updateCartSummary: () => {
-        // FIX: Define cartItems within this function's scope to prevent ReferenceError.
-        // This was the root cause of the application failing to start.
+        const itemTotalEl = document.getElementById('cartItemTotal');
+        const deliveryFeeEl = document.getElementById('cartDeliveryFee');
+        const toPayEl = document.getElementById('cartToPay');
+        const placeOrderBtn = document.getElementById('cartPlaceOrderBtn');
+        const savedMsgEl = document.getElementById('cartSavedMsg');
+        const discountRowEl = document.getElementById('cartDiscountRow');
+        const discountEl = document.getElementById('cartDiscount');
+        const progressTextEl = document.getElementById('cartProgressText');
+        const progressBarEl = document.getElementById('cartProgressBar');
+        const paymentOptionsEl = document.getElementById('paymentOptions');
+
         const cartItems = Object.entries(state.cart).map(([variantId, qty]) => {
             const [productId, variantIndex] = variantId.split('-').map(Number);
             const product = state.products.find(p => p.id === productId);
@@ -911,17 +920,7 @@ export const UI = {
                 variantId: variantId,
                 qty: qty
             };
-        }).filter(Boolean); // This was a bug, now fixed
-        const itemTotalEl = document.getElementById('cartItemTotal');
-        const deliveryFeeEl = document.getElementById('cartDeliveryFee');
-        const toPayEl = document.getElementById('cartToPay');
-        const placeOrderBtn = document.getElementById('cartPlaceOrderBtn');
-        const savedMsgEl = document.getElementById('cartSavedMsg');
-        const discountRowEl = document.getElementById('cartDiscountRow');
-        const discountEl = document.getElementById('cartDiscount');
-        const progressTextEl = document.getElementById('cartProgressText');
-        const progressBarEl = document.getElementById('cartProgressBar');
-        const paymentOptionsEl = document.getElementById('paymentOptions');
+        }).filter(Boolean);
 
         if (cartItems.length === 0) {
             const emptyCartEl = document.getElementById('emptyCart');

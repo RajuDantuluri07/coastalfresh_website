@@ -264,18 +264,15 @@ body {
 
 /* Desktop background */
 @media (min-width: 481px) {
-  body {
-    background-image: url('https://res.cloudinary.com/dpyniai9l/image/upload/v1758106311/Coastalfresh_website_Background_nkpuzo.png');
-    background-size: cover;
-    background-attachment: fixed;
-    background-position: center;
-  }
-  
   .app {
-    border-radius: 20px;
-    overflow: hidden;
-    /* FIX: Move padding from body to .app to avoid affecting fixed elements */
-    margin: 20px auto;
+    /* On tablet-sized screens, the app is a centered container */
+    max-width: var(--app-max-width);
+    margin: 0 auto;
+    background: var(--bg-white);
+    min-height: 100%;
+    box-shadow: 0 0 50px rgba(0,0,0,0.1);
+    position: relative;
+    overflow-x: hidden;
   }
 }
 
@@ -919,11 +916,6 @@ z-index: 2;                 /* sits above input content */
 }
 
 /* --- NEW: Desktop Grid Enhancements --- */
-@media (min-width: 992px) {
-  .products {
-    grid-template-columns: repeat(4, 1fr); /* Show 4 products per row on desktop */
-  }
-}
 
 .card.product {
   border-radius: 12px;
@@ -3899,5 +3891,9 @@ body.popup-open .bottom-bar {
     max-width: 1140px;
     margin-left: auto;
     margin-right: auto;
+  }
+  /* NEW: Enhance product grid on desktop */
+  .products {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
