@@ -3742,58 +3742,6 @@ body.popup-open .bottom-bar {
   border-bottom-color: var(--primary-color);
 }
 
-/* --- NEW: Desktop Dropdown Menu Styles --- */
-.desktop-nav-item.dropdown {
-  position: relative;
-}
-
-.desktop-nav-link .fa-chevron-down {
-  font-size: 12px;
-  margin-left: 4px;
-  transition: transform 0.2s ease;
-}
-
-.desktop-nav-item.dropdown:hover .fa-chevron-down {
-  transform: rotate(180deg);
-}
-
-.desktop-dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background: var(--bg-white);
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-  padding: 8px;
-  min-width: 200px;
-  z-index: 1001;
-  opacity: 0;
-  transform: translateY(10px);
-  pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-}
-
-.desktop-nav-item.dropdown:hover .desktop-dropdown-menu {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.desktop-dropdown-item {
-  display: block;
-  padding: 10px 16px;
-  border-radius: 6px;
-  color: var(--text-primary);
-  text-decoration: none;
-  font-size: 15px;
-  font-weight: 500;
-}
-
-.desktop-dropdown-item:hover {
-  background-color: var(--primary-light);
-  color: var(--primary-color);
-}
-
 .desktop-header-actions { display: flex; align-items: center; gap: 16px; }
 
 .desktop-search-container { position: relative; }
