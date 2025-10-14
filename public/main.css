@@ -3684,7 +3684,7 @@ body.popup-open .bottom-bar {
 .desktop-header {
   position: sticky;
   top: 0;
-  z-index: 1000;
+  z-index: 1050; /* Increased to be above modals */
   background: var(--bg-white); /* Add background to prevent content from showing through */
   box-shadow: 0 2px 10px rgba(0,0,0,0.05); /* Add shadow for depth */
 }
@@ -3865,13 +3865,22 @@ body.popup-open .bottom-bar {
 
 /* --- FINAL RESPONSIVE SWITCH --- */
 @media (min-width: 1200px) {
+  /* NEW: On desktop, the body manages the layout */
+  body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
   /* Show desktop elements */
   .desktop-header, .desktop-footer {
     display: block;
   }
 
   /* Hide mobile elements */
-  .app .header, .bottom-bar, .ticker-container {
+  .app .header, .bottom-bar, .ticker-container,
+  /* Hide modals that are part of the mobile .app container */
+  .login-modal, .product-popup, .cart-modal {
     display: none !important;
   }
 
@@ -3881,6 +3890,8 @@ body.popup-open .bottom-bar {
     margin: 0 auto;
     padding-top: 30px;
     padding-bottom: 50px;
+    flex-grow: 1; /* Allow the main content to fill available space */
+    width: 100%;
   }
   
   /* Special handling for homepage sections to be full-width */
