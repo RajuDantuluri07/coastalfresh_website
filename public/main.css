@@ -62,10 +62,10 @@
 
 /* --- REVAMPED: Login Modal Styles (based on new design) --- */
 .login-modal {
-  position: fixed;
+  position: fixed; /* Changed from absolute to fixed */
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0; /* Changed from 50% to 0 */
+  transform: none; /* Removed transform */
   width: 100%;
   max-width: var(--app-max-width);
   height: 100%;
@@ -1112,10 +1112,10 @@ z-index: 2;                 /* sits above input content */
 
 /* Product-popup this ENTIRE block */
 .product-popup {
-position: fixed;
+position: fixed; /* Changed from absolute to fixed */
 top: 0;
-left: 50%;
-transform: translateX(-50%);
+left: 0; /* Changed from 50% to 0 */
+transform: none; /* Removed transform */
 width: 100%;
 max-width: var(--app-max-width);
 height: 100%; /* FIX: Use 100% instead of 100vh to respect mobile browser UI */
@@ -1692,10 +1692,10 @@ overflow: hidden;
 
 /* --- REVAMPED CART PAGE STYLES --- */
 .cart-modal {
-  position: fixed;
+  position: fixed; /* Changed from absolute to fixed */
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0; /* Changed from 50% to 0 */
+  transform: none; /* Removed transform */
   width: 100%;
   max-width: var(--app-max-width);
   height: 100%;
@@ -3826,11 +3826,7 @@ body.popup-open .bottom-bar {
   }
 
   /* Hide mobile elements */
-  .app .header, .bottom-bar, .ticker-container,
-  /* Hide modals that are part of the mobile .app container */
-  .login-modal, .product-popup, .cart-modal {
-    display: none !important;
-  }
+  .app .header, .bottom-bar, .ticker-container { display: none !important; }
 
   /* Adjust main content area */
   .app .page {
