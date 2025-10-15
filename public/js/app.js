@@ -149,18 +149,6 @@ async function init() {
       state.dom.profile.referBtn = document.getElementById('referBtn'); // FIX: Correctly cache the refer button
       state.dom.profile.avatar = document.querySelector('#profilePage .profile-avatar-small');
 
-      // NEW: Cache popup DOM elements
-      state.dom.popup.main = document.getElementById('productPopup');
-      state.dom.popup.title = document.getElementById('popupProductTitle');
-      state.dom.popup.weight = document.getElementById('popupProductWeight');
-      state.dom.popup.priceSection = document.getElementById('popupPriceSection');
-      state.dom.popup.infoContent = document.getElementById('productInfoContent');
-      state.dom.popup.mainImage = document.getElementById('popupMainImage');
-      state.dom.popup.cta = document.getElementById('popupStickyCta');
-      state.dom.popup.contentWrapper = document.getElementById('popupContentWrapper');
-      state.dom.popup.backBtn = state.dom.popup.main.querySelector('.popup-back-btn');
-
-
 
       UI.showInitialSkeletons();
 

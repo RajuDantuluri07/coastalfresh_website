@@ -422,31 +422,26 @@ export const Handlers = {
             }
         });
 
-        document.querySelector('.popup-back-btn').addEventListener('click', UI.closePopup);
-        document.querySelector('.popup-action-btn.favorite').addEventListener('click', Handlers.toggleFavorite);
-        document.querySelector('.popup-action-btn.share').addEventListener('click', Handlers.shareProduct);
-
-        // Event delegation for the dynamic sticky CTA
-        document.getElementById('popupStickyCta').addEventListener('click', (e) => {
-            const addBtn = e.target.closest('.popup-cta-add-btn');
-            const qtyBtn = e.target.closest('.qty-btn');
-            if (addBtn) {
-                Handlers.addPopupToCart();
-            } else if (qtyBtn) {
-                const variantId = `${state.popupProduct?.id}-${state.selectedVariantIndex}`;
-                const change = qtyBtn.classList.contains('inc') ? 1 : -1;
-                Handlers.updateQty(variantId, change, 'popup');
+        // --- NEW: Event listeners for the new product popup design ---
+        const popup = document.getElementById('productPopupOverlay');
+        popup.addEventListener('click', (e) => {
+            // Close button or clicking the overlay background
+            if (e.target.closest('.popup-close-btn') || e.target === popup) {
+                UI.closePopup();
             }
+            // Add to cart button
+            if (e.target.closest('#popupAddToCartBtn')) Handlers.addPopupToCart();
+            // Wishlist button
+            if (e.target.closest('#popupWishlistBtn')) Handlers.toggleFavorite(state.popupProduct.id);
+            // Quantity controls
+            if (e.target.closest('#popupQtyInc')) Handlers.changePopupQty(1);
+            if (e.target.closest('#popupQtyDec')) Handlers.changePopupQty(-1);
         });
 
-        // Product Popup Variant Selection
-        document.getElementById('popupProductWeight').addEventListener('click', (e) => {
-            const variantCard = e.target.closest('.variant-card');
-            if (variantCard && !variantCard.classList.contains('active')) {
-                const newIndex = parseInt(variantCard.dataset.variantIndex, 10);
-                // FIX: Call a more efficient update function instead of re-rendering the whole popup.
-                UI.updatePopupSelection(newIndex);
-            }
+        // Variant selector dropdown
+        document.getElementById('popupVariantSelector').addEventListener('change', (e) => {
+            const newIndex = parseInt(e.target.value, 10);
+            UI.updatePopupSelection(newIndex);
         });
 
         // Coupon section

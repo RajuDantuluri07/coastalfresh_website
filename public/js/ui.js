@@ -332,14 +332,7 @@ export const UI = {
         state.currentProductQty = state.cart[`${product.id}-${state.selectedVariantIndex}`] || 1; // Reflect quantity of selected variant in cart
 
         // Use cached DOM elements for speed
-        const { backBtn } = state.dom.popup;
-
-        // Update favorite button state in popup
-        const favoriteBtn = popup.querySelector('.popup-action-btn.favorite');
-        const isFavorite = state.favorites.has(product.id);
-        favoriteBtn.setAttribute('aria-pressed', isFavorite);
-        favoriteBtn.innerHTML = `<i class="${isFavorite ? 'fas' : 'far'} fa-heart"></i>`;
-        favoriteBtn.style.color = isFavorite ? 'var(--pink)' : 'var(--primary-color)';
+        const backBtn = document.querySelector('#productPopupOverlay .popup-close-btn');
 
         const populatePopup = () => {
             document.getElementById('popupProductTitle').textContent = product.name;
@@ -373,10 +366,6 @@ export const UI = {
 
             UI.updatePopupCta(); // This will also update the total
 
-            document.getElementById('popupImageIndicators').style.display = 'none';
-
-            UI.updatePopupCta();
-            if (contentWrapper) contentWrapper.scrollTop = 0;
 
             // Defer non-critical tasks to run after the popup is visible
             const runDeferredTasks = () => {
