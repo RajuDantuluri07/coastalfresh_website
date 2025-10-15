@@ -225,6 +225,15 @@
     }
 
     /* responsive adjustments */
+    @media(max-width:480px){
+      .cta-card{
+        flex-direction:column;
+        align-items:stretch;
+      }
+      .add-btn{width:100%;}
+      .qty-control{width:100%;}
+    }
+
     @media(min-width:900px){
       .container{padding:0}
       body{padding:28px}
