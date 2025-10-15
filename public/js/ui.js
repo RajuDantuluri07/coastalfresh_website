@@ -332,7 +332,7 @@ export const UI = {
         state.currentProductQty = state.cart[`${product.id}-${state.selectedVariantIndex}`] || 1; // Reflect quantity of selected variant in cart
 
         // Use cached DOM elements for speed
-        const backBtn = document.querySelector('#productPopupOverlay .popup-close-btn');
+        const backBtn = document.querySelector('#productPopupOverlay .back-btn');
 
         const populatePopup = () => {
             document.getElementById('popupProductTitle').textContent = product.name;
@@ -341,7 +341,7 @@ export const UI = {
             const variantSelector = document.getElementById('popupVariantSelector');
             variantSelector.innerHTML = product.variants.map((v, index) => {
                 const displayName = (v.name && v.name !== product.name) ? `${v.name} (${v.net})` : v.net;
-                return `<option value="${index}" ${index === state.selectedVariantIndex ? 'selected' : ''}>${displayName} — ₹${v.finalPrice}</option>`;
+                return `<option value="${index}" ${index === state.selectedVariantIndex ? 'selected' : ''}>${displayName}</option>`;
             }).join('');
 
             UI.updatePopupPrice();
@@ -488,10 +488,6 @@ export const UI = {
             mrpEl.style.display = 'none';
             discountEl.style.display = 'none';
         }
-
-        // Update total
-        // This is now part of updatePopupCta
-        UI.updatePopupCta();
     },
 
     /**
@@ -506,7 +502,7 @@ export const UI = {
         // Update the active state on variant cards
         const variantId = `${state.popupProduct.id}-${state.selectedVariantIndex}`;
         const qtyInCart = state.cart[variantId] || 0;
-        state.currentProductQty = qtyInCart > 0 ? qtyInCart : 0; // If not in cart, qty is 0
+        state.currentProductQty = qtyInCart > 0 ? qtyInCart : 1;
 
         UI.updatePopupPrice();
         UI.updatePopupCta();
@@ -524,11 +520,11 @@ export const UI = {
         const qtyCount = document.getElementById('popupQty');
 
         if (qtyInCart > 0) {
-            addBtn.style.display = 'none';
+            addBtn.style.display = 'none'; // Hide "Add" button
             qtyControls.style.display = 'flex';
             qtyCount.textContent = qtyInCart;
         } else {
-            addBtn.style.display = 'inline-flex';
+            addBtn.style.display = 'inline-flex'; // Show "Add" button
             qtyControls.style.display = 'none';
         }
     },

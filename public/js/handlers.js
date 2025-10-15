@@ -431,24 +431,21 @@ export const Handlers = {
         const popup = document.getElementById('productPopupOverlay');
         popup.addEventListener('click', (e) => {
             // Close button or clicking the overlay background
-            if (e.target.closest('.popup-close-btn') || e.target === popup) {
+            if (e.target.closest('.popup-close-btn') || e.target.closest('.back-btn') || e.target === popup) {
                 UI.closePopup();
             }
             // Add to cart button
             const addToCartBtn = e.target.closest('#popupAddToCartBtn');
             if (addToCartBtn) {
-                // FIX: Correctly handle "Go to Cart" state. This was a bug.
-                if (addToCartBtn.classList.contains('go-to-cart')) {
-                    UI.showCart();
-                } else {
-                    Handlers.addPopupToCart();
-                }
+                Handlers.addPopupToCart();
             }
             // Wishlist button
-            if (e.target.closest('#popupWishlistBtn')) Handlers.toggleFavorite(state.popupProduct.id);
             // Quantity controls
-            if (e.target.closest('#popupQtyInc')) Handlers.changePopupQty(1);
-            if (e.target.closest('#popupQtyDec')) Handlers.changePopupQty(-1);
+            const qtyBtn = e.target.closest('.qty-control button');
+            if (qtyBtn) {
+                const change = qtyBtn.id.includes('Inc') ? 1 : -1;
+                Handlers.changePopupQty(change);
+            }
         });
 
         // Variant selector dropdown
@@ -552,17 +549,15 @@ export const Handlers = {
 
     changePopupQty: (change) => {
         state.currentProductQty = Math.max(1, Math.min(99, state.currentProductQty + change));
-        // FIX: Update total price when quantity changes. This was a bug.
-        UI.updatePopupPrice();
-        UI.updatePopupCta();
+        const variantId = `${state.popupProduct.id}-${state.selectedVariantIndex}`;
+        const newQty = (state.cart[variantId] || 0) + change;
+        Handlers.updateQty(variantId, change, 'popup');
     },
 
     addPopupToCart: () => {
         if (!state.popupProduct) return;
         const variantId = `${state.popupProduct.id}-${state.selectedVariantIndex}`;
         Handlers.addToCart(variantId, state.currentProductQty); 
-        // FIX: Update the button state immediately after adding to cart.
-        UI.updatePopupCta(); 
     },
 
     /**
