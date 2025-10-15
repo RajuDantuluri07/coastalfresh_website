@@ -3164,17 +3164,20 @@ body.popup-open .bottom-bar {
     border-radius: 16px; /* Rounded corners for the modal */
     box-shadow: 0 10px 40px rgba(0,0,0,0.2);
     animation: slideUpAndFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* NEW: Make the modal itself a grid to contain header, content, and footer */
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    overflow: hidden; /* Prevent content from spilling out */
   }
 
-  /* NEW: Create a 2-column grid for the popup content on desktop */
+  /* Create a 2-column grid for the popup content on desktop */
   .product-popup .popup-content-wrapper {
     display: grid;
     grid-template-columns: 40% 60%; /* Image on left, info on right */
     gap: 24px;
     padding: 24px;
     align-items: start;
-    /* NEW: Ensure the grid layout doesn't create horizontal overflow */
-    overflow: hidden;
+    overflow-y: auto; /* Allow the content area to scroll */
   }
 
   .popup-image-section {
@@ -3207,7 +3210,6 @@ body.popup-open .bottom-bar {
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
     box-shadow: none;
     /* Ensure it's at the bottom of the modal content flow */
-    margin-top: auto;
     /* NEW: Center the inner content of the CTA bar */
     display: flex;
     justify-content: center;
