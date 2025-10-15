@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(snapshot => {
                 if (snapshot.empty) {
                     console.log('No matching documents.');
-                    // Handle product not found
                     document.querySelector('.container').innerHTML = '<h1>Product not found</h1>';
                     return;
                 }
@@ -30,52 +29,70 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelector('.container').innerHTML = '<h1>Error loading product</h1>';
             });
     } else {
-        // Handle no product ID
         document.querySelector('.container').innerHTML = '<h1>No product specified</h1>';
     }
 });
 
 function renderProduct(product) {
+    let displayPrice = product.finalPrice;
+    let displayMrp = product.mrp;
+    let displayNet = product.net;
+    let displayGross = product.gross;
+    let displayOffer = product.offer;
+
+    if (product.variants && product.variants.length > 0) {
+        const firstVariant = product.variants[0];
+        displayPrice = firstVariant.finalPrice;
+        displayMrp = firstVariant.mrp;
+        displayNet = firstVariant.net || product.net;
+        displayGross = firstVariant.gross || product.gross;
+    }
+
     document.title = `${product.name} — Coastal Fresh`;
 
-    // Image
     const productImage = document.querySelector('.product-image');
-    productImage.src = product.image;
-    productImage.alt = product.name;
+    if (productImage) {
+        productImage.src = product.image;
+        productImage.alt = product.name;
+    }
 
-    // Title and subline
-    document.querySelector('h1').textContent = product.name;
-    document.querySelector('.subline').textContent = product.desc; // Using desc for subline
+    const h1 = document.querySelector('h1');
+    if (h1) h1.textContent = product.name;
 
-    // Info row
+    const subline = document.querySelector('.subline');
+    if (subline) subline.textContent = product.desc;
+
     const infoRow = document.querySelector('.info-row');
-    infoRow.innerHTML = `
-        <div class="info-item" role="listitem">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden><path d="M12 3v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 7h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 21h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            ${product.net}
-        </div>
-        <div class="info-item">
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden><path d="M3 6h18" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M7 12h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-            Gross: ${product.gross}
-        </div>
-    `;
+    if (infoRow) {
+        infoRow.innerHTML = `
+            <div class="info-item" role="listitem">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden><path d="M12 3v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 7h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 21h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                ${displayNet || ''}
+            </div>
+            <div class="info-item">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden><path d="M3 6h18" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M7 12h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                Gross: ${displayGross || ''}
+            </div>
+        `;
+    }
 
-    // Description
-    document.querySelector('.desc').textContent = product.desc;
+    const desc = document.querySelector('.desc');
+    if (desc) desc.textContent = product.desc;
 
-    // Price
-    document.querySelector('.price .final').textContent = `₹${product.finalPrice}`;
-    if (product.offer > 0) {
-        document.querySelector('.price .mrp').innerHTML = `MRP: <span style="text-decoration:line-through;color:var(--muted)">₹${product.mrp}</span>`;
-        document.querySelector('.discount').textContent = `${product.offer}% off`;
+    const finalPriceEl = document.querySelector('.price .final');
+    if (finalPriceEl) finalPriceEl.textContent = `₹${displayPrice}`;
+    
+    const mrpEl = document.querySelector('.price .mrp');
+    const discountEl = document.querySelector('.discount');
+
+    if (displayOffer > 0) {
+        if (mrpEl) mrpEl.innerHTML = `MRP: <span style="text-decoration:line-through;color:var(--muted)">₹${displayMrp}</span>`;
+        if (discountEl) discountEl.textContent = `${displayOffer}% off`;
     } else {
-        document.querySelector('.price .mrp').style.display = 'none';
-        document.querySelector('.discount').style.display = 'none';
+        if (mrpEl) mrpEl.style.display = 'none';
+        if (discountEl) discountEl.style.display = 'none';
     }
     
-    // Sticky footer price
-    document.querySelector('.sticky-footer .cta-card > div:first-child div:last-child').textContent = `₹${product.finalPrice}`;
-
-    // Note: The add to cart logic is simple and doesn't connect to the main app's cart.
-    // This would need to be integrated with the main cart logic from app.js/handlers.js for a full solution.
+    const stickyPriceEl = document.querySelector('.sticky-footer .cta-card > div:first-child div:last-child');
+    if (stickyPriceEl) stickyPriceEl.textContent = `₹${displayPrice}`;
 }
