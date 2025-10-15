@@ -332,10 +332,11 @@ export const UI = {
         state.currentProductQty = state.cart[`${product.id}-${state.selectedVariantIndex}`] || 1; // Reflect quantity of selected variant in cart
 
         // Use cached DOM elements for speed
-        const popupOverlay = document.getElementById('productPopupOverlay');
+        const popupOverlay = document.getElementById('productPopupOverlay'); // This is the main overlay
 
         const populatePopup = () => {
             document.getElementById('popupProductTitle').textContent = product.name;
+            // FIX: Use a safer way to get the first sentence for the subtitle.
             document.getElementById('popupProductSub').textContent = product.desc.split('.')[0] || ''; // Use first sentence as subtitle
 
             const variantSelector = document.getElementById('popupVariantSelector');
@@ -346,7 +347,7 @@ export const UI = {
 
             UI.updatePopupPrice();
 
-            document.getElementById('popupDescription').textContent = product.desc; // This is now the .popup-note
+            document.getElementById('popupDescription').textContent = product.desc;
 
             const optimizedPopupImage = UI.getOptimizedImageUrl(product.image, 600, 600);
             document.getElementById('popupMainImage').src = optimizedPopupImage;
@@ -355,11 +356,10 @@ export const UI = {
             // Update quantity and total
             const variantId = `${product.id}-${state.selectedVariantIndex}`;
             const qtyInCart = state.cart[variantId] || 0;
-            state.currentProductQty = qtyInCart > 0 ? qtyInCart : 1;
+            state.currentProductQty = qtyInCart > 0 ? qtyInCart : 1; // Reset to 1 if not in cart
             document.getElementById('popupQty').textContent = state.currentProductQty;
 
             UI.updatePopupCta();
-            UI.updatePopupTotal(); // NEW: Update the total price label
 
             const runDeferredTasks = () => {
                 const productSlug = UI.generateProductSlug(product);
@@ -445,7 +445,7 @@ export const UI = {
 
         populatePopup();
         state.isPopupOpen = true;
-        UI.openModal(popupOverlay, popupOverlay.querySelector('.popup-close-btn'));
+        UI.openModal(popupOverlay, popupOverlay.querySelector('#popupVariantSelector'));
         
         // Analytics can also be tracked after the initial render
         window.Analytics.trackEvent('view_item', {
@@ -470,11 +470,12 @@ export const UI = {
         const finalPriceEl = document.getElementById('popupFinalPrice');
 
         if (selectedVariant.mrp > selectedVariant.finalPrice) {
-            finalPriceEl.innerHTML = `₹${selectedVariant.finalPrice} <span style="font-size: 16px; text-decoration: line-through; color: #999; margin-left: 8px;">₹${selectedVariant.mrp}</span>`;
+            // Use CSS classes for styling instead of inline styles for better maintenance
+            finalPriceEl.innerHTML = `₹${selectedVariant.finalPrice} <span class="old-price" style="font-size: 16px; margin-left: 8px;">₹${selectedVariant.mrp}</span>`;
         } else {
             finalPriceEl.textContent = `₹${selectedVariant.finalPrice}`;
         }
-        UI.updatePopupTotal();
+        UI.updatePopupTotal(); // Update total whenever price changes
     },
 
     /**
@@ -519,21 +520,22 @@ export const UI = {
         const qtyInCart = state.cart[variantId] || 0;
 
         const addBtn = document.getElementById('popupAddToCartBtn');
-        const qtyControls = document.getElementById('popupQtyControls');
         const qtyCount = document.getElementById('popupQty');
         
-        addBtn.textContent = 'Add to cart'; // Reset button text
-        addBtn.disabled = false;
-
         if (qtyInCart > 0) {
-            addBtn.textContent = 'Added ✓';
-            addBtn.disabled = true;
+            // If item is in cart, update the quantity display and button text
             qtyCount.textContent = qtyInCart;
-            setTimeout(() => { addBtn.textContent = 'Add more'; addBtn.disabled = false; }, 900);
+            addBtn.textContent = 'Add More';
+            addBtn.disabled = false; // Always enable the button
         } else {
-            qtyCount.textContent = state.currentProductQty;
+            // If not in cart, reset to default state
+            qtyCount.textContent = '1'; // Default quantity is 1
+            state.currentProductQty = 1;
+            addBtn.textContent = 'Add to cart';
+            addBtn.disabled = false;
         }
-    },
+        UI.updatePopupTotal(); // Also update the total price
+    },    
 
     // NEW: Variant Drawer functions
     openVariantDrawer: (productId) => {

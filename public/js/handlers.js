@@ -438,10 +438,10 @@ export const Handlers = {
                 UI.closePopup();
             }
             // Add to cart button
-            const addToCartBtn = e.target.closest('#popupAddToCartBtn');
-            if (addToCartBtn) {
+            if (e.target.closest('#popupAddToCartBtn')) {
                 Handlers.addPopupToCart();
             }
+
             // NEW: Share button in popup
             const shareBtn = e.target.closest('#popupShareBtn');
             if (shareBtn) {
@@ -449,9 +449,9 @@ export const Handlers = {
             }
             // Wishlist button
             // Quantity controls
-            const qtyBtn = e.target.closest('.qty-control button');
+            const qtyBtn = e.target.closest('#popupQtyControls button');
             if (qtyBtn) {
-                const change = qtyBtn.id.includes('Inc') ? 1 : -1;
+                const change = qtyBtn.id === 'popupQtyInc' ? 1 : -1;
                 Handlers.changePopupQty(change);
             }
         });
@@ -556,10 +556,10 @@ export const Handlers = {
     },
 
     changePopupQty: (change) => {
-        state.currentProductQty = Math.max(1, Math.min(99, state.currentProductQty + change));
-        const variantId = `${state.popupProduct.id}-${state.selectedVariantIndex}`;
-        const newQty = (state.cart[variantId] || 0) + change;
-        Handlers.updateQty(variantId, change, 'popup');
+        const newQty = Math.max(1, state.currentProductQty + change);
+        state.currentProductQty = newQty;
+        document.getElementById('popupQty').textContent = newQty;
+        UI.updatePopupTotal();
     },
 
     addPopupToCart: () => {

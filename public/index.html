@@ -701,51 +701,45 @@
 
     <!-- NEW: Updated Product Popup with new design -->
     <div class="product-popup-overlay" id="productPopupOverlay">
-      <div class="product-popup" id="productPopup">
-        <!-- Close/Back buttons remain outside the new card structure for consistent modal control -->
-        <button class="popup-close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
-        <button class="popup-back-btn-mobile" aria-label="Go Back"><i class="fas fa-arrow-left"></i></button>
-    
-        <!-- NEW: Simplified Card Layout -->
-        <article class="popup-card-simple" aria-labelledby="popupProductTitle">
-          <!-- Left Column: Image -->
-          <div class="popup-card-left">
-            <img class="product-image" id="popupMainImage" src="" alt="" loading="lazy">
+      <!-- Close/Back buttons remain outside the new card structure for consistent modal control -->
+      <button class="popup-close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
+      <button class="popup-back-btn-mobile" aria-label="Go Back"><i class="fas fa-arrow-left"></i></button>
+  
+      <!-- NEW: Simplified Card Layout based on user design -->
+      <article class="popup-card-simple" aria-labelledby="popupProductTitle">
+        <!-- Left Column: Image -->
+        <div class="popup-card-left">
+          <img class="product-image" id="popupMainImage" src="" alt="" loading="lazy">
+        </div>
+  
+        <!-- Right Column: Details & Controls -->
+        <div class="popup-card-right">
+          <h1 id="popupProductTitle"></h1>
+          <div id="popupProductSub" class="popup-meta"></div>
+  
+          <div class="popup-price" id="popupFinalPrice"></div>
+  
+          <div id="popupVariantSelectorContainer">
+            <div class="popup-form-label">Choose weight</div>
+            <select id="popupVariantSelector" aria-label="Choose weight"></select>
           </div>
-    
-          <!-- Right Column: Details & Controls -->
-          <div class="popup-card-right">
-            <div class="popup-title-row">
-              <h1 id="popupProductTitle"></h1>
-              <button class="popup-share-btn" id="popupShareBtn" aria-label="Share Product"><i class="fas fa-share-alt"></i></button>
+  
+          <div style="margin-top:10px;">
+            <div class="popup-form-label">Quantity</div>
+            <div id="popupQtyControls" class="popup-qty" role="group" aria-label="Quantity">
+              <button id="popupQtyDec" aria-label="Decrease">−</button>
+              <span id="popupQty">1</span>
+              <button id="popupQtyInc" aria-label="Increase">+</button>
             </div>
-            <div id="popupProductSub" class="popup-meta"></div>
-    
-            <div class="popup-price" id="popupFinalPrice"></div>
-    
-            <div id="popupVariantSelectorContainer">
-              <div class="popup-form-label">Choose weight</div>
-              <select id="popupVariantSelector" aria-label="Choose weight"></select>
-            </div>
-    
-            <div style="margin-top:10px;">
-              <div class="popup-form-label">Quantity</div>
-              <div id="popupQtyControls" class="popup-qty" role="group" aria-label="Quantity">
-                <button id="popupQtyDec" aria-label="Decrease">−</button>
-                <span id="popupQty">1</span>
-                <button id="popupQtyInc" aria-label="Increase">+</button>
-              </div>
-            </div>
-    
-            <div class="popup-total" id="popupTotalLabel"></div>
-    
-            <div style="margin-top:12px">
-              <button class="popup-btn-primary" id="popupAddToCartBtn">Add to cart</button>
-            </div>
-    
-            <div class="popup-note" id="popupDescription"></div>
           </div>
-        </article>
+  
+          <div class="popup-total" id="popupTotalLabel"></div>
+  
+          <div class="popup-note" id="popupDescription"></div>
+        </div>
+      </article>
+      <div class="popup-sticky-cta" id="popupStickyCta">
+        <button class="popup-btn-primary" id="popupAddToCartBtn">Add to cart</button>
       </div>
     </div>
   </div>
