@@ -1114,9 +1114,14 @@ export const UI = {
         }
         UI.updateSEOTags({ title: pageTitle, description: pageDesc, canonicalPath: pagePath });
 
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        const navItem = document.querySelector(`.nav-item[data-page='${page}']`);
-        if (navItem) navItem.classList.add('active');
+        // NEW: Update active state for both top and bottom navigation
+        document.querySelectorAll('.nav-item, .top-nav-item').forEach(n => n.classList.remove('active'));
+        const bottomNavItem = document.querySelector(`.nav-item[data-page='${page}']`);
+        if (bottomNavItem) bottomNavItem.classList.add('active');
+
+        const topNavItem = document.querySelector(`.top-nav-item[data-page='${page}']`);
+        if (topNavItem) topNavItem.classList.add('active');
+
 
         state.currentPage = page;
         window.scrollTo(0, 0);

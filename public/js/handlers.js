@@ -491,6 +491,17 @@ export const Handlers = {
             }
         });
 
+        // NEW: Top Navigation (Desktop)
+        document.getElementById('topNavDesktop').addEventListener('click', e => {
+            e.preventDefault(); // Prevent the link's default # behavior
+            const navItem = e.target.closest('.top-nav-item');
+            if (!navItem) return;
+            const page = navItem.dataset.page;
+            if (page) {
+                UI.showPage(page);
+            }
+        });
+
         // Dynamic Padding & Keyboard Handling for Product Popup
         const popupStickyCta = document.getElementById('popupStickyCta');
         const popupContentWrapper = document.getElementById('popupContentWrapper');

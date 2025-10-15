@@ -344,6 +344,11 @@ body {
   margin-bottom: 12px;
 }
 
+/* Hide desktop navigation on mobile by default */
+.top-nav-desktop {
+  display: none;
+}
+
 /* NEW: Generic class for modal/page headers with a back button */
 .modal-header-main {
   justify-content: flex-start;
@@ -1137,14 +1142,14 @@ max-width: var(--app-max-width);
 height: 100%; /* FIX: Use 100% instead of 100vh to respect mobile browser UI */
 background: var(--bg-white);
 z-index: 1000;
-display: none; /* Changed from flex to allow self-scrolling */
+display: flex; /* Let the parent overlay control visibility */
 flex-direction: column;
 overflow: hidden;
 }
 
 .product-popup-overlay.active {
   display: flex; /* Show the overlay, which in turn shows the popup */
-  /* The .product-popup itself is always display:flex, so we just show its parent */
+  animation: fadeIn 0.2s ease-out; /* Add a subtle fade-in */
 }
 
 /* Updated popup header to match new design */
@@ -1714,12 +1719,13 @@ overflow: hidden;
   max-width: var(--app-max-width);
   height: 100%;
   background: var(--bg-light);
-  z-index: 1051;
-  display: flex; flex-direction: column;
+  z-index: 1051; /* Above product popup */
+  display: flex; /* Let the parent overlay control visibility */
+  flex-direction: column;
   overflow: hidden;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.cart-modal.active { transform: translateX(-50%) translateY(0); }
+.cart-overlay.active .cart-modal { transform: translateX(-50%) translateY(0); }
 
 .cart-content-wrapper {
   flex: 1;
@@ -3181,7 +3187,7 @@ body.popup-open .bottom-bar {
     border-radius: 0;
     box-shadow: -10px 0 30px rgba(0,0,0,0.15);
     transform: translateX(100%); /* Start off-screen to the right */
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -3769,4 +3775,9 @@ body.popup-open .bottom-bar {
 
 @keyframes tick {
   50% { transform: scale(1.05); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
