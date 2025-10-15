@@ -472,22 +472,26 @@ export const UI = {
         const selectedVariant = product.variants[state.selectedVariantIndex];
         if (!selectedVariant) return;
 
-        const priceEl = document.getElementById('popupPrice');
-        const oldPriceEl = document.getElementById('popupOldPrice');
+        const finalPriceEl = document.getElementById('popupFinalPrice');
+        const mrpEl = document.getElementById('popupMrp');
+        const discountEl = document.getElementById('popupDiscount');
 
         if (selectedVariant.mrp > selectedVariant.finalPrice) {
-            priceEl.textContent = `₹${selectedVariant.finalPrice}`;
-            oldPriceEl.textContent = `₹${selectedVariant.mrp}`;
-            oldPriceEl.style.display = 'inline';
+            finalPriceEl.textContent = `₹${selectedVariant.finalPrice}`;
+            mrpEl.textContent = `MRP: ₹${selectedVariant.mrp}`;
+            mrpEl.style.display = 'inline';
+            const discount = Math.round(((selectedVariant.mrp - selectedVariant.finalPrice) / selectedVariant.mrp) * 100);
+            discountEl.textContent = `${discount}% off`;
+            discountEl.style.display = 'inline';
         } else {
-            priceEl.textContent = `₹${selectedVariant.finalPrice}`;
-            oldPriceEl.style.display = 'none';
+            finalPriceEl.textContent = `₹${selectedVariant.finalPrice}`;
+            mrpEl.style.display = 'none';
+            discountEl.style.display = 'none';
         }
 
         // Update total
-        const totalEl = document.getElementById('popupTotal');
-        const totalValue = selectedVariant.finalPrice * state.currentProductQty;
-        totalEl.textContent = `₹${totalValue.toFixed(2)}`;
+        // This is now part of updatePopupCta
+        UI.updatePopupCta();
     },
 
     /**
@@ -502,31 +506,31 @@ export const UI = {
         // Update the active state on variant cards
         const variantId = `${state.popupProduct.id}-${state.selectedVariantIndex}`;
         const qtyInCart = state.cart[variantId] || 0;
-        state.currentProductQty = qtyInCart > 0 ? qtyInCart : 1;
-        document.getElementById('popupQty').textContent = state.currentProductQty;
+        state.currentProductQty = qtyInCart > 0 ? qtyInCart : 0; // If not in cart, qty is 0
 
         UI.updatePopupPrice();
         UI.updatePopupCta();
     },
 
     updatePopupCta: () => {
-        if (!state.popupProduct) return;
+        const product = state.popupProduct;
+        if (!product) return;
 
-        const variantId = `${state.popupProduct.id}-${state.selectedVariantIndex}`;
+        const variantId = `${product.id}-${state.selectedVariantIndex}`;
         const qtyInCart = state.cart[variantId] || 0;
 
-        // Update quantity display
-        document.getElementById('popupQty').textContent = state.currentProductQty;
+        const addBtn = document.getElementById('popupAddToCartBtn');
+        const qtyControls = document.getElementById('popupQtyControls');
+        const qtyCount = document.getElementById('popupQty');
 
-        // Update total price
-        const selectedVariant = state.popupProduct.variants[state.selectedVariantIndex];
-        const totalEl = document.getElementById('popupTotal');
-        if (selectedVariant && totalEl) {
-            const totalValue = selectedVariant.finalPrice * state.currentProductQty;
-            totalEl.textContent = `₹${totalValue.toFixed(2)}`;
+        if (qtyInCart > 0) {
+            addBtn.style.display = 'none';
+            qtyControls.style.display = 'flex';
+            qtyCount.textContent = qtyInCart;
+        } else {
+            addBtn.style.display = 'inline-flex';
+            qtyControls.style.display = 'none';
         }
-
-        // The Add to Cart button is now static, so no innerHTML changes are needed.
     },
 
     // NEW: Variant Drawer functions

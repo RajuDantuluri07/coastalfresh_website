@@ -2934,7 +2934,7 @@ body.popup-open .bottom-bar {
   .product-popup {
     position: relative;
     display: grid;
-    grid-template-columns: 1fr 420px; /* Desktop two-column layout */
+    grid-template-columns: 1fr 1fr; /* Two equal columns for desktop */
     gap: 20px;
     background: var(--bg-white);
     padding: 18px;
@@ -2943,16 +2943,16 @@ body.popup-open .bottom-bar {
     width: 100%;
     max-width: 920px;
     max-height: 90vh;
-    overflow-y: auto;
+    overflow: visible; /* Let the inner columns handle scroll */
     text-align: left; /* Reset text-align for grid content */
   }
 
   /* Hide mobile-specific elements on desktop */
-  .popup-header-mobile, .popup-sticky-footer {
+  .popup-header-mobile {
     display: none;
   }
   .popup-scroll-container {
-    display: contents; /* Make this wrapper have no effect on desktop grid */
+    display: contents; /* Make this wrapper have no effect on desktop grid layout */
   }
 
   .popup-close-btn {
@@ -2967,54 +2967,15 @@ body.popup-open .bottom-bar {
     cursor: pointer;
     z-index: 10;
   }
-
-  .main-image { height: 420px; border-radius: 12px; overflow: hidden; border: 1px solid #e6eef2; }
-  .main-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-  .details { padding: 6px 2px; }
-  .details .title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
-  .details .sub { color: var(--text-secondary); font-size: 13px; margin-bottom: 12px; }
-
-  .price-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 14px; }
-  .price-row .price { font-size: 20px; font-weight: 700; color: var(--primary-color); }
-  .price-row .old { color: var(--text-secondary); text-decoration: line-through; font-size: 14px; }
-  .price-row .badge { display: inline-block; background: #e8f8fb; padding: 6px 10px; border-radius: 999px; color: var(--primary-color); font-weight: 600; font-size: 13px; }
-
-  .selectors { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-  .selectors .select { background: #f8fbfd; border: 1px solid #e6f3f6; padding: 8px 12px; border-radius: 10px; min-width: 110px; }
-
-  .qty { display: flex; align-items: center; gap: 8px; }
-  .btn-square { width: 36px; height: 36px; border-radius: 10px; border: 1px solid #d7e9ee; background: white; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
-  .qty-number { min-width: 44px; text-align: center; font-weight: 600; }
-
-  .add-cart { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
-  .btn-add { background: var(--primary-color); color: white; padding: 12px 18px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(1, 101, 154, 0.18); }
-  .btn-wish { padding: 12px; border-radius: 10px; border: 1px dashed #d6e9ef; background: white; cursor: pointer; font-size: 16px; }
-
-  /* NEW: Style for the "Go to Cart" button state */
-  .btn-add.go-to-cart {
-    background: var(--success-color); /* Change color to green */
-    box-shadow: 0 6px 18px rgba(56, 142, 60, 0.2);
+  .media {
+    position: sticky;
+    top: 0;
+    height: 90vh; /* Make image container take up viewport height */
+    align-self: start;
   }
-
-  .tabs { margin-top: 18px; border-top: 1px solid #eef6f8; padding-top: 12px; }
-  .tab-content { margin-top: 12px; color: #1f2937; line-height: 1.5; }
-  .muted { color: var(--text-secondary); font-size: 13px; }
-
-  /* Mobile stack for new popup */
-  @media (max-width: 880px) {
-    /* This ensures the two-column layout becomes a single column on smaller desktops/tablets, but not on mobile phones */
-    .product-popup {
-      grid-template-columns: 1fr;
-      padding: 14px;
-      max-height: 95vh;
-      height: auto;
-    }
-    .main-image { height: 320px; }
+  .content {
+    overflow-y: auto;
+    height: 90vh; /* Make content scrollable */
   }
 
   /* --- END NEW Product Popup Styles --- */
