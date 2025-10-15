@@ -2934,7 +2934,7 @@ body.popup-open .bottom-bar {
   .product-popup {
     position: relative;
     display: grid;
-    grid-template-columns: 1fr 420px;
+    grid-template-columns: 1fr 420px; /* Desktop two-column layout */
     gap: 20px;
     background: var(--bg-white);
     padding: 18px;

@@ -593,9 +593,7 @@ function populateProductForm(product) {
 
     const deleteBtn = document.getElementById('delete-product-btn');
     if (product) {
-        deleteBtn.style.display = 'block';
-        // FIX: Ensure docId is correctly set on the delete button.
-        // This was missing, causing deletes to fail.
+        deleteBtn.style.display = 'block'; // FIX: Ensure docId is correctly set on the delete button.
         deleteBtn.dataset.docId = product.docId;
     } else {
         deleteBtn.style.display = 'none';
@@ -604,7 +602,7 @@ function populateProductForm(product) {
 
 // Listen for category changes to toggle the variant section
 document.getElementById('product-category').addEventListener('change', () => {
-    // FIX: After toggling the UI, we must also check the state of multi-variant fields.
+    // FIX: After toggling the UI, we must also check the state of multi-variant fields. This was a bug.
     toggleVariantUI();
     checkMultiVariantState();
 });

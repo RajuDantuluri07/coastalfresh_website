@@ -41,7 +41,7 @@ const pages = [
  * @returns {string} The escaped string.
  */
 function escapeXml(unsafe) {
-  // FIX: Ensure the input is a string before trying to replace.
+  // FIX: Ensure the input is a string before trying to replace. This was a bug.
   // If it's not a string (e.g., it's null or undefined), return an empty string.
   if (typeof unsafe !== 'string') {
     return '';

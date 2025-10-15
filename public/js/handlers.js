@@ -278,7 +278,7 @@ export const Handlers = {
             }
 
             // --- FIX: Cart quantity controls ---
-            const cartQtyBtn = target.closest('.cart-item-qty .qty-btn');
+            const cartQtyBtn = target.closest('.cart-item-qty .qty-btn'); // This selector is specific to the cart items
             if (cartQtyBtn) {
                 e.stopPropagation();
                 // FIX: The data-id is on the parent '.cart-item-qty' or '.cart-item-card'

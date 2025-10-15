@@ -366,8 +366,6 @@ export const UI = {
 
             UI.updatePopupCta(); // This will also update the total
 
-
-            // Defer non-critical tasks to run after the popup is visible
             const runDeferredTasks = () => {
                 const productSlug = UI.generateProductSlug(product);
                 const productUrl = `/product/${productSlug}`;
@@ -686,11 +684,11 @@ export const UI = {
         const productCards = document.querySelectorAll(`.product[data-id="${productId}"]`);
         if (productCards.length === 0) return;
     
-        const product = state.products.find(p => p.id === productId);
+        const product = state.products.find(p => p.id === parseInt(productId, 10));
         if (!product) return;
 
         productCards.forEach(card => {
-            // Re-render the entire card's HTML. This is simpler and more robust.
+            // FIX: Re-render the entire card's HTML. This is simpler and more robust.
             card.outerHTML = UI.createProductHTML(product);
         });
     },
@@ -755,7 +753,7 @@ export const UI = {
                 // FIX: Provide a fallback image and an onerror handler for robustness.
                 const placeholderImg = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/food_yircgb.png';
                 const optimizedCartImage = UI.getOptimizedImageUrl(item.image, 128, 128) || placeholderImg;
-                const displayName = UI.getVariantDisplayName(item);
+                const displayName = UI.getVariantDisplayName(item); // FIX: Use helper for consistent naming.
 
                 return `
           <article class="cart-item-card" data-id="${item.variantId}">
@@ -1682,6 +1680,11 @@ export const UI = {
         modalElement.classList.add('active');
         document.body.classList.add('popup-open');
 
+        // NEW: Explicitly hide the bottom bar when a modal opens
+        const bottomBar = document.getElementById('bottomNav');
+        if (bottomBar) {
+            bottomBar.style.display = 'none';
+        }
         const focusableElements = modalElement.querySelectorAll(
             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         );
@@ -1717,6 +1720,12 @@ export const UI = {
 
         modalElement.classList.remove('active');
         document.body.classList.remove('popup-open');
+
+        // NEW: Explicitly show the bottom bar when a modal closes
+        const bottomBar = document.getElementById('bottomNav');
+        if (bottomBar) {
+            bottomBar.style.display = 'flex';
+        }
         if (state.previouslyFocusedElement) state.previouslyFocusedElement.focus();
     },
 
