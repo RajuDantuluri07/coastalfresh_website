@@ -702,32 +702,47 @@
     <!-- NEW: Updated Product Popup with new design -->
     <div class="product-popup-overlay" id="productPopupOverlay">
       <div class="product-popup" id="productPopup">
-        <!-- Close button for the modal -->
-        <button class="popup-close-btn" aria-label="Close product details">&times;</button>
+        <!-- NEW: Mobile-specific header -->
+        <div class="popup-header-mobile">
+          <button class="back-btn" aria-label="Go Back"><i class="fas fa-arrow-left"></i></button>
+          <button class="popup-close-btn" aria-label="Close product details">&times;</button>
+        </div>
 
-        <!-- Left Column: Image Gallery -->
-        <section class="gallery" aria-label="Product image">
-          <div class="main-image" id="popupMainImageContainer">
-            <img src="" alt="" id="popupMainImage" loading="lazy">
-          </div>
-        </section>
-
-        <!-- Right Column: Details -->
-        <aside class="details">
-          <h1 class="title" id="popupProductTitle"></h1>
-          <div class="sub" id="popupProductSub"></div>
-
-          <div class="price-row">
-            <div class="price" id="popupPrice"></div>
-            <div class="old" id="popupOldPrice"></div>
-            <div class="badge" id="popupDeliveryBadge">Free delivery over ₹1500</div>
-          </div>
-
-          <div class="selectors">
-            <div class="select" aria-label="Choose weight">
-              <label class="muted" style="display:block;font-size:12px">Weight</label>
-              <select id="popupVariantSelector" style="border:none;background:transparent;font-weight:600;outline:none"></select>
+        <div class="popup-scroll-container">
+          <!-- Image Gallery -->
+          <section class="gallery" aria-label="Product image">
+            <div class="main-image" id="popupMainImageContainer">
+              <img src="" alt="" id="popupMainImage" loading="lazy">
             </div>
+          </section>
+
+          <!-- Details -->
+          <aside class="details">
+            <h1 class="title" id="popupProductTitle"></h1>
+            <div class="sub" id="popupProductSub"></div>
+
+            <div class="price-row">
+              <div class="price" id="popupPrice"></div>
+              <div class="old" id="popupOldPrice"></div>
+              <div class="badge" id="popupDeliveryBadge">Free delivery over ₹1500</div>
+            </div>
+
+            <div class="selectors">
+              <div class="select" aria-label="Choose weight">
+                <label class="muted" style="display:block;font-size:12px">Weight</label>
+                <select id="popupVariantSelector" style="border:none;background:transparent;font-weight:600;outline:none"></select>
+              </div>
+            </div>
+
+            <div class="tabs">
+              <div class="tab-content" id="popupDescription"></div>
+            </div>
+          </aside>
+        </div>
+
+        <!-- Sticky Footer for CTA -->
+        <div class="popup-sticky-footer">
+          <div class="selectors">
             <div class="select qty" aria-label="Quantity selector">
               <label class="muted" style="display:block;font-size:12px">Quantity</label>
               <div style="display:flex;align-items:center;margin-top:6px">
@@ -736,21 +751,16 @@
                 <button class="btn-square" id="popupQtyInc" aria-label="increase">+</button>
               </div>
             </div>
-            <div style="flex:1;min-width:160px">
+            <div style="flex:1;min-width:100px; text-align: right;">
               <div class="muted" style="font-size:12px">Est. total</div>
               <div style="font-weight:700;margin-top:6px" id="popupTotal"></div>
             </div>
           </div>
-
           <div class="add-cart">
             <button class="btn-add" id="popupAddToCartBtn">Add to cart</button>
             <button class="btn-wish" id="popupWishlistBtn" aria-label="Add to wishlist">♡</button>
           </div>
-
-          <div class="tabs">
-            <div class="tab-content" id="popupDescription"></div>
-          </div>
-        </aside>
+        </div>
       </div>
     </div>
 
