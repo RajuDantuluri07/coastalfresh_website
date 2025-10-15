@@ -702,66 +702,55 @@
     <!-- NEW: Updated Product Popup with new design -->
     <div class="product-popup-overlay" id="productPopupOverlay">
       <div class="product-popup" id="productPopup">
-        <div class="popup-header">
-          <button class="popup-back-btn popup-action-btn" aria-label="Close Product View"><i class="fas fa-arrow-left"></i></button>
-          <div class="popup-header-actions">
-            <button class="popup-action-btn favorite" aria-label="Add to Favorites" aria-pressed="false"><i class="far fa-heart"></i></button>
-            <button class="popup-action-btn share" aria-label="Share Product"><i class="fas fa-share-alt"></i></button>
-          </div>
-        </div>
+        <!-- Close button for the modal -->
+        <button class="popup-close-btn" aria-label="Close Product View">&times;</button>
 
-        <div class="popup-content-wrapper" id="popupContentWrapper">
-          <!-- Product Image Section -->
-          <div class="popup-image-section">
-            <div class="popup-image-container">
-              <img src="" alt="" class="popup-image" id="popupMainImage" loading="lazy">
+        <!-- Left Column: Image Gallery -->
+        <section class="gallery" aria-label="Product image">
+          <div class="main-image" id="popupMainImageContainer">
+            <img src="" alt="" id="popupMainImage" loading="lazy">
+          </div>
+        </section>
+
+        <!-- Right Column: Details -->
+        <aside class="details">
+          <h1 class="title" id="popupProductTitle"></h1>
+          <div class="sub" id="popupProductSub"></div>
+
+          <div class="price-row">
+            <div class="price" id="popupPrice"></div>
+            <div class="old" id="popupOldPrice"></div>
+            <div class="badge" id="popupDeliveryBadge">Free delivery over ₹1500</div>
+          </div>
+
+          <div class="selectors">
+            <div class="select" aria-label="Choose weight">
+              <label class="muted" style="display:block;font-size:12px">Weight</label>
+              <select id="popupVariantSelector" style="border:none;background:transparent;font-weight:600;outline:none"></select>
             </div>
-           <div class="popup-image-indicators" id="popupImageIndicators"></div>
-          </div>
-
-          <!-- Product Info -->
-          <div class="popup-info-column">
-            <div class="popup-info-scrollable">
-              <div class="popup-info">
-                <h1 class="popup-title" id="popupProductTitle"></h1>
-                <div class="popup-weight" id="popupProductWeight"></div>
-
-                <div class="popup-price-section" id="popupPriceSection">
-                  <!-- Price will be injected here -->
-                </div>
-
-                <!-- NEW: Grouped meta info -->
-                <div class="popup-meta-info" id="popupMetaInfo">
-                  <div class="popup-delivery-time">
-                    <span>🚚</span>
-                    <strong>Next Day Delivery</strong>
-                  </div>
-                </div>
-              </div>
-
-              <!-- NEW: Product Highlights Section -->
-              <div class="popup-highlights">
-                <div class="highlight-item">🐟 Freshly cleaned</div>
-                <div class="highlight-item">💧 Hygienically processed</div>
-                <div class="highlight-item">🍲 Ready to cook</div>
-              </div>
-
-              <!-- Collapsible Details Section -->
-              <div class="popup-details-section">
-                <div class="detail-item" id="productInfoDetailItem">
-                  <div class="detail-header">
-                    <span>Product Details</span>
-                  </div>
-                  <div class="detail-content" id="productInfoContent">
-                    <!-- Description and Weight content will be injected here by JS -->
-                  </div>
-                </div>
+            <div class="select qty" aria-label="Quantity selector">
+              <label class="muted" style="display:block;font-size:12px">Quantity</label>
+              <div style="display:flex;align-items:center;margin-top:6px">
+                <button class="btn-square" id="popupQtyDec" aria-label="decrease">−</button>
+                <div class="qty-number" id="popupQty">1</div>
+                <button class="btn-square" id="popupQtyInc" aria-label="increase">+</button>
               </div>
             </div>
-            <!-- Sticky CTA is now INSIDE the right column -->
-            <div class="popup-sticky-cta" id="popupStickyCta"></div>
+            <div style="flex:1;min-width:160px">
+              <div class="muted" style="font-size:12px">Est. total</div>
+              <div style="font-weight:700;margin-top:6px" id="popupTotal"></div>
+            </div>
           </div>
-        </div>
+
+          <div class="add-cart">
+            <button class="btn-add" id="popupAddToCartBtn">Add to cart</button>
+            <button class="btn-wish" id="popupWishlistBtn" aria-label="Add to wishlist">♡</button>
+          </div>
+
+          <div class="tabs">
+            <div class="tab-content" id="popupDescription"></div>
+          </div>
+        </aside>
       </div>
     </div>
 

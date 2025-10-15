@@ -332,7 +332,7 @@ export const UI = {
         state.currentProductQty = state.cart[`${product.id}-${state.selectedVariantIndex}`] || 1; // Reflect quantity of selected variant in cart
 
         // Use cached DOM elements for speed
-        const { main: popup, title, weight, priceSection, infoContent, mainImage, contentWrapper, backBtn } = state.dom.popup;
+        const { backBtn } = state.dom.popup;
 
         // Update favorite button state in popup
         const favoriteBtn = popup.querySelector('.popup-action-btn.favorite');
@@ -342,39 +342,36 @@ export const UI = {
         favoriteBtn.style.color = isFavorite ? 'var(--pink)' : 'var(--primary-color)';
 
         const populatePopup = () => {
-            title.textContent = product.name;
+            document.getElementById('popupProductTitle').textContent = product.name;
+            document.getElementById('popupProductSub').textContent = product.desc.split('.')[0]; // Use first sentence as subtitle
 
-            // FIX: Only show variant selector for specific categories with multiple variants.
-            const showVariantSelector = (product.category === 'Prawns' || product.category === 'Pickles') && product.variants && product.variants.length > 1;
-
-            if (showVariantSelector) {
-                weight.innerHTML = product.variants.map((v, index) => {
-                    const isSelected = index === state.selectedVariantIndex;
-                    // FIX: Display variant name intelligently to avoid duplication.
-                    const variantDisplayName = (v.name && v.name !== product.name) ? `${v.name} (${v.net})` : v.net;
-                    return `
-                        <div class="variant-card ${isSelected ? 'active' : ''}" data-variant-index="${index}" role="radio" aria-checked="${isSelected}" tabindex="0">
-                            <div class="variant-name">${variantDisplayName}</div>
-                        </div>`;
-                }).join('');
-            } else if (product.variants && product.variants.length === 1) {
-                // For single-variant products, just show the net weight without a selector.
-                weight.innerHTML = `<div class="variant-card active"><div class="variant-name">${product.variants[0]?.net || ''}</div></div>`;
-            } else {
-                // Fallback if no variants exist
-                weight.innerHTML = '';
-            }
+            const variantSelector = document.getElementById('popupVariantSelector');
+            variantSelector.innerHTML = product.variants.map((v, index) => {
+                const displayName = (v.name && v.name !== product.name) ? `${v.name} (${v.net})` : v.net;
+                return `<option value="${index}" ${index === state.selectedVariantIndex ? 'selected' : ''}>${displayName} — ₹${v.finalPrice}</option>`;
+            }).join('');
 
             UI.updatePopupPrice();
 
-            const selectedVariant = product.variants[state.selectedVariantIndex];
-            infoContent.innerHTML = `
-                <p>${product.desc}</p>
-                <p style="margin-top: 16px;"><strong>Gross Wt:</strong> ${selectedVariant?.gross || ''} | <strong>Net Wt:</strong> ${selectedVariant?.net || ''}<br><small>Net weight is after cleaning. Weight loss varies by product.</small></p>`;
+            document.getElementById('popupDescription').innerHTML = `<p>${product.desc}</p>`;
 
             const optimizedPopupImage = UI.getOptimizedImageUrl(product.image, 600, 600);
-            mainImage.src = optimizedPopupImage;
-            mainImage.alt = `High-quality ${DOMPurify.sanitize(product.name)} from Coastal Fresh India`;
+            document.getElementById('popupMainImage').src = optimizedPopupImage;
+            document.getElementById('popupMainImage').alt = `High-quality ${DOMPurify.sanitize(product.name)} from Coastal Fresh India`;
+
+            // Update favorite button
+            const wishlistBtn = document.getElementById('popupWishlistBtn');
+            const isFavorite = state.favorites.has(product.id);
+            wishlistBtn.textContent = isFavorite ? '♥' : '♡';
+            wishlistBtn.setAttribute('aria-pressed', isFavorite);
+
+            // Update quantity and total
+            const variantId = `${product.id}-${state.selectedVariantIndex}`;
+            const qtyInCart = state.cart[variantId] || 0;
+            state.currentProductQty = qtyInCart > 0 ? qtyInCart : 1;
+            document.getElementById('popupQty').textContent = state.currentProductQty;
+
+            UI.updatePopupCta(); // This will also update the total
 
             document.getElementById('popupImageIndicators').style.display = 'none';
 
@@ -488,18 +485,22 @@ export const UI = {
         const selectedVariant = product.variants[state.selectedVariantIndex];
         if (!selectedVariant) return;
 
-        const priceSection = state.dom.popup.priceSection;
+        const priceEl = document.getElementById('popupPrice');
+        const oldPriceEl = document.getElementById('popupOldPrice');
 
         if (selectedVariant.mrp > selectedVariant.finalPrice) {
-            const savings = selectedVariant.mrp - selectedVariant.finalPrice;
-            priceSection.innerHTML = `
-                <span class="popup-price-final">₹${selectedVariant.finalPrice}</span>
-                <span class="popup-price-mrp">₹${selectedVariant.mrp}</span>
-                <span class="popup-price-savings-badge">SAVE ₹${savings}</span>
-            `;
+            priceEl.textContent = `₹${selectedVariant.finalPrice}`;
+            oldPriceEl.textContent = `₹${selectedVariant.mrp}`;
+            oldPriceEl.style.display = 'inline';
         } else {
-            priceSection.innerHTML = `<span class="popup-price-final">₹${selectedVariant.finalPrice}</span>`;
+            priceEl.textContent = `₹${selectedVariant.finalPrice}`;
+            oldPriceEl.style.display = 'none';
         }
+
+        // Update total
+        const totalEl = document.getElementById('popupTotal');
+        const totalValue = selectedVariant.finalPrice * state.currentProductQty;
+        totalEl.textContent = `₹${totalValue.toFixed(2)}`;
     },
 
     /**
@@ -512,52 +513,33 @@ export const UI = {
         state.selectedVariantIndex = newIndex;
 
         // Update the active state on variant cards
-        document.querySelectorAll('#popupProductWeight .variant-card').forEach((card, index) => {
-            card.classList.toggle('active', index === newIndex);
-            card.setAttribute('aria-checked', index === newIndex);
-        });
+        const variantId = `${state.popupProduct.id}-${state.selectedVariantIndex}`;
+        const qtyInCart = state.cart[variantId] || 0;
+        state.currentProductQty = qtyInCart > 0 ? qtyInCart : 1;
+        document.getElementById('popupQty').textContent = state.currentProductQty;
 
         UI.updatePopupPrice();
         UI.updatePopupCta();
     },
 
     updatePopupCta: () => {
-        const ctaContainer = document.getElementById('popupStickyCta');
-        if (!state.popupProduct || !ctaContainer) return;
+        if (!state.popupProduct) return;
 
         const variantId = `${state.popupProduct.id}-${state.selectedVariantIndex}`;
         const qtyInCart = state.cart[variantId] || 0;
-        const isInCart = qtyInCart > 0;
 
-        const totalQtyInCart = Object.values(state.cart).reduce((sum, qty) => sum + Number(qty), 0);
+        // Update quantity display
+        document.getElementById('popupQty').textContent = state.currentProductQty;
 
-        if (isInCart) {
-            ctaContainer.innerHTML = `
-            <div class="popup-sticky-cta-inner">
-              <div class="popup-cta-left">
-                <button class="popup-cta-view-cart" id="popupViewCartBtn">
-                  <i class="fas fa-shopping-bag"></i>
-                  <span>View Cart</span>
-                  <span class="cart-badge">${totalQtyInCart}</span>
-                </button>
-              </div>
-              <div class="popup-cta-right">
-                <div class="popup-cta-qty-selector" data-id="${variantId}">
-                  <button class="qty-btn dec" aria-label="Decrease quantity">-</button>
-                  <span class="qty" aria-live="polite">${qtyInCart}</span>
-                  <button class="qty-btn inc" aria-label="Increase quantity">+</button>
-                </div>
-              </div>
-            </div>`;
-            document.getElementById('popupViewCartBtn').addEventListener('click', () => UI.showCart());
-        } else {
-            const selectedVariant = state.popupProduct.variants[state.selectedVariantIndex];
-            ctaContainer.innerHTML = `
-        <div class="popup-sticky-cta-inner">
-          <span class="popup-cta-price">₹${selectedVariant.finalPrice}</span>
-          <button class="popup-cta-add-btn">Add to Cart</button>
-        </div>`;
+        // Update total price
+        const selectedVariant = state.popupProduct.variants[state.selectedVariantIndex];
+        const totalEl = document.getElementById('popupTotal');
+        if (selectedVariant && totalEl) {
+            const totalValue = selectedVariant.finalPrice * state.currentProductQty;
+            totalEl.textContent = `₹${totalValue.toFixed(2)}`;
         }
+
+        // The Add to Cart button is now static, so no innerHTML changes are needed.
     },
 
     // NEW: Variant Drawer functions

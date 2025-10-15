@@ -1117,20 +1117,6 @@ z-index: 2;                 /* sits above input content */
   backdrop-filter: blur(1px);
 }
 
-/* --- NEW: Product Popup Overlay --- */
-.product-popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1000;
-  display: none; /* Hidden by default */
-  background: rgba(0, 0, 0, 0.5); /* Dimming overlay */
-  align-items: center;
-  justify-content: center;
-}
-
 /* Product-popup this ENTIRE block */
 .product-popup {
 position: fixed;
@@ -1138,18 +1124,16 @@ top: 0;
 left: 50%;
 transform: translateX(-50%);
 width: 100%;
-max-width: var(--app-max-width);
 height: 100%; /* FIX: Use 100% instead of 100vh to respect mobile browser UI */
 background: var(--bg-white);
 z-index: 1000;
-display: flex; /* Let the parent overlay control visibility */
+display: none; /* Let the parent overlay control visibility */
 flex-direction: column;
 overflow: hidden;
 }
 
 .product-popup-overlay.active {
-  display: flex; /* Show the overlay, which in turn shows the popup */
-  animation: fadeIn 0.2s ease-out; /* Add a subtle fade-in */
+  display: block; /* Show the overlay, which in turn shows the popup */
 }
 
 /* Updated popup header to match new design */
@@ -1161,95 +1145,6 @@ overflow: hidden;
   background: var(--bg-white);
   border-bottom: 1px solid var(--border-color);
   z-index: 10;
-  flex-shrink: 0; /* Prevent header from shrinking */
-}
-
-.popup-header-actions {
-  display: flex;
-  gap: 8px; /* Space between favorite and share icons */
-}
-
-.popup-action-btn {
-  width: 36px; /* Larger touch target */
-  height: 36px; /* Larger touch target */
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 20px; /* Larger icon */
-  color: var(--primary-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: background-color 0.2s;
-}
-
-.popup-action-btn:active {
-  background-color: var(--primary-light);
-}
-
-/* Product Image Section */
-.popup-image-section {
-  position: relative;
-  background: var(--bg-white);
-  padding: 16px 20px;
-}
-
-.popup-image-container {
-  position: relative;
-  width: 100%;
-  height: 200px; /* Further reduced height for a more compact look */
-  background: var(--bg-light);
-  border-radius: var(--radius-img);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.popup-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: var(--radius-img);
-}
-
-.popup-image-nav {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(0,0,0,0.5);
-  color: white;
-  border: none;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.popup-image-indicators {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 12px;
-}
-
-.popup-indicator {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #ddd;
-}
-
-.popup-indicator.active {
-  background: #333;
-}
-
-/* Product Info */
-.popup-info {
-  padding: 12px 20px 20px; /* Reduced top padding */
-  background: var(--bg-white);
 }
 
 /* NEW: Grouped meta info below price */
@@ -1261,15 +1156,6 @@ overflow: hidden;
   padding: 12px;
   background: var(--bg-light);
   border-radius: 12px;
-}
-
-.popup-delivery-time {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 400;
 }
 
 .popup-delivery-time strong {
@@ -1291,13 +1177,6 @@ overflow: hidden;
   font-size: 12px;
   color: var(--text-primary);
   font-weight: 500;
-}
-
-.popup-title {
-  font-size: 20px; /* H1 Title */
-  font-weight: 700; /* UPDATED */
-  margin-bottom: 4px;
-  color: var(--text-primary);
 }
 
 /* NEW: Card-style variant selector */
@@ -1365,14 +1244,6 @@ overflow: hidden;
   display: inline-block; /* To allow margin-top */
 }
 
-.popup-price-section {
-  display: flex; 
-  align-items: baseline; /* Align by baseline for different font sizes */
-  gap: 8px;
-  margin-bottom: 4px; /* Reduced margin */
-  flex-wrap: wrap; /* Allow wrapping on small screens */
-}
-
 /* NEW: Price presentation styles */
 .popup-price-final { font-size: 24px; font-weight: 600; color: var(--text-primary); }
 .popup-price-mrp { font-size: 16px; color: var(--text-secondary); text-decoration: line-through; opacity: 0.7; }
@@ -1384,19 +1255,6 @@ overflow: hidden;
   padding: 4px 8px;
   border-radius: 6px;
   border: 1px solid var(--success-color);
-}
-
-.popup-details-btn {
-  color: var(--success-color);
-  background: none;
-  border: none;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-bottom: 20px;
 }
 
 .popup-feature {
@@ -1427,26 +1285,11 @@ overflow: hidden;
   color: var(--text-secondary);
 }
 
-/* NEW: Product Highlights Section */
-.popup-highlights {
-  display: flex;
-  justify-content: space-around;
-  padding: 16px 20px;
-  background: var(--bg-white);
-  border-top: 1px solid var(--border-color);
-}
-
 .highlight-item {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
   text-align: center;
-}
-
-/* --- Product Details Accordion --- */
-.popup-details-section {
-  padding: 0 20px;
-  background: var(--bg-white);
 }
 
 .detail-item {
@@ -1488,13 +1331,6 @@ overflow: hidden;
   padding: 0 0 16px 0 !important; /* Always show padding */
 }
 
-/* Highlights Section */
-.popup-highlights-section {
-  padding: 16px 20px;
-  background: var(--bg-light);
-  border-top: 1px solid var(--border-color);
-}
-
 .popup-highlights-header {
   display: flex;
   justify-content: space-between;
@@ -1504,11 +1340,6 @@ overflow: hidden;
   transition: background-color 0.2s;
 }
 
-.popup-highlights-title {
-  font-size: 18px;
-  font-weight: 600; /* UPDATED */
-}
-
 .popup-expand-btn {
   background: none;
   border: none;
@@ -1516,11 +1347,6 @@ overflow: hidden;
   cursor: pointer;
   color: var(--text-secondary);
   transition: transform 0.3s;
-}
-
-.popup-highlights-content {
-  padding-top: 0;
-  display: none; /* Hidden by default */
 }
 
 .popup-highlight-item {
@@ -1547,16 +1373,6 @@ overflow: hidden;
   font-weight: 400;
 }
 
-/* NEW: Make content wrapper scrollable */
-.popup-content-wrapper {
-  flex: 1; /* Allow this to grow and fill space */
-  overflow-y: auto; /* Enable vertical scrolling for the main content */
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-  width: 100%;
-  /* STICKY FOOTER: Add padding to prevent content from being hidden by the fixed footer */
-  padding-bottom: 100px; /* Default padding, JS will adjust it */
-}
-
 /* --- NEW: Sticky Product Page CTA --- */
 .popup-sticky-cta {
   position: fixed;
@@ -1575,13 +1391,6 @@ overflow: hidden;
   padding-bottom: calc(12px + env(safe-area-inset-bottom));
 }
 
-/* Hide CTA when keyboard is open */
-.popup-sticky-cta.keyboard-open {
-  transform: translateX(-50%) translateY(100%);
-  opacity: 0;
-  pointer-events: none;
-}
-
 .popup-sticky-cta-inner {
   display: flex;
   align-items: center;
@@ -1595,19 +1404,6 @@ overflow: hidden;
   white-space: nowrap;
 }
 
-.popup-cta-add-btn {
-  background: var(--success-color);
-  color: white;
-  border: none;
-  padding: 14px 24px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s;
-  flex-grow: 1;
-  box-shadow: 0 4px 12px rgba(56, 142, 60, 0.4);
-}
 .popup-cta-add-btn:active {
   transform: scale(0.98);
   filter: brightness(1.1);
@@ -1620,23 +1416,6 @@ overflow: hidden;
 .popup-cta-right {
   flex-shrink: 0;
 }
-.popup-cta-view-cart {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 14px;
-  border-radius: 12px;
-  background: var(--primary-color);
-  color: white;
-  font-size: 16px;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(1, 101, 154, 0.3);
-  position: relative; /* For badge positioning */
-}
 .popup-cta-view-cart .cart-badge {
   position: absolute;
   top: -5px;
@@ -1648,11 +1427,6 @@ overflow: hidden;
   border: 2px solid var(--bg-white);
 }
 
-.popup-cta-add-btn:active {
-  transform: scale(0.98);
-  filter: brightness(1.1);
-}
-
 /* --- NEW: Quantity Selector for Sticky CTA --- */
 .popup-cta-qty-selector {
   display: flex;
@@ -1662,23 +1436,6 @@ overflow: hidden;
   border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 4px;
-}
-
-.popup-cta-qty-selector .qty-btn {
-  background: var(--bg-white);
-  border: none;
-  border-radius: 8px;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 20px;
-  font-weight: 400;
-  color: var(--primary-color);
-  transition: all 0.2s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .popup-cta-qty-selector .qty-btn:active {
@@ -1693,10 +1450,6 @@ overflow: hidden;
   text-align: center;
   color: var(--text-primary);
 }
-.popup-cta-add-btn {
-  margin-left: auto; /* Push the add button to the right */
-}
-
 /* --- REVAMPED CART PAGE STYLES --- */
 .cart-overlay {
   position: fixed;
@@ -3153,74 +2906,86 @@ body.popup-open .bottom-bar {
   }
 
   /* --- DESKTOP: Product Popup as Modal --- */
-  .product-popup {
-    position: relative; /* Override fixed position */
-    transform: none; /* Override transform */
-    left: auto; top: auto; /* Override positioning */
-    max-width: 860px; /* Set a max-width for the modal */
-    width: 90vw;
-    height: auto; /* Height is determined by content */
-    max-height: 90vh; /* Limit height to 90% of viewport */
-    border-radius: 16px; /* Rounded corners for the modal */
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    animation: slideUpAndFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex; /* Use flexbox for the main modal structure */
-    overflow: hidden; /* Prevent content from spilling out */
-  }
 
-  /* Create a 2-column grid for the popup content on desktop */
-  .product-popup .popup-content-wrapper {
-    display: grid;
-    grid-template-columns: 40% 60%; /* Image on left, info on right */
-    gap: 0; /* Remove gap, padding will handle it */
-    padding: 24px;
-    align-items: start;
-    overflow-y: auto; /* Allow the content area to scroll */
-  }
-
-  .popup-image-section {
-    padding: 0; /* Reset padding */
-    position: sticky; /* Make image sticky on scroll */
-    top: 0;
-  }
-
-  /* NEW: This is the new right-hand column container */
-  .popup-info-column {
-    display: flex;
-    flex-direction: column;
-    height: 100%; /* Make it fill the available height */
-    overflow: hidden;
-    padding-left: 24px; /* Create space from the image column */
-  }
-
-  /* NEW: This is the scrollable part of the right column */
-  .popup-info-scrollable {
-    overflow-y: auto;
-    flex-grow: 1; /* Allow it to take up all available space */
-  }
-
-  .popup-info, .popup-highlights, .popup-details-section {
-    padding: 0; /* Reset padding on these sections */
-  }
-
-  .popup-header .popup-back-btn {
-    /* On desktop, the back button should be a close (X) icon */
-    content: '\f00d'; /* FontAwesome times icon */
-    font-family: "Font Awesome 6 Free";
-    font-weight: 900;
-  }
-
-  .popup-sticky-cta {
-    position: relative; /* Override fixed position */
-    transform: none; /* Override transform */
-    border-top: 1px solid var(--border-color); /* Add a separator line */
-    padding: 12px 24px; /* Match horizontal padding of content */
-    padding-bottom: calc(12px + env(safe-area-inset-bottom));
-    box-shadow: none;
-    /* NEW: Center the inner content of the CTA bar */
-    display: flex;
+  /* --- NEW: Product Popup Styles from Example --- */
+  .product-popup-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    display: none;
+    align-items: center;
     justify-content: center;
+    padding: 16px;
   }
+  .product-popup-overlay.active { display: flex; }
+
+  .product-popup {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 20px;
+    background: var(--bg-white);
+    padding: 18px;
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 920px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .popup-close-btn {
+    position: absolute;
+    top: 10px; right: 10px;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-light);
+    font-size: 20px;
+    cursor: pointer;
+    z-index: 10;
+  }
+
+  .main-image { height: 420px; border-radius: 12px; overflow: hidden; border: 1px solid #e6eef2; }
+  .main-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .details { padding: 6px 2px; }
+  .details .title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .details .sub { color: var(--text-secondary); font-size: 13px; margin-bottom: 12px; }
+
+  .price-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .price-row .price { font-size: 20px; font-weight: 700; color: var(--primary-color); }
+  .price-row .old { color: var(--text-secondary); text-decoration: line-through; font-size: 14px; }
+  .price-row .badge { display: inline-block; background: #e8f8fb; padding: 6px 10px; border-radius: 999px; color: var(--primary-color); font-weight: 600; font-size: 13px; }
+
+  .selectors { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .selectors .select { background: #f8fbfd; border: 1px solid #e6f3f6; padding: 8px 12px; border-radius: 10px; min-width: 110px; }
+
+  .qty { display: flex; align-items: center; gap: 8px; }
+  .btn-square { width: 36px; height: 36px; border-radius: 10px; border: 1px solid #d7e9ee; background: white; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+  .qty-number { min-width: 44px; text-align: center; font-weight: 600; }
+
+  .add-cart { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
+  .btn-add { background: var(--primary-color); color: white; padding: 12px 18px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(1, 101, 154, 0.18); }
+  .btn-wish { padding: 12px; border-radius: 10px; border: 1px dashed #d6e9ef; background: white; cursor: pointer; font-size: 16px; }
+
+  .tabs { margin-top: 18px; border-top: 1px solid #eef6f8; padding-top: 12px; }
+  .tab-content { margin-top: 12px; color: #1f2937; line-height: 1.5; }
+  .muted { color: var(--text-secondary); font-size: 13px; }
+
+  /* Mobile stack for new popup */
+  @media (max-width: 880px) {
+    .product-popup {
+      grid-template-columns: 1fr;
+      padding: 14px;
+      max-height: 95vh;
+      height: auto;
+    }
+    .main-image { height: 320px; }
+  }
+
+  /* --- END NEW Product Popup Styles --- */
 
   /* --- DESKTOP: Cart as Side Panel --- */
   .cart-modal {
