@@ -2963,12 +2963,12 @@ body.popup-open .bottom-bar {
   .media {
     position: sticky;
     top: 0;
-    height: 90vh; /* Make image container take up viewport height */
-    align-self: start;
+    height: auto; /* Let the image determine the height */
+    align-self: flex-start; /* Prevent stretching */
   }
   .content {
     overflow-y: auto;
-    height: 90vh; /* Make content scrollable */
+    max-height: calc(90vh - 120px); /* Make content scrollable */
   }
 
   /* --- END NEW Product Popup Styles --- */
