@@ -332,7 +332,7 @@ export const UI = {
         state.currentProductQty = state.cart[`${product.id}-${state.selectedVariantIndex}`] || 1; // Reflect quantity of selected variant in cart
 
         // Use cached DOM elements for speed
-        const backBtn = document.querySelector('#productPopupOverlay .popup-back-btn-mobile');
+        const popupOverlay = document.getElementById('productPopupOverlay');
 
         const populatePopup = () => {
             document.getElementById('popupProductTitle').textContent = product.name;
@@ -346,19 +346,7 @@ export const UI = {
 
             UI.updatePopupPrice();
 
-            document.getElementById('popupDescription').textContent = product.desc;
-
-            // NEW: Populate info row
-            const infoRow = document.getElementById('popupInfoRow');
-            const primaryVariant = product.variants[0];
-            infoRow.innerHTML = `
-                <div class="info-item" role="listitem">
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden><path d="M12 3v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 7h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 21h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                    <span>${primaryVariant.net || 'N/A'}</span>
-                </div>
-                ${primaryVariant.pieces ? `<div class="info-item"><svg viewBox="0 0 24 24" fill="none" aria-hidden><path d="M3 6h18" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M7 12h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span>${primaryVariant.pieces} Pieces</span></div>` : ''}
-                ${primaryVariant.serves ? `<div class="info-item"><svg viewBox="0 0 24 24" fill="none" aria-hidden><path d="M12 2v20" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M4 10h16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span>Serves ${primaryVariant.serves}</span></div>` : ''}
-            `;
+            document.getElementById('popupDescription').textContent = product.desc; // This is now the .popup-note
 
             const optimizedPopupImage = UI.getOptimizedImageUrl(product.image, 600, 600);
             document.getElementById('popupMainImage').src = optimizedPopupImage;
@@ -370,7 +358,8 @@ export const UI = {
             state.currentProductQty = qtyInCart > 0 ? qtyInCart : 1;
             document.getElementById('popupQty').textContent = state.currentProductQty;
 
-            UI.updatePopupCta(); // This will also update the total
+            UI.updatePopupCta();
+            UI.updatePopupTotal(); // NEW: Update the total price label
 
             const runDeferredTasks = () => {
                 const productSlug = UI.generateProductSlug(product);
@@ -456,7 +445,7 @@ export const UI = {
 
         populatePopup();
         state.isPopupOpen = true;
-        UI.openModal(document.getElementById('productPopupOverlay'), backBtn);
+        UI.openModal(popupOverlay, popupOverlay.querySelector('.popup-close-btn'));
         
         // Analytics can also be tracked after the initial render
         window.Analytics.trackEvent('view_item', {
@@ -479,21 +468,28 @@ export const UI = {
         if (!selectedVariant) return;
 
         const finalPriceEl = document.getElementById('popupFinalPrice');
-        const mrpEl = document.getElementById('popupMrp');
-        const discountEl = document.getElementById('popupDiscount');
 
         if (selectedVariant.mrp > selectedVariant.finalPrice) {
-            finalPriceEl.textContent = `₹${selectedVariant.finalPrice}`;
-            mrpEl.textContent = `₹${selectedVariant.mrp}`;
-            mrpEl.style.display = 'inline';
-            const discount = Math.round(((selectedVariant.mrp - selectedVariant.finalPrice) / selectedVariant.mrp) * 100);
-            discountEl.textContent = `${discount}% off`;
-            discountEl.style.display = 'inline';
+            finalPriceEl.innerHTML = `₹${selectedVariant.finalPrice} <span style="font-size: 16px; text-decoration: line-through; color: #999; margin-left: 8px;">₹${selectedVariant.mrp}</span>`;
         } else {
             finalPriceEl.textContent = `₹${selectedVariant.finalPrice}`;
-            mrpEl.style.display = 'none';
-            discountEl.style.display = 'none';
         }
+        UI.updatePopupTotal();
+    },
+
+    /**
+     * NEW: Calculates and updates the total price in the new popup design.
+     */
+    updatePopupTotal: () => {
+        const product = state.popupProduct;
+        if (!product) return;
+
+        const selectedVariant = product.variants[state.selectedVariantIndex];
+        if (!selectedVariant) return;
+
+        const total = selectedVariant.finalPrice * state.currentProductQty;
+        const totalLabel = document.getElementById('popupTotalLabel');
+        if (totalLabel) totalLabel.textContent = `Total: ₹${total.toFixed(2)}`;
     },
 
     /**
@@ -512,6 +508,7 @@ export const UI = {
 
         UI.updatePopupPrice();
         UI.updatePopupCta();
+        UI.updatePopupTotal();
     },
 
     updatePopupCta: () => {
@@ -524,16 +521,17 @@ export const UI = {
         const addBtn = document.getElementById('popupAddToCartBtn');
         const qtyControls = document.getElementById('popupQtyControls');
         const qtyCount = document.getElementById('popupQty');
-
-        addBtn.textContent = 'Add +'; // Reset button text
+        
+        addBtn.textContent = 'Add to cart'; // Reset button text
+        addBtn.disabled = false;
 
         if (qtyInCart > 0) {
-            addBtn.style.display = 'none';
-            qtyControls.style.display = 'flex';
+            addBtn.textContent = 'Added ✓';
+            addBtn.disabled = true;
             qtyCount.textContent = qtyInCart;
+            setTimeout(() => { addBtn.textContent = 'Add more'; addBtn.disabled = false; }, 900);
         } else {
-            addBtn.style.display = 'inline-flex';
-            qtyControls.style.display = 'none';
+            qtyCount.textContent = state.currentProductQty;
         }
     },
 

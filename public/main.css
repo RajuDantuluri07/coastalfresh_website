@@ -1158,8 +1158,8 @@ z-index: 2;                 /* sits above input content */
   top: 10px;
   left: 10px;
   z-index: 20;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(4px);
+  /* NEW: Use a solid, consistent background */
+  background: var(--bg-white);
   border: 1px solid var(--border-color);
   width: 40px;
   height: 40px;
@@ -1167,18 +1167,20 @@ z-index: 2;                 /* sits above input content */
   font-size: 18px;
   cursor: pointer;
 }
-
 /* Desktop close button */
 .popup-close-btn {
-  display: none; /* Hidden on mobile */
+  display: none; /* Hidden on mobile by default */
 }
 
-/* The content area that scrolls on mobile */
+/* BUG FIX: On mobile, the image column should NOT scroll. The content column should. */
 .popup-media-column {
-  overflow-y: auto;
-  flex-grow: 1;
+  /* This column just holds the image, no scroll needed */
+  flex-shrink: 0;
 }
-
+.popup-content-column {
+  overflow-y: auto; /* This makes the content area scroll on mobile */
+  flex-grow: 1; /* Allow it to fill remaining space */
+}
 /* --- Sticky Footer for Popup --- */
 .product-popup-overlay .sticky-footer {
   position: sticky; /* Stick to the bottom of its container */
@@ -1188,18 +1190,46 @@ z-index: 2;                 /* sits above input content */
   border-top: 1px solid var(--border-color);
   box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
 }
-
 .product-popup-overlay .cta-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
+/* BUG FIX: Add missing quantity control styles for the popup footer */
+.product-popup-overlay .qty-control {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: var(--bg-light);
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+.product-popup-overlay .qty-control button {
+  border: 0;
+  background: transparent;
+  width: 32px;
+  height: 32px;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+.product-popup-overlay .qty-control .count {
+  min-width: 34px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 16px;
+}
 
-.product-popup-overlay .card {
-  background: var(--bg-white);
-  border-radius: 12px;
-  box-shadow: none; /* Shadow is on the popup container */
-  overflow: hidden;
+/* BUG FIX: Create a specific class for the popup CTA button to avoid conflicts */
+.popup-cta-btn {
+  position: static; /* Override absolute positioning from the generic .add-btn */
+  min-width: 120px;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  background: var(--success-color); /* Match the product card style */
 }
 
 .product-popup-overlay .popup-media-column .card {
@@ -3111,79 +3141,38 @@ body.popup-open .bottom-bar {
   /* --- DESKTOP: Product Popup as Modal --- */
 
   /* --- Override mobile styles for desktop modal --- */
-  /* The overlay for the modal */
   .product-popup-overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.5);
     z-index: 1000;
     display: none; /* Hidden by default, shown by .active */
-    align-items: flex-start; /* Align modal to the top */
+    align-items: center; /* Vertically center */
     justify-content: center; /* Horizontally center the modal */
-    padding: 8vh 16px 16px; /* Add top padding to push it down from the edge */
+    padding: 16px;
   }
   .product-popup-overlay.active { display: flex; }
 
-  /* The modal itself */
   .product-popup {
     position: relative;
-    display: grid;
-    grid-template-columns: 1.1fr 1fr; /* Image column slightly larger */
-    gap: 20px;
-    background: var(--bg-white);
-    padding: 24px;
-    border-radius: var(--radius-card);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-    width: 100%;
-    max-width: 920px;
-    max-height: 85vh; /* Limit height */
-    overflow: hidden; /* Important for child scrolling */
+    width: auto; /* Let the content define the width */
+    height: auto; /* Let the content define the height */
+    background: transparent; /* Overlay has the background */
+    box-shadow: none;
+    overflow: visible;
   }
 
-  /* Show desktop close button and hide mobile one */
-  .popup-close-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: 12px; right: 12px;
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    border: none;
-    background: var(--bg-light);
-    font-size: 18px;
-    cursor: pointer;
-    z-index: 10;
-    color: var(--text-secondary);
-  }
-  .popup-back-btn-mobile {
-    display: none;
-  }
-
-  /* Image column setup */
-  .popup-media-column {
-    overflow-y: hidden; /* No scroll on image column */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Content column setup */
-  .popup-content-column {
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto; /* This column will scroll */
-  }
-
-  /* --- END NEW Product Popup Styles --- */
+  .popup-close-btn { display: block; }
+  .popup-back-btn-mobile { display: none; }
+}
 
   /* --- DESKTOP: Cart as Side Panel --- */
   .cart-modal {
     left: auto; /* Unset left */
     right: 0; /* Pin to the right */
     width: 420px; /* A good width for a side panel */
-    max-width: 90vw; /* Ensure it's not too wide on smaller desktops */
-    border-radius: 0;
+    max-width: 420px;
+    border-radius: 16px 0 0 16px;
     box-shadow: -10px 0 30px rgba(0,0,0,0.15);
     transform: translateX(100%); /* Start off-screen to the right */
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);

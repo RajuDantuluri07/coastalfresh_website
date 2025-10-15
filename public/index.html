@@ -702,68 +702,50 @@
     <!-- NEW: Updated Product Popup with new design -->
     <div class="product-popup-overlay" id="productPopupOverlay">
       <div class="product-popup" id="productPopup">
-        <!-- Close button for desktop, back button for mobile -->
+        <!-- Close/Back buttons remain outside the new card structure for consistent modal control -->
         <button class="popup-close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
         <button class="popup-back-btn-mobile" aria-label="Go Back"><i class="fas fa-arrow-left"></i></button>
     
-        <!-- Image Column -->
-        <div class="popup-media-column">
-          <div class="media">
-            <img class="product-image" id="popupMainImage" src="" alt="">
-          </div>
-        </div>
-    
-        <!-- Content Column -->
-        <div class="popup-content-column">
-          <div class="content">
-            <div class="title-row">
-              <div style="flex:1;min-width:0">
-                <h1 id="popupProductTitle"></h1>
-                <div id="popupProductSub" class="subline"></div>
-                <div style="margin-top:8px">
-                  <span class="badge">100% Fresh & Clean</span>
-                </div>
-              </div>
-              <div style="align-self:flex-start;margin-left:8px">
-                <div style="text-align:right;color:var(--text-secondary);font-size:13px">Delivery in <strong>Next Slot</strong></div>
-              </div>
-            </div>
-    
-            <div class="info-row" id="popupInfoRow" role="list" aria-label="product info">
-              <!-- Info items will be injected here -->
-            </div>
-    
-            <p class="desc" id="popupDescription"></p>
-    
-            <div class="price-row" aria-hidden="true">
-              <div>
-                <div class="price">
-                  <div class="final" id="popupFinalPrice"></div>
-                  <div class="discount" id="popupDiscount"></div>
-                </div>
-                <div class="mrp" style="margin-top:6px">MRP: <span style="text-decoration:line-through;color:var(--text-secondary)" id="popupMrp"></span></div>
-              </div>
-            </div>
+        <!-- NEW: Simplified Card Layout -->
+        <article class="popup-card-simple" aria-labelledby="popupProductTitle">
+          <!-- Left Column: Image -->
+          <div class="popup-card-left">
+            <img class="product-image" id="popupMainImage" src="" alt="" loading="lazy">
           </div>
     
-          <!-- Sticky footer CTA (now inside the content column) -->
-          <div class="sticky-footer">
-            <div class="cta-card" role="region" aria-label="add to cart controls">
-              <div id="popupVariantSelectorContainer" style="min-width:120px;">
-                <div style="font-size:13px;color:var(--text-secondary)">Weight</div>
-                <select id="popupVariantSelector" style="border:none;background:transparent;font-weight:700;outline:none;font-size:16px;"></select>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;">
-                <div id="popupQtyControls" class="qty-control" style="display:none">
-                  <button id="popupQtyDec" aria-label="decrease quantity">−</button>
-                  <div class="count" id="popupQty">1</div>
-                  <button id="popupQtyInc" aria-label="increase quantity">+</button>
-                </div>
-                <button id="popupAddToCartBtn" class="add-btn" aria-label="add to cart">Add +</button>
+          <!-- Right Column: Details & Controls -->
+          <div class="popup-card-right">
+            <div class="popup-title-row">
+              <h1 id="popupProductTitle"></h1>
+              <button class="popup-share-btn" id="popupShareBtn" aria-label="Share Product"><i class="fas fa-share-alt"></i></button>
+            </div>
+            <div id="popupProductSub" class="popup-meta"></div>
+    
+            <div class="popup-price" id="popupFinalPrice"></div>
+    
+            <div id="popupVariantSelectorContainer">
+              <div class="popup-form-label">Choose weight</div>
+              <select id="popupVariantSelector" aria-label="Choose weight"></select>
+            </div>
+    
+            <div style="margin-top:10px;">
+              <div class="popup-form-label">Quantity</div>
+              <div id="popupQtyControls" class="popup-qty" role="group" aria-label="Quantity">
+                <button id="popupQtyDec" aria-label="Decrease">−</button>
+                <span id="popupQty">1</span>
+                <button id="popupQtyInc" aria-label="Increase">+</button>
               </div>
             </div>
+    
+            <div class="popup-total" id="popupTotalLabel"></div>
+    
+            <div style="margin-top:12px">
+              <button class="popup-btn-primary" id="popupAddToCartBtn">Add to cart</button>
+            </div>
+    
+            <div class="popup-note" id="popupDescription"></div>
           </div>
-        </div>
+        </article>
       </div>
     </div>
   </div>

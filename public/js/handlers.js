@@ -442,6 +442,11 @@ export const Handlers = {
             if (addToCartBtn) {
                 Handlers.addPopupToCart();
             }
+            // NEW: Share button in popup
+            const shareBtn = e.target.closest('#popupShareBtn');
+            if (shareBtn) {
+                Handlers.shareCurrentProduct();
+            }
             // Wishlist button
             // Quantity controls
             const qtyBtn = e.target.closest('.qty-control button');
@@ -591,6 +596,38 @@ export const Handlers = {
             UI.updateCartUI();
             UI.showToast(`${itemsAddedCount} item(s) from your order have been added to the cart!`);
             UI.showCart();
+        }
+    },
+
+    /**
+     * NEW: Shares the currently viewed product in the popup.
+     */
+    shareCurrentProduct: async () => {
+        const product = state.popupProduct;
+        if (!product) {
+            UI.showToast('Could not find product to share.', true);
+            return;
+        }
+
+        const productUrl = `https://www.coastalfresh.in${window.location.pathname}`;
+        const shareText = `Check out this fresh ${product.name} from Coastal Fresh! 🐟\n\n${productUrl}`;
+        const shareTitle = `Fresh ${product.name} at Coastal Fresh`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: shareTitle,
+                    text: shareText,
+                });
+                window.Analytics.trackEvent('share', { method: 'Web Share API', content_type: 'product', item_id: product.id });
+            } catch (error) {
+                console.log('Share was cancelled or failed', error);
+            }
+        } else {
+            // Fallback for browsers that do not support Web Share API
+            navigator.clipboard.writeText(shareText).then(() => {
+                UI.showToast('Product link copied to clipboard!');
+            });
         }
     },
 
