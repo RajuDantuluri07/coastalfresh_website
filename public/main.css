@@ -1117,10 +1117,6 @@ z-index: 2;                 /* sits above input content */
   backdrop-filter: blur(1px);
 }
 
-.product-popup-overlay.active {
-  display: flex;
-}
-
 /* Updated popup header to match new design */
 .popup-header {
   display: flex;
@@ -1130,6 +1126,17 @@ z-index: 2;                 /* sits above input content */
   background: var(--bg-white);
   border-bottom: 1px solid var(--border-color);
   z-index: 10;
+}
+/* --- START: Mobile Product Page Styles --- */
+.product-popup-overlay {
+  display: none; /* Hidden by default */
+}
+.product-popup-overlay.active {
+  display: block; /* Show the container when active */
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  z-index: 1000;
+  background: var(--bg-white);
 }
 
 /* NEW: Grouped meta info below price */
@@ -2913,11 +2920,11 @@ body.popup-open .bottom-bar {
 
   /* --- NEW: Product Popup Styles from Example --- */
   .product-popup-overlay {
-    position: absolute;
+    position: absolute; /* This is correct for desktop containment */
     top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.5);
     z-index: 1000;
-    display: none; /* Hidden by default, shown by .active */
+    display: none;
     align-items: center; /* Vertically center the modal */
     justify-content: center; /* Horizontally center the modal */
     padding: 16px;
@@ -2927,7 +2934,7 @@ body.popup-open .bottom-bar {
   .product-popup {
     position: relative;
     display: grid;
-    grid-template-columns: 1fr 420px;
+    grid-template-columns: 1fr 420px; /* Desktop two-column layout */
     gap: 20px;
     background: var(--bg-white);
     padding: 18px;
@@ -2936,7 +2943,7 @@ body.popup-open .bottom-bar {
     width: 100%;
     max-width: 920px;
     max-height: 90vh;
-    overflow-y: auto;
+    overflow-y: auto; /* Allow internal scrolling for the modal */
     text-align: left; /* Reset text-align for grid content */
   }
 
@@ -2987,11 +2994,12 @@ body.popup-open .bottom-bar {
 
   /* Mobile stack for new popup */
   @media (max-width: 880px) {
-    .product-popup {
+    /* This ensures the two-column layout becomes a single column on smaller desktops/tablets */
+    .product-popup { 
       grid-template-columns: 1fr;
       padding: 14px;
       max-height: 95vh;
-      height: auto;
+      height: auto; 
     }
     .main-image { height: 320px; }
   }
