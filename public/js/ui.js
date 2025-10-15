@@ -466,7 +466,7 @@ export const UI = {
 
         populatePopup();
         state.isPopupOpen = true;
-        UI.openModal(popup, backBtn);
+        UI.openModal(document.getElementById('productPopupOverlay'), backBtn);
         
         // Analytics can also be tracked after the initial render
         window.Analytics.trackEvent('view_item', {

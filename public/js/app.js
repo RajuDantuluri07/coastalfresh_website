@@ -192,21 +192,20 @@ async function init() {
           const productMatch = path.match(/^\/product\/(.+)-(\d+)$/);
           const urlParams = new URLSearchParams(window.location.search);
 
+          const searchQuery = urlParams.get('q');
+
           if (productMatch) {
               const productId = parseInt(productMatch[2], 10);
               UI.showProductPopup(productId);
-          } else {
-              const searchQuery = urlParams.get('q');
+          } else if (path === '/catalog' || searchQuery) {
+              UI.showPage('catalog');
               if (searchQuery) {
-                  UI.showPage('catalog');
                   const searchInput = document.getElementById('catalogSearch');
-                  if (searchInput) {
-                      searchInput.value = searchQuery;
-                      Handlers.handleCatalogSearch({ target: searchInput });
-                  }
-              } else if (path === '/' || path === '/index.html' || path === '') {
-                  UI.showPage('home');
+                  searchInput.value = searchQuery;
+                  Handlers.handleCatalogSearch({ target: searchInput });
               }
+          } else {
+              UI.showPage('home');
           }
       } catch (error) {
           console.error("Could not load product data:", error);
