@@ -720,44 +720,48 @@
           </div>
 
           <!-- Product Info -->
-          <div class="popup-info">
-            <h1 class="popup-title" id="popupProductTitle"></h1>
-            <div class="popup-weight" id="popupProductWeight"></div>
+          <div class="popup-info-column">
+            <div class="popup-info-scrollable">
+              <div class="popup-info">
+                <h1 class="popup-title" id="popupProductTitle"></h1>
+                <div class="popup-weight" id="popupProductWeight"></div>
 
-            <div class="popup-price-section" id="popupPriceSection">
-              <!-- Price will be injected here -->
-            </div>
+                <div class="popup-price-section" id="popupPriceSection">
+                  <!-- Price will be injected here -->
+                </div>
 
-            <!-- NEW: Grouped meta info -->
-            <div class="popup-meta-info" id="popupMetaInfo">
-              <div class="popup-delivery-time">
-                <span>🚚</span>
-                <strong>Next Day Delivery</strong>
+                <!-- NEW: Grouped meta info -->
+                <div class="popup-meta-info" id="popupMetaInfo">
+                  <div class="popup-delivery-time">
+                    <span>🚚</span>
+                    <strong>Next Day Delivery</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- NEW: Product Highlights Section -->
+              <div class="popup-highlights">
+                <div class="highlight-item">🐟 Freshly cleaned</div>
+                <div class="highlight-item">💧 Hygienically processed</div>
+                <div class="highlight-item">🍲 Ready to cook</div>
+              </div>
+
+              <!-- Collapsible Details Section -->
+              <div class="popup-details-section">
+                <div class="detail-item" id="productInfoDetailItem">
+                  <div class="detail-header">
+                    <span>Product Details</span>
+                  </div>
+                  <div class="detail-content" id="productInfoContent">
+                    <!-- Description and Weight content will be injected here by JS -->
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-
-          <!-- NEW: Product Highlights Section -->
-          <div class="popup-highlights">
-            <div class="highlight-item">🐟 Freshly cleaned</div>
-            <div class="highlight-item">💧 Hygienically processed</div>
-            <div class="highlight-item">🍲 Ready to cook</div>
-          </div>
-
-          <!-- Collapsible Details Section -->
-          <div class="popup-details-section">
-            <div class="detail-item" id="productInfoDetailItem">
-              <div class="detail-header">
-                <span>Product Details</span>
-              </div>
-              <div class="detail-content" id="productInfoContent">
-                <!-- Description and Weight content will be injected here by JS -->
-              </div>
-            </div>
+            <!-- Sticky CTA is now INSIDE the right column -->
+            <div class="popup-sticky-cta" id="popupStickyCta"></div>
           </div>
         </div>
-        <!-- NEW: Sticky CTA will be placed here, outside the scrollable wrapper -->
-        <div class="popup-sticky-cta" id="popupStickyCta"></div>
       </div>
     </div>
 
