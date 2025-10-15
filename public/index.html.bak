@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Coastal Fresh India: Buy Fresh Fish & Seafood Online in Hyderabad</title>
+
+  <!-- Preconnects -->
+  <link rel="preconnect" href="https://res.cloudinary.com">
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="preconnect" href="https://static.hotjar.com">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Google Fonts - Roboto (as per typography guidelines) -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- SEO -->
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="description" content="The best place to buy fresh fish and seafood online in Hyderabad, India! Coastal Fresh offers a wide variety of hygienically cleaned fish, prawns, crabs, and authentic Andhra pickles with next-day delivery. Order now for the freshest catch." />
+  <link rel="canonical" href="https://www.coastalfresh.in" />
+  <meta name="theme-color" content="#01659a" />
+  <meta name="keywords" content="buy fresh fish online hyderabad, seafood delivery hyderabad, online fish delivery, prawns online hyderabad, buy crabs online, coastal fresh hyderabad, andhra pickles online, pomfret online, seer fish hyderabad" />
+  <!-- Hreflang for regional targeting -->
+  <link rel="alternate" href="https://www.coastalfresh.in" hreflang="en-in" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Coastal Fresh India" />
+  <meta property="og:locale" content="en_IN" />
+  <meta property="og:title" content="Coastal Fresh: Fresh Fish & Seafood, Delivered" />
+  <meta property="og:description" content="The best place to buy fresh fish and seafood online in Hyderabad. We offer next-day delivery of premium, hygienically cleaned seafood and authentic pickles." />
+  <meta property="og:url" content="https://www.coastalfresh.in" />
+  <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Coastal Fresh: Fresh Fish & Seafood, Delivered" />
+  <meta name="twitter:description" content="Order fresh fish, prawns, and crabs online in Hyderabad, India. We offer next-day delivery of premium, hygienically cleaned seafood and authentic pickles." />
+  <meta name="twitter:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" />
+
+  <!-- Analytics: GA4 (clean params) + Hotjar + WhatsApp tracking -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GSHMPRYPW1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-GSHMPRYPW1');
+  </script>
+
+  <script>
+    (function(h,o,t,j,a,r){
+      h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)}
+      h._hjSettings={hjid:6498243,hjsv:6};
+      a=o.getElementsByTagName('head')[0];
+      r=o.createElement('script');r.async=1;
+      r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+      a.appendChild(r);
+    })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+  </script>
+
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- DOMPurify (for final safe sanitization if needed) -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js" crossorigin="anonymous"></script>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js"></script>
+
+  <!-- External CSS -->
+  <link rel="stylesheet" href="/main.css">
+</head>
+<body>
+  <!-- NOSCRIPT FALLBACK FOR SEO -->
+  <noscript>
+    <div style="padding: 20px; text-align: center; background-color: #fff1f1; color: #333;">
+      <h1>JavaScript is required to use Coastal Fresh</h1>
+      <p>Please enable JavaScript in your browser to shop for the freshest seafood in Hyderabad.</p>
+      <p>You can also browse our main pages:</p>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/catalog">All Products</a></li>
+        <li><a href="/about">About Us</a></li>
+        <li><a href="/faq">FAQs</a></li>
+      </ul>
+    </div>
+  </noscript>
+  <div class="app">
+    <!-- Ticker - Now above header -->
+    <div class="ticker-container">
+      <div class="ticker" aria-hidden="true">
+        <div class="ticker-item"><i class="fas fa-truck"></i> Order Now & Get Delivered on Sunday</div>
+        <div class="ticker-item"><i class="fas fa-fish"></i> From Coast to Kitchen – Super Fresh</div>
+        <div class="ticker-item"><i class="fas fa-tag"></i> Free Delivery on Orders Above ₹1500</div>
+        <div class="ticker-item"><i class="fas fa-shield-alt"></i> 100% Hygienic & Safe Packaging</div>
+      </div>
+    </div>
+
+    <!-- Home Page -->
+    <div class="page active" id="home">
+      <header class="header">
+        <div class="header-top">
+          <div class="logo" aria-label="Coastal Fresh India Home">
+            <img class="logo-img" src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" alt="Coastal Fresh India" width="40" height="40" loading="eager">
+            <span>COASTAL FRESH</span>
+          </div>
+          <!-- NEW: Desktop Navigation -->
+          <nav class="top-nav-desktop" id="topNavDesktop">
+            <a href="#" class="top-nav-item active" data-page="home">Home</a>
+            <a href="#" class="top-nav-item" data-page="catalog">Catalog</a>
+            <a href="#" class="top-nav-item" data-page="favoritesPage">Favorites</a>
+            <a href="#" class="top-nav-item" data-page="ordersPage">My Orders</a>
+            <a href="#" class="top-nav-item" data-page="profilePage">Profile</a>
+          </nav>
+          <!-- END: Desktop Navigation -->
+          <button class="cart-btn" aria-label="Open Cart">
+            <i class="fas fa-shopping-bag"></i>
+            <span class="cart-count" id="cartCount">0</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- The H1 for SEO - visually hidden but accessible to crawlers -->
+      <h1 class="visually-hidden">Fresh Seafood Delivery in Hyderabad: Order Fish, Prawns & Crabs Online</h1>
+
+      <!-- Carousel -->
+      <div class="carousel">
+        <div class="slides" id="slides">
+          <div class="slide" data-action="showPage" data-target="catalog" style="cursor: pointer;" role="button" tabindex="0" aria-label="View all our fresh seafood products"><img src="https://res.cloudinary.com/dpyniai9l/image/upload/f_auto,q_auto,c_fill,w_960,h_300/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" alt="Order fresh seafood online in Hyderabad from Coastal Fresh India" loading="eager" width="960" height="300"></div>
+          <div class="slide" data-action="showProductPopup" data-target="20" style="cursor: pointer;" role="button" tabindex="0" aria-label="View our Freshwater Prawns"><img src="https://res.cloudinary.com/dpyniai9l/image/upload/f_auto,q_auto,c_fill,w_960,h_300/v1756722096/Prawns_-_Banner_cyzx5z.png" alt="Freshwater Prawns for sale in Hyderabad" loading="lazy" width="960" height="300"></div>
+        </div>
+        <div class="carousel-dots" id="carouselDots"></div>
+      </div>
+
+      <!-- Trust Icons -->
+      <section class="trust-strip" id="trustStrip" aria-label="Trust and features"></section>
+
+      <!-- NEW: Flash Sale Section -->
+      <section class="flash-sale-section" id="flashSaleSection">
+        <div class="flash-sale-header">
+          <h2 class="section-title">🔥 Best Deals</h2>
+          <a href="/catalog" class="view-all" aria-label="View all deals">View All</a>
+        </div>
+        <div class="flash-sale-products" id="flashSaleProducts"></div>
+      </section>
+
+      <!-- NEW: Section Divider -->
+      <div class="section-divider"></div>
+
+      <main class="section featured-section">
+        <h2 class="section-title">
+          <div class="section-title-main">
+            ✨ Featured Products
+          </div>
+          <a href="/catalog" class="view-all" aria-label="View all featured products">View All</a>
+        </h2>
+        <div class="featured-products" id="featuredProducts"></div>
+      </main>
+
+      <!-- NEW: Customer Reviews Section -->
+      <section class="section reviews-section">
+        <h2 class="section-title">What Our Customers Say</h2>
+        <div class="reviews-carousel" id="reviewsCarousel">
+          <!-- Reviews will be injected here by JS -->
+        </div>
+      </section>
+
+      <!-- NEW: Combined Refer Banner & Tagline Section -->
+      <section class="section" style="padding-top: 32px; padding-bottom: 24px; text-align: center;">
+        <div class="communication-carousel" id="communicationCarousel">
+          <div class="slides">
+            <div class="slide" data-action="showPage" data-target="referPage" style="cursor: pointer;">
+              <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1758973579/refer-banner_-_bottom_blwrt6.png" alt="Refer a friend and earn rewards at Coastal Fresh India">
+            </div>
+          </div>
+          <div class="carousel-dots"></div>
+        </div>
+        <div style="margin-top: 24px;">
+          <h2 class="title" style="font-size: 16px; margin-bottom: 4px;">Freshness, Delivered</h2>
+          <p class="subtitle" style="margin-bottom: 8px;">From the Coast to Your Kitchen</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- Catalog Page -->
+    <div class="page" id="catalog">
+      <header class="header">
+        <div class="header-top modal-header-main">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="logo">All Products</h1>
+          <button class="cart-btn" aria-label="Open Cart">
+            <i class="fas fa-shopping-bag"></i>
+            <span class="cart-count" id="cartCountCatalog">0</span>
+          </button>
+        </div>
+        <div class="search-container">
+          <label for="catalogSearch" class="visually-hidden">Search for products</label>
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" class="search" placeholder="Search products..." id="catalogSearch" aria-label="Search for products">
+        </div>
+      </header>
+
+      <main class="section">
+        <div class="categories" id="categories">
+          <!-- Categories will be injected here by JS -->
+        </div>
+        <div class="products" id="catalogProducts"></div>
+      </main>
+    </div>
+
+    <!-- NEW: Favorites Page -->
+    <div class="page" id="favoritesPage">
+      <header class="header">
+        <div class="header-top modal-header-main">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="logo">My Favorites</h1>
+          <div style="width: 36px;"></div> <!-- Spacer -->
+        </div>
+      </header>
+      <main class="section">
+        <!-- Container for the grid of favorite products -->
+        <div class="products" id="favoriteProducts"></div>
+
+        <!-- NEW: Dedicated container for the empty state message -->
+        <div id="favoritesEmptyState" style="display: none;">
+          <!-- The empty message HTML will be injected here by ui.js -->
+        </div>
+
+        <!-- FIX: Add padding at the bottom to avoid being obscured by the nav bar -->
+        <div style="height: 80px;"></div>
+      </main>
+    </div>
+
+    <!-- FAQ Page -->
+    <div class="page" id="faqPage">
+      <header class="header">
+        <div class="header-top modal-header-main">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="logo">FAQs</h1>
+          <div></div>
+        </div>
+      </header>
+
+      <main class="faq-wrap">
+        <div class="faq-list">
+          <div class="faq" data-priority="high">
+            <button class="q">
+              <span class="q-text">How quickly will I receive my order?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="a">
+              <div class="answer-content">
+                <p><strong>Sunday & Wednesday morning</strong> timed with the freshest catch for unbeatable taste. </p>
+                <div class="answer-highlight">⚡ Peak freshness, guaranteed</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq" data-priority="high">
+            <button class="q">
+              <span class="q-text">How do you guarantee freshness during delivery?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="a">
+              <div class="answer-content">
+                <p>Premium insulated packaging with ice thermocol box maintains ideal temperature. Your seafood stays fresh, safe, and ready to cook from our coast to your kitchen.</p>
+                <div class="answer-highlight">🧊 Temperature-controlled throughout delivery</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq" data-priority="medium">
+            <button class="q">
+              <span class="q-text">Where is your seafood sourced from?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="a">
+              <div class="answer-content">
+                <p>Sourced across Coastal Andhra — from trusted suppliers, our own fish & prawn farms, and local fishermen — for fresh, restaurant-quality seafood.</p>
+                <div class="answer-highlight">🐟 Fresh from coast to kitchen</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq" data-priority="medium">
+            <button class="q">
+              <span class="q-text">What areas in Hyderabad do you deliver to?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="a">
+              <div class="answer-content">
+                <p>We deliver across all major areas including Gachibowli, Hitech City, Banjara Hills, Film Nagar, Jubilee Hills, Madhapur, Kondapur, and surrounding regions.</p>
+                <div class="answer-highlight">🏠 Free delivery above ₹1500</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq" data-priority="low">
+            <button class="q">
+              <span class="q-text">Is your seafood cleaned and ready to cook?</span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="a">
+              <div class="answer-content">
+                <p>Yes! All our seafood is carefully cleaned, deveined, and neatly packed — so it's 100% ready to cook when it reaches your kitchen.</p>
+                <div class="answer-highlight">✨ Hygienically cleaned & ready to cook</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- NEW: About Us Page -->
+    <div class="page" id="aboutPage">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="logo">About Us</h1>
+          <div></div>
+        </div>
+      </header>
+
+      <main class="section" style="padding-top: 0;">
+        <div class="about-us-content">
+          <h3 class="about-subtitle">Our Story</h3>
+          <p class="about-text">Fresh seafood, straight from the coast to your kitchen. We started Coastal Fresh to end the compromise with frozen or mishandled seafood. By working directly with fishermen and our own coastal farms, we bring you the <strong>day’s catch</strong> — processed within hours and delivered to Hyderabad the <strong>very next day</strong>.</p>
+ 
+          <h3 class="about-subtitle">Our Mission</h3>
+          <p class="about-text">To make seafood in Hyderabad as fresh as it is by the shore. We promise unmatched <strong>freshness</strong>, hygienic handling, and <strong>convenience</strong> at your doorstep.</p>
+ 
+          <h3 class="about-subtitle">Our Core Values</h3>
+          <div class="about-values">
+            <div class="value-item">
+              <i class="fas fa-fish"></i>
+              <h4>Peak Freshness</h4>
+              <p>Sourced daily. Delivered overnight.</p>
+            </div>
+            <div class="value-item">
+              <i class="fas fa-shield-alt"></i>
+              <h4>Unmatched Quality</h4>
+              <p>Hygienically cleaned &amp; packed.</p>
+            </div>
+            <div class="value-item">
+              <i class="fas fa-handshake"></i>
+              <h4>Customer Trust</h4>
+              <p>Transparent &amp; reliable service.</p>
+            </div>
+          </div>
+ 
+          <!-- NEW: Call to Action -->
+          <div class="about-cta-container">
+            <p>Order today and taste the coast tomorrow!</p>
+            <button class="about-cta-btn" id="aboutPageCtaBtn">
+              Explore Today's Fresh Catch
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+
+          <!-- NEW: Social Media Section with Title -->
+          <div class="about-socials-section">
+            <h4 class="social-title">Follow us on</h4>
+            <div class="social-bar">
+              <a href="https://www.instagram.com/coastalfresh.in" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+              <a href="https://www.facebook.com/CoastalFresh.in/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+              <a href="https://wa.me/919985125678" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+              <a href="https://www.youtube.com/@CoastalFresh" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+              <a href="https://t.me/coastalfreshseafoods" target="_blank" rel="noopener noreferrer" aria-label="Telegram"><i class="fab fa-telegram-plane"></i></a>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- ENHANCED: Refer a Friend Page -->
+    <div class="page" id="referPage">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="logo">Refer & Earn</h1>
+          <div></div>
+        </div>
+      </header>
+
+      <main class="section" style="padding-top: 16px; background-color: var(--bg-light);">
+        <!-- Hero Section -->
+        <div class="refer-hero">
+          <div class="refer-hero-icon"><i class="fas fa-gift"></i></div>
+          <h2 class="refer-title">Share the Freshness, Get Rewards!</h2>
+          <p class="refer-subtitle">
+            Give your friends <strong>10% OFF</strong> their first order, and you'll get a <strong>10% discount coupon</strong> for your next purchase once they order. It's a win-win!
+          </p>
+        </div>
+
+        <!-- Share Actions (Moved from footer) -->
+        <div class="refer-actions-container" id="referralShareContainer">
+          <div class="refer-link-container" id="copyReferralBtn" role="button" tabindex="0" aria-label="Copy referral link">
+            <span id="referralLink" class="refer-link">https://coastalfresh.in?ref=GUEST123</span>
+            <i class="far fa-copy"></i>
+          </div>
+          <div class="refer-share-buttons">
+            <button id="shareOnWhatsAppBtn" class="share-btn whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+            <button id="shareOnOtherAppsBtn" class="share-btn other-apps"><i class="fas fa-share-alt"></i> Share</button>
+          </div>
+        </div>
+
+        <!-- NEW: Login prompt for guest users -->
+        <div class="refer-login-prompt" id="referralLoginPrompt" style="display: none;">
+          <div class="refer-login-text">
+            <i class="fas fa-lock"></i>
+            <span>Login to get your unique referral code</span>
+          </div>
+          <button class="refer-login-btn" id="referralLoginBtn">Login / Sign Up</button>
+        </div>
+
+        <!-- How It Works Section -->
+        <div class="refer-steps-section">
+          <div class="refer-steps-header">
+            <h3>How It Works</h3>
+            <button class="refer-terms-btn" id="showTermsBtn">Terms</button>
+          </div>
+          <div class="refer-step">
+            <div class="refer-step-num">1</div>
+            <div class="refer-step-text">
+              <div class="refer-step-desc">Share your unique link</div>
+              <div class="refer-step-muted">Send it via WhatsApp or any other app.</div>
+            </div>
+          </div>
+          <div class="refer-step">
+            <div class="refer-step-num">2</div>
+            <div class="refer-step-text">
+              <div class="refer-step-desc">Your friend gets 10% off</div>
+              <div class="refer-step-muted">They must be a new customer and use your link to order.</div>
+            </div>
+          </div>
+          <div class="refer-step">
+            <div class="refer-step-num">3</div>
+            <div class="refer-step-text">
+              <div class="refer-step-desc">You get a 10% discount</div>
+              <div class="refer-step-muted">Your coupon is unlocked after their first successful delivery.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="refer-influencer-card">
+          <div class="refer-influencer-text">Are you an influencer? <span>Let's collaborate!</span></div>
+          <a href="https://wa.me/919985125678?text=Hi%20Coastal%20Fresh,%20I'm%20an%20influencer%20and%20would%20like%20to%20collaborate." target="_blank" class="refer-influencer-contact">Contact Us</a>
+        </div>
+      </main>
+    </div>
+
+    <!-- NEW: Contact Us Page -->
+    <div class="page" id="contactPage">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="logo">Contact Us</h1>
+          <div></div>
+        </div>
+      </header>
+
+      <main class="section">
+        <div class="contact-page-content">
+          <div class="contact-hero">
+            <i class="fas fa-headset"></i>
+            <h2>Get in Touch</h2>
+            <p>Have a question or need help with your order? We're here to assist you!</p>
+          </div>
+
+          <div class="contact-options">
+            <a href="mailto:coastalfreshseafoods@gmail.com" class="contact-card email">
+              <i class="fas fa-envelope"></i>
+              <div class="contact-card-text">
+                <strong>Email Us</strong>
+                <span>coastalfreshseafoods@gmail.com</span>
+              </div>
+            </a>
+            <a href="https://wa.me/919985125678?text=Hi%20Coastal%20Fresh,%20I%20need%20some%20assistance." target="_blank" rel="noopener noreferrer" class="contact-card whatsapp">
+              <i class="fab fa-whatsapp"></i>
+              <div class="contact-card-text">
+                <strong>Chat on WhatsApp</strong>
+                <span>Typically replies in a few minutes</span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Profile Page -->
+    <div class="page" id="profilePage">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="logo">Profile</h1>
+          <div></div>
+        </div>
+      </header>
+
+      <main class="section">
+        <!-- NEW: Simplified Profile Header -->
+        <div class="profile-header-simple">
+          <div class="profile-avatar-small">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="profile-user-info">
+            <h2 id="profileUserName">Guest User</h2>
+            <p id="profileUserStatus">You are browsing as a guest.</p>
+          </div>
+        </div>
+
+        <!-- Action Group -->
+        <div class="profile-actions">
+          <button class="profile-button login-cta" id="guestProfileCta">Login / Sign Up</button>
+          <button class="profile-button refer" id="referBtn">
+            <i class="fas fa-share-alt"></i> Refer & Earn
+          </button>
+          <button class="profile-button install-app" id="profileInstallBtn" style="display: none;">
+            <i class="fas fa-download"></i> Install App
+          </button>
+          <button class="profile-button orders">
+            <i class="fas fa-box-open"></i> My Orders
+          </button>
+          <button class="profile-button address">
+            <i class="fas fa-map-marker-alt"></i> My Address
+          </button>
+          <button class="profile-button faq">
+            <i class="fas fa-question-circle"></i> FAQ
+          </button>
+          <button class="profile-button about">
+            <i class="fas fa-info-circle"></i> About Us
+          </button>
+          <button class="profile-button support">
+            <i class="fas fa-headset"></i> Contact Us
+          </button>
+          <button class="profile-button" id="logoutBtn" style="display: none; color: var(--error-color);">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </div>
+
+        <div class="profile-footer">
+          <div class="app-version">
+            Coastal Fresh v1.0.0
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- NEW: Orders Page -->
+    <div class="page" id="ordersPage">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="logo">My Orders</h1>
+          <div style="width: 36px;"></div> <!-- Spacer -->
+        </div>
+        <div class="order-controls">
+          <div class="order-filter-tabs" id="orderFilterTabs" role="tablist" aria-label="Filter orders by status"></div>
+        </div>
+      </header>
+      <main class="section" id="ordersMainContent">
+        <!-- Order list will be injected here -->
+        <div class="empty-cart" id="ordersEmptyState" style="display: none; flex-grow: 1; min-height: 60vh;">
+          <i class="fas fa-receipt" style="font-size: 64px; margin-bottom: 24px; color: var(--border-color);"></i>
+          <h3>No Orders Yet</h3>
+          <p>Your past and current orders will appear here.</p>
+          <button class="empty-cart-btn" id="shopFromEmptyOrdersBtn">Start Shopping</button>
+        </div>
+      </main>
+    </div>
+
+    <!-- NEW: Address Page -->
+    <div class="page" id="addressPage">
+      <header class="header">
+        <div class="header-top">
+          <button class="back-btn" aria-label="Go Back">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1 class="logo">My Address</h1>
+          <div></div>
+        </div>
+      </header>
+
+      <main class="section" style="padding-top: 10px; padding-bottom: 80px;">
+        <!-- Address List View -->
+        <div id="addressListContainer">
+          <!-- Addresses will be injected here by JS -->
+        </div>
+
+        <!-- Address Form View (initially hidden if addresses exist) -->
+        <div id="addressFormContainer" style="display: none;">
+          <form id="addressForm" class="address-form">
+            <div class="form-group">
+              <label for="addressFullName">Full Name</label>
+              <input id="addressFullName" class="input" type="text" placeholder="Person receiving the order" required>
+            </div>
+            <div class="form-group">
+              <label for="addressMobile">Mobile Number</label>
+              <input id="addressMobile" class="input" type="tel" placeholder="10-digit mobile number" required pattern="\d{10}" title="Please enter a 10-digit mobile number.">
+            </div>
+            <div class="form-group">
+              <label for="addressHouse">House/Flat/Building Number</label>
+              <input id="addressHouse" class="input" type="text" placeholder="e.g., Flat 502, B-Wing" required>
+            </div>
+            <div class="form-group">
+              <label for="addressStreet">Street / Locality / Area</label>
+              <input id="addressStreet" class="input" type="text" placeholder="e.g., Kondapur" required>
+            </div>
+            <div class="form-group">
+              <label for="addressCity">City / Town</label>
+              <input id="addressCity" class="input" type="text" value="Hyderabad" required readonly>
+            </div>
+            <div class="form-group">
+              <label for="addressPincode">Pincode / ZIP Code</label>
+              <input id="addressPincode" class="input" type="text" placeholder="6-digit pincode" required pattern="\d{6}" title="Please enter a 6-digit pincode.">
+            </div>
+            <button class="cta" type="submit">Save Address</button>
+          </form>
+        </div>
+      </main>
+      <!-- NEW: Sticky "Add New Address" Button -->
+      <button id="addNewAddressBtnFixed" style="display: none;"><i class="fas fa-plus"></i> Add New Address</button>
+    </div>
+
+    <!-- Login/Signup Modal -->
+    <div class="login-modal" id="loginModal">
+      <div class="login-card">
+        <button class="back-btn" aria-label="Close Login"><i class="fas fa-times"></i></button>
+        <div class="title" id="authTitle">Get Started</div>
+        <div class="subtitle" id="authSubtitle">Sign up to order the freshest coastal seafood</div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="login-form">
+          <div class="form-group">
+            <label for="loginEmail">Email Address</label>
+            <input id="loginEmail" class="input" type="email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input id="loginPassword" class="input" type="password" required>
+          </div>
+          <button class="cta" type="submit">Login</button>
+          <div class="row" style="display: flex; justify-content: space-between;">
+            <a href="#" id="showSignup">Create Account</a>
+            <a href="#" id="forgotPassword">Forgot Password?</a>
+          </div>
+        </form>
+
+        <!-- Signup Form -->
+        <form id="signupForm" class="login-form active">
+          <div class="form-group">
+            <label for="signupEmail">Email Address</label>
+            <input id="signupEmail" class="input" type="email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="signupPassword">Create Password</label>
+            <input id="signupPassword" class="input" type="password" placeholder="At least 8 characters" required>
+          </div>
+          <button class="cta" type="submit">Sign Up</button>
+          <div class="row" style="margin-top:12px;">
+            Already have an account? <a href="#" id="showLogin">Login</a>
+          </div>
+        </form>
+
+        <div class="or">
+          <div class="hr"></div>OR<div class="hr"></div>
+        </div>
+
+        <div class="socials">
+          <button id="googleLoginBtn" type="button" class="social-btn google"><i class="fab fa-google"></i> Google</button>
+          <button id="facebookLoginBtn" type="button" class="social-btn facebook" style="display: none;"><i class="fab fa-facebook-f"></i> Facebook</button>
+        </div>
+        <p id="authError" style="color: var(--error-color); text-align: center; margin-top: 16px; font-size: 14px;"></p>
+      </div>
+    </div>
+
+
+    <!-- NEW: Updated Product Popup with new design -->
+<div class="product-popup-overlay" id="productPopupOverlay">
+  <div class="product-popup" id="productPopup">
+    <header class="popup-header-mobile">
+      <button class="back-btn" aria-label="Go Back"><i class="fas fa-arrow-left"></i></button>
+      <button class="popup-close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
+    </header>
+    <div class="popup-scroll-container">
+      <article class="card" aria-label="product card">
+        <!-- Image area -->
+        <div class="media">
+          <img class="product-image" id="popupMainImage" src="" alt="">
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+          <div class="title-row">
+            <div style="flex:1;min-width:0">
+              <h1 id="popupProductTitle"></h1>
+              <div id="popupProductSub" class="subline"></div>
+              <div style="margin-top:8px">
+                <span class="badge">100% Fresh & Clean</span>
+              </div>
+            </div>
+            <div style="align-self:flex-start;margin-left:8px">
+              <div style="text-align:right;color:var(--muted);font-size:13px">Delivery in <strong>Next Slot</strong></div>
+            </div>
+          </div>
+
+          <div class="info-row" id="popupInfoRow" role="list" aria-label="product info">
+            <!-- Info items will be injected here -->
+          </div>
+
+          <p class="desc" id="popupDescription"></p>
+
+          <div class="price-row" aria-hidden="true">
+            <div>
+              <div class="price">
+                <div class="final" id="popupFinalPrice"></div>
+                <div class="discount" id="popupDiscount"></div>
+              </div>
+              <div class="mrp" style="margin-top:6px">MRP: <span style="text-decoration:line-through;color:var(--muted)" id="popupMrp"></span></div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Sticky footer CTA (visible always) -->
+    <div class="sticky-footer" aria-hidden="false">
+      <div class="sticky-inner">
+        <div class="cta-card" role="region" aria-label="add to cart controls">
+          <div id="popupVariantSelectorContainer" style="min-width:120px;">
+            <div style="font-size:13px;color:var(--muted)">Weight</div>
+            <select id="popupVariantSelector" style="border:none;background:transparent;font-weight:700;outline:none;font-size:16px;"></select>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div id="popupQtyControls" class="qty-control" aria-hidden="true" style="display:none">
+              <button id="popupQtyDec" aria-label="decrease quantity">−</button>
+              <div class="count" id="popupQty">1</div>
+              <button id="popupQtyInc" aria-label="increase quantity">+</button>
+            </div>
+            <button id="popupAddToCartBtn" class="add-btn" aria-label="add to cart">Add +</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <!-- Cart Page as Modal -->
+    <div class="cart-overlay" id="cartOverlay">
+      <div class="cart-modal" id="cartModal" style="--accent: #137a3a; --accent-600: #167a3b;">
+        <header class="header">
+          <div class="header-top">
+            <button class="back-btn" aria-label="Close Cart">
+              <i class="fas fa-times"></i>
+            </button>
+            <h1 class="logo">Your Cart</h1>
+            <div style="width: 36px;"></div>
+          </div>
+        </header>
+      
+        <div class="cart-content-wrapper" id="cartContentWrapper">
+          <!-- Product list -->
+          <section class="cart-products" id="cartItems"></section>
+      
+          <!-- Empty Cart State -->
+          <div id="emptyCart" class="empty-cart" style="display: none;">
+            <div class="illustration" aria-hidden="true">
+              <!-- Inline SVG: seafood cart / basket illustration (simple, stylized) -->
+              <svg width="160" height="140" viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Cart illustration">
+                <defs>
+                  <linearGradient id="g1" x1="0" x2="1">
+                    <stop offset="0" stop-color="#e6fbff" />
+                    <stop offset="1" stop-color="#dff6fb" />
+                  </linearGradient>
+                </defs>
+                <path d="M0 220 Q80 190 160 210 T320 200 L320 260 L0 260 Z" fill="#E9F8FB"/>
+                <rect x="36" y="40" rx="14" ry="14" width="220" height="120" fill="url(#g1)" stroke="#CEEFF6" stroke-width="2" />
+                <path d="M48 52 C20 20, 60 12, 90 36" stroke="#A7D7E3" stroke-width="8" stroke-linecap="round" fill="none" />
+                <g transform="translate(50,58)">
+                  <ellipse cx="50" cy="28" rx="40" ry="18" fill="#58B4CC"/>
+                  <polygon points="15,28 -6,20 -6,36" fill="#58B4CC"/>
+                  <circle cx="78" cy="22" r="4" fill="#062A33"/>
+                  <g transform="translate(120,28) scale(0.9)">
+                    <path d="M36 16c0 8-10 20-22 20-6 0-12-4-14-8" stroke="#F07A36" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    <circle cx="36" cy="16" r="6" fill="#F07A36"/>
+                  </g>
+                </g>
+                <circle cx="240" cy="170" r="16" fill="#0F1724" opacity="0.08" />
+                <circle cx="68" cy="170" r="16" fill="#0F1724" opacity="0.08" />
+              </svg>
+            </div>
+            <h2 class="empty-cart-title">Your cart is empty</h2>
+            <p class="empty-cart-lead">Add some fresh seafood to get started — choose from fish, prawns, crabs and more. We'll keep it fresh and fast.</p>
+          </div>
+      
+          <div id="cartSummaryContainer" style="display: none; padding: 0 16px;">
+            <!-- Progress bar -->
+            <div class="cart-progress-wrap">
+              <div class="cart-progress-card">
+                <div class="cart-progress-text" id="cartProgressText"></div>
+                <div class="cart-bar" aria-hidden="true"><div class="cart-bar-inner" id="cartProgressBar"></div></div>
+              </div>
+            </div>
+      
+            <!-- Bill details -->
+            <section class="cart-bill" aria-labelledby="billHeading">
+              <div class="cart-bill-header">
+                <h2 id="billHeading" class="section-title">Bill Details</h2>
+                <button id="clearCartBtn" class="clear-cart-btn">Clear Cart</button>
+              </div>
+              <div class="cart-bill-row"><div>Item Total</div><div id="cartItemTotal">₹0</div></div>
+              <div class="cart-bill-row" id="cartDiscountRow" style="display: none;"><div>Discount</div><div id="cartDiscount" style="color: var(--success-color);">₹0</div></div>
+              <div class="cart-bill-row">
+                <div>
+                  Delivery Fee <i class="fas fa-info-circle" title="Free delivery in Manikonda & surrounding areas." style="color: var(--text-secondary); font-size: 12px; cursor: pointer;"></i>
+                </div>
+                <div id="cartDeliveryFee">₹0</div>
+              </div>
+              <div class="cart-bill-row total"><div>To Pay</div><div id="cartToPay">₹0</div></div>
+              <div class="cart-saved center" id="cartSavedMsg" style="display:none"></div>
+            </section>
+      
+            <!-- Coupon -->
+            <div id="cartCouponSection"></div>
+      
+            <!-- Payment options -->
+            <div class="cart-payments" id="paymentOptions" role="radiogroup" aria-label="Payment methods"></div>
+          </div>
+      
+          <!-- bottom CTA is sticky so keep some space at the end of content -->
+          <div style="height:86px"></div>
+        </div>
+      
+        <div class="cart-sticky-ctawrap" id="cartFooter" style="display: none;">
+          <button class="cart-cta checkout-btn" id="cartPlaceOrderBtn">Place Order</button>
+        </div>
+
+        <!-- NEW: Sticky CTA for Empty Cart -->
+        <div class="cart-sticky-ctawrap" id="emptyCartFooter" style="display: none;">
+          <button class="cart-cta empty-cart-btn" id="emptyCartBrowseBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M3 3h2l.4 2M7 13h10l3-8H6.4" stroke="white" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="10" cy="20" r="1.6" fill="white"/>
+              <circle cx="18" cy="20" r="1.6" fill="white"/>
+            </svg>
+            <span>Browse Fresh Seafood</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEW: Custom Install Prompt -->
+    <div class="install-prompt" id="installPrompt" role="dialog" aria-modal="true" aria-labelledby="installPromptTitle" aria-describedby="installPromptDesc">
+      <div class="install-prompt-content">
+        <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523817/Coastal_Fresh_Logo_2_ztcdvm.png" alt="Coastal Fresh" class="install-prompt-logo">
+        <div class="install-prompt-text">
+          <strong id="installPromptTitle">Install Coastal Fresh</strong>
+          <span id="installPromptDesc">For a faster, app-like experience.</span>
+        </div>
+      </div>
+      <div class="install-prompt-actions">
+        <button id="installBtn" class="install-btn">Install</button>
+        <button id="installDismissBtn" class="install-dismiss-btn" aria-label="Dismiss install prompt">&times;</button>
+      </div>
+    </div>
+
+    <!-- Bottom Navigation - FIXED: Properly constrained to mobile container -->
+    <nav class="bottom-bar" id="bottomNav">
+      <div class="nav-item active" data-page="home">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </div>
+      <div class="nav-item" data-page="catalog">
+        <i class="fas fa-layer-group"></i>
+        <span>Catalog</span>
+      </div>
+      <div class="nav-item" data-page="favoritesPage">
+        <i class="fas fa-heart"></i>
+        <span>Favorites</span>
+      </div>
+      <div class="nav-item" data-page="cart">
+        <i class="fas fa-shopping-bag"></i>
+        <span>Cart</span>
+        <span class="nav-badge" id="navBadge">0</span>
+      </div>
+      <div class="nav-item" data-page="profilePage">
+        <i class="fas fa-user"></i>
+        <span>Profile</span>
+      </div>
+    </nav>
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+      <i class="fas fa-check-circle"></i>
+      <span id="toastText">Added to cart!</span>
+    </div>
+
+    <!-- NEW: Simple Tooltip -->
+    <div class="simple-tooltip" id="simpleTooltip">
+      <!-- Content is set by JS -->
+    </div>
+
+    <!-- NEW: Confirmation Modal -->
+    <div class="confirm-modal-overlay" id="confirmDeleteModal">
+      <div class="confirm-modal-card">
+        <h3>Delete Address</h3>
+        <p>Are you sure you want to permanently delete this address?</p>
+        <div class="confirm-modal-actions">
+          <button class="confirm-modal-btn cancel" id="cancelDeleteBtn">Cancel</button>
+          <button class="confirm-modal-btn confirm" id="confirmDeleteBtn">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEW: Confirmation Modal for Clear Cart -->
+    <div class="confirm-modal-overlay" id="confirmClearCartModal">
+      <div class="confirm-modal-card">
+        <h3>Clear Cart</h3>
+        <p>Are you sure you want to remove all items from your cart?</p>
+        <div class="confirm-modal-actions">
+          <button class="confirm-modal-btn cancel" id="cancelClearCartBtn">Cancel</button>
+          <button class="confirm-modal-btn confirm" id="confirmClearCartBtn">Yes, Clear Cart</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEW: Referral Terms Modal -->
+    <div class="confirm-modal-overlay" id="referralTermsModal">
+      <div class="confirm-modal-card">
+        <h3>Referral Terms</h3>
+        <ul class="terms-list">
+          <li>Your friend must be a new customer and place their first order using your unique link.</li>
+          <li>Your 10% discount coupon will be credited to your account after your friend's first order is successfully delivered.</li>
+          <li>The referral program is subject to change and may be discontinued at any time.</li>
+          <li>Coastal Fresh reserves the right to void rewards for fraudulent activities.</li>
+        </ul>
+        <button class="confirm-modal-btn confirm" id="closeTermsBtn" style="background: var(--primary-color);">Got It</button>
+      </div>
+    </div>
+
+    <!-- NEW: Order Success Modal -->
+    <div class="confirm-modal-overlay" id="orderSuccessModal">
+      <div class="confirm-modal-card" style="text-align: center;">
+        <div style="font-size: 48px; color: var(--success-color); margin-bottom: 16px;">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h3>Order Placed Successfully!</h3>
+        <p id="orderSuccessMessage" style="margin-bottom: 24px;">Your order has been received. You can track its status in "My Orders".</p>
+        <div class="confirm-modal-actions" style="flex-direction: column;">
+          <button class="confirm-modal-btn confirm" id="trackOrderBtn">Track Order</button>
+          <button class="confirm-modal-btn cancel" id="continueShoppingBtn">Continue Shopping</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW: Static Breadcrumb Schemas for SEO -->
+  <script type="application/ld+json" id="breadcrumb-about">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" },
+      { "@type": "ListItem", "position": 2, "name": "About Us" }
+    ]
+  }
+  </script>
+  <script type="application/ld+json" id="breadcrumb-faq">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" },
+      { "@type": "ListItem", "position": 2, "name": "FAQs" }
+    ]
+  }
+  </script>
+  <script type="application/ld+json" id="breadcrumb-refer">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" },
+      { "@type": "ListItem", "position": 2, "name": "Refer & Earn" }
+    ]
+  }
+  </script>
+  <script type="application/ld+json" id="breadcrumb-contact">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.coastalfresh.in/" },
+      { "@type": "ListItem", "position": 2, "name": "Contact Us" }
+    ]
+  }
+  </script>
+
+  <!-- NEW: Order Details Drawer -->
+  <div class="drawer-overlay" id="orderDetailsDrawerOverlay" style="display: none;">
+    <div class="drawer" id="orderDetailsDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+      <div class="drawer-header">
+        <h2 class="drawer-title" id="drawerTitle">Order Details</h2>
+        <button class="drawer-close-btn" aria-label="Close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="drawer-content">
+        <!-- Order Meta -->
+        <div class="drawer-section">
+          <div class="drawer-order-meta">
+            <div><div class="meta-label">Order ID</div><div class="meta-value" id="drawerOrderId"></div></div>
+            <div><div class="meta-label">Placed On</div><div class="meta-value" id="drawerOrderDate"></div></div>
+            <div><div class="meta-label">Payment</div><div class="meta-value" id="drawerPaymentMethod"></div></div>
+          </div>
+        </div>
+
+        <!-- NEW: Order Status Timeline -->
+        <div class="drawer-section">
+          <h3 class="drawer-section-title">Order Status</h3>
+          <div class="order-status-timeline" id="drawerStatusTimeline">
+            <!-- Status steps will be injected here by JS -->
+          </div>
+        </div>
+
+        <!-- Items List -->
+        <div class="drawer-section">
+          <h3 class="drawer-section-title">Items</h3>
+          <div id="drawerItemsList"></div>
+        </div>
+
+        <!-- Bill Summary -->
+        <div class="drawer-section" id="drawerBillSection">
+          <h3 class="drawer-section-title">Bill Summary</h3>
+          <div class="drawer-bill-details" id="drawerBillDetails">
+            <!-- Bill rows will be injected here by JS -->
+          </div>
+        </div>
+
+        <!-- Address Section -->
+        <div class="drawer-section" id="drawerAddressSection">
+          <h3 class="drawer-section-title">Delivery Address</h3>
+          <div class="drawer-address-content">
+            <strong id="drawerAddressName"></strong>
+            <p id="drawerAddressFull"></p>
+          </div>
+        </div>
+      </div>
+      <div class="drawer-footer" id="drawerFooter"></div>
+    </div>
+  </div>
+
+  <!-- NEW: Variant Selection Drawer -->
+  <div class="variant-drawer-overlay" id="variantDrawerOverlay"></div>
+  <div class="variant-drawer" id="variantDrawer">
+    <div class="variant-drawer-header">
+      <h2 id="variantDrawerTitle" class="variant-drawer-title">Select a Variant</h2>
+      <button id="variantDrawerClose" class="variant-drawer-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="variant-drawer-content" id="variantDrawerContent">
+      <!-- Variant options will be injected here -->
+    </div>
+  </div>
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "Coastal Fresh India",
+    "url": "https://coastalfresh.in",
+    "logo": "https://res.cloudinary.com/dpyniai9l/image/upload/v1758244909/Coastal_Fresh_India_Logo_uqd6bk.png",
+    "image": "https://res.cloudinary.com/dpyniai9l/image/upload/v1757139649/refer_eran_whats_app_ryhhmi.png",
+    "description": "Fresh seafood delivery in Hyderabad & India. Order fish, prawns, crabs & more online.",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Panchavati Colony Manikonda",
+      "addressLocality": "Hyderabad",
+      "addressRegion": "Telangana",
+      "postalCode": "500089",
+      "addressCountry": "IN"
+    },
+    "telephone": "+91-9985125678",
+    "sameAs": [
+      "https://www.facebook.com/CoastalFresh.in",
+      "https://www.instagram.com/coastalfresh.in"
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Coastal Fresh",
+    "url": "https://www.coastalfresh.in",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://www.coastalfresh.in/?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
+  <!-- External JS -->
+  <script src="/analytics.js" defer></script>
+  <script src="/js/app.js" type="module"></script>
+</body>
+</html>

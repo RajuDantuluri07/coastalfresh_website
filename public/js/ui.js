@@ -332,31 +332,37 @@ export const UI = {
         state.currentProductQty = state.cart[`${product.id}-${state.selectedVariantIndex}`] || 1; // Reflect quantity of selected variant in cart
 
         // Use cached DOM elements for speed
-        const backBtn = document.querySelector('#productPopupOverlay .back-btn');
+        const backBtn = document.querySelector('#productPopupOverlay .popup-header-mobile .back-btn');
 
         const populatePopup = () => {
             document.getElementById('popupProductTitle').textContent = product.name;
-            document.getElementById('popupProductSub').textContent = product.desc.split('.')[0]; // Use first sentence as subtitle
+            document.getElementById('popupProductSub').textContent = product.desc.split('.')[0] || ''; // Use first sentence as subtitle
 
             const variantSelector = document.getElementById('popupVariantSelector');
             variantSelector.innerHTML = product.variants.map((v, index) => {
-                const displayName = (v.name && v.name !== product.name) ? `${v.name} (${v.net})` : v.net;
+                const displayName = (v.name && v.name !== product.name) ? `${v.name} (${v.net || ''})` : (v.net || 'Standard');
                 return `<option value="${index}" ${index === state.selectedVariantIndex ? 'selected' : ''}>${displayName}</option>`;
             }).join('');
 
             UI.updatePopupPrice();
 
-            document.getElementById('popupDescription').innerHTML = `<p>${product.desc}</p>`;
+            document.getElementById('popupDescription').textContent = product.desc;
+
+            // NEW: Populate info row
+            const infoRow = document.getElementById('popupInfoRow');
+            const primaryVariant = product.variants[0];
+            infoRow.innerHTML = `
+                <div class="info-item" role="listitem">
+                    <svg viewBox="0 0 24 24" fill="none" aria-hidden><path d="M12 3v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 7h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 21h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span>${primaryVariant.net || 'N/A'}</span>
+                </div>
+                ${primaryVariant.pieces ? `<div class="info-item"><svg viewBox="0 0 24 24" fill="none" aria-hidden><path d="M3 6h18" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M7 12h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span>${primaryVariant.pieces} Pieces</span></div>` : ''}
+                ${primaryVariant.serves ? `<div class="info-item"><svg viewBox="0 0 24 24" fill="none" aria-hidden><path d="M12 2v20" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M4 10h16" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg><span>Serves ${primaryVariant.serves}</span></div>` : ''}
+            `;
 
             const optimizedPopupImage = UI.getOptimizedImageUrl(product.image, 600, 600);
             document.getElementById('popupMainImage').src = optimizedPopupImage;
             document.getElementById('popupMainImage').alt = `High-quality ${DOMPurify.sanitize(product.name)} from Coastal Fresh India`;
-
-            // Update favorite button
-            const wishlistBtn = document.getElementById('popupWishlistBtn');
-            const isFavorite = state.favorites.has(product.id);
-            wishlistBtn.textContent = isFavorite ? '♥' : '♡';
-            wishlistBtn.setAttribute('aria-pressed', isFavorite);
 
             // Update quantity and total
             const variantId = `${product.id}-${state.selectedVariantIndex}`;
@@ -478,7 +484,7 @@ export const UI = {
 
         if (selectedVariant.mrp > selectedVariant.finalPrice) {
             finalPriceEl.textContent = `₹${selectedVariant.finalPrice}`;
-            mrpEl.textContent = `MRP: ₹${selectedVariant.mrp}`;
+            mrpEl.textContent = `₹${selectedVariant.mrp}`;
             mrpEl.style.display = 'inline';
             const discount = Math.round(((selectedVariant.mrp - selectedVariant.finalPrice) / selectedVariant.mrp) * 100);
             discountEl.textContent = `${discount}% off`;
@@ -519,12 +525,14 @@ export const UI = {
         const qtyControls = document.getElementById('popupQtyControls');
         const qtyCount = document.getElementById('popupQty');
 
+        addBtn.textContent = 'Add +'; // Reset button text
+
         if (qtyInCart > 0) {
-            addBtn.style.display = 'none'; // Hide "Add" button
+            addBtn.style.display = 'none';
             qtyControls.style.display = 'flex';
             qtyCount.textContent = qtyInCart;
         } else {
-            addBtn.style.display = 'inline-flex'; // Show "Add" button
+            addBtn.style.display = 'inline-flex';
             qtyControls.style.display = 'none';
         }
     },

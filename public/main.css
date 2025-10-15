@@ -1139,6 +1139,138 @@ z-index: 2;                 /* sits above input content */
   background: var(--bg-white);
 }
 
+/* --- START: NEW Product Popup Styles (from user design) --- */
+.product-popup-overlay .card {
+  background: var(--bg-white);
+  border-radius: 12px;
+  box-shadow: none; /* Shadow is on the popup container */
+  overflow: hidden;
+}
+
+.product-popup-overlay .media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: linear-gradient(180deg, #fbfbfb, #fff);
+}
+
+.product-popup-overlay .product-image {
+  width: 100%;
+  max-width: 740px;
+  height: auto;
+  border-radius: 10px;
+  object-fit: cover;
+  display: block;
+}
+
+.product-popup-overlay .content {
+  padding: 18px 18px 120px; /* bottom pad for sticky footer space */
+}
+
+.product-popup-overlay .title-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.product-popup-overlay h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+}
+
+.product-popup-overlay .subline {
+  color: #6b6b6b; /* --muted */
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.product-popup-overlay .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff0f6;
+  color: #d81b60; /* --accent */
+  padding: 8px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 13px;
+  border: 1px solid rgba(216, 27, 96, 0.08);
+}
+
+.product-popup-overlay .info-row {
+  display: flex;
+  gap: 14px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.product-popup-overlay .info-item {
+  background: #fbfbfb;
+  padding: 10px 12px;
+  border-radius: 10px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 13px;
+  color: #6b6b6b; /* --muted */
+  min-width: 110px;
+}
+
+.product-popup-overlay .info-item svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0.85;
+}
+
+.product-popup-overlay .desc {
+  margin-top: 18px;
+  font-size: 14px;
+  color: #222;
+}
+
+.product-popup-overlay .price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.product-popup-overlay .price {
+  display: flex;
+  gap: 12px;
+  align-items: baseline;
+  font-weight: 700;
+}
+
+.product-popup-overlay .price .final {
+  font-size: 20px;
+  color: #0b0b0b;
+  background: linear-gradient(90deg, #fdf2f8, #fff);
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+.product-popup-overlay .discount {
+  color: #2a9d3f;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.product-popup-overlay .mrp {
+  font-size: 13px;
+  color: #6b6b6b; /* --muted */
+}
+
+/* --- END: NEW Product Popup Styles --- */
+
+
 /* NEW: Grouped meta info below price */
 .popup-meta-info {
   display: flex;
