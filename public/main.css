@@ -3186,11 +3186,17 @@ body.popup-open .bottom-bar {
     top: 0;
   }
 
-  /* NEW: Ensure the right-side column can scroll if content is too long */
+  /* NEW: Make the right-side column a flex container to manage its content and footer */
   .popup-info {
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Prevent content from spilling out of the column */
   }
 
+  /* NEW: Allow the main info content to scroll independently */
+  .popup-info > div:not(.popup-sticky-cta) {
+    overflow-y: auto;
+  }
   .popup-info, .popup-highlights, .popup-details-section {
     padding: 0; /* Reset padding on these sections */
   }
