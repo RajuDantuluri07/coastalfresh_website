@@ -332,7 +332,7 @@ export const UI = {
         state.currentProductQty = state.cart[`${product.id}-${state.selectedVariantIndex}`] || 1; // Reflect quantity of selected variant in cart
 
         // Use cached DOM elements for speed
-        const backBtn = document.querySelector('#productPopupOverlay .popup-header-mobile .back-btn');
+        const backBtn = document.querySelector('#productPopupOverlay .popup-back-btn-mobile');
 
         const populatePopup = () => {
             document.getElementById('popupProductTitle').textContent = product.name;

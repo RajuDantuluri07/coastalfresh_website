@@ -434,7 +434,7 @@ export const Handlers = {
         const popup = document.getElementById('productPopupOverlay');
         popup.addEventListener('click', (e) => {
             // Close button or clicking the overlay background
-            if (e.target.closest('.popup-close-btn') || e.target.closest('.back-btn') || e.target === popup) {
+            if (e.target.closest('.popup-close-btn') || e.target.closest('.popup-back-btn-mobile') || e.target === popup) {
                 UI.closePopup();
             }
             // Add to cart button
