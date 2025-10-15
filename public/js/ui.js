@@ -665,12 +665,11 @@ export const UI = {
     },
 
     closePopup: () => {
-        const popup = document.getElementById('productPopup');
-        if (!popup || !state.isPopupOpen) return; // FIX: Check isPopupOpen to prevent errors on rapid clicks
+        const popupOverlay = document.getElementById('productPopupOverlay');
+        if (!popupOverlay || !state.isPopupOpen) return;
 
-        UI.closeModal(popup);
+        UI.closeModal(popupOverlay);
         state.isPopupOpen = false;
-        // UI.updateProductCardState(state.popupProduct.id); // This is now more complex, handled differently
         state.popupProduct = null;
 
         const underlyingPage = state.pageHistory[state.pageHistory.length - 1] || 'home';
@@ -682,7 +681,7 @@ export const UI = {
         }
         history.pushState({ page: underlyingPage }, pageInfo.title, pageInfo.path);
 
-        UI.showPage(underlyingPage, true);
+        UI.showPage(underlyingPage);
     },
 
     updateCartUI: () => {

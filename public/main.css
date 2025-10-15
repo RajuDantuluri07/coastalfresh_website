@@ -3173,12 +3173,19 @@ body.popup-open .bottom-bar {
     gap: 24px;
     padding: 24px;
     align-items: start;
+    /* NEW: Ensure the grid layout doesn't create horizontal overflow */
+    overflow: hidden;
   }
 
   .popup-image-section {
     padding: 0; /* Reset padding */
     position: sticky; /* Make image sticky on scroll */
     top: 0;
+  }
+
+  /* NEW: Ensure the right-side column can scroll if content is too long */
+  .popup-info {
+    overflow-y: auto;
   }
 
   .popup-info, .popup-highlights, .popup-details-section {
@@ -3196,9 +3203,14 @@ body.popup-open .bottom-bar {
     position: relative; /* Override fixed position */
     transform: none; /* Override transform */
     border-top: 1px solid var(--border-color);
+    padding: 12px 24px; /* Match horizontal padding of content */
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
     box-shadow: none;
     /* Ensure it's at the bottom of the modal content flow */
     margin-top: auto;
+    /* NEW: Center the inner content of the CTA bar */
+    display: flex;
+    justify-content: center;
   }
 
   /* --- DESKTOP: Cart as Side Panel --- */
