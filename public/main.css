@@ -3166,6 +3166,25 @@ body.popup-open .bottom-bar {
     animation: slideUpAndFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  /* NEW: Create a 2-column grid for the popup content on desktop */
+  .product-popup .popup-content-wrapper {
+    display: grid;
+    grid-template-columns: 40% 60%; /* Image on left, info on right */
+    gap: 24px;
+    padding: 24px;
+    align-items: start;
+  }
+
+  .popup-image-section {
+    padding: 0; /* Reset padding */
+    position: sticky; /* Make image sticky on scroll */
+    top: 0;
+  }
+
+  .popup-info, .popup-highlights, .popup-details-section {
+    padding: 0; /* Reset padding on these sections */
+  }
+
   .popup-header .popup-back-btn {
     /* On desktop, the back button should be a close (X) icon */
     content: '\f00d'; /* FontAwesome times icon */
@@ -3176,6 +3195,10 @@ body.popup-open .bottom-bar {
   .popup-sticky-cta {
     position: relative; /* Override fixed position */
     transform: none; /* Override transform */
+    border-top: 1px solid var(--border-color);
+    box-shadow: none;
+    /* Ensure it's at the bottom of the modal content flow */
+    margin-top: auto;
   }
 
   /* --- DESKTOP: Cart as Side Panel --- */
