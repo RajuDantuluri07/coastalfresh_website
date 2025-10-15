@@ -497,23 +497,6 @@ export const Handlers = {
             }
         });
 
-        // Dynamic Padding & Keyboard Handling for Product Popup
-        const popupStickyCta = document.getElementById('popupStickyCta');
-        const popupContentWrapper = document.getElementById('popupContentWrapper');
-
-        const resizeObserver = new ResizeObserver(() => {
-            const ctaHeight = popupStickyCta.offsetHeight;
-            popupContentWrapper.style.paddingBottom = `${ctaHeight + 10}px`;
-        });
-        if (popupStickyCta) resizeObserver.observe(popupStickyCta);
-
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', () => {
-                const isKeyboardOpen = window.visualViewport.height < window.innerHeight * 0.7;
-                popupStickyCta.classList.toggle('keyboard-open', isKeyboardOpen);
-            });
-        }
-
         // Dynamic Padding for Cart Footer
         const cartFooterEl = document.getElementById('cartFooter');
         const cartContentWrapperEl = document.querySelector('.cart-content-wrapper');
@@ -595,27 +578,6 @@ export const Handlers = {
             UI.updateCartUI();
             UI.showToast(`${itemsAddedCount} item(s) from your order have been added to the cart!`);
             UI.showCart();
-        }
-    },
-    toggleFavorite: () => {
-        state.isPopupFavorite = !state.isPopupFavorite;
-        const favoriteBtn = document.querySelector('.popup-action-btn.favorite');
-        favoriteBtn.setAttribute('aria-pressed', state.isPopupFavorite);
-        favoriteBtn.setAttribute('aria-label', state.isPopupFavorite ? 'Remove from Favorites' : 'Add to Favorites');
-        favoriteBtn.innerHTML = `<i class="${state.isPopupFavorite ? 'fas' : 'far'} fa-heart"></i>`;
-        favoriteBtn.style.color = state.isPopupFavorite ? 'var(--error-color)' : 'var(--primary-color)';
-
-        if (state.popupProduct) {
-            window.Analytics.trackEvent(state.isPopupFavorite ? 'add_to_wishlist' : 'remove_from_wishlist', {
-                currency: 'INR',
-                value: state.popupProduct.finalPrice * state.currentProductQty,
-                items: [{
-                    item_id: state.popupProduct.id,
-                    item_name: state.popupProduct.name,
-                    item_category: state.popupProduct.category,
-                    price: state.popupProduct.finalPrice
-                }]
-            });
         }
     },
 
@@ -859,7 +821,7 @@ export const Handlers = {
         const isFavorited = state.favorites.has(productId);
         const product = state.products.find(p => p.id === productId);
 
-        if (isFavorited) {
+        if (isFavorited) { // If it is already a favorite, remove it.
             state.favorites.delete(productId);
             UI.showToast(`${product.name} removed from favorites`);
             if (product) window.Analytics.trackEvent('remove_from_wishlist', {
@@ -888,11 +850,11 @@ export const Handlers = {
         });
 
         // Update popup if it's open for this product
-        if (state.isPopupOpen && state.popupProduct?.id === productId) {
-            const favoriteBtn = document.querySelector('.popup-action-btn.favorite');
-            favoriteBtn.setAttribute('aria-pressed', isFavorited);
-            favoriteBtn.innerHTML = `<i class="${isFavorited ? 'fas' : 'far'} fa-heart"></i>`;
-            favoriteBtn.style.color = isFavorited ? 'var(--pink)' : 'var(--primary-color)';
+        if (state.isPopupOpen && state.popupProduct?.id === productId) { // This check is correct
+            const wishlistBtn = document.getElementById('popupWishlistBtn');
+            if (wishlistBtn) {
+                wishlistBtn.textContent = isFavorited ? '♥' : '♡';
+            }
         }
     },
 
