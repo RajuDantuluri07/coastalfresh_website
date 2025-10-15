@@ -1751,6 +1751,11 @@ export const UI = {
         modalElement.classList.add('active');
         document.body.classList.add('popup-open');
 
+        // NEW: Explicitly hide the bottom bar when a modal opens
+        const bottomBar = document.getElementById('bottomNav');
+        if (bottomBar) {
+            bottomBar.style.display = 'none';
+        }
         const focusableElements = modalElement.querySelectorAll(
             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         );
@@ -1786,6 +1791,12 @@ export const UI = {
 
         modalElement.classList.remove('active');
         document.body.classList.remove('popup-open');
+
+        // NEW: Explicitly show the bottom bar when a modal closes
+        const bottomBar = document.getElementById('bottomNav');
+        if (bottomBar) {
+            bottomBar.style.display = 'flex';
+        }
         if (state.previouslyFocusedElement) state.previouslyFocusedElement.focus();
     },
 
