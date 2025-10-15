@@ -1112,6 +1112,20 @@ z-index: 2;                 /* sits above input content */
   backdrop-filter: blur(1px);
 }
 
+/* --- NEW: Product Popup Overlay --- */
+.product-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  display: none; /* Hidden by default */
+  background: rgba(0, 0, 0, 0.5); /* Dimming overlay */
+  align-items: center;
+  justify-content: center;
+}
+
 /* Product-popup this ENTIRE block */
 .product-popup {
 position: fixed;
@@ -1128,23 +1142,9 @@ flex-direction: column;
 overflow: hidden;
 }
 
-/* For desktop - keep it centered and constrained */
-@media (min-width: 481px) {
-.product-popup {
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  height: 100vh;
-  max-width: var(--app-max-width);
-  border-radius: 0;
-  box-shadow: 0 0 50px rgba(0,0,0,0.2);
-}
-}
-
-
-.product-popup.active {
-  display: flex;
+.product-popup-overlay.active {
+  display: flex; /* Show the overlay, which in turn shows the popup */
+  /* The .product-popup itself is always display:flex, so we just show its parent */
 }
 
 /* Updated popup header to match new design */
@@ -1693,21 +1693,33 @@ overflow: hidden;
 }
 
 /* --- REVAMPED CART PAGE STYLES --- */
+.cart-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1050; /* Above product popup overlay */
+  display: none;
+  background: rgba(0,0,0,0.5);
+}
+.cart-overlay.active { display: block; }
+
 .cart-modal {
   position: fixed;
   top: 0;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(100%); /* Start off-screen */
   width: 100%;
   max-width: var(--app-max-width);
   height: 100%;
   background: var(--bg-light);
-  z-index: 1000;
-  display: none;
-  flex-direction: column;
+  z-index: 1051;
+  display: flex; flex-direction: column;
   overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.cart-modal.active { display: flex; }
+.cart-modal.active { transform: translateX(-50%) translateY(0); }
 
 .cart-content-wrapper {
   flex: 1;
@@ -3101,6 +3113,76 @@ body.popup-open .bottom-bar {
   .products {
     grid-template-columns: repeat(4, 1fr);
   }
+
+  /* Hide mobile bottom bar on desktop */
+  .bottom-bar {
+    display: none;
+  }
+
+  /* Show and style desktop top navigation */
+  .top-nav-desktop {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin: 0 auto; /* Center the nav links */
+  }
+
+  .top-nav-item {
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 15px;
+    padding: 8px 0;
+    position: relative;
+    transition: color 0.2s ease;
+  }
+
+  .top-nav-item:hover {
+    color: var(--primary-color);
+  }
+
+  .top-nav-item.active {
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color);
+  }
+
+  /* --- DESKTOP: Product Popup as Modal --- */
+  .product-popup {
+    position: relative; /* Override fixed position */
+    transform: none; /* Override transform */
+    left: auto; top: auto; /* Override positioning */
+    max-width: 860px; /* Set a max-width for the modal */
+    width: 90vw;
+    height: auto; /* Height is determined by content */
+    max-height: 90vh; /* Limit height to 90% of viewport */
+    border-radius: 16px; /* Rounded corners for the modal */
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    animation: slideUpAndFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .popup-header .popup-back-btn {
+    /* On desktop, the back button should be a close (X) icon */
+    content: '\f00d'; /* FontAwesome times icon */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+  }
+
+  .popup-sticky-cta {
+    position: relative; /* Override fixed position */
+    transform: none; /* Override transform */
+  }
+
+  /* --- DESKTOP: Cart as Side Panel --- */
+  .cart-modal {
+    left: auto; /* Unset left */
+    right: 0; /* Pin to the right */
+    width: 420px; /* A good width for a side panel */
+    max-width: 90vw; /* Ensure it's not too wide on smaller desktops */
+    border-radius: 0;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.15);
+    transform: translateX(100%); /* Start off-screen to the right */
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }
 
 .order-controls {
@@ -3679,21 +3761,6 @@ body.popup-open .bottom-bar {
 .contact-card.whatsapp i { color: #25D366; }
 .contact-card-text strong { display: block; font-size: 16px; font-weight: 600; }
 .contact-card-text span { font-size: 13px; color: var(--text-secondary); }
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes tick {
-  50% { transform: scale(1.05); }
-}
-.variant-option .variant-cta {
-  flex-shrink: 0;
-}
-.variant-option .add-btn {
-  position: static; /* Override absolute positioning from product card */
-}
 
 @keyframes shimmer {
   0% { background-position: -200% 0; }

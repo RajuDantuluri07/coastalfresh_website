@@ -225,7 +225,7 @@ export const Handlers = {
             if (target.id === 'addNewAddressBtnFixed') UI.showAddressForm();
 
             // Cart back button
-            if (target.closest('#cartModal .back-btn')) UI.closeCart();
+            if (target.closest('#cartModal .back-btn') || target.closest('#cartOverlay') === target) UI.closeCart();
             if (target.closest('.cart-btn')) UI.showCart();
 
             // Profile page buttons
@@ -686,7 +686,7 @@ export const Handlers = {
         }
 
         // NEW: If the cart is currently open, re-render it to show the newly added item.
-        if (document.getElementById('cartModal')?.classList.contains('active')) {
+        if (document.getElementById('cartOverlay')?.classList.contains('active')) {
             UI.showCart();
         }
 
@@ -729,7 +729,7 @@ export const Handlers = {
         }
 
         if (!state.currentUser) {
-            document.getElementById('cartModal').classList.remove('active');
+            UI.closeCart();
             UI.showToast('Please log in to continue checkout.'); 
             state.afterLoginAction = UI.showCart;
 

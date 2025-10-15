@@ -849,8 +849,8 @@ export const UI = {
             UI.renderCouponSection();
         }
 
-        const cartModal = document.getElementById('cartModal');
-        UI.openModal(cartModal, cartModal.querySelector('.back-btn'));
+        const cartOverlay = document.getElementById('cartOverlay');
+        UI.openModal(cartOverlay, cartOverlay.querySelector('.back-btn'));
 
         const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0); // This was a bug, now fixed
         window.Analytics.trackEvent('view_cart', {
@@ -1022,8 +1022,8 @@ export const UI = {
     },
 
     closeCart: () => {
-        const cartModal = document.getElementById('cartModal');
-        UI.closeModal(cartModal);
+        const cartOverlay = document.getElementById('cartOverlay');
+        UI.closeModal(cartOverlay);
     },
 
     showOrderSuccessModal: (orderId) => {
