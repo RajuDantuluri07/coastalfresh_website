@@ -25,7 +25,10 @@ export const Handlers = {
             if (productCard && !target.closest('.cart-controls, .add-btn, .wish, .variant-btn, .notify-btn')) {
                 e.preventDefault();
                 const productId = parseInt(productCard.dataset.id, 10);
-                if (productId) window.location.href = `/product.html?id=${productId}`;
+                if (productId) {
+                    // FIX: Instead of navigating, call the function to show the popup directly.
+                    UI.showProductPopup(productId);
+                }
             }
 
             // NEW: Handle "Find Products" button on empty favorites page
