@@ -3077,6 +3077,32 @@ body.popup-open .bottom-bar {
   }
 }
 
+/* --- NEW: DESKTOP ENHANCEMENTS --- */
+@media (min-width: 768px) {
+  :root {
+    --app-max-width: 960px; /* Widen the container for desktop */
+  }
+
+  .login-modal {
+    justify-content: center; /* Center the login card in the wider view */
+  }
+
+  /* Convert horizontally-scrolling sections to grids */
+  .flash-sale-products,
+  .featured-products {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    overflow-x: visible;
+    margin: 0; /* Reset negative margin */
+    padding: 4px 0 12px; /* Adjust padding */
+  }
+
+  /* Show more products per row on the catalog page */
+  .products {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
 .order-controls {
   padding-top: 8px;
 }
