@@ -1601,106 +1601,161 @@ z-index: 2;                 /* sits above input content */
   z-index: 1001;
   box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, opacity 0.3s ease;
-  display: none; /* Hide by default, JS will manage visibility */
+  display: none; /* Hide by default on desktop */
   /* Respect safe area for iPhone home indicator */
   padding-bottom: calc(12px + env(safe-area-inset-bottom));
 }
 
-.product-popup-overlay.active .popup-sticky-cta {
-  display: block;
-}
-
-/* --- START: NEW Product Popup Styles (from user design) --- */
+/* --- START: REFINED Product Popup Styles --- */
 .product-popup-overlay {
-  position: fixed; /* Changed to fixed for true modal behavior */
+  position: fixed;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
   width: 100%;
-  max-width: var(--app-max-width);
   height: 100%;
   background: rgba(0,0,0,0.5);
   z-index: 1000;
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: 20px;
 }
 
 .product-popup-overlay.active {
   display: flex;
 }
 
+/* The main card container for the popup */
 .popup-card-simple {
   background: #fff;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 8px 20px rgba(10,30,20,0.06);
-  overflow: hidden;
-  display: flex;
-  gap: 18px;
-  align-items: flex-start;
-  padding: 16px;
   width: 100%;
-  max-width: 900px;
-  max-height: 90vh;
-  position: relative; /* For close buttons */
+  max-width: 800px;
+  max-height: 95vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Important for border-radius on children */
 }
 
+/* This inner container holds the two columns and allows for scrolling */
+.popup-card-content {
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+  overflow-y: auto; /* Allow content to scroll if it overflows */
+  flex-grow: 1;
+}
+
+/* Left column for the image */
 .popup-card-left {
   flex: 1 1 320px;
-  min-width: 220px;
+  min-width: 280px;
 }
 
+/* Right column for product details */
 .popup-card-right {
-  width: 320px;
-  padding: 8px 4px;
+  flex: 0 0 320px; /* Fixed width for the right column on desktop */
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
+/* Product image styling */
 .popup-card-simple .product-image {
   width: 100%;
   height: auto;
   border-radius: 8px;
   display: block;
   object-fit: cover;
+  border: 1px solid var(--border-color);
 }
 
-.popup-card-simple h1 { font-size: 18px; margin: 6px 0; font-weight: 600; }
-.popup-meta { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
-.popup-price { font-size: 22px; color: var(--primary-color); font-weight: 700; margin: 6px 0; }
+/* Typography and pricing */
+.popup-card-simple h1 { font-size: 20px; margin: 0; font-weight: 600; line-height: 1.3; }
+.popup-meta { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; }
+.popup-price { font-size: 24px; color: var(--primary-color); font-weight: 700; margin: 8px 0; }
 
-.popup-form-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+/* Form controls */
+.popup-form-label { font-size: 14px; color: var(--text-secondary); margin-bottom: 6px; }
 
-.popup-card-simple select, .popup-card-simple .popup-qty {
-  padding: 8px 10px;
+.popup-card-simple select,
+.popup-card-simple .popup-qty {
+  padding: 10px 12px;
   border-radius: 8px;
   border: 1px solid #e6eef0;
   background: white;
   font-weight: 700;
   width: 100%;
+  font-size: 16px;
 }
 
-.popup-qty { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
-.popup-qty button { background: transparent; border: 0; font-size: 18px; cursor: pointer; padding: 6px 8px; }
-.popup-qty span { min-width: 32px; text-align: center; display: inline-block; }
+.popup-qty { display: flex; align-items: center; justify-content: space-between; }
+.popup-qty button { background: transparent; border: 0; font-size: 20px; cursor: pointer; padding: 6px 10px; color: var(--primary-color); }
+.popup-qty span { min-width: 40px; text-align: center; display: inline-block; font-size: 16px; }
 
-.popup-total { margin-top: 12px; font-weight: 700; }
-.popup-note { font-size: 13px; color: var(--text-secondary); margin-top: 10px; }
+.popup-total { margin-top: 16px; font-weight: 700; font-size: 18px; }
+.popup-note { font-size: 14px; color: var(--text-secondary); margin-top: 12px; line-height: 1.5; }
 
+/* Main "Add to cart" button */
 .popup-btn-primary {
   background: var(--primary-color);
   color: #fff; border: 0; padding: 12px 16px; border-radius: 8px; cursor: pointer; font-weight: 800;
   width: 100%; font-size: 16px;
+  transition: background-color 0.2s;
+}
+.popup-btn-primary:hover { background: var(--primary-dark); }
+.popup-btn-primary:disabled { background: var(--success-color); cursor: not-allowed; }
+
+/* Close buttons */
+.popup-close-btn, .popup-back-btn-mobile {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--border-color);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.popup-back-btn-mobile {
+  display: none; /* Hidden by default */
+  left: 12px;
+  right: auto;
 }
 
-@media (max-width: 780px) {
-  .popup-card-simple { flex-direction: column; overflow-y: auto; }
-  .popup-card-right { width: 100%; }
+/* --- Responsive Styles for Mobile --- */
+@media (max-width: 768px) {
+  .product-popup-overlay {
+    padding: 0; /* Full screen on mobile */
+    align-items: stretch; /* Stretch card to full height */
+  }
+  .popup-card-simple {
+    border-radius: 0;
+    max-height: 100%;
+    height: 100%;
+  }
+  .popup-card-content {
+    flex-direction: column;
+    padding: 16px;
+    padding-bottom: 100px; /* Space for sticky footer */
+  }
+  .popup-card-right {
+    width: 100%;
+    padding: 0;
+  }
+  .popup-close-btn { display: none; }
+  .popup-back-btn-mobile { display: flex; }
   .popup-sticky-cta { display: block; }
 }
-/* --- END: NEW Product Popup Styles --- */
+/* --- END: REFINED Product Popup Styles --- */
 
 .popup-sticky-cta-inner {
   display: flex;
