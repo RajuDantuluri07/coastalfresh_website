@@ -813,7 +813,10 @@
       
             <!-- Bill details -->
             <section class="cart-bill" aria-labelledby="billHeading">
-              <h2 id="billHeading" class="section-title" style="font-size: 18px; margin-bottom: 8px;">Bill Details</h2>
+              <div class="cart-bill-header">
+                <h2 id="billHeading" class="section-title">Bill Details</h2>
+                <button id="clearCartBtn" class="clear-cart-btn">Clear Cart</button>
+              </div>
               <div class="cart-bill-row"><div>Item Total</div><div id="cartItemTotal">₹0</div></div>
               <div class="cart-bill-row" id="cartDiscountRow" style="display: none;"><div>Discount</div><div id="cartDiscount" style="color: var(--success-color);">₹0</div></div>
               <div class="cart-bill-row">
@@ -914,6 +917,18 @@
         <div class="confirm-modal-actions">
           <button class="confirm-modal-btn cancel" id="cancelDeleteBtn">Cancel</button>
           <button class="confirm-modal-btn confirm" id="confirmDeleteBtn">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEW: Confirmation Modal for Clear Cart -->
+    <div class="confirm-modal-overlay" id="confirmClearCartModal">
+      <div class="confirm-modal-card">
+        <h3>Clear Cart</h3>
+        <p>Are you sure you want to remove all items from your cart?</p>
+        <div class="confirm-modal-actions">
+          <button class="confirm-modal-btn cancel" id="cancelClearCartBtn">Cancel</button>
+          <button class="confirm-modal-btn confirm" id="confirmClearCartBtn">Yes, Clear Cart</button>
         </div>
       </div>
     </div>

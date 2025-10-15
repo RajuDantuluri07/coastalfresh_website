@@ -1127,13 +1127,13 @@ width: 100%;
 height: 100%; /* FIX: Use 100% instead of 100vh to respect mobile browser UI */
 background: var(--bg-white);
 z-index: 1000;
-display: none; /* Let the parent overlay control visibility */
+display: flex; /* Let the parent overlay control visibility */
 flex-direction: column;
 overflow: hidden;
 }
 
 .product-popup-overlay.active {
-  display: block; /* Show the overlay, which in turn shows the popup */
+  display: flex; /* Show the overlay, which in turn shows the popup */
 }
 
 /* Updated popup header to match new design */
@@ -1574,6 +1574,25 @@ overflow: hidden;
 
 /* Bill details */
 .cart-bill { background: var(--bg-white); padding: 16px; border-radius: 14px; box-shadow: 0 6px 18px rgba(15,23,42,0.08); margin: 10px 0; }
+.cart-bill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.cart-bill-header .section-title {
+  font-size: 18px;
+  margin-bottom: 0;
+}
+.clear-cart-btn {
+  background: none;
+  border: 1px solid transparent;
+  color: var(--error-color);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+}
 .cart-bill-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eef2f3; font-size: 14px; }
 .cart-bill-row:last-of-type { border-bottom: none; }
 .cart-bill-row.total { border-bottom: none; font-weight: 700; font-size: 18px; }
@@ -2915,7 +2934,7 @@ body.popup-open .bottom-bar {
     z-index: 1000;
     display: none;
     align-items: center;
-    justify-content: center;
+    justify-content: center; /* This will center the modal */
     padding: 16px;
   }
   .product-popup-overlay.active { display: flex; }
@@ -2932,7 +2951,7 @@ body.popup-open .bottom-bar {
     width: 100%;
     max-width: 920px;
     max-height: 90vh;
-    overflow-y: auto;
+    overflow-y: auto; /* Allow scrolling within the modal if content is long */
   }
 
   .popup-close-btn {
@@ -2969,6 +2988,12 @@ body.popup-open .bottom-bar {
   .add-cart { display: flex; gap: 10px; align-items: center; margin-top: 8px; }
   .btn-add { background: var(--primary-color); color: white; padding: 12px 18px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(1, 101, 154, 0.18); }
   .btn-wish { padding: 12px; border-radius: 10px; border: 1px dashed #d6e9ef; background: white; cursor: pointer; font-size: 16px; }
+
+  /* NEW: Style for the "Go to Cart" button state */
+  .btn-add.go-to-cart {
+    background: var(--success-color); /* Change color to green */
+    box-shadow: 0 6px 18px rgba(56, 142, 60, 0.2);
+  }
 
   .tabs { margin-top: 18px; border-top: 1px solid #eef6f8; padding-top: 12px; }
   .tab-content { margin-top: 12px; color: #1f2937; line-height: 1.5; }

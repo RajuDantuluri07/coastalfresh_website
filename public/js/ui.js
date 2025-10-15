@@ -756,6 +756,7 @@ export const UI = {
         const cartFooterEl = document.getElementById('cartFooter');
         const emptyCartFooterEl = document.getElementById('emptyCartFooter');
         const cartSummaryContainerEl = document.getElementById('cartSummaryContainer');
+        const clearCartBtn = document.getElementById('clearCartBtn');
         const items = Object.entries(state.cart).map(([variantId, qty]) => {
             const [productId, variantIndex] = variantId.split('-').map(Number);
             const product = state.products.find(p => p.id === productId);
@@ -775,6 +776,7 @@ export const UI = {
             if (cartFooterEl) cartFooterEl.style.display = 'none';
             if (emptyCartFooterEl) emptyCartFooterEl.style.display = 'flex'; // NEW
             if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'none';
+            if (clearCartBtn) clearCartBtn.style.display = 'none';
 
             // NEW: Attach event listener to the new sticky button
             const emptyCartBtn = document.getElementById('emptyCartBrowseBtn');
@@ -787,6 +789,7 @@ export const UI = {
             if (cartFooterEl) cartFooterEl.style.display = 'flex';
             if (emptyCartFooterEl) emptyCartFooterEl.style.display = 'none'; // NEW
             if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'block';
+            if (clearCartBtn) clearCartBtn.style.display = 'block';
 
             cartItemsEl.innerHTML = items.map(item => {
                 // FIX: Define hasOffer inside the map scope to prevent ReferenceError.

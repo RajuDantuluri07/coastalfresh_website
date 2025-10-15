@@ -216,6 +216,10 @@ export const Handlers = {
             // Confirmation modal buttons
             if (target.id === 'cancelDeleteBtn') document.getElementById('confirmDeleteModal').classList.remove('active');
             if (target.id === 'confirmDeleteBtn') Handlers.executeDeleteAddress();
+            // NEW: Clear Cart confirmation
+            if (target.id === 'clearCartBtn') Handlers.showClearCartConfirmation();
+            if (target.id === 'cancelClearCartBtn') UI.closeModal(document.getElementById('confirmClearCartModal'));
+            if (target.id === 'confirmClearCartBtn') Handlers.executeClearCart();
 
             // Order Success modal buttons
             if (target.id === 'continueShoppingBtn') UI.closeOrderSuccessModal();
@@ -430,7 +434,14 @@ export const Handlers = {
                 UI.closePopup();
             }
             // Add to cart button
-            if (e.target.closest('#popupAddToCartBtn')) Handlers.addPopupToCart();
+            const addToCartBtn = e.target.closest('#popupAddToCartBtn');
+            if (addToCartBtn) {
+                if (addToCartBtn.classList.contains('go-to-cart')) {
+                    UI.showCart();
+                } else {
+                    Handlers.addPopupToCart();
+                }
+            }
             // Wishlist button
             if (e.target.closest('#popupWishlistBtn')) Handlers.toggleFavorite(state.popupProduct.id);
             // Quantity controls
@@ -662,6 +673,24 @@ export const Handlers = {
         window.Analytics.trackAddToCart({ ...product, ...variant }, qty);
     },
 
+    showClearCartConfirmation: () => {
+        const modal = document.getElementById('confirmClearCartModal');
+        if (modal) {
+            UI.openModal(modal, modal.querySelector('#cancelClearCartBtn'));
+        }
+    },
+
+    executeClearCart: () => {
+        state.cart = {};
+        Handlers.saveCart();
+        UI.updateCartUI();
+        UI.showToast('Cart has been cleared.');
+        UI.closeModal(document.getElementById('confirmClearCartModal'));
+        // Re-render any visible product cards to show "ADD" instead of quantity controls
+        UI.renderFeaturedProducts();
+        UI.renderCatalogProducts();
+    },
+
     checkout: async () => {
         const cartFooter = document.getElementById('cartFooter');
         const checkoutBtn = document.getElementById('cartPlaceOrderBtn');
@@ -821,7 +850,7 @@ export const Handlers = {
         const isFavorited = state.favorites.has(productId);
         const product = state.products.find(p => p.id === productId);
 
-        if (isFavorited) { // If it is already a favorite, remove it.
+        if (isFavorited) {
             state.favorites.delete(productId);
             UI.showToast(`${product.name} removed from favorites`);
             if (product) window.Analytics.trackEvent('remove_from_wishlist', {
