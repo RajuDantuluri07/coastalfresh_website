@@ -686,54 +686,12 @@ export const UI = {
         const productCards = document.querySelectorAll(`.product[data-id="${productId}"]`);
         if (productCards.length === 0) return;
     
-        const product = state.products.find(p => p.id === parseInt(productId, 10));
+        const product = state.products.find(p => p.id === productId);
         if (!product) return;
 
         productCards.forEach(card => {
-            // FIX: The CTA button or out-of-stock badge is directly inside the .product-image container.
-            const imageContainer = card.querySelector('.product-image');
-            if (!imageContainer) return;
-    
-            // Find and remove the old control (add button, qty selector, or out of stock badge).
-            // This is more robust than assuming the structure.
-            const oldControls = imageContainer.querySelector('.add-btn, .cart-controls, .out-of-stock-overlay, .variant-btn');
-            if (oldControls) {
-                oldControls.remove();
-            }
-
-            let newControlHTML = '';
-            const sanitizedName = product.name;
-
-            if (product.available) {
-                const variants = product.variants || [];
-                const variantCount = variants.length;
-                const isSpecialCategory = product.category === 'Prawns' || product.category === 'Pickles';
-                const useSizesCta = variantCount >= 3 || (variantCount > 1 && isSpecialCategory);
-
-                const qtyInCart = Object.keys(state.cart)
-                    .filter(key => key.startsWith(`${product.id}-`))
-                    .reduce((sum, key) => sum + state.cart[key], 0);
-
-                if (qtyInCart > 0 && variantCount === 1) {
-                    const variantId = `${product.id}-0`;
-                    newControlHTML = `<div class="cart-controls" data-id="${variantId}"><button class="qty-btn dec" aria-label="Decrease quantity">-</button><span class="qty">${qtyInCart}</span><button class="qty-btn inc" aria-label="Increase quantity">+</button></div>`;
-                } else if (useSizesCta) {
-                    const ctaText = `${variantCount} Sizes`;
-                    newControlHTML = `<button class="add-btn variant-btn" data-id="${product.id}" aria-label="${ctaText}" aria-haspopup="dialog">${ctaText}</button>`;
-                } else {
-                    const variantId = `${product.id}-0`;
-                    const buttonActionId = variantCount > 1 ? product.id : variantId;
-                    const buttonClass = variantCount > 1 ? 'add-btn variant-btn' : 'add-btn';
-                    newControlHTML = `<button class="${buttonClass}" data-id="${buttonActionId}" aria-label="Add ${sanitizedName} to cart">ADD</button>`;
-                }
-            } else {
-                newControlHTML = `<div class="out-of-stock-overlay">Out of Stock</div>`;
-            }
-
-            // Insert the new, correct control into the image container.
-            if (newControlHTML) {
-                imageContainer.insertAdjacentHTML('beforeend', newControlHTML);
-            }
+            // Re-render the entire card's HTML. This is simpler and more robust.
+            card.outerHTML = UI.createProductHTML(product);
         });
     },
 

@@ -623,6 +623,12 @@ function renderVariantForms(variants = []) {
     // FIX: After rendering, check if we need to show the single-variant fallback.
     checkMultiVariantState();
 }
+document.getElementById('product-form').addEventListener('click', (e) => {
+    if (e.target.classList.contains('remove-variant-btn')) {
+        e.target.closest('.variant-card').remove();
+        checkMultiVariantState();
+    }
+});
 
 // NEW: Create a single variant form group
 function createVariantForm(variant, index) {
@@ -647,34 +653,11 @@ function createVariantForm(variant, index) {
     return div;
 }
 
-
-// NEW: Handle file input change for image preview
-document.getElementById('product-image-upload').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            const preview = document.getElementById('product-image-preview');
-            preview.src = event.target.result;
-            preview.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
 // NEW: Add/Remove Variant Buttons
 document.getElementById('add-variant-btn').addEventListener('click', () => {
     // FIX #2: The "Add Variant" button was not working.
     const container = document.getElementById('variants-container');
     container.appendChild(createVariantForm({}, container.children.length));
-});
-
-document.getElementById('variants-container').addEventListener('click', (e) => {
-    if (e.target.classList.contains('remove-variant-btn')) {
-        e.target.closest('.variant-card').remove();
-        // FIX #8: After removing a variant, check if we need to show the single-variant fields.
-        checkMultiVariantState();
-    }
 });
 
 document.getElementById('product-form').addEventListener('submit', async (e) => {

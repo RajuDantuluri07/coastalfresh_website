@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿const fs = require('fs');
+﻿﻿﻿﻿﻿﻿﻿const fs = require('fs');
 const path = require('path');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
@@ -42,7 +42,7 @@ const pages = [
  */
 function escapeXml(unsafe) {
   // FIX: Ensure the input is a string before trying to replace.
-  // If it's not a string (e.g., it's a URL in the caption field), return an empty string.
+  // If it's not a string (e.g., it's null or undefined), return an empty string.
   if (typeof unsafe !== 'string') {
     return '';
   }

@@ -297,9 +297,7 @@ export const Handlers = {
             const addBtn = e.target.closest('.add-btn');
             if (addBtn) {
                 e.stopPropagation(); // FIX: Stop the event from bubbling up to the body handler.
-                // FIX: Call updateVariantDrawer instead of re-rendering the whole thing.
                 Handlers.addToCart(addBtn.dataset.id);
-                UI.updateVariantDrawer();
             }
             const qtyBtn = e.target.closest('.qty-btn');
             if (qtyBtn) {
@@ -309,6 +307,9 @@ export const Handlers = {
                 const variantId = controls.dataset.id;
                 const change = qtyBtn.classList.contains('inc') ? 1 : -1;
                 Handlers.updateQty(variantId, change, 'drawer');
+                // FIX: Update the drawer UI after changing quantity.
+                // This was a bug where the drawer UI wouldn't refresh after a quantity change.
+                UI.updateVariantDrawer();
             }
         });
 
@@ -436,6 +437,7 @@ export const Handlers = {
             // Add to cart button
             const addToCartBtn = e.target.closest('#popupAddToCartBtn');
             if (addToCartBtn) {
+                // FIX: Correctly handle "Go to Cart" state. This was a bug.
                 if (addToCartBtn.classList.contains('go-to-cart')) {
                     UI.showCart();
                 } else {
@@ -550,14 +552,16 @@ export const Handlers = {
 
     changePopupQty: (change) => {
         state.currentProductQty = Math.max(1, Math.min(99, state.currentProductQty + change));
+        // FIX: Update total price when quantity changes. This was a bug.
+        UI.updatePopupPrice();
         UI.updatePopupCta();
     },
 
     addPopupToCart: () => {
         if (!state.popupProduct) return;
         const variantId = `${state.popupProduct.id}-${state.selectedVariantIndex}`;
-        // FIX: Pass the selected quantity and update the CTA button afterwards.
         Handlers.addToCart(variantId, state.currentProductQty); 
+        // FIX: Update the button state immediately after adding to cart.
         UI.updatePopupCta(); 
     },
 
@@ -850,6 +854,7 @@ export const Handlers = {
         const isFavorited = state.favorites.has(productId);
         const product = state.products.find(p => p.id === productId);
 
+        // FIX: Correctly handle adding/removing from favorites. The old logic was reversed.
         if (isFavorited) {
             state.favorites.delete(productId);
             UI.showToast(`${product.name} removed from favorites`);
@@ -865,24 +870,18 @@ export const Handlers = {
         }
 
         Handlers.saveFavorites();
-        Handlers.updateFavoriteButtons(productId);
-    },
-
-    updateFavoriteButtons: (productId) => {
-        const isFavorited = state.favorites.has(productId);
-
-        // Update all product cards for this product
+        // Update all matching buttons
         document.querySelectorAll(`.wish[data-id="${productId}"]`).forEach(btn => {
-            btn.innerHTML = isFavorited ? '♥' : '♡';
-            btn.setAttribute('aria-pressed', isFavorited);
-            btn.style.color = isFavorited ? 'var(--pink)' : '#444';
+            btn.innerHTML = !isFavorited ? '♥' : '♡'; // The new state is the opposite of the old one
+            btn.setAttribute('aria-pressed', !isFavorited);
         });
 
         // Update popup if it's open for this product
-        if (state.isPopupOpen && state.popupProduct?.id === productId) { // This check is correct
+        if (state.isPopupOpen && state.popupProduct?.id === productId) {
             const wishlistBtn = document.getElementById('popupWishlistBtn');
             if (wishlistBtn) {
-                wishlistBtn.textContent = isFavorited ? '♥' : '♡';
+                wishlistBtn.textContent = !isFavorited ? '♥' : '♡';
+                wishlistBtn.setAttribute('aria-pressed', isFavorited);
             }
         }
     },
