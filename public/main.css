@@ -1746,10 +1746,12 @@ z-index: 2;                 /* sits above input content */
     flex-direction: column;
     padding: 16px;
     padding-bottom: 100px; /* Space for sticky footer */
+    gap: 0; /* Remove the large gap for the column layout */
   }
   .popup-card-right {
     width: 100%;
     padding: 0;
+    margin-top: 16px; /* Add a controlled space above the details */
   }
   .popup-close-btn { display: none; }
   .popup-back-btn-mobile { display: flex; }
@@ -1831,18 +1833,19 @@ z-index: 2;                 /* sits above input content */
 
 .cart-modal {
   position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%) translateY(100%); /* Start off-screen */
+  /* FIX: Simplify positioning for a full-screen mobile-first approach */
+  top: 0; left: 0;
+  transform: translateY(100%); /* Start off-screen */
   width: 100%;
   max-width: var(--app-max-width);
   height: 100%;
   background: var(--bg-light);
   z-index: 1051; /* Above product popup */
-  display: flex; /* Let the parent overlay control visibility */
+  display: flex;
   flex-direction: column;
   overflow: hidden;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  left: 50%; transform: translateX(-50%) translateY(100%); /* Re-add for desktop centering */
 }
 .cart-overlay.active .cart-modal { transform: translateX(-50%) translateY(0); }
 
@@ -1896,6 +1899,15 @@ z-index: 2;                 /* sits above input content */
   text-decoration: line-through;
   font-weight: 600;
   margin-left: 8px;
+}
+.cart-item-savings {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--success-color);
+  background-color: #e8f5e9;
+  padding: 3px 6px;
+  border-radius: 6px;
+  display: inline-block; /* To make padding and radius work */
 }
 .cart-item-qty {
   display: flex; align-items: center; gap: 8px;

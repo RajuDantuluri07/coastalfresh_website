@@ -757,7 +757,8 @@ export const UI = {
 
             cartItemsEl.innerHTML = items.map(item => {
                 // FIX: Define hasOffer inside the map scope to prevent ReferenceError.
-                const hasOffer = item.mrp > item.finalPrice; 
+                const hasOffer = item.mrp > item.finalPrice;
+                const savings = hasOffer ? item.mrp - item.finalPrice : 0;
                 // FIX: Provide a fallback image and an onerror handler for robustness.
                 const placeholderImg = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/food_yircgb.png';
                 const optimizedCartImage = UI.getOptimizedImageUrl(item.image, 128, 128) || placeholderImg;
@@ -772,6 +773,8 @@ export const UI = {
                 ₹${item.finalPrice}
                 ${hasOffer ? `<span class="cart-item-mrp">₹${item.mrp}</span>` : ''}
               </div>
+              <!-- NEW: Show savings per item -->
+              ${savings > 0 ? `<div class="cart-item-savings">You save ₹${savings.toFixed(0)}</div>` : ''}
             </div>
             <div class="cart-item-qty" data-id="${item.variantId}">
               <button class="qty-btn cart-qty-btn dec" aria-label="decrease quantity">−</button>
