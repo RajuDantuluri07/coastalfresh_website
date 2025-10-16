@@ -1,5 +1,5 @@
 import { _simpleHash } from './ui.js'; // Import _simpleHash
-let state, config, UI; // UI is passed in init, so no need to import directly here
+let state, config, UI;
 
 export const Handlers = {
     init: (appState, appConfig, uiModule) => {
@@ -7,21 +7,14 @@ export const Handlers = {
         config = appConfig;
         UI = uiModule;
     },
-
-    /**
-     * A helper function to safely add event listeners.
-     * It checks if the element exists before adding the listener.
-     * @param {string} selector - The CSS selector for the element.
-     * @param {string} event - The event type (e.g., 'click').
-     * @param {Function} handler - The event handler function.
-     */
+    
     setupEvents: () => {
-        // --- Event Delegation on the Body for Dynamic/Repeated Elements ---
-        document.body.addEventListener('click', (e) => {
-            const target = e.target;
-
-            // Product card click (but not on buttons that have their own handlers)
-            const productCard = target.closest('.product:not(.unavailable)'); // FIX: Only select available product cards
+        // --- OPTIMIZATION: Scoped Event Delegation ---
+        const setupHomePageEvents = () => {
+            document.getElementById('home').addEventListener('click', e => {
+                const target = e.target;
+                // Product card click
+                const productCard = target.closest('.product:not(.unavailable)');
             if (productCard && !target.closest('.cart-controls, .add-btn, .wish, .variant-btn, .notify-btn')) {
                 e.preventDefault();
                 const productId = parseInt(productCard.dataset.id, 10);
@@ -31,16 +24,10 @@ export const Handlers = {
                 }
             }
 
-            // NEW: Handle "Find Products" button on empty favorites page
-            const findProductsBtn = target.closest('#findProductsFromFavorites');
-            if (findProductsBtn) {
-                UI.showPage('catalog');
-            }
-
-            // CTA button on product cards
-            const addBtn = target.closest('.add-btn');
-            if (addBtn) {
-                e.stopPropagation();
+                // CTA button on product cards
+                const addBtn = target.closest('.add-btn');
+                if (addBtn) {
+                    e.stopPropagation();
                 const buttonId = addBtn.dataset.id;
                 const isVariantAction = addBtn.classList.contains('variant-btn');
                 const productId = isVariantAction ? parseInt(buttonId, 10) : parseInt(buttonId.split('-')[0], 10);
@@ -62,12 +49,12 @@ export const Handlers = {
                     // This is a direct "ADD" for a single-variant product.
                     Handlers.addToCart(buttonId);
                 }
-            }
+                }
 
-            // Quantity controls on product cards (scoped to image container)
-            const productQtyBtn = target.closest('.product-image .cart-controls .qty-btn');
-            if (productQtyBtn) {
-                e.stopPropagation(); // Prevent card click
+                // Quantity controls on product cards
+                const productQtyBtn = target.closest('.product-image .cart-controls .qty-btn');
+                if (productQtyBtn) {
+                    e.stopPropagation();
                 const controls = productQtyBtn.closest('.cart-controls');
                 const variantId = controls.dataset.id;
                 if (variantId) {
@@ -75,26 +62,12 @@ export const Handlers = {
                     Handlers.updateQty(variantId, change, 'card');
                 }
             }
-
-            // Favorite button on product card
-            const favBtn = target.closest('.wish');
-            if (favBtn) {
-                e.stopPropagation(); // Prevent popup from opening
+                // Favorite button
+                const favBtn = target.closest('.wish');
+                if (favBtn) {
+                    e.stopPropagation();
                 const productId = parseInt(favBtn.dataset.id, 10);
                 if (!isNaN(productId)) Handlers.toggleFavorite(productId);
-            }
-
-            // NEW: Handle notify me button click
-            const notifyBtn = target.closest('.notify-btn');
-            if (notifyBtn) {
-                e.stopPropagation();
-                UI.showToast('Notify me feature coming soon!');
-            }
-
-            // FAQ toggle
-            const faqToggle = target.closest('.faq .q');
-            if (faqToggle) {
-                UI.toggleFAQ(faqToggle);
             }
 
             // Carousel slide click
@@ -112,6 +85,12 @@ export const Handlers = {
                     Handlers.openWhatsApp(slideTarget);
                 }
             }
+            });
+        };
+
+        const setupGlobalEvents = () => {
+            document.body.addEventListener('click', e => {
+                const target = e.target;
 
             // Product description toggle
             const descToggle = target.closest('.popup-description-toggle');
@@ -143,8 +122,6 @@ export const Handlers = {
                 }
             }
 
-            // --- Safely handle clicks on page-specific or modal buttons ---
-
             // Login/Signup form toggling
             if (target.id === 'showLogin') {
                 e.preventDefault();
@@ -163,6 +140,30 @@ export const Handlers = {
                 document.getElementById('authError').textContent = '';
             }
 
+                // Confirmation modal buttons
+                if (target.id === 'cancelDeleteBtn') document.getElementById('confirmDeleteModal').classList.remove('active');
+                if (target.id === 'confirmDeleteBtn') Handlers.executeDeleteAddress();
+                if (target.id === 'clearCartBtn') Handlers.showClearCartConfirmation();
+                if (target.id === 'cancelClearCartBtn') UI.closeModal(document.getElementById('confirmClearCartModal'));
+                if (target.id === 'confirmOrderBtn') Handlers.executePlaceOrder();
+                if (target.id === 'cancelOrderBtn') UI.closeModal(document.getElementById('confirmOrderModal'));
+                if (target.id === 'confirmClearCartBtn') Handlers.executeClearCart();
+
+                // Order Success modal buttons
+                if (target.id === 'continueShoppingBtn') UI.closeOrderSuccessModal();
+                if (target.id === 'trackOrderBtn') Handlers.handleTrackOrder(e);
+
+                // Profile page buttons
+                const profileBtn = target.closest('.profile-button');
+                if (profileBtn) Handlers.handleProfileButtonClick(profileBtn);
+            });
+        };
+
+        const setupCatalogEvents = () => {
+            document.getElementById('catalog').addEventListener('click', e => {
+                const target = e.target;
+
+
             // Category filter buttons
             const categoryButton = target.closest('.category');
             if (categoryButton) {
@@ -178,12 +179,6 @@ export const Handlers = {
                 window.Analytics.trackEvent('select_category', { category: state.currentCategory });
             }
 
-            // Header buttons and View All
-            if (target.closest('#home .view-all')) {
-                e.preventDefault();
-                UI.showPage('catalog');
-            }
-
             // Back buttons
             const backBtn = target.closest('.page .back-btn');
             if (backBtn) {
@@ -194,56 +189,65 @@ export const Handlers = {
                     Handlers.goBack();
                 }
             }
+            });
+        };
 
-            // Address list actions
-            const optionsBtn = target.closest('.address-options-btn');
-            if (optionsBtn) {
-                const dropdown = optionsBtn.nextElementSibling;
-                document.querySelectorAll('.address-dropdown-content.active').forEach(openDropdown => {
-                    if (openDropdown !== dropdown) openDropdown.classList.remove('active');
-                });
-                dropdown.classList.toggle('active');
-                e.stopPropagation();
-                return;
-            }
-            const actionBtn = target.closest('.address-action-btn');
-            if (actionBtn) {
-                const addressId = actionBtn.dataset.id;
-                if (actionBtn.classList.contains('delete-address-btn')) Handlers.deleteAddress(addressId);
-                else if (actionBtn.classList.contains('set-default-btn')) Handlers.setDefaultAddress(addressId);
-                else if (actionBtn.classList.contains('edit-address-btn')) Handlers.editAddress(addressId);
-                actionBtn.closest('.address-dropdown-content').classList.remove('active');
-                return;
-            }
+        const setupAddressPageEvents = () => {
+            document.getElementById('addressPage').addEventListener('click', e => {
+                const target = e.target;
+                // Address list actions
+                const optionsBtn = target.closest('.address-options-btn');
+                if (optionsBtn) {
+                    const dropdown = optionsBtn.nextElementSibling;
+                    document.querySelectorAll('.address-dropdown-content.active').forEach(openDropdown => {
+                        if (openDropdown !== dropdown) openDropdown.classList.remove('active');
+                    });
+                    dropdown.classList.toggle('active');
+                    e.stopPropagation();
+                    return;
+                }
+                const actionBtn = target.closest('.address-action-btn');
+                if (actionBtn) {
+                    const addressId = actionBtn.dataset.id;
+                    if (actionBtn.classList.contains('delete-address-btn')) Handlers.deleteAddress(addressId);
+                    else if (actionBtn.classList.contains('set-default-btn')) Handlers.setDefaultAddress(addressId);
+                    else if (actionBtn.classList.contains('edit-address-btn')) Handlers.editAddress(addressId);
+                    actionBtn.closest('.address-dropdown-content').classList.remove('active');
+                    return;
+                }
+                // Fixed "Add New Address" button
+                if (target.id === 'addNewAddressBtnFixed') UI.showAddressForm();
+            });
+        };
 
-            // Confirmation modal buttons
-            if (target.id === 'cancelDeleteBtn') document.getElementById('confirmDeleteModal').classList.remove('active');
-            if (target.id === 'confirmDeleteBtn') Handlers.executeDeleteAddress();
-            // NEW: Clear Cart confirmation
-            if (target.id === 'clearCartBtn') Handlers.showClearCartConfirmation();
-            if (target.id === 'cancelClearCartBtn') UI.closeModal(document.getElementById('confirmClearCartModal'));
-            if (target.id === 'confirmClearCartBtn') Handlers.executeClearCart();
-
-            // Order Success modal buttons
-            if (target.id === 'continueShoppingBtn') UI.closeOrderSuccessModal();
-            if (target.id === 'trackOrderBtn') Handlers.handleTrackOrder(e);
-
-            // Fixed "Add New Address" button
-            if (target.id === 'addNewAddressBtnFixed') UI.showAddressForm();
+        const setupCartEvents = () => {
+            document.getElementById('cartModal').addEventListener('click', e => {
+                const target = e.target;
 
             // Cart back button
             if (target.closest('#cartModal .back-btn') || target.closest('#cartOverlay') === target) UI.closeCart();
             if (target.closest('.cart-btn')) UI.showCart();
 
-            // Profile page buttons
-            const profileBtn = target.closest('.profile-button');
-            if (profileBtn) Handlers.handleProfileButtonClick(profileBtn);
-
             // Checkout button in cart
-            if (target.id === 'cartPlaceOrderBtn') Handlers.checkout();
+            if (target.id === 'cartPlaceOrderBtn') Handlers.showCheckoutConfirmation();
 
-            // NEW: Handle click on the entire order card to show details
-            const orderCard = target.closest('.order-card');
+                // Cart quantity controls
+                const cartQtyBtn = target.closest('.cart-item-qty .qty-btn');
+                if (cartQtyBtn) {
+                    e.stopPropagation();
+                    const cartControls = target.closest('[data-id]');
+                    const variantId = cartControls.dataset.id;
+                    const change = cartQtyBtn.classList.contains('inc') ? 1 : -1;
+                    Handlers.updateQty(variantId, change, 'cart');
+                }
+            });
+        };
+
+        const setupOrdersPageEvents = () => {
+            document.getElementById('ordersPage').addEventListener('click', e => {
+                const target = e.target;
+                // Handle click on the entire order card to show details
+                const orderCard = target.closest('.order-card');
             if (orderCard) {
                 const orderId = orderCard.dataset.orderId;
                 if (orderId) {
@@ -254,44 +258,49 @@ export const Handlers = {
                     });
                 }
             }
+            });
+        };
 
-            // NEW: Handle click on the "Explore Today's Fresh Catch" button on the About Us page
-            if (target.id === 'aboutPageCtaBtn') {
-                UI.showPage('catalog');
-            }
+        const setupReferPageEvents = () => {
+            document.getElementById('referPage').addEventListener('click', e => {
+                const target = e.target;
+                if (target.id === 'shareOnWhatsAppBtn') {
+                    e.preventDefault();
+                    Handlers.openWhatsApp('refer');
+                }
+                if (target.id === 'shareOnOtherAppsBtn') {
+                    e.preventDefault();
+                    Handlers.shareProduct();
+                }
+                if (target.id === 'showTermsBtn') {
+                    UI.openModal(document.getElementById('referralTermsModal'));
+                }
+                if (target.id === 'closeTermsBtn') {
+                    UI.closeModal(document.getElementById('referralTermsModal'));
+                }
+                if (target.closest('#copyReferralBtn')) Handlers.copyReferralLink();
+                if (target.closest('#referralLoginBtn')) UI.showLoginModal(null, 'signup');
+            });
+        };
 
-            // NEW: Handle "Share on WhatsApp" button on the refer page
-            if (target.id === 'shareOnWhatsAppBtn') {
-                e.preventDefault();
-                Handlers.openWhatsApp('refer');
-            }
+        const setupMiscPageEvents = () => {
+            document.getElementById('faqPage').addEventListener('click', e => {
+                const faqToggle = e.target.closest('.faq .q');
+                if (faqToggle) UI.toggleFAQ(faqToggle);
+            });
+            document.getElementById('aboutPage').addEventListener('click', e => {
+                if (e.target.id === 'aboutPageCtaBtn') UI.showPage('catalog');
+            });
+            document.getElementById('favoritesPage').addEventListener('click', e => {
+                if (e.target.closest('#findProductsFromFavorites')) UI.showPage('catalog');
+            });
+        };
 
-            // NEW: Handle "Share on Other Apps" button on refer page
-            if (target.id === 'shareOnOtherAppsBtn') {
-                e.preventDefault();
-                Handlers.shareProduct(); // Re-use the generic share handler
-            }
-
-            // NEW: Handle "Terms" button on refer page
-            if (target.id === 'showTermsBtn') {
-                UI.openModal(document.getElementById('referralTermsModal'));
-            }
-            if (target.id === 'closeTermsBtn') {
-                UI.closeModal(document.getElementById('referralTermsModal'));
-            }
-
-            // --- FIX: Cart quantity controls ---
-            const cartQtyBtn = target.closest('.cart-item-qty .qty-btn'); // This selector is specific to the cart items
-            if (cartQtyBtn) {
-                e.stopPropagation();
-                // FIX: The data-id is on the parent '.cart-item-qty' or '.cart-item-card'
-                const cartControls = target.closest('[data-id]');
-                const variantId = cartControls.dataset.id;
-                const change = cartQtyBtn.classList.contains('inc') ? 1 : -1;
-                // The check for variantId happens inside updateQty
-                Handlers.updateQty(variantId, change, 'cart');
-            }
-        });
+        // --- Call all setup functions ---
+        setupGlobalEvents();
+        setupHomePageEvents();
+        setupCartEvents();
+        setupAddressPageEvents();
 
         // Variant Drawer events
         document.getElementById('variantDrawerClose').addEventListener('click', UI.closeVariantDrawer);
@@ -316,15 +325,10 @@ export const Handlers = {
             }
         });
 
-        // --- NEW: Event listener for the enhanced Refer a Friend page ---
-        const referPage = document.getElementById('referPage');
-        if (referPage) { // FIX: Add listener for the new login button
-            referPage.addEventListener('click', (e) => {
-                if (e.target.closest('#copyReferralBtn')) Handlers.copyReferralLink();
-                // NEW: Handle click on the login button on the refer page
-                if (e.target.closest('#referralLoginBtn')) UI.showLoginModal(null, 'signup');
-            });
-        }
+        setupCatalogEvents();
+        setupOrdersPageEvents();
+        setupReferPageEvents();
+        setupMiscPageEvents();
 
         // Typewriter focus/blur handlers
         const catalogSearchInput = document.getElementById('catalogSearch');
@@ -730,9 +734,8 @@ export const Handlers = {
         UI.renderCatalogProducts();
     },
 
-    checkout: async () => {
-        const cartFooter = document.getElementById('cartFooter');
-        const checkoutBtn = document.getElementById('cartPlaceOrderBtn');
+    // NEW: Refactored checkout flow into multiple steps
+    showCheckoutConfirmation: async () => {
         const rawItems = Object.entries(state.cart).map(([variantId, qty]) => {
             const [productId, variantIndex] = variantId.split('-').map(Number);
             const product = state.products.find(p => p.id === productId);
@@ -743,7 +746,6 @@ export const Handlers = {
             }
             return { ...product, ...variant, variantId, qty };
         });
-
         const items = rawItems.filter(Boolean);
 
         if (items.length !== rawItems.length) {
@@ -767,8 +769,7 @@ export const Handlers = {
         if (!state.currentUser) {
             UI.closeCart();
             UI.showToast('Please log in to continue checkout.'); 
-            state.afterLoginAction = UI.showCart;
-
+            state.afterLoginAction = Handlers.showCheckoutConfirmation; // Come back to this step after login
             UI.showLoginModal(null, 'signup');
             return;
         }
@@ -786,7 +787,7 @@ export const Handlers = {
         }
 
         if (!userAddress) {
-            state.afterAddressAction = Handlers.checkout;
+            state.afterAddressAction = Handlers.showCheckoutConfirmation; // Come back here after adding address
             UI.showToast('Please add a delivery address to continue.');
             UI.showPage('addressPage');
             UI.showAddressForm();
@@ -794,19 +795,38 @@ export const Handlers = {
             return;
         }
 
-        // NEW: Disable the button to prevent double-clicks
-        if (checkoutBtn) {
-            checkoutBtn.disabled = true;
-            checkoutBtn.innerHTML = '<div class="loading"></div>';
+        // All checks passed, show the confirmation modal
+        UI.openCheckoutConfirmation(items, userAddress);
+    },
+
+    executePlaceOrder: async () => {
+        const confirmBtn = document.getElementById('confirmOrderBtn');
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<div class="loading"></div>';
+
+        // Re-fetch cart items and address to ensure they are current
+        const rawItems = Object.entries(state.cart).map(([variantId, qty]) => {
+            const [productId, variantIndex] = variantId.split('-').map(Number);
+            const product = state.products.find(p => p.id === productId);
+            const variant = product?.variants[variantIndex];
+            return { ...product, ...variant, variantId, qty };
+        });
+        const items = rawItems.filter(p => p.name); // Simple validation
+        const addressSnapshot = await state.db.collection('users').doc(state.currentUser.uid).collection('addresses').where('isDefault', '==', true).limit(1).get();
+        const userAddress = addressSnapshot.empty ? null : addressSnapshot.docs[0].data();
+
+        if (items.length === 0 || !userAddress) {
+            UI.showToast("Your cart or address has changed. Please review and try again.", true);
+            UI.closeModal(document.getElementById('confirmOrderModal'));
+            return;
         }
-        const orderId = `CF-${Date.now()}${Math.floor(Math.random() * 100)}`;
 
         const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
         const couponDiscount = state.appliedCoupon ? (state.appliedCoupon.type === 'percent' ? (subtotal * state.appliedCoupon.value) / 100 : state.appliedCoupon.value) : 0;
-
         const deliveryFee = 0;
         const total = subtotal - couponDiscount + deliveryFee;
 
+        const orderId = `CF-${Date.now()}${Math.floor(Math.random() * 100)}`;
         const orderData = {
             orderId: orderId,
             userId: state.currentUser.uid,
@@ -824,30 +844,26 @@ export const Handlers = {
         // Track that the user has initiated the checkout process.
         window.Analytics.trackBeginCheckout(orderId, total, items);
 
-        state.db.collection('orders').add(orderData)
-            .then(() => {
+        try {
+            await state.db.collection('orders').add(orderData);
                 state.cart = {};
                 Handlers.saveCart();
                 UI.updateCartUI();
-                UI.closeCart();
+                UI.closeModal(document.getElementById('confirmOrderModal'));
                 UI.showOrderSuccessModal(orderId);
 
                 window.Analytics.trackPurchase(orderId, total, items);
-            })
-            .catch((error) => {
+        } catch (error) {
                 console.error("Error saving order to Firestore:", error);
                 UI.showToast("Could not place your order. Please try again.");
                 window.Analytics.trackEvent('purchase_failure', {
                     error_message: error.message
                 });
-            })
-            .finally(() => {
-                // NEW: Re-enable the button after the process is complete
-                if (checkoutBtn) { 
-                    checkoutBtn.disabled = false;
-                    checkoutBtn.textContent = 'Place Order';
-                }
-            });
+        } finally {
+            // Re-enable the button
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Confirm & Place Order';
+        }
     },
 
     updateQty: (variantId, change, source = 'card') => {

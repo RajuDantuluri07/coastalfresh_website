@@ -753,29 +753,28 @@ export const UI = {
             if (clearCartBtn) clearCartBtn.style.display = 'block';
 
       cartItemsEl.innerHTML = items.map(item => {
-        const { product, variant, qty, variantId } = item;
-        const displayName = product.name + (variant.name ? ` - ${variant.name}` : '');
+        const displayName = UI.getVariantDisplayName(item);
         const placeholderImg = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png';
-        const optimizedCartImage = UI.getOptimizedImageUrl(product.image, 160, 160) || placeholderImg;
-        const hasOffer = variant.mrp && variant.mrp > variant.price;
-        const savings = hasOffer ? (variant.mrp - variant.price) * qty : 0;
+        const optimizedCartImage = UI.getOptimizedImageUrl(item.image, 160, 160) || placeholderImg;
+        const hasOffer = item.mrp && item.mrp > item.finalPrice;
+        const savings = hasOffer ? (item.mrp - item.finalPrice) * item.qty : 0;
 
         return `
-            <article class="cart-item-card" data-id="${variantId}">
+            <article class="cart-item-card" data-id="${item.variantId}">
                 <img src="${optimizedCartImage}" alt="${displayName}" class="cart-item-thumb" onerror="this.onerror=null;this.src='${placeholderImg}';">
                 <div class="cart-item-meta">
                     <div>
                         <div class="cart-item-name">${displayName}</div>
                         <div class="cart-item-price-row">
-                            <span>₹${variant.price.toFixed(0)}</span>
-                            ${hasOffer ? `<span class="cart-item-mrp">₹${variant.mrp}</span>` : ''}
+                            <span>₹${item.finalPrice.toFixed(0)}</span>
+                            ${hasOffer ? `<span class="cart-item-mrp">₹${item.mrp}</span>` : ''}
                         </div>
                         ${savings > 0 ? `<div class="cart-item-savings">You save ₹${savings.toFixed(0)}</div>` : ''}
                     </div>
                     <div class="cart-item-actions">
-                        <div class="cart-item-qty" data-id="${variantId}">
+                        <div class="cart-item-qty" data-id="${item.variantId}">
                             <button class="qty-btn cart-qty-btn dec" aria-label="decrease quantity">−</button>
-                            <div class="count cart-qty" aria-live="polite">${qty}</div>
+                            <div class="count cart-qty" aria-live="polite">${item.qty}</div>
                             <button class="qty-btn cart-qty-btn inc" aria-label="increase quantity">+</button>
                         </div>
                     </div>
@@ -964,6 +963,41 @@ export const UI = {
     closeOrderSuccessModal: () => {
         UI.closeModal(document.getElementById('orderSuccessModal'));
         UI.showPage('home');
+    },
+
+    /**
+     * NEW: Shows a final confirmation modal before placing the order.
+     * @param {Array} items - The array of item objects in the cart.
+     * @param {object} address - The user's default address object.
+     */
+    openCheckoutConfirmation: (items, address) => {
+        const modal = document.getElementById('confirmOrderModal');
+        const summaryEl = document.getElementById('orderConfirmSummary');
+        if (!modal || !summaryEl) return;
+
+        const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
+        let couponDiscount = 0;
+        if (state.appliedCoupon) {
+            couponDiscount = state.appliedCoupon.type === 'percent' ? (subtotal * state.appliedCoupon.value) / 100 : state.appliedCoupon.value;
+        }
+        const total = subtotal - couponDiscount;
+
+        summaryEl.innerHTML = `
+            <div class="order-confirm-section">
+                <h4><i class="fas fa-map-marker-alt"></i> Delivery Address</h4>
+                <p>${address.fullName}, ${address.house}, ${address.street}, ${address.city} - ${address.pincode}</p>
+            </div>
+            <div class="order-confirm-section">
+                <h4><i class="fas fa-wallet"></i> Payment</h4>
+                <p>Cash on Delivery</p>
+            </div>
+            <div class="order-confirm-section">
+                <h4><i class="fas fa-receipt"></i> Grand Total</h4>
+                <p class="order-confirm-total">₹${Math.round(total)}</p>
+            </div>
+        `;
+
+        UI.openModal(modal, document.getElementById('confirmOrderBtn'));
     },
 
     renderFavoritesPage: () => {
