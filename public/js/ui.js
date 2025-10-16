@@ -287,7 +287,7 @@ export const UI = {
             }
 
             const priceOrStockHTML = product.available ? `
-                <div class="price-row">
+                <div class="price-row" role="text" aria-label="Price is ${primaryVariant.finalPrice || 'Not available'}">
                     <span class="final-price">₹${primaryVariant.finalPrice || 'N/A'}</span>
                     ${hasOffer ? `<span class="old-price">₹${primaryVariant.mrp}</span>` : ''}
                 </div>
@@ -782,7 +782,7 @@ export const UI = {
         `;
             }).join('');
 
-            UI.updateCartSummary();
+            UI.updateCartSummary(items);
             UI.renderCouponSection();
         }
 
@@ -834,21 +834,8 @@ export const UI = {
         }
     },
 
-    updateCartSummary: () => {
-        // FIX: Define cartItems within this function's scope to prevent ReferenceError.
-        // This was the root cause of the application failing to start.
-        const cartItems = Object.entries(state.cart).map(([variantId, qty]) => {
-            const [productId, variantIndex] = variantId.split('-').map(Number);
-            const product = state.products.find(p => p.id === productId);
-            if (!product || !product.variants[variantIndex]) return null;
-            const variant = product.variants[variantIndex];
-            return {
-                ...product,
-                ...variant,
-                variantId: variantId,
-                qty: qty
-            };
-        }).filter(Boolean); // This was a bug, now fixed
+    updateCartSummary: (cartItems) => {
+        // OPTIMIZATION: Pass cartItems to avoid recalculating them.
         const itemTotalEl = document.getElementById('cartItemTotal');
         const deliveryFeeEl = document.getElementById('cartDeliveryFee');
         const toPayEl = document.getElementById('cartToPay');

@@ -1379,14 +1379,15 @@ export const Handlers = {
         const input = document.getElementById('couponInput');
         if (!input) return;
         const code = input.value.trim().toUpperCase();
-        state.couponError = null;
 
         if (!code) {
             state.couponError = 'Please enter a coupon code.';
-            UI.updateCartSummary();
+            // FIX: Pass items to updateCartSummary to avoid errors.
+            const items = Object.keys(state.cart).map(id => ({ ...state.products.find(p => p.id === parseInt(id.split('-')[0])), qty: state.cart[id] }));
+            UI.updateCartSummary(items);
             return;
         }
-
+        state.couponError = null;
         const coupon = config.COUPONS[code];
         const items = Object.keys(state.cart).map(id => {
             const product = state.products.find(p => p.id === parseInt(id));
@@ -1396,8 +1397,8 @@ export const Handlers = {
 
         if (!coupon || (coupon.minOrder && subtotal < coupon.minOrder)) {
             state.couponError = coupon ? `This coupon is valid on orders above ₹${coupon.minOrder}.` : 'Promo code is invalid. Please try another code.';
-            UI.showToast(coupon ? `Minimum order of ₹${coupon.minOrder} required.` : 'Invalid coupon code.');
-            UI.updateCartSummary();
+            UI.showToast(state.couponError, true);
+            UI.updateCartSummary(items);
             input.value = code;
             return;
         }
@@ -1405,7 +1406,7 @@ export const Handlers = {
         state.appliedCoupon = { code, ...coupon };
         UI.showToast(`Coupon '${code}' applied successfully!`);
         UI.renderCouponSection();
-        UI.updateCartSummary();
+        UI.updateCartSummary(items);
         window.Analytics.trackEvent('apply_coupon', { coupon: code });
     },
 
@@ -1416,7 +1417,9 @@ export const Handlers = {
         // FIX: Re-render the coupon section *before* updating the summary to prevent race conditions.
         UI.renderCouponSection();
         UI.showToast('Coupon removed.');
-        UI.updateCartSummary();
+        // FIX: Pass items to updateCartSummary to avoid errors.
+        const items = Object.keys(state.cart).map(id => ({ ...state.products.find(p => p.id === parseInt(id.split('-')[0])), qty: state.cart[id] }));
+        UI.updateCartSummary(items);
         window.Analytics.trackEvent('remove_coupon', { coupon: removedCode });
     },
 
