@@ -748,18 +748,18 @@
 
     <!-- Cart Page as Modal -->
     <div class="cart-overlay" id="cartOverlay">
-      <div class="cart-modal" id="cartModal" style="--accent: #137a3a; --accent-600: #167a3b;">
+      <div class="page cart-modal" id="cartModal" style="--accent: #137a3a; --accent-600: #167a3b;">
         <header class="header">
           <div class="header-top">
             <button class="back-btn" aria-label="Close Cart">
-              <i class="fas fa-times"></i>
+              <i class="fas fa-arrow-left"></i>
             </button>
             <h1 class="logo">Your Cart</h1>
             <div style="width: 36px;"></div>
           </div>
         </header>
       
-        <div class="cart-content-wrapper" id="cartContentWrapper">
+        <main class="section" id="cartContentWrapper">
           <!-- Product list -->
           <section class="cart-products" id="cartItems"></section>
       
@@ -827,10 +827,7 @@
             <!-- Payment options -->
             <div class="cart-payments" id="paymentOptions" role="radiogroup" aria-label="Payment methods"></div>
           </div>
-      
-          <!-- bottom CTA is sticky so keep some space at the end of content -->
-          <div style="height:86px"></div>
-        </div>
+        </main>
 
         <!-- NEW: Sticky CTA for Empty Cart -->
         <div class="cart-sticky-ctawrap" id="emptyCartFooter" style="display: none;">

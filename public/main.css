@@ -1370,7 +1370,7 @@ z-index: 2;                 /* sits above input content */
 }
 .cart-overlay.active { display: block; }
 
-.cart-modal {
+.page.cart-modal {
   position: fixed;
   /* FIX: Simplify positioning for a full-screen mobile-first approach */
   top: 0; left: 0;
@@ -1389,11 +1389,6 @@ z-index: 2;                 /* sits above input content */
   transform: translateY(0);
 }
 
-.cart-content-wrapper {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
 #cartModal .header .logo {
   font-size: 20px;
   font-weight: 700;
