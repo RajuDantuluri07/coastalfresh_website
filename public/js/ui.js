@@ -752,35 +752,37 @@ export const UI = {
             if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'block';
             if (clearCartBtn) clearCartBtn.style.display = 'block';
 
-            cartItemsEl.innerHTML = items.map(item => {
-                // FIX: Define hasOffer inside the map scope to prevent ReferenceError.
-                const hasOffer = item.mrp > item.finalPrice;
-                const savings = hasOffer ? item.mrp - item.finalPrice : 0;
-                // FIX: Provide a fallback image and an onerror handler for robustness.
-                const placeholderImg = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1757005094/food_yircgb.png';
-                const optimizedCartImage = UI.getOptimizedImageUrl(item.image, 128, 128) || placeholderImg;
-                const displayName = UI.getVariantDisplayName(item); // FIX: Use helper for consistent naming.
+      cartItemsEl.innerHTML = items.map(item => {
+        const { product, variant, qty, variantId } = item;
+        const displayName = product.name + (variant.name ? ` - ${variant.name}` : '');
+        const placeholderImg = 'https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png';
+        const optimizedCartImage = UI.getOptimizedImageUrl(product.image, 160, 160) || placeholderImg;
+        const hasOffer = variant.mrp && variant.mrp > variant.price;
+        const savings = hasOffer ? (variant.mrp - variant.price) * qty : 0;
 
-                return `
-          <article class="cart-item-card" data-id="${item.variantId}">
-            <img src="${optimizedCartImage}" alt="${displayName}" class="cart-item-thumb" onerror="this.onerror=null;this.src='${placeholderImg}';">
-            <div class="cart-item-meta">
-              <div class="cart-item-name">${displayName}</div>
-              <div class="cart-item-price">
-                ₹${item.finalPrice}
-                ${hasOffer ? `<span class="cart-item-mrp">₹${item.mrp}</span>` : ''}
-              </div>
-              <!-- NEW: Show savings per item -->
-              ${savings > 0 ? `<div class="cart-item-savings">You save ₹${savings.toFixed(0)}</div>` : ''}
-            </div>
-            <div class="cart-item-qty" data-id="${item.variantId}">
-              <button class="qty-btn cart-qty-btn dec" aria-label="decrease quantity">−</button>
-              <div class="count cart-qty" aria-live="polite">${item.qty}</div>
-              <button class="qty-btn cart-qty-btn inc" aria-label="increase quantity">+</button>
-            </div>
-          </article>
+        return `
+            <article class="cart-item-card" data-id="${variantId}">
+                <img src="${optimizedCartImage}" alt="${displayName}" class="cart-item-thumb" onerror="this.onerror=null;this.src='${placeholderImg}';">
+                <div class="cart-item-meta">
+                    <div>
+                        <div class="cart-item-name">${displayName}</div>
+                        <div class="cart-item-price-row">
+                            <span>₹${variant.price.toFixed(0)}</span>
+                            ${hasOffer ? `<span class="cart-item-mrp">₹${variant.mrp}</span>` : ''}
+                        </div>
+                        ${savings > 0 ? `<div class="cart-item-savings">You save ₹${savings.toFixed(0)}</div>` : ''}
+                    </div>
+                    <div class="cart-item-actions">
+                        <div class="cart-item-qty" data-id="${variantId}">
+                            <button class="qty-btn cart-qty-btn dec" aria-label="decrease quantity">−</button>
+                            <div class="count cart-qty" aria-live="polite">${qty}</div>
+                            <button class="qty-btn cart-qty-btn inc" aria-label="increase quantity">+</button>
+                        </div>
+                    </div>
+                </div>
+            </article>
         `;
-            }).join('');
+    }).join('');
 
             UI.updateCartSummary(items);
             UI.renderCouponSection();

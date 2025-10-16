@@ -1398,60 +1398,85 @@ z-index: 2;                 /* sits above input content */
 .cart-products { display: flex; flex-direction: column; gap: 10px; padding: 10px 16px; }
 .cart-item-card {
   display: flex;
-  gap: 12px;
+  gap: 16px;
   background: var(--bg-white);
-  padding: 12px;
+  padding: 16px;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(15,23,42,0.08);
-  align-items: center;
+  align-items: flex-start;
   position: relative;
   transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-  overflow: hidden; /* Keep this to respect border-radius on children */
-  min-height: 88px; /* NEW: Ensure a consistent minimum height for all cards */
+  overflow: hidden;
 }
 .cart-item-thumb {
-  width: 64px; height: 64px; border-radius: 10px; object-fit: cover; background: var(--bg-light);
-  flex-shrink: 0; /* NEW: Prevent image from shrinking */
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  object-fit: cover;
+  background: var(--bg-light);
+  flex-shrink: 0;
 }
 .cart-item-meta {
   flex: 1;
-  display: flex; /* NEW: Use flexbox for vertical alignment */
-  flex-direction: column; /* NEW: Stack name and price vertically */
-  justify-content: center; /* NEW: Center content vertically */
-  min-width: 0; /* NEW: Prevent text overflow issues */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  height: 80px;
 }
 .cart-item-name {
   font-weight: 600;
+  font-size: 16px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 8px; /* NEW: Space between name and price */
 }
-.cart-item-price { font-weight: 700; margin-top: 8px; }
+.cart-item-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 700;
+}
 .cart-item-mrp {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
   text-decoration: line-through;
-  font-weight: 600;
-  margin-left: 8px;
+  font-weight: 500;
 }
 .cart-item-savings {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--success-color);
   background-color: #e8f5e9;
-  padding: 3px 6px;
+  padding: 2px 6px;
   border-radius: 6px;
-  display: inline-block; /* To make padding and radius work */
+  display: inline-block;
+}
+.cart-item-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
 }
 .cart-item-qty {
-  display: flex; align-items: center; gap: 8px;
-  flex-shrink: 0; /* NEW: Prevent quantity controls from shrinking */
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.cart-item-qty .qty-btn { width: 36px; height: 36px; border-radius: 18px; border: 0; background: #f1f5f9; font-size: 18px; cursor: pointer; }
+.cart-item-qty .qty-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  border: 0;
+  background: #f1f5f9;
+  font-size: 16px;
+  cursor: pointer;
+}
 .cart-item-qty .count {
-  min-width: 24px; /* NEW: Reduced min-width for a more compact look */
-  text-align: center; font-weight: 500;
+  min-width: 20px;
+  text-align: center;
+  font-weight: 500;
 }
 .cart-item-card.removing {
   opacity: 0;
@@ -1567,6 +1592,32 @@ z-index: 2;                 /* sits above input content */
 .cart-cta:active { transform: translateY(1px); }
 
 /* --- END REVAMPED CART STYLES --- */
+
+@media (max-width: 360px) {
+  .cart-item-card {
+    gap: 12px;
+    padding: 12px;
+  }
+  .cart-item-thumb {
+    width: 64px;
+    height: 64px;
+  }
+  .cart-item-meta {
+    height: 64px;
+  }
+  .cart-item-name {
+    font-size: 14px;
+  }
+  .cart-item-price-row {
+    font-size: 14px;
+  }
+  .cart-item-qty .qty-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
+  }
+}
+
 
 /* Old cart footer - to be removed */
 .cart-footer {
