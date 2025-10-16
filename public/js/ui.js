@@ -717,7 +717,6 @@ export const UI = {
         state.couponError = null;
         const cartItemsEl = document.getElementById('cartItems');
         const emptyCartEl = document.getElementById('emptyCart');
-        const cartFooterEl = document.getElementById('cartFooter');
         const emptyCartFooterEl = document.getElementById('emptyCartFooter');
         const cartSummaryContainerEl = document.getElementById('cartSummaryContainer');
         const clearCartBtn = document.getElementById('clearCartBtn');
@@ -737,7 +736,6 @@ export const UI = {
         if (items.length === 0) {
             emptyCartEl.style.display = 'flex';
             cartItemsEl.innerHTML = '';
-            if (cartFooterEl) cartFooterEl.style.display = 'none';
             if (emptyCartFooterEl) emptyCartFooterEl.style.display = 'flex'; // NEW
             if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'none';
             if (clearCartBtn) clearCartBtn.style.display = 'none';
@@ -750,7 +748,6 @@ export const UI = {
             }
         } else {
             emptyCartEl.style.display = 'none';
-            if (cartFooterEl) cartFooterEl.style.display = 'flex';
             if (emptyCartFooterEl) emptyCartFooterEl.style.display = 'none'; // NEW
             if (cartSummaryContainerEl) cartSummaryContainerEl.style.display = 'block';
             if (clearCartBtn) clearCartBtn.style.display = 'block';
