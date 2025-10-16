@@ -1381,17 +1381,21 @@ export const Handlers = {
         const code = input.value.trim().toUpperCase();
 
         if (!code) {
-            state.couponError = 'Please enter a coupon code.';
-            // FIX: Pass items to updateCartSummary to avoid errors.
-            const items = Object.keys(state.cart).map(id => ({ ...state.products.find(p => p.id === parseInt(id.split('-')[0])), qty: state.cart[id] }));
-            UI.updateCartSummary(items);
+            UI.showToast('Please enter a coupon code.', true);
             return;
         }
         state.couponError = null;
         const coupon = config.COUPONS[code];
-        const items = Object.keys(state.cart).map(id => {
-            const product = state.products.find(p => p.id === parseInt(id));
-            return { ...product, qty: state.cart[id] };
+        // FIX: Correctly map cart items to products for subtotal calculation.
+        const items = Object.entries(state.cart).map(([variantId, qty]) => {
+            const [productIdStr] = variantId.split('-');
+            const productId = parseInt(productIdStr, 10);
+            const product = state.products.find(p => p.id === productId);
+            const variant = product?.variants[parseInt(variantId.split('-')[1], 10)];
+            if (!product || !variant) {
+                return null; // Item not found, will be filtered out
+            }
+            return { ...product, ...variant, qty };
         });
         const subtotal = items.reduce((sum, item) => sum + (item.finalPrice * item.qty), 0);
 
@@ -1417,8 +1421,17 @@ export const Handlers = {
         // FIX: Re-render the coupon section *before* updating the summary to prevent race conditions.
         UI.renderCouponSection();
         UI.showToast('Coupon removed.');
-        // FIX: Pass items to updateCartSummary to avoid errors.
-        const items = Object.keys(state.cart).map(id => ({ ...state.products.find(p => p.id === parseInt(id.split('-')[0])), qty: state.cart[id] }));
+        // FIX: Correctly map cart items to products for summary update.
+        const items = Object.entries(state.cart).map(([variantId, qty]) => {
+            const [productIdStr] = variantId.split('-');
+            const productId = parseInt(productIdStr, 10);
+            const product = state.products.find(p => p.id === productId);
+            const variant = product?.variants[parseInt(variantId.split('-')[1], 10)];
+            if (!product || !variant) {
+                return null; // Item not found, will be filtered out
+            }
+            return { ...product, ...variant, qty };
+        });
         UI.updateCartSummary(items);
         window.Analytics.trackEvent('remove_coupon', { coupon: removedCode });
     },
