@@ -412,7 +412,7 @@ async function renderCustomersPage() { // This function is now async
                     </div>
                     <div class="management">
                         <input type="text" class="select" style="flex: 1;" value="${escapeHtml(role)}" data-role-input="${doc.id}" placeholder="Enter new role">
-                        <button class="btn-small btn-primary" data-update-role="${doc.id}">Update Role</button>
+                        <button class="btn-small btn-primary" data-update-role="${doc.id}" aria-label="Update role for ${escapeHtml(user.email)}">Update Role</button>
                     </div>
                 </div>
             `;
@@ -462,16 +462,16 @@ async function renderProductsPage() {
 
 function productCardHTML(product) {
     const variants = product.variants || [];
-    const primaryVariant = variants[0] || {};
+    const primaryVariant = variants[0] || { finalPrice: 'N/A' };
 
     return `
     <div class="order-card product-card" data-product-id="${product.id}">
       <div class="order-head" role="button" tabindex="0" aria-expanded="false" data-action="toggle">
-        <img src="${product.image}" alt="${escapeHtml(product.name)}" class="product-thumb-admin" loading="lazy">
+        <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" class="product-thumb-admin" loading="lazy">
         <div class="order-meta">
           <div class="id">ID: ${product.id}</div>
-          <div class="time">${escapeHtml(product.name)}</div>
-          <div style="font-size:.85rem;color:var(--muted)">${escapeHtml(product.category)}</div>
+          <div class="time">${escapeHtml(product.name || '')}</div>
+          <div style="font-size:.85rem;color:var(--muted)">${escapeHtml(product.category || '')}</div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.35rem">
           <div class="order-total">₹${primaryVariant.finalPrice || 'N/A'}</div>
@@ -481,14 +481,14 @@ function productCardHTML(product) {
       <div class="order-body" aria-hidden="true">
         <div class="order-section">
           <strong>Description</strong>
-          <p style="font-size:.9rem;color:var(--muted);">${escapeHtml(product.desc)}</p>
+          <p style="font-size:.9rem;color:var(--muted);">${escapeHtml(product.desc || '')}</p>
         </div>
         <div class="order-section">
           <strong>Variants (${variants.length})</strong>
           <ul class="variant-list">
             ${variants.map(v => `
               <li>
-                <span>${escapeHtml(v.name)} (${escapeHtml(v.net)})</span>
+                <span>${escapeHtml(v.name || '')} (${escapeHtml(v.net || '')})</span>
                 <span>MRP: ₹${v.mrp} / Price: ₹${v.finalPrice}</span>
                 <span class="status-badge ${v.available ? 'available' : 'unavailable'}">${v.available ? 'Yes' : 'No'}</span>
               </li>`).join('') || '<li>No variants defined.</li>'}
@@ -573,7 +573,7 @@ function populateProductForm(product) {
     // NEW: Handle image preview
     const imagePreview = document.getElementById('product-image-preview');
     imagePreview.src = product ? product.image : '';
-    imagePreview.style.display = (product && product.image) ? 'block' : 'none';
+    imagePreview.style.display = (product && product.image) ? 'block' : 'none'; // Display logic is fine
     document.getElementById('product-image-url').value = product ? product.image : '';
 
     // Populate the correct variant fields
@@ -638,9 +638,9 @@ function createVariantForm(variant, index) {
             <button type="button" class="remove-variant-btn" data-index="${index}">&times;</button>
         </div>
         <div class="field-row">
-            <div class="field"><label>Name</label><input type="text" class="variant-name" value="${escapeHtml(variant.name || '')}" placeholder="Optional for single variant"></div>
-            <div class="field"><label>Gross Wt.</label><input type="text" class="variant-gross" value="${escapeHtml(variant.gross || '')}" placeholder="e.g., 1kg"></div>
-            <div class="field"><label>Net Wt.</label><input type="text" class="variant-net" value="${escapeHtml(variant.net || '')}" placeholder="e.g., 500g"></div>
+            <div class="field"><label>Name</label><input type="text" class="variant-name" value="${variant.name || ''}" placeholder="Optional for single variant"></div>
+            <div class="field"><label>Gross Wt.</label><input type="text" class="variant-gross" value="${variant.gross || ''}" placeholder="e.g., 1kg"></div>
+            <div class="field"><label>Net Wt.</label><input type="text" class="variant-net" value="${variant.net || ''}" placeholder="e.g., 500g" required></div>
         </div>
         <div class="field-row">
             <div class="field"><label>MRP (₹)</label><input type="number" step="0.01" class="variant-mrp" value="${variant.mrp || 0}" required></div>
@@ -721,7 +721,7 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
                 }
 
                 variants.push({
-                    name: variantName || productName,
+                    name: variantName || productName, // If variant name is empty, use product name
                     gross: card.querySelector('.variant-gross').value,
                     net: card.querySelector('.variant-net').value,
                     mrp: mrp,
@@ -735,7 +735,7 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
             const mrp = parseFloat(document.getElementById('single-variant-mrp').value);
             const finalPrice = parseFloat(document.getElementById('single-variant-finalPrice').value);
             variants.push({
-                name: productName, // Name is always the product name
+                name: productName, // Name is always the product name for single variant
                 gross: document.getElementById('single-variant-gross').value,
                 net: document.getElementById('single-variant-net').value,
                 mrp: mrp,
@@ -750,7 +750,7 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
         }
 
         const productData = {
-            name: productName,
+            name: productName, // Product name is always required
             desc: document.getElementById('product-desc').value,
             category: document.getElementById('product-category').value,
             image: imageUrl, // Use the new or existing URL
@@ -764,18 +764,17 @@ document.getElementById('product-form').addEventListener('submit', async (e) => 
 
         if (productId) { // Editing existing product
             // FIX: Get docId from the delete button, which is populated when the form loads.
-            const docId = document.getElementById('delete-product-btn').dataset.docId;
+            const docId = document.getElementById('delete-product-btn').dataset.docId; // This is correct
             productData.id = parseInt(productId, 10);
             const docRef = db.collection('products').doc(docId);
             await docRef.set(productData, { merge: true });
             toast('Product updated successfully!');
         } else { // Creating new product
+            // FIX #1: Use Firestore's auto-generated ID for new documents and a sequential ID for display.
             const productsRef = db.collection('products');
             const lastProductQuery = await productsRef.orderBy('id', 'desc').limit(1).get();
             const newId = lastProductQuery.empty ? 1 : lastProductQuery.docs[0].data().id + 1;
             productData.id = newId;
-            // FIX #1: Use Firestore's auto-generated ID for new documents instead of the numerical ID.
-            // This prevents potential ID collisions and is a more robust practice.
             await productsRef.add(productData);
             toast('Product created successfully!');
         }

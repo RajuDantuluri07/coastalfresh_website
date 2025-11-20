@@ -123,6 +123,28 @@ window.addEventListener('unhandledrejection', function(event) {
     }
 });
 
+/**
+ * NEW: Handles keyboard visibility for better mobile UX.
+ * Adds a 'keyboard-open' class to the body when a text input is focused,
+ * and removes it on blur. This allows CSS to hide sticky elements that
+ * might obstruct the view.
+ */
+function handleKeyboardVisibility() {
+    const inputs = document.querySelectorAll('input:not([type="hidden"]), textarea'); // Select all visible input types and textareas
+    inputs.forEach(input => {
+        input.addEventListener('focus', () => document.body.classList.add('keyboard-open'));
+        input.addEventListener('blur', () => document.body.classList.remove('keyboard-open'));
+    });
+
+    // NEW: Ensure keyboard-open class is removed on page navigation or app close
+    window.addEventListener('pageshow', () => {
+        // On page show (e.g., back button), ensure the class is removed if no input is focused
+        if (!document.activeElement || !document.activeElement.matches('input, textarea')) {
+            document.body.classList.remove('keyboard-open');
+        }
+    });
+}
+
 // Initialize Firebase
 try {
   firebase.initializeApp(firebaseConfig);
@@ -135,6 +157,9 @@ async function init() {
       // Pass dependencies to modules
       UI.init(state, config, Handlers);
       Handlers.init(state, config, UI);
+
+      // NEW: Set up global keyboard visibility handling
+      handleKeyboardVisibility();
 
       // Firebase Auth Listener
       firebase.auth().onAuthStateChanged(Handlers.handleAuthStateChange);

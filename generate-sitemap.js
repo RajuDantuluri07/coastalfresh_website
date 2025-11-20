@@ -43,7 +43,7 @@ const pages = [
 function escapeXml(unsafe) {
   // FIX: Ensure the input is a string before trying to replace. This was a bug.
   // If it's not a string (e.g., it's null or undefined), return an empty string.
-  if (typeof unsafe !== 'string') {
+  if (typeof unsafe !== 'string' || unsafe === null || unsafe === undefined) {
     return '';
   }
   return unsafe.replace(/[<>&'"]/g, c => {

@@ -308,13 +308,12 @@ export const Handlers = {
         document.getElementById('variantDrawerContent').addEventListener('click', (e) => {
             const addBtn = e.target.closest('.add-btn');
             if (addBtn) {
-                e.stopPropagation(); // FIX: Stop the event from bubbling up to the body handler.
+                e.stopPropagation();
                 Handlers.addToCart(addBtn.dataset.id);
             }
             const qtyBtn = e.target.closest('.qty-btn');
             if (qtyBtn) {
-                e.stopPropagation(); // FIX: Also stop quantity button events from bubbling.
-                // FIX: Ensure we are targeting the correct container for the variant ID.
+                e.stopPropagation();
                 const controls = qtyBtn.closest('[data-id]');
                 const variantId = controls.dataset.id;
                 const change = qtyBtn.classList.contains('inc') ? 1 : -1;
@@ -578,14 +577,14 @@ export const Handlers = {
      * @param {Array} items - Array of items from an order ({ id, qty }).
      */
     addMultipleToCart: (items) => {
-        if (!items || items.length === 0) return;
-
-        // FIX: The 'items' from an order have {id, name, qty, price, image}. The 'id' is the variantId.
+        if (!items || items.length === 0) return; // The 'items' from an order have {id, name, qty, price, image}. The 'id' is the variantId.
         let itemsAddedCount = 0;
         items.forEach(item => {
             const [productId, variantIndex] = item.id.split('-').map(Number);
             const product = state.products.find(p => p.id === productId);
             const qtyToAdd = (typeof item.qty === 'number' && item.qty > 0) ? item.qty : 1;
+
+            // FIX #6: Reorder was failing because it didn't check for variant availability.
             if (product && product.variants[variantIndex]?.available) {
                 // FIX #6: Analytics was tracking the wrong price on reorder.
                 const variant = product.variants[variantIndex];

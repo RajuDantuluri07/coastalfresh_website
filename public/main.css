@@ -2916,19 +2916,6 @@ body.popup-open .bottom-bar {
   .popup-back-btn-mobile { display: none; }
 }
 
-  /* --- DESKTOP: Cart as Side Panel --- */
-  .cart-modal {
-    left: auto; /* Unset left */
-    right: 0; /* Pin to the right */
-    width: 420px; /* A good width for a side panel */
-    max-width: 420px;
-    border-radius: 16px 0 0 16px;
-    box-shadow: -10px 0 30px rgba(0,0,0,0.15);
-    transform: translateX(100%); /* Start off-screen to the right */
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-
 .order-controls {
   padding-top: 8px;
 }

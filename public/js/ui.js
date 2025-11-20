@@ -694,10 +694,28 @@ export const UI = {
     
         const product = state.products.find(p => p.id === parseInt(productId, 10));
         if (!product) return;
-
+    
+        // FIX: The previous implementation was complex and didn't always work.
+        // A simpler, more reliable approach is to replace the card's inner HTML
+        // with a newly generated one, but preserve the main element to avoid layout shifts.
         productCards.forEach(card => {
-            // FIX: Re-render the entire card's HTML. This is simpler and more robust.
-            card.outerHTML = UI.createProductHTML(product);
+            const newCardHTML = UI.createProductHTML(product);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newCardHTML;
+            const newCard = tempDiv.firstElementChild;
+
+            if (newCard) {
+                // Replace the content of the existing card with the new content
+                card.innerHTML = newCard.innerHTML;
+            }
+
+            // Re-apply favorite status, as innerHTML replacement removes it.
+            const isFavorite = state.favorites.has(product.id);
+            const wishBtn = card.querySelector('.wish');
+            if (wishBtn) {
+                wishBtn.innerHTML = isFavorite ? '♥' : '♡';
+                wishBtn.setAttribute('aria-pressed', isFavorite);
+            }
         });
     },
 
