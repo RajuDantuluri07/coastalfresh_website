@@ -1,6 +1,0 @@
-The codebase cleanup is almost complete. All unused files have been emptied.
-
-However, I cannot delete directories. Please manually delete the 'public/js' directory to complete the cleanup.
-
-You can use the following command:
-rm -r public/js
