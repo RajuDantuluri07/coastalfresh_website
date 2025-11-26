@@ -3,8 +3,118 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Coastal Fresh — Bulk Seafood for Events & Hotels</title>
-  <meta name="description" content="Coastal Fresh supplies bulk seafood (5 kg to 1 ton) direct from coastal waters & Konasema farms. Perfect for events, caterers, hotels, hostels & canteens. Nationwide cold-chain delivery."/>
+  <title>Coastal Fresh: Fresh Fish & Seafood, Delivered</title>
+  <!-- Google Fonts - Roboto (as per typography guidelines) -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- SEO -->
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+  <meta name="description" content="The best place to buy fresh fish and seafood online in Hyderabad, India! Coastal Fresh offers a wide variety of hygienically cleaned fish, prawns, crabs, and authentic Andhra pickles with next-day delivery. Order now for the freshest catch." />
+  <link rel="canonical" href="https://www.coastalfresh.in" />
+  <meta name="theme-color" content="#01659a" />
+  <meta name="keywords" content="buy fresh fish online hyderabad, seafood delivery hyderabad, online fish delivery, prawns online hyderabad, buy crabs online, coastal fresh hyderabad, andhra pickles online, pomfret online, seer fish hyderabad" />
+  <!-- Hreflang for regional targeting -->
+  <link rel="alternate" href="https://www.coastalfresh.in" hreflang="en-in" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Coastal Fresh India" />
+  <meta property="og:locale" content="en_IN" />
+  <meta property="og:title" content="Coastal Fresh: Fresh Fish & Seafood, Delivered" />
+  <meta property="og:description" content="The best place to buy fresh fish and seafood online in Hyderabad. We offer next-day delivery of premium, hygienically cleaned seafood and authentic pickles." />
+  <meta property="og:url" content="https://www.coastalfresh.in" />
+  <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Coastal Fresh: Fresh Fish & Seafood, Delivered" />
+  <meta name="twitter:description" content="Order fresh fish, prawns, and crabs online in Hyderabad, India. We offer next-day delivery of premium, hygienically cleaned seafood and authentic pickles." />
+  <meta name="twitter:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" />
+
+  <!-- Analytics: GA4 (clean params) + Hotjar + WhatsApp tracking -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GSHMPRYPW1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-GSHMPRYPW1');
+
+    try {
+      if (!localStorage.getItem('firstVisit')) {
+        localStorage.setItem('firstVisit', new Date().toISOString());
+        gtag('set', 'user_properties', { user_type: 'new' });
+      } else {
+        gtag('set', 'user_properties', { user_type: 'returning' });
+      }
+    } catch (_) {}
+  </script>
+
+  <script>
+    (function(h,o,t,j,a,r){
+      h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)}
+      h._hjSettings={hjid:6498243,hjsv:6};
+      a=o.getElementsByTagName('head')[0];
+      r=o.createElement('script');r.async=1;
+      r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+      a.appendChild(r);
+    })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+  </script>
+
+  <script>
+    (function () {
+      const utm = 'utm_source=website&utm_medium=whatsapp&utm_campaign=order_intent';
+      function withUTM(url) {
+        try {
+          const u = new URL(url, location.origin);
+          if (u.hostname.includes('wa.me') || u.hostname.includes('api.whatsapp.com')) {
+            if (u.search) { u.search += '&' + utm; } else { u.search = '?' + utm; }
+          }
+          return u.toString();
+        } catch(e) { return url; }
+      }
+      document.addEventListener('DOMContentLoaded', function() {
+        const waLinks = Array.from(document.querySelectorAll('a[href*="wa.me/"], a[href*="api.whatsapp.com/"]'));
+        waLinks.forEach(a => { a.href = withUTM(a.href); });
+
+        function track(eventName, extra) {
+          if (typeof gtag === 'function') gtag('event', eventName, extra || {});
+        }
+        function onClick(e) {
+          const a = e.currentTarget;
+          track('click', {
+            link_text: (a.getAttribute('aria-label') || a.textContent || '').trim(),
+            link_url: a.href,
+            link_target: a.target || '_self',
+            location: a.dataset.trackLocation || 'link',
+            outbound: a.host && a.host !== location.host
+          });
+        }
+        waLinks.forEach(a => a.addEventListener('click', onClick));
+        const oldOpenWA = window.openWhatsApp;
+        window.openWhatsApp = function() {
+          track('click', { location: 'floating_button', link_text: 'WhatsApp CTA', link_url: 'https://wa.me' });
+          if (typeof oldOpenWA === 'function') return oldOpenWA();
+        };
+        window.withUTM = withUTM;
+      });
+    })();
+  </script>
+
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- DOMPurify (for final safe sanitization if needed) -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js" crossorigin="anonymous"></script>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js"></script>
   <style>
     /* ---------- Begin provided CSS (kept mostly intact + center-banner changes) ---------- */
     :root{
@@ -149,9 +259,7 @@
   <div class="container">
     <header>
       <div class="site-left">
-        <div class="logo" aria-hidden="true">
-          <div class="badge" title="Coastal Fresh">CF</div>
-        </div>
+        <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" alt="Coastal Fresh Logo" style="height: var(--logo-height);">
 
         <div class="logo-wrap">
           <h1 style="font-size:16px">Coastal Fresh</h1>
