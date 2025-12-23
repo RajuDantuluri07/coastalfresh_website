@@ -966,7 +966,7 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 10000;
             padding: 20px;
             animation: fadeIn 0.3s ease;
         }
@@ -1127,7 +1127,7 @@
             transform: translateY(100px);
             opacity: 0;
             transition: var(--transition);
-            z-index: 1001;
+            z-index: 10001;
             max-width: 350px;
         }
 
@@ -2012,7 +2012,7 @@
                 });
                 
                 // Save Feed Entries
-                document.getElementById('saveFeedEntries').addEventListener('click', () => this.saveFeedEntries());
+                document.getElementById('saveFeedEntries').addEventListener('click', () => this.submitFeedEntries());
                 
                 // Edit/Delete Feed
                 document.getElementById('updateFeedBtn').addEventListener('click', () => this.updateFeedEntry());
@@ -2876,7 +2876,7 @@
                 }
             }
             
-            saveFeedEntries() {
+            submitFeedEntries() {
                 try {
                     const farmSelect = document.getElementById('feedTankSelect');
                     const dateInput = document.getElementById('feedDate');
