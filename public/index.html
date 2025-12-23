@@ -2966,16 +2966,7 @@
                     this.closeAllModals();
                     
                     // Update tank feed consumed
-                    const tankIndex = this.state.tanks.findIndex(t => t.id === tankId);
-                    if (tankIndex !== -1) {
-                        const tankFeed = this.state.feedEntries
-                            .filter(e => e.tankId === tankId)
-                            .reduce((sum, e) => sum + e.amount, 0);
-                        
-                        this.state.tanks[tankIndex].feedConsumed = tankFeed.toFixed(1);
-                        this.saveTanks();
-                    }
-                    
+                    this.updateTankFeedStats(tankId);
                     this.renderAll();
                     this.showToast(`${savedCount} feed entries saved successfully!`, 'success');
                     
@@ -3007,6 +2998,7 @@
                     this.state.feedEntries[entryIndex].date = date;
                     
                     this.saveFeedEntries();
+                    this.updateTankFeedStats(this.state.feedEntries[entryIndex].tankId);
                     this.closeAllModals();
                     this.renderLogBook();
                     this.showFeedRecommendation();
@@ -3022,9 +3014,13 @@
             deleteCurrentFeedEntry() {
                 if (!this.editingEntryId) return;
                 
+                const entry = this.state.feedEntries.find(e => e.id === this.editingEntryId);
+                if (!entry) return;
+                
                 if (confirm('Are you sure you want to delete this feed entry?')) {
                     this.state.feedEntries = this.state.feedEntries.filter(e => e.id !== this.editingEntryId);
                     this.saveFeedEntries();
+                    this.updateTankFeedStats(entry.tankId);
                     this.closeAllModals();
                     this.renderLogBook();
                     this.showFeedRecommendation();
@@ -3045,6 +3041,7 @@
                 if (confirm('Are you sure you want to delete this feed entry?')) {
                     this.state.feedEntries = this.state.feedEntries.filter(e => e.id !== entryId);
                     this.saveFeedEntries();
+                    this.updateTankFeedStats(entry.tankId);
                     this.renderLogBook();
                     this.showFeedRecommendation();
                     this.showToast('Feed entry deleted', 'success');
@@ -3092,6 +3089,18 @@
                 } catch (error) {
                     console.error('Error saving application:', error);
                     this.showToast('Error saving application', 'error');
+                }
+            }
+            
+            updateTankFeedStats(tankId) {
+                const tankIndex = this.state.tanks.findIndex(t => t.id === tankId);
+                if (tankIndex !== -1) {
+                    const tankFeed = this.state.feedEntries
+                        .filter(e => e.tankId === tankId)
+                        .reduce((sum, e) => sum + e.amount, 0);
+                    
+                    this.state.tanks[tankIndex].feedConsumed = tankFeed.toFixed(1);
+                    this.saveTanks();
                 }
             }
             
