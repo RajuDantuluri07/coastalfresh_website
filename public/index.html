@@ -1,749 +1,3302 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Coastal Fresh: Fresh Fish & Seafood, Delivered</title>
-  <!-- Google Fonts - Roboto (as per typography guidelines) -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <!-- SEO -->
-  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-  <meta name="description" content="The best place to buy fresh fish and seafood online in Hyderabad, India! Coastal Fresh offers a wide variety of hygienically cleaned fish, prawns, crabs, and authentic Andhra pickles with next-day delivery. Order now for the freshest catch." />
-  <link rel="canonical" href="https://www.coastalfresh.in" />
-  <meta name="theme-color" content="#01659a" />
-  <meta name="keywords" content="buy fresh fish online hyderabad, seafood delivery hyderabad, online fish delivery, prawns online hyderabad, buy crabs online, coastal fresh hyderabad, andhra pickles online, pomfret online, seer fish hyderabad" />
-  <!-- Hreflang for regional targeting -->
-  <link rel="alternate" href="https://www.coastalfresh.in" hreflang="en-in" />
-
-  <!-- Open Graph / Twitter -->
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="Coastal Fresh India" />
-  <meta property="og:locale" content="en_IN" />
-  <meta property="og:title" content="Coastal Fresh: Fresh Fish & Seafood, Delivered" />
-  <meta property="og:description" content="The best place to buy fresh fish and seafood online in Hyderabad. We offer next-day delivery of premium, hygienically cleaned seafood and authentic pickles." />
-  <meta property="og:url" content="https://www.coastalfresh.in" />
-  <meta property="og:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Coastal Fresh: Fresh Fish & Seafood, Delivered" />
-  <meta name="twitter:description" content="Order fresh fish, prawns, and crabs online in Hyderabad, India. We offer next-day delivery of premium, hygienically cleaned seafood and authentic pickles." />
-  <meta name="twitter:image" content="https://res.cloudinary.com/dpyniai9l/image/upload/v1757311267/Coastal_Fresh_-_Home_page_banner_eg5mbv.png" />
-
-  <!-- Analytics: GA4 (clean params) + Hotjar + WhatsApp tracking -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-GSHMPRYPW1"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){ dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-GSHMPRYPW1');
-
-    try {
-      if (!localStorage.getItem('firstVisit')) {
-        localStorage.setItem('firstVisit', new Date().toISOString());
-        gtag('set', 'user_properties', { user_type: 'new' });
-      } else {
-        gtag('set', 'user_properties', { user_type: 'returning' });
-      }
-    } catch (_) {}
-  </script>
-
-  <script>
-    (function(h,o,t,j,a,r){
-      h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)}
-      h._hjSettings={hjid:6498243,hjsv:6};
-      a=o.getElementsByTagName('head')[0];
-      r=o.createElement('script');r.async=1;
-      r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-      a.appendChild(r);
-    })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
-  </script>
-
-  <script>
-    (function () {
-      const utm = 'utm_source=website&utm_medium=whatsapp&utm_campaign=order_intent';
-      function withUTM(url) {
-        try {
-          const u = new URL(url, location.origin);
-          if (u.hostname.includes('wa.me') || u.hostname.includes('api.whatsapp.com')) {
-            if (u.search) { u.search += '&' + utm; } else { u.search = '?' + utm; }
-          }
-          return u.toString();
-        } catch(e) { return url; }
-      }
-      document.addEventListener('DOMContentLoaded', function() {
-        const waLinks = Array.from(document.querySelectorAll('a[href*="wa.me/"], a[href*="api.whatsapp.com/"]'));
-        waLinks.forEach(a => { a.href = withUTM(a.href); });
-
-        function track(eventName, extra) {
-          if (typeof gtag === 'function') gtag('event', eventName, extra || {});
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AquaBook Pro - Multi-Farm Management</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐟</text></svg>">
+    <style>
+        /* ===== RESET & BASE STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
-        function onClick(e) {
-          const a = e.currentTarget;
-          track('click', {
-            link_text: (a.getAttribute('aria-label') || a.textContent || '').trim(),
-            link_url: a.href,
-            link_target: a.target || '_self',
-            location: a.dataset.trackLocation || 'link',
-            outbound: a.host && a.host !== location.host
-          });
+
+        :root {
+            --primary: #2196F3;
+            --primary-dark: #1976D2;
+            --success: #4CAF50;
+            --success-dark: #2e7d32;
+            --danger: #F44336;
+            --warning: #FF9800;
+            --warning-dark: #ef6c00;
+            --info: #00BCD4;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --gray: #6c757d;
+            --border: #dee2e6;
+            --shadow: 0 4px 12px rgba(0,0,0,0.1);
+            --radius: 16px;
+            --radius-sm: 8px;
+            --transition: all 0.3s ease;
         }
-        waLinks.forEach(a => a.addEventListener('click', onClick));
-        const oldOpenWA = window.openWhatsApp;
-        window.openWhatsApp = function() {
-          track('click', { location: 'floating_button', link_text: 'WhatsApp CTA', link_url: 'https://wa.me' });
-          if (typeof oldOpenWA === 'function') return oldOpenWA();
-        };
-        window.withUTM = withUTM;
-      });
-    })();
-  </script>
 
-  <link rel="icon" href="/favicon.ico" />
-  <link rel="apple-touch-icon" href="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png">
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            color: var(--dark);
+            overscroll-behavior: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
 
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="/manifest.json">
+        /* ===== APP CONTAINER ===== */
+        #app {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
 
-  <!-- DOMPurify (for final safe sanitization if needed) -->
-  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js" crossorigin="anonymous"></script>
+        /* ===== FIRST TIME USER LOCK ===== */
+        .first-time-lock {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: white;
+            z-index: 9998;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js"></script>
-  <style>
-    /* ---------- Begin provided CSS (kept mostly intact + center-banner changes) ---------- */
-    :root{
-      --pink:#ef4444; --pink-dark:#e21f6d; --primary-dark:#00486d; --primary-color:#01659a;
-      --accent-color:#0bade2; --primary-light:#e6f0f5; --text-primary:#263238; --text-dark:#162029;
-      --text-secondary:#546E7A; --border-color:#CFD8DC; --bg-light:#ECEFF1; --bg-white:#FFFFFF;
-      --success-color:#388E3C; --error-color:#D32F2F; --card-shadow:0 6px 18px rgba(7,20,25,0.06);
-      --card-radius:12px; --app-max-width:480px; --header-padding:8px 16px; --logo-height:32px;
-      --cart-badge-size:22px; --carousel-height:180px; --carousel-transition:0.5s; --trust-icon-height:44px;
-      --tabs-icon-size:20px; --grid-gap:12px; --radius-card:14px; --radius-img:14px; --add-pill-padding:7px 12px;
-      --add-pill-font-size:13px; --qty-btn-size:26px; --qty-font-size:15px; --price-now-font-size:14px;
-      --product-name-font-size:12px; --search-padding:10px 40px 10px 44px; --search-radius:25px; --search-font-size:15px;
-      --floating-cart-bottom:70px; --bottom-nav-height:64px; --bottom-nav-btn-width:64px; --bottom-nav-icon-size:18px;
-      --toast-bottom:150px; --toast-animation:1800ms;
-    }
+        .first-time-lock.hidden {
+            display: none;
+        }
 
-    /* Demo product card styles */
-    .card.product { border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.1); padding:12px; background:#fff; position:relative; transition:transform .2s ease-in-out; display:flex; flex-direction:column; cursor:pointer; }
-    .card.product.unavailable { cursor:not-allowed; opacity:.8; }
-    .card.product:hover { transform:translateY(-4px); }
-    .product-image { position:relative; text-align:center; }
-    .product-image img { width:100%; height:120px; object-fit:contain; border-radius:8px; display:block; }
-    .wish { position:absolute; top:6px; right:6px; background:#fff; border:1px solid #ddd; border-radius:50%; width:28px; height:28px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; }
-    .bulk-badge { position:absolute; top:6px; left:6px; background:var(--primary-dark); color:white; padding:3px 8px; border-radius:6px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; z-index:2; }
-    .notify-btn { position:absolute; bottom:8px; right:8px; background:var(--primary-color); color:#fff; padding:5px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; box-shadow:0 2px 4px rgba(0,0,0,0.2); z-index:2; display:flex; }
-    .add-btn { position:absolute; bottom:8px; right:8px; background:var(--success-color); color:#fff; padding:5px 12px; border:none; border-radius:6px; cursor:pointer; font-weight:600; font-size:13px; box-shadow:0 2px 4px rgba(0,0,0,0.2); z-index:2; }
-    .add-btn:hover { filter:brightness(1.1); }
-    .select-btn { font-size:12px; padding:6px 10px; background:var(--primary-color); }
-    .cart-controls { position:absolute; bottom:8px; right:8px; display:flex; align-items:center; background:var(--success-color); color:white; font-weight:600; border-radius:6px; box-shadow:0 2px 4px rgba(0,0,0,0.2); z-index:2; height:29px; }
-    .cart-controls .qty-btn { background:none; border:none; width:28px; height:29px; color:white; font-size:16px; cursor:pointer; }
-    .cart-controls .qty { font-size:13px; min-width:20px; text-align:center; }
-    .info { margin-top:8px; display:flex; flex-direction:column; gap:4px; }
-    .name { font-size:14px; font-weight:500; color:#111; margin:0; }
-    .price-row { display:flex; align-items:center; gap:6px; }
-    .final-price { font-size:16px; font-weight:600; color:#111; }
-    .old-price { text-decoration:line-through; font-size:13px; color:#999; }
-    .save { font-size:13px; color:green; font-weight:500; }
-    .out-of-stock-text { font-size:14px; font-weight:600; color:var(--error-color); margin-top:8px; }
-    .out-of-stock-overlay { position:absolute; inset:0; background:rgba(255,255,255,0.7); display:flex; align-items:center; justify-content:center; border-radius:8px; color:var(--error-color); font-weight:700; font-size:14px; backdrop-filter:blur(1px); }
+        .lock-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            border: 3px solid var(--primary);
+        }
 
-    body { margin:0; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg-light); color:var(--text-primary); -webkit-font-smoothing:antialiased; }
-    .container { max-width:1100px; margin:0 auto; padding:18px; }
-    header{display:flex;align-items:center;gap:12px;margin-bottom:14px; justify-content:space-between;}
-    .site-left { display:flex; align-items:center; gap:12px; }
-    .badge{height:44px;width:44px;border-radius:999px;background:var(--accent-color);display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
-    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-    @media(min-width:1000px){ .grid{grid-template-columns:repeat(4,1fr)} }
+        .lock-icon i {
+            font-size: 36px;
+            color: var(--primary);
+        }
 
-    .controls { display:flex; gap:8px; align-items:center; margin-top:8px; }
-    .select { padding:8px;border-radius:8px;border:1px solid #eef2f6; background:white; font-size:13px; }
-    .btn { padding:7px 10px;border-radius:8px;border:0;cursor:pointer; }
-    .btn.primary { background:var(--accent-color); color:white; }
-    .muted { color:var(--text-secondary); font-size:13px; }
+        .lock-message {
+            max-width: 400px;
+            margin-bottom: 30px;
+        }
 
-    /* modal */
-    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:80;align-items:center;justify-content:center;padding:16px}
-    .modal { background:white;border-radius:12px;padding:14px;max-width:720px;width:100%;box-shadow:var(--card-shadow); }
-    .input, textarea { padding:8px;border-radius:8px;border:1px solid #e6eef3; font-size:14px; width:100%; box-sizing:border-box; }
-    textarea { min-height:80px; resize:vertical; }
-    .header-cta { padding:8px 12px; border-radius:8px; background:var(--primary-color); color:white; border:0; cursor:pointer; font-weight:600; }
+        .lock-message h2 {
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
 
-    /* small responsive tweaks */
-    @media(max-width:520px){ .container{padding:12px} .product-image img{height:110px} .modal{padding:12px} }
+        .lock-message p {
+            color: var(--gray);
+            line-height: 1.6;
+            font-size: 15px;
+        }
 
-    /* ---------- Carousel specific styles (centered overlay) ---------- */
-    .carousel-wrap { border-radius:12px; overflow:hidden; box-shadow:var(--card-shadow); position:relative; background:linear-gradient(180deg,#e6f7fc, #fff); }
-    .carousel { display:flex; width:100%; height:var(--carousel-height); transition:transform var(--carousel-transition) ease; will-change:transform; touch-action:pan-y; }
-    .carousel-slide { min-width:100%; height:var(--carousel-height); position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#ddd; }
-    .carousel-slide img { width:100%; height:100%; object-fit:cover; display:block; }
-    /* CENTER the overlay: both vertically & horizontally */
-    .carousel-overlay {
-      position:absolute;
-      inset:0;
-      display:flex;
-      align-items:center;       /* vertical center */
-      justify-content:center;   /* horizontal center */
-      padding:18px;
-      background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.48) 100%);
-      color:#fff;
-      pointer-events:none; /* let buttons inside override pointer-events */
-    }
-    .carousel-caption {
-      max-width:720px;
-      text-align:center;       /* center text */
-      pointer-events:auto;     /* enable buttons/links */
-    }
-    .carousel-caption h2 { margin:0 0 6px 0; font-size:20px; line-height:1.05; }
-    .carousel-caption p { margin:0 0 10px 0; font-size:13px; opacity:0.95; }
-    .carousel-nav { position:absolute; top:50%; transform:translateY(-50%); width:100%; display:flex; justify-content:space-between; pointer-events:none; }
-    .carousel-button { pointer-events:auto; background:rgba(0,0,0,0.45); border:0; color:#fff; width:40px; height:40px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; margin:0 8px; }
-    .carousel-button:focus { outline:3px solid rgba(255,255,255,0.2); }
-    .carousel-dots { position:absolute; left:50%; transform:translateX(-50%); bottom:10px; display:flex; gap:8px; z-index:6; }
-    .carousel-dot { width:10px; height:10px; border-radius:10px; background:rgba(255,255,255,0.6); border:0; cursor:pointer; }
-    .carousel-dot[aria-current="true"] { background:#fff; transform:scale(1.15); }
-    .carousel-cta { margin-top:8px; padding:10px 16px; border-radius:8px; background:var(--accent-color); color:#fff; border:0; cursor:pointer; font-weight:700; display:inline-block; }
-    @media (max-width:520px){
-      :root{ --carousel-height:150px }
-      .carousel-caption h2{ font-size:16px }
-      .carousel-cta { padding:8px 12px; font-size:14px; }
-    }
-    /* ---------- End carousel changes ---------- */
+        /* ===== HEADER ===== */
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-    /* ---------- TICKER (header) ---------- */
-    .logo-wrap { display:flex; flex-direction:column; min-width:0; }
-    h1 { margin:0; font-size:16px; white-space:nowrap; }
-    .header-ticker {
-      margin-top:4px;
-      overflow:hidden;
-      width:320px;
-      max-width:50vw;
-      background:transparent;
-      border-radius:6px;
-      align-self:flex-start;
-    }
-    .ticker-track {
-      display:inline-block;
-      white-space:nowrap;
-      padding-left:12px;
-      animation:scroll-left 14s linear infinite;
-      font-size:13px;
-      color:var(--text-secondary);
-      font-weight:500;
-      padding:6px 0;
-      box-sizing:content-box;
-      animation-play-state:running;
-    }
-    .header-ticker:hover .ticker-track,
-    .header-ticker:focus-within .ticker-track {
-      animation-play-state:paused;
-    }
-    @keyframes scroll-left {
-      0%   { transform:translateX(0%); }
-      100% { transform:translateX(-50%); }
-    }
-    .sr-only { position:absolute; left:-10000px; top:auto; width:1px; height:1px; overflow:hidden; }
-    /* ---------- End ticker ---------- */
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    /* ---------- End provided CSS ---------- */
-  </style>
+        .farm-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .farm-selector i {
+            font-size: 14px;
+        }
+
+        .app-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .current-date {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        /* ===== NAVIGATION - REDUCED TO 4 TABS ===== */
+        .nav-tabs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            background: var(--light);
+            position: sticky;
+            top: 72px;
+            z-index: 99;
+            border-bottom: 1px solid var(--border);
+        }
+
+        @media (max-width: 768px) {
+            .nav-tabs {
+                grid-template-columns: repeat(4, 1fr);
+                top: 68px;
+            }
+        }
+
+        .nav-btn {
+            padding: 16px 5px;
+            border: none;
+            background: none;
+            font-size: 11px;
+            color: var(--gray);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-btn i {
+            font-size: 18px;
+        }
+
+        .nav-btn.active {
+            color: var(--primary);
+        }
+
+        .nav-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .nav-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== SCREENS ===== */
+        .screen {
+            display: none;
+            animation: fadeIn 0.4s ease;
+            padding: 20px;
+            min-height: calc(100vh - 140px);
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .screen-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .screen-title {
+            font-size: 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* ===== HOME SCREEN - ENHANCED ===== */
+        .overall-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            text-align: center;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 12px;
+            font-weight: 500;
+            display: block;
+        }
+
+        .stat-subtext {
+            font-size: 10px;
+            color: var(--gray);
+            margin-top: 4px;
+        }
+
+        /* Farm Cards */
+        .farms-container {
+            display: grid;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .farm-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .farm-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .farm-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .farm-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .farm-stats {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .farm-stat {
+            text-align: center;
+        }
+
+        .farm-stat-value {
+            font-weight: 700;
+            color: var(--dark);
+            display: block;
+        }
+
+        .tanks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+            padding: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .tanks-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tank-summary-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            position: relative;
+        }
+
+        .tank-summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+        }
+
+        .tank-summary-card.good::before { background: var(--success); }
+        .tank-summary-card.warning::before { background: var(--warning); }
+        .tank-summary-card.danger::before { background: var(--danger); }
+
+        .tank-summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .tank-summary-name {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 15px;
+        }
+
+        .tank-summary-doc {
+            font-size: 12px;
+            color: var(--gray);
+            background: var(--light);
+            padding: 4px 8px;
+            border-radius: 10px;
+        }
+
+        .tank-summary-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .tank-summary-stat {
+            background: var(--light);
+            padding: 10px;
+            border-radius: var(--radius-sm);
+        }
+
+        .tank-summary-label {
+            color: var(--gray);
+            font-size: 11px;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .tank-summary-value {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .tray-status {
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-left: 4px solid var(--success);
+        }
+
+        .tray-status.warning { border-left-color: var(--warning); }
+        .tray-status.danger { border-left-color: var(--danger); }
+
+        /* ===== FEED RECOMMENDATION ===== */
+        .feed-recommendation {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 2px solid var(--primary);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .feed-recommendation.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .recommendation-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .recommendation-header i {
+            color: var(--primary);
+            font-size: 20px;
+        }
+
+        .recommendation-header h4 {
+            color: var(--primary-dark);
+            font-size: 16px;
+            margin: 0;
+        }
+
+        .recommendation-text {
+            color: var(--dark);
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .recommendation-action {
+            font-weight: 600;
+            color: var(--primary-dark);
+            font-size: 15px;
+        }
+
+        /* ===== LOG BOOK - ENHANCED ===== */
+        .log-filters {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .log-filters {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .log-container {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .log-header {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr;
+            background: linear-gradient(135deg, var(--light) 0%, #e9ecef 100%);
+            padding: 16px;
+            font-weight: 700;
+            color: var(--dark);
+            border-bottom: 2px solid var(--border);
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .log-header {
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+                font-size: 11px;
+                padding: 12px;
+            }
+        }
+
+        .log-entry {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1fr 1fr 1fr;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .log-entry:active {
+            background: var(--light);
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 768px) {
+            .log-entry {
+                grid-template-columns: 1fr 1fr 1fr 1fr;
+                padding: 12px;
+                font-size: 12px;
+            }
+        }
+
+        .feed-badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .feed-badge {
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            min-width: 50px;
+            text-align: center;
+            border: 1px solid;
+        }
+
+        .feed-badge.empty { background: #ffebee; color: var(--danger); border-color: var(--danger); }
+        .feed-badge.little { background: #fff3e0; color: var(--warning); border-color: var(--warning); }
+        .feed-badge.half { background: #e8f5e8; color: var(--success); border-color: var(--success); }
+        .feed-badge.too-much { background: #f3e5f5; color: #7b1fa2; border-color: #7b1fa2; }
+
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        /* ===== FEED ENTRY MODAL - ENHANCED ===== */
+        .feed-entry-modal .modal-content {
+            max-width: 600px;
+        }
+
+        .feed-entry-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 480px) {
+            .feed-entry-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feed-entry-card {
+            background: var(--light);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .feed-entry-card.active {
+            border-color: var(--primary);
+            background: rgba(33, 150, 243, 0.1);
+        }
+
+        .feed-entry-card:hover:not(.active) {
+            border-color: var(--gray);
+        }
+
+        .feed-entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .feed-entry-number {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--dark);
+        }
+
+        .feed-entry-time {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .feed-entry-details {
+            display: grid;
+            gap: 8px;
+        }
+
+        .feed-entry-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .feed-entry-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .tray-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .tray-option {
+            padding: 12px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 13px;
+        }
+
+        .tray-option.active {
+            border-color: var(--primary);
+            background: rgba(33, 150, 243, 0.1);
+            font-weight: 600;
+        }
+
+        /* ===== APPLICATIONS - ENHANCED ===== */
+        .applications-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .application-tab {
+            padding: 10px 20px;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            font-size: 13px;
+        }
+
+        .application-tab.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .applications-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .application-card {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .application-card:hover {
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .app-date {
+            color: var(--gray);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .app-type {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .app-type.probiotic { background: #e3f2fd; color: var(--primary); }
+        .app-type.mineral { background: #fff3e0; color: var(--warning); }
+        .app-type.supplement { background: #e8f5e8; color: var(--success); }
+        .app-type.medicine { background: #ffebee; color: var(--danger); }
+
+        .app-details {
+            display: grid;
+            gap: 8px;
+        }
+
+        .app-product {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 16px;
+        }
+
+        .app-tank {
+            color: var(--gray);
+            font-size: 13px;
+        }
+
+        .app-remarks {
+            color: var(--gray);
+            font-size: 13px;
+            font-style: italic;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border);
+        }
+
+        /* ===== PRICES - ENHANCED ===== */
+        .prices-container {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .price-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            background: linear-gradient(135deg, var(--light) 0%, #e9ecef 100%);
+            padding: 16px;
+            font-weight: 700;
+            color: var(--dark);
+            border-bottom: 2px solid var(--border);
+            font-size: 13px;
+        }
+
+        .price-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            transition: var(--transition);
+            align-items: center;
+        }
+
+        .price-row:active {
+            background: var(--light);
+        }
+
+        .price-row:last-child {
+            border-bottom: none;
+        }
+
+        .price-count {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .price-value {
+            color: var(--success);
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .price-change {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .price-change.up { color: var(--success); }
+        .price-change.down { color: var(--danger); }
+
+        .price-trend {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+        }
+
+        .trend-up { color: var(--success); }
+        .trend-down { color: var(--danger); }
+        .trend-stable { color: var(--gray); }
+
+        /* ===== FARM MANAGEMENT ===== */
+        .farms-management {
+            display: grid;
+            gap: 20px;
+        }
+
+        .farm-form {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            transition: var(--transition);
+            background: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 6px rgba(33, 150, 243, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--light);
+            color: var(--dark);
+            border: 1px solid var(--border);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-icon {
+            padding: 8px;
+            border-radius: 8px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-icon:hover {
+            background: var(--light);
+        }
+
+        /* ===== MODALS ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.4s ease;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--gray);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .close-modal:active {
+            background: var(--light);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            background: var(--light);
+            border-radius: 0 0 var(--radius) var(--radius);
+        }
+
+        /* ===== UTILITY ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .text-center { text-align: center; }
+        .text-muted { color: var(--gray); }
+        .mb-0 { margin-bottom: 0 !important; }
+        .mt-20 { margin-top: 20px; }
+        .d-none { display: none !important; }
+        .d-flex { display: flex !important; }
+        .gap-2 { gap: 8px; }
+
+        /* ===== LOADING ===== */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.9);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 16px 20px;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1001;
+            max-width: 350px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast i {
+            font-size: 20px;
+        }
+
+        .toast.warning { background: var(--warning); }
+        .toast.error { background: var(--danger); }
+        .toast.info { background: var(--info); }
+    </style>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="site-left">
-        <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1755523336/Coastal_Fresh_Logo_2_u4xdfa.png" alt="Coastal Fresh Logo" style="height: var(--logo-height);">
-
-        <div class="logo-wrap">
-          <h1 style="font-size:16px; color: var(--primary-color); text-transform: uppercase;">COASTAL FRESH</h1>
-
-          <!-- TICKER merged: only this highlighted text scrolls -->
-          <div class="header-ticker" tabindex="0" aria-label="Site tagline — scrolling" role="region">
-            <div class="ticker-track" aria-hidden="false">
-              Bulk Orders • Direct from coast &amp; Konasema — Bulk Orders • Direct from coast &amp; Konasema —
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <button id="openContact" class="header-cta" aria-haspopup="dialog">Get in touch</button>
-      </div>
-    </header>
-
-    <!-- Carousel banner -->
-    <section style="margin-bottom:14px">
-      <div class="carousel-wrap" id="coastalCarousel" aria-roledescription="carousel" aria-label="Coastal Fresh highlights">
-        <div class="carousel" id="carouselTrack" tabindex="0">
-          <!-- slides (images & overlay content set from JS for easier maintenance) -->
-        </div>
-
-        <!-- navigation arrows -->
-        <div class="carousel-nav" aria-hidden="false">
-          <div style="display:flex;justify-content:flex-start;align-items:center;">
-            <button class="carousel-button" id="prevBtn" aria-label="Previous slide">‹</button>
-          </div>
-          <div style="display:flex;justify-content:flex-end;align-items:center;">
-            <button class="carousel-button" id="nextBtn" aria-label="Next slide">›</button>
-          </div>
-        </div>
-
-        <!-- dots -->
-        <div class="carousel-dots" id="carouselDots" role="tablist" aria-label="Slide indicators"></div>
-      </div>
-    </section>
-
-    <section>
-      <h3 style="margin:0 0 8px 0">Available bulk products</h3>
-      <p class="muted" style="margin:0 0 12px 0;font-size:13px">Select quantity range (5 kg to 1 ton), add to inquiry, and send us your requirements.</p>
-
-      <div class="grid" id="productGrid" aria-live="polite"></div>
-    </section>
-
-    <footer style="margin-top:18px;color:var(--text-secondary);font-size:13px">
-      Coastal Fresh — Bulk seafood (5 kg to 1 ton) • Email: sales@coastalfresh.example
-    </footer>
-  </div>
-
-  <!-- modal (single backdrop used for both modes: 'inquiry' and 'contact') -->
-  <div id="modalBackdrop" class="modal-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="modal" id="modal" aria-labelledby="modalTitle">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <h4 id="modalTitle" style="margin:0">Modal</h4>
-        <button id="closeModal" style="background:none;border:0;cursor:pointer;font-size:18px" aria-label="Close">✕</button>
-      </div>
-
-      <div id="modalContent" style="margin-top:12px"></div>
-
-      <div id="modalFooter" style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
-        <button id="modalCancel" class="btn">Cancel</button>
-        <button id="modalPrimary" class="btn primary">Send</button>
-      </div>
+    <!-- Loading Overlay -->
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading AquaBook...</div>
     </div>
-  </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  // product dataset
-  const products = [
-    { id: 1, name: 'Sea Prawns', category:'prawns', origin: 'coastal', grade: 'A', availability: 'High', image: 'https://res.cloudinary.com/dnr1nv1im/image/upload/v1758972585/Sea_Parwns_nv4xwz.png' },
-    { id: 2, name: 'Live Crab', category:'crabs', origin: 'coastal', grade: 'A', availability: 'Medium', image: 'https://res.cloudinary.com/dnr1nv1im/image/upload/v1758972579/Live_Carb_vf6ipf.png' },
-    { id: 3, name: 'Freshwater Prawns', category:'prawns', origin: 'konasema', grade: 'A+', availability: 'High', image: 'https://res.cloudinary.com/dnr1nv1im/image/upload/v1758972574/Fresh_Water_Parwns_wb3xon.png' },
-    { id: 4, name: 'Catla', category:'fish', origin: 'konasema', grade: 'B', availability: 'Medium', image: 'https://res.cloudinary.com/dnr1nv1im/image/upload/v1758972569/Catla_-_Fish_k599bn.png' },
-    { id: 5, name: 'Roopchnad', category:'fish', origin: 'coastal', grade: 'A', availability: 'Seasonal', image: 'https://res.cloudinary.com/dnr1nv1im/image/upload/v1758972568/4_znqnj1.png' },
-    { id: 6, name: 'Rohu', category:'fish', origin: 'regional', grade: 'B', availability: 'Medium', image: 'https://res.cloudinary.com/dnr1nv1im/image/upload/v1758972564/3_rbmt1q.png' }
-  ];
-
-  // carousel slides (you can add / reorder / edit these)
-  const slides = [
-    {
-      img: 'https://res.cloudinary.com/dnr1nv1im/image/upload/v1758972585/Sea_Parwns_nv4xwz.png',
-      title: 'Bulk seafood — directly from coastal landings',
-      subtitle: 'From 5 kg up to 1 ton — ideal for events, hotels & caterers',
-      cta: 'Get in touch'
-    },
-    {
-      img: 'https://res.cloudinary.com/dnr1nv1im/image/upload/v1758972574/Fresh_Water_Parwns_wb3xon.png',
-      title: 'Konasema freshwater prawns — premium grade',
-      subtitle: 'Farm-sourced, packed & shipped with cold-chain partners',
-      cta: 'Request prices'
-    },
-    {
-      img: 'https://res.cloudinary.com/dnr1nv1im/image/upload/v1758972579/Live_Carb_vf6ipf.png',
-      title: 'Live crabs for bulk supply',
-      subtitle: 'Regional ports, fast dispatch — check availability',
-      cta: 'Check availability'
-    }
-  ];
-
-  // local storage for inquiry
-  let inquiry = JSON.parse(localStorage.getItem('coastal_inquiry') || '[]');
-
-  const grid = document.getElementById('productGrid');
-  const modalBackdrop = document.getElementById('modalBackdrop');
-  const modal = document.getElementById('modal');
-  const modalContent = document.getElementById('modalContent');
-  const modalTitle = document.getElementById('modalTitle');
-  const modalPrimary = document.getElementById('modalPrimary');
-  const modalCancel = document.getElementById('modalCancel');
-  const closeModal = document.getElementById('closeModal');
-  const openContactBtn = document.getElementById('openContact');
-
-  /* ---------- Carousel logic ---------- */
-  const carouselTrack = document.getElementById('carouselTrack');
-  const carouselDots = document.getElementById('carouselDots');
-  const prevBtn = document.getElementById('prevBtn');
-  const nextBtn = document.getElementById('nextBtn');
-  const carouselWrap = document.getElementById('coastalCarousel');
-
-  let currentIndex = 0;
-  let autoplayTimer = null;
-  const AUTOPLAY_DELAY = 4000;
-
-  function createSlides(){
-    carouselTrack.innerHTML = '';
-    slides.forEach((s, idx) => {
-      const slide = document.createElement('div');
-      slide.className = 'carousel-slide';
-      slide.setAttribute('role', 'group');
-      slide.setAttribute('aria-roledescription', 'slide');
-      slide.setAttribute('aria-label', `${idx + 1} of ${slides.length}`);
-      slide.dataset.index = idx;
-
-      // image
-      const img = document.createElement('img');
-      img.loading = 'lazy';
-      img.src = s.img;
-      img.alt = s.title || `Slide ${idx + 1}`;
-
-      // overlay caption (centered)
-      const overlay = document.createElement('div');
-      overlay.className = 'carousel-overlay';
-      overlay.innerHTML = `
-        <div class="carousel-caption">
-          <h2>${escapeHtml(s.title)}</h2>
-          <p>${escapeHtml(s.subtitle)}</p>
-          <div style="margin-top:8px">
-            <button class="carousel-cta" data-cta="${escapeHtml(s.cta)}">${escapeHtml(s.cta)}</button>
-          </div>
+    <!-- First Time User Lock -->
+    <div class="first-time-lock" id="firstTimeLock">
+        <div class="lock-icon">
+            <i class="fas fa-farm"></i>
         </div>
-      `;
-
-      slide.appendChild(img);
-      slide.appendChild(overlay);
-      carouselTrack.appendChild(slide);
-    });
-
-    // dots
-    carouselDots.innerHTML = '';
-    slides.forEach((_, i) => {
-      const d = document.createElement('button');
-      d.className = 'carousel-dot';
-      d.setAttribute('role','tab');
-      d.setAttribute('aria-label', `Go to slide ${i+1}`);
-      d.dataset.index = i;
-      if(i === 0) d.setAttribute('aria-current','true');
-      carouselDots.appendChild(d);
-    });
-  }
-
-  function goTo(index, fromUser = false){
-    if(index < 0) index = slides.length - 1;
-    if(index >= slides.length) index = 0;
-    currentIndex = index;
-    const offset = -index * 100;
-    carouselTrack.style.transform = `translateX(${offset}%)`;
-    // update dots
-    Array.from(carouselDots.children).forEach((dot, i) => {
-      if(i === index) dot.setAttribute('aria-current','true');
-      else dot.removeAttribute('aria-current');
-    });
-    // restart autoplay if user interacted
-    if(fromUser) restartAutoplay();
-  }
-
-  function nextSlide(fromUser = false){ goTo(currentIndex + 1, fromUser); }
-  function prevSlide(fromUser = false){ goTo(currentIndex - 1, fromUser); }
-
-  function startAutoplay(){
-    if(autoplayTimer) clearInterval(autoplayTimer);
-    autoplayTimer = setInterval(()=> nextSlide(false), AUTOPLAY_DELAY);
-  }
-  function stopAutoplay(){ if(autoplayTimer) { clearInterval(autoplayTimer); autoplayTimer = null; } }
-  function restartAutoplay(){ stopAutoplay(); startAutoplay(); }
-
-  // touch swipe support (simple)
-  let touchStartX = null;
-  carouselTrack.addEventListener('touchstart', (e) => {
-    if(e.touches && e.touches.length === 1) touchStartX = e.touches[0].clientX;
-  }, {passive:true});
-  carouselTrack.addEventListener('touchend', (e) => {
-    if(touchStartX === null) return;
-    const dx = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX - touchStartX : 0;
-    if(Math.abs(dx) > 40){
-      if(dx < 0) nextSlide(true);
-      else prevSlide(true);
-    }
-    touchStartX = null;
-  });
-
-  // dot clicks
-  carouselDots.addEventListener('click', (e) => {
-    const idx = Number(e.target.dataset.index);
-    if(!Number.isNaN(idx)) goTo(idx, true);
-  });
-
-  // prev/next
-  prevBtn.addEventListener('click', ()=> prevSlide(true));
-  nextBtn.addEventListener('click', ()=> nextSlide(true));
-
-  // pause on hover/focus
-  carouselWrap.addEventListener('mouseenter', stopAutoplay);
-  carouselWrap.addEventListener('mouseleave', startAutoplay);
-  carouselTrack.addEventListener('focusin', stopAutoplay);
-  carouselTrack.addEventListener('focusout', startAutoplay);
-
-  // keyboard left/right when track focused
-  carouselTrack.addEventListener('keydown', (e) => {
-    if(e.key === 'ArrowLeft') { prevSlide(true); e.preventDefault(); }
-    if(e.key === 'ArrowRight') { nextSlide(true); e.preventDefault(); }
-  });
-
-  // CTA buttons inside slides (open contact modal)
-  function bindSlideCtas(){
-    carouselTrack.querySelectorAll('.carousel-cta').forEach(btn=>{
-      btn.addEventListener('click', (ev)=>{
-        openModal('contact');
-      });
-    });
-  }
-
-  /* ---------- End carousel logic ---------- */
-
-  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-  function capitalize(s){ if(!s) return ''; return String(s).charAt(0).toUpperCase() + String(s).slice(1); }
-
-  function renderProducts(){
-    grid.innerHTML = '';
-    products.forEach(p=>{
-      const card = document.createElement('article');
-      card.className = 'card product';
-      card.setAttribute('data-id', p.id);
-      const isSeasonal = String(p.availability).toLowerCase().includes('seasonal') || String(p.availability).toLowerCase().includes('low');
-      const seasonalBadge = isSeasonal ? `<div style="position:absolute;top:6px;right:44px;background:#FFB000;color:#fff;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;z-index:2">Seasonal</div>` : '';
-      card.innerHTML = `
-        <div class="product-image" aria-hidden="false">
-          <div class="bulk-badge">Bulk</div>
-          ${seasonalBadge}
-          <button class="wish" title="Save to wishlist" aria-label="Save ${escapeHtml(p.name)}">♡</button>
-          <img loading="lazy" src="${p.image}" alt="${escapeHtml(p.name)}">
-          <!-- CTAs removed: small floating +Add and inline Add button have been intentionally removed -->
+        <div class="lock-message">
+            <h2>Welcome to AquaBook Pro! 🎉</h2>
+            <p>To get started, you need to add your first farm. This will unlock all features including feed tracking, applications, and price monitoring.</p>
         </div>
+        <button class="btn btn-primary" id="addFirstFarmBtn">
+            <i class="fas fa-plus"></i>
+            Add Your First Farm
+        </button>
+    </div>
 
-        <div class="info">
-          <h4 class="name">${escapeHtml(p.name)}</h4>
-          <div class="muted" style="font-size:12px">${p.grade} • ${p.availability} • ${capitalize(p.category)}</div>
-
-          <div class="controls" aria-hidden="false" style="position:relative; margin-top:8px;">
-            <div style="flex:1">
-              <select class="select qtySel" data-id="${p.id}" aria-label="Choose bulk range for ${escapeHtml(p.name)}">
-                <option value="5-50">5 – 50 kg</option>
-                <option value="50-200">50 – 200 kg</option>
-                <option value="200-500">200 – 500 kg</option>
-                <option value="500+">500+ kg (up to 1 ton)</option>
-              </select>
+    <!-- Main App -->
+    <div id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="farm-selector" id="farmSelector">
+                    <i class="fas fa-farm"></i>
+                    <span id="currentFarmName">Select Farm</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="current-date" id="currentDate"></div>
             </div>
-            <!-- Removed the inline Add CTA — keep only selector so user can choose range and then use 'Get in touch' -->
-          </div>
+        </header>
+
+        <!-- Navigation - Reduced to 4 tabs -->
+        <nav class="nav-tabs">
+            <button class="nav-btn active" data-screen="home">
+                <i class="fas fa-home"></i>
+                <span>Overview</span>
+            </button>
+            <button class="nav-btn" data-screen="log">
+                <i class="fas fa-book"></i>
+                <span>Log Book</span>
+            </button>
+            <button class="nav-btn" data-screen="applications">
+                <i class="fas fa-flask"></i>
+                <span>Applications</span>
+            </button>
+            <button class="nav-btn" data-screen="prices">
+                <i class="fas fa-chart-line"></i>
+                <span>Prices</span>
+            </button>
+        </nav>
+
+        <!-- Screens -->
+        <main>
+            <!-- Home Screen -->
+            <section id="homeScreen" class="screen active">
+                <div class="screen-header">
+                    <h2 class="screen-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Overall Farm Summary
+                    </h2>
+                    <button class="btn btn-primary" id="quickAddBtn">
+                        <i class="fas fa-plus"></i>
+                        Quick Add
+                    </button>
+                </div>
+
+                <!-- Feed Recommendation -->
+                <div class="feed-recommendation" id="feedRecommendation">
+                    <div class="recommendation-header">
+                        <i class="fas fa-lightbulb"></i>
+                        <h4>Feed Recommendation</h4>
+                    </div>
+                    <div class="recommendation-text" id="recommendationText">
+                        Based on recent feed checks, here's our suggestion:
+                    </div>
+                    <div class="recommendation-action" id="recommendationAction">
+                        Adjust feed as suggested
+                    </div>
+                </div>
+
+                <!-- Overall Stats -->
+                <div class="overall-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalFarms">0</div>
+                        <div class="stat-label">Total Farms</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalTanks">0</div>
+                        <div class="stat-label">Total Tanks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalFeed">0 kg</div>
+                        <div class="stat-label">Feed Consumed</div>
+                        <div class="stat-subtext">Till Date</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgFCR">0.00</div>
+                        <div class="stat-label">Average FCR</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalBiomass">0 kg</div>
+                        <div class="stat-label">Total Biomass</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="feedToday">0 kg</div>
+                        <div class="stat-label">Feed Today</div>
+                    </div>
+                </div>
+
+                <!-- Farms List -->
+                <div class="farms-container" id="farmsList">
+                    <!-- Farms will be loaded here -->
+                </div>
+
+                <div class="text-center text-muted">
+                    <small>Tap on any tank to view details or edit</small>
+                </div>
+            </section>
+
+            <!-- Log Book Screen -->
+            <section id="logScreen" class="screen">
+                <div class="screen-header">
+                    <h2 class="screen-title">
+                        <i class="fas fa-history"></i>
+                        Feed Log Book
+                    </h2>
+                    <button class="btn btn-primary" id="addLogEntryBtn">
+                        <i class="fas fa-plus"></i>
+                        Add Entry
+                    </button>
+                </div>
+
+                <!-- Filters -->
+                <div class="log-filters">
+                    <select id="logFarmSelect" class="form-control">
+                        <option value="all">All Farms</option>
+                    </select>
+                    <select id="logTankSelect" class="form-control">
+                        <option value="all">All Tanks</option>
+                    </select>
+                    <select id="logDateSelect" class="form-control">
+                        <option value="today">Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                </div>
+
+                <!-- Log Entries -->
+                <div class="log-container">
+                    <div class="log-header">
+                        <div>Date & Time</div>
+                        <div>Tank & Farm</div>
+                        <div>Feeds</div>
+                        <div>Tray Status</div>
+                        <div>Actions</div>
+                    </div>
+                    <div class="log-entries" id="logEntries">
+                        <!-- Log entries will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="empty-state" id="emptyLog" style="display: none;">
+                    <i class="fas fa-book-open"></i>
+                    <h3>No Feed Entries Yet</h3>
+                    <p>Add your first feed entry to start tracking</p>
+                    <button class="btn btn-primary mt-20" id="addFirstEntry">
+                        <i class="fas fa-plus"></i>
+                        Add First Entry
+                    </button>
+                </div>
+            </section>
+
+            <!-- Applications Screen -->
+            <section id="applicationsScreen" class="screen">
+                <div class="screen-header">
+                    <h2 class="screen-title">
+                        <i class="fas fa-prescription-bottle"></i>
+                        Applications
+                    </h2>
+                    <button class="btn btn-primary" id="addApplicationBtn">
+                        <i class="fas fa-plus"></i>
+                        Add Application
+                    </button>
+                </div>
+
+                <!-- Application Tabs -->
+                <div class="applications-tabs">
+                    <button class="application-tab active" data-type="all">All</button>
+                    <button class="application-tab" data-type="probiotic">Probiotics</button>
+                    <button class="application-tab" data-type="mineral">Minerals</button>
+                    <button class="application-tab" data-type="supplement">Supplements</button>
+                    <button class="application-tab" data-type="medicine">Medicine</button>
+                </div>
+
+                <!-- Applications List -->
+                <div class="applications-container" id="applicationsList">
+                    <!-- Applications will be loaded here -->
+                </div>
+
+                <div class="empty-state" id="emptyApps" style="display: none;">
+                    <i class="fas fa-flask"></i>
+                    <h3>No Applications Recorded</h3>
+                    <p>Track probiotics, minerals, and supplements here</p>
+                </div>
+            </section>
+
+            <!-- Prices Screen -->
+            <section id="pricesScreen" class="screen">
+                <div class="screen-header">
+                    <h2 class="screen-title">
+                        <i class="fas fa-rupee-sign"></i>
+                        Vannamei Prices
+                    </h2>
+                    <div class="text-muted">
+                        Updated: <span id="priceUpdateDate">Today</span>
+                    </div>
+                </div>
+
+                <div class="prices-container">
+                    <div class="price-header">
+                        <div>Count (per kg)</div>
+                        <div>Price (₹/kg)</div>
+                        <div>Weekly Change</div>
+                        <div>Trend</div>
+                    </div>
+                    <div class="price-rows" id="priceRows">
+                        <!-- Prices will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Price Calculator -->
+                <div class="farm-form mt-20">
+                    <h4 class="screen-title mb-0">
+                        <i class="fas fa-calculator"></i>
+                        Harvest Value Calculator
+                    </h4>
+                    <div class="form-row mt-20">
+                        <div class="form-group">
+                            <label>Expected Yield (kg)</label>
+                            <input type="number" id="harvestYield" class="form-control" placeholder="e.g., 5000" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Shrimp Size (count/kg)</label>
+                            <select id="harvestSize" class="form-control">
+                                <option value="30">30 count</option>
+                                <option value="40">40 count</option>
+                                <option value="50">50 count</option>
+                                <option value="60">60 count</option>
+                                <option value="70">70 count</option>
+                                <option value="80">80 count</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button class="btn btn-success" id="calculateHarvest" style="width: 100%;">
+                                <i class="fas fa-calculator"></i>
+                                Calculate Value
+                            </button>
+                        </div>
+                    </div>
+                    <div class="stat-card" id="harvestResult" style="display: none;">
+                        <div class="stat-value" id="harvestValue">₹0</div>
+                        <div class="stat-label">Estimated Harvest Value</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <!-- Farm Selector Modal -->
+    <div class="modal-overlay" id="farmSelectorModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-farm"></i>
+                    Select Farm
+                </h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="farmsListModal">
+                    <!-- Farms list for selection -->
+                </div>
+                <div class="text-center mt-20">
+                    <button class="btn btn-primary" id="addFarmFromSelector">
+                        <i class="fas fa-plus"></i>
+                        Add New Farm
+                    </button>
+                </div>
+            </div>
         </div>
-      `;
-      grid.appendChild(card);
-    });
+    </div>
 
-    // attach handlers
-    // NOTE: Add buttons were removed, so listeners for them are intentionally omitted.
-    document.querySelectorAll('.wish').forEach(btn=>{
-      btn.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        btn.classList.toggle('active');
-      });
-    });
-  }
+    <!-- Feed Entry Modal -->
+    <div class="modal-overlay" id="feedModal">
+        <div class="modal-content feed-entry-modal">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-utensils"></i>
+                    Add Feed Entry
+                </h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Tank</label>
+                    <select id="feedTankSelect" class="form-control">
+                        <!-- Options will be loaded -->
+                    </select>
+                </div>
 
-  function addToInquiry(id, qtyRange){
-    const p = products.find(x=>x.id===id);
-    if(!p) return;
-    const existing = inquiry.find(i=>i.id === id && i.q === qtyRange);
-    if(existing) existing.count += 1;
-    else inquiry.push({ id: p.id, name: p.name, category: p.category, origin: p.origin, q: qtyRange, count: 1 });
-    localStorage.setItem('coastal_inquiry', JSON.stringify(inquiry));
-    showToast(`${p.name} added to inquiry`);
-    if(navigator && navigator.vibrate) navigator.vibrate(30);
-    updateFloatingInquiryButton();
-  }
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="feedDate" class="form-control" value="">
+                </div>
 
-  function showToast(msg){
-    const existing = document.getElementById('cf-toast');
-    if(existing){ existing.remove(); }
-    const t = document.createElement('div');
-    t.id = 'cf-toast';
-    t.textContent = msg;
-    t.style.position = 'fixed'; t.style.left = '50%'; t.style.bottom = '110px'; t.style.transform = 'translateX(-50%)';
-    t.style.background = 'var(--success-color)'; t.style.color = '#fff'; t.style.padding = '10px 14px'; t.style.borderRadius = '10px';
-    t.style.boxShadow = '0 6px 18px rgba(0,0,0,0.12)'; t.style.zIndex = 9999;
-    document.body.appendChild(t);
-    setTimeout(()=> t.style.opacity = '0', 1600);
-    setTimeout(()=> t.remove(), 2000);
-  }
+                <h4 class="screen-title mb-0 mt-20">
+                    <i class="fas fa-clock"></i>
+                    Feed Schedule (1-4)
+                </h4>
+                <div class="feed-entry-grid mt-20" id="feedEntriesGrid">
+                    <!-- Feed entry cards will be added here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="saveFeedEntries">
+                    <i class="fas fa-save"></i>
+                    Save All Feeds
+                </button>
+            </div>
+        </div>
+    </div>
 
-  // Modal control: mode can be 'inquiry' or 'contact'
-  let lastFocusedElement = null;
-  function openModal(mode){
-    lastFocusedElement = document.activeElement;
-    modalBackdrop.style.display = 'flex';
-    modalBackdrop.setAttribute('aria-hidden', 'false');
-    if(mode === 'inquiry'){
-      modalTitle.textContent = 'Review bulk inquiry';
-      modalPrimary.textContent = 'Send inquiry';
-      renderInquiryContent();
-    } else {
-      modalTitle.textContent = 'Contact Coastal Fresh';
-      modalPrimary.textContent = 'Send message';
-      renderContactContent();
-    }
-    // focus primary focusable element
-    setTimeout(()=> {
-      const firstInput = modal.querySelector('input, textarea, button, select');
-      if(firstInput) firstInput.focus();
-    }, 50);
-  }
+    <!-- Edit Feed Entry Modal -->
+    <div class="modal-overlay" id="editFeedModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-edit"></i>
+                    Edit Feed Entry
+                </h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Feed Amount (kg)</label>
+                    <input type="number" id="editFeedAmount" class="form-control" min="0" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Tray Status</label>
+                    <select id="editTrayStatus" class="form-control">
+                        <option value="empty">Empty</option>
+                        <option value="little">Little Left</option>
+                        <option value="half">Half Full</option>
+                        <option value="too-much">Too Much</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="editFeedDate" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="deleteFeedBtn">
+                    <i class="fas fa-trash"></i>
+                    Delete
+                </button>
+                <button class="btn btn-success" id="updateFeedBtn">
+                    <i class="fas fa-save"></i>
+                    Update
+                </button>
+            </div>
+        </div>
+    </div>
 
-  function closeModalFn(){
-    modalBackdrop.style.display = 'none';
-    modalBackdrop.setAttribute('aria-hidden', 'true');
-    if(lastFocusedElement) lastFocusedElement.focus();
-  }
+    <!-- Add Farm Modal -->
+    <div class="modal-overlay" id="farmModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-plus-circle"></i>
+                    Add New Farm
+                </h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Farm Name</label>
+                    <input type="text" id="farmNameInput" class="form-control" placeholder="e.g., Shree Shrimp Farm">
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" id="farmLocation" class="form-control" placeholder="e.g., Nellore, Andhra Pradesh">
+                </div>
+                <div class="form-group">
+                    <label>Contact Person</label>
+                    <input type="text" id="farmContact" class="form-control" placeholder="Farm Manager Name">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="farmPhone" class="form-control" placeholder="+91 XXXXX XXXXX">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="saveFarmBtn">
+                    <i class="fas fa-save"></i>
+                    Save Farm
+                </button>
+            </div>
+        </div>
+    </div>
 
-  function renderInquiryContent(){
-    if(inquiry.length === 0){
-      modalContent.innerHTML = '<p class="muted">Your inquiry is empty. Add at least one item before sending.</p>';
-      modalPrimary.disabled = true;
-      return;
-    }
-    modalPrimary.disabled = false;
-    modalContent.innerHTML = '<ul style="padding-left:12px"></ul>';
-    const ul = modalContent.querySelector('ul');
-    inquiry.forEach(it=>{
-      const li = document.createElement('li');
-      li.style.marginBottom = '8px';
-      li.innerHTML = `<strong>${escapeHtml(it.name)}</strong> — ${escapeHtml(it.q)} — ${it.count} pack(s) — ${it.category ? capitalize(it.category) : (it.origin === 'coastal' ? 'Coastal' : 'Konasema')}`;
-      ul.appendChild(li);
-    });
+    <!-- Add Tank Modal -->
+    <div class="modal-overlay" id="tankModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-water"></i>
+                    Add New Tank
+                </h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Farm</label>
+                    <select id="tankFarmSelect" class="form-control">
+                        <!-- Options will be loaded -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tank Name</label>
+                    <input type="text" id="tankNameInput" class="form-control" placeholder="e.g., Pond A">
+                </div>
+                <div class="form-group">
+                    <label>Size (acres)</label>
+                    <input type="number" id="tankSize" class="form-control" placeholder="e.g., 1.5" step="0.1" min="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Stocking Date</label>
+                    <input type="date" id="stockingDate" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Initial Seed Count</label>
+                    <input type="number" id="initialSeed" class="form-control" placeholder="e.g., 30000" min="0">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="saveTankBtn">
+                    <i class="fas fa-save"></i>
+                    Save Tank
+                </button>
+            </div>
+        </div>
+    </div>
 
-    // inputs for sender
-    const formWrap = document.createElement('div');
-    formWrap.style.marginTop = '12px';
-    formWrap.innerHTML = `
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <input id="buyerName" class="input" placeholder="Your name / company" aria-label="Your name or company" />
-        <input id="buyerEmail" class="input" placeholder="Email for reply" aria-label="Your email" />
-      </div>
-      <div style="margin-top:8px">
-        <textarea id="notes" placeholder="Message / event date / delivery city / port (optional)" aria-label="Notes"></textarea>
-      </div>
-    `;
-    modalContent.appendChild(formWrap);
+    <!-- Application Modal -->
+    <div class="modal-overlay" id="applicationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-prescription-bottle"></i>
+                    Add Application
+                </h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Farm & Tank</label>
+                    <select id="appFarmSelect" class="form-control">
+                        <!-- Options will be loaded -->
+                    </select>
+                    <select id="appTankSelect" class="form-control mt-2">
+                        <!-- Options will be loaded -->
+                    </select>
+                </div>
 
-    // override modalPrimary click for inquiry send
-    modalPrimary.onclick = sendEmailFromModal;
-  }
+                <div class="form-group">
+                    <label>Application Type</label>
+                    <select id="appTypeSelect" class="form-control">
+                        <option value="probiotic">Probiotic</option>
+                        <option value="mineral">Mineral</option>
+                        <option value="supplement">Supplement</option>
+                        <option value="medicine">Medicine</option>
+                    </select>
+                </div>
 
-  function renderContactContent(){
-    modalContent.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <input id="contactName" class="input" placeholder="Your name / company" aria-label="Your name or company" />
-        <input id="contactEmail" class="input" placeholder="Email" aria-label="Your email" />
-        <input id="contactPhone" class="input" placeholder="Phone (optional)" aria-label="Phone number" />
-        <textarea id="contactMessage" placeholder="How can we help?" aria-label="Message"></textarea>
-      </div>
-    `;
-    modalPrimary.onclick = sendContactFromModal;
-  }
+                <div class="form-group">
+                    <label>Product Name</label>
+                    <input type="text" id="appProductName" class="form-control" placeholder="Enter product name">
+                </div>
 
-  function sendEmailFromModal(){
-    const buyerName = document.getElementById('buyerName')?.value?.trim() || '';
-    const buyerEmail = document.getElementById('buyerEmail')?.value?.trim() || '';
-    const notes = document.getElementById('notes')?.value?.trim() || '';
-    let body = `Inquiry from ${buyerName || '[Name]'}\nContact: ${buyerEmail || '[Email]'}\n\nBulk items:\n`;
-    inquiry.forEach(it=>{ body += `- ${it.name} | ${it.q} | packs: ${it.count} | category: ${it.category || '[N/A]'} | origin: ${it.origin}\n`; });
-    if(notes) body += `\nNotes:\n${notes}\n`;
-    body += `\nPlease reply with price, lead time, packaging & shipping options.\nThanks.\n`;
-    const to = 'sales@coastalfresh.example';
-    const subject = 'Bulk seafood inquiry — Coastal Fresh';
-    // Encode whole body & subject properly
-    const href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    // open mail client
-    window.location.href = href;
-    closeModalFn();
-  }
+                <div class="form-group">
+                    <label>Dosage</label>
+                    <input type="text" id="appDosage" class="form-control" placeholder="e.g., 100ml per acre">
+                </div>
 
-  function sendContactFromModal(){
-    const name = document.getElementById('contactName')?.value?.trim() || '';
-    const email = document.getElementById('contactEmail')?.value?.trim() || '';
-    const phone = document.getElementById('contactPhone')?.value?.trim() || '';
-    const message = document.getElementById('contactMessage')?.value?.trim() || '';
-    let body = `Contact from ${name || '[Name]'}\nEmail: ${email || '[Email]'}\nPhone: ${phone || '[Phone]'}\n\nMessage:\n${message}\n`;
-    const to = 'sales@coastalfresh.example';
-    const subject = 'Contact — Coastal Fresh';
-    const href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = href;
-    closeModalFn();
-  }
+                <div class="form-group">
+                    <label>Remarks</label>
+                    <textarea id="appRemarks" class="form-control" rows="3" placeholder="Any additional notes..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="saveAppBtn">
+                    <i class="fas fa-save"></i>
+                    Save Application
+                </button>
+            </div>
+        </div>
+    </div>
 
-  // open contact via header
-  openContactBtn.addEventListener('click', ()=> openModal('contact'));
+    <!-- Tank Detail Modal -->
+    <div class="modal-overlay" id="tankDetailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-water"></i>
+                    <span id="tankDetailTitle">Tank Details</span>
+                </h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="tankDetailContent">
+                    <!-- Tank details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="addTankBtn">
+                    <i class="fas fa-plus"></i>
+                    Add Another Tank
+                </button>
+            </div>
+        </div>
+    </div>
 
-  // wire modal close buttons
-  closeModal.addEventListener('click', closeModalFn);
-  modalCancel.addEventListener('click', closeModalFn);
+    <!-- Toast Notifications -->
+    <div class="toast" id="successToast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Operation completed successfully!</span>
+    </div>
 
-  // Esc key closes modal
-  window.addEventListener('keydown', e=> { if(e.key === 'Escape') closeModalFn(); });
+    <div class="toast" id="errorToast">
+        <i class="fas fa-exclamation-circle"></i>
+        <span id="errorMessage">Error! Please try again.</span>
+    </div>
 
-  // clicking outside modal closes
-  modalBackdrop.addEventListener('click', (e)=> { if(e.target === modalBackdrop) closeModalFn(); });
+    <!-- JavaScript Application -->
+    <script>
+        // ===== AQUABOOK PRO - MVP ENHANCED =====
+        class AquaBookPro {
+            constructor() {
+                this.state = {
+                    farms: [],           // Array of farm objects
+                    tanks: [],           // Array of tank objects (belonging to farms)
+                    feedEntries: [],     // All feed entries
+                    applications: [],    // All applications
+                    prices: [],          // Market prices
+                    settings: {
+                        currentFarmId: null,
+                        currency: 'INR'
+                    }
+                };
+                
+                this.currentDate = this.getFormattedDate();
+                this.initialized = false;
+                this.editingEntryId = null;
+                
+                // Initialize when DOM is ready
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', () => this.init());
+                } else {
+                    this.init();
+                }
+            }
+            
+            init() {
+                this.showLoading(true);
+                
+                // Load all data
+                this.loadAllData();
+                
+                // Setup UI
+                this.setupUI();
+                
+                // Check first-time user lock
+                this.checkFirstTimeUser();
+                
+                // Render initial data
+                this.renderAll();
+                
+                // Setup event listeners
+                this.setupEventListeners();
+                
+                // Simulate loading delay
+                setTimeout(() => {
+                    this.showLoading(false);
+                    this.initialized = true;
+                    this.showToast('AquaBook Pro is ready!', 'success');
+                    
+                    // Check if demo data should be added
+                    if (this.state.farms.length === 0) {
+                        // Don't add demo data for first-time users
+                    }
+                }, 800);
+            }
+            
+            // ===== FIRST TIME USER LOCK =====
+            checkFirstTimeUser() {
+                const hasFarms = this.state.farms.length > 0;
+                const lock = document.getElementById('firstTimeLock');
+                const navTabs = document.querySelector('.nav-tabs');
+                const mainApp = document.getElementById('app');
+                
+                if (!hasFarms) {
+                    // Show lock screen
+                    lock.classList.remove('hidden');
+                    // Disable main app navigation
+                    if (navTabs) navTabs.style.display = 'none';
+                    if (mainApp) mainApp.style.opacity = '0.5';
+                    // Disable farm selector
+                    const farmSelector = document.getElementById('farmSelector');
+                    if (farmSelector) farmSelector.style.pointerEvents = 'none';
+                    // Disable all nav buttons
+                    document.querySelectorAll('.nav-btn').forEach(btn => {
+                        btn.classList.add('disabled');
+                    });
+                } else {
+                    // Hide lock screen
+                    lock.classList.add('hidden');
+                    // Enable main app
+                    if (navTabs) navTabs.style.display = 'grid';
+                    if (mainApp) mainApp.style.opacity = '1';
+                    // Enable farm selector
+                    const farmSelector = document.getElementById('farmSelector');
+                    if (farmSelector) farmSelector.style.pointerEvents = 'auto';
+                    // Enable all nav buttons
+                    document.querySelectorAll('.nav-btn').forEach(btn => {
+                        btn.classList.remove('disabled');
+                    });
+                }
+            }
+            
+            // ===== DATA MANAGEMENT =====
+            loadAllData() {
+                // Load farms
+                const farmsData = localStorage.getItem('aquabook_farms');
+                this.state.farms = farmsData ? JSON.parse(farmsData) : [];
+                
+                // Load tanks
+                const tanksData = localStorage.getItem('aquabook_tanks');
+                this.state.tanks = tanksData ? JSON.parse(tanksData) : [];
+                
+                // Load feed entries
+                const entriesData = localStorage.getItem('aquabook_entries');
+                this.state.feedEntries = entriesData ? JSON.parse(entriesData) : [];
+                
+                // Load applications
+                const appsData = localStorage.getItem('aquabook_applications');
+                this.state.applications = appsData ? JSON.parse(appsData) : [];
+                
+                // Load prices
+                const pricesData = localStorage.getItem('aquabook_prices');
+                if (pricesData) {
+                    this.state.prices = JSON.parse(pricesData);
+                } else {
+                    // Default market prices
+                    this.state.prices = [
+                        { count: 30, price: 450, change: '+2.5%', trend: 'up' },
+                        { count: 40, price: 400, change: '+1.8%', trend: 'up' },
+                        { count: 50, price: 380, change: '+0.5%', trend: 'up' },
+                        { count: 60, price: 350, change: '-1.2%', trend: 'down' },
+                        { count: 70, price: 320, change: '-2.0%', trend: 'down' },
+                        { count: 80, price: 300, change: '0%', trend: 'stable' }
+                    ];
+                    this.savePrices();
+                }
+                
+                // Load settings
+                const settingsData = localStorage.getItem('aquabook_settings');
+                if (settingsData) {
+                    this.state.settings = JSON.parse(settingsData);
+                } else {
+                    this.saveSettings();
+                }
+            }
+            
+            saveAllData() {
+                localStorage.setItem('aquabook_farms', JSON.stringify(this.state.farms));
+                localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
+                localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
+                localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
+                localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
+            }
+            
+            saveFarms() {
+                localStorage.setItem('aquabook_farms', JSON.stringify(this.state.farms));
+            }
+            
+            saveTanks() {
+                localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
+            }
+            
+            saveFeedEntries() {
+                localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
+            }
+            
+            saveApplications() {
+                localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
+            }
+            
+            savePrices() {
+                localStorage.setItem('aquabook_prices', JSON.stringify(this.state.prices));
+            }
+            
+            saveSettings() {
+                localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
+            }
+            
+            // ===== FEED RECOMMENDATION LOGIC =====
+            calculateFeedRecommendation() {
+                const today = this.currentDate;
+                const yesterday = this.getFormattedDate(new Date(Date.now() - 86400000));
+                
+                // Get today's feed entries
+                const todayEntries = this.state.feedEntries.filter(entry => entry.date === today);
+                
+                if (todayEntries.length === 0) {
+                    // No entries today, check yesterday
+                    const yesterdayEntries = this.state.feedEntries.filter(entry => entry.date === yesterday);
+                    
+                    if (yesterdayEntries.length === 0) {
+                        return null; // No data to base recommendation on
+                    }
+                    
+                    // Count empty trays from yesterday
+                    const emptyCount = yesterdayEntries.filter(entry => entry.trayResult === 'empty').length;
+                    
+                    if (emptyCount >= 2) {
+                        return {
+                            text: "Yesterday, 2 or more feed trays were empty. Consider increasing feed by 5-10%.",
+                            action: "Increase feed by 5-10% today"
+                        };
+                    }
+                } else {
+                    // Analyze today's entries
+                    const emptyCount = todayEntries.filter(entry => entry.trayResult === 'empty').length;
+                    const tooMuchCount = todayEntries.filter(entry => entry.trayResult === 'too-much').length;
+                    
+                    if (emptyCount >= 2) {
+                        return {
+                            text: `Today, ${emptyCount} feed trays were empty. Consider increasing feed.`,
+                            action: "Increase next feed by 5-10%"
+                        };
+                    } else if (tooMuchCount > 0) {
+                        return {
+                            text: `Today, ${tooMuchCount} feed trays had too much leftover. Consider reducing feed.`,
+                            action: "Reduce next feed by 10%"
+                        };
+                    } else {
+                        // Check feed consistency
+                        const amounts = todayEntries.map(e => e.amount);
+                        const avgAmount = amounts.reduce((a, b) => a + b, 0) / amounts.length;
+                        const isConsistent = Math.max(...amounts) - Math.min(...amounts) < avgAmount * 0.3;
+                        
+                        if (!isConsistent && amounts.length >= 2) {
+                            return {
+                                text: "Feed amounts are inconsistent between meals. Try to maintain consistent feeding.",
+                                action: "Keep feed amounts consistent"
+                            };
+                        }
+                    }
+                }
+                
+                return null;
+            }
+            
+            showFeedRecommendation() {
+                const recommendation = this.calculateFeedRecommendation();
+                const container = document.getElementById('feedRecommendation');
+                const textEl = document.getElementById('recommendationText');
+                const actionEl = document.getElementById('recommendationAction');
+                
+                if (recommendation && this.state.feedEntries.length > 0) {
+                    textEl.textContent = recommendation.text;
+                    actionEl.textContent = recommendation.action;
+                    container.classList.add('show');
+                } else {
+                    container.classList.remove('show');
+                }
+            }
+            
+            // ===== UI SETUP =====
+            setupUI() {
+                this.renderCurrentDate();
+                this.setupNavigation();
+                this.updateFarmSelector();
+            }
+            
+            setupEventListeners() {
+                // Navigation
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        if (e.currentTarget.classList.contains('disabled')) return;
+                        const screen = e.currentTarget.dataset.screen;
+                        this.switchScreen(screen);
+                    });
+                });
+                
+                // Farm Selector
+                document.getElementById('farmSelector').addEventListener('click', () => {
+                    this.openFarmSelector();
+                });
+                
+                // First Time Lock Button
+                document.getElementById('addFirstFarmBtn').addEventListener('click', () => {
+                    this.openFarmModal();
+                });
+                
+                // Quick Add Button
+                document.getElementById('quickAddBtn').addEventListener('click', () => {
+                    this.openFeedModal();
+                });
+                
+                // Add Farm from Selector
+                document.getElementById('addFarmFromSelector').addEventListener('click', () => {
+                    this.closeAllModals();
+                    this.openFarmModal();
+                });
+                
+                // Add Tank Button
+                document.getElementById('addTankBtn').addEventListener('click', () => {
+                    this.closeAllModals();
+                    this.openTankModal();
+                });
+                
+                // Log Book Buttons
+                document.getElementById('addLogEntryBtn').addEventListener('click', () => this.openFeedModal());
+                document.getElementById('addFirstEntry').addEventListener('click', () => this.openFeedModal());
+                
+                // Application Buttons
+                document.getElementById('addApplicationBtn').addEventListener('click', () => this.openApplicationModal());
+                
+                // Farm Management
+                document.getElementById('saveFarmBtn').addEventListener('click', () => this.saveFarm());
+                document.getElementById('saveTankBtn').addEventListener('click', () => this.saveTank());
+                
+                // Modal Close Buttons
+                document.querySelectorAll('.close-modal').forEach(btn => {
+                    btn.addEventListener('click', () => this.closeAllModals());
+                });
+                
+                // Close modals on outside click
+                document.querySelectorAll('.modal-overlay').forEach(modal => {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) this.closeAllModals();
+                    });
+                });
+                
+                // Save Feed Entries
+                document.getElementById('saveFeedEntries').addEventListener('click', () => this.submitFeedEntries());
+                
+                // Feed Modal Interactivity
+                document.getElementById('feedTankSelect').addEventListener('change', () => this.renderFeedGrid());
+                document.getElementById('feedDate').addEventListener('change', () => this.renderFeedGrid());
+                
+                document.getElementById('feedEntriesGrid').addEventListener('click', (e) => {
+                    if (e.target.classList.contains('tray-option')) {
+                        const feedNum = e.target.dataset.feed;
+                        // Remove active class from all options for this feed
+                        document.querySelectorAll(`#feedEntriesGrid [data-feed="${feedNum}"].tray-option`).forEach(opt => {
+                            opt.classList.remove('active');
+                        });
+                        // Add active class to selected option
+                        e.target.classList.add('active');
+                    }
+                });
+                
+                // Edit/Delete Feed
+                document.getElementById('updateFeedBtn').addEventListener('click', () => this.updateFeedEntry());
+                document.getElementById('deleteFeedBtn').addEventListener('click', () => this.deleteCurrentFeedEntry());
+                
+                // Save Application
+                document.getElementById('saveAppBtn').addEventListener('click', () => this.saveApplication());
+                
+                // Application Tabs
+                document.querySelectorAll('.application-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        const type = e.currentTarget.dataset.type;
+                        this.filterApplications(type);
+                    });
+                });
+                
+                // Log Filters
+                document.getElementById('logFarmSelect').addEventListener('change', () => this.renderLogBook());
+                document.getElementById('logTankSelect').addEventListener('change', () => this.renderLogBook());
+                document.getElementById('logDateSelect').addEventListener('change', () => this.renderLogBook());
+                
+                // Price Calculator
+                document.getElementById('calculateHarvest').addEventListener('click', () => this.calculateHarvestValue());
+                
+                // Touch/swipe support
+                this.setupTouchEvents();
+            }
+            
+            setupTouchEvents() {
+                let startX = 0;
+                const threshold = 50;
+                
+                document.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                }, { passive: true });
+                
+                document.addEventListener('touchend', (e) => {
+                    if (!startX) return;
+                    
+                    const endX = e.changedTouches[0].clientX;
+                    const diffX = startX - endX;
+                    
+                    if (Math.abs(diffX) > threshold) {
+                        const screens = ['home', 'log', 'applications', 'prices'];
+                        const current = document.querySelector('.screen.active').id.replace('Screen', '');
+                        const currentIndex = screens.indexOf(current);
+                        
+                        if (diffX > 0 && currentIndex < screens.length - 1) {
+                            this.switchScreen(screens[currentIndex + 1]);
+                        } else if (diffX < 0 && currentIndex > 0) {
+                            this.switchScreen(screens[currentIndex - 1]);
+                        }
+                    }
+                    
+                    startX = 0;
+                }, { passive: true });
+            }
+            
+            // ===== RENDER FUNCTIONS =====
+            renderAll() {
+                this.renderOverallStats();
+                this.renderFarms();
+                this.renderLogBook();
+                this.renderApplications();
+                this.renderPrices();
+                this.showFeedRecommendation();
+            }
+            
+            renderCurrentDate() {
+                const date = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                document.getElementById('currentDate').textContent = date.toLocaleDateString('en-IN', options);
+            }
+            
+            renderOverallStats() {
+                // Total farms
+                document.getElementById('totalFarms').textContent = this.state.farms.length;
+                
+                // Total tanks
+                document.getElementById('totalTanks').textContent = this.state.tanks.length;
+                
+                // Total feed consumed
+                const totalFeed = this.state.feedEntries.reduce((sum, entry) => sum + entry.amount, 0);
+                document.getElementById('totalFeed').textContent = `${totalFeed.toFixed(1)} kg`;
+                
+                // Average FCR (simplified calculation)
+                const totalBiomass = this.state.tanks.reduce((sum, tank) => sum + (tank.biomass || 0), 0);
+                const avgFCR = totalBiomass > 0 ? (totalFeed / totalBiomass).toFixed(2) : '0.00';
+                document.getElementById('avgFCR').textContent = avgFCR;
+                
+                // Total biomass
+                document.getElementById('totalBiomass').textContent = `${totalBiomass.toFixed(1)} kg`;
+                
+                // Feed today
+                const feedToday = this.state.feedEntries
+                    .filter(e => e.date === this.currentDate)
+                    .reduce((sum, e) => sum + e.amount, 0);
+                document.getElementById('feedToday').textContent = `${feedToday.toFixed(1)} kg`;
+            }
+            
+            renderFarms() {
+                const container = document.getElementById('farmsList');
+                if (!container) return;
+                
+                if (this.state.farms.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-farm"></i><h3>No Farms Added</h3><p>Add your first farm to get started</p></div>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                this.state.farms.forEach(farm => {
+                    const farmTanks = this.state.tanks.filter(tank => tank.farmId === farm.id);
+                    
+                    // Calculate farm stats
+                    const farmStats = this.calculateFarmStats(farm.id);
+                    
+                    const farmDiv = document.createElement('div');
+                    farmDiv.className = 'farm-card';
+                    farmDiv.innerHTML = `
+                        <div class="farm-header">
+                            <div class="farm-name">
+                                <i class="fas fa-farm"></i>
+                                ${farm.name}
+                                <span style="font-size: 12px; color: var(--gray); margin-left: 8px;">(${farm.location})</span>
+                            </div>
+                            <div class="farm-stats">
+                                <div class="farm-stat">
+                                    <span class="farm-stat-value">${farmTanks.length}</span>
+                                    <span>Tanks</span>
+                                </div>
+                                <div class="farm-stat">
+                                    <span class="farm-stat-value">${farmStats.totalFeed.toFixed(1)}kg</span>
+                                    <span>Total Feed</span>
+                                </div>
+                                <div class="farm-stat">
+                                    <span class="farm-stat-value">${farmStats.avgFCR}</span>
+                                    <span>Avg FCR</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tanks-grid">
+                            ${farmTanks.map(tank => this.renderTankSummaryCard(tank)).join('')}
+                            <div class="tank-summary-card" style="border-style: dashed; border-color: var(--gray); opacity: 0.7; cursor: pointer;" onclick="app.openTankModal(${farm.id})">
+                                <div style="text-align: center; padding: 20px;">
+                                    <i class="fas fa-plus" style="font-size: 24px; color: var(--gray); margin-bottom: 10px;"></i>
+                                    <div style="color: var(--gray); font-weight: 600;">Add New Tank</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(farmDiv);
+                });
+            }
+            
+            renderTankSummaryCard(tank) {
+                const farm = this.state.farms.find(f => f.id === tank.farmId);
+                const tankStats = this.calculateTankStats(tank.id);
+                const statusClass = tank.status || 'good';
+                const trayStatus = this.getTankTrayStatus(tank.id);
+                
+                return `
+                    <div class="tank-summary-card ${statusClass}" onclick="app.openTankDetail(${tank.id})" style="cursor: pointer;">
+                        <div class="tank-summary-header">
+                            <div class="tank-summary-name">${tank.name}</div>
+                            <div class="tank-summary-doc">DOC: ${tank.doc} days</div>
+                        </div>
+                        <div class="tank-summary-stats">
+                            <div class="tank-summary-stat">
+                                <span class="tank-summary-label">Size</span>
+                                <span class="tank-summary-value">${tank.size} acre</span>
+                            </div>
+                            <div class="tank-summary-stat">
+                                <span class="tank-summary-label">Feed Consumed</span>
+                                <span class="tank-summary-value">${tank.feedConsumed || 0} kg</span>
+                            </div>
+                            <div class="tank-summary-stat">
+                                <span class="tank-summary-label">Biomass</span>
+                                <span class="tank-summary-value">${tank.biomass || 0} kg</span>
+                            </div>
+                            <div class="tank-summary-stat">
+                                <span class="tank-summary-label">Current Stock</span>
+                                <span class="tank-summary-value">${this.formatNumber(tank.currentStock || 0)}</span>
+                            </div>
+                        </div>
+                        <div class="tray-status ${trayStatus.class}">
+                            <i class="fas fa-${trayStatus.icon}"></i>
+                            <div>${trayStatus.message}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            renderLogBook() {
+                const container = document.getElementById('logEntries');
+                const emptyState = document.getElementById('emptyLog');
+                const farmSelect = document.getElementById('logFarmSelect');
+                const tankSelect = document.getElementById('logTankSelect');
+                const dateFilter = document.getElementById('logDateSelect').value;
+                
+                // Update filter options
+                this.updateLogFilters(farmSelect, tankSelect);
+                
+                // Get selected filters
+                const selectedFarmId = farmSelect.value === 'all' ? null : parseInt(farmSelect.value);
+                const selectedTankId = tankSelect.value === 'all' ? null : parseInt(tankSelect.value);
+                
+                // Filter entries
+                let entries = [...this.state.feedEntries];
+                
+                if (selectedFarmId) {
+                    entries = entries.filter(entry => entry.farmId === selectedFarmId);
+                }
+                
+                if (selectedTankId) {
+                    entries = entries.filter(entry => entry.tankId === selectedTankId);
+                }
+                
+                // Apply date filter
+                const today = this.currentDate;
+                const yesterday = this.getFormattedDate(new Date(Date.now() - 86400000));
+                
+                switch(dateFilter) {
+                    case 'today':
+                        entries = entries.filter(entry => entry.date === today);
+                        break;
+                    case 'yesterday':
+                        entries = entries.filter(entry => entry.date === yesterday);
+                        break;
+                    case 'week':
+                        const weekAgo = new Date(Date.now() - 7 * 86400000);
+                        entries = entries.filter(entry => new Date(entry.date) >= weekAgo);
+                        break;
+                    case 'month':
+                        const monthAgo = new Date(Date.now() - 30 * 86400000);
+                        entries = entries.filter(entry => new Date(entry.date) >= monthAgo);
+                        break;
+                }
+                
+                // Sort by date and time (newest first)
+                entries.sort((a, b) => {
+                    if (a.date === b.date) {
+                        return b.feedNumber - a.feedNumber;
+                    }
+                    return new Date(b.date) - new Date(a.date);
+                });
+                
+                // Render entries
+                container.innerHTML = '';
+                
+                if (entries.length === 0) {
+                    container.style.display = 'none';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+                
+                container.style.display = 'block';
+                emptyState.style.display = 'none';
+                
+                // Group entries by date for better organization
+                const groupedByDate = {};
+                entries.forEach(entry => {
+                    if (!groupedByDate[entry.date]) {
+                        groupedByDate[entry.date] = [];
+                    }
+                    groupedByDate[entry.date].push(entry);
+                });
+                
+                // Render each date group
+                Object.keys(groupedByDate).sort().reverse().forEach(date => {
+                    const dateEntries = groupedByDate[date];
+                    const isToday = date === today;
+                    
+                    // Add date header
+                    const dateHeader = document.createElement('div');
+                    dateHeader.className = 'log-entry';
+                    dateHeader.style.background = '#f8f9fa';
+                    dateHeader.style.fontWeight = 'bold';
+                    dateHeader.innerHTML = `
+                        <div>${this.formatDate(date)} ${isToday ? '(Today)' : ''}</div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    `;
+                    container.appendChild(dateHeader);
+                    
+                    // Render entries for this date
+                    dateEntries.forEach(entry => {
+                        const tank = this.state.tanks.find(t => t.id === entry.tankId);
+                        const farm = this.state.farms.find(f => f.id === entry.farmId);
+                        const feedBadge = this.getFeedBadge(entry.amount, entry.trayResult);
+                        
+                        const entryDiv = document.createElement('div');
+                        entryDiv.className = 'log-entry';
+                        entryDiv.innerHTML = `
+                            <div>
+                                <div style="font-weight: 600;">${entry.time}</div>
+                                <div style="font-size: 11px; color: var(--gray);">Feed ${entry.feedNumber}</div>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600;">${tank ? tank.name : 'Unknown Tank'}</div>
+                                <div style="font-size: 11px; color: var(--gray);">${farm ? farm.name : 'Unknown Farm'}</div>
+                            </div>
+                            <div class="feed-badges">
+                                ${feedBadge}
+                            </div>
+                            <div>
+                                <span class="feed-badge ${entry.trayResult}">
+                                    ${this.getTrayLabel(entry.trayResult)}
+                                </span>
+                            </div>
+                            <div class="action-buttons">
+                                ${isToday ? `
+                                    <button class="btn-icon" onclick="app.editFeedEntry(${entry.id})">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-icon" onclick="app.deleteFeedEntry(${entry.id})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                ` : '<span style="color: var(--gray); font-size: 11px;">Read only</span>'}
+                            </div>
+                        `;
+                        
+                        container.appendChild(entryDiv);
+                    });
+                });
+            }
+            
+            renderApplications(filterType = 'all') {
+                const container = document.getElementById('applicationsList');
+                const emptyState = document.getElementById('emptyApps');
+                
+                let applications = [...this.state.applications];
+                
+                if (filterType !== 'all') {
+                    applications = applications.filter(app => app.type === filterType);
+                }
+                
+                // Sort by date (newest first)
+                applications.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                if (applications.length === 0) {
+                    container.style.display = 'none';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+                
+                container.style.display = 'grid';
+                emptyState.style.display = 'none';
+                container.innerHTML = '';
+                
+                applications.forEach(app => {
+                    const tank = this.state.tanks.find(t => t.id === app.tankId);
+                    const farm = this.state.farms.find(f => f.id === app.farmId);
+                    
+                    const card = document.createElement('div');
+                    card.className = 'application-card';
+                    card.innerHTML = `
+                        <div class="app-header">
+                            <div class="app-date">${this.formatDate(app.date)}</div>
+                            <span class="app-type ${app.type}">${app.type.toUpperCase()}</span>
+                        </div>
+                        <div class="app-details">
+                            <div class="app-product">${app.productName}</div>
+                            <div class="app-tank">${farm ? farm.name : ''} - ${tank ? tank.name : 'Unknown Tank'}</div>
+                            ${app.dosage ? `<div style="font-size: 13px; color: var(--primary); margin-top: 4px;"><i class="fas fa-prescription-bottle"></i> ${app.dosage}</div>` : ''}
+                            ${app.remarks ? `<div class="app-remarks">${app.remarks}</div>` : ''}
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+            
+            renderPrices() {
+                const container = document.getElementById('priceRows');
+                const today = new Date().toLocaleDateString('en-IN');
+                document.getElementById('priceUpdateDate').textContent = today;
+                
+                container.innerHTML = '';
+                
+                this.state.prices.forEach(price => {
+                    const trendIcon = price.trend === 'up' ? 'fas fa-arrow-up' :
+                                    price.trend === 'down' ? 'fas fa-arrow-down' : 'fas fa-minus';
+                    const trendClass = price.trend === 'up' ? 'trend-up' :
+                                     price.trend === 'down' ? 'trend-down' : 'trend-stable';
+                    
+                    const row = document.createElement('div');
+                    row.className = 'price-row';
+                    row.innerHTML = `
+                        <div class="price-count">${price.count} count/kg</div>
+                        <div class="price-value">₹${price.price}/kg</div>
+                        <div class="price-change ${price.trend === 'up' ? 'up' : 'down'}">${price.change}</div>
+                        <div class="price-trend ${trendClass}">
+                            <i class="${trendIcon}"></i>
+                            <span>${price.trend}</span>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
+            }
+            
+            // ===== UTILITY FUNCTIONS =====
+            calculateFarmStats(farmId) {
+                const farmTanks = this.state.tanks.filter(tank => tank.farmId === farmId);
+                const farmEntries = this.state.feedEntries.filter(entry => entry.farmId === farmId);
+                
+                const totalFeed = farmEntries.reduce((sum, entry) => sum + entry.amount, 0);
+                const totalBiomass = farmTanks.reduce((sum, tank) => sum + (tank.biomass || 0), 0);
+                const avgFCR = totalBiomass > 0 ? (totalFeed / totalBiomass).toFixed(2) : '0.00';
+                
+                return {
+                    totalFeed: totalFeed,
+                    totalBiomass: totalBiomass,
+                    avgFCR: avgFCR,
+                    tankCount: farmTanks.length
+                };
+            }
+            
+            calculateTankStats(tankId) {
+                const tankEntries = this.state.feedEntries.filter(entry => entry.tankId === tankId);
+                const totalFeed = tankEntries.reduce((sum, entry) => sum + entry.amount, 0);
+                const todayFeed = tankEntries
+                    .filter(e => e.date === this.currentDate)
+                    .reduce((sum, e) => sum + e.amount, 0);
+                
+                return {
+                    totalFeed: totalFeed,
+                    todayFeed: todayFeed,
+                    feedPerDay: (totalFeed / 30).toFixed(1) // Assuming 30 days
+                };
+            }
+            
+            getTankTrayStatus(tankId) {
+                const todayEntries = this.state.feedEntries.filter(
+                    e => e.tankId === tankId && e.date === this.currentDate
+                );
+                
+                if (todayEntries.length === 0) {
+                    return { class: 'warning', icon: 'info-circle', message: 'No feeds today' };
+                }
+                
+                const emptyCount = todayEntries.filter(e => e.trayResult === 'empty').length;
+                const tooMuchCount = todayEntries.filter(e => e.trayResult === 'too-much').length;
+                
+                if (tooMuchCount > 0) {
+                    return { class: 'danger', icon: 'exclamation-triangle', message: 'Overfeeding detected' };
+                } else if (emptyCount >= 2) {
+                    return { class: 'warning', icon: 'exclamation-circle', message: 'May need more feed' };
+                } else {
+                    return { class: 'normal', icon: 'check-circle', message: 'Feeding OK' };
+                }
+            }
+            
+            getFeedBadge(amount, trayResult) {
+                return `<span class="feed-badge ${trayResult}">${amount}kg</span>`;
+            }
+            
+            getTrayLabel(tray) {
+                const labels = {
+                    'empty': 'Empty',
+                    'little': 'Little Left',
+                    'half': 'Half Full',
+                    'too-much': 'Too Much'
+                };
+                return labels[tray] || tray;
+            }
+            
+            getFormattedDate(date = new Date()) {
+                const d = date instanceof Date ? date : new Date(date);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+            
+            formatDate(dateStr) {
+                if (!dateStr) return 'Not set';
+                
+                const date = new Date(dateStr);
+                const today = new Date();
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (date.toDateString() === today.toDateString()) return 'Today';
+                if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
+                
+                return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+            }
+            
+            formatNumber(num) {
+                if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+                if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+                return num.toString();
+            }
+            
+            // ===== MODAL FUNCTIONS =====
+            openFarmSelector() {
+                const modal = document.getElementById('farmSelectorModal');
+                const container = document.getElementById('farmsListModal');
+                
+                container.innerHTML = '';
+                
+                this.state.farms.forEach(farm => {
+                    const farmDiv = document.createElement('div');
+                    farmDiv.className = 'tank-summary-card good';
+                    farmDiv.style.cursor = 'pointer';
+                    farmDiv.style.marginBottom = '12px';
+                    farmDiv.innerHTML = `
+                        <div class="tank-summary-header">
+                            <div class="tank-summary-name">${farm.name}</div>
+                            <div style="font-size: 12px; color: var(--gray);">${farm.location}</div>
+                        </div>
+                        <div style="padding: 12px 0;">
+                            <div style="font-size: 13px; color: var(--gray);">Contact: ${farm.contact}</div>
+                            <div style="font-size: 13px; color: var(--gray); margin-top: 4px;">Phone: ${farm.phone}</div>
+                        </div>
+                    `;
+                    
+                    farmDiv.addEventListener('click', () => {
+                        this.state.settings.currentFarmId = farm.id;
+                        this.saveSettings();
+                        this.updateFarmSelector();
+                        this.closeAllModals();
+                        this.renderAll();
+                    });
+                    
+                    container.appendChild(farmDiv);
+                });
+                
+                modal.classList.add('active');
+            }
+            
+            openFarmModal() {
+                const modal = document.getElementById('farmModal');
+                
+                // Clear form
+                document.getElementById('farmNameInput').value = '';
+                document.getElementById('farmLocation').value = '';
+                document.getElementById('farmContact').value = '';
+                document.getElementById('farmPhone').value = '';
+                
+                modal.classList.add('active');
+            }
+            
+            openTankModal(preSelectedFarmId = null) {
+                const modal = document.getElementById('tankModal');
+                const farmSelect = document.getElementById('tankFarmSelect');
+                
+                // Populate farm select
+                farmSelect.innerHTML = '<option value="">Select Farm</option>';
+                this.state.farms.forEach(farm => {
+                    const option = document.createElement('option');
+                    option.value = farm.id;
+                    option.textContent = farm.name;
+                    if (preSelectedFarmId && farm.id === preSelectedFarmId) {
+                        option.selected = true;
+                    }
+                    farmSelect.appendChild(option);
+                });
+                
+                // Set default stocking date to today
+                document.getElementById('stockingDate').value = this.currentDate;
+                document.getElementById('tankNameInput').value = '';
+                document.getElementById('tankSize').value = '';
+                document.getElementById('initialSeed').value = '';
+                
+                modal.classList.add('active');
+            }
+            
+            renderFeedGrid() {
+                const tankId = parseInt(document.getElementById('feedTankSelect').value);
+                const date = document.getElementById('feedDate').value;
+                const entriesGrid = document.getElementById('feedEntriesGrid');
+                
+                if (!tankId || !date) {
+                    entriesGrid.innerHTML = '';
+                    return;
+                }
 
-  // show a small floating "View inquiry" keyboard shortcut via 'i' (helpful in dev)
-  window.addEventListener('keydown', (e)=>{
-    if((e.key === 'i' || e.key === 'I') && (e.ctrlKey || e.metaKey)){ e.preventDefault(); openModal('inquiry'); }
-  });
+                // Get existing entries for this tank and date
+                const existingEntries = this.state.feedEntries.filter(
+                    e => e.tankId === tankId && e.date === date
+                );
 
-  // attach "review / open inquiry" button to footer or provide simple keyboard path:
-  // For convenience add small floating button if inquiry has items
-  function updateFloatingInquiryButton(){
-    let floatBtn = document.getElementById('cf-inquiry-btn');
-    if(!floatBtn){
-      floatBtn = document.createElement('button');
-      floatBtn.id = 'cf-inquiry-btn';
-      floatBtn.className = 'header-cta';
-      floatBtn.style.position = 'fixed';
-      floatBtn.style.right = '16px';
-      floatBtn.style.bottom = '18px';
-      floatBtn.style.zIndex = 9999;
-      floatBtn.textContent = 'Review inquiry';
-      floatBtn.addEventListener('click', ()=> openModal('inquiry'));
-      document.body.appendChild(floatBtn);
-    }
-    floatBtn.style.display = inquiry.length ? 'block' : 'none';
-  }
+                entriesGrid.innerHTML = '';
+                
+                for (let i = 1; i <= 4; i++) {
+                    const existingEntry = existingEntries.find(e => e.feedNumber === i);
+                    const amount = existingEntry ? existingEntry.amount : '';
+                    const trayStatus = existingEntry ? existingEntry.trayResult : '';
+                    
+                    const entryCard = document.createElement('div');
+                    entryCard.className = `feed-entry-card ${existingEntry ? 'active' : ''}`;
+                    entryCard.innerHTML = `
+                        <div class="feed-entry-header">
+                            <div class="feed-entry-number">Feed ${i}</div>
+                            <div class="feed-entry-time">${6 + (i-1)*4}:00</div>
+                        </div>
+                        <div class="feed-entry-details">
+                            <input type="number" class="feed-entry-input" placeholder="Amount (kg)" min="0" step="0.1" data-feed="${i}" value="${amount}">
+                            <div class="tray-options">
+                                <div class="tray-option ${trayStatus === 'empty' ? 'active' : ''}" data-feed="${i}" data-tray="empty">Empty</div>
+                                <div class="tray-option ${trayStatus === 'little' ? 'active' : ''}" data-feed="${i}" data-tray="little">Little</div>
+                                <div class="tray-option ${trayStatus === 'half' ? 'active' : ''}" data-feed="${i}" data-tray="half">Half</div>
+                                <div class="tray-option ${trayStatus === 'too-much' ? 'active' : ''}" data-feed="${i}" data-tray="too-much">Too Much</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    entriesGrid.appendChild(entryCard);
+                }
+            }
+            
+            openFeedModal(tankId = null) {
+                if (this.state.tanks.length === 0) {
+                    this.showToast('Please add a tank first', 'error');
+                    this.openTankModal();
+                    return;
+                }
+                
+                const modal = document.getElementById('feedModal');
+                const farmSelect = document.getElementById('feedTankSelect');
+                const dateInput = document.getElementById('feedDate');
+                
+                // Set date to today
+                dateInput.value = this.currentDate;
+                
+                // Populate tank select
+                this.populateTankSelect(farmSelect, tankId);
+                
+                // Render grid
+                this.renderFeedGrid();
+                
+                modal.classList.add('active');
+            }
+            
+            openApplicationModal() {
+                if (this.state.tanks.length === 0) {
+                    this.showToast('Please add a tank first', 'error');
+                    this.openTankModal();
+                    return;
+                }
+                
+                const modal = document.getElementById('applicationModal');
+                const farmSelect = document.getElementById('appFarmSelect');
+                const tankSelect = document.getElementById('appTankSelect');
+                
+                // Populate farm select
+                farmSelect.innerHTML = '<option value="">Select Farm</option>';
+                this.state.farms.forEach(farm => {
+                    const option = document.createElement('option');
+                    option.value = farm.id;
+                    option.textContent = farm.name;
+                    farmSelect.appendChild(option);
+                });
+                
+                // Update tank options when farm changes
+                farmSelect.addEventListener('change', () => {
+                    const farmId = parseInt(farmSelect.value);
+                    this.populateTankSelect(tankSelect, null, farmId);
+                });
+                
+                modal.classList.add('active');
+            }
+            
+            openTankDetail(tankId) {
+                const modal = document.getElementById('tankDetailModal');
+                const tank = this.state.tanks.find(t => t.id === tankId);
+                const farm = this.state.farms.find(f => f.id === tank.farmId);
+                const tankStats = this.calculateTankStats(tankId);
+                
+                if (!tank) return;
+                
+                document.getElementById('tankDetailTitle').textContent = `${tank.name} Details`;
+                
+                const content = `
+                    <div class="tank-summary-card ${tank.status || 'good'}">
+                        <div class="tank-summary-header">
+                            <div class="tank-summary-name">${tank.name}</div>
+                            <div class="tank-summary-doc">DOC: ${tank.doc} days</div>
+                        </div>
+                        <div class="tank-summary-stats">
+                            <div class="tank-summary-stat">
+                                <span class="tank-summary-label">Farm</span>
+                                <span class="tank-summary-value">${farm ? farm.name : 'Unknown'}</span>
+                            </div>
+                            <div class="tank-summary-stat">
+                                <span class="tank-summary-label">Size</span>
+                                <span class="tank-summary-value">${tank.size} acres</span>
+                            </div>
+                            <div class="tank-summary-stat">
+                                <span class="tank-summary-label">Stocking Date</span>
+                                <span class="tank-summary-value">${this.formatDate(tank.stockingDate)}</span>
+                            </div>
+                            <div class="tank-summary-stat">
+                                <span class="tank-summary-label">Initial Seed</span>
+                                <span class="tank-summary-value">${this.formatNumber(tank.initialStock)}</span>
+                            </div>
+                            <div class="tank-summary-stat">
+                                <span class="tank-summary-label">Current Stock</span>
+                                <span class="tank-summary-value">${this.formatNumber(tank.currentStock)}</span>
+                            </div>
+                            <div class="tank-summary-stat">
+                                <span class="tank-summary-label">Biomass</span>
+                                <span class="tank-summary-value">${tank.biomass} kg</span>
+                            </div>
+                        </div>
+                        <div class="tank-summary-stats mt-20">
+                            <div class="tank-summary-stat">
+                                <span class="tank-summary-label">Feed Consumed</span>
+                                <span class="tank-summary-value">${tank.feedConsumed} kg</span>
+                            </div>
+                            <div class="tank-summary-stat">
+                                <span class="tank-summary-label">Feed Today</span>
+                                <span class="tank-summary-value">${tankStats.todayFeed.toFixed(1)} kg</span>
+                            </div>
+                            <div class="tank-summary-stat">
+                                <span class="tank-summary-label">Avg Feed/Day</span>
+                                <span class="tank-summary-value">${tankStats.feedPerDay} kg</span>
+                            </div>
+                            <div class="tank-summary-stat">
+                                <span class="tank-summary-label">Expected Harvest</span>
+                                <span class="tank-summary-value">${this.formatDate(tank.expectedHarvest)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2 mt-20">
+                        <button class="btn btn-primary" onclick="app.openFeedModal(${tankId})">
+                            <i class="fas fa-utensils"></i>
+                            Add Feed
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('tankDetailContent').innerHTML = content;
+                modal.classList.add('active');
+            }
+            
+            editFeedEntry(entryId) {
+                const entry = this.state.feedEntries.find(e => e.id === entryId);
+                if (!entry) return;
+                
+                // Check if entry is from today
+                if (entry.date !== this.currentDate) {
+                    this.showToast('Only today\'s entries can be edited', 'error');
+                    return;
+                }
+                
+                this.editingEntryId = entryId;
+                const modal = document.getElementById('editFeedModal');
+                
+                document.getElementById('editFeedAmount').value = entry.amount;
+                document.getElementById('editTrayStatus').value = entry.trayResult;
+                document.getElementById('editFeedDate').value = entry.date;
+                
+                modal.classList.add('active');
+            }
+            
+            closeAllModals() {
+                document.querySelectorAll('.modal-overlay').forEach(modal => {
+                    modal.classList.remove('active');
+                });
+                this.editingEntryId = null;
+            }
+            
+            // ===== DATA OPERATIONS =====
+            saveFarm() {
+                try {
+                    const name = document.getElementById('farmNameInput').value.trim();
+                    const location = document.getElementById('farmLocation').value.trim();
+                    const contact = document.getElementById('farmContact').value.trim();
+                    const phone = document.getElementById('farmPhone').value.trim();
+                    
+                    if (!name || !location) {
+                        this.showToast('Please enter farm name and location', 'error');
+                        return;
+                    }
+                    
+                    const farm = {
+                        id: Date.now(),
+                        name: name,
+                        location: location,
+                        contact: contact || 'Not specified',
+                        phone: phone || 'Not specified',
+                        tanks: []
+                    };
+                    
+                    this.state.farms.push(farm);
+                    this.saveFarms();
+                    
+                    // Set as current farm
+                    this.state.settings.currentFarmId = farm.id;
+                    this.saveSettings();
+                    
+                    this.closeAllModals();
+                    
+                    // Update UI
+                    this.checkFirstTimeUser();
+                    this.renderAll();
+                    this.updateFarmSelector();
+                    
+                    this.showToast('Farm added successfully! Add tanks to get started.', 'success');
+                    
+                    // Auto-open tank modal
+                    setTimeout(() => {
+                        this.openTankModal(farm.id);
+                    }, 500);
+                    
+                } catch (error) {
+                    console.error('Error saving farm:', error);
+                    this.showToast('Error saving farm', 'error');
+                }
+            }
+            
+            saveTank() {
+                try {
+                    const farmId = parseInt(document.getElementById('tankFarmSelect').value);
+                    const name = document.getElementById('tankNameInput').value.trim();
+                    const size = parseFloat(document.getElementById('tankSize').value);
+                    const stockingDate = document.getElementById('stockingDate').value;
+                    const initialSeed = parseInt(document.getElementById('initialSeed').value);
+                    
+                    if (!farmId || !name || !size || !stockingDate || !initialSeed) {
+                        this.showToast('Please fill all fields', 'error');
+                        return;
+                    }
+                    
+                    // Calculate DOC (Days of Culture)
+                    const stocking = new Date(stockingDate);
+                    const today = new Date();
+                    const doc = Math.floor((today - stocking) / (1000 * 60 * 60 * 24));
+                    
+                    // Calculate biomass (simplified: assume 30 count per kg for now)
+                    const currentStock = Math.floor(initialSeed * 0.85); // 15% mortality
+                    const biomass = currentStock / 30; // Simplified calculation
+                    
+                    const tank = {
+                        id: Date.now(),
+                        farmId: farmId,
+                        name: name,
+                        size: size,
+                        stockingDate: stockingDate,
+                        initialStock: initialSeed,
+                        currentStock: currentStock,
+                        doc: doc > 0 ? doc : 0,
+                        biomass: parseFloat(biomass.toFixed(1)),
+                        feedConsumed: 0,
+                        expectedHarvest: this.getFormattedDate(new Date(stocking.getTime() + 90 * 86400000)), // 90 days
+                        status: doc > 50 ? 'danger' : (doc > 30 ? 'warning' : 'good')
+                    };
+                    
+                    this.state.tanks.push(tank);
+                    this.saveTanks();
+                    
+                    this.closeAllModals();
+                    this.renderAll();
+                    
+                    this.showToast('Tank added successfully!', 'success');
+                    
+                } catch (error) {
+                    console.error('Error saving tank:', error);
+                    this.showToast('Error saving tank', 'error');
+                }
+            }
+            
+            submitFeedEntries() {
+                try {
+                    const farmSelect = document.getElementById('feedTankSelect');
+                    const dateInput = document.getElementById('feedDate');
+                    const entriesGrid = document.getElementById('feedEntriesGrid');
+                    
+                    const tankId = parseInt(farmSelect.value);
+                    const date = dateInput.value;
+                    const tank = this.state.tanks.find(t => t.id === tankId);
+                    
+                    if (!tank) {
+                        this.showToast('Please select a tank', 'error');
+                        return;
+                    }
+                    
+                    // Get all feed inputs
+                    const feedInputs = entriesGrid.querySelectorAll('input[type="number"]');
+                    let savedCount = 0;
+                    
+                    for (let i = 0; i < feedInputs.length; i++) {
+                        const input = feedInputs[i];
+                        const amount = parseFloat(input.value);
+                        const feedNumber = i + 1;
+                        
+                        // Find existing entry index
+                        const existingIndex = this.state.feedEntries.findIndex(
+                            e => e.tankId === tankId && e.date === date && e.feedNumber === feedNumber
+                        );
 
-  // init
-  renderProducts();
-  updateFloatingInquiryButton();
+                        if (amount && amount > 0) {
+                            // Get selected tray result for this feed
+                            const selectedTray = entriesGrid.querySelector(`.tray-option.active[data-feed="${feedNumber}"]`);
+                            const trayResult = selectedTray ? selectedTray.dataset.tray : 'empty';
+                            
+                            const entryData = {
+                                farmId: tank.farmId,
+                                tankId: tankId,
+                                date: date,
+                                feedNumber: feedNumber,
+                                amount: amount,
+                                trayResult: trayResult,
+                                time: `${6 + (feedNumber-1)*4}:00`,
+                                supplement: 'none'
+                            };
+                            
+                            if (existingIndex >= 0) {
+                                // Update existing
+                                this.state.feedEntries[existingIndex] = {
+                                    ...this.state.feedEntries[existingIndex],
+                                    ...entryData
+                                };
+                            } else {
+                                // Create new
+                                this.state.feedEntries.push({
+                                    id: Date.now() + i,
+                                    ...entryData
+                                });
+                            }
+                            savedCount++;
+                        } else if (existingIndex >= 0) {
+                            // If amount is empty/0 but entry exists, remove it (user cleared it)
+                            this.state.feedEntries.splice(existingIndex, 1);
+                        }
+                    }
+                    
+                    this.saveFeedEntries();
+                    this.closeAllModals();
+                    
+                    // Update tank feed consumed
+                    const tankIndex = this.state.tanks.findIndex(t => t.id === tankId);
+                    if (tankIndex !== -1) {
+                        const tankFeed = this.state.feedEntries
+                            .filter(e => e.tankId === tankId)
+                            .reduce((sum, e) => sum + e.amount, 0);
+                        
+                        this.state.tanks[tankIndex].feedConsumed = tankFeed.toFixed(1);
+                        this.saveTanks();
+                    }
+                    
+                    this.renderAll();
+                    this.showToast(`${savedCount} feed entries saved successfully!`, 'success');
+                    
+                } catch (error) {
+                    console.error('Error saving feed entries:', error);
+                    this.showToast('Error saving entries', 'error');
+                }
+            }
+            
+            updateFeedEntry() {
+                if (!this.editingEntryId) return;
+                
+                try {
+                    const entryIndex = this.state.feedEntries.findIndex(e => e.id === this.editingEntryId);
+                    if (entryIndex === -1) return;
+                    
+                    const amount = parseFloat(document.getElementById('editFeedAmount').value);
+                    const trayResult = document.getElementById('editTrayStatus').value;
+                    const date = document.getElementById('editFeedDate').value;
+                    
+                    if (!amount || amount <= 0) {
+                        this.showToast('Please enter valid amount', 'error');
+                        return;
+                    }
+                    
+                    // Update entry
+                    this.state.feedEntries[entryIndex].amount = amount;
+                    this.state.feedEntries[entryIndex].trayResult = trayResult;
+                    this.state.feedEntries[entryIndex].date = date;
+                    
+                    this.saveFeedEntries();
+                    this.closeAllModals();
+                    this.renderLogBook();
+                    this.showFeedRecommendation();
+                    
+                    this.showToast('Feed entry updated successfully!', 'success');
+                    
+                } catch (error) {
+                    console.error('Error updating feed entry:', error);
+                    this.showToast('Error updating entry', 'error');
+                }
+            }
+            
+            deleteCurrentFeedEntry() {
+                if (!this.editingEntryId) return;
+                
+                if (confirm('Are you sure you want to delete this feed entry?')) {
+                    this.state.feedEntries = this.state.feedEntries.filter(e => e.id !== this.editingEntryId);
+                    this.saveFeedEntries();
+                    this.closeAllModals();
+                    this.renderLogBook();
+                    this.showFeedRecommendation();
+                    this.showToast('Feed entry deleted', 'success');
+                }
+            }
+            
+            deleteFeedEntry(entryId) {
+                const entry = this.state.feedEntries.find(e => e.id === entryId);
+                if (!entry) return;
+                
+                // Check if entry is from today
+                if (entry.date !== this.currentDate) {
+                    this.showToast('Only today\'s entries can be deleted', 'error');
+                    return;
+                }
+                
+                if (confirm('Are you sure you want to delete this feed entry?')) {
+                    this.state.feedEntries = this.state.feedEntries.filter(e => e.id !== entryId);
+                    this.saveFeedEntries();
+                    this.renderLogBook();
+                    this.showFeedRecommendation();
+                    this.showToast('Feed entry deleted', 'success');
+                }
+            }
+            
+            saveApplication() {
+                try {
+                    const farmId = parseInt(document.getElementById('appFarmSelect').value);
+                    const tankId = parseInt(document.getElementById('appTankSelect').value);
+                    const type = document.getElementById('appTypeSelect').value;
+                    const productName = document.getElementById('appProductName').value.trim();
+                    const dosage = document.getElementById('appDosage').value.trim();
+                    const remarks = document.getElementById('appRemarks').value.trim();
+                    
+                    if (!farmId || !tankId || !productName) {
+                        this.showToast('Please fill all required fields', 'error');
+                        return;
+                    }
+                    
+                    const application = {
+                        id: Date.now(),
+                        farmId: farmId,
+                        tankId: tankId,
+                        date: this.currentDate,
+                        type: type,
+                        productName: productName,
+                        dosage: dosage,
+                        remarks: remarks
+                    };
+                    
+                    this.state.applications.push(application);
+                    this.saveApplications();
+                    
+                    this.closeAllModals();
+                    this.renderApplications();
+                    
+                    // Clear form
+                    document.getElementById('appProductName').value = '';
+                    document.getElementById('appDosage').value = '';
+                    document.getElementById('appRemarks').value = '';
+                    
+                    this.showToast('Application saved successfully!', 'success');
+                    
+                } catch (error) {
+                    console.error('Error saving application:', error);
+                    this.showToast('Error saving application', 'error');
+                }
+            }
+            
+            // ===== UI CONTROLS =====
+            switchScreen(screenName) {
+                // Update navigation
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                const navBtn = document.querySelector(`[data-screen="${screenName}"]`);
+                if (navBtn) navBtn.classList.add('active');
+                
+                // Show selected screen
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.remove('active');
+                });
+                
+                const screen = document.getElementById(`${screenName}Screen`);
+                if (screen) screen.classList.add('active');
+                
+                // Update page title
+                const titles = {
+                    'home': 'Farm Overview',
+                    'log': 'Feed Log Book',
+                    'applications': 'Applications',
+                    'prices': 'Market Prices'
+                };
+                
+                document.title = `AquaBook Pro - ${titles[screenName] || 'Dashboard'}`;
+            }
+            
+            setupNavigation() {
+                this.switchScreen('home');
+            }
+            
+            updateFarmSelector() {
+                const selector = document.getElementById('farmSelector');
+                const farmName = document.getElementById('currentFarmName');
+                
+                if (this.state.settings.currentFarmId) {
+                    const farm = this.state.farms.find(f => f.id === this.state.settings.currentFarmId);
+                    if (farm) {
+                        farmName.textContent = farm.name;
+                    }
+                } else if (this.state.farms.length > 0) {
+                    this.state.settings.currentFarmId = this.state.farms[0].id;
+                    this.saveSettings();
+                    farmName.textContent = this.state.farms[0].name;
+                } else {
+                    farmName.textContent = 'Select Farm';
+                }
+            }
+            
+            updateLogFilters(farmSelect, tankSelect) {
+                // Update farm select
+                farmSelect.innerHTML = '<option value="all">All Farms</option>';
+                this.state.farms.forEach(farm => {
+                    const option = document.createElement('option');
+                    option.value = farm.id;
+                    option.textContent = farm.name;
+                    farmSelect.appendChild(option);
+                });
+                
+                // Update tank select based on selected farm
+                const selectedFarmId = farmSelect.value === 'all' ? null : parseInt(farmSelect.value);
+                tankSelect.innerHTML = '<option value="all">All Tanks</option>';
+                
+                let tanks = this.state.tanks;
+                if (selectedFarmId) {
+                    tanks = tanks.filter(tank => tank.farmId === selectedFarmId);
+                }
+                
+                tanks.forEach(tank => {
+                    const farm = this.state.farms.find(f => f.id === tank.farmId);
+                    const option = document.createElement('option');
+                    option.value = tank.id;
+                    option.textContent = `${tank.name} (${farm ? farm.name : 'Unknown'})`;
+                    tankSelect.appendChild(option);
+                });
+            }
+            
+            populateTankSelect(selectElement, selectedTankId = null, farmId = null) {
+                selectElement.innerHTML = '<option value="">Select Tank</option>';
+                
+                let tanks = this.state.tanks;
+                if (farmId) {
+                    tanks = tanks.filter(tank => tank.farmId === farmId);
+                }
+                
+                tanks.forEach(tank => {
+                    const farm = this.state.farms.find(f => f.id === tank.farmId);
+                    const option = document.createElement('option');
+                    option.value = tank.id;
+                    option.textContent = `${farm ? farm.name : 'Unknown'} - ${tank.name}`;
+                    
+                    if (tank.id === selectedTankId) {
+                        option.selected = true;
+                    }
+                    
+                    selectElement.appendChild(option);
+                });
+            }
+            
+            filterApplications(type) {
+                // Update active tab
+                document.querySelectorAll('.application-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                
+                const activeTab = document.querySelector(`[data-type="${type}"]`);
+                if (activeTab) activeTab.classList.add('active');
+                
+                // Render filtered applications
+                this.renderApplications(type);
+            }
+            
+            calculateHarvestValue() {
+                const yieldInput = parseFloat(document.getElementById('harvestYield').value);
+                const sizeSelect = parseInt(document.getElementById('harvestSize').value);
+                
+                if (!yieldInput || yieldInput <= 0) {
+                    this.showToast('Please enter expected yield', 'error');
+                    return;
+                }
+                
+                // Find price for selected size
+                const priceData = this.state.prices.find(p => p.count === sizeSelect);
+                const price = priceData ? priceData.price : 350;
+                
+                const totalValue = yieldInput * price;
+                
+                document.getElementById('harvestValue').textContent = `₹${totalValue.toLocaleString()}`;
+                document.getElementById('harvestResult').style.display = 'block';
+                
+                this.showToast(`Estimated harvest value: ₹${totalValue.toLocaleString()}`, 'success');
+            }
+            
+            // ===== NOTIFICATIONS =====
+            showToast(message, type = 'success') {
+                const toast = document.getElementById(`${type}Toast`);
+                if (!toast) return;
+                
+                const messageElement = toast.querySelector('span');
+                if (messageElement) {
+                    messageElement.textContent = message;
+                }
+                
+                // Hide all toasts first
+                document.querySelectorAll('.toast').forEach(t => {
+                    t.classList.remove('show');
+                    t.style.display = 'none';
+                });
+                
+                // Show selected toast
+                toast.style.display = 'flex';
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 10);
+                
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        toast.style.display = 'none';
+                    }, 300);
+                }, 3000);
+            }
+            
+            showLoading(show) {
+                const loading = document.getElementById('loading');
+                if (loading) {
+                    loading.classList.toggle('active', show);
+                }
+            }
+        }
 
-  // expose helper for demo: clear inquiry on long-press (not shown in UI)
-  window.__coastal_clear_inquiry = function(){ inquiry = []; localStorage.removeItem('coastal_inquiry'); updateFloatingInquiryButton(); showToast('Inquiry cleared'); };
-
-  // ensure floating button reflects saved state
-  updateFloatingInquiryButton();
-
-  /* ---------- initialize carousel ---------- */
-  createSlides();
-  bindSlideCtas();
-  goTo(0);
-  startAutoplay();
-
-  // ensure focusability for accessibility
-  carouselTrack.setAttribute('tabindex', '0');
-
-});
-</script>
+        // ===== INITIALIZE APP =====
+        document.addEventListener('DOMContentLoaded', () => {
+            window.app = new AquaBookPro();
+            
+            // Add offline detection
+            window.addEventListener('offline', () => {
+                window.app.showToast('You are offline. Changes saved locally.', 'warning');
+            });
+            
+            window.addEventListener('online', () => {
+                window.app.showToast('You are back online!', 'success');
+            });
+            
+            // Add keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // Escape to close modals
+                if (e.key === 'Escape') {
+                    window.app.closeAllModals();
+                }
+                
+                // Ctrl+S to save data
+                if (e.ctrlKey && e.key === 's') {
+                    e.preventDefault();
+                    window.app.saveAllData();
+                    window.app.showToast('All data saved!', 'success');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
