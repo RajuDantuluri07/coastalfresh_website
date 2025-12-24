@@ -1298,6 +1298,53 @@
             gap: 8px;
             border: 1px solid rgba(33, 150, 243, 0.2);
         }
+        
+        .smart-suggestion {
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #2e7d32;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+        .smart-suggestion.reduce {
+            background: #ffebee;
+            border-color: #ef5350;
+            color: #c62828;
+        }
+
+        .alert-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .alert-card {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            border-radius: 4px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            animation: slideIn 0.3s ease;
+        }
+        .alert-btn {
+            background: white;
+            border: 1px solid #f44336;
+            color: #f44336;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
 
         /* ===== LOG MATRIX STYLES (NEW) ===== */
         .log-date-nav {
@@ -1436,6 +1483,9 @@
                         Quick Add
                     </button>
                 </div>
+
+                <!-- Critical Alerts (New) -->
+                <div id="criticalAlerts" class="alert-container"></div>
 
                 <!-- Feed Recommendation -->
                 <div class="feed-recommendation" id="feedRecommendation">
@@ -2157,6 +2207,7 @@
                 this.renderApplications();
                 this.renderPrices();
                 this.showFeedRecommendation();
+                this.renderAlerts();
                 this.renderFeedTrendChart();
             }
 
@@ -2181,6 +2232,44 @@
 
                 const avgFCR = totalBiomass > 0 ? (totalFeed / totalBiomass).toFixed(2) : '0.00';
                 document.getElementById('avgFCR').textContent = avgFCR;
+            }
+
+            renderAlerts() {
+                const container = document.getElementById('criticalAlerts');
+                if (!container) return;
+                container.innerHTML = '';
+                
+                const alerts = [];
+                this.state.tanks.forEach(tank => {
+                    const entries = this.state.feedEntries
+                        .filter(e => e.tankId === tank.id)
+                        .sort((a, b) => b.id - a.id);
+                        
+                    if (entries.length > 0) {
+                        const last = entries[0];
+                        if (last.trayResult === 'too-much') {
+                            alerts.push({ tank, last });
+                        }
+                    }
+                });
+
+                if (alerts.length > 0) {
+                    alerts.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'alert-card';
+                        div.innerHTML = `
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <i class="fas fa-exclamation-triangle" style="color:#d32f2f;"></i>
+                                <div>
+                                    <div style="font-weight:700; color:#c62828;">Waste Detected: ${item.tank.name}</div>
+                                    <div style="font-size:11px; color:#555;">Last feed ${item.last.amount}kg was not finished.</div>
+                                </div>
+                            </div>
+                            <button class="alert-btn" onclick="app.resolveWaste('${item.tank.id}')">Fix Now</button>
+                        `;
+                        container.appendChild(div);
+                    });
+                }
             }
 
             renderFeedTrendChart() {
@@ -2311,6 +2400,10 @@
                 const todayEntries = allTankEntries.filter(e => e.date === this.currentDate);
                 const todayFeed = todayEntries.reduce((sum, e) => sum + e.amount, 0);
 
+                // FCR Calculation
+                const currentBiomass = tank.biomass || 1; // Avoid div by zero
+                const estimatedFCR = (totalFeed / currentBiomass).toFixed(2);
+
                 // Tray Analysis for Remarks
                 const totalFeedsToday = todayEntries.length;
                 const notCompleted = todayEntries.filter(e => e.trayResult !== 'empty').length;
@@ -2371,7 +2464,7 @@
                         </div>
 
                         <div style="margin-top: 12px; font-size: 12px; color: var(--gray); border-top: 1px solid #eee; padding-top: 8px;">
-                            Biomass: <span style="color: var(--dark); font-weight: 600;">${tank.biomass || 0} kg</span>
+                            Biomass: <span style="color: var(--dark); font-weight: 600;">${tank.biomass || 0} kg</span> • FCR: <span style="color: var(--primary); font-weight: 600;">${estimatedFCR}</span>
                         </div>
                     </div>
                 `;
@@ -2694,6 +2787,22 @@
                 document.getElementById('tankModal').classList.add('active');
             }
 
+            resolveWaste(tankId) {
+                const tank = this.getTankById(tankId);
+                if (tank && tank.farmId !== this.state.settings.currentFarmId) {
+                    this.state.settings.currentFarmId = tank.farmId;
+                    this.saveSettings();
+                    this.updateFarmSelector();
+                    this.renderFarmsList();
+                }
+                
+                this.openFeedModal();
+                const select = document.getElementById('feedTankSelect');
+                select.value = tankId;
+                // Trigger change manually to update context
+                this.updateFeedContext();
+            }
+
             openFeedModal() {
                 const select = document.getElementById('feedTankSelect');
                 select.innerHTML = '';
@@ -2724,6 +2833,9 @@
                     <div id="lastFeedContext" class="last-feed-context" style="display:none;">
                         <i class="fas fa-info-circle"></i>
                         <span></span>
+                    </div>
+                    <div id="smartSuggestion" class="smart-suggestion" style="display:none;">
+                        <!-- Content injected via JS -->
                     </div>
                     <div class="form-group">
                         <label>Feed Amount (kg)</label>
@@ -2764,6 +2876,8 @@
                 const tankId = document.getElementById('feedTankSelect').value;
                 const contextDiv = document.getElementById('lastFeedContext');
                 const contextSpan = contextDiv.querySelector('span');
+                const suggestionDiv = document.getElementById('smartSuggestion');
+                const amountInput = document.getElementById('feedAmount');
                 
                 const tankEntries = this.state.feedEntries
                     .filter(e => e.tankId == tankId)
@@ -2774,13 +2888,28 @@
                     contextSpan.innerHTML = `Last feed: <b>${last.amount}kg</b> was <b>${last.trayResult}</b>`;
                     contextDiv.style.display = 'flex';
                     
-                    // Auto-fill amount if empty
-                    const amountInput = document.getElementById('feedAmount');
-                    if (!amountInput.value) {
+                    // SMART SUGGESTION LOGIC
+                    if (last.trayResult === 'too-much') {
+                        const reducedAmount = (last.amount * 0.9).toFixed(1); // 10% reduction
+                        amountInput.value = reducedAmount;
+                        suggestionDiv.className = 'smart-suggestion reduce';
+                        suggestionDiv.innerHTML = `
+                            <i class="fas fa-leaf"></i>
+                            <div>
+                                <strong>Waste Reduction:</strong> Previous feed was wasted. 
+                                We've reduced the amount by 10% (from ${last.amount}kg to ${reducedAmount}kg).
+                            </div>
+                        `;
+                        suggestionDiv.style.display = 'flex';
+                    } else {
+                        // Default behavior: repeat last amount
                         amountInput.value = last.amount;
+                        suggestionDiv.style.display = 'none';
                     }
                 } else {
                     contextDiv.style.display = 'none';
+                    suggestionDiv.style.display = 'none';
+                    amountInput.value = '';
                 }
             }
 
