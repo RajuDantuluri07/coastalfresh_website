@@ -1298,6 +1298,63 @@
             gap: 8px;
             border: 1px solid rgba(33, 150, 243, 0.2);
         }
+
+        /* ===== LOG MATRIX STYLES (NEW) ===== */
+        .log-date-nav {
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 16px; 
+            background: white; 
+            padding: 12px 16px; 
+            border-radius: 12px; 
+            border: 2px solid var(--border);
+        }
+
+        .log-matrix-container {
+            background: white;
+            border-radius: 12px;
+            overflow-x: auto;
+            border: 2px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .log-matrix-head {
+            display: grid;
+            grid-template-columns: 1.4fr repeat(4, 1.2fr) 0.7fr;
+            padding: 14px;
+            background: #f1f3f6;
+            font-weight: 600;
+            color: #555;
+            font-size: 12px;
+            align-items: center;
+            min-width: 700px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .log-matrix-row {
+            display: grid;
+            grid-template-columns: 1.4fr repeat(4, 1.2fr) 0.7fr;
+            padding: 14px;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+            align-items: center;
+            min-width: 700px;
+        }
+        .log-matrix-row:last-child { border-bottom: none; }
+
+        .log-matrix-tank { font-weight: 700; color: var(--dark); font-size: 14px; }
+        .log-matrix-sub { font-size: 11px; color: var(--gray); margin-top: 2px; }
+        
+        .log-matrix-feed { display: flex; flex-direction: column; gap: 4px; }
+        .log-matrix-val { font-weight: 700; color: var(--dark); }
+        
+        .tray-badge { font-size: 10px; padding: 3px 8px; border-radius: 6px; font-weight: 600; width: fit-content; display: inline-flex; align-items: center; gap: 4px; }
+        .tray-badge.empty { background:#e8f5e9; color:#2e7d32; }
+        .tray-badge.little { background:#fffde7; color:#f9a825; }
+        .tray-badge.half { background:#fff3e0; color:#ef6c00; }
+        .tray-badge.too-much { background:#ffebee; color:#c62828; }
+        .log-matrix-total { font-weight: 800; color: var(--primary); font-size: 15px; }
     </style>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1445,63 +1502,34 @@
                         <i class="fas fa-history"></i>
                         Feed Log Book
                     </h2>
-                    <div>
-                        <button class="btn btn-secondary" id="toggleLogViewBtn">
-                            <i class="fas fa-list"></i>
-                            Summary View
-                        </button>
-                        <button class="btn btn-primary" id="addLogEntryBtn">
-                            <i class="fas fa-plus"></i>
-                            Add Entry
-                        </button>
+                    <button class="btn btn-primary" id="addLogEntryBtn">
+                        <i class="fas fa-plus"></i>
+                        + Add Feed
+                    </button>
+                </div>
+
+                <!-- Date Navigation -->
+                <div class="log-date-nav">
+                    <button class="btn-icon" id="prevDayBtn"><i class="fas fa-chevron-left"></i></button>
+                    <div style="text-align: center;">
+                        <div style="font-weight: 700; font-size: 16px; color: var(--dark);" id="logDisplayDate">Today</div>
+                        <div style="font-size: 12px; color: var(--gray);" id="logDisplayDay">Tuesday</div>
                     </div>
+                    <button class="btn-icon" id="nextDayBtn"><i class="fas fa-chevron-right"></i></button>
                 </div>
 
-                <!-- Filters -->
-                <div class="log-filters">
-                    <select id="logFarmSelect" class="form-control">
-                        <option value="all">All Farms</option>
-                    </select>
-                    <select id="logTankSelect" class="form-control">
-                        <option value="all">All Tanks</option>
-                    </select>
-                    <select id="logDateSelect" class="form-control">
-                        <option value="today">Today</option>
-                        <option value="yesterday">Yesterday</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                        <option value="last30">Last 30 Days</option>
-                    </select>
-                </div>
-
-                <!-- Log Entries -->
-                <div id="detailedLogView">
-                    <div class="log-container">
-                        <div class="log-header">
-                            <div>Date & Time</div>
-                            <div>Tank & Farm</div>
-                            <div>Feeds</div>
-                            <div>Tray Status</div>
-                            <div>Actions</div>
-                        </div>
-                        <div class="log-entries" id="logEntries">
-                            <!-- Log entries will be loaded here -->
-                        </div>
+                <!-- Matrix Table -->
+                <div class="log-matrix-container">
+                    <div class="log-matrix-head">
+                        <div>Tank</div>
+                        <div>Feed 1<br><small>6AM</small></div>
+                        <div>Feed 2<br><small>10AM</small></div>
+                        <div>Feed 3<br><small>2PM</small></div>
+                        <div>Feed 4<br><small>6PM</small></div>
+                        <div>Total</div>
                     </div>
-                </div>
-
-                <!-- Summary Log View -->
-                <div id="summaryLogView" style="display: none;">
-                     <div class="log-container">
-                        <div class="log-header summary-header">
-                            <div>Date</div>
-                            <div>Feeds (Kgs)</div>
-                            <div>Tray Status</div>
-                            <div>Analysis / Recommendation</div>
-                        </div>
-                        <div class="log-entries" id="summaryLogEntries">
-                            <!-- Summary log entries will be loaded here -->
-                        </div>
+                    <div id="logMatrixBody">
+                        <!-- Rows will be loaded here -->
                     </div>
                 </div>
 
@@ -1906,6 +1934,7 @@
                 this.initialized = false;
                 this.editingEntryId = null;
                 this.editingFarmId = null;
+                this.logDate = new Date(); // Current date being viewed in log
                 
                 // Initialize when DOM is ready
                 if (document.readyState === 'loading') {
@@ -2133,7 +2162,6 @@
 
             setupUI() {
                 document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                this.updateLogFilters(document.getElementById('logFarmSelect'), document.getElementById('logTankSelect'));
             }
             
             renderOverallStats() {
@@ -2275,9 +2303,34 @@
             getTankCardHTML(tank) {
                 const doc = Math.floor((new Date() - new Date(tank.stockingDate)) / (1000 * 60 * 60 * 24));
                 const status = doc > 75 ? 'danger' : doc > 50 ? 'warning' : 'good';
-                const todayFeed = this.state.feedEntries
-                    .filter(e => e.tankId === tank.id && e.date === this.currentDate)
-                    .reduce((sum, e) => sum + e.amount, 0);
+                
+                // Feed calculations
+                const allTankEntries = this.state.feedEntries.filter(e => e.tankId === tank.id);
+                const totalFeed = allTankEntries.reduce((sum, e) => sum + e.amount, 0);
+                
+                const todayEntries = allTankEntries.filter(e => e.date === this.currentDate);
+                const todayFeed = todayEntries.reduce((sum, e) => sum + e.amount, 0);
+
+                // Tray Analysis for Remarks
+                const totalFeedsToday = todayEntries.length;
+                const notCompleted = todayEntries.filter(e => e.trayResult !== 'empty').length;
+                
+                let remarks = "No feeds recorded today";
+                let remarksColor = "var(--gray)";
+                
+                if (totalFeedsToday > 0) {
+                    if (notCompleted > 0) {
+                        remarks = `Out of ${totalFeedsToday} feeds, ${notCompleted} trays not completed: <b>Reduce Feed</b>`;
+                        remarksColor = "var(--danger)";
+                    } else {
+                        remarks = `All ${totalFeedsToday} feeds completed: <b>Good Appetite</b>`;
+                        remarksColor = "var(--success)";
+                    }
+                }
+
+                // Last tray status
+                const lastEntry = todayEntries.length > 0 ? todayEntries[todayEntries.length - 1] : null;
+                const lastTrayStatus = lastEntry ? lastEntry.trayResult : 'N/A';
 
                 // Get last feed status for visual indicator
                 const tankEntries = this.state.feedEntries
@@ -2314,156 +2367,110 @@
                 `;
             }
 
-            getFilteredFeedEntries() {
-                const farmId = document.getElementById('logFarmSelect').value;
-                const tankId = document.getElementById('logTankSelect').value;
-                const dateRange = document.getElementById('logDateSelect').value;
-
-                let filtered = this.state.feedEntries;
-
-                if (farmId !== 'all') {
-                    const farmTanks = this.state.tanks.filter(t => t.farmId === farmId).map(t => t.id);
-                    filtered = filtered.filter(entry => farmTanks.includes(entry.tankId));
-                }
-                if (tankId !== 'all') {
-                    filtered = filtered.filter(entry => entry.tankId === tankId);
-                }
-
-                const now = new Date();
-                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-                if (dateRange === 'today') {
-                    const todayStr = this.getFormattedDate(today);
-                    filtered = filtered.filter(entry => entry.date === todayStr);
-                } else if (dateRange === 'yesterday') {
-                    const yesterday = new Date(today);
-                    yesterday.setDate(yesterday.getDate() - 1);
-                    const yesterdayStr = this.getFormattedDate(yesterday);
-                    filtered = filtered.filter(entry => entry.date === yesterdayStr);
-                } else if (dateRange === 'week') {
-                    const weekStart = new Date(today);
-                    weekStart.setDate(weekStart.getDate() - now.getDay());
-                    filtered = filtered.filter(entry => new Date(entry.date) >= weekStart);
-                } else if (dateRange === 'month') {
-                    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-                    filtered = filtered.filter(entry => new Date(entry.date) >= monthStart);
-                } else if (dateRange === 'last30') {
-                    const thirtyDaysAgo = new Date(today);
-                    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-                    filtered = filtered.filter(entry => new Date(entry.date) >= thirtyDaysAgo);
-                }
-
-                return filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-            }
-
             renderLogBook() {
-                if (this.state.settings.logView === 'summary') {
-                    this.renderSummaryLogBook();
-                    return;
+                // Update Date Display
+                const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+                const dayOptions = { weekday: 'long' };
+                document.getElementById('logDisplayDate').textContent = this.logDate.toLocaleDateString('en-IN', dateOptions);
+                document.getElementById('logDisplayDay').textContent = this.logDate.toLocaleDateString('en-IN', dayOptions);
+
+                const dateStr = this.getFormattedDate(this.logDate);
+                const container = document.getElementById('logMatrixBody');
+                const emptyState = document.getElementById('emptyLog');
+                
+                // Filter tanks based on current farm
+                let tanksToShow = this.state.tanks;
+                if (this.state.settings.currentFarmId) {
+                    tanksToShow = this.state.tanks.filter(t => t.farmId === this.state.settings.currentFarmId);
                 }
 
-                const entries = this.getFilteredFeedEntries();
-                const container = document.getElementById('logEntries');
-                const emptyState = document.getElementById('emptyLog');
-
-                if (entries.length === 0) {
+                if (tanksToShow.length === 0) {
                     container.innerHTML = '';
                     emptyState.style.display = 'block';
                     return;
                 }
-
                 emptyState.style.display = 'none';
+                container.innerHTML = '';
 
-                const groupedByDateAndTank = entries.reduce((acc, entry) => {
-                    const key = `${entry.date}|${entry.tankId}`;
-                    if (!acc[key]) {
-                        acc[key] = {
-                            id: entry.id,
-                            date: entry.date,
-                            tankId: entry.tankId,
-                            feeds: [],
-                            trays: []
-                        };
-                    }
-                    acc[key].feeds.push({amount: entry.amount, time: entry.time.slice(0, 5)});
-                    acc[key].trays.push(entry.trayResult);
-                    return acc;
-                }, {});
+                // Initialize totals
+                const colTotals = [0, 0, 0, 0];
+                let grandTotal = 0;
 
-                const dailyEntries = Object.values(groupedByDateAndTank);
-
-                container.innerHTML = dailyEntries.map(entry => {
-                    const tank = this.getTankById(entry.tankId);
-                    const farm = tank ? this.getFarmById(tank.farmId) : null;
-                    const feeds = entry.feeds.map(f => `${f.amount || 0}kg`).join(', ');
-                    const lastTray = entry.trays[entry.trays.length - 1] || 'N/A';
-
-                    return `
-                        <div class="log-entry" data-id="${entry.id}">
-                            <div>${new Date(entry.date).toLocaleDateString()}</div>
-                            <div>${tank?.name || 'N/A'}<br><small>${farm?.name || 'N/A'}</small></div>
-                            <div>${feeds}</div>
-                            <div>${lastTray}</div>
-                            <div class="action-buttons">
-                                <button class="btn btn-sm btn-secondary edit-log-btn" data-id="${entry.id}"><i class="fas fa-edit"></i></button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            renderSummaryLogBook() {
-                const entries = this.getFilteredFeedEntries();
-                const container = document.getElementById('summaryLogEntries');
-                const emptyState = document.getElementById('emptyLog');
-
-                if (entries.length === 0) {
-                    container.innerHTML = '';
-                    emptyState.style.display = 'block';
-                    return;
-                }
-
-                emptyState.style.display = 'none';
-
-                const groupedByDateAndTank = entries.reduce((acc, entry) => {
-                    const key = `${entry.date}|${entry.tankId}`;
-                    if (!acc[key]) {
-                        acc[key] = {
-                            date: entry.date,
-                            tankId: entry.tankId,
-                            feeds: [],
-                            trays: []
-                        };
-                    }
-                    acc[key].feeds.push(entry.amount || 0);
-                    acc[key].trays.push(entry.trayResult || 'N/A');
-                    return acc;
-                }, {});
-
-                const summaryData = Object.values(groupedByDateAndTank);
-
-                container.innerHTML = summaryData.map(data => {
-                    const tank = this.getTankById(data.tankId);
-                    const farm = tank ? this.getFarmById(tank.farmId) : null;
+                tanksToShow.forEach(tank => {
+                    const farm = this.getFarmById(tank.farmId);
                     
-                    const feedsStr = data.feeds.length > 0 ? data.feeds.join('kg, ') + 'kg' : 'N/A';
-                    const traysStr = data.trays.length > 0 ? data.trays.join(', ') : 'N/A';
-                    const analysis = this.getFeedAnalysis(data.trays);
+                    // Get entries for this tank and date
+                    const entries = this.state.feedEntries
+                        .filter(e => e.tankId === tank.id && e.date === dateStr)
+                        .sort((a, b) => a.id - b.id); // Sort by creation time (id is timestamp)
 
-                    return `
-                        <div class="log-entry summary-entry" style="grid-template-columns: 1fr 1.5fr 1.5fr 2fr;">
-                            <div>
-                                ${new Date(data.date).toLocaleDateString()}<br>
-                                <small>${tank?.name} (${farm?.name})</small>
-                            </div>
-                            <div>${feedsStr}</div>
-                            <div>${traysStr}</div>
-                            <div>${analysis}</div>
+                    const total = entries.reduce((sum, e) => sum + e.amount, 0);
+                    grandTotal += total;
+
+                    // Helper to generate cell HTML
+                    const getCell = (index) => {
+                        if (entries[index]) {
+                            const e = entries[index];
+                            colTotals[index] += e.amount;
+                            let badgeClass = 'unknown';
+                            let badgeIcon = '';
+                            let badgeText = e.trayResult;
+
+                            if (e.trayResult === 'empty') { badgeClass = 'empty'; badgeIcon = '🟢'; badgeText = 'Empty'; }
+                            else if (e.trayResult === 'little') { badgeClass = 'little'; badgeIcon = '🟡'; badgeText = 'Little'; }
+                            else if (e.trayResult === 'half') { badgeClass = 'half'; badgeIcon = '🟠'; badgeText = 'Half'; }
+                            else if (e.trayResult === 'too-much') { badgeClass = 'too-much'; badgeIcon = '🔴'; badgeText = 'Too Much'; }
+
+                            return `
+                                <div class="log-matrix-feed" onclick="app.editFeedEntry(${e.id})">
+                                    <div class="log-matrix-val">${e.amount} kg</div>
+                                    <span class="tray-badge ${badgeClass}">${badgeIcon} ${badgeText}</span>
+                                </div>
+                            `;
+                        }
+                        return `<div style="color: #ddd;">-</div>`;
+                    };
+
+                    const row = document.createElement('div');
+                    row.className = 'log-matrix-row';
+                    row.innerHTML = `
+                        <div>
+                            <div class="log-matrix-tank">${tank.name}</div>
+                            <div class="log-matrix-sub">${farm ? farm.name : ''}</div>
                         </div>
+                        <div>${getCell(0)}</div>
+                        <div>${getCell(1)}</div>
+                        <div>${getCell(2)}</div>
+                        <div>${getCell(3)}</div>
+                        <div class="log-matrix-total">${total > 0 ? total.toFixed(1) : '-'}</div>
                     `;
-                }).join('');
+                    container.appendChild(row);
+                });
+
+                // Add Total Row
+                const totalRow = document.createElement('div');
+                totalRow.className = 'log-matrix-row';
+                totalRow.style.backgroundColor = '#e3f2fd';
+                totalRow.style.borderTop = '2px solid var(--primary)';
+                
+                totalRow.innerHTML = `
+                    <div class="log-matrix-tank" style="color: var(--primary);">TOTAL</div>
+                    <div class="log-matrix-val">${colTotals[0] > 0 ? colTotals[0].toFixed(1) : '-'}</div>
+                    <div class="log-matrix-val">${colTotals[1] > 0 ? colTotals[1].toFixed(1) : '-'}</div>
+                    <div class="log-matrix-val">${colTotals[2] > 0 ? colTotals[2].toFixed(1) : '-'}</div>
+                    <div class="log-matrix-val">${colTotals[3] > 0 ? colTotals[3].toFixed(1) : '-'}</div>
+                    <div class="log-matrix-total">${grandTotal > 0 ? grandTotal.toFixed(1) : '-'}</div>
+                `;
+                container.appendChild(totalRow);
             }
-            
+
+            changeLogDate(days) {
+                const newDate = new Date(this.logDate);
+                newDate.setDate(newDate.getDate() + days);
+                this.logDate = newDate;
+                this.renderLogBook();
+            }
+
             getFeedAnalysis(trays) {
                 if (!trays || trays.length === 0) return "No tray data.";
 
@@ -2523,21 +2530,9 @@
                 document.getElementById('addLogEntryBtn').addEventListener('click', () => this.openFeedModal());
                 document.getElementById('addFirstEntry').addEventListener('click', () => this.openFeedModal());
                 
-                // Log Filters
-                document.getElementById('logFarmSelect').addEventListener('change', () => this.renderLogBook());
-                document.getElementById('logTankSelect').addEventListener('change', () => this.renderLogBook());
-                document.getElementById('logDateSelect').addEventListener('change', () => this.renderLogBook());
-
-                // Toggle Log View
-                document.getElementById('toggleLogViewBtn').addEventListener('click', () => this.toggleLogView());
-
-                // Edit Log Entry
-                document.getElementById('logEntries').addEventListener('click', (e) => {
-                    const editBtn = e.target.closest('.edit-log-btn');
-                    if (editBtn) {
-                        this.editFeedEntry(parseInt(editBtn.dataset.id));
-                    }
-                });
+                // Log Date Navigation
+                document.getElementById('prevDayBtn').addEventListener('click', () => this.changeLogDate(-1));
+                document.getElementById('nextDayBtn').addEventListener('click', () => this.changeLogDate(1));
                 
                 // Update Feed Entry
                 document.getElementById('updateFeedBtn').addEventListener('click', () => this.updateFeedEntry());
@@ -2563,26 +2558,6 @@
                     this.closeAllModals();
                     this.openTankModal(this.state.settings.currentFarmId);
                 });
-            }
-
-            toggleLogView() {
-                const detailedView = document.getElementById('detailedLogView');
-                const summaryView = document.getElementById('summaryLogView');
-                const toggleBtn = document.getElementById('toggleLogViewBtn');
-                
-                if (this.state.settings.logView === 'summary') {
-                    this.state.settings.logView = 'detailed';
-                    detailedView.style.display = 'block';
-                    summaryView.style.display = 'none';
-                    toggleBtn.innerHTML = '<i class="fas fa-list"></i> Summary View';
-                } else {
-                    this.state.settings.logView = 'summary';
-                    detailedView.style.display = 'none';
-                    summaryView.style.display = 'block';
-                    toggleBtn.innerHTML = '<i class="fas fa-table"></i> Detailed View';
-                }
-                this.saveSettings();
-                this.renderLogBook();
             }
 
             // ===== UTILITY FUNCTIONS =====
@@ -2635,20 +2610,6 @@
                 } else {
                     selector.textContent = "Select Farm";
                 }
-            }
-
-            updateLogFilters(farmSelect, tankSelect) {
-                // Populate Farm Select
-                farmSelect.innerHTML = '<option value="all">All Farms</option>';
-                this.state.farms.forEach(farm => {
-                    farmSelect.innerHTML += `<option value="${farm.id}">${farm.name}</option>`;
-                });
-
-                // Populate Tank Select
-                tankSelect.innerHTML = '<option value="all">All Tanks</option>';
-                this.state.tanks.forEach(tank => {
-                    tankSelect.innerHTML += `<option value="${tank.id}">${tank.name}</option>`;
-                });
             }
 
             getTankById(id) {
@@ -2813,6 +2774,19 @@
                 }
             }
 
+            recalculateTankBiomass(tankId) {
+                const tank = this.getTankById(tankId);
+                if (!tank) return;
+                
+                const entries = this.state.feedEntries.filter(e => e.tankId == tankId);
+                const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
+                
+                // Using standard FCR of 1.2 for estimation
+                const estimatedFCR = 1.2;
+                tank.biomass = parseFloat((totalFeed / estimatedFCR).toFixed(1));
+                this.saveTanks();
+            }
+
             selectTray(btn, status) {
                 document.querySelectorAll('.tray-btn-large').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
@@ -2939,6 +2913,7 @@
 
                 this.state.feedEntries.push(newEntry);
                 this.saveFeedEntries();
+                this.recalculateTankBiomass(tankId);
                 this.closeAllModals();
                 this.renderAll();
                 this.showToast('Feed entry saved');
@@ -2970,6 +2945,7 @@
                     this.state.feedEntries[index].date = date;
                     
                     this.saveFeedEntries();
+                    this.recalculateTankBiomass(this.state.feedEntries[index].tankId);
                     this.closeAllModals();
                     this.renderAll();
                     this.showToast('Entry updated');
@@ -2979,8 +2955,12 @@
             deleteCurrentFeedEntry() {
                 if (!this.editingEntryId) return;
                 
+                const entry = this.state.feedEntries.find(e => e.id === this.editingEntryId);
+                const tankId = entry ? entry.tankId : null;
+
                 this.state.feedEntries = this.state.feedEntries.filter(e => e.id !== this.editingEntryId);
                 this.saveFeedEntries();
+                if (tankId) this.recalculateTankBiomass(tankId);
                 this.closeAllModals();
                 this.renderAll();
                 this.showToast('Entry deleted', 'warning');
