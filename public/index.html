@@ -1905,6 +1905,7 @@
                 this.currentDate = this.getFormattedDate();
                 this.initialized = false;
                 this.editingEntryId = null;
+                this.editingFarmId = null;
                 
                 // Initialize when DOM is ready
                 if (document.readyState === 'loading') {
@@ -2248,11 +2249,19 @@
                                 <i class="fas fa-tractor"></i>
                                 ${farm.name}
                             </div>
-                            <div class="farm-stats">
-                                <div class="farm-stat">
-                                    <span class="farm-stat-value">${farmTanks.length}</span>
-                                    Tanks
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div class="farm-stats">
+                                    <div class="farm-stat">
+                                        <span class="farm-stat-value">${farmTanks.length}</span>
+                                        Tanks
+                                    </div>
                                 </div>
+                                <button class="btn btn-sm btn-secondary" onclick="app.editFarm('${farm.id}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-primary" onclick="app.openTankModal('${farm.id}')">
+                                    <i class="fas fa-plus"></i> Add Tank
+                                </button>
                             </div>
                         </div>
                         <div class="tanks-grid">
@@ -2656,6 +2665,26 @@
             }
 
             openFarmModal() {
+                this.editingFarmId = null;
+                document.getElementById('farmNameInput').value = '';
+                document.getElementById('farmLocation').value = '';
+                document.getElementById('farmContact').value = '';
+                document.getElementById('farmPhone').value = '';
+                document.querySelector('#farmModal h3').innerHTML = '<i class="fas fa-plus-circle"></i> Add New Farm';
+                document.getElementById('farmModal').classList.add('active');
+            }
+
+            editFarm(id) {
+                const farm = this.getFarmById(id);
+                if (!farm) return;
+
+                this.editingFarmId = id;
+                document.getElementById('farmNameInput').value = farm.name;
+                document.getElementById('farmLocation').value = farm.location;
+                document.getElementById('farmContact').value = farm.contact || '';
+                document.getElementById('farmPhone').value = farm.phone || '';
+                
+                document.querySelector('#farmModal h3').innerHTML = '<i class="fas fa-edit"></i> Edit Farm';
                 document.getElementById('farmModal').classList.add('active');
             }
 
@@ -2814,32 +2843,47 @@
                     return;
                 }
 
-                const newFarm = {
-                    id: Date.now().toString(),
-                    name,
-                    location,
-                    contact,
-                    phone,
-                    created: new Date().toISOString()
-                };
+                if (this.editingFarmId) {
+                    const farm = this.getFarmById(this.editingFarmId);
+                    if (farm) {
+                        farm.name = name;
+                        farm.location = location;
+                        farm.contact = contact;
+                        farm.phone = phone;
+                        this.showToast('Farm updated successfully');
+                    }
+                } else {
+                    const newFarm = {
+                        id: Date.now().toString(),
+                        name,
+                        location,
+                        contact,
+                        phone,
+                        created: new Date().toISOString()
+                    };
 
-                this.state.farms.push(newFarm);
-                this.saveFarms();
-                
-                // Set as current if first
-                if (this.state.farms.length === 1) {
-                    this.state.settings.currentFarmId = newFarm.id;
-                    this.saveSettings();
+                    this.state.farms.push(newFarm);
+                    
+                    // Set as current if first
+                    if (this.state.farms.length === 1) {
+                        this.state.settings.currentFarmId = newFarm.id;
+                        this.saveSettings();
+                    }
+                    this.showToast('Farm added successfully');
                 }
+
+                this.saveFarms();
 
                 this.closeAllModals();
                 this.checkFirstTimeUser();
                 this.renderAll();
-                this.showToast('Farm added successfully');
                 
                 // Clear inputs
                 document.getElementById('farmNameInput').value = '';
                 document.getElementById('farmLocation').value = '';
+                document.getElementById('farmContact').value = '';
+                document.getElementById('farmPhone').value = '';
+                this.editingFarmId = null;
             }
 
             saveTank() {
