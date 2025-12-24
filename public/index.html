@@ -2404,17 +2404,25 @@
             
             renderOverallStats() {
                 document.getElementById('totalFarms').textContent = this.state.farms.length;
-                document.getElementById('totalTanks').textContent = this.state.tanks.length;
 
-                const totalFeed = this.state.feedEntries.reduce((sum, entry) => sum + entry.amount, 0);
+                const currentFarmId = this.state.settings.currentFarmId;
+
+                // Filter tanks and entries by the current farm
+                const farmTanks = currentFarmId ? this.state.tanks.filter(t => t.farmId === currentFarmId) : [];
+                const farmTankIds = farmTanks.map(t => t.id);
+                const farmFeedEntries = currentFarmId ? this.state.feedEntries.filter(e => farmTankIds.includes(String(e.tankId))) : [];
+
+                document.getElementById('totalTanks').textContent = farmTanks.length;
+
+                const totalFeed = farmFeedEntries.reduce((sum, entry) => sum + entry.amount, 0);
                 document.getElementById('totalFeed').textContent = `${totalFeed.toFixed(1)} kg`;
 
-                const todayFeed = this.state.feedEntries
+                const todayFeed = farmFeedEntries
                     .filter(e => e.date === this.currentDate)
                     .reduce((sum, e) => sum + e.amount, 0);
                 document.getElementById('feedToday').textContent = `${todayFeed.toFixed(1)} kg`;
 
-                const totalBiomass = this.state.tanks.reduce((sum, tank) => sum + (tank.biomass || 0), 0);
+                const totalBiomass = farmTanks.reduce((sum, tank) => sum + (tank.biomass || 0), 0);
                 document.getElementById('totalBiomass').textContent = `${totalBiomass.toFixed(1)} kg`;
 
                 const avgFCR = totalBiomass > 0 ? (totalFeed / totalBiomass).toFixed(2) : '0.00';
@@ -2429,8 +2437,13 @@
                 if (!container) return;
                 container.innerHTML = '';
                 
+                const currentFarmId = this.state.settings.currentFarmId;
+                if (!currentFarmId) return; // Don't show alerts if no farm is selected
+
                 const alerts = [];
-                this.state.tanks.forEach(tank => {
+                const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
+
+                farmTanks.forEach(tank => {
                     const entries = this.state.feedEntries
                         .filter(e => e.tankId === tank.id)
                         .sort((a, b) => b.id - a.id);
@@ -2472,6 +2485,9 @@
                     return;
                 }
 
+                const currentFarmId = this.state.settings.currentFarmId;
+                const farmTankIds = currentFarmId ? this.state.tanks.filter(t => t.farmId === currentFarmId).map(t => t.id) : [];
+
                 // Prepare data: Last 30 days
                 const labels = [];
                 const dataPoints = [];
@@ -2484,8 +2500,12 @@
                     labels.push(d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }));
                     
                     // Sum feed for this date
-                    const dayFeed = this.state.feedEntries
-                        .filter(e => e.date === dateStr)
+                    let entriesToSum = this.state.feedEntries.filter(e => e.date === dateStr);
+                    if (currentFarmId) {
+                        entriesToSum = entriesToSum.filter(e => farmTankIds.includes(String(e.tankId)));
+                    }
+
+                    const dayFeed = entriesToSum
                         .reduce((sum, e) => sum + e.amount, 0);
                     dataPoints.push(dayFeed);
                 }
@@ -2550,13 +2570,30 @@
                     return;
                 }
 
-                this.state.farms.forEach(farm => {
-                    const farmCard = document.createElement('div');
-                    farmCard.className = 'farm-card';
+                const currentFarmId = this.state.settings.currentFarmId;
+                let farmToRender = this.state.farms.find(f => f.id === currentFarmId);
 
-                    const farmTanks = this.state.tanks.filter(tank => tank.farmId === farm.id);
-                    
-                    farmCard.innerHTML = `
+                if (!farmToRender && this.state.farms.length > 0) {
+                    // If selected farm doesn't exist (e.g. deleted), default to first one
+                    farmToRender = this.state.farms[0];
+                    this.state.settings.currentFarmId = farmToRender.id;
+                    this.saveSettings();
+                    this.updateFarmSelector();
+                }
+
+                if (!farmToRender) {
+                    // Still no farm, something is wrong, or there are no farms.
+                    return;
+                }
+
+                // Render only the selected farm
+                const farm = farmToRender;
+                const farmCard = document.createElement('div');
+                farmCard.className = 'farm-card';
+
+                const farmTanks = this.state.tanks.filter(tank => tank.farmId === farm.id);
+                
+                farmCard.innerHTML = `
                         <div class="farm-header">
                             <div class="farm-name">
                                 <i class="fas fa-tractor"></i>
@@ -2581,8 +2618,7 @@
                             ${farmTanks.map(tank => this.getTankCardHTML(tank)).join('')}
                         </div>
                     `;
-                    container.appendChild(farmCard);
-                });
+                container.appendChild(farmCard);
             }
 
             getTankCardHTML(tank) {
