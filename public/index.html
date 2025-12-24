@@ -1346,6 +1346,65 @@
             cursor: pointer;
         }
 
+        /* ===== WEATHER WIDGET ===== */
+        .weather-widget {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .weather-info {
+            z-index: 2;
+        }
+        
+        .weather-temp {
+            font-size: 36px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .weather-condition {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+        
+        .weather-location {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .weather-icon-large {
+            font-size: 64px;
+            opacity: 0.8;
+            z-index: 1;
+        }
+
+        .weather-advice-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(5px);
+            margin-top: 12px;
+            display: inline-block;
+        }
+
         /* ===== LOG MATRIX STYLES (NEW) ===== */
         .log-date-nav {
             display: flex; 
@@ -1487,6 +1546,26 @@
                 <!-- Critical Alerts (New) -->
                 <div id="criticalAlerts" class="alert-container"></div>
 
+                <!-- Weather Widget -->
+                <div class="weather-widget" id="weatherWidget" style="display: none;">
+                    <div class="weather-info">
+                        <div class="weather-temp">
+                            <span id="weatherTemp">--°</span>
+                        </div>
+                        <div class="weather-condition" id="weatherCondition">Loading weather...</div>
+                        <div class="weather-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="weatherLoc">Detecting location...</span>
+                        </div>
+                        <div class="weather-advice-badge" id="weatherAdvice">
+                            <i class="fas fa-info-circle"></i> Checking conditions...
+                        </div>
+                    </div>
+                    <div class="weather-icon-large">
+                        <i class="fas fa-cloud-sun" id="weatherIcon"></i>
+                    </div>
+                </div>
+
                 <!-- Feed Recommendation -->
                 <div class="feed-recommendation" id="feedRecommendation">
                     <div class="recommendation-header">
@@ -1527,6 +1606,10 @@
                     <div class="stat-card">
                         <div class="stat-value" id="feedToday">0 kg</div>
                         <div class="stat-label">Feed Today</div>
+                    </div>
+                    <div class="stat-card" onclick="app.openInventoryModal()" style="cursor: pointer; border: 2px dashed var(--info);">
+                        <div class="stat-value" id="currentStock">0 kg</div>
+                        <div class="stat-label" style="color: var(--info);">Feed Stock <i class="fas fa-plus-circle"></i></div>
                     </div>
                 </div>
 
@@ -1572,10 +1655,10 @@
                 <div class="log-matrix-container">
                     <div class="log-matrix-head">
                         <div>Tank</div>
-                        <div>Feed 1<br><small>6AM</small></div>
-                        <div>Feed 2<br><small>10AM</small></div>
-                        <div>Feed 3<br><small>2PM</small></div>
-                        <div>Feed 4<br><small>6PM</small></div>
+                        <div>Feed 1</div>
+                        <div>Feed 2</div>
+                        <div>Feed 3</div>
+                        <div>Feed 4</div>
                         <div>Total</div>
                     </div>
                     <div id="logMatrixBody">
@@ -1951,6 +2034,35 @@
         </div>
     </div>
 
+    <!-- Inventory Modal -->
+    <div class="modal-overlay" id="inventoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-boxes"></i> Manage Feed Stock</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="stat-card" style="margin-bottom: 20px; background: #e3f2fd; border: none;">
+                    <div class="stat-value" id="modalCurrentStock">0 kg</div>
+                    <div class="stat-label">Current Stock</div>
+                </div>
+                <div class="form-group">
+                    <label>Add Stock (Bags)</label>
+                    <input type="number" id="stockBags" class="form-control" placeholder="Number of bags">
+                </div>
+                <div class="form-group">
+                    <label>Bag Weight (kg)</label>
+                    <input type="number" id="bagWeight" class="form-control" value="25">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="saveStockBtn">
+                    <i class="fas fa-plus"></i> Add Stock
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notifications -->
     <div class="toast" id="successToast">
         <i class="fas fa-check-circle"></i>
@@ -1973,6 +2085,7 @@
                     feedEntries: [],     // All feed entries
                     applications: [],    // All applications
                     prices: [],          // Market prices
+                    inventory: { totalKg: 0 }, // Inventory
                     settings: {
                         currentFarmId: null,
                         currency: 'INR',
@@ -2011,6 +2124,9 @@
                 
                 // Setup event listeners
                 this.setupEventListeners();
+                
+                // Initialize Weather
+                this.initWeather();
                 
                 // Simulate loading delay
                 setTimeout(() => {
@@ -2079,6 +2195,10 @@
                 const appsData = localStorage.getItem('aquabook_applications');
                 this.state.applications = appsData ? JSON.parse(appsData) : [];
                 
+                // Load inventory
+                const inventoryData = localStorage.getItem('aquabook_inventory');
+                this.state.inventory = inventoryData ? JSON.parse(inventoryData) : { totalKg: 0 };
+
                 // Load prices
                 const pricesData = localStorage.getItem('aquabook_prices');
                 if (pricesData) {
@@ -2110,6 +2230,7 @@
                 localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
                 localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
                 localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
+                localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
                 localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
             }
             
@@ -2129,6 +2250,10 @@
                 localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
             }
             
+            saveInventory() {
+                localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
+            }
+
             savePrices() {
                 localStorage.setItem('aquabook_prices', JSON.stringify(this.state.prices));
             }
@@ -2232,6 +2357,9 @@
 
                 const avgFCR = totalBiomass > 0 ? (totalFeed / totalBiomass).toFixed(2) : '0.00';
                 document.getElementById('avgFCR').textContent = avgFCR;
+
+                // Render Inventory
+                document.getElementById('currentStock').textContent = `${(this.state.inventory.totalKg || 0).toFixed(1)} kg`;
             }
 
             renderAlerts() {
@@ -2574,30 +2702,6 @@
                 this.renderLogBook();
             }
 
-            getFeedAnalysis(trays) {
-                if (!trays || trays.length === 0) return "No tray data.";
-
-                const emptyCount = trays.filter(t => t && t.toLowerCase() === 'empty').length;
-                if (emptyCount >= 2) {
-                    return "Multiple empty trays. Consider increasing feed by 5-10%.";
-                }
-                
-                const tooMuchCount = trays.filter(t => t && t.toLowerCase() === 'too-much').length;
-                if (tooMuchCount >= 1) {
-                    return "Excess feed observed. Consider decreasing feed by 5-10%.";
-                }
-
-                if (trays.every(t => t && t.toLowerCase() === 'half')) {
-                    return "Feed consumption is optimal.";
-                }
-
-                if (emptyCount > 0) {
-                    return "One empty tray, consumption is good. Monitor next feed.";
-                }
-
-                return "Normal consumption.";
-            }
-            
             setupEventListeners() {
                 // Screen navigation
                 document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -2661,6 +2765,9 @@
                     this.closeAllModals();
                     this.openTankModal(this.state.settings.currentFarmId);
                 });
+
+                // Inventory
+                document.getElementById('saveStockBtn').addEventListener('click', () => this.saveStock());
             }
 
             // ===== UTILITY FUNCTIONS =====
@@ -2801,6 +2908,28 @@
                 select.value = tankId;
                 // Trigger change manually to update context
                 this.updateFeedContext();
+            }
+
+            openInventoryModal() {
+                document.getElementById('modalCurrentStock').textContent = `${(this.state.inventory.totalKg || 0).toFixed(1)} kg`;
+                document.getElementById('stockBags').value = '';
+                document.getElementById('inventoryModal').classList.add('active');
+            }
+
+            saveStock() {
+                const bags = parseFloat(document.getElementById('stockBags').value) || 0;
+                const weight = parseFloat(document.getElementById('bagWeight').value) || 25;
+                
+                if (bags > 0) {
+                    const addedKg = bags * weight;
+                    this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + addedKg;
+                    this.saveInventory();
+                    this.renderOverallStats();
+                    this.closeAllModals();
+                    this.showToast(`Added ${addedKg} kg to stock`);
+                } else {
+                    this.showToast('Please enter valid quantity', 'error');
+                }
             }
 
             openFeedModal() {
@@ -3052,6 +3181,11 @@
 
                 this.state.feedEntries.push(newEntry);
                 this.saveFeedEntries();
+                
+                // Deduct from inventory
+                this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) - amount;
+                this.saveInventory();
+
                 this.recalculateTankBiomass(tankId);
                 this.closeAllModals();
                 this.renderAll();
@@ -3079,11 +3213,19 @@
 
                 const index = this.state.feedEntries.findIndex(e => e.id === this.editingEntryId);
                 if (index !== -1) {
+                    const oldAmount = this.state.feedEntries[index].amount;
+                    const diff = amount - oldAmount;
+
                     this.state.feedEntries[index].amount = amount;
                     this.state.feedEntries[index].trayResult = trayResult;
                     this.state.feedEntries[index].date = date;
                     
                     this.saveFeedEntries();
+                    
+                    // Adjust inventory
+                    this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) - diff;
+                    this.saveInventory();
+
                     this.recalculateTankBiomass(this.state.feedEntries[index].tankId);
                     this.closeAllModals();
                     this.renderAll();
@@ -3096,9 +3238,15 @@
                 
                 const entry = this.state.feedEntries.find(e => e.id === this.editingEntryId);
                 const tankId = entry ? entry.tankId : null;
+                const amount = entry ? entry.amount : 0;
 
                 this.state.feedEntries = this.state.feedEntries.filter(e => e.id !== this.editingEntryId);
                 this.saveFeedEntries();
+                
+                // Refund inventory
+                this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + amount;
+                this.saveInventory();
+
                 if (tankId) this.recalculateTankBiomass(tankId);
                 this.closeAllModals();
                 this.renderAll();
