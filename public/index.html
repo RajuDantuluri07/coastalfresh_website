@@ -2110,37 +2110,38 @@
             }
             
             init() {
-                this.showLoading(true);
-                
-                // Load all data
-                this.loadAllData();
-                
-                // Setup UI
-                this.setupUI();
-                
-                // Check first-time user lock
-                this.checkFirstTimeUser();
-                
-                // Render initial data
-                this.renderAll();
-                
-                // Setup event listeners
-                this.setupEventListeners();
-                
-                // Initialize Weather
-                this.initWeather();
-                
-                // Simulate loading delay
-                setTimeout(() => {
-                    this.showLoading(false);
-                    this.initialized = true;
-                    this.showToast('AquaBook Pro is ready!', 'success');
+                try {
+                    this.showLoading(true);
                     
-                    // Check if demo data should be added
-                    if (this.state.farms.length === 0) {
-                        // Don't add demo data for first-time users
-                    }
-                }, 800);
+                    // Load all data
+                    this.loadAllData();
+                    
+                    // Setup UI
+                    this.setupUI();
+                    
+                    // Check first-time user lock
+                    this.checkFirstTimeUser();
+                    
+                    // Render initial data
+                    this.renderAll();
+                    
+                    // Setup event listeners
+                    this.setupEventListeners();
+                    
+                    // Initialize Weather
+                    this.initWeather();
+                    
+                    // Simulate loading delay
+                    setTimeout(() => {
+                        this.showLoading(false);
+                        this.initialized = true;
+                        this.showToast('AquaBook Pro is ready!', 'success');
+                    }, 800);
+                } catch (error) {
+                    console.error("App initialization failed:", error);
+                    this.showLoading(false);
+                    this.showToast("Something went wrong. Please refresh.", "error");
+                }
             }
             
             // ===== FIRST TIME USER LOCK =====
@@ -2193,24 +2194,30 @@
                     }
                 };
 
+                // Helper to ensure array and filter invalid items
+                const safeArray = (data) => Array.isArray(data) ? data.filter(item => item !== null && item !== undefined) : [];
+
                 // Load farms
-                this.state.farms = safeParse('aquabook_farms', []);
+                this.state.farms = safeArray(safeParse('aquabook_farms', []));
                 
                 // Load tanks
-                this.state.tanks = safeParse('aquabook_tanks', []);
+                this.state.tanks = safeArray(safeParse('aquabook_tanks', []));
                 
                 // Load feed entries
-                this.state.feedEntries = safeParse('aquabook_entries', []);
+                this.state.feedEntries = safeArray(safeParse('aquabook_entries', []));
                 
                 // Load applications
-                this.state.applications = safeParse('aquabook_applications', []);
+                this.state.applications = safeArray(safeParse('aquabook_applications', []));
                 
                 // Load inventory
                 this.state.inventory = safeParse('aquabook_inventory', { totalKg: 0 });
+                if (!this.state.inventory || typeof this.state.inventory !== 'object') {
+                    this.state.inventory = { totalKg: 0 };
+                }
 
                 // Load prices
                 const savedPrices = safeParse('aquabook_prices', null);
-                if (savedPrices) {
+                if (savedPrices && Array.isArray(savedPrices)) {
                     this.state.prices = savedPrices;
                 } else {
                     // Default market prices
@@ -2227,8 +2234,8 @@
                 
                 // Load settings
                 const savedSettings = safeParse('aquabook_settings', null);
-                if (savedSettings) {
-                    this.state.settings = savedSettings;
+                if (savedSettings && typeof savedSettings === 'object') {
+                    this.state.settings = { ...this.state.settings, ...savedSettings };
                 } else {
                     this.saveSettings();
                 }
