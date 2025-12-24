@@ -1241,6 +1241,63 @@
         .toast.warning { background: var(--warning); }
         .toast.error { background: var(--danger); }
         .toast.info { background: var(--info); }
+
+        /* ===== NEW MVP FEATURES ===== */
+        .fab-btn {
+            position: fixed;
+            bottom: 90px; /* Above nav bar */
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: none;
+            cursor: pointer;
+            z-index: 90;
+            transition: var(--transition);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .fab-btn:active { transform: scale(0.95); }
+        @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+        .tank-feed-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-good { background: var(--success); } /* Empty/Finished */
+        .status-warn { background: var(--warning); } /* Little/Half */
+        .status-bad { background: var(--danger); animation: pulse 2s infinite; } /* Too Much */
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(244, 67, 54, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(244, 67, 54, 0); }
+        }
+
+        .last-feed-context {
+            background: #e3f2fd;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: var(--primary-dark);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid rgba(33, 150, 243, 0.2);
+        }
     </style>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1268,6 +1325,11 @@
             Add Your First Farm
         </button>
     </div>
+
+    <!-- Floating Action Button for Quick Feed -->
+    <button class="fab-btn" id="fabAddFeed" onclick="app.openFeedModal()">
+        <i class="fas fa-utensils"></i>
+    </button>
 
     <!-- Main App -->
     <div id="app">
@@ -2208,8 +2270,23 @@
                     .filter(e => e.tankId === tank.id && e.date === this.currentDate)
                     .reduce((sum, e) => sum + e.amount, 0);
 
+                // Get last feed status for visual indicator
+                const tankEntries = this.state.feedEntries
+                    .filter(e => e.tankId === tank.id)
+                    .sort((a, b) => b.id - a.id);
+                
+                let statusDot = '';
+                if (tankEntries.length > 0) {
+                    const last = tankEntries[0];
+                    let statusClass = 'status-good';
+                    if (last.trayResult === 'too-much') statusClass = 'status-bad';
+                    else if (last.trayResult === 'half' || last.trayResult === 'little') statusClass = 'status-warn';
+                    statusDot = `<div class="tank-feed-status ${statusClass}" title="Last Feed: ${last.trayResult}"></div>`;
+                }
+
                 return `
                     <div class="tank-summary-card ${status}" onclick="app.openTankDetail(${tank.id})">
+                        ${statusDot}
                         <div class="tank-summary-header">
                             <div class="tank-summary-name">${tank.name}</div>
                             <div class="tank-summary-doc">DOC: ${doc}</div>
@@ -2636,11 +2713,18 @@
                     select.innerHTML += `<option value="${tank.id}">${tank.name}</option>`;
                 });
 
+                // Add listener to update context when tank changes
+                select.onchange = () => this.updateFeedContext();
+
                 document.getElementById('feedDate').value = this.currentDate;
                 
                 // Render dynamic content (Tray selection)
                 const content = document.getElementById('feedDynamicContent');
                 content.innerHTML = `
+                    <div id="lastFeedContext" class="last-feed-context" style="display:none;">
+                        <i class="fas fa-info-circle"></i>
+                        <span></span>
+                    </div>
                     <div class="form-group">
                         <label>Feed Amount (kg)</label>
                         <input type="number" id="feedAmount" class="form-control" placeholder="e.g., 5.0" step="0.1">
@@ -2673,12 +2757,49 @@
                 `;
                 
                 document.getElementById('feedModal').classList.add('active');
+                this.updateFeedContext(); // Initial call
+            }
+
+            updateFeedContext() {
+                const tankId = document.getElementById('feedTankSelect').value;
+                const contextDiv = document.getElementById('lastFeedContext');
+                const contextSpan = contextDiv.querySelector('span');
+                
+                const tankEntries = this.state.feedEntries
+                    .filter(e => e.tankId == tankId)
+                    .sort((a, b) => b.id - a.id);
+
+                if (tankEntries.length > 0) {
+                    const last = tankEntries[0];
+                    contextSpan.innerHTML = `Last feed: <b>${last.amount}kg</b> was <b>${last.trayResult}</b>`;
+                    contextDiv.style.display = 'flex';
+                    
+                    // Auto-fill amount if empty
+                    const amountInput = document.getElementById('feedAmount');
+                    if (!amountInput.value) {
+                        amountInput.value = last.amount;
+                    }
+                } else {
+                    contextDiv.style.display = 'none';
+                }
             }
 
             selectTray(btn, status) {
                 document.querySelectorAll('.tray-btn-large').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
                 document.getElementById('selectedTrayStatus').value = status;
+
+                // Immediate feedback for waste reduction
+                if (status === 'too-much') {
+                    this.showToast('⚠️ Waste detected! Consider reducing feed amount.', 'warning');
+                    // Optional: Auto-reduce amount by 10%
+                    const amountInput = document.getElementById('feedAmount');
+                    if (amountInput.value) {
+                        const current = parseFloat(amountInput.value);
+                        const reduced = (current * 0.9).toFixed(1);
+                        // We don't force change, but we could suggest it visually
+                    }
+                }
             }
 
             // CRUD Operations
