@@ -1462,6 +1462,52 @@
         .tray-badge.too-much { background:#ffebee; color:#c62828; }
         .tray-badge.unknown { background:#f5f5f5; color:#9e9e9e; }
         .log-matrix-total { font-weight: 800; color: var(--primary); font-size: 15px; }
+
+        /* Mobile Responsive Log Matrix */
+        @media (max-width: 768px) {
+            .log-matrix-container {
+                background: transparent;
+                border: none;
+                box-shadow: none;
+                overflow-x: visible;
+            }
+            .log-matrix-head {
+                display: none;
+            }
+            .log-matrix-row {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-areas: 
+                    "tank tank tank total"
+                    "feed1 feed2 feed3 feed4";
+                min-width: auto;
+                background: white;
+                margin-bottom: 12px;
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 12px;
+                gap: 12px 4px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            }
+            .log-matrix-row:last-child { margin-bottom: 0; }
+            
+            .log-matrix-row > div:nth-child(1) { grid-area: tank; }
+            .log-matrix-row > div:nth-child(6) { grid-area: total; text-align: right; justify-self: end; align-self: center; }
+            
+            .log-matrix-row > div:nth-child(2) { grid-area: feed1; position: relative; }
+            .log-matrix-row > div:nth-child(3) { grid-area: feed2; position: relative; border-left: 1px dashed #eee; }
+            .log-matrix-row > div:nth-child(4) { grid-area: feed3; position: relative; border-left: 1px dashed #eee; }
+            .log-matrix-row > div:nth-child(5) { grid-area: feed4; position: relative; border-left: 1px dashed #eee; }
+
+            /* Mobile Labels */
+            .log-matrix-row > div:nth-child(2)::before { content: "Feed 1"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
+            .log-matrix-row > div:nth-child(3)::before { content: "Feed 2"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
+            .log-matrix-row > div:nth-child(4)::before { content: "Feed 3"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
+            .log-matrix-row > div:nth-child(5)::before { content: "Feed 4"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
+
+            .log-matrix-feed { align-items: center; }
+            .tray-badge { font-size: 9px; padding: 2px 4px; }
+        }
     </style>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
