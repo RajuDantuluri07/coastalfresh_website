@@ -2353,15 +2353,25 @@
                             <div class="tank-summary-name">${tank.name}</div>
                             <div class="tank-summary-doc">DOC: ${doc}</div>
                         </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; font-size: 12px; color: var(--gray);">
+                            <div>Size: <span style="color: var(--dark); font-weight: 600;">${tank.size || '-'} acre</span></div>
+                            <div>Stock: <span style="color: var(--dark); font-weight: 600;">${tank.initialSeed || '-'} PL</span></div>
+                        </div>
+
                         <div class="tank-summary-stats">
                             <div class="tank-summary-stat">
                                 <span class="tank-summary-label">Feed Today</span>
                                 <span class="tank-summary-value">${todayFeed.toFixed(1)} kg</span>
                             </div>
                             <div class="tank-summary-stat">
-                                <span class="tank-summary-label">Biomass</span>
-                                <span class="tank-summary-value">${tank.biomass || 0} kg</span>
+                                <span class="tank-summary-label">Total Feed</span>
+                                <span class="tank-summary-value">${totalFeed.toFixed(1)} kg</span>
                             </div>
+                        </div>
+
+                        <div style="margin-top: 12px; font-size: 12px; color: var(--gray); border-top: 1px solid #eee; padding-top: 8px;">
+                            Biomass: <span style="color: var(--dark); font-weight: 600;">${tank.biomass || 0} kg</span>
                         </div>
                     </div>
                 `;
