@@ -162,7 +162,7 @@
         /* ===== NAVIGATION - REDUCED TO 4 TABS ===== */
         .nav-tabs {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             background: var(--light);
             position: sticky;
             top: 72px;
@@ -172,7 +172,7 @@
 
         @media (max-width: 768px) {
             .nav-tabs {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(3, 1fr);
                 top: 68px;
             }
         }
@@ -1728,10 +1728,6 @@
                 <i class="fas fa-book"></i>
                 <span>Log Book</span>
             </button>
-            <button class="nav-btn" data-screen="applications">
-                <i class="fas fa-flask"></i>
-                <span>Applications</span>
-            </button>
             <button class="nav-btn" data-screen="prices">
                 <i class="fas fa-chart-line"></i>
                 <span>Prices</span>
@@ -1872,40 +1868,6 @@
                 </div>
             </section>
 
-            <!-- Applications Screen -->
-            <section id="applicationsScreen" class="screen">
-                <div class="screen-header">
-                    <h2 class="screen-title">
-                        <i class="fas fa-prescription-bottle"></i>
-                        Applications
-                    </h2>
-                    <button class="btn btn-primary" id="addApplicationBtn">
-                        <i class="fas fa-plus"></i>
-                        Add Application
-                    </button>
-                </div>
-
-                <!-- Application Tabs -->
-                <div class="applications-tabs">
-                    <button class="application-tab active" data-type="all">All</button>
-                    <button class="application-tab" data-type="probiotic">Probiotics</button>
-                    <button class="application-tab" data-type="mineral">Minerals</button>
-                    <button class="application-tab" data-type="supplement">Supplements</button>
-                    <button class="application-tab" data-type="medicine">Medicine</button>
-                </div>
-
-                <!-- Applications List -->
-                <div class="applications-container" id="applicationsList">
-                    <!-- Applications will be loaded here -->
-                </div>
-
-                <div class="empty-state" id="emptyApps" style="display: none;">
-                    <i class="fas fa-flask"></i>
-                    <h3>No Applications Recorded</h3>
-                    <p>Track probiotics, minerals, and supplements here</p>
-                </div>
-            </section>
-
             <!-- Prices Screen -->
             <section id="pricesScreen" class="screen">
                 <div class="screen-header">
@@ -2036,6 +1998,10 @@
                 <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body" style="padding: 0;">
+                <div style="padding: 12px 16px; background: #f8f9fa; border-bottom: 1px solid var(--border);">
+                    <label style="font-size: 12px; font-weight: 600; color: var(--gray); margin-bottom: 8px; display: block;"><i class="fas fa-mortar-pestle"></i> Mix Supplements (Optional)</label>
+                    <div class="supplement-grid" id="roundSupplements"></div>
+                </div>
                 <div class="feed-round-row feed-round-header">
                     <div>Tank / Tray Grams</div>
                     <div>Last</div>
@@ -2194,6 +2160,13 @@
                     <button class="btn btn-primary" onclick="app.addNewSupplement()">Add</button>
                 </div>
                 <div class="settings-list" id="settingsSupplementsList"></div>
+                <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+                <h4 style="margin-bottom: 12px; color: var(--dark);">Manage Feed Types</h4>
+                <div class="form-group" style="display: flex; gap: 8px;">
+                    <input type="text" id="newFeedTypeInput" class="form-control" placeholder="e.g., Pellet 1.2mm">
+                    <button class="btn btn-primary" onclick="app.addNewFeedType()">Add</button>
+                </div>
+                <div class="settings-list" id="settingsFeedTypesList"></div>
             </div>
         </div>
     </div>
@@ -2278,61 +2251,6 @@
         </div>
     </div>
 
-    <!-- Application Modal -->
-    <div class="modal-overlay" id="applicationModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>
-                    <i class="fas fa-prescription-bottle"></i>
-                    Add Application
-                </h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Select Farm & Tank</label>
-                    <select id="appFarmSelect" class="form-control">
-                        <!-- Options will be loaded -->
-                    </select>
-                    <select id="appTankSelect" class="form-control mt-2">
-                        <!-- Options will be loaded -->
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Application Type</label>
-                    <select id="appTypeSelect" class="form-control">
-                        <option value="probiotic">Probiotic</option>
-                        <option value="mineral">Mineral</option>
-                        <option value="supplement">Supplement</option>
-                        <option value="medicine">Medicine</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Product Name</label>
-                    <input type="text" id="appProductName" class="form-control" placeholder="Enter product name">
-                </div>
-
-                <div class="form-group">
-                    <label>Dosage</label>
-                    <input type="text" id="appDosage" class="form-control" placeholder="e.g., 100ml per acre">
-                </div>
-
-                <div class="form-group">
-                    <label>Remarks</label>
-                    <textarea id="appRemarks" class="form-control" rows="3" placeholder="Any additional notes..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" id="saveAppBtn">
-                    <i class="fas fa-save"></i>
-                    Save Application
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Tank Detail Modal -->
     <div class="modal-overlay" id="tankDetailModal">
         <div class="modal-content">
@@ -2411,7 +2329,6 @@
                     tanks: [],           // Array of tank objects (belonging to farms)
                     feedEntries: [],     // All feed entries
                     harvests: [],        // Harvest records
-                    applications: [],    // All applications
                     prices: [],          // Market prices
                     inventory: { totalKg: 0 }, // Inventory
                     settings: {
@@ -2419,7 +2336,8 @@
                         currency: 'INR',
                         logView: 'detailed', // or 'summary'
                         supplements: ['Gut Probiotic', 'Gill Health', 'Growth Booster', 'Vitamin C', 'Mineral Mix', 'Binder'],
-                        feedsPerDay: 4
+                        feedsPerDay: 4,
+                        feedTypes: ['Pellet 1.0mm', 'Pellet 1.2mm', 'Pellet 1.4mm', 'Pellet 1.6mm', 'Pellet 2.0mm']
                     }
                 };
                 
@@ -2540,9 +2458,6 @@
                 // Load harvests
                 this.state.harvests = safeArray(safeParse('aquabook_harvests', []));
                 
-                // Load applications
-                this.state.applications = safeArray(safeParse('aquabook_applications', []));
-                
                 // Load inventory
                 this.state.inventory = safeParse('aquabook_inventory', { totalKg: 0 });
                 if (!this.state.inventory || typeof this.state.inventory !== 'object') {
@@ -2577,6 +2492,9 @@
                     if (!this.state.settings.feedsPerDay) {
                         this.state.settings.feedsPerDay = 4;
                     }
+                    if (!this.state.settings.feedTypes || !Array.isArray(this.state.settings.feedTypes)) {
+                        this.state.settings.feedTypes = ['Pellet 1.0mm', 'Pellet 1.2mm', 'Pellet 1.4mm', 'Pellet 1.6mm', 'Pellet 2.0mm'];
+                    }
                 } else {
                     this.saveSettings();
                 }
@@ -2587,7 +2505,6 @@
                 localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
                 localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
                 localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
-                localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
                 localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
                 localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
             }
@@ -2606,10 +2523,6 @@
 
             saveHarvests() {
                 localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
-            }
-            
-            saveApplications() {
-                localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
             }
             
             saveInventory() {
@@ -2691,7 +2604,6 @@
                 this.renderFarmsList();
                 this.renderOverallStats();
                 this.renderLogBook();
-                this.renderApplications();
                 this.renderPrices();
                 this.checkPendingTrays();
                 this.renderFeedTrendChart();
@@ -2949,6 +2861,8 @@
                 const lastEntry = todayEntries.length > 0 ? todayEntries[todayEntries.length - 1] : null;
                 const lastTrayStatus = lastEntry ? lastEntry.trayResult : 'N/A';
 
+                const currentStock = tank.currentSeed || tank.initialSeed || 0;
+
                 // Get last feed status for visual indicator
                 const tankEntries = this.state.feedEntries
                     .filter(e => e.tankId === tank.id)
@@ -2973,7 +2887,7 @@
                         
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; font-size: 12px; color: var(--gray);">
                             <div>Size: <span style="color: var(--dark); font-weight: 600;">${tank.size || '-'} acre</span></div>
-                            <div>Stock: <span style="color: var(--dark); font-weight: 600;">${tank.initialSeed || '-'} PL</span></div>
+                            <div>Est. Stock: <span style="color: var(--dark); font-weight: 600;">${currentStock.toLocaleString()}</span></div>
                         </div>
 
                         <div class="tank-summary-stats">
@@ -2988,7 +2902,7 @@
                         </div>
 
                         <div style="margin-top: 12px; font-size: 12px; color: var(--gray); border-top: 1px solid #eee; padding-top: 8px;">
-                            Biomass: <span style="color: var(--dark); font-weight: 600;">${tank.biomass || 0} kg</span> • FCR: <span style="color: var(--primary); font-weight: 600;">${estimatedFCR}</span>
+                            Biomass: <span style="color: var(--dark); font-weight: 600;">${(tank.biomass || 0).toFixed(0)} kg</span> • FCR: <span style="color: var(--primary); font-weight: 600;">${estimatedFCR}</span>
                         </div>
                     </div>
                 `;
@@ -3284,13 +3198,6 @@
                 // Delete Feed Entry
                 document.getElementById('deleteFeedBtn').addEventListener('click', () => this.deleteCurrentFeedEntry());
 
-                // Applications
-                document.getElementById('addApplicationBtn').addEventListener('click', () => this.openApplicationModal());
-                document.querySelectorAll('.application-tab').forEach(tab => {
-                    tab.addEventListener('click', () => this.filterApplications(tab.dataset.type));
-                });
-                document.getElementById('saveAppBtn').addEventListener('click', () => this.saveApplication());
-
                 // Price Calculator
                 document.getElementById('calculateHarvest').addEventListener('click', () => this.calculateHarvestValue());
 
@@ -3491,6 +3398,16 @@
                 
                 document.querySelector('#feedRoundModal .modal-header h3').innerHTML = `<i class="fas fa-utensils"></i> Log Feed (Round ${roundNumber})`;
 
+                // Populate Supplements for Bulk Entry
+                const suppContainer = document.getElementById('roundSupplements');
+                if (suppContainer) {
+                    suppContainer.innerHTML = this.state.settings.supplements.map(s => `
+                        <div class="supplement-option" onclick="this.classList.toggle('selected')">
+                            <i class="fas fa-plus"></i> ${s}
+                        </div>
+                    `).join('');
+                }
+
                 const list = document.getElementById('feedRoundList');
                 list.innerHTML = '';
 
@@ -3500,6 +3417,12 @@
                     const lastEntry = entries[0];
                     
                     let lastAmount = lastEntry ? lastEntry.amount : 0;
+                    let lastTimeStr = "";
+                    if (lastEntry && lastEntry.time) {
+                        // Extract HH:MM roughly or use existing string
+                        lastTimeStr = ` <span style="font-size:10px; color:var(--gray);">(${lastEntry.time})</span>`;
+                    }
+
                     let suggestion = lastAmount;
                     let reason = "Same as last";
 
@@ -3523,7 +3446,7 @@
                             <div style="font-weight:600;">${tank.name}</div>
                             <div class="suggestion-text">Tray: ${checkTrayGrams}g</div>
                         </div>
-                        <div style="font-size:12px; color:var(--gray);">${lastAmount}kg</div>
+                        <div style="font-size:12px; color:var(--dark); font-weight:500;">${lastAmount}kg${lastTimeStr}</div>
                         <div>
                             <div style="font-weight:600; color:var(--primary); font-size:13px;">${suggestion}</div>
                             <div class="suggestion-text">${reason}</div>
@@ -3540,6 +3463,11 @@
             saveFeedRound() {
                 const inputs = document.querySelectorAll('.feed-round-input');
                 let count = 0;
+                let totalAmount = 0;
+                
+                // Get selected supplements for this round
+                const supplements = Array.from(document.querySelectorAll('#roundSupplements .supplement-option.selected'))
+                    .map(el => el.textContent.trim());
                 
                 inputs.forEach(input => {
                     const amount = parseFloat(input.value);
@@ -3552,16 +3480,27 @@
                             time: new Date().toLocaleTimeString(),
                             amount,
                             trayResult: 'pending', // Mark as pending check
-                            supplements: [] // Can add bulk supplements later if needed
+                            supplements: supplements
                         };
                         this.state.feedEntries.push(newEntry);
-                        this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) - amount;
                         this.recalculateTankBiomass(tankId);
                         count++;
+                        totalAmount += amount;
                     }
                 });
 
+                // Inventory Check
+                const currentStock = this.state.inventory.totalKg || 0;
+                if (totalAmount > currentStock) {
+                    if (!confirm(`⚠️ Low Inventory Warning\n\nYou are about to feed ${totalAmount.toFixed(1)}kg, but you only have ${currentStock.toFixed(1)}kg in stock.\n\nProceed anyway?`)) {
+                        // Rollback state changes (remove added entries)
+                        this.state.feedEntries.splice(this.state.feedEntries.length - count, count);
+                        return;
+                    }
+                }
+
                 if (count > 0) {
+                    this.state.inventory.totalKg = currentStock - totalAmount;
                     this.saveFeedEntries();
                     this.saveInventory();
                     this.closeAllModals();
@@ -3941,108 +3880,6 @@
                 this.showToast('Entry deleted', 'warning');
             }
 
-            // Applications
-            openApplicationModal() {
-                const farmSelect = document.getElementById('appFarmSelect');
-                const tankSelect = document.getElementById('appTankSelect');
-                
-                // Populate farms
-                farmSelect.innerHTML = '';
-                this.state.farms.forEach(f => {
-                    farmSelect.innerHTML += `<option value="${f.id}">${f.name}</option>`;
-                });
-
-                // Helper to populate tanks based on farm
-                const updateTanks = () => {
-                    const farmId = farmSelect.value;
-                    tankSelect.innerHTML = '';
-                    const tanks = this.state.tanks.filter(t => t.farmId === farmId);
-                    tanks.forEach(t => {
-                        tankSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
-                    });
-                };
-
-                farmSelect.onchange = updateTanks;
-                if (this.state.farms.length > 0) updateTanks();
-
-                document.getElementById('applicationModal').classList.add('active');
-            }
-
-            saveApplication() {
-                const tankId = document.getElementById('appTankSelect').value;
-                const type = document.getElementById('appTypeSelect').value;
-                const product = document.getElementById('appProductName').value;
-                const dosage = document.getElementById('appDosage').value;
-                const remarks = document.getElementById('appRemarks').value;
-
-                if (!product) {
-                    this.showToast('Product name is required', 'error');
-                    return;
-                }
-
-                const app = {
-                    id: Date.now(),
-                    tankId,
-                    type,
-                    product,
-                    dosage,
-                    remarks,
-                    date: this.currentDate
-                };
-
-                this.state.applications.push(app);
-                this.saveApplications();
-                this.closeAllModals();
-                this.renderApplications();
-                this.showToast('Application recorded');
-            }
-
-            renderApplications() {
-                const container = document.getElementById('applicationsList');
-                const empty = document.getElementById('emptyApps');
-                
-                if (this.state.applications.length === 0) {
-                    container.innerHTML = '';
-                    empty.style.display = 'block';
-                    return;
-                }
-                
-                empty.style.display = 'none';
-                container.innerHTML = this.state.applications.map(app => {
-                    const tank = this.getTankById(app.tankId);
-                    return `
-                        <div class="application-card">
-                            <div class="app-header">
-                                <span class="app-date">${new Date(app.date).toLocaleDateString()}</span>
-                                <span class="app-type ${app.type}">${app.type}</span>
-                            </div>
-                            <div class="app-details">
-                                <div class="app-product">${app.product}</div>
-                                <div class="app-tank">Tank: ${tank ? tank.name : 'Unknown'}</div>
-                                <div class="text-muted">Dosage: ${app.dosage}</div>
-                                ${app.remarks ? `<div class="app-remarks">${app.remarks}</div>` : ''}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            filterApplications(type) {
-                document.querySelectorAll('.application-tab').forEach(t => {
-                    if (t.dataset.type === type) t.classList.add('active');
-                    else t.classList.remove('active');
-                });
-                
-                const allApps = this.state.applications;
-                const filtered = type === 'all' ? allApps : allApps.filter(a => a.type === type);
-                
-                // Temporarily swap state for render
-                const temp = this.state.applications;
-                this.state.applications = filtered;
-                this.renderApplications();
-                this.state.applications = temp;
-            }
-
             // Prices
             renderPrices() {
                 const container = document.getElementById('priceRows');
@@ -4115,6 +3952,7 @@
             // Settings
             openSettingsModal() {
                 this.renderSettingsSupplements();
+                this.renderSettingsFeedTypes();
                 document.getElementById('settingFeedsPerDay').value = this.state.settings.feedsPerDay || 4;
                 document.getElementById('settingsModal').classList.add('active');
             }
@@ -4125,6 +3963,18 @@
                     <div class="settings-item">
                         <span>${s}</span>
                         <button class="btn-icon" style="color: var(--danger);" onclick="app.removeSupplement('${s}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            renderSettingsFeedTypes() {
+                const list = document.getElementById('settingsFeedTypesList');
+                list.innerHTML = this.state.settings.feedTypes.map(s => `
+                    <div class="settings-item">
+                        <span>${s}</span>
+                        <button class="btn-icon" style="color: var(--danger);" onclick="app.removeFeedType('${s}')">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -4152,6 +4002,23 @@
                 this.state.settings.supplements = this.state.settings.supplements.filter(s => s !== name);
                 this.saveSettings();
                 this.renderSettingsSupplements();
+            }
+
+            addNewFeedType() {
+                const input = document.getElementById('newFeedTypeInput');
+                const name = input.value.trim();
+                if (name && !this.state.settings.feedTypes.includes(name)) {
+                    this.state.settings.feedTypes.push(name);
+                    this.saveSettings();
+                    this.renderSettingsFeedTypes();
+                    input.value = '';
+                }
+            }
+
+            removeFeedType(name) {
+                this.state.settings.feedTypes = this.state.settings.feedTypes.filter(s => s !== name);
+                this.saveSettings();
+                this.renderSettingsFeedTypes();
             }
 
             // ===== PARTIAL HARVEST =====
