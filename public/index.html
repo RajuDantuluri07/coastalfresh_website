@@ -3291,10 +3291,17 @@
                             // Supplements in tooltip
                             const suppTitle = (e.supplements && e.supplements.length > 0) ? `Supplements: ${e.supplements.join(', ')}` : '';
 
+                            // Supplements display
+                            let suppHTML = '';
+                            if (e.supplements && e.supplements.length > 0) {
+                                suppHTML = `<div style="margin-top:4px; display:flex; flex-wrap:wrap; justify-content:center; gap:2px;">${e.supplements.map(s => `<span style="font-size:9px; color:#1565c0; background:#e3f2fd; padding:1px 4px; border-radius:4px; white-space:nowrap;">${s}</span>`).join('')}</div>`;
+                            }
+
                             return `
-                                <div onclick="app.editFeedEntry(${e.id})" title="${suppTitle}" style="cursor:pointer;">
+                                <div onclick="app.editFeedEntry(${e.id})" title="${suppTitle}" style="cursor:pointer; width:100%;">
                                     <div class="log-feed-value">${e.amount} kg</div>
                                     <span class="log-status ${badgeClass}">${badgeText}</span>
+                                    ${suppHTML}
                                 </div> 
                             `;
                         }
@@ -3374,10 +3381,17 @@
                                     else if (e.trayResult === 'too-much') badgeClass = 'too-much';
                                     else if (e.trayResult === 'pending') badgeClass = 'pending';
                                     
+                                    // Supplements display
+                                    let suppHTML = '';
+                                    if (e.supplements && e.supplements.length > 0) {
+                                        suppHTML = `<div style="margin-top:4px; display:flex; flex-wrap:wrap; justify-content:center; gap:2px;">${e.supplements.map(s => `<span style="font-size:9px; color:#1565c0; background:#e3f2fd; padding:1px 4px; border-radius:4px; white-space:nowrap;">${s}</span>`).join('')}</div>`;
+                                    }
+
                                     return `
-                                        <div onclick="app.editFeedEntry(${e.id})" title="${suppTitle}" style="cursor:pointer;">
+                                        <div onclick="app.editFeedEntry(${e.id})" title="${suppTitle}" style="cursor:pointer; width:100%;">
                                             <div class="log-feed-value">${e.amount} kg</div>
                                             <span class="log-status ${badgeClass}">${badgeText}</span>
+                                            ${suppHTML}
                                         </div>
                                     `;
                                 }
