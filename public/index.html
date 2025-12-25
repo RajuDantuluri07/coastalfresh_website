@@ -1427,25 +1427,25 @@
 
         .log-matrix-head {
             display: grid;
-            grid-template-columns: 1.4fr repeat(4, 1.2fr) 0.7fr;
+            grid-template-columns: 1.4fr repeat(var(--feed-cols, 6), 1fr) 0.7fr;
             padding: 14px;
             background: #f1f3f6;
             font-weight: 600;
             color: #555;
             font-size: 12px;
             align-items: center;
-            min-width: 700px;
+            min-width: 900px;
             border-bottom: 1px solid var(--border);
         }
 
         .log-matrix-row {
             display: grid;
-            grid-template-columns: 1.4fr repeat(4, 1.2fr) 0.7fr;
+            grid-template-columns: 1.4fr repeat(var(--feed-cols, 6), 1fr) 0.7fr;
             padding: 14px;
             border-bottom: 1px solid #eee;
             font-size: 13px;
             align-items: center;
-            min-width: 700px;
+            min-width: 900px;
         }
         .log-matrix-row:last-child { border-bottom: none; }
 
@@ -1476,10 +1476,11 @@
             }
             .log-matrix-row {
                 display: grid;
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(3, 1fr);
                 grid-template-areas: 
-                    "tank tank tank total"
-                    "feed1 feed2 feed3 feed4";
+                    "tank tank total"
+                    "feed1 feed2 feed3"
+                    "feed4 feed5 feed6";
                 min-width: auto;
                 background: white;
                 margin-bottom: 12px;
@@ -1492,18 +1493,22 @@
             .log-matrix-row:last-child { margin-bottom: 0; }
             
             .log-matrix-row > div:nth-child(1) { grid-area: tank; }
-            .log-matrix-row > div:nth-child(6) { grid-area: total; text-align: right; justify-self: end; align-self: center; }
+            .log-matrix-row > div:nth-child(8) { grid-area: total; text-align: right; justify-self: end; align-self: center; }
             
             .log-matrix-row > div:nth-child(2) { grid-area: feed1; position: relative; }
             .log-matrix-row > div:nth-child(3) { grid-area: feed2; position: relative; border-left: 1px dashed #eee; }
             .log-matrix-row > div:nth-child(4) { grid-area: feed3; position: relative; border-left: 1px dashed #eee; }
             .log-matrix-row > div:nth-child(5) { grid-area: feed4; position: relative; border-left: 1px dashed #eee; }
+            .log-matrix-row > div:nth-child(6) { grid-area: feed5; position: relative; border-left: 1px dashed #eee; border-top: 1px dashed #eee; }
+            .log-matrix-row > div:nth-child(7) { grid-area: feed6; position: relative; border-left: 1px dashed #eee; border-top: 1px dashed #eee; }
 
             /* Mobile Labels */
             .log-matrix-row > div:nth-child(2)::before { content: "Feed 1"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
             .log-matrix-row > div:nth-child(3)::before { content: "Feed 2"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
             .log-matrix-row > div:nth-child(4)::before { content: "Feed 3"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
             .log-matrix-row > div:nth-child(5)::before { content: "Feed 4"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
+            .log-matrix-row > div:nth-child(6)::before { content: "Feed 5"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
+            .log-matrix-row > div:nth-child(7)::before { content: "Feed 6"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
 
             .log-matrix-feed { align-items: center; }
             .tray-badge { font-size: 9px; padding: 2px 4px; }
@@ -1537,6 +1542,42 @@
         }
         .supplement-option i {
             font-size: 14px;
+        }
+        
+        /* ===== LOG RANGE TABS ===== */
+        .log-range-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .range-tab {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            background: white;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray);
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+        .range-tab.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .tank-section-header {
+            background: #e3f2fd;
+            padding: 10px 14px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            border-bottom: 1px solid var(--border);
+            border-top: 2px solid white;
+            grid-column: 1 / -1;
         }
 
         /* ===== SETTINGS ===== */
@@ -1795,14 +1836,13 @@
                     </button>
                 </div>
 
-                <!-- Date Navigation -->
-                <div class="log-date-nav">
-                    <button class="btn-icon" id="prevDayBtn"><i class="fas fa-chevron-left"></i></button>
-                    <div style="text-align: center;">
-                        <div style="font-weight: 700; font-size: 16px; color: var(--dark);" id="logDisplayDate">Today</div>
-                        <div style="font-size: 12px; color: var(--gray);" id="logDisplayDay">Tuesday</div>
-                    </div>
-                    <button class="btn-icon" id="nextDayBtn"><i class="fas fa-chevron-right"></i></button>
+                <!-- Range Tabs -->
+                <div class="log-range-tabs">
+                    <button class="range-tab active" data-range="today">Today</button>
+                    <button class="range-tab" data-range="yesterday">Yesterday</button>
+                    <button class="range-tab" data-range="7days">Last 7 Days</button>
+                    <button class="range-tab" data-range="30days">Last 30 Days</button>
+                    <button class="range-tab" data-range="all">Full Crop</button>
                 </div>
 
                 <!-- Pending Checks Banner -->
@@ -1814,12 +1854,7 @@
                 <!-- Matrix Table -->
                 <div class="log-matrix-container">
                     <div class="log-matrix-head">
-                        <div>Tank</div>
-                        <div>Feed 1</div>
-                        <div>Feed 2</div>
-                        <div>Feed 3</div>
-                        <div>Feed 4</div>
-                        <div>Total</div>
+                        <!-- Headers generated dynamically -->
                     </div>
                     <div id="logMatrixBody">
                         <!-- Rows will be loaded here -->
@@ -2137,6 +2172,19 @@
                 <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body">
+                <h4 style="margin-bottom: 12px; color: var(--dark);">General</h4>
+                <div class="form-group">
+                    <label>Feeds per Day</label>
+                    <select id="settingFeedsPerDay" class="form-control" onchange="app.updateFeedsPerDay(this.value)">
+                        <option value="1">1 Feed</option>
+                        <option value="2">2 Feeds</option>
+                        <option value="3">3 Feeds</option>
+                        <option value="4">4 Feeds</option>
+                        <option value="5">5 Feeds</option>
+                        <option value="6">6 Feeds</option>
+                    </select>
+                </div>
+                <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
                 <h4 style="margin-bottom: 12px; color: var(--dark);">Manage Supplements</h4>
                 <div class="form-group" style="display: flex; gap: 8px;">
                     <input type="text" id="newSupplementInput" class="form-control" placeholder="New supplement name">
@@ -2367,7 +2415,8 @@
                         currentFarmId: null,
                         currency: 'INR',
                         logView: 'detailed', // or 'summary'
-                        supplements: ['Gut Probiotic', 'Gill Health', 'Growth Booster', 'Vitamin C', 'Mineral Mix', 'Binder']
+                        supplements: ['Gut Probiotic', 'Gill Health', 'Growth Booster', 'Vitamin C', 'Mineral Mix', 'Binder'],
+                        feedsPerDay: 4
                     }
                 };
                 
@@ -2375,7 +2424,7 @@
                 this.initialized = false;
                 this.editingEntryId = null;
                 this.editingFarmId = null;
-                this.logDate = new Date(); // Current date being viewed in log
+                this.viewMode = 'today'; // today, yesterday, 7days, 30days, all
                 
                 // Initialize when DOM is ready
                 if (document.readyState === 'loading') {
@@ -2521,6 +2570,9 @@
                     // Ensure supplements exist
                     if (!this.state.settings.supplements || !Array.isArray(this.state.settings.supplements)) {
                         this.state.settings.supplements = ['Gut Probiotic', 'Gill Health', 'Growth Booster', 'Vitamin C', 'Mineral Mix', 'Binder'];
+                    }
+                    if (!this.state.settings.feedsPerDay) {
+                        this.state.settings.feedsPerDay = 4;
                     }
                 } else {
                     this.saveSettings();
@@ -2940,15 +2992,20 @@
             }
 
             renderLogBook() {
-                // Update Date Display
-                const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-                const dayOptions = { weekday: 'long' };
-                document.getElementById('logDisplayDate').textContent = this.logDate.toLocaleDateString('en-IN', dateOptions);
-                document.getElementById('logDisplayDay').textContent = this.logDate.toLocaleDateString('en-IN', dayOptions);
-
-                const dateStr = this.getFormattedDate(this.logDate);
                 const container = document.getElementById('logMatrixBody');
                 const emptyState = document.getElementById('emptyLog');
+                const feedsCount = this.state.settings.feedsPerDay || 4;
+                
+                // Update Grid Columns
+                document.querySelector('.log-matrix-container').style.setProperty('--feed-cols', feedsCount);
+
+                // Generate Header
+                let headerHTML = `<div>${(this.viewMode === 'today' || this.viewMode === 'yesterday') ? 'Tank' : 'Date'}</div>`;
+                for(let i=1; i<=6; i++) {
+                    headerHTML += `<div style="${i > feedsCount ? 'display:none' : ''}">Feed ${i}</div>`;
+                }
+                headerHTML += `<div>Total</div>`;
+                document.querySelector('.log-matrix-head').innerHTML = headerHTML;
                 
                 // Filter tanks based on current farm
                 let tanksToShow = this.state.tanks;
@@ -2969,17 +3026,45 @@
                 emptyState.style.display = 'none';
                 container.innerHTML = '';
 
-                // Initialize totals
-                const colTotals = [0, 0, 0, 0];
-                let grandTotal = 0;
+                // Determine Date Range
+                const today = new Date();
+                let startDate, endDate;
+                
+                if (this.viewMode === 'today') {
+                    startDate = this.getFormattedDate(today);
+                    endDate = startDate;
+                } else if (this.viewMode === 'yesterday') {
+                    const y = new Date(today); y.setDate(y.getDate() - 1);
+                    startDate = this.getFormattedDate(y);
+                    endDate = startDate;
+                } else if (this.viewMode === '7days') {
+                    const d = new Date(today); d.setDate(d.getDate() - 6);
+                    startDate = this.getFormattedDate(d);
+                    endDate = this.getFormattedDate(today);
+                } else if (this.viewMode === '30days') {
+                    const d = new Date(today); d.setDate(d.getDate() - 29);
+                    startDate = this.getFormattedDate(d);
+                    endDate = this.getFormattedDate(today);
+                } else {
+                    startDate = '2000-01-01';
+                    endDate = this.getFormattedDate(today);
+                }
 
-                tanksToShow.forEach(tank => {
-                    const farm = this.getFarmById(tank.farmId);
-                    
-                    // Get entries for this tank and date
-                    const entries = this.state.feedEntries
-                        .filter(e => e.tankId == tank.id && e.date === dateStr)
-                        .sort((a, b) => a.id - b.id); // Sort by creation time (id is timestamp)
+                // Helper to check if date is in range
+                const isDateInRange = (d) => d >= startDate && d <= endDate;
+
+                // Render Logic
+                if (this.viewMode === 'today' || this.viewMode === 'yesterday') {
+                    // COMPACT VIEW (Rows = Tanks)
+                    const dateStr = startDate;
+                    const colTotals = [0, 0, 0, 0, 0, 0];
+                    let grandTotal = 0;
+
+                    tanksToShow.forEach(tank => {
+                        const farm = this.getFarmById(tank.farmId);
+                        const entries = this.state.feedEntries
+                            .filter(e => e.tankId == tank.id && e.date === dateStr)
+                            .sort((a, b) => a.id - b.id);
 
                     const total = entries.reduce((sum, e) => sum + e.amount, 0);
                     grandTotal += total;
@@ -3018,10 +3103,12 @@
                             <div class="log-matrix-tank">${tank.name}</div>
                             <div class="log-matrix-sub">${farm ? farm.name : ''}</div>
                         </div>
-                        <div>${getCell(0)}</div>
-                        <div>${getCell(1)}</div>
-                        <div>${getCell(2)}</div>
-                        <div>${getCell(3)}</div>
+                        <div style="${1 > feedsCount ? 'display:none' : ''}">${getCell(0)}</div>
+                        <div style="${2 > feedsCount ? 'display:none' : ''}">${getCell(1)}</div>
+                        <div style="${3 > feedsCount ? 'display:none' : ''}">${getCell(2)}</div>
+                        <div style="${4 > feedsCount ? 'display:none' : ''}">${getCell(3)}</div>
+                        <div style="${5 > feedsCount ? 'display:none' : ''}">${getCell(4)}</div>
+                        <div style="${6 > feedsCount ? 'display:none' : ''}">${getCell(5)}</div>
                         <div class="log-matrix-total">${total > 0 ? total.toFixed(1) : '-'}</div>
                     `;
                     container.appendChild(row);
@@ -3035,13 +3122,87 @@
                 
                 totalRow.innerHTML = `
                     <div class="log-matrix-tank" style="color: var(--primary);">TOTAL</div>
-                    <div class="log-matrix-val">${colTotals[0] > 0 ? colTotals[0].toFixed(1) : '-'}</div>
-                    <div class="log-matrix-val">${colTotals[1] > 0 ? colTotals[1].toFixed(1) : '-'}</div>
-                    <div class="log-matrix-val">${colTotals[2] > 0 ? colTotals[2].toFixed(1) : '-'}</div>
-                    <div class="log-matrix-val">${colTotals[3] > 0 ? colTotals[3].toFixed(1) : '-'}</div>
+                    <div class="log-matrix-val" style="${1 > feedsCount ? 'display:none' : ''}">${colTotals[0] > 0 ? colTotals[0].toFixed(1) : '-'}</div>
+                    <div class="log-matrix-val" style="${2 > feedsCount ? 'display:none' : ''}">${colTotals[1] > 0 ? colTotals[1].toFixed(1) : '-'}</div>
+                    <div class="log-matrix-val" style="${3 > feedsCount ? 'display:none' : ''}">${colTotals[2] > 0 ? colTotals[2].toFixed(1) : '-'}</div>
+                    <div class="log-matrix-val" style="${4 > feedsCount ? 'display:none' : ''}">${colTotals[3] > 0 ? colTotals[3].toFixed(1) : '-'}</div>
+                    <div class="log-matrix-val" style="${5 > feedsCount ? 'display:none' : ''}">${colTotals[4] > 0 ? colTotals[4].toFixed(1) : '-'}</div>
+                    <div class="log-matrix-val" style="${6 > feedsCount ? 'display:none' : ''}">${colTotals[5] > 0 ? colTotals[5].toFixed(1) : '-'}</div>
                     <div class="log-matrix-total">${grandTotal > 0 ? grandTotal.toFixed(1) : '-'}</div>
                 `;
                 container.appendChild(totalRow);
+                } else {
+                    // DETAILED VIEW (Grouped by Tank, Rows = Dates)
+                    tanksToShow.forEach(tank => {
+                        // Filter entries for this tank in range
+                        const tankEntries = this.state.feedEntries
+                            .filter(e => e.tankId == tank.id && isDateInRange(e.date));
+                        
+                        if (tankEntries.length === 0) return;
+
+                        // Header Row
+                        const headerRow = document.createElement('div');
+                        headerRow.className = 'log-matrix-row tank-section-header';
+                        headerRow.innerHTML = `${tank.name} <span style="font-weight:400; font-size:11px; margin-left:8px; color:var(--gray);">(${this.viewMode === 'all' ? 'Full Crop' : 'Range View'})</span>`;
+                        container.appendChild(headerRow);
+
+                        // Group by Date
+                        const entriesByDate = {};
+                        tankEntries.forEach(e => {
+                            if (!entriesByDate[e.date]) entriesByDate[e.date] = [];
+                            entriesByDate[e.date].push(e);
+                        });
+
+                        // Sort dates descending
+                        const sortedDates = Object.keys(entriesByDate).sort().reverse();
+
+                        sortedDates.forEach(date => {
+                            const entries = entriesByDate[date].sort((a, b) => a.id - b.id);
+                            const total = entries.reduce((sum, e) => sum + e.amount, 0);
+                            
+                            // Helper to get cell (similar to above but simplified)
+                            const getCell = (index) => {
+                                if (entries[index]) {
+                                    const e = entries[index];
+                                    let badgeClass = 'unknown';
+                                    let badgeText = e.trayResult;
+                                    if (e.trayResult === 'empty') badgeClass = 'empty';
+                                    else if (e.trayResult === 'little') badgeClass = 'little';
+                                    else if (e.trayResult === 'half') badgeClass = 'half';
+                                    else if (e.trayResult === 'too-much') badgeClass = 'too-much';
+                                    
+                                    return `
+                                        <div class="log-matrix-feed" onclick="app.editFeedEntry(${e.id})">
+                                            <div class="log-matrix-val">${e.amount}</div>
+                                            <span class="tray-badge ${badgeClass}" style="font-size:8px;">${badgeText}</span>
+                                        </div>
+                                    `;
+                                }
+                                return `<div style="color:#eee;">-</div>`;
+                            };
+
+                            const row = document.createElement('div');
+                            row.className = 'log-matrix-row';
+                            // Format date nicely
+                            const dateObj = new Date(date);
+                            const dateDisplay = dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+
+                            row.innerHTML = `
+                                <div>
+                                    <div class="log-matrix-tank" style="font-weight:500;">${dateDisplay}</div>
+                                </div>
+                                <div style="${1 > feedsCount ? 'display:none' : ''}">${getCell(0)}</div>
+                                <div style="${2 > feedsCount ? 'display:none' : ''}">${getCell(1)}</div>
+                                <div style="${3 > feedsCount ? 'display:none' : ''}">${getCell(2)}</div>
+                                <div style="${4 > feedsCount ? 'display:none' : ''}">${getCell(3)}</div>
+                                <div style="${5 > feedsCount ? 'display:none' : ''}">${getCell(4)}</div>
+                                <div style="${6 > feedsCount ? 'display:none' : ''}">${getCell(5)}</div>
+                                <div class="log-matrix-total" style="font-size:13px;">${total.toFixed(1)}</div>
+                            `;
+                            container.appendChild(row);
+                        });
+                    });
+                }
             }
 
             checkPendingTrays() {
@@ -3055,10 +3216,12 @@
                 if (banner) banner.style.display = pending.length > 0 ? 'flex' : 'none';
             }
 
-            changeLogDate(days) {
-                const newDate = new Date(this.logDate);
-                newDate.setDate(newDate.getDate() + days);
-                this.logDate = newDate;
+            setViewMode(mode) {
+                this.viewMode = mode;
+                document.querySelectorAll('.range-tab').forEach(t => {
+                    if (t.dataset.range === mode) t.classList.add('active');
+                    else t.classList.remove('active');
+                });
                 this.renderLogBook();
             }
 
@@ -3107,9 +3270,10 @@
                     }
                 });
                 
-                // Log Date Navigation
-                document.getElementById('prevDayBtn').addEventListener('click', () => this.changeLogDate(-1));
-                document.getElementById('nextDayBtn').addEventListener('click', () => this.changeLogDate(1));
+                // Log Range Tabs
+                document.querySelectorAll('.range-tab').forEach(tab => {
+                    tab.addEventListener('click', () => this.setViewMode(tab.dataset.range));
+                });
                 
                 // Update Feed Entry
                 document.getElementById('updateFeedBtn').addEventListener('click', () => this.updateFeedEntry());
@@ -3914,6 +4078,7 @@
             // Settings
             openSettingsModal() {
                 this.renderSettingsSupplements();
+                document.getElementById('settingFeedsPerDay').value = this.state.settings.feedsPerDay || 4;
                 document.getElementById('settingsModal').classList.add('active');
             }
 
@@ -3927,6 +4092,12 @@
                         </button>
                     </div>
                 `).join('');
+            }
+
+            updateFeedsPerDay(val) {
+                this.state.settings.feedsPerDay = parseInt(val);
+                this.saveSettings();
+                this.renderLogBook();
             }
 
             addNewSupplement() {
