@@ -1708,9 +1708,6 @@
                     </h2>
                 </div>
 
-                <!-- Critical Alerts (New) -->
-                <div id="criticalAlerts" class="alert-container"></div>
-
                 <!-- Weather Widget -->
                 <div class="weather-widget" id="weatherWidget" style="display: none;">
                     <div class="weather-info">
@@ -2041,7 +2038,6 @@
             </div>
         </div>
     </div>
-
     <!-- Partial Harvest Modal -->
     <div class="modal-overlay" id="partialHarvestModal">
         <div class="modal-content">
@@ -2642,8 +2638,6 @@
                 this.renderLogBook();
                 this.renderApplications();
                 this.renderPrices();
-                this.showFeedRecommendation();
-                this.renderAlerts();
                 this.checkPendingTrays();
                 this.renderFeedTrendChart();
             }
@@ -2719,131 +2713,6 @@
 
                 const avgFCR = totalBiomass > 0 ? (totalFeed / totalBiomass).toFixed(2) : '0.00';
                 document.getElementById('avgFCR').textContent = avgFCR;
-            }
-
-            renderAlerts() {
-                const container = document.getElementById('criticalAlerts');
-                if (!container) return;
-                container.innerHTML = '';
-                
-                const currentFarmId = this.state.settings.currentFarmId;
-                if (!currentFarmId) return; // Don't show alerts if no farm is selected
-
-                const alerts = [];
-                const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
-
-                farmTanks.forEach(tank => {
-                    const entries = this.state.feedEntries
-                        .filter(e => e.tankId === tank.id)
-                        .sort((a, b) => b.id - a.id);
-                        
-                    if (entries.length > 0) {
-                        const last = entries[0];
-                        if (last.trayResult === 'too-much') {
-                            alerts.push({ tank, last });
-                        }
-                    }
-                });
-
-                if (alerts.length > 0) {
-                    alerts.forEach(item => {
-                        const div = document.createElement('div');
-                        div.className = 'alert-card';
-                        div.innerHTML = `
-                            <div style="display:flex; align-items:center; gap:10px;">
-                                <i class="fas fa-exclamation-triangle" style="color:#d32f2f;"></i>
-                                <div>
-                                    <div style="font-weight:700; color:#c62828;">Waste Detected: ${item.tank.name}</div>
-                                    <div style="font-size:11px; color:#555;">Last feed ${item.last.amount}kg was not finished.</div>
-                                </div>
-                            </div>
-                            <button class="alert-btn" onclick="app.resolveWaste('${item.tank.id}')">Fix Now</button>
-                        `;
-                        container.appendChild(div);
-                    });
-                }
-            }
-
-            renderFeedTrendChart() {
-                const ctx = document.getElementById('feedTrendChart');
-                if (!ctx) return;
-
-                // Check if Chart.js is loaded (prevents crash if offline)
-                if (typeof Chart === 'undefined') {
-                    ctx.parentElement.innerHTML = '<div class="text-center text-muted" style="padding: 40px;">Chart unavailable (Offline)</div>';
-                    return;
-                }
-
-                const currentFarmId = this.state.settings.currentFarmId;
-                const farmTankIds = currentFarmId ? this.state.tanks.filter(t => t.farmId === currentFarmId).map(t => t.id) : [];
-
-                // Prepare data: Last 30 days
-                const labels = [];
-                const dataPoints = [];
-                const today = new Date();
-                
-                for (let i = 29; i >= 0; i--) {
-                    const d = new Date();
-                    d.setDate(today.getDate() - i);
-                    const dateStr = this.getFormattedDate(d);
-                    labels.push(d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }));
-                    
-                    // Sum feed for this date
-                    let entriesToSum = this.state.feedEntries.filter(e => e.date === dateStr);
-                    if (currentFarmId) {
-                        entriesToSum = entriesToSum.filter(e => farmTankIds.includes(String(e.tankId)));
-                    }
-
-                    const dayFeed = entriesToSum
-                        .reduce((sum, e) => sum + e.amount, 0);
-                    dataPoints.push(dayFeed);
-                }
-
-                // Destroy existing chart if it exists
-                if (this.feedChart) {
-                    this.feedChart.destroy();
-                }
-
-                this.feedChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Daily Feed (kg)',
-                            data: dataPoints,
-                            borderColor: '#2196F3',
-                            backgroundColor: 'rgba(33, 150, 243, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            title: {
-                                display: true,
-                                text: '30-Day Feed Consumption Trend',
-                                align: 'start',
-                                font: { size: 16, weight: 'bold' },
-                                padding: { bottom: 15 }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: { borderDash: [2, 4] }
-                            },
-                            x: {
-                                grid: { display: false },
-                                ticks: { maxTicksLimit: 10 }
-                            }
-                        }
-                    }
-                });
             }
 
             renderFarmsList() {
@@ -3360,42 +3229,32 @@
 
                 tanks.forEach(tank => {
                     // Get last feed info
-                    const doc = Math.floor((new Date() - new Date(tank.stockingDate)) / (1000 * 60 * 60 * 24));
                     const entries = this.state.feedEntries.filter(e => e.tankId == tank.id).sort((a, b) => b.id - a.id);
                     const lastEntry = entries[0];
                     
                     let lastAmount = lastEntry ? lastEntry.amount : 0;
                     let suggestion = lastAmount;
-                    let reason = "Same as last feed";
+                    let reason = "Same as last";
 
-                    // New Suggestion Logic: Prioritize accepted suggestions
-                    if (tank.nextSuggestedFeed) {
-                        suggestion = tank.nextSuggestedFeed.amount;
-                        reason = tank.nextSuggestedFeed.reason;
-                        // Use suggestion only once
-                        tank.nextSuggestedFeed = null; 
+                    // Suggestion Logic
+                    if (lastEntry) {
+                        if (lastEntry.trayResult === 'empty') { suggestion = (lastAmount * 1.05).toFixed(1); reason = "Inc 5% (Empty)"; }
+                        else if (lastEntry.trayResult === 'half') { suggestion = (lastAmount * 0.9).toFixed(1); reason = "Dec 10% (Half)"; }
+                        else if (lastEntry.trayResult === 'too-much') { suggestion = (lastAmount * 0.8).toFixed(1); reason = "Dec 20% (Waste)"; }
                     } else {
-                        // Fallback to old logic if no suggestion exists
-                        if (lastEntry) {
-                            if (lastEntry.trayResult === 'empty') { suggestion = (lastAmount * 1.05).toFixed(1); reason = "Inc 5% (Empty)"; }
-                            else if (lastEntry.trayResult === 'half') { suggestion = (lastAmount * 0.9).toFixed(1); reason = "Dec 10% (Half)"; }
-                            else if (lastEntry.trayResult === 'too-much') { suggestion = (lastAmount * 0.8).toFixed(1); reason = "Dec 20% (Waste)"; }
-                        } else {
-                            suggestion = 2.0; // Default start
-                            reason = "Initial Feed";
-                        }
+                        suggestion = 2.0; // Default start
+                        reason = "Initial";
                     }
 
-                    // Check Tray Grams Suggestion (e.g. 5g/kg for DOC < 40, 10g/kg after)
-                    const gramsPerKg = doc < 40 ? 5 : 10;
-                    const checkTrayGrams = Math.ceil(suggestion * gramsPerKg); 
+                    // Check Tray Grams Suggestion (e.g. 10g per kg)
+                    const checkTrayGrams = Math.ceil(suggestion * 10); 
 
                     const row = document.createElement('div');
                     row.className = 'feed-round-row';
                     row.innerHTML = `
                         <div>
                             <div style="font-weight:600;">${tank.name}</div>
-                            <div class="suggestion-text" style="color:var(--success-dark);">Tray: ${checkTrayGrams}g (${gramsPerKg}g/kg)</div>
+                            <div class="suggestion-text">Tray: ${checkTrayGrams}g</div>
                         </div>
                         <div style="font-size:12px; color:var(--gray);">${lastAmount}kg</div>
                         <div>
@@ -3438,14 +3297,9 @@
                 if (count > 0) {
                     this.saveFeedEntries();
                     this.saveInventory();
-                    this.renderAll();
-
-                    // Show wait timer
-                    const checkTime = new Date(Date.now() + 2 * 60 * 60 * 1000);
-                    document.getElementById('checkTimeDisplay').textContent = checkTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
                     this.closeAllModals();
-                    document.getElementById('waitTimerModal').classList.add('active');
-
+                    this.renderAll();
+                    this.showToast(`Saved ${count} feed entries. Check trays in 2 hours!`);
                 } else {
                     this.showToast('No feed amounts entered', 'error');
                 }
@@ -3713,7 +3567,7 @@
                     stockingDate: stockingDate || this.currentDate,
                     initialSeed: initialSeed || 0,
                     biomass: 0, // Initial biomass
-                    nextSuggestedFeed: null,
+                    nextSuggestedFeed: null
                 };
 
                 this.state.tanks.push(newTank);
