@@ -1474,7 +1474,6 @@
 
         .log-table {
             width: 100%;
-            min-width: 900px;
             border-collapse: collapse;
         }
 
@@ -1541,6 +1540,77 @@
             font-weight: 700;
             border-top: 2px solid #dbeafe;
             color: var(--dark);
+        }
+        
+        @media (max-width: 768px) {
+            .log-table-container {
+                overflow-x: hidden;
+                background: transparent;
+                box-shadow: none;
+                border: none;
+            }
+            .log-table {
+                border-collapse: separate;
+                border-spacing: 0 12px;
+                min-width: 0;
+            }
+            .log-table thead, .log-table tfoot {
+                display: none;
+            }
+            .log-table tr {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                background: white;
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 12px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            }
+            .log-table td {
+                padding: 0;
+                border: none;
+                background: transparent;
+            }
+            .log-table tr td:first-child {
+                grid-column: 1 / span 3;
+                border-bottom: 1px solid #f0f0f0;
+                padding-bottom: 8px;
+                margin-bottom: 4px;
+            }
+            .log-table tr td:last-child {
+                grid-column: 4 / span 1;
+                text-align: right;
+                border-bottom: 1px solid #f0f0f0;
+                padding-bottom: 8px;
+                margin-bottom: 4px;
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                justify-content: center;
+            }
+            .log-table tr td:not(:first-child):not(:last-child) {
+                background: #f8f9fa;
+                border-radius: 8px;
+                padding: 8px 4px;
+                text-align: center;
+                min-height: 60px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+            .log-table tr td:not(:first-child):not(:last-child)::before {
+                content: attr(data-label);
+                font-size: 9px;
+                color: #888;
+                text-transform: uppercase;
+                margin-bottom: 4px;
+                font-weight: 700;
+            }
+            .log-total {
+                font-size: 14px;
+            }
         }
 
         /* ===== SUPPLEMENT CHIPS ===== */
@@ -3248,7 +3318,7 @@
                                 </div>
                             </div>
                         </td>
-                        ${Array.from({length: feedsCount}, (_, i) => `<td>${getCell(i)}</td>`).join('')}
+                        ${Array.from({length: feedsCount}, (_, i) => `<td data-label="${feedLabels[i]}">${getCell(i)}</td>`).join('')}
                         <td class="log-total">${total > 0 ? total.toFixed(1) : '0'}</td>
                     `;
                     tableBody.appendChild(row);
@@ -3341,7 +3411,7 @@
                                 <td>
                                     <div class="log-pond-name" style="font-weight:500;">${dateDisplay}</div>
                                 </td>
-                                ${Array.from({length: feedsCount}, (_, i) => `<td>${getCell(i)}</td>`).join('')}
+                                ${Array.from({length: feedsCount}, (_, i) => `<td data-label="${feedLabels[i]}">${getCell(i)}</td>`).join('')}
                                 <td class="log-total">${total.toFixed(1)}</td>
                             `;
                             tableBody.appendChild(row);
