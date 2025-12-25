@@ -1559,13 +1559,17 @@
             .log-matrix-row > div:nth-child(6) { grid-area: feed5; position: relative; border-left: 1px dashed #eee; border-top: 1px dashed #eee; }
             .log-matrix-row > div:nth-child(7) { grid-area: feed6; position: relative; border-left: 1px dashed #eee; border-top: 1px dashed #eee; }
 
-            /* Mobile Labels */
-            .log-matrix-row > div:nth-child(2)::before { content: "Feed 1"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
-            .log-matrix-row > div:nth-child(3)::before { content: "Feed 2"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
-            .log-matrix-row > div:nth-child(4)::before { content: "Feed 3"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
-            .log-matrix-row > div:nth-child(5)::before { content: "Feed 4"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
-            .log-matrix-row > div:nth-child(6)::before { content: "Feed 5"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
-            .log-matrix-row > div:nth-child(7)::before { content: "Feed 6"; display: block; font-size: 9px; color: #999; margin-bottom: 4px; text-align: center; }
+            /* Mobile Labels - Dynamic */
+            .log-matrix-row > div[data-label]::before { 
+                content: attr(data-label); 
+                display: block; 
+                font-size: 10px; 
+                color: var(--gray); 
+                margin-bottom: 4px; 
+                text-align: center; 
+                font-weight: 600;
+                text-transform: uppercase;
+            }
 
             .log-matrix-feed { align-items: center; }
             .tray-badge { font-size: 9px; padding: 2px 4px; }
@@ -1608,14 +1612,23 @@
             line-height: 1.1;
             white-space: normal;
         }
+
+        /* Problematic Tank Highlight */
+        .log-matrix-row.has-issues {
+            border-left: 4px solid var(--warning);
+            background: #fffdeb;
+        }
+        .log-matrix-row.has-issues .log-matrix-tank {
+            color: var(--warning-dark);
+        }
         
         /* ===== LOG RANGE TABS ===== */
         .log-range-tabs {
             display: flex;
             gap: 8px;
-            margin-bottom: 16px;
             overflow-x: auto;
             padding-bottom: 4px;
+            align-items: center;
             -webkit-overflow-scrolling: touch;
         }
         .range-tab {
@@ -1634,6 +1647,13 @@
             background: var(--primary);
             color: white;
             border-color: var(--primary);
+        }
+        .log-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 10px;
         }
         .tank-section-header {
             background: #e3f2fd;
@@ -1967,18 +1987,16 @@
                 </div>
 
                 <!-- Range Tabs -->
-                <div class="log-range-tabs">
-                    <button class="range-tab active" data-range="today">Today</button>
-                    <button class="range-tab" data-range="yesterday">Yesterday</button>
-                    <button class="range-tab" data-range="7days">Last 7 Days</button>
-                    <button class="range-tab" data-range="30days">Last 30 Days</button>
-                    <button class="range-tab" data-range="all">Full Crop</button>
-                </div>
-                
-                <!-- View Toggle -->
-                <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
-                    <button class="btn btn-sm btn-secondary" id="toggleViewBtn" onclick="app.toggleLogView()">
-                        <i class="fas fa-list"></i> Switch to List View
+                <div class="log-toolbar">
+                    <div class="log-range-tabs">
+                        <button class="range-tab active" data-range="today">Today</button>
+                        <button class="range-tab" data-range="yesterday">Yesterday</button>
+                        <button class="range-tab" data-range="7days">Last 7 Days</button>
+                        <button class="range-tab" data-range="30days">Last 30 Days</button>
+                        <button class="range-tab" data-range="all">Full Crop</button>
+                    </div>
+                    <button class="btn btn-sm btn-secondary" id="toggleViewBtn" onclick="app.toggleLogView()" title="Switch View">
+                        <i class="fas fa-list"></i>
                     </button>
                 </div>
 
@@ -3073,18 +3091,24 @@
                 const toggleBtn = document.getElementById('toggleViewBtn');
 
                 // Update Toggle Button Text
-                toggleBtn.innerHTML = this.logViewType === 'matrix' 
-                    ? '<i class="fas fa-list"></i> Switch to List View' 
-                    : '<i class="fas fa-th"></i> Switch to Grid View';
+                toggleBtn.innerHTML = this.logViewType === 'matrix' ? '<i class="fas fa-list"></i>' : '<i class="fas fa-th"></i>';
 
                 
                 // Update Grid Columns
                 document.querySelector('.log-matrix-container').style.setProperty('--feed-cols', feedsCount);
 
+                // Generate Feed Labels
+                let feedLabels = [];
+                if (feedsCount === 1) feedLabels = ['Daily'];
+                else if (feedsCount === 2) feedLabels = ['Morning', 'Evening'];
+                else if (feedsCount === 3) feedLabels = ['Morning', 'Afternoon', 'Evening'];
+                else if (feedsCount === 4) feedLabels = ['Morning', 'Afternoon', 'Evening', 'Night'];
+                else feedLabels = Array.from({length: feedsCount}, (_, i) => `Feed ${i+1}`);
+
                 // Generate Header
                 let headerHTML = `<div>${(this.viewMode === 'today' || this.viewMode === 'yesterday') ? 'Tank' : 'Date'}</div>`;
-                for(let i=1; i<=6; i++) {
-                    headerHTML += `<div style="${i > feedsCount ? 'display:none' : ''}">Feed ${i}</div>`;
+                for(let i=0; i<6; i++) {
+                    headerHTML += `<div style="${i >= feedsCount ? 'display:none' : ''}">${feedLabels[i] || 'Feed '+(i+1)}</div>`;
                 }
                 headerHTML += `<div>Total</div>`;
                 document.querySelector('.log-matrix-head').innerHTML = headerHTML;
@@ -3149,6 +3173,7 @@
                     let grandTotal = 0;
 
                     tanksToShow.forEach(tank => {
+                        let hasIssues = false;
                         const farm = this.getFarmById(tank.farmId);
                         const entries = this.state.feedEntries
                             .filter(e => e.tankId == tank.id && e.date === dateStr)
@@ -3162,23 +3187,27 @@
                         if (entries[index]) {
                             const e = entries[index];
                             colTotals[index] += e.amount;
+                            
                             let badgeClass = 'unknown';
-                            let badgeIcon = '';
-                            let badgeText = e.trayResult;
+                            let badgeText = e.trayResult.charAt(0).toUpperCase() + e.trayResult.slice(1);
 
-                            let suppHTML = (e.supplements && e.supplements.length > 0) ? `<div class="log-supplements"><i class="fas fa-flask" style="font-size:8px;"></i> ${e.supplements.join(', ')}</div>` : '';
+                            if (e.trayResult === 'empty') { badgeClass = 'empty'; hasIssues = true; }
+                            else if (e.trayResult === 'little') { badgeClass = 'little'; }
+                            else if (e.trayResult === 'half') { badgeClass = 'half'; }
+                            else if (e.trayResult === 'too-much') { badgeClass = 'too-much'; badgeText = 'Waste'; hasIssues = true; }
+                            else if (e.trayResult === 'pending') { badgeClass = 'unknown'; }
 
-                            if (e.trayResult === 'empty') { badgeClass = 'empty'; badgeIcon = '🟢'; badgeText = 'Empty'; }
-                            else if (e.trayResult === 'little') { badgeClass = 'little'; badgeIcon = '🟡'; badgeText = 'Little'; }
-                            else if (e.trayResult === 'half') { badgeClass = 'half'; badgeIcon = '🟠'; badgeText = 'Half'; }
-                            else if (e.trayResult === 'too-much') { badgeClass = 'too-much'; badgeIcon = '🔴'; badgeText = 'Too Much'; }
-                            else if (e.trayResult === 'pending') { badgeClass = 'unknown'; badgeIcon = '⏳'; badgeText = 'Pending'; }
+                            // Supplements in tooltip
+                            const suppTitle = (e.supplements && e.supplements.length > 0) ? `Supplements: ${e.supplements.join(', ')}` : '';
+                            const suppIndicator = (e.supplements && e.supplements.length > 0) ? `<i class="fas fa-flask" style="font-size:8px; color:var(--primary); margin-left:2px;"></i>` : '';
 
                             return `
-                                <div class="log-matrix-feed" onclick="app.editFeedEntry(${e.id})">
-                                    <div class="log-matrix-val">${e.amount} kg</div>
-                                    <span class="tray-badge ${badgeClass}">${badgeIcon} ${badgeText}</span>
-                                    ${suppHTML}
+                                <div class="log-matrix-feed" onclick="app.editFeedEntry(${e.id})" title="${suppTitle}">
+                                    <div class="log-matrix-val" style="font-size:14px;">
+                                        ${e.amount} <span style="font-size:10px; font-weight:400; color:var(--gray);">kg</span>
+                                        ${suppIndicator}
+                                    </div>
+                                    <span class="tray-badge ${badgeClass}" style="margin-top:2px;">${badgeText}</span>
                                 </div>
                             `;
                         }
@@ -3186,19 +3215,22 @@
                     };
 
                     const row = document.createElement('div');
-                    row.className = 'log-matrix-row';
+                    row.className = `log-matrix-row ${hasIssues ? 'has-issues' : ''}`;
                     row.innerHTML = `
                         <div>
                             <div class="log-matrix-tank">${tank.name}</div>
                             <div class="log-matrix-sub">${farm ? farm.name : ''}</div>
                         </div>
-                        <div style="${1 > feedsCount ? 'display:none' : ''}">${getCell(0)}</div>
-                        <div style="${2 > feedsCount ? 'display:none' : ''}">${getCell(1)}</div>
-                        <div style="${3 > feedsCount ? 'display:none' : ''}">${getCell(2)}</div>
-                        <div style="${4 > feedsCount ? 'display:none' : ''}">${getCell(3)}</div>
-                        <div style="${5 > feedsCount ? 'display:none' : ''}">${getCell(4)}</div>
-                        <div style="${6 > feedsCount ? 'display:none' : ''}">${getCell(5)}</div>
-                        <div class="log-matrix-total">${total > 0 ? total.toFixed(1) : '-'}</div>
+                        <div style="${1 > feedsCount ? 'display:none' : ''}" data-label="${feedLabels[0]}">${getCell(0)}</div>
+                        <div style="${2 > feedsCount ? 'display:none' : ''}" data-label="${feedLabels[1]}">${getCell(1)}</div>
+                        <div style="${3 > feedsCount ? 'display:none' : ''}" data-label="${feedLabels[2]}">${getCell(2)}</div>
+                        <div style="${4 > feedsCount ? 'display:none' : ''}" data-label="${feedLabels[3]}">${getCell(3)}</div>
+                        <div style="${5 > feedsCount ? 'display:none' : ''}" data-label="${feedLabels[4]}">${getCell(4)}</div>
+                        <div style="${6 > feedsCount ? 'display:none' : ''}" data-label="${feedLabels[5]}">${getCell(5)}</div>
+                        <div class="log-matrix-total">
+                            <span style="font-size:10px; color:var(--gray); display:block;">Total Today</span>
+                            ${total > 0 ? total.toFixed(1) : '0'} kg
+                        </div>
                     `;
                     container.appendChild(row);
                 });
@@ -3217,7 +3249,7 @@
                     <div class="log-matrix-val" style="${4 > feedsCount ? 'display:none' : ''}">${colTotals[3] > 0 ? colTotals[3].toFixed(1) : '-'}</div>
                     <div class="log-matrix-val" style="${5 > feedsCount ? 'display:none' : ''}">${colTotals[4] > 0 ? colTotals[4].toFixed(1) : '-'}</div>
                     <div class="log-matrix-val" style="${6 > feedsCount ? 'display:none' : ''}">${colTotals[5] > 0 ? colTotals[5].toFixed(1) : '-'}</div>
-                    <div class="log-matrix-total">${grandTotal > 0 ? grandTotal.toFixed(1) : '-'}</div>
+                    <div class="log-matrix-total">${grandTotal > 0 ? grandTotal.toFixed(1) : '0'} kg</div>
                 `;
                 container.appendChild(totalRow);
                 } else {
@@ -3255,7 +3287,9 @@
                                     const e = entries[index];
                                     let badgeClass = 'unknown';
                                     let badgeText = e.trayResult;
-                                    let suppHTML = (e.supplements && e.supplements.length > 0) ? `<div class="log-supplements"><i class="fas fa-flask" style="font-size:8px;"></i> ${e.supplements.join(', ')}</div>` : '';
+                                    // Supplements in tooltip for consistency
+                                    const suppTitle = (e.supplements && e.supplements.length > 0) ? `Supplements: ${e.supplements.join(', ')}` : '';
+                                    const suppIndicator = (e.supplements && e.supplements.length > 0) ? `<i class="fas fa-flask" style="font-size:8px; color:var(--primary); margin-left:2px;"></i>` : '';
 
                                     if (e.trayResult === 'empty') badgeClass = 'empty';
                                     else if (e.trayResult === 'little') badgeClass = 'little';
@@ -3263,10 +3297,9 @@
                                     else if (e.trayResult === 'too-much') badgeClass = 'too-much';
                                     
                                     return `
-                                        <div class="log-matrix-feed" onclick="app.editFeedEntry(${e.id})">
-                                            <div class="log-matrix-val">${e.amount} kg</div>
+                                        <div class="log-matrix-feed" onclick="app.editFeedEntry(${e.id})" title="${suppTitle}">
+                                            <div class="log-matrix-val">${e.amount} kg ${suppIndicator}</div>
                                             <span class="tray-badge ${badgeClass}" style="font-size:8px;">${badgeText}</span>
-                                            ${suppHTML}
                                         </div>
                                     `;
                                 }
