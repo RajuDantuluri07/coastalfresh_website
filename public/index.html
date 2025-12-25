@@ -1601,6 +1601,14 @@
             font-size: 14px;
         }
         
+        .log-supplements {
+            font-size: 9px;
+            color: var(--primary-dark);
+            margin-top: 2px;
+            line-height: 1.1;
+            white-space: normal;
+        }
+        
         /* ===== LOG RANGE TABS ===== */
         .log-range-tabs {
             display: flex;
@@ -3158,7 +3166,7 @@
                             let badgeIcon = '';
                             let badgeText = e.trayResult;
 
-                            let suppIcon = (e.supplements && e.supplements.length > 0) ? `<i class="fas fa-pills" style="color: var(--info); margin-left: 4px;" title="${e.supplements.join(', ')}"></i>` : '';
+                            let suppHTML = (e.supplements && e.supplements.length > 0) ? `<div class="log-supplements"><i class="fas fa-flask" style="font-size:8px;"></i> ${e.supplements.join(', ')}</div>` : '';
 
                             if (e.trayResult === 'empty') { badgeClass = 'empty'; badgeIcon = '🟢'; badgeText = 'Empty'; }
                             else if (e.trayResult === 'little') { badgeClass = 'little'; badgeIcon = '🟡'; badgeText = 'Little'; }
@@ -3169,7 +3177,8 @@
                             return `
                                 <div class="log-matrix-feed" onclick="app.editFeedEntry(${e.id})">
                                     <div class="log-matrix-val">${e.amount} kg</div>
-                                    <span class="tray-badge ${badgeClass}">${badgeIcon} ${badgeText} ${suppIcon}</span>
+                                    <span class="tray-badge ${badgeClass}">${badgeIcon} ${badgeText}</span>
+                                    ${suppHTML}
                                 </div>
                             `;
                         }
@@ -3246,6 +3255,8 @@
                                     const e = entries[index];
                                     let badgeClass = 'unknown';
                                     let badgeText = e.trayResult;
+                                    let suppHTML = (e.supplements && e.supplements.length > 0) ? `<div class="log-supplements"><i class="fas fa-flask" style="font-size:8px;"></i> ${e.supplements.join(', ')}</div>` : '';
+
                                     if (e.trayResult === 'empty') badgeClass = 'empty';
                                     else if (e.trayResult === 'little') badgeClass = 'little';
                                     else if (e.trayResult === 'half') badgeClass = 'half';
@@ -3253,8 +3264,9 @@
                                     
                                     return `
                                         <div class="log-matrix-feed" onclick="app.editFeedEntry(${e.id})">
-                                            <div class="log-matrix-val">${e.amount}</div>
+                                            <div class="log-matrix-val">${e.amount} kg</div>
                                             <span class="tray-badge ${badgeClass}" style="font-size:8px;">${badgeText}</span>
+                                            ${suppHTML}
                                         </div>
                                     `;
                                 }
