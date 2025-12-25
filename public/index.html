@@ -1462,83 +1462,85 @@
             display: inline-block;
         }
 
-        /* ===== LOG MATRIX STYLES (NEW) ===== */
-        .log-date-nav {
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 16px; 
-            background: white; 
-            padding: 12px 16px; 
-            border-radius: 12px; 
-            border: 2px solid var(--border);
-        }
-
-        .log-matrix-container {
+        /* ===== LOG TABLE STYLES (REQUESTED) ===== */
+        .log-table-container {
             background: white;
             border-radius: 12px;
+            padding: 0;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.05);
             overflow-x: auto;
-            border: 2px solid var(--border);
-            box-shadow: var(--shadow);
-        }
-
-        .log-matrix-head {
-            display: grid;
-            grid-template-columns: 1.4fr repeat(var(--feed-cols, 6), 1fr) 0.7fr;
-            padding: 14px;
-            background: #f1f3f6;
-            font-weight: 600;
-            color: #555;
-            font-size: 12px;
-            align-items: center;
-            min-width: 900px;
             border-bottom: 1px solid var(--border);
         }
 
-        /* Sticky First Column for Professional Table View */
-        .log-matrix-head > div:first-child,
-        .log-matrix-row > div:first-child {
-            position: sticky;
-            left: 0;
-            z-index: 10;
-            border-right: 1px solid var(--border);
-        }
-        .log-matrix-head > div:first-child {
-            background: #f1f3f6;
-            z-index: 11;
-        }
-        .log-matrix-row > div:first-child {
-            background: white;
-        }
-
-        .log-matrix-row {
-            display: grid;
-            grid-template-columns: 1.4fr repeat(var(--feed-cols, 6), 1fr) 0.7fr;
-            padding: 14px;
-            border-bottom: 1px solid #eee;
-            font-size: 13px;
-            align-items: center;
+        .log-table {
+            width: 100%;
             min-width: 900px;
+            border-collapse: collapse;
         }
-        .log-matrix-row:last-child { border-bottom: none; }
 
-        .log-matrix-tank { font-weight: 700; color: var(--dark); font-size: 14px; }
-        .log-matrix-sub { font-size: 11px; color: var(--gray); margin-top: 2px; }
-        
-        .log-matrix-feed { display: flex; flex-direction: column; gap: 4px; }
-        .log-matrix-val { font-weight: 700; color: var(--dark); }
-        
-        .tray-badge { font-size: 10px; padding: 3px 8px; border-radius: 6px; font-weight: 600; width: fit-content; display: inline-flex; align-items: center; gap: 4px; }
-        .tray-badge.empty { background:#e8f5e9; color:#2e7d32; }
-        .tray-badge.little { background:#fffde7; color:#f9a825; }
-        .tray-badge.half { background:#fff3e0; color:#ef6c00; }
-        .tray-badge.too-much { background:#ffebee; color:#c62828; }
-        .tray-badge.unknown { background:#f5f5f5; color:#9e9e9e; }
-        .log-matrix-total { font-weight: 800; color: var(--primary); font-size: 15px; }
+        .log-table thead th {
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            color: #6b7280;
+            padding: 10px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+            background: #f9fafb;
+        }
 
-        /* Mobile Responsive Log Matrix */
-        @media (max-width: 768px) {
-            .tray-badge { font-size: 9px; padding: 2px 4px; }
+        .log-table tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+        }
+
+        .log-pond-name {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--dark);
+        }
+
+        .log-farm-name {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .log-feed-value {
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            color: var(--dark);
+        }
+
+        .log-status {
+            display: inline-block;
+            margin-top: 4px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .log-status.empty { background: #e6f9ee; color: #16a34a; }
+        .log-status.little { background: #fff7e6; color: #d97706; }
+        .log-status.half { background: #fff1e6; color: #ea580c; }
+        .log-status.too-much { background: #fee2e2; color: #dc2626; }
+        .log-status.unknown { background: #f3f4f6; color: #9ca3af; }
+        .log-status.pending { background: #f3f4f6; color: #6b7280; border: 1px dashed #d1d5db; }
+
+        .log-total {
+            font-weight: 700;
+            color: #2563eb;
+            white-space: nowrap;
+        }
+
+        .log-table tfoot td {
+            background: #eff6ff;
+            font-weight: 700;
+            border-top: 2px solid #dbeafe;
+            color: var(--dark);
         }
 
         /* ===== SUPPLEMENT CHIPS ===== */
@@ -1571,22 +1573,7 @@
             font-size: 14px;
         }
         
-        .log-supplements {
-            font-size: 9px;
-            color: var(--primary-dark);
-            margin-top: 2px;
-            line-height: 1.1;
-            white-space: normal;
-        }
-
         /* Problematic Tank Highlight */
-        .log-matrix-row.has-issues {
-            border-left: 4px solid var(--warning);
-            background: #fffdeb;
-        }
-        .log-matrix-row.has-issues .log-matrix-tank {
-            color: var(--warning-dark);
-        }
         
         /* ===== LOG RANGE TABS ===== */
         .log-range-tabs {
@@ -1692,6 +1679,65 @@
             display: flex;
             align-items: center;
             gap: 4px;
+        }
+        
+        /* ===== TANK ACTION MENU ===== */
+        .tank-action-menu {
+            position: relative;
+            display: inline-block;
+        }
+        .tank-menu-btn {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+        .tank-menu-btn:hover {
+            background: rgba(0,0,0,0.05);
+            color: var(--dark);
+        }
+        .tank-menu-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 100;
+            min-width: 140px;
+            overflow: hidden;
+        }
+        .tank-menu-dropdown.show {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+        .tank-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 10px 16px;
+            text-align: left;
+            background: none;
+            border: none;
+            font-size: 13px;
+            color: var(--dark);
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .tank-menu-item:hover {
+            background: var(--light);
+        }
+        .tank-menu-item.delete {
+            color: var(--danger);
+        }
+        .tank-menu-item.delete:hover {
+            background: #ffebee;
         }
 
         /* ===== SETTINGS ===== */
@@ -1972,14 +2018,19 @@
                     <button class="btn btn-sm btn-warning" onclick="app.openTrayCheckModal()">Update Results</button>
                 </div>
 
-                <!-- Matrix Table -->
-                <div class="log-matrix-container">
-                    <div class="log-matrix-head">
-                        <!-- Headers generated dynamically -->
-                    </div>
-                    <div id="logMatrixBody">
-                        <!-- Rows will be loaded here -->
-                    </div>
+                <!-- Log Table -->
+                <div class="log-table-container">
+                    <table class="log-table" id="logTable">
+                        <thead>
+                            <!-- Generated by JS -->
+                        </thead>
+                        <tbody id="logTableBody">
+                            <!-- Generated by JS -->
+                        </tbody>
+                        <tfoot id="logTableFoot">
+                            <!-- Generated by JS -->
+                        </tfoot>
+                    </table>
                 </div>
 
                 <div class="empty-state" id="emptyLog" style="display: none;">
@@ -2470,6 +2521,7 @@
                 this.initialized = false;
                 this.editingEntryId = null;
                 this.editingFarmId = null;
+                this.editingTankId = null;
                 this.viewMode = 'today'; // today, yesterday, 7days, 30days, all
                 this.logViewType = 'matrix'; // 'matrix' or 'list'
                 
@@ -3051,17 +3103,15 @@
             }
 
             renderLogBook() {
-                const container = document.getElementById('logMatrixBody');
+                const tableHead = document.querySelector('#logTable thead');
+                const tableBody = document.getElementById('logTableBody');
+                const tableFoot = document.getElementById('logTableFoot');
                 const emptyState = document.getElementById('emptyLog');
                 const feedsCount = this.state.settings.feedsPerDay || 4;
                 const toggleBtn = document.getElementById('toggleViewBtn');
 
                 // Update Toggle Button Text
                 toggleBtn.innerHTML = this.logViewType === 'matrix' ? '<i class="fas fa-list"></i>' : '<i class="fas fa-th"></i>';
-
-                
-                // Update Grid Columns
-                document.querySelector('.log-matrix-container').style.setProperty('--feed-cols', feedsCount);
 
                 // Generate Feed Labels
                 let feedLabels = [];
@@ -3071,13 +3121,16 @@
                 else if (feedsCount === 4) feedLabels = ['Morning', 'Afternoon', 'Evening', 'Night'];
                 else feedLabels = Array.from({length: feedsCount}, (_, i) => `Feed ${i+1}`);
 
-                // Generate Header
-                let headerHTML = `<div>${(this.viewMode === 'today' || this.viewMode === 'yesterday') ? 'Tank' : 'Date'}</div>`;
+                // Generate Table Header
+                let headerHTML = `<tr>`;
+                headerHTML += `<th>${(this.viewMode === 'today' || this.viewMode === 'yesterday') ? 'Pond' : 'Date'}</th>`;
                 for(let i=0; i<6; i++) {
-                    headerHTML += `<div style="${i >= feedsCount ? 'display:none' : ''}">${feedLabels[i] || 'Feed '+(i+1)}</div>`;
+                    if (i < feedsCount) {
+                        headerHTML += `<th>${feedLabels[i] || 'Feed '+(i+1)}</th>`;
+                    }
                 }
-                headerHTML += `<div>Total</div>`;
-                document.querySelector('.log-matrix-head').innerHTML = headerHTML;
+                headerHTML += `<th>Total</th></tr>`;
+                tableHead.innerHTML = headerHTML;
                 
                 // Filter tanks based on current farm
                 let tanksToShow = this.state.tanks;
@@ -3086,7 +3139,7 @@
                 }
 
                 if (tanksToShow.length === 0) {
-                    container.innerHTML = '';
+                    tableBody.innerHTML = '';
                     emptyState.style.display = 'block';
                     // Update empty state for No Tanks
                     emptyState.querySelector('h3').textContent = 'No Tanks Found';
@@ -3096,7 +3149,7 @@
                     return;
                 }
                 emptyState.style.display = 'none';
-                container.innerHTML = '';
+                tableBody.innerHTML = '';
 
                 // Determine Date Range
                 const today = new Date();
@@ -3127,7 +3180,7 @@
 
                 // Branch to List View if selected
                 if (this.logViewType === 'list') {
-                    this.renderLogTimeline(container, tanksToShow, isDateInRange);
+                    this.renderLogTimeline(tableBody.parentElement.parentElement, tanksToShow, isDateInRange); // Pass container
                     return;
                 }
 
@@ -3139,7 +3192,6 @@
                     let grandTotal = 0;
 
                     tanksToShow.forEach(tank => {
-                        let hasIssues = false;
                         const farm = this.getFarmById(tank.farmId);
                         const entries = this.state.feedEntries
                             .filter(e => e.tankId == tank.id && e.date === dateStr)
@@ -3156,68 +3208,62 @@
                             
                             let badgeClass = 'unknown';
                             let badgeText = e.trayResult.charAt(0).toUpperCase() + e.trayResult.slice(1);
+                            if (e.trayResult === 'too-much') badgeText = 'Too Much';
 
-                            if (e.trayResult === 'empty') { badgeClass = 'empty'; hasIssues = true; }
+                            if (e.trayResult === 'empty') { badgeClass = 'empty'; }
                             else if (e.trayResult === 'little') { badgeClass = 'little'; }
                             else if (e.trayResult === 'half') { badgeClass = 'half'; }
-                            else if (e.trayResult === 'too-much') { badgeClass = 'too-much'; badgeText = 'Waste'; hasIssues = true; }
-                            else if (e.trayResult === 'pending') { badgeClass = 'unknown'; }
+                            else if (e.trayResult === 'too-much') { badgeClass = 'too-much'; }
+                            else if (e.trayResult === 'pending') { badgeClass = 'pending'; }
 
                             // Supplements in tooltip
                             const suppTitle = (e.supplements && e.supplements.length > 0) ? `Supplements: ${e.supplements.join(', ')}` : '';
-                            const suppIndicator = (e.supplements && e.supplements.length > 0) ? `<i class="fas fa-flask" style="font-size:8px; color:var(--primary); margin-left:2px;"></i>` : '';
 
                             return `
-                                <div class="log-matrix-feed" onclick="app.editFeedEntry(${e.id})" title="${suppTitle}">
-                                    <div class="log-matrix-val" style="font-size:14px;">
-                                        ${e.amount} <span style="font-size:10px; font-weight:400; color:var(--gray);">kg</span>
-                                        ${suppIndicator}
-                                    </div>
-                                    <span class="tray-badge ${badgeClass}" style="margin-top:2px;">${badgeText}</span>
-                                </div>
+                                <div onclick="app.editFeedEntry(${e.id})" title="${suppTitle}" style="cursor:pointer;">
+                                    <div class="log-feed-value">${e.amount} kg</div>
+                                    <span class="log-status ${badgeClass}">${badgeText}</span>
+                                </div> 
                             `;
                         }
-                        return `<div style="color: #ddd;">-</div>`;
+                        return ``;
                     };
 
-                    const row = document.createElement('div');
-                    row.className = `log-matrix-row ${hasIssues ? 'has-issues' : ''}`;
+                    const row = document.createElement('tr');
                     row.innerHTML = `
-                        <div>
-                            <div class="log-matrix-tank">${tank.name}</div>
-                            <div class="log-matrix-sub">${farm ? farm.name : ''}</div>
-                        </div>
-                        <div style="${1 > feedsCount ? 'display:none' : ''}" data-label="${feedLabels[0]}">${getCell(0)}</div>
-                        <div style="${2 > feedsCount ? 'display:none' : ''}" data-label="${feedLabels[1]}">${getCell(1)}</div>
-                        <div style="${3 > feedsCount ? 'display:none' : ''}" data-label="${feedLabels[2]}">${getCell(2)}</div>
-                        <div style="${4 > feedsCount ? 'display:none' : ''}" data-label="${feedLabels[3]}">${getCell(3)}</div>
-                        <div style="${5 > feedsCount ? 'display:none' : ''}" data-label="${feedLabels[4]}">${getCell(4)}</div>
-                        <div style="${6 > feedsCount ? 'display:none' : ''}" data-label="${feedLabels[5]}">${getCell(5)}</div>
-                        <div class="log-matrix-total">
-                            <span style="font-size:10px; color:var(--gray); display:block;">Total Today</span>
-                            ${total > 0 ? total.toFixed(1) : '0'} kg
-                        </div>
+                        <td>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <div class="log-pond-name">${tank.name}</div>
+                                    <div class="log-farm-name">${farm ? farm.name : ''}</div>
+                                </div>
+                                <div class="tank-action-menu">
+                                    <button class="tank-menu-btn" onclick="event.stopPropagation(); app.toggleTankMenu('${tank.id}')"><i class="fas fa-ellipsis-v"></i></button>
+                                    <div id="tank-menu-${tank.id}" class="tank-menu-dropdown">
+                                        <button class="tank-menu-item" onclick="event.stopPropagation(); app.openTankDetail('${tank.id}'); app.toggleTankMenu('${tank.id}')"><i class="fas fa-info-circle"></i> Details</button>
+                                        <button class="tank-menu-item" onclick="event.stopPropagation(); app.editTank('${tank.id}'); app.toggleTankMenu('${tank.id}')"><i class="fas fa-edit"></i> Edit</button>
+                                        <div style="height:1px; background:var(--border); margin:4px 0;"></div>
+                                        <button class="tank-menu-item delete" onclick="event.stopPropagation(); app.deleteTank('${tank.id}'); app.toggleTankMenu('${tank.id}')"><i class="fas fa-trash"></i> Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        ${Array.from({length: feedsCount}, (_, i) => `<td>${getCell(i)}</td>`).join('')}
+                        <td class="log-total">${total > 0 ? total.toFixed(1) : '0'}</td>
                     `;
-                    container.appendChild(row);
+                    tableBody.appendChild(row);
                 });
 
-                // Add Total Row
-                const totalRow = document.createElement('div');
-                totalRow.className = 'log-matrix-row';
-                totalRow.style.backgroundColor = '#e3f2fd';
-                totalRow.style.borderTop = '2px solid var(--primary)';
-                
+                // Add Footer Row
+                const totalRow = document.createElement('tr');
                 totalRow.innerHTML = `
-                    <div class="log-matrix-tank" style="color: var(--primary);">TOTAL</div>
-                    <div class="log-matrix-val" style="${1 > feedsCount ? 'display:none' : ''}">${colTotals[0] > 0 ? colTotals[0].toFixed(1) : '-'}</div>
-                    <div class="log-matrix-val" style="${2 > feedsCount ? 'display:none' : ''}">${colTotals[1] > 0 ? colTotals[1].toFixed(1) : '-'}</div>
-                    <div class="log-matrix-val" style="${3 > feedsCount ? 'display:none' : ''}">${colTotals[2] > 0 ? colTotals[2].toFixed(1) : '-'}</div>
-                    <div class="log-matrix-val" style="${4 > feedsCount ? 'display:none' : ''}">${colTotals[3] > 0 ? colTotals[3].toFixed(1) : '-'}</div>
-                    <div class="log-matrix-val" style="${5 > feedsCount ? 'display:none' : ''}">${colTotals[4] > 0 ? colTotals[4].toFixed(1) : '-'}</div>
-                    <div class="log-matrix-val" style="${6 > feedsCount ? 'display:none' : ''}">${colTotals[5] > 0 ? colTotals[5].toFixed(1) : '-'}</div>
-                    <div class="log-matrix-total">${grandTotal > 0 ? grandTotal.toFixed(1) : '0'} kg</div>
+                    <td>TOTAL</td>
+                    ${Array.from({length: feedsCount}, (_, i) => `<td>${colTotals[i] > 0 ? colTotals[i].toFixed(1) : ''}</td>`).join('')}
+                    <td class="log-total">${grandTotal > 0 ? grandTotal.toFixed(1) : '0'}</td>
                 `;
-                container.appendChild(totalRow);
+                tableFoot.innerHTML = '';
+                tableFoot.appendChild(totalRow);
+
                 } else {
                     // DETAILED VIEW (Grouped by Tank, Rows = Dates)
                     tanksToShow.forEach(tank => {
@@ -3227,11 +3273,23 @@
                         
                         if (tankEntries.length === 0) return;
 
-                        // Header Row
-                        const headerRow = document.createElement('div');
-                        headerRow.className = 'log-matrix-row tank-section-header';
-                        headerRow.innerHTML = `${tank.name} <span style="font-weight:400; font-size:11px; margin-left:8px; color:var(--gray);">(${this.viewMode === 'all' ? 'Full Crop' : 'Range View'})</span>`;
-                        container.appendChild(headerRow);
+                        // Section Header
+                        const headerRow = document.createElement('tr');
+                        headerRow.innerHTML = `<td colspan="${feedsCount + 2}" style="background:#e3f2fd; font-weight:700; color:var(--primary-dark);">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>${tank.name}</span>
+                                <div class="tank-action-menu">
+                                    <button class="tank-menu-btn" onclick="event.stopPropagation(); app.toggleTankMenu('${tank.id}')"><i class="fas fa-ellipsis-v"></i></button>
+                                    <div id="tank-menu-${tank.id}" class="tank-menu-dropdown">
+                                        <button class="tank-menu-item" onclick="event.stopPropagation(); app.openTankDetail('${tank.id}'); app.toggleTankMenu('${tank.id}')"><i class="fas fa-info-circle"></i> Details</button>
+                                        <button class="tank-menu-item" onclick="event.stopPropagation(); app.editTank('${tank.id}'); app.toggleTankMenu('${tank.id}')"><i class="fas fa-edit"></i> Edit</button>
+                                        <div style="height:1px; background:var(--border); margin:4px 0;"></div>
+                                        <button class="tank-menu-item delete" onclick="event.stopPropagation(); app.deleteTank('${tank.id}'); app.toggleTankMenu('${tank.id}')"><i class="fas fa-trash"></i> Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>`;
+                        tableBody.appendChild(headerRow);
 
                         // Group by Date
                         const entriesByDate = {};
@@ -3253,51 +3311,51 @@
                                     const e = entries[index];
                                     let badgeClass = 'unknown';
                                     let badgeText = e.trayResult;
+                                    if (e.trayResult === 'too-much') badgeText = 'Too Much';
+
                                     // Supplements in tooltip for consistency
                                     const suppTitle = (e.supplements && e.supplements.length > 0) ? `Supplements: ${e.supplements.join(', ')}` : '';
-                                    const suppIndicator = (e.supplements && e.supplements.length > 0) ? `<i class="fas fa-flask" style="font-size:8px; color:var(--primary); margin-left:2px;"></i>` : '';
 
                                     if (e.trayResult === 'empty') badgeClass = 'empty';
                                     else if (e.trayResult === 'little') badgeClass = 'little';
                                     else if (e.trayResult === 'half') badgeClass = 'half';
                                     else if (e.trayResult === 'too-much') badgeClass = 'too-much';
+                                    else if (e.trayResult === 'pending') badgeClass = 'pending';
                                     
                                     return `
-                                        <div class="log-matrix-feed" onclick="app.editFeedEntry(${e.id})" title="${suppTitle}">
-                                            <div class="log-matrix-val">${e.amount} kg ${suppIndicator}</div>
-                                            <span class="tray-badge ${badgeClass}" style="font-size:8px;">${badgeText}</span>
+                                        <div onclick="app.editFeedEntry(${e.id})" title="${suppTitle}" style="cursor:pointer;">
+                                            <div class="log-feed-value">${e.amount} kg</div>
+                                            <span class="log-status ${badgeClass}">${badgeText}</span>
                                         </div>
                                     `;
                                 }
-                                return `<div style="color:#eee;">-</div>`;
+                                return ``;
                             };
 
-                            const row = document.createElement('div');
-                            row.className = 'log-matrix-row';
+                            const row = document.createElement('tr');
                             // Format date nicely
                             const dateObj = new Date(date);
                             const dateDisplay = dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
 
                             row.innerHTML = `
-                                <div>
-                                    <div class="log-matrix-tank" style="font-weight:500;">${dateDisplay}</div>
-                                </div>
-                                <div style="${1 > feedsCount ? 'display:none' : ''}">${getCell(0)}</div>
-                                <div style="${2 > feedsCount ? 'display:none' : ''}">${getCell(1)}</div>
-                                <div style="${3 > feedsCount ? 'display:none' : ''}">${getCell(2)}</div>
-                                <div style="${4 > feedsCount ? 'display:none' : ''}">${getCell(3)}</div>
-                                <div style="${5 > feedsCount ? 'display:none' : ''}">${getCell(4)}</div>
-                                <div style="${6 > feedsCount ? 'display:none' : ''}">${getCell(5)}</div>
-                                <div class="log-matrix-total" style="font-size:13px;">${total.toFixed(1)}</div>
+                                <td>
+                                    <div class="log-pond-name" style="font-weight:500;">${dateDisplay}</div>
+                                </td>
+                                ${Array.from({length: feedsCount}, (_, i) => `<td>${getCell(i)}</td>`).join('')}
+                                <td class="log-total">${total.toFixed(1)}</td>
                             `;
-                            container.appendChild(row);
+                            tableBody.appendChild(row);
                         });
                     });
+                    tableFoot.innerHTML = ''; // No footer for detailed view
                 }
             }
 
             renderLogTimeline(container, tanks, dateFilterFn) {
-                container.innerHTML = '';
+                // When switching to list view, we need to clear the table container and append the timeline
+                // The container passed here is the parent of the table
+                const parent = document.querySelector('.log-table-container');
+                parent.innerHTML = '';
                 
                 // 1. Gather all relevant entries
                 let allEntries = [];
@@ -3365,7 +3423,7 @@
                     timelineContainer.appendChild(card);
                 });
                 
-                container.appendChild(timelineContainer);
+                parent.appendChild(timelineContainer);
             }
 
             checkPendingTrays() {
@@ -3466,6 +3524,13 @@
 
                 // Inventory
                 document.getElementById('saveStockBtn').addEventListener('click', () => this.saveStock());
+
+                // Close menus on click outside
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.tank-action-menu')) {
+                        document.querySelectorAll('.tank-menu-dropdown').forEach(el => el.classList.remove('show'));
+                    }
+                });
             }
 
             // ===== UTILITY FUNCTIONS =====
@@ -3580,6 +3645,13 @@
             }
 
             openTankModal(farmId) {
+                this.editingTankId = null;
+                document.getElementById('tankNameInput').value = '';
+                document.getElementById('tankSize').value = '';
+                document.getElementById('stockingDate').value = '';
+                document.getElementById('initialSeed').value = '';
+                document.querySelector('#tankModal h3').innerHTML = '<i class="fas fa-water"></i> Add New Tank';
+
                 const select = document.getElementById('tankFarmSelect');
                 select.innerHTML = '';
                 this.state.farms.forEach(farm => {
@@ -4039,24 +4111,67 @@
                     return;
                 }
 
-                const newTank = {
-                    id: Date.now().toString(),
-                    farmId,
-                    name,
-                    size,
-                    stockingDate: stockingDate || this.currentDate,
-                    initialSeed: initialSeed || 0,
-                    biomass: 0, // Initial biomass
-                    nextSuggestedFeed: null
-                };
+                if (this.editingTankId) {
+                    const tank = this.getTankById(this.editingTankId);
+                    if (tank) {
+                        tank.farmId = farmId;
+                        tank.name = name;
+                        tank.size = size;
+                        tank.stockingDate = stockingDate;
+                        tank.initialSeed = initialSeed;
+                        this.showToast('Tank updated successfully');
+                    }
+                } else {
+                    const newTank = {
+                        id: Date.now().toString(),
+                        farmId,
+                        name,
+                        size,
+                        stockingDate: stockingDate || this.currentDate,
+                        initialSeed: initialSeed || 0,
+                        biomass: 0, // Initial biomass
+                        nextSuggestedFeed: null
+                    };
+                    this.state.tanks.push(newTank);
+                    this.showToast('Tank added successfully');
+                }
 
-                this.state.tanks.push(newTank);
                 this.saveTanks();
                 this.closeAllModals();
                 this.renderAll();
-                this.showToast('Tank added successfully');
+                this.editingTankId = null;
+            }
+
+            editTank(id) {
+                const tank = this.getTankById(id);
+                if (!tank) return;
                 
-                document.getElementById('tankNameInput').value = '';
+                this.editingTankId = id;
+                this.openTankModal(tank.farmId);
+                document.getElementById('tankNameInput').value = tank.name;
+                document.getElementById('tankSize').value = tank.size;
+                document.getElementById('stockingDate').value = tank.stockingDate;
+                document.getElementById('initialSeed').value = tank.initialSeed;
+                document.querySelector('#tankModal h3').innerHTML = '<i class="fas fa-edit"></i> Edit Tank';
+            }
+
+            deleteTank(id) {
+                if(confirm('Are you sure you want to delete this tank? All feed entries will be lost.')) {
+                    this.state.tanks = this.state.tanks.filter(t => t.id !== id);
+                    this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId !== id);
+                    this.saveTanks();
+                    this.saveFeedEntries();
+                    this.renderAll();
+                    this.showToast('Tank deleted');
+                }
+            }
+
+            toggleTankMenu(id) {
+                document.querySelectorAll('.tank-menu-dropdown').forEach(el => {
+                    if(el.id !== `tank-menu-${id}`) el.classList.remove('show');
+                });
+                const menu = document.getElementById(`tank-menu-${id}`);
+                if(menu) menu.classList.toggle('show');
             }
 
             editFeedEntry(id) {
