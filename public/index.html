@@ -3320,15 +3320,6 @@
                                     <div class="log-pond-name">${tank.name}</div>
                                     <div class="log-farm-name">${farm ? farm.name : ''}</div>
                                 </div>
-                                <div class="tank-action-menu">
-                                    <button class="tank-menu-btn" onclick="event.stopPropagation(); app.toggleTankMenu('${tank.id}')"><i class="fas fa-ellipsis-v"></i></button>
-                                    <div id="tank-menu-${tank.id}" class="tank-menu-dropdown">
-                                        <button class="tank-menu-item" onclick="event.stopPropagation(); app.openTankDetail('${tank.id}'); app.toggleTankMenu('${tank.id}')"><i class="fas fa-info-circle"></i> Details</button>
-                                        <button class="tank-menu-item" onclick="event.stopPropagation(); app.editTank('${tank.id}'); app.toggleTankMenu('${tank.id}')"><i class="fas fa-edit"></i> Edit</button>
-                                        <div style="height:1px; background:var(--border); margin:4px 0;"></div>
-                                        <button class="tank-menu-item delete" onclick="event.stopPropagation(); app.deleteTank('${tank.id}'); app.toggleTankMenu('${tank.id}')"><i class="fas fa-trash"></i> Delete</button>
-                                    </div>
-                                </div>
                             </div>
                         </td>
                         ${Array.from({length: feedsCount}, (_, i) => `<td data-label="${feedLabels[i]}">${getCell(i)}</td>`).join('')}
@@ -3361,15 +3352,6 @@
                         headerRow.innerHTML = `<td colspan="${feedsCount + 2}" style="background:#e3f2fd; font-weight:700; color:var(--primary-dark);">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span>${tank.name}</span>
-                                <div class="tank-action-menu">
-                                    <button class="tank-menu-btn" onclick="event.stopPropagation(); app.toggleTankMenu('${tank.id}')"><i class="fas fa-ellipsis-v"></i></button>
-                                    <div id="tank-menu-${tank.id}" class="tank-menu-dropdown">
-                                        <button class="tank-menu-item" onclick="event.stopPropagation(); app.openTankDetail('${tank.id}'); app.toggleTankMenu('${tank.id}')"><i class="fas fa-info-circle"></i> Details</button>
-                                        <button class="tank-menu-item" onclick="event.stopPropagation(); app.editTank('${tank.id}'); app.toggleTankMenu('${tank.id}')"><i class="fas fa-edit"></i> Edit</button>
-                                        <div style="height:1px; background:var(--border); margin:4px 0;"></div>
-                                        <button class="tank-menu-item delete" onclick="event.stopPropagation(); app.deleteTank('${tank.id}'); app.toggleTankMenu('${tank.id}')"><i class="fas fa-trash"></i> Delete</button>
-                                    </div>
-                                </div>
                             </div>
                         </td>`;
                         tableBody.appendChild(headerRow);
