@@ -1637,6 +1637,69 @@
             grid-column: 1 / -1;
         }
 
+        /* ===== TIMELINE VIEW (LIST) ===== */
+        .timeline-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .timeline-date-group {
+            margin-bottom: 10px;
+        }
+        .timeline-date-header {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gray);
+            margin-bottom: 10px;
+            padding-left: 4px;
+        }
+        .timeline-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            position: relative;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            margin-bottom: 12px;
+        }
+        .timeline-card.warning { border-left-color: var(--warning); }
+        .timeline-card.danger { border-left-color: var(--danger); }
+
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        .timeline-time {
+            font-weight: 800;
+            font-size: 16px;
+            color: var(--dark);
+        }
+        .timeline-meta {
+            font-size: 12px;
+            color: var(--gray);
+        }
+        .timeline-supplements {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+        .supp-tag {
+            background: #e3f2fd;
+            color: var(--primary-dark);
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         /* ===== SETTINGS ===== */
         .settings-list {
             display: flex;
@@ -1902,6 +1965,13 @@
                     <button class="range-tab" data-range="7days">Last 7 Days</button>
                     <button class="range-tab" data-range="30days">Last 30 Days</button>
                     <button class="range-tab" data-range="all">Full Crop</button>
+                </div>
+                
+                <!-- View Toggle -->
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 12px;">
+                    <button class="btn btn-sm btn-secondary" id="toggleViewBtn" onclick="app.toggleLogView()">
+                        <i class="fas fa-list"></i> Switch to List View
+                    </button>
                 </div>
 
                 <!-- Pending Checks Banner -->
@@ -2409,6 +2479,7 @@
                 this.editingEntryId = null;
                 this.editingFarmId = null;
                 this.viewMode = 'today'; // today, yesterday, 7days, 30days, all
+                this.logViewType = 'matrix'; // 'matrix' or 'list'
                 
                 // Initialize when DOM is ready
                 if (document.readyState === 'loading') {
@@ -2991,6 +3062,13 @@
                 const container = document.getElementById('logMatrixBody');
                 const emptyState = document.getElementById('emptyLog');
                 const feedsCount = this.state.settings.feedsPerDay || 4;
+                const toggleBtn = document.getElementById('toggleViewBtn');
+
+                // Update Toggle Button Text
+                toggleBtn.innerHTML = this.logViewType === 'matrix' 
+                    ? '<i class="fas fa-list"></i> Switch to List View' 
+                    : '<i class="fas fa-th"></i> Switch to Grid View';
+
                 
                 // Update Grid Columns
                 document.querySelector('.log-matrix-container').style.setProperty('--feed-cols', feedsCount);
@@ -3048,6 +3126,12 @@
 
                 // Helper to check if date is in range
                 const isDateInRange = (d) => d >= startDate && d <= endDate;
+
+                // Branch to List View if selected
+                if (this.logViewType === 'list') {
+                    this.renderLogTimeline(container, tanksToShow, isDateInRange);
+                    return;
+                }
 
                 // Render Logic
                 if (this.viewMode === 'today' || this.viewMode === 'yesterday') {
@@ -3201,6 +3285,78 @@
                 }
             }
 
+            renderLogTimeline(container, tanks, dateFilterFn) {
+                container.innerHTML = '';
+                
+                // 1. Gather all relevant entries
+                let allEntries = [];
+                tanks.forEach(tank => {
+                    const entries = this.state.feedEntries.filter(e => e.tankId == tank.id && dateFilterFn(e.date));
+                    allEntries = allEntries.concat(entries);
+                });
+
+                if (allEntries.length === 0) {
+                    document.getElementById('emptyLog').style.display = 'block';
+                    return;
+                }
+                document.getElementById('emptyLog').style.display = 'none';
+
+                // 2. Group by Date -> Time (Round)
+                // Sort by ID desc (newest first)
+                allEntries.sort((a, b) => b.id - a.id);
+
+                const grouped = {};
+                allEntries.forEach(e => {
+                    const key = `${e.date}_${e.time}`; // Simple grouping by exact time string
+                    if (!grouped[key]) grouped[key] = [];
+                    grouped[key].push(e);
+                });
+
+                // 3. Render Groups
+                const timelineContainer = document.createElement('div');
+                timelineContainer.className = 'timeline-container';
+
+                Object.keys(grouped).forEach(key => {
+                    const groupEntries = grouped[key];
+                    const first = groupEntries[0];
+                    const totalAmount = groupEntries.reduce((sum, e) => sum + e.amount, 0);
+                    
+                    // Supplements (union of all supplements in this group)
+                    const allSupplements = [...new Set(groupEntries.flatMap(e => e.supplements || []))];
+                    
+                    // Tray Status Summary
+                    const wasteCount = groupEntries.filter(e => e.trayResult === 'too-much' || e.trayResult === 'half').length;
+                    const pendingCount = groupEntries.filter(e => e.trayResult === 'pending').length;
+                    
+                    let statusClass = '';
+                    if (wasteCount > 0) statusClass = 'warning';
+                    
+                    const dateDisplay = new Date(first.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+
+                    const card = document.createElement('div');
+                    card.className = `timeline-card ${statusClass}`;
+                    card.innerHTML = `
+                        <div class="timeline-header">
+                            <div>
+                                <div class="timeline-time">${first.time} <span style="font-weight:400; font-size:13px; color:var(--gray);">• ${dateDisplay}</span></div>
+                                <div class="timeline-meta">${groupEntries.length} Tanks Fed • Total: <strong>${totalAmount.toFixed(1)} kg</strong></div>
+                            </div>
+                            ${wasteCount > 0 ? '<div class="tray-badge too-much">Waste Detected</div>' : ''}
+                            ${pendingCount > 0 ? '<div class="tray-badge unknown">Checks Pending</div>' : ''}
+                        </div>
+                        
+                        ${allSupplements.length > 0 ? `
+                            <div class="timeline-supplements">
+                                ${allSupplements.map(s => `<span class="supp-tag"><i class="fas fa-flask"></i> ${s}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    `;
+                    timelineContainer.appendChild(card);
+                });
+                
+                container.appendChild(timelineContainer);
+            }
+
             checkPendingTrays() {
                 const currentFarmId = this.state.settings.currentFarmId;
                 if (!currentFarmId) return;
@@ -3218,6 +3374,11 @@
                     if (t.dataset.range === mode) t.classList.add('active');
                     else t.classList.remove('active');
                 });
+                this.renderLogBook();
+            }
+
+            toggleLogView() {
+                this.logViewType = this.logViewType === 'matrix' ? 'list' : 'matrix';
                 this.renderLogBook();
             }
 
