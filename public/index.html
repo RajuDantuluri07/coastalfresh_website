@@ -3303,6 +3303,16 @@
                     return;
                 }
 
+                // Calculate Feed Round Number
+                let maxEntries = 0;
+                tanks.forEach(t => {
+                    const count = this.state.feedEntries.filter(e => e.tankId == t.id && e.date === this.currentDate).length;
+                    if (count > maxEntries) maxEntries = count;
+                });
+                const roundNumber = maxEntries + 1;
+                
+                document.querySelector('#feedRoundModal .modal-header h3').innerHTML = `<i class="fas fa-utensils"></i> Log Feed (Round ${roundNumber})`;
+
                 const list = document.getElementById('feedRoundList');
                 list.innerHTML = '';
 
