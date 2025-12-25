@@ -1786,7 +1786,7 @@
                     </h2>
                     <button class="btn btn-primary" id="startFeedRoundBtn">
                         <i class="fas fa-plus"></i>
-                        Start Feed Round
+                        Log Feed
                     </button>
                 </div>
 
@@ -1827,7 +1827,7 @@
                     <p>Add your first feed entry to start tracking</p>
                     <button class="btn btn-primary mt-20" id="addFirstEntry">
                         <i class="fas fa-plus"></i>
-                        Add First Entry
+                        Log Feed
                     </button>
                 </div>
             </section>
@@ -1958,7 +1958,7 @@
     <div class="modal-overlay" id="feedRoundModal">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
-                <h3><i class="fas fa-utensils"></i> New Feed Round</h3>
+                <h3><i class="fas fa-utensils"></i> Log Feed (Round)</h3>
                 <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body" style="padding: 0;">
@@ -2039,7 +2039,7 @@
             <div class="modal-header">
                 <h3>
                     <i class="fas fa-utensils"></i>
-                    Add Feed Entry
+                    Log Feed (Single)
                 </h3>
                 <button class="close-modal">&times;</button>
             </div>
@@ -2989,6 +2989,11 @@
                 if (tanksToShow.length === 0) {
                     container.innerHTML = '';
                     emptyState.style.display = 'block';
+                    // Update empty state for No Tanks
+                    emptyState.querySelector('h3').textContent = 'No Tanks Found';
+                    emptyState.querySelector('p').textContent = 'Add a tank to start logging feed.';
+                    const btn = document.getElementById('addFirstEntry');
+                    btn.innerHTML = '<i class="fas fa-plus"></i> Add Tank';
                     return;
                 }
                 emptyState.style.display = 'none';
@@ -3122,7 +3127,15 @@
                 const startFeedRoundBtn = document.getElementById('startFeedRoundBtn');
                 if (startFeedRoundBtn) startFeedRoundBtn.addEventListener('click', () => this.openFeedRoundModal());
                 
-                document.getElementById('addFirstEntry').addEventListener('click', () => this.openFeedModal());
+                document.getElementById('addFirstEntry').addEventListener('click', () => {
+                    const currentFarmId = this.state.settings.currentFarmId;
+                    const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
+                    if (tanks.length === 0) {
+                        this.openTankModal(currentFarmId);
+                    } else {
+                        this.openFeedRoundModal();
+                    }
+                });
                 
                 // Log Date Navigation
                 document.getElementById('prevDayBtn').addEventListener('click', () => this.changeLogDate(-1));
