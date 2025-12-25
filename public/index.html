@@ -2696,7 +2696,7 @@
                 // Filter tanks and entries by the current farm
                 const farmTanks = currentFarmId ? this.state.tanks.filter(t => t.farmId === currentFarmId) : [];
                 const farmTankIds = farmTanks.map(t => t.id);
-                const farmFeedEntries = currentFarmId ? this.state.feedEntries.filter(e => farmTankIds.includes(String(e.tankId))) : [];
+                const farmFeedEntries = currentFarmId ? this.state.feedEntries.filter(e => farmTankIds.some(id => id == e.tankId)) : [];
 
                 document.getElementById('totalTanks').textContent = farmTanks.length;
 
@@ -2713,6 +2713,85 @@
 
                 const avgFCR = totalBiomass > 0 ? (totalFeed / totalBiomass).toFixed(2) : '0.00';
                 document.getElementById('avgFCR').textContent = avgFCR;
+            }
+
+            renderFeedTrendChart() {
+                const ctx = document.getElementById('feedTrendChart');
+                if (!ctx) return;
+
+                // Check if Chart.js is loaded (prevents crash if offline)
+                if (typeof Chart === 'undefined') {
+                    ctx.parentElement.innerHTML = '<div class="text-center text-muted" style="padding: 40px;">Chart unavailable (Offline)</div>';
+                    return;
+                }
+
+                const currentFarmId = this.state.settings.currentFarmId;
+                const farmTankIds = currentFarmId ? this.state.tanks.filter(t => t.farmId === currentFarmId).map(t => t.id) : [];
+
+                // Prepare data: Last 30 days
+                const labels = [];
+                const dataPoints = [];
+                const today = new Date();
+                
+                for (let i = 29; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(today.getDate() - i);
+                    const dateStr = this.getFormattedDate(d);
+                    labels.push(d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }));
+                    
+                    // Sum feed for this date
+                    let entriesToSum = this.state.feedEntries.filter(e => e.date === dateStr);
+                    if (currentFarmId) {
+                        entriesToSum = entriesToSum.filter(e => farmTankIds.some(id => id == e.tankId));
+                    }
+
+                    const dayFeed = entriesToSum.reduce((sum, e) => sum + e.amount, 0);
+                    dataPoints.push(dayFeed);
+                }
+
+                // Destroy existing chart if it exists
+                if (this.feedChart) this.feedChart.destroy();
+
+                this.feedChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Daily Feed (kg)',
+                            data: dataPoints,
+                            borderColor: '#2196F3',
+                            backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            title: {
+                                display: true,
+                                text: '30-Day Feed Consumption Trend',
+                                align: 'start',
+                                font: { size: 16, weight: 'bold' },
+                                padding: { bottom: 15 }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { borderDash: [2, 4] }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { maxTicksLimit: 10 }
+                            }
+                        }
+                    }
+                });
             }
 
             renderFarmsList() {
@@ -2899,7 +2978,7 @@
                     
                     // Get entries for this tank and date
                     const entries = this.state.feedEntries
-                        .filter(e => e.tankId === tank.id && e.date === dateStr)
+                        .filter(e => e.tankId == tank.id && e.date === dateStr)
                         .sort((a, b) => a.id - b.id); // Sort by creation time (id is timestamp)
 
                     const total = entries.reduce((sum, e) => sum + e.amount, 0);
