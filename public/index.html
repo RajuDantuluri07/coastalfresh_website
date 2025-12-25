@@ -1578,23 +1578,12 @@
                 background: transparent;
             }
             .log-table tr td:first-child {
-                grid-column: 1 / span 3;
+                grid-column: 1 / -1;
                 border-bottom: 1px solid #f0f0f0;
                 padding-bottom: 8px;
                 margin-bottom: 4px;
             }
-            .log-table tr td:last-child {
-                grid-column: 4 / span 1;
-                text-align: right;
-                border-bottom: 1px solid #f0f0f0;
-                padding-bottom: 8px;
-                margin-bottom: 4px;
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
-                justify-content: center;
-            }
-            .log-table tr td:not(:first-child):not(:last-child) {
+            .log-table tr td:not(:first-child) {
                 background: #f8f9fa;
                 border-radius: 8px;
                 padding: 8px 4px;
@@ -1605,7 +1594,7 @@
                 align-items: center;
                 justify-content: center;
             }
-            .log-table tr td:not(:first-child):not(:last-child)::before {
+            .log-table tr td:not(:first-child)::before {
                 content: attr(data-label);
                 font-size: 9px;
                 color: #888;
@@ -3212,7 +3201,7 @@
                         headerHTML += `<th>${feedLabels[i] || 'Feed '+(i+1)}</th>`;
                     }
                 }
-                headerHTML += `<th>Total</th></tr>`;
+                headerHTML += `</tr>`;
                 tableHead.innerHTML = headerHTML;
                 
                 // Filter tanks based on current farm
@@ -3323,7 +3312,6 @@
                             </div>
                         </td>
                         ${Array.from({length: feedsCount}, (_, i) => `<td data-label="${feedLabels[i]}">${getCell(i)}</td>`).join('')}
-                        <td class="log-total">${total > 0 ? total.toFixed(1) : '0'}</td>
                     `;
                     tableBody.appendChild(row);
                 });
@@ -3333,7 +3321,6 @@
                 totalRow.innerHTML = `
                     <td>TOTAL</td>
                     ${Array.from({length: feedsCount}, (_, i) => `<td>${colTotals[i] > 0 ? colTotals[i].toFixed(1) : ''}</td>`).join('')}
-                    <td class="log-total">${grandTotal > 0 ? grandTotal.toFixed(1) : '0'}</td>
                 `;
                 tableFoot.innerHTML = '';
                 tableFoot.appendChild(totalRow);
@@ -3349,7 +3336,7 @@
 
                         // Section Header
                         const headerRow = document.createElement('tr');
-                        headerRow.innerHTML = `<td colspan="${feedsCount + 2}" style="background:#e3f2fd; font-weight:700; color:var(--primary-dark);">
+                        headerRow.innerHTML = `<td colspan="${feedsCount + 1}" style="background:#e3f2fd; font-weight:700; color:var(--primary-dark);">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <span>${tank.name}</span>
                             </div>
@@ -3407,7 +3394,6 @@
                                     <div class="log-pond-name" style="font-weight:500;">${dateDisplay}</div>
                                 </td>
                                 ${Array.from({length: feedsCount}, (_, i) => `<td data-label="${feedLabels[i]}">${getCell(i)}</td>`).join('')}
-                                <td class="log-total">${total.toFixed(1)}</td>
                             `;
                             tableBody.appendChild(row);
                         });
