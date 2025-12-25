@@ -1597,6 +1597,23 @@
             border-color: var(--primary);
         }
 
+        /* ===== SUGGESTION & WAIT MODALS ===== */
+        .suggestion-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.2fr;
+            gap: 10px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+        .suggestion-row:last-child { border-bottom: none; }
+        .suggestion-header {
+            font-weight: 700;
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+
         /* ===== HARVEST PLAN ===== */
         .plan-card {
             background: #e8f5e9;
@@ -1640,11 +1657,6 @@
             Add Your First Farm
         </button>
     </div>
-
-    <!-- Floating Action Button for Quick Feed -->
-    <button class="fab-btn" id="fabAddFeed" onclick="app.openFeedModal()">
-        <i class="fas fa-utensils"></i>
-    </button>
 
     <!-- Main App -->
     <div id="app">
@@ -1694,10 +1706,6 @@
                         <i class="fas fa-chart-pie"></i>
                         Overall Farm Summary
                     </h2>
-                    <button class="btn btn-primary" id="quickAddBtn">
-                        <i class="fas fa-plus"></i>
-                        Quick Add
-                    </button>
                 </div>
 
                 <!-- Critical Alerts (New) -->
@@ -1954,6 +1962,40 @@
         </div>
     </div>
 
+    <!-- Wait Timer Modal -->
+    <div class="modal-overlay" id="waitTimerModal">
+        <div class="modal-content text-center" style="max-width: 400px;">
+            <div class="modal-body" style="padding: 40px 20px;">
+                <i class="fas fa-check-circle" style="font-size: 48px; color: var(--success); margin-bottom: 20px;"></i>
+                <h3 style="margin-bottom: 10px;">Feed Round Logged!</h3>
+                <p class="text-muted" style="margin-bottom: 20px;">Return to check the feed trays at approximately:</p>
+                <div style="font-size: 28px; font-weight: 800; color: var(--primary);" id="checkTimeDisplay"></div>
+                <button class="btn btn-primary mt-20" style="width: 100%;" onclick="app.closeAllModals()">OK, Got It</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suggestion Modal -->
+    <div class="modal-overlay" id="suggestionModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-lightbulb"></i> Post-Check Plan</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="suggestion-row suggestion-header">
+                    <div>Tank</div>
+                    <div>Tray Result</div>
+                    <div>Next Feed Suggestion</div>
+                </div>
+                <div id="suggestionList"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" style="width: 100%;" onclick="app.acceptSuggestions()">Accept & Plan Next Feed</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Feed Round Modal (Bulk Entry) -->
     <div class="modal-overlay" id="feedRoundModal">
         <div class="modal-content" style="max-width: 600px;">
@@ -1963,7 +2005,7 @@
             </div>
             <div class="modal-body" style="padding: 0;">
                 <div class="feed-round-row feed-round-header">
-                    <div>Tank</div>
+                    <div>Tank / Tray Grams</div>
                     <div>Last</div>
                     <div>Sugg.</div>
                     <div>Amount (kg)</div>
@@ -1983,9 +2025,19 @@
                 <h3><i class="fas fa-search"></i> Update Tray Results</h3>
                 <button class="close-modal">&times;</button>
             </div>
-            <div class="modal-body" id="trayCheckList" style="padding: 10px; max-height: 60vh; overflow-y: auto;"></div>
+            <div class="modal-body" style="padding: 0;">
+                <div class="feed-round-row feed-round-header" style="grid-template-columns: 1fr 1.5fr 1fr;">
+                    <div>Tank</div>
+                    <div>Result</div>
+                    <div>Notes (Optional)</div>
+                </div>
+                <div id="trayCheckList" style="max-height: 60vh; overflow-y: auto;"></div>
+            </div>
             <div class="modal-footer">
-                <button class="btn btn-success" style="width: 100%;" onclick="app.saveTrayChecks()">Update Results</button>
+                <button class="btn btn-primary" style="width: 100%;" onclick="app.processTrayResultsForSuggestion()">
+                    Generate Plan
+                    <i class="fas fa-arrow-right"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -2030,40 +2082,6 @@
                 <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body" id="harvestPlanContent"></div>
-        </div>
-    </div>
-
-    <!-- Feed Entry Modal -->
-    <div class="modal-overlay" id="feedModal">
-        <div class="modal-content feed-entry-modal">
-            <div class="modal-header">
-                <h3>
-                    <i class="fas fa-utensils"></i>
-                    Log Feed (Single)
-                </h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-row mb-0">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Tank</label>
-                        <select id="feedTankSelect" class="form-control">
-                            <!-- Options will be loaded -->
-                        </select>
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Date</label>
-                        <input type="date" id="feedDate" class="form-control" value="">
-                    </div>
-                </div>
-
-                <div id="feedDynamicContent" class="mt-20">
-                    <!-- Dynamic Content -->
-                </div>
-            </div>
-            <div class="modal-footer" id="feedModalFooter" style="display: none;">
-                <!-- Footer -->
-            </div>
         </div>
     </div>
 
@@ -2465,6 +2483,10 @@
                 // Load tanks
                 this.state.tanks = safeArray(safeParse('aquabook_tanks', []));
                 
+                this.state.tanks.forEach(tank => {
+                    if (tank.nextSuggestedFeed === undefined) tank.nextSuggestedFeed = null;
+                });
+
                 // Load feed entries
                 this.state.feedEntries = safeArray(safeParse('aquabook_entries', []));
                 // Load harvests
@@ -3157,9 +3179,6 @@
                 // Price Calculator
                 document.getElementById('calculateHarvest').addEventListener('click', () => this.calculateHarvestValue());
 
-                // Quick Add
-                document.getElementById('quickAddBtn').addEventListener('click', () => this.openFeedModal());
-
                 // Tank Detail Modal Buttons
                 document.getElementById('addTankBtn').addEventListener('click', () => {
                     this.closeAllModals();
@@ -3300,22 +3319,6 @@
                 document.getElementById('tankModal').classList.add('active');
             }
 
-            resolveWaste(tankId) {
-                const tank = this.getTankById(tankId);
-                if (tank && tank.farmId !== this.state.settings.currentFarmId) {
-                    this.state.settings.currentFarmId = tank.farmId;
-                    this.saveSettings();
-                    this.updateFarmSelector();
-                    this.renderFarmsList();
-                }
-                
-                this.openFeedModal();
-                const select = document.getElementById('feedTankSelect');
-                select.value = tankId;
-                // Trigger change manually to update context
-                this.updateFeedContext();
-            }
-
             openInventoryModal() {
                 document.getElementById('modalCurrentStock').textContent = `${(this.state.inventory.totalKg || 0).toFixed(1)} kg`;
                 document.getElementById('stockBags').value = '';
@@ -3357,32 +3360,42 @@
 
                 tanks.forEach(tank => {
                     // Get last feed info
+                    const doc = Math.floor((new Date() - new Date(tank.stockingDate)) / (1000 * 60 * 60 * 24));
                     const entries = this.state.feedEntries.filter(e => e.tankId == tank.id).sort((a, b) => b.id - a.id);
                     const lastEntry = entries[0];
                     
                     let lastAmount = lastEntry ? lastEntry.amount : 0;
                     let suggestion = lastAmount;
-                    let reason = "Same as last";
+                    let reason = "Same as last feed";
 
-                    // Suggestion Logic
-                    if (lastEntry) {
-                        if (lastEntry.trayResult === 'empty') { suggestion = (lastAmount * 1.05).toFixed(1); reason = "Inc 5% (Empty)"; }
-                        else if (lastEntry.trayResult === 'half') { suggestion = (lastAmount * 0.9).toFixed(1); reason = "Dec 10% (Half)"; }
-                        else if (lastEntry.trayResult === 'too-much') { suggestion = (lastAmount * 0.8).toFixed(1); reason = "Dec 20% (Waste)"; }
+                    // New Suggestion Logic: Prioritize accepted suggestions
+                    if (tank.nextSuggestedFeed) {
+                        suggestion = tank.nextSuggestedFeed.amount;
+                        reason = tank.nextSuggestedFeed.reason;
+                        // Use suggestion only once
+                        tank.nextSuggestedFeed = null; 
                     } else {
-                        suggestion = 2.0; // Default start
-                        reason = "Initial";
+                        // Fallback to old logic if no suggestion exists
+                        if (lastEntry) {
+                            if (lastEntry.trayResult === 'empty') { suggestion = (lastAmount * 1.05).toFixed(1); reason = "Inc 5% (Empty)"; }
+                            else if (lastEntry.trayResult === 'half') { suggestion = (lastAmount * 0.9).toFixed(1); reason = "Dec 10% (Half)"; }
+                            else if (lastEntry.trayResult === 'too-much') { suggestion = (lastAmount * 0.8).toFixed(1); reason = "Dec 20% (Waste)"; }
+                        } else {
+                            suggestion = 2.0; // Default start
+                            reason = "Initial Feed";
+                        }
                     }
 
-                    // Check Tray Grams Suggestion (e.g. 10g per kg)
-                    const checkTrayGrams = Math.ceil(suggestion * 10); 
+                    // Check Tray Grams Suggestion (e.g. 5g/kg for DOC < 40, 10g/kg after)
+                    const gramsPerKg = doc < 40 ? 5 : 10;
+                    const checkTrayGrams = Math.ceil(suggestion * gramsPerKg); 
 
                     const row = document.createElement('div');
                     row.className = 'feed-round-row';
                     row.innerHTML = `
                         <div>
                             <div style="font-weight:600;">${tank.name}</div>
-                            <div class="suggestion-text">Tray: ${checkTrayGrams}g</div>
+                            <div class="suggestion-text" style="color:var(--success-dark);">Tray: ${checkTrayGrams}g (${gramsPerKg}g/kg)</div>
                         </div>
                         <div style="font-size:12px; color:var(--gray);">${lastAmount}kg</div>
                         <div>
@@ -3393,6 +3406,7 @@
                     `;
                     list.appendChild(row);
                 });
+                this.saveTanks(); // Save the cleared suggestions
 
                 document.getElementById('feedRoundModal').classList.add('active');
             }
@@ -3424,9 +3438,14 @@
                 if (count > 0) {
                     this.saveFeedEntries();
                     this.saveInventory();
-                    this.closeAllModals();
                     this.renderAll();
-                    this.showToast(`Saved ${count} feed entries. Check trays in 2 hours!`);
+
+                    // Show wait timer
+                    const checkTime = new Date(Date.now() + 2 * 60 * 60 * 1000);
+                    document.getElementById('checkTimeDisplay').textContent = checkTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                    this.closeAllModals();
+                    document.getElementById('waitTimerModal').classList.add('active');
+
                 } else {
                     this.showToast('No feed amounts entered', 'error');
                 }
@@ -3451,21 +3470,26 @@
 
                 pending.forEach(entry => {
                     const tank = this.getTankById(entry.tankId);
-                    const div = document.createElement('div');
-                    div.className = 'tray-check-row';
-                    div.innerHTML = `
-                        <div>
-                            <div style="font-weight:700;">${tank.name}</div>
-                            <div style="font-size:11px; color:var(--gray);">Fed: ${entry.amount}kg @ ${entry.time}</div>
-                        </div>
-                        <div class="tray-btn-group" id="tray-group-${entry.id}">
-                            <div class="tray-btn-sm" onclick="app.selectTrayCheck(${entry.id}, 'empty', this)">Empty</div>
-                            <div class="tray-btn-sm" onclick="app.selectTrayCheck(${entry.id}, 'little', this)">Little</div>
-                            <div class="tray-btn-sm" onclick="app.selectTrayCheck(${entry.id}, 'half', this)">Half</div>
-                            <div class="tray-btn-sm" onclick="app.selectTrayCheck(${entry.id}, 'too-much', this)">Full</div>
-                        </div>
-                    `;
-                    list.appendChild(div);
+                    if (tank) {
+                        const div = document.createElement('div');
+                        div.className = 'feed-round-row';
+                        div.style.gridTemplateColumns = '1fr 1.5fr 1fr';
+                        div.dataset.entryId = entry.id;
+                        div.innerHTML = `
+                            <div>
+                                <div style="font-weight:700;">${tank.name}</div>
+                                <div style="font-size:11px; color:var(--gray);">Fed: ${entry.amount}kg @ ${entry.time}</div>
+                            </div>
+                            <div class="tray-btn-group" id="tray-group-${entry.id}">
+                                <div class="tray-btn-sm" onclick="app.selectTrayCheck(${entry.id}, 'empty', this)">Empty</div>
+                                <div class="tray-btn-sm" onclick="app.selectTrayCheck(${entry.id}, 'little', this)">Little</div>
+                                <div class="tray-btn-sm" onclick="app.selectTrayCheck(${entry.id}, 'half', this)">Half</div>
+                                <div class="tray-btn-sm" onclick="app.selectTrayCheck(${entry.id}, 'too-much', this)">Waste</div>
+                            </div>
+                            <input type="text" class="form-control" placeholder="Notes..." style="font-size:12px; padding: 6px;">
+                        `;
+                        list.appendChild(div);
+                    }
                 });
 
                 document.getElementById('trayCheckModal').classList.add('active');
@@ -3483,148 +3507,120 @@
                 group.dataset.selectedStatus = status;
             }
 
-            saveTrayChecks() {
-                const groups = document.querySelectorAll('.tray-btn-group');
-                let updated = 0;
+            processTrayResultsForSuggestion() {
+                const rows = document.querySelectorAll('#trayCheckList .feed-round-row');
+                const suggestions = [];
+                let allSelected = true;
 
-                groups.forEach(group => {
+                rows.forEach(row => {
+                    const entryId = parseInt(row.dataset.entryId);
+                    const group = row.querySelector('.tray-btn-group');
+                    const notesInput = row.querySelector('input');
                     const status = group.dataset.selectedStatus;
-                    if (status) {
-                        const entryId = parseInt(group.id.replace('tray-group-', ''));
-                        const entry = this.state.feedEntries.find(e => e.id === entryId);
-                        if (entry) {
-                            entry.trayResult = status;
-                            updated++;
-                        }
+
+                    if (!status) {
+                        allSelected = false;
+                        return;
                     }
+
+                    const entry = this.state.feedEntries.find(e => e.id === entryId);
+                    if (!entry) return;
+
+                    const tank = this.getTankById(entry.tankId);
+                    let newAmount = entry.amount;
+                    let reason = "Keep same";
+                    let reasonColor = "var(--gray)";
+
+                    if (status === 'empty') {
+                        newAmount = (entry.amount * 1.05).toFixed(1);
+                        reason = `+5% (was ${entry.amount}kg)`;
+                        reasonColor = "var(--success)";
+                    } else if (status === 'little') {
+                        // Keep same
+                    } else if (status === 'half') {
+                        newAmount = (entry.amount * 0.9).toFixed(1);
+                        reason = `-10% (was ${entry.amount}kg)`;
+                        reasonColor = "var(--warning-dark)";
+                    } else if (status === 'too-much') {
+                        newAmount = (entry.amount * 0.8).toFixed(1);
+                        reason = `-20% (was ${entry.amount}kg)`;
+                        reasonColor = "var(--danger)";
+                    }
+
+                    suggestions.push({
+                        entryId: entry.id,
+                        tankId: entry.tankId,
+                        tankName: tank.name,
+                        trayResult: status,
+                        notes: notesInput.value,
+                        newAmount: parseFloat(newAmount),
+                        reason,
+                        reasonColor
+                    });
                 });
 
-                if (updated > 0) {
-                    this.saveFeedEntries();
-                    this.closeAllModals();
-                    this.renderAll();
-                    this.showToast(`Updated ${updated} tray results`);
-                } else {
-                    this.showToast('Please select results for tanks', 'warning');
-                }
-            }
-
-            openFeedModal() {
-                const select = document.getElementById('feedTankSelect');
-                select.innerHTML = '';
-                
-                // Filter tanks by current farm if selected
-                let tanksToShow = this.state.tanks;
-                if (this.state.settings.currentFarmId) {
-                    tanksToShow = this.state.tanks.filter(t => t.farmId === this.state.settings.currentFarmId);
-                }
-
-                if (tanksToShow.length === 0) {
-                    this.showToast('Please add a tank first', 'error');
+                if (!allSelected) {
+                    this.showToast('Please select a tray result for all tanks.', 'error');
                     return;
                 }
 
-                tanksToShow.forEach(tank => {
-                    select.innerHTML += `<option value="${tank.id}">${tank.name}</option>`;
-                });
-
-                // Add listener to update context when tank changes
-                select.onchange = () => this.updateFeedContext();
-
-                document.getElementById('feedDate').value = this.currentDate;
-                
-                // Render dynamic content (Tray selection)
-                const content = document.getElementById('feedDynamicContent');
-                content.innerHTML = `
-                    <div id="lastFeedContext" class="last-feed-context" style="display:none;">
-                        <i class="fas fa-info-circle"></i>
-                        <span></span>
-                    </div>
-                    <div id="smartSuggestion" class="smart-suggestion" style="display:none;">
-                        <!-- Content injected via JS -->
-                    </div>
-                    <div class="form-group">
-                        <label>Feed Amount (kg)</label>
-                        <input type="number" id="feedAmount" class="form-control" placeholder="e.g., 5.0" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>Tray Status Check</label>
-                        <div class="tray-selection-grid">
-                            <div class="tray-btn-large" onclick="app.selectTray(this, 'empty')">
-                                <i class="fas fa-check-circle"></i>
-                                <span>Empty</span>
-                            </div>
-                            <div class="tray-btn-large" onclick="app.selectTray(this, 'little')">
-                                <i class="fas fa-search"></i>
-                                <span>Little Left</span>
-                            </div>
-                            <div class="tray-btn-large" onclick="app.selectTray(this, 'half')">
-                                <i class="fas fa-adjust"></i>
-                                <span>Half Full</span>
-                            </div>
-                            <div class="tray-btn-large" onclick="app.selectTray(this, 'too-much')">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <span>Too Much</span>
-                            </div>
-                        </div>
-                        <input type="hidden" id="selectedTrayStatus" value="">
-                    </div>
-                    <div class="form-group">
-                        <label>Add Supplements (Optional)</label>
-                        <div class="supplement-grid">
-                            ${this.state.settings.supplements.map(s => `
-                                <div class="supplement-option" onclick="this.classList.toggle('selected')"><i class="fas fa-plus"></i> ${s}</div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" style="width: 100%;" onclick="app.saveFeedEntry()">
-                        Save Feed Entry
-                    </button>
-                `;
-                
-                document.getElementById('feedModal').classList.add('active');
-                this.updateFeedContext(); // Initial call
+                this.renderSuggestionModal(suggestions);
             }
 
-            updateFeedContext() {
-                const tankId = document.getElementById('feedTankSelect').value;
-                const contextDiv = document.getElementById('lastFeedContext');
-                const contextSpan = contextDiv.querySelector('span');
-                const suggestionDiv = document.getElementById('smartSuggestion');
-                const amountInput = document.getElementById('feedAmount');
-                
-                const tankEntries = this.state.feedEntries
-                    .filter(e => e.tankId == tankId)
-                    .sort((a, b) => b.id - a.id);
+            renderSuggestionModal(suggestions) {
+                this.pendingSuggestions = suggestions;
+                const list = document.getElementById('suggestionList');
+                list.innerHTML = '';
 
-                if (tankEntries.length > 0) {
-                    const last = tankEntries[0];
-                    contextSpan.innerHTML = `Last feed: <b>${last.amount}kg</b> was <b>${last.trayResult}</b>`;
-                    contextDiv.style.display = 'flex';
-                    
-                    // SMART SUGGESTION LOGIC
-                    if (last.trayResult === 'too-much') {
-                        const reducedAmount = (last.amount * 0.9).toFixed(1); // 10% reduction
-                        amountInput.value = reducedAmount;
-                        suggestionDiv.className = 'smart-suggestion reduce';
-                        suggestionDiv.innerHTML = `
-                            <i class="fas fa-leaf"></i>
-                            <div>
-                                <strong>Waste Reduction:</strong> Previous feed was wasted. 
-                                We've reduced the amount by 10% (from ${last.amount}kg to ${reducedAmount}kg).
-                            </div>
-                        `;
-                        suggestionDiv.style.display = 'flex';
-                    } else {
-                        // Default behavior: repeat last amount
-                        amountInput.value = last.amount;
-                        suggestionDiv.style.display = 'none';
+                suggestions.forEach(s => {
+                    const row = document.createElement('div');
+                    row.className = 'suggestion-row';
+                    row.innerHTML = `
+                        <div>
+                            <div style="font-weight: 700;">${s.tankName}</div>
+                        </div>
+                        <div>
+                            <span class="tray-badge ${s.trayResult}">${s.trayResult.replace('-', ' ')}</span>
+                        </div>
+                        <div>
+                            <div style="font-weight: 800; font-size: 16px; color: var(--primary);">${s.newAmount} kg</div>
+                            <div style="font-size: 11px; font-weight: 600; color: ${s.reasonColor};">${s.reason}</div>
+                        </div>
+                    `;
+                    list.appendChild(row);
+                });
+
+                this.closeAllModals();
+                document.getElementById('suggestionModal').classList.add('active');
+            }
+
+            acceptSuggestions() {
+                if (!this.pendingSuggestions) return;
+
+                this.pendingSuggestions.forEach(s => {
+                    // Update the original feed entry with the result
+                    const entry = this.state.feedEntries.find(e => e.id === s.entryId);
+                    if (entry) {
+                        entry.trayResult = s.trayResult;
+                        entry.notes = s.notes; // Assuming you add a notes property
                     }
-                } else {
-                    contextDiv.style.display = 'none';
-                    suggestionDiv.style.display = 'none';
-                    amountInput.value = '';
-                }
+
+                    // Update the tank with the next suggested feed amount
+                    const tank = this.getTankById(s.tankId);
+                    if (tank) {
+                        tank.nextSuggestedFeed = {
+                            amount: s.newAmount,
+                            reason: s.reason
+                        };
+                    }
+                });
+
+                this.saveFeedEntries();
+                this.saveTanks();
+                this.closeAllModals();
+                this.renderAll();
+                this.showToast('Plan for next feed is updated!', 'success');
+                this.pendingSuggestions = null;
             }
 
             recalculateTankBiomass(tankId) {
@@ -3638,30 +3634,8 @@
                 
                 // Using standard FCR of 1.2 for estimation
                 const estimatedFCR = 1.2;
-                tank.biomass = parseFloat((totalFeed / estimatedFCR).toFixed(1));
+                tank.biomass = Math.max(0, parseFloat(((totalFeed / estimatedFCR) - totalHarvested).toFixed(1)));
                 this.saveTanks();
-            }
-
-            // Updated logic to account for harvests
-            // Note: In a real app, we'd want a more complex growth model. 
-            // Here we assume biomass = (Total Feed / FCR) - Harvested.
-
-            selectTray(btn, status) {
-                document.querySelectorAll('.tray-btn-large').forEach(b => b.classList.remove('selected'));
-                btn.classList.add('selected');
-                document.getElementById('selectedTrayStatus').value = status;
-
-                // Immediate feedback for waste reduction
-                if (status === 'too-much') {
-                    this.showToast('⚠️ Waste detected! Consider reducing feed amount.', 'warning');
-                    // Optional: Auto-reduce amount by 10%
-                    const amountInput = document.getElementById('feedAmount');
-                    if (amountInput.value) {
-                        const current = parseFloat(amountInput.value);
-                        const reduced = (current * 0.9).toFixed(1);
-                        // We don't force change, but we could suggest it visually
-                    }
-                }
             }
 
             // CRUD Operations
@@ -3738,7 +3712,8 @@
                     size,
                     stockingDate: stockingDate || this.currentDate,
                     initialSeed: initialSeed || 0,
-                    biomass: 0 // Initial biomass
+                    biomass: 0, // Initial biomass
+                    nextSuggestedFeed: null,
                 };
 
                 this.state.tanks.push(newTank);
@@ -3748,43 +3723,6 @@
                 this.showToast('Tank added successfully');
                 
                 document.getElementById('tankNameInput').value = '';
-            }
-
-            saveFeedEntry() {
-                const tankId = document.getElementById('feedTankSelect').value;
-                const date = document.getElementById('feedDate').value;
-                const amount = parseFloat(document.getElementById('feedAmount').value);
-                const trayResult = document.getElementById('selectedTrayStatus').value;
-                
-                const supplements = Array.from(document.querySelectorAll('#feedModal .supplement-option.selected'))
-                    .map(el => el.textContent.trim());
-
-                if (!amount) {
-                    this.showToast('Please enter feed amount', 'error');
-                    return;
-                }
-
-                const newEntry = {
-                    id: Date.now(),
-                    tankId,
-                    date,
-                    time: new Date().toLocaleTimeString(),
-                    amount,
-                    trayResult: trayResult || 'unknown',
-                    supplements: supplements
-                };
-
-                this.state.feedEntries.push(newEntry);
-                this.saveFeedEntries();
-                
-                // Deduct from inventory
-                this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) - amount;
-                this.saveInventory();
-
-                this.recalculateTankBiomass(tankId);
-                this.closeAllModals();
-                this.renderAll();
-                this.showToast('Feed entry saved');
             }
 
             editFeedEntry(id) {
