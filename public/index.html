@@ -2065,10 +2065,13 @@
                 </div>
                 <div id="trayCheckList" style="max-height: 60vh; overflow-y: auto;"></div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" style="flex-direction: column;">
                 <button class="btn btn-primary" style="width: 100%;" onclick="app.processTrayResultsForSuggestion()">
                     Generate Plan
                     <i class="fas fa-arrow-right"></i>
+                </button>
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 8px; border: none; background: transparent; color: var(--gray);" onclick="app.skipTrayChecks()">
+                    Skip & Log Feed Immediately
                 </button>
             </div>
         </div>
@@ -3467,6 +3470,17 @@
                     return;
                 }
 
+                // Check for pending tray results
+                const pending = this.state.feedEntries.filter(e => 
+                    tanks.some(t => t.id == e.tankId) && e.trayResult === 'pending'
+                );
+
+                if (pending.length > 0) {
+                    this.showToast('⚠️ Please update tray results from the last feed first!', 'warning');
+                    this.openTrayCheckModal();
+                    return;
+                }
+
                 // Calculate Feed Round Number
                 let maxEntries = 0;
                 tanks.forEach(t => {
@@ -3600,6 +3614,29 @@
                 });
 
                 document.getElementById('trayCheckModal').classList.add('active');
+            }
+
+            skipTrayChecks() {
+                if (!confirm("Are you sure? Pending tray checks will be marked as 'Unknown'.")) return;
+
+                const currentFarmId = this.state.settings.currentFarmId;
+                const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
+                
+                let updatedCount = 0;
+                this.state.feedEntries.forEach(e => {
+                    if (tanks.some(t => t.id == e.tankId) && e.trayResult === 'pending') {
+                        e.trayResult = 'unknown';
+                        updatedCount++;
+                    }
+                });
+
+                if (updatedCount > 0) {
+                    this.saveFeedEntries();
+                    this.showToast('Tray checks skipped.');
+                }
+                
+                this.closeAllModals();
+                this.openFeedRoundModal();
             }
 
             selectTrayCheck(entryId, status, btn) {
