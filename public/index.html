@@ -1596,6 +1596,23 @@
             color: white;
             border-color: var(--primary);
         }
+
+        /* ===== HARVEST PLAN ===== */
+        .plan-card {
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .plan-title {
+            font-weight: 700;
+            color: #2e7d32;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
     </style>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1973,6 +1990,49 @@
         </div>
     </div>
 
+    <!-- Partial Harvest Modal -->
+    <div class="modal-overlay" id="partialHarvestModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-weight-hanging"></i> Partial Harvest</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Harvest Date</label>
+                    <input type="date" id="harvestDate" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Harvested Weight (kg)</label>
+                    <input type="number" id="harvestWeight" class="form-control" placeholder="e.g. 500">
+                </div>
+                <div class="form-group">
+                    <label>Count (pcs/kg)</label>
+                    <input type="number" id="harvestCount" class="form-control" placeholder="e.g. 40">
+                </div>
+                <div class="alert-card" style="margin-top: 10px; background: #e3f2fd; border-left-color: var(--info);">
+                    <div style="font-size: 12px; color: var(--dark);">
+                        <i class="fas fa-info-circle"></i> This will update remaining biomass and suggest a new feed plan.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="app.savePartialHarvest()">Calculate & Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Harvest Plan Modal -->
+    <div class="modal-overlay" id="harvestPlanModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-clipboard-list"></i> Post-Harvest Plan</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="harvestPlanContent"></div>
+        </div>
+    </div>
+
     <!-- Feed Entry Modal -->
     <div class="modal-overlay" id="feedModal">
         <div class="modal-content feed-entry-modal">
@@ -2228,6 +2288,10 @@
                     <i class="fas fa-plus"></i>
                     Add Another Tank
                 </button>
+                <button class="btn btn-warning" id="partialHarvestBtn">
+                    <i class="fas fa-weight-hanging"></i>
+                    Partial Harvest
+                </button>
             </div>
         </div>
     </div>
@@ -2281,6 +2345,7 @@
                     farms: [],           // Array of farm objects
                     tanks: [],           // Array of tank objects (belonging to farms)
                     feedEntries: [],     // All feed entries
+                    harvests: [],        // Harvest records
                     applications: [],    // All applications
                     prices: [],          // Market prices
                     inventory: { totalKg: 0 }, // Inventory
@@ -2402,6 +2467,8 @@
                 
                 // Load feed entries
                 this.state.feedEntries = safeArray(safeParse('aquabook_entries', []));
+                // Load harvests
+                this.state.harvests = safeArray(safeParse('aquabook_harvests', []));
                 
                 // Load applications
                 this.state.applications = safeArray(safeParse('aquabook_applications', []));
@@ -2446,6 +2513,7 @@
                 localStorage.setItem('aquabook_farms', JSON.stringify(this.state.farms));
                 localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
                 localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
+                localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
                 localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
                 localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
                 localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
@@ -2461,6 +2529,10 @@
             
             saveFeedEntries() {
                 localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
+            }
+
+            saveHarvests() {
+                localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
             }
             
             saveApplications() {
@@ -3080,6 +3152,12 @@
                     this.closeAllModals();
                     this.openTankModal(this.state.settings.currentFarmId);
                 });
+                
+                document.getElementById('partialHarvestBtn').addEventListener('click', () => {
+                    const title = document.getElementById('tankDetailTitle').textContent;
+                    const tank = this.state.tanks.find(t => t.name === title); // Simple lookup by name for now or store ID
+                    if (tank) this.openPartialHarvestModal(tank.id);
+                });
 
                 // Inventory
                 document.getElementById('saveStockBtn').addEventListener('click', () => this.saveStock());
@@ -3542,12 +3620,18 @@
                 
                 const entries = this.state.feedEntries.filter(e => e.tankId == tankId);
                 const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
+                const tankHarvests = this.state.harvests.filter(h => h.tankId == tankId);
+                const totalHarvested = tankHarvests.reduce((sum, h) => sum + h.weight, 0);
                 
                 // Using standard FCR of 1.2 for estimation
                 const estimatedFCR = 1.2;
                 tank.biomass = parseFloat((totalFeed / estimatedFCR).toFixed(1));
                 this.saveTanks();
             }
+
+            // Updated logic to account for harvests
+            // Note: In a real app, we'd want a more complex growth model. 
+            // Here we assume biomass = (Total Feed / FCR) - Harvested.
 
             selectTray(btn, status) {
                 document.querySelectorAll('.tray-btn-large').forEach(b => b.classList.remove('selected'));
@@ -3930,6 +4014,7 @@
                 
                 document.getElementById('tankDetailTitle').textContent = tank.name;
                 document.getElementById('tankDetailModal').classList.add('active');
+                // Store ID for harvest button
             }
 
             // Settings
@@ -3965,6 +4050,93 @@
                 this.state.settings.supplements = this.state.settings.supplements.filter(s => s !== name);
                 this.saveSettings();
                 this.renderSettingsSupplements();
+            }
+
+            // ===== PARTIAL HARVEST =====
+            openPartialHarvestModal(tankId) {
+                this.currentHarvestTankId = tankId;
+                document.getElementById('harvestDate').value = this.currentDate;
+                document.getElementById('harvestWeight').value = '';
+                document.getElementById('harvestCount').value = '';
+                this.closeAllModals();
+                document.getElementById('partialHarvestModal').classList.add('active');
+            }
+
+            savePartialHarvest() {
+                const tankId = this.currentHarvestTankId;
+                const date = document.getElementById('harvestDate').value;
+                const weight = parseFloat(document.getElementById('harvestWeight').value);
+                const count = parseFloat(document.getElementById('harvestCount').value);
+
+                if (!weight || !count) {
+                    this.showToast('Please enter weight and count', 'error');
+                    return;
+                }
+
+                const tank = this.getTankById(tankId);
+                
+                // Record Harvest
+                const harvest = {
+                    id: Date.now(),
+                    tankId,
+                    date,
+                    weight,
+                    count
+                };
+                this.state.harvests.push(harvest);
+                this.saveHarvests();
+
+                // Update Tank Stats
+                // 1. Update Biomass
+                const oldBiomass = tank.biomass || 0;
+                const newBiomass = Math.max(0, oldBiomass - weight);
+                tank.biomass = newBiomass;
+
+                // 2. Update Seed Count (Approximate)
+                // Harvested pieces = Weight (kg) * Count (pcs/kg)
+                const harvestedPcs = weight * count;
+                // If we don't have currentSeed, assume initialSeed is the start
+                if (!tank.currentSeed) tank.currentSeed = tank.initialSeed;
+                tank.currentSeed = Math.max(0, Math.floor(tank.currentSeed - harvestedPcs));
+
+                this.saveTanks();
+
+                // Generate Plan
+                this.renderHarvestPlan(tank, weight, count, newBiomass, tank.currentSeed);
+                
+                this.closeAllModals();
+                document.getElementById('harvestPlanModal').classList.add('active');
+                this.renderAll();
+            }
+
+            renderHarvestPlan(tank, hWeight, hCount, remBiomass, remSeed) {
+                const content = document.getElementById('harvestPlanContent');
+                // Simple feed logic: 2% of biomass for maintenance/growth after stress
+                const suggestedFeed = (remBiomass * 0.02).toFixed(1); 
+
+                content.innerHTML = `
+                    <div class="stat-card" style="margin-bottom:16px; border-color:var(--success);">
+                        <div class="stat-label">Harvest Recorded</div>
+                        <div class="stat-value" style="color:var(--success);">${hWeight} kg <span style="font-size:14px; color:var(--gray);">@ ${hCount}c</span></div>
+                    </div>
+                    
+                    <div class="plan-card">
+                        <div class="plan-title"><i class="fas fa-chart-line"></i> Status Update</div>
+                        <p><strong>Remaining Biomass:</strong> ${remBiomass.toFixed(1)} kg</p>
+                        <p><strong>Est. Remaining Stock:</strong> ${remSeed.toLocaleString()} pcs</p>
+                        <p><strong>New Feed Target:</strong> ~${suggestedFeed} kg/day</p>
+                    </div>
+
+                    <div class="plan-card" style="background:#fff3e0; border-color:#ff9800;">
+                        <div class="plan-title" style="color:#e65100;"><i class="fas fa-exclamation-circle"></i> Immediate Actions</div>
+                        <ul style="padding-left:20px; font-size:13px; line-height:1.6;">
+                            <li><strong>Stop Feed:</strong> Skip the next scheduled feed to allow tank to settle.</li>
+                            <li><strong>Check Bottom:</strong> Harvesting disturbs sludge. Apply <strong>Probiotics</strong> (Soil/Water) immediately to prevent ammonia spikes.</li>
+                            <li><strong>Monitor Oxygen:</strong> Ensure aerators are running full capacity tonight.</li>
+                            <li><strong>Resume Feeding:</strong> Start with 50% of the new target (${(suggestedFeed/2).toFixed(1)} kg) tomorrow and increase gradually.</li>
+                        </ul>
+                    </div>
+                `;
             }
         }
 
