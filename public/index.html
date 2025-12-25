@@ -1968,6 +1968,9 @@
         <main>
             <!-- Home Screen -->
             <section id="homeScreen" class="screen active">
+                <!-- Farm Header Block -->
+                <div id="farmHeaderContainer" style="margin-bottom: 20px;"></div>
+
                 <div class="screen-header">
                     <h2 class="screen-title">
                         <i class="fas fa-chart-pie"></i>
@@ -3027,7 +3030,9 @@
 
             renderFarmsList() {
                 const container = document.getElementById('farmsList');
+                const headerContainer = document.getElementById('farmHeaderContainer');
                 container.innerHTML = '';
+                if (headerContainer) headerContainer.innerHTML = '';
                 
                 if (this.state.farms.length === 0) {
                     container.innerHTML = `<div class="empty-state">
@@ -3056,13 +3061,12 @@
 
                 // Render only the selected farm
                 const farm = farmToRender;
-                const farmCard = document.createElement('div');
-                farmCard.className = 'farm-card';
-
                 const farmTanks = this.state.tanks.filter(tank => tank.farmId === farm.id);
                 
-                farmCard.innerHTML = `
-                        <div class="farm-header">
+                // Render Header at the top
+                if (headerContainer) {
+                    headerContainer.innerHTML = `
+                        <div class="farm-header" style="border: 2px solid var(--border); border-radius: var(--radius);">
                             <div class="farm-name">
                                 <i class="fas fa-tractor"></i>
                                 ${farm.name}
@@ -3082,11 +3086,15 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="tanks-grid">
-                            ${farmTanks.map(tank => this.getTankCardHTML(tank)).join('')}
-                        </div>
                     `;
-                container.appendChild(farmCard);
+                }
+
+                // Render Tanks Grid at the bottom
+                container.innerHTML = `
+                    <div class="tanks-grid" style="padding: 0;">
+                        ${farmTanks.map(tank => this.getTankCardHTML(tank)).join('')}
+                    </div>
+                `;
             }
 
             getTankCardHTML(tank) {
