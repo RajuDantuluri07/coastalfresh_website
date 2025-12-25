@@ -1556,6 +1556,46 @@
             border-radius: var(--radius-sm);
             font-size: 13px;
         }
+
+        /* ===== FEED ROUND STYLES ===== */
+        .feed-round-row {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr 1fr 1.2fr;
+            gap: 8px;
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+        }
+        .feed-round-row:last-child { border-bottom: none; }
+        .feed-round-header {
+            font-weight: 700;
+            font-size: 12px;
+            background: var(--light);
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        }
+        .suggestion-text {
+            font-size: 10px;
+            color: var(--info);
+            display: block;
+        }
+        .tray-btn-group {
+            display: flex;
+            gap: 2px;
+        }
+        .tray-btn-sm {
+            flex: 1;
+            padding: 8px 2px;
+            border: 1px solid var(--border);
+            background: white;
+            font-size: 10px;
+            text-align: center;
+            cursor: pointer;
+        }
+        .tray-btn-sm.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
     </style>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1727,9 +1767,9 @@
                         <i class="fas fa-history"></i>
                         Feed Log Book
                     </h2>
-                    <button class="btn btn-primary" id="addLogEntryBtn">
+                    <button class="btn btn-primary" id="startFeedRoundBtn">
                         <i class="fas fa-plus"></i>
-                        + Add Feed
+                        Start Feed Round
                     </button>
                 </div>
 
@@ -1741,6 +1781,12 @@
                         <div style="font-size: 12px; color: var(--gray);" id="logDisplayDay">Tuesday</div>
                     </div>
                     <button class="btn-icon" id="nextDayBtn"><i class="fas fa-chevron-right"></i></button>
+                </div>
+
+                <!-- Pending Checks Banner -->
+                <div id="pendingChecksBanner" style="display: none; background: #fff3e0; border: 1px solid #ffe0b2; padding: 12px; border-radius: var(--radius-sm); margin-bottom: 16px; align-items: center; justify-content: space-between;">
+                    <div style="color: #e65100; font-weight: 600; font-size: 13px;"><i class="fas fa-clock"></i> Pending Tray Checks</div>
+                    <button class="btn btn-sm btn-warning" onclick="app.openTrayCheckModal()">Update Results</button>
                 </div>
 
                 <!-- Matrix Table -->
@@ -1891,6 +1937,42 @@
         </div>
     </div>
 
+    <!-- Feed Round Modal (Bulk Entry) -->
+    <div class="modal-overlay" id="feedRoundModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-utensils"></i> New Feed Round</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 0;">
+                <div class="feed-round-row feed-round-header">
+                    <div>Tank</div>
+                    <div>Last</div>
+                    <div>Sugg.</div>
+                    <div>Amount (kg)</div>
+                </div>
+                <div id="feedRoundList" style="max-height: 50vh; overflow-y: auto;"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" style="width: 100%;" onclick="app.saveFeedRound()">Save All Entries</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tray Check Modal -->
+    <div class="modal-overlay" id="trayCheckModal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-search"></i> Update Tray Results</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="trayCheckList" style="padding: 10px; max-height: 60vh; overflow-y: auto;"></div>
+            <div class="modal-footer">
+                <button class="btn btn-success" style="width: 100%;" onclick="app.saveTrayChecks()">Update Results</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Feed Entry Modal -->
     <div class="modal-overlay" id="feedModal">
         <div class="modal-content feed-entry-modal">
@@ -1943,6 +2025,7 @@
                 <div class="form-group">
                     <label>Tray Status</label>
                     <select id="editTrayStatus" class="form-control">
+                        <option value="pending">Pending Check</option>
                         <option value="empty">Empty</option>
                         <option value="little">Little Left</option>
                         <option value="half">Half Full</option>
@@ -2467,7 +2550,52 @@
                 this.renderPrices();
                 this.showFeedRecommendation();
                 this.renderAlerts();
+                this.checkPendingTrays();
                 this.renderFeedTrendChart();
+            }
+            
+            // ===== WEATHER WIDGET =====
+            initWeather() {
+                const weatherWidget = document.getElementById('weatherWidget');
+                if (!weatherWidget) return;
+
+                if ("geolocation" in navigator) {
+                    navigator.geolocation.getCurrentPosition(async (position) => {
+                        try {
+                            const lat = position.coords.latitude;
+                            const lon = position.coords.longitude;
+                            // Using Open-Meteo (Free, no API key required)
+                            const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+                            const data = await response.json();
+                            
+                            if (data.current_weather) {
+                                document.getElementById('weatherTemp').textContent = `${Math.round(data.current_weather.temperature)}°`;
+                                document.getElementById('weatherCondition').textContent = this.getWeatherCondition(data.current_weather.weathercode);
+                                document.getElementById('weatherLoc').textContent = "Local Farm";
+                                document.getElementById('weatherAdvice').innerHTML = `<i class="fas fa-info-circle"></i> ${this.getWeatherAdvice(data.current_weather.weathercode)}`;
+                                weatherWidget.style.display = 'flex';
+                            }
+                        } catch (e) {
+                            console.error("Weather fetch failed", e);
+                        }
+                    }, (err) => {
+                        console.log("Geolocation denied or error", err);
+                    });
+                }
+            }
+
+            getWeatherCondition(code) {
+                if (code === 0) return "Clear Sky";
+                if (code < 3) return "Partly Cloudy";
+                if (code < 50) return "Foggy";
+                if (code < 80) return "Rainy";
+                return "Stormy";
+            }
+
+            getWeatherAdvice(code) {
+                if (code > 60) return "Rain expected. Monitor O2.";
+                if (code === 0) return "Sunny. Check plankton.";
+                return "Conditions stable.";
             }
 
             setupUI() {
@@ -2824,6 +2952,7 @@
                             else if (e.trayResult === 'little') { badgeClass = 'little'; badgeIcon = '🟡'; badgeText = 'Little'; }
                             else if (e.trayResult === 'half') { badgeClass = 'half'; badgeIcon = '🟠'; badgeText = 'Half'; }
                             else if (e.trayResult === 'too-much') { badgeClass = 'too-much'; badgeIcon = '🔴'; badgeText = 'Too Much'; }
+                            else if (e.trayResult === 'pending') { badgeClass = 'unknown'; badgeIcon = '⏳'; badgeText = 'Pending'; }
 
                             return `
                                 <div class="log-matrix-feed" onclick="app.editFeedEntry(${e.id})">
@@ -2868,6 +2997,17 @@
                 container.appendChild(totalRow);
             }
 
+            checkPendingTrays() {
+                const currentFarmId = this.state.settings.currentFarmId;
+                if (!currentFarmId) return;
+                
+                const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId).map(t => t.id);
+                const pending = this.state.feedEntries.filter(e => farmTanks.includes(String(e.tankId)) && e.trayResult === 'pending');
+                
+                const banner = document.getElementById('pendingChecksBanner');
+                if (banner) banner.style.display = pending.length > 0 ? 'flex' : 'none';
+            }
+
             changeLogDate(days) {
                 const newDate = new Date(this.logDate);
                 newDate.setDate(newDate.getDate() + days);
@@ -2907,7 +3047,9 @@
                 document.getElementById('saveTankBtn').addEventListener('click', () => this.saveTank());
                 
                 // Add Log Entry
-                document.getElementById('addLogEntryBtn').addEventListener('click', () => this.openFeedModal());
+                const startFeedRoundBtn = document.getElementById('startFeedRoundBtn');
+                if (startFeedRoundBtn) startFeedRoundBtn.addEventListener('click', () => this.openFeedRoundModal());
+                
                 document.getElementById('addFirstEntry').addEventListener('click', () => this.openFeedModal());
                 
                 // Log Date Navigation
@@ -3102,6 +3244,177 @@
                     this.showToast(`Added ${addedKg} kg to stock`);
                 } else {
                     this.showToast('Please enter valid quantity', 'error');
+                }
+            }
+
+            // ===== FEED ROUND (BULK) =====
+            openFeedRoundModal() {
+                const currentFarmId = this.state.settings.currentFarmId;
+                if (!currentFarmId) {
+                    this.showToast('Please select a farm first', 'error');
+                    return;
+                }
+
+                const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
+                if (tanks.length === 0) {
+                    this.showToast('No tanks found in this farm', 'error');
+                    return;
+                }
+
+                const list = document.getElementById('feedRoundList');
+                list.innerHTML = '';
+
+                tanks.forEach(tank => {
+                    // Get last feed info
+                    const entries = this.state.feedEntries.filter(e => e.tankId == tank.id).sort((a, b) => b.id - a.id);
+                    const lastEntry = entries[0];
+                    
+                    let lastAmount = lastEntry ? lastEntry.amount : 0;
+                    let suggestion = lastAmount;
+                    let reason = "Same as last";
+
+                    // Suggestion Logic
+                    if (lastEntry) {
+                        if (lastEntry.trayResult === 'empty') { suggestion = (lastAmount * 1.05).toFixed(1); reason = "Inc 5% (Empty)"; }
+                        else if (lastEntry.trayResult === 'half') { suggestion = (lastAmount * 0.9).toFixed(1); reason = "Dec 10% (Half)"; }
+                        else if (lastEntry.trayResult === 'too-much') { suggestion = (lastAmount * 0.8).toFixed(1); reason = "Dec 20% (Waste)"; }
+                    } else {
+                        suggestion = 2.0; // Default start
+                        reason = "Initial";
+                    }
+
+                    // Check Tray Grams Suggestion (e.g. 10g per kg)
+                    const checkTrayGrams = Math.ceil(suggestion * 10); 
+
+                    const row = document.createElement('div');
+                    row.className = 'feed-round-row';
+                    row.innerHTML = `
+                        <div>
+                            <div style="font-weight:600;">${tank.name}</div>
+                            <div class="suggestion-text">Tray: ${checkTrayGrams}g</div>
+                        </div>
+                        <div style="font-size:12px; color:var(--gray);">${lastAmount}kg</div>
+                        <div>
+                            <div style="font-weight:600; color:var(--primary); font-size:13px;">${suggestion}</div>
+                            <div class="suggestion-text">${reason}</div>
+                        </div>
+                        <input type="number" class="form-control feed-round-input" data-tank-id="${tank.id}" value="${suggestion}" step="0.1" style="padding: 8px;">
+                    `;
+                    list.appendChild(row);
+                });
+
+                document.getElementById('feedRoundModal').classList.add('active');
+            }
+
+            saveFeedRound() {
+                const inputs = document.querySelectorAll('.feed-round-input');
+                let count = 0;
+                
+                inputs.forEach(input => {
+                    const amount = parseFloat(input.value);
+                    if (amount > 0) {
+                        const tankId = input.dataset.tankId;
+                        const newEntry = {
+                            id: Date.now() + count, // Ensure unique IDs
+                            tankId,
+                            date: this.currentDate,
+                            time: new Date().toLocaleTimeString(),
+                            amount,
+                            trayResult: 'pending', // Mark as pending check
+                            supplements: [] // Can add bulk supplements later if needed
+                        };
+                        this.state.feedEntries.push(newEntry);
+                        this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) - amount;
+                        this.recalculateTankBiomass(tankId);
+                        count++;
+                    }
+                });
+
+                if (count > 0) {
+                    this.saveFeedEntries();
+                    this.saveInventory();
+                    this.closeAllModals();
+                    this.renderAll();
+                    this.showToast(`Saved ${count} feed entries. Check trays in 2 hours!`);
+                } else {
+                    this.showToast('No feed amounts entered', 'error');
+                }
+            }
+
+            openTrayCheckModal() {
+                const currentFarmId = this.state.settings.currentFarmId;
+                const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId).map(t => t.id);
+                
+                // Find pending entries for today (or recent)
+                const pending = this.state.feedEntries
+                    .filter(e => farmTanks.includes(String(e.tankId)) && e.trayResult === 'pending')
+                    .sort((a, b) => b.id - a.id);
+
+                if (pending.length === 0) {
+                    this.showToast('No pending tray checks found', 'info');
+                    return;
+                }
+
+                const list = document.getElementById('trayCheckList');
+                list.innerHTML = '';
+
+                pending.forEach(entry => {
+                    const tank = this.getTankById(entry.tankId);
+                    const div = document.createElement('div');
+                    div.className = 'tray-check-row';
+                    div.innerHTML = `
+                        <div>
+                            <div style="font-weight:700;">${tank.name}</div>
+                            <div style="font-size:11px; color:var(--gray);">Fed: ${entry.amount}kg @ ${entry.time}</div>
+                        </div>
+                        <div class="tray-btn-group" id="tray-group-${entry.id}">
+                            <div class="tray-btn-sm" onclick="app.selectTrayCheck(${entry.id}, 'empty', this)">Empty</div>
+                            <div class="tray-btn-sm" onclick="app.selectTrayCheck(${entry.id}, 'little', this)">Little</div>
+                            <div class="tray-btn-sm" onclick="app.selectTrayCheck(${entry.id}, 'half', this)">Half</div>
+                            <div class="tray-btn-sm" onclick="app.selectTrayCheck(${entry.id}, 'too-much', this)">Full</div>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+
+                document.getElementById('trayCheckModal').classList.add('active');
+            }
+
+            selectTrayCheck(entryId, status, btn) {
+                // Visual selection
+                const group = document.getElementById(`tray-group-${entryId}`);
+                group.querySelectorAll('.tray-btn-sm').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                
+                // Update state immediately (or could wait for save button)
+                // For this flow, let's store in a temp map or just update directly if user clicks "Update Results"
+                // To keep it simple, I'll attach the status to the DOM element data
+                group.dataset.selectedStatus = status;
+            }
+
+            saveTrayChecks() {
+                const groups = document.querySelectorAll('.tray-btn-group');
+                let updated = 0;
+
+                groups.forEach(group => {
+                    const status = group.dataset.selectedStatus;
+                    if (status) {
+                        const entryId = parseInt(group.id.replace('tray-group-', ''));
+                        const entry = this.state.feedEntries.find(e => e.id === entryId);
+                        if (entry) {
+                            entry.trayResult = status;
+                            updated++;
+                        }
+                    }
+                });
+
+                if (updated > 0) {
+                    this.saveFeedEntries();
+                    this.closeAllModals();
+                    this.renderAll();
+                    this.showToast(`Updated ${updated} tray results`);
+                } else {
+                    this.showToast('Please select results for tanks', 'warning');
                 }
             }
 
