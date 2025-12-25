@@ -1495,6 +1495,22 @@
             border-bottom: 1px solid var(--border);
         }
 
+        /* Sticky First Column for Professional Table View */
+        .log-matrix-head > div:first-child,
+        .log-matrix-row > div:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 10;
+            border-right: 1px solid var(--border);
+        }
+        .log-matrix-head > div:first-child {
+            background: #f1f3f6;
+            z-index: 11;
+        }
+        .log-matrix-row > div:first-child {
+            background: white;
+        }
+
         .log-matrix-row {
             display: grid;
             grid-template-columns: 1.4fr repeat(var(--feed-cols, 6), 1fr) 0.7fr;
@@ -1522,56 +1538,6 @@
 
         /* Mobile Responsive Log Matrix */
         @media (max-width: 768px) {
-            .log-matrix-container {
-                background: transparent;
-                border: none;
-                box-shadow: none;
-                overflow-x: visible;
-            }
-            .log-matrix-head {
-                display: none;
-            }
-            .log-matrix-row {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                grid-template-areas: 
-                    "tank tank total"
-                    "feed1 feed2 feed3"
-                    "feed4 feed5 feed6";
-                min-width: auto;
-                background: white;
-                margin-bottom: 12px;
-                border: 1px solid var(--border);
-                border-radius: 12px;
-                padding: 12px;
-                gap: 12px 4px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            }
-            .log-matrix-row:last-child { margin-bottom: 0; }
-            
-            .log-matrix-row > div:nth-child(1) { grid-area: tank; }
-            .log-matrix-row > div:nth-child(8) { grid-area: total; text-align: right; justify-self: end; align-self: center; }
-            
-            .log-matrix-row > div:nth-child(2) { grid-area: feed1; position: relative; }
-            .log-matrix-row > div:nth-child(3) { grid-area: feed2; position: relative; border-left: 1px dashed #eee; }
-            .log-matrix-row > div:nth-child(4) { grid-area: feed3; position: relative; border-left: 1px dashed #eee; }
-            .log-matrix-row > div:nth-child(5) { grid-area: feed4; position: relative; border-left: 1px dashed #eee; }
-            .log-matrix-row > div:nth-child(6) { grid-area: feed5; position: relative; border-left: 1px dashed #eee; border-top: 1px dashed #eee; }
-            .log-matrix-row > div:nth-child(7) { grid-area: feed6; position: relative; border-left: 1px dashed #eee; border-top: 1px dashed #eee; }
-
-            /* Mobile Labels - Dynamic */
-            .log-matrix-row > div[data-label]::before { 
-                content: attr(data-label); 
-                display: block; 
-                font-size: 10px; 
-                color: var(--gray); 
-                margin-bottom: 4px; 
-                text-align: center; 
-                font-weight: 600;
-                text-transform: uppercase;
-            }
-
-            .log-matrix-feed { align-items: center; }
             .tray-badge { font-size: 9px; padding: 2px 4px; }
         }
 
