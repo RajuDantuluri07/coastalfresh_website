@@ -260,30 +260,38 @@
 
         .stat-card {
             background: white;
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            padding: 16px;
-            text-align: center;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            text-align: left;
             transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
         .stat-card:hover {
             border-color: var(--primary);
             transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
         }
 
         .stat-value {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 4px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+            order: 2;
         }
 
         .stat-label {
             color: var(--gray);
-            font-size: 12px;
-            font-weight: 500;
-            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            order: 1;
         }
 
         .stat-subtext {
