@@ -1508,6 +1508,54 @@
             .log-matrix-feed { align-items: center; }
             .tray-badge { font-size: 9px; padding: 2px 4px; }
         }
+
+        /* ===== SUPPLEMENT CHIPS ===== */
+        .supplement-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .supplement-option {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            background: white;
+            color: var(--gray);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .supplement-option.selected {
+            background: #e3f2fd;
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        .supplement-option i {
+            font-size: 14px;
+        }
+
+        /* ===== SETTINGS ===== */
+        .settings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--light);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+        }
     </style>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1551,7 +1599,12 @@
                     <span id="currentFarmName">Select Farm</span>
                     <i class="fas fa-chevron-down"></i>
                 </div>
-                <div class="current-date" id="currentDate"></div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="current-date" id="currentDate"></div>
+                    <button class="btn-icon" style="color: white; background: rgba(255,255,255,0.2);" onclick="app.openSettingsModal()">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -1630,10 +1683,6 @@
                 <!-- Overall Stats -->
                 <div class="overall-stats">
                     <div class="stat-card">
-                        <div class="stat-value" id="totalFarms">0</div>
-                        <div class="stat-label">Total Farms</div>
-                    </div>
-                    <div class="stat-card">
                         <div class="stat-value" id="totalTanks">0</div>
                         <div class="stat-label">Total Tanks</div>
                     </div>
@@ -1653,10 +1702,6 @@
                     <div class="stat-card">
                         <div class="stat-value" id="feedToday">0 kg</div>
                         <div class="stat-label">Feed Today</div>
-                    </div>
-                    <div class="stat-card" onclick="app.openInventoryModal()" style="cursor: pointer; border: 2px dashed var(--info);">
-                        <div class="stat-value" id="currentStock">0 kg</div>
-                        <div class="stat-label" style="color: var(--info);">Feed Stock <i class="fas fa-plus-circle"></i></div>
                     </div>
                 </div>
 
@@ -1909,6 +1954,10 @@
                     <label>Date</label>
                     <input type="date" id="editFeedDate" class="form-control">
                 </div>
+                <div class="form-group">
+                    <label>Supplements (Optional)</label>
+                    <div class="supplement-grid" id="editFeedSupplements"></div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-danger" id="deleteFeedBtn">
@@ -1919,6 +1968,24 @@
                     <i class="fas fa-save"></i>
                     Update
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> Settings</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h4 style="margin-bottom: 12px; color: var(--dark);">Manage Supplements</h4>
+                <div class="form-group" style="display: flex; gap: 8px;">
+                    <input type="text" id="newSupplementInput" class="form-control" placeholder="New supplement name">
+                    <button class="btn btn-primary" onclick="app.addNewSupplement()">Add</button>
+                </div>
+                <div class="settings-list" id="settingsSupplementsList"></div>
             </div>
         </div>
     </div>
@@ -2137,7 +2204,8 @@
                     settings: {
                         currentFarmId: null,
                         currency: 'INR',
-                        logView: 'detailed' // or 'summary'
+                        logView: 'detailed', // or 'summary'
+                        supplements: ['Gut Probiotic', 'Gill Health', 'Growth Booster', 'Vitamin C', 'Mineral Mix', 'Binder']
                     }
                 };
                 
@@ -2282,6 +2350,10 @@
                 const savedSettings = safeParse('aquabook_settings', null);
                 if (savedSettings && typeof savedSettings === 'object') {
                     this.state.settings = { ...this.state.settings, ...savedSettings };
+                    // Ensure supplements exist
+                    if (!this.state.settings.supplements || !Array.isArray(this.state.settings.supplements)) {
+                        this.state.settings.supplements = ['Gut Probiotic', 'Gill Health', 'Growth Booster', 'Vitamin C', 'Mineral Mix', 'Binder'];
+                    }
                 } else {
                     this.saveSettings();
                 }
@@ -2403,8 +2475,6 @@
             }
             
             renderOverallStats() {
-                document.getElementById('totalFarms').textContent = this.state.farms.length;
-
                 const currentFarmId = this.state.settings.currentFarmId;
 
                 // Filter tanks and entries by the current farm
@@ -2427,9 +2497,6 @@
 
                 const avgFCR = totalBiomass > 0 ? (totalFeed / totalBiomass).toFixed(2) : '0.00';
                 document.getElementById('avgFCR').textContent = avgFCR;
-
-                // Render Inventory
-                document.getElementById('currentStock').textContent = `${(this.state.inventory.totalKg || 0).toFixed(1)} kg`;
             }
 
             renderAlerts() {
@@ -2751,6 +2818,8 @@
                             let badgeIcon = '';
                             let badgeText = e.trayResult;
 
+                            let suppIcon = (e.supplements && e.supplements.length > 0) ? `<i class="fas fa-pills" style="color: var(--info); margin-left: 4px;" title="${e.supplements.join(', ')}"></i>` : '';
+
                             if (e.trayResult === 'empty') { badgeClass = 'empty'; badgeIcon = '🟢'; badgeText = 'Empty'; }
                             else if (e.trayResult === 'little') { badgeClass = 'little'; badgeIcon = '🟡'; badgeText = 'Little'; }
                             else if (e.trayResult === 'half') { badgeClass = 'half'; badgeIcon = '🟠'; badgeText = 'Half'; }
@@ -2759,7 +2828,7 @@
                             return `
                                 <div class="log-matrix-feed" onclick="app.editFeedEntry(${e.id})">
                                     <div class="log-matrix-val">${e.amount} kg</div>
-                                    <span class="tray-badge ${badgeClass}">${badgeIcon} ${badgeText}</span>
+                                    <span class="tray-badge ${badgeClass}">${badgeIcon} ${badgeText} ${suppIcon}</span>
                                 </div>
                             `;
                         }
@@ -3096,6 +3165,14 @@
                         </div>
                         <input type="hidden" id="selectedTrayStatus" value="">
                     </div>
+                    <div class="form-group">
+                        <label>Add Supplements (Optional)</label>
+                        <div class="supplement-grid">
+                            ${this.state.settings.supplements.map(s => `
+                                <div class="supplement-option" onclick="this.classList.toggle('selected')"><i class="fas fa-plus"></i> ${s}</div>
+                            `).join('')}
+                        </div>
+                    </div>
                     <button class="btn btn-primary" style="width: 100%;" onclick="app.saveFeedEntry()">
                         Save Feed Entry
                     </button>
@@ -3268,6 +3345,9 @@
                 const date = document.getElementById('feedDate').value;
                 const amount = parseFloat(document.getElementById('feedAmount').value);
                 const trayResult = document.getElementById('selectedTrayStatus').value;
+                
+                const supplements = Array.from(document.querySelectorAll('#feedModal .supplement-option.selected'))
+                    .map(el => el.textContent.trim());
 
                 if (!amount) {
                     this.showToast('Please enter feed amount', 'error');
@@ -3280,7 +3360,8 @@
                     date,
                     time: new Date().toLocaleTimeString(),
                     amount,
-                    trayResult: trayResult || 'unknown'
+                    trayResult: trayResult || 'unknown',
+                    supplements: supplements
                 };
 
                 this.state.feedEntries.push(newEntry);
@@ -3304,6 +3385,14 @@
                 document.getElementById('editFeedAmount').value = entry.amount;
                 document.getElementById('editTrayStatus').value = entry.trayResult;
                 document.getElementById('editFeedDate').value = entry.date;
+
+                const suppContainer = document.getElementById('editFeedSupplements');
+                suppContainer.innerHTML = this.state.settings.supplements.map(s => {
+                    const isSelected = entry.supplements && entry.supplements.includes(s);
+                    return `
+                        <div class="supplement-option ${isSelected ? 'selected' : ''}" onclick="this.classList.toggle('selected')"><i class="fas ${isSelected ? 'fa-check' : 'fa-plus'}"></i> ${s}</div>
+                    `;
+                }).join('');
                 
                 document.getElementById('editFeedModal').classList.add('active');
             }
@@ -3314,6 +3403,8 @@
                 const amount = parseFloat(document.getElementById('editFeedAmount').value);
                 const trayResult = document.getElementById('editTrayStatus').value;
                 const date = document.getElementById('editFeedDate').value;
+                const supplements = Array.from(document.querySelectorAll('#editFeedSupplements .supplement-option.selected'))
+                    .map(el => el.textContent.trim());
 
                 const index = this.state.feedEntries.findIndex(e => e.id === this.editingEntryId);
                 if (index !== -1) {
@@ -3323,6 +3414,7 @@
                     this.state.feedEntries[index].amount = amount;
                     this.state.feedEntries[index].trayResult = trayResult;
                     this.state.feedEntries[index].date = date;
+                    this.state.feedEntries[index].supplements = supplements;
                     
                     this.saveFeedEntries();
                     
@@ -3525,6 +3617,41 @@
                 
                 document.getElementById('tankDetailTitle').textContent = tank.name;
                 document.getElementById('tankDetailModal').classList.add('active');
+            }
+
+            // Settings
+            openSettingsModal() {
+                this.renderSettingsSupplements();
+                document.getElementById('settingsModal').classList.add('active');
+            }
+
+            renderSettingsSupplements() {
+                const list = document.getElementById('settingsSupplementsList');
+                list.innerHTML = this.state.settings.supplements.map(s => `
+                    <div class="settings-item">
+                        <span>${s}</span>
+                        <button class="btn-icon" style="color: var(--danger);" onclick="app.removeSupplement('${s}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            addNewSupplement() {
+                const input = document.getElementById('newSupplementInput');
+                const name = input.value.trim();
+                if (name && !this.state.settings.supplements.includes(name)) {
+                    this.state.settings.supplements.push(name);
+                    this.saveSettings();
+                    this.renderSettingsSupplements();
+                    input.value = '';
+                }
+            }
+
+            removeSupplement(name) {
+                this.state.settings.supplements = this.state.settings.supplements.filter(s => s !== name);
+                this.saveSettings();
+                this.renderSettingsSupplements();
             }
         }
 
