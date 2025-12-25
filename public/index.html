@@ -253,7 +253,7 @@
         /* ===== HOME SCREEN - ENHANCED ===== */
         .overall-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 12px;
             margin-bottom: 24px;
         }
@@ -1788,11 +1788,10 @@
                     <div class="stat-card">
                         <div class="stat-value" id="totalFeed">0 kg</div>
                         <div class="stat-label">Feed Consumed</div>
-                        <div class="stat-subtext">Till Date</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="avgFCR">0.00</div>
-                        <div class="stat-label">Average FCR</div>
+                        <div class="stat-label">Avrg FCR</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="totalBiomass">0 kg</div>
@@ -1801,6 +1800,13 @@
                     <div class="stat-card">
                         <div class="stat-value" id="feedToday">0 kg</div>
                         <div class="stat-label">Feed Today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="feedWaste">0%</div>
+                        <div class="stat-label">
+                            Feed Waste % 
+                            <i class="fas fa-info-circle" style="font-size: 11px; margin-left: 4px; color: var(--gray); cursor: help;" title="Percentage of tray checks reported as 'Half' or 'Too Much' (indicating overfeeding)"></i>
+                        </div>
                     </div>
                 </div>
 
@@ -2680,6 +2686,19 @@
 
                 const avgFCR = totalBiomass > 0 ? (totalFeed / totalBiomass).toFixed(2) : '0.00';
                 document.getElementById('avgFCR').textContent = avgFCR;
+
+                // Feed Waste % (based on tray results)
+                // Considering 'half' and 'too-much' as waste events
+                const validChecks = farmFeedEntries.filter(e => ['empty', 'little', 'half', 'too-much'].includes(e.trayResult));
+                const wasteChecks = validChecks.filter(e => ['half', 'too-much'].includes(e.trayResult));
+                const wastePctVal = validChecks.length > 0 ? ((wasteChecks.length / validChecks.length) * 100) : 0;
+                const wastePct = wastePctVal.toFixed(1);
+                const feedWasteEl = document.getElementById('feedWaste');
+                feedWasteEl.textContent = `${wastePct}%`;
+
+                if (wastePctVal <= 10) feedWasteEl.style.color = 'var(--success)';
+                else if (wastePctVal <= 20) feedWasteEl.style.color = 'var(--warning)';
+                else feedWasteEl.style.color = 'var(--danger)';
             }
 
             renderFeedTrendChart() {
