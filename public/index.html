@@ -2112,6 +2112,12 @@
 
                 <div class="text-center text-muted">
                     <small>Tap on any tank to view details or edit</small>
+                    <div style="margin-top: 15px; font-size: 12px; opacity: 0.8; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <span>With ❤️ - Built by Farmer - Built for Farmers</span>
+                        <button class="btn btn-sm btn-primary" onclick="app.shareApp()" style="padding: 4px 10px; border-radius: 20px; font-size: 11px;">
+                            <i class="fas fa-share-alt"></i> Share App
+                        </button>
+                    </div>
                 </div>
             </section>
 
@@ -2736,6 +2742,22 @@
                     <button class="btn btn-primary" onclick="app.addNewFeedType()">Add</button>
                 </div>
                 <div class="settings-list" id="settingsFeedTypesList"></div>
+                <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+                <h4 style="margin-bottom: 12px; color: var(--dark);">Data Management</h4>
+                <div class="alert-card" style="background: #e3f2fd; border-left-color: var(--info); margin-bottom: 15px;">
+                    <div style="font-size: 12px; color: var(--dark);">
+                        <i class="fas fa-info-circle"></i> Your data is stored on this device. Backup regularly to avoid data loss.
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="app.exportData()">
+                        <i class="fas fa-download"></i> Backup Data
+                    </button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">
+                        <i class="fas fa-upload"></i> Restore Data
+                    </button>
+                    <input type="file" id="importFile" style="display: none;" accept=".json" onchange="app.importData(this)">
+                </div>
             </div>
         </div>
     </div>
@@ -2898,6 +2920,37 @@
         </div>
     </div>
 
+    <!-- Sampling Modal -->
+    <div class="modal-overlay" id="samplingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-balance-scale"></i> Log Growth Sample</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="sampleDate" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Net Weight (grams)</label>
+                    <input type="number" id="sampleWeight" class="form-control" placeholder="Total weight of shrimp in net">
+                </div>
+                <div class="form-group">
+                    <label>Count (number of shrimp)</label>
+                    <input type="number" id="sampleCount" class="form-control" placeholder="Number of shrimp in net">
+                </div>
+                <div class="stat-card" id="abwResultCard" style="display:none; background:#e8f5e9; border-color:#4caf50;">
+                    <div class="stat-value" id="calculatedABW" style="color:#2e7d32;">0g</div>
+                    <div class="stat-label">Calculated ABW (Average Body Weight)</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" onclick="app.saveSampling()">Save Record</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notifications -->
     <div class="toast" id="successToast">
         <i class="fas fa-check-circle"></i>
@@ -2921,6 +2974,7 @@
                     harvests: [],        // Harvest records
                     waterEntries: [],    // Water test history
                     expenses: [],        // Expense records
+                    samplingEntries: [], // Growth sampling records
                     tasks: [],           // Task records
                     prices: [],          // Market prices
                     inventory: { totalKg: 0 }, // Inventory
@@ -3063,6 +3117,8 @@
                 this.state.waterEntries = safeArray(safeParse('aquabook_water', []));
                 // Load expenses
                 this.state.expenses = safeArray(safeParse('aquabook_expenses', []));
+                // Load sampling
+                this.state.samplingEntries = safeArray(safeParse('aquabook_sampling', []));
                 // Load tasks
                 this.state.tasks = safeArray(safeParse('aquabook_tasks', []));
                 
@@ -3115,6 +3171,7 @@
                 localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
                 localStorage.setItem('aquabook_water', JSON.stringify(this.state.waterEntries));
                 localStorage.setItem('aquabook_expenses', JSON.stringify(this.state.expenses));
+                localStorage.setItem('aquabook_sampling', JSON.stringify(this.state.samplingEntries));
                 localStorage.setItem('aquabook_tasks', JSON.stringify(this.state.tasks));
                 localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
                 localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
@@ -3142,6 +3199,10 @@
 
             saveExpenses() {
                 localStorage.setItem('aquabook_expenses', JSON.stringify(this.state.expenses));
+            }
+
+            saveSamplingEntries() {
+                localStorage.setItem('aquabook_sampling', JSON.stringify(this.state.samplingEntries));
             }
 
             saveTasks() {
@@ -5594,6 +5655,10 @@
                 const entries = this.state.feedEntries.filter(e => e.tankId == tankId);
                 const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
 
+                // Get latest ABW
+                const samples = this.state.samplingEntries.filter(s => s.tankId == tankId).sort((a,b) => new Date(b.date) - new Date(a.date));
+                const latestABW = samples.length > 0 ? samples[0].abw : 0;
+
                 const content = document.getElementById('tankDetailContent');
                 this.editingTankId = tankId; // Important for footer actions
 
@@ -5619,6 +5684,15 @@
                             <div class="stat-value">${entries.length}</div>
                             <div class="stat-label">Feed Entries</div>
                         </div>
+                        <div class="stat-card" style="border-color: var(--info);">
+                            <div class="stat-value" style="color: var(--info);">${latestABW}g</div>
+                            <div class="stat-label">Current ABW</div>
+                        </div>
+                    </div>
+
+                    <!-- Growth Chart -->
+                    <div class="chart-container" style="height: 250px; margin-top: 20px; background: white; border: 2px solid var(--border); border-radius: var(--radius); padding: 10px; display: none;" id="growthChartContainer">
+                        <canvas id="growthChart"></canvas>
                     </div>
                 `;
                 
@@ -5633,17 +5707,23 @@
                     `;
                 } else {
                     footer.innerHTML = `
-                        <button class="btn btn-danger" onclick="app.openEndCropModal('${tank.id}')">
-                            <i class="fas fa-flag-checkered"></i> End Crop Cycle
+                        <button class="btn btn-primary" style="width: 100%; margin-bottom: 8px;" onclick="app.openSamplingModal('${tank.id}')">
+                            <i class="fas fa-balance-scale"></i> Log Growth Sample
                         </button>
-                        <button class="btn btn-warning" onclick="app.openPartialHarvestModal('${tank.id}')">
-                            <i class="fas fa-weight-hanging"></i> Partial Harvest
-                        </button>
+                        <div style="display:flex; gap:8px; width:100%;">
+                            <button class="btn btn-danger" style="flex:1;" onclick="app.openEndCropModal('${tank.id}')">
+                                <i class="fas fa-flag-checkered"></i> End Crop
+                            </button>
+                            <button class="btn btn-warning" style="flex:1;" onclick="app.openPartialHarvestModal('${tank.id}')">
+                                <i class="fas fa-weight-hanging"></i> Partial
+                            </button>
+                        </div>
                     `;
                 }
 
                 document.getElementById('tankDetailTitle').textContent = tank.name;
                 document.getElementById('tankDetailModal').classList.add('active');
+                this.renderGrowthChart(tankId);
             }
 
             // Settings
@@ -5811,6 +5891,99 @@
                 this.showToast(`New crop cycle started for ${tank.name}!`, 'success');
             }
 
+            // ===== SAMPLING & GROWTH CHART =====
+            openSamplingModal(tankId) {
+                if(tankId) this.editingTankId = tankId;
+                document.getElementById('sampleDate').value = this.currentDate;
+                document.getElementById('sampleWeight').value = '';
+                document.getElementById('sampleCount').value = '';
+                document.getElementById('abwResultCard').style.display = 'none';
+                
+                const calcABW = () => {
+                    const w = parseFloat(document.getElementById('sampleWeight').value);
+                    const c = parseFloat(document.getElementById('sampleCount').value);
+                    if(w && c) {
+                        const abw = (w/c).toFixed(2);
+                        document.getElementById('calculatedABW').textContent = `${abw}g`;
+                        document.getElementById('abwResultCard').style.display = 'block';
+                    }
+                };
+                document.getElementById('sampleWeight').onkeyup = calcABW;
+                document.getElementById('sampleCount').onkeyup = calcABW;
+                document.getElementById('sampleWeight').onchange = calcABW;
+                document.getElementById('sampleCount').onchange = calcABW;
+
+                this.closeAllModals();
+                document.getElementById('samplingModal').classList.add('active');
+            }
+
+            saveSampling() {
+                const tankId = this.editingTankId;
+                const date = document.getElementById('sampleDate').value;
+                const weight = parseFloat(document.getElementById('sampleWeight').value);
+                const count = parseFloat(document.getElementById('sampleCount').value);
+
+                if(!weight || !count) { this.showToast('Invalid input', 'error'); return; }
+
+                const abw = parseFloat((weight/count).toFixed(2));
+                this.state.samplingEntries.push({
+                    id: Date.now(), tankId, date, weight, count, abw
+                });
+                
+                this.saveSamplingEntries();
+                this.closeAllModals();
+                this.showToast(`Sample logged! ABW: ${abw}g`);
+                if(tankId) this.openTankDetail(tankId);
+            }
+
+            renderGrowthChart(tankId) {
+                const ctx = document.getElementById('growthChart');
+                const container = document.getElementById('growthChartContainer');
+                if (!ctx || !container) return;
+
+                const samples = this.state.samplingEntries
+                    .filter(s => s.tankId == tankId)
+                    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                if (samples.length < 2) {
+                    container.style.display = 'none';
+                    return;
+                }
+                container.style.display = 'block';
+
+                const labels = samples.map(s => new Date(s.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }));
+                const data = samples.map(s => s.abw);
+
+                if (this.growthChart) this.growthChart.destroy();
+
+                this.growthChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'ABW (g)',
+                            data: data,
+                            borderColor: '#9C27B0',
+                            backgroundColor: 'rgba(156, 39, 176, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: { display: true, text: 'Growth Trend (ABW)' },
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: { beginAtZero: false }
+                        }
+                    }
+                });
+            }
+
             // ===== PARTIAL HARVEST =====
             openPartialHarvestModal(tankId) {
                 this.currentHarvestTankId = tankId;
@@ -5896,6 +6069,88 @@
                         </ul>
                     </div>
                 `;
+            }
+
+            shareApp() {
+                if (navigator.share) {
+                    navigator.share({
+                        title: 'AquaBook Pro',
+                        text: 'Manage your shrimp farm efficiently with AquaBook Pro. Track feed, water quality, and expenses in one place.',
+                        url: window.location.href
+                    }).catch(console.error);
+                } else {
+                    navigator.clipboard.writeText(window.location.href).then(() => {
+                        this.showToast('App link copied to clipboard!');
+                    });
+                }
+            }
+
+            // ===== DATA BACKUP & RESTORE =====
+            exportData() {
+                const data = {
+                    farms: this.state.farms,
+                    tanks: this.state.tanks,
+                    feedEntries: this.state.feedEntries,
+                    harvests: this.state.harvests,
+                    waterEntries: this.state.waterEntries,
+                    expenses: this.state.expenses,
+                    samplingEntries: this.state.samplingEntries,
+                    tasks: this.state.tasks,
+                    inventory: this.state.inventory,
+                    settings: this.state.settings,
+                    prices: this.state.prices,
+                    exportDate: new Date().toISOString(),
+                    version: '1.0'
+                };
+
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "aquabook_backup_" + this.getFormattedDate() + ".json");
+                document.body.appendChild(downloadAnchorNode); // required for firefox
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                this.showToast('Backup file downloaded successfully');
+            }
+
+            importData(input) {
+                const file = input.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        // Validate basic structure
+                        if (!data.farms || !data.tanks) {
+                            throw new Error("Invalid backup file format");
+                        }
+
+                        if (confirm(`Restore data from ${new Date(data.exportDate).toLocaleDateString()}? This will overwrite current data.`)) {
+                            localStorage.setItem('aquabook_farms', JSON.stringify(data.farms));
+                            localStorage.setItem('aquabook_tanks', JSON.stringify(data.tanks));
+                            localStorage.setItem('aquabook_entries', JSON.stringify(data.feedEntries));
+                            localStorage.setItem('aquabook_harvests', JSON.stringify(data.harvests));
+                            localStorage.setItem('aquabook_water', JSON.stringify(data.waterEntries || []));
+                            localStorage.setItem('aquabook_expenses', JSON.stringify(data.expenses || []));
+                            localStorage.setItem('aquabook_sampling', JSON.stringify(data.samplingEntries || []));
+                            localStorage.setItem('aquabook_tasks', JSON.stringify(data.tasks || []));
+                            localStorage.setItem('aquabook_inventory', JSON.stringify(data.inventory));
+                            localStorage.setItem('aquabook_settings', JSON.stringify(data.settings));
+                            localStorage.setItem('aquabook_prices', JSON.stringify(data.prices || []));
+                            
+                            alert('Data restored successfully! The app will now reload.');
+                            window.location.reload();
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        this.showToast('Failed to restore data. Invalid file.', 'error');
+                    }
+                    // Reset input
+                    input.value = '';
+                };
+                reader.readAsText(file);
             }
         }
 
