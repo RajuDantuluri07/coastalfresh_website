@@ -2105,6 +2105,30 @@
                     </div>
                 </div>
 
+                <!-- Inventory Section -->
+                <div class="screen-header" style="margin-top: 24px;">
+                    <h2 class="screen-title">
+                        <i class="fas fa-boxes"></i>
+                        Inventory
+                    </h2>
+                </div>
+                <div class="overall-stats" style="grid-template-columns: 1fr 1fr;">
+                    <div class="stat-card">
+                        <div class="stat-value" id="displayFeedStock">0 kg</div>
+                        <div class="stat-label">Feed Stock</div>
+                        <button class="btn btn-sm btn-secondary mt-20" onclick="app.openInventoryModal()" style="margin-top: 10px; width: 100%;">
+                            <i class="fas fa-plus"></i> Add Stock
+                        </button>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="displayMedStock">0 Items</div>
+                        <div class="stat-label">Medicine & Minerals</div>
+                        <button class="btn btn-sm btn-secondary mt-20" onclick="app.openMedicineInventoryModal()" style="margin-top: 10px; width: 100%;">
+                            <i class="fas fa-pills"></i> Manage
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Feed Trend Chart -->
                 <div class="chart-container" style="height: 300px; margin-bottom: 24px; background: white; border: 2px solid var(--border); border-radius: var(--radius); padding: 16px;">
                     <canvas id="feedTrendChart"></canvas>
@@ -2920,6 +2944,44 @@
         </div>
     </div>
 
+    <!-- Medicine Inventory Modal -->
+    <div class="modal-overlay" id="medicineInventoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-pills"></i> Medicine Inventory</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="farm-form" style="padding: 16px; margin-bottom: 20px; border: 1px solid var(--border);">
+                    <h4 style="margin-bottom: 12px; font-size: 14px;">Add / Update Stock</h4>
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" id="medName" class="form-control" placeholder="e.g. Probiotic A" list="supplementList">
+                        <datalist id="supplementList">
+                            <!-- Populated by JS -->
+                        </datalist>
+                    </div>
+                    <div class="form-row" style="margin-bottom: 0;">
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" id="medQty" class="form-control" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Unit</label>
+                            <select id="medUnit" class="form-control">
+                                <option value="kg">kg</option>
+                                <option value="L">L</option>
+                                <option value="pcs">pcs</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.saveMedicineStock()">Update Stock</button>
+                </div>
+                <div id="medicineList" class="settings-list"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Sampling Modal -->
     <div class="modal-overlay" id="samplingModal">
         <div class="modal-content">
@@ -2978,6 +3040,7 @@
                     tasks: [],           // Task records
                     prices: [],          // Market prices
                     inventory: { totalKg: 0 }, // Inventory
+                    medicineInventory: [], // Medicine inventory array
                     settings: {
                         currentFarmId: null,
                         currency: 'INR',
@@ -2990,6 +3053,7 @@
                 
                 this.currentDate = this.getFormattedDate();
                 this.initialized = false;
+                this.currentWeatherCode = null;
                 this.editingEntryId = null;
                 this.editingFarmId = null;
                 this.editingTankId = null;
@@ -3127,6 +3191,8 @@
                 if (!this.state.inventory || typeof this.state.inventory !== 'object') {
                     this.state.inventory = { totalKg: 0 };
                 }
+                // Load medicine inventory
+                this.state.medicineInventory = safeArray(safeParse('aquabook_medicine', []));
 
                 // Load prices
                 const savedPrices = safeParse('aquabook_prices', null);
@@ -3174,6 +3240,7 @@
                 localStorage.setItem('aquabook_sampling', JSON.stringify(this.state.samplingEntries));
                 localStorage.setItem('aquabook_tasks', JSON.stringify(this.state.tasks));
                 localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
+                localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
                 localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
             }
             
@@ -3213,6 +3280,10 @@
                 localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
             }
 
+            saveMedicineInventory() {
+                localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
+            }
+
             savePrices() {
                 localStorage.setItem('aquabook_prices', JSON.stringify(this.state.prices));
             }
@@ -3226,6 +3297,14 @@
                 const today = this.currentDate;
                 const yesterday = this.getFormattedDate(new Date(Date.now() - 86400000));
                 
+                // 1. Weather Check (High Priority)
+                if (this.currentWeatherCode !== null && this.currentWeatherCode >= 50) {
+                    return {
+                        text: "🌧️ Weather Alert: Rain or overcast conditions detected. Dissolved Oxygen may drop.",
+                        action: "Reduce feed by 10-20% to prevent waste."
+                    };
+                }
+
                 // Get today's feed entries
                 const todayEntries = this.state.feedEntries.filter(entry => entry.date === today);
                 
@@ -3292,6 +3371,7 @@
                 this.renderPrices();
                 this.checkPendingTrays();
                 this.renderFeedTrendChart();
+                this.renderInventorySummary();
             }
             
             // ===== WEATHER WIDGET =====
@@ -3309,6 +3389,7 @@
                             const data = await response.json();
                             
                             if (data.current_weather) {
+                                this.currentWeatherCode = data.current_weather.weathercode;
                                 document.getElementById('weatherTemp').textContent = `${Math.round(data.current_weather.temperature)}°`;
                                 document.getElementById('weatherCondition').textContent = this.getWeatherCondition(data.current_weather.weathercode);
                                 document.getElementById('weatherLoc').textContent = "Local Farm";
@@ -3381,6 +3462,12 @@
                 if (wastePctVal <= 10) feedWasteEl.style.color = 'var(--success)';
                 else if (wastePctVal <= 20) feedWasteEl.style.color = 'var(--warning)';
                 else feedWasteEl.style.color = 'var(--danger)';
+            }
+            
+            renderInventorySummary() {
+                const feedStock = this.state.inventory.totalKg || 0;
+                document.getElementById('displayFeedStock').innerHTML = `${feedStock.toFixed(1)} <span class="unit">kg</span>`;
+                document.getElementById('displayMedStock').innerHTML = `${this.state.medicineInventory.length} <span class="unit">Items</span>`;
             }
 
             renderFeedTrendChart() {
@@ -4411,6 +4498,70 @@
                 }
             }
 
+            // ===== MEDICINE INVENTORY =====
+            openMedicineInventoryModal() {
+                // Populate datalist
+                const datalist = document.getElementById('supplementList');
+                datalist.innerHTML = this.state.settings.supplements.map(s => `<option value="${s}">`).join('');
+                
+                this.renderMedicineInventoryList();
+                document.getElementById('medicineInventoryModal').classList.add('active');
+            }
+
+            renderMedicineInventoryList() {
+                const list = document.getElementById('medicineList');
+                if (this.state.medicineInventory.length === 0) {
+                    list.innerHTML = '<div class="empty-state" style="padding: 20px;"><p>No medicines in stock</p></div>';
+                    return;
+                }
+                list.innerHTML = this.state.medicineInventory.map(item => `
+                    <div class="settings-item">
+                        <div style="display:flex; flex-direction:column;">
+                            <span style="font-weight:600;">${item.name}</span>
+                            <span style="font-size:12px; color:var(--gray);">${item.quantity} ${item.unit}</span>
+                        </div>
+                        <button class="btn-icon" style="color: var(--danger);" onclick="app.deleteMedicineItem('${item.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `).join('');
+            }
+
+            saveMedicineStock() {
+                const name = document.getElementById('medName').value.trim();
+                const qty = parseFloat(document.getElementById('medQty').value);
+                const unit = document.getElementById('medUnit').value;
+
+                if (!name || isNaN(qty)) {
+                    this.showToast('Please enter valid name and quantity', 'error');
+                    return;
+                }
+
+                const existing = this.state.medicineInventory.find(i => i.name.toLowerCase() === name.toLowerCase() && i.unit === unit);
+                if (existing) {
+                    existing.quantity += qty;
+                } else {
+                    this.state.medicineInventory.push({ id: Date.now().toString(), name, quantity: qty, unit });
+                }
+                this.saveMedicineInventory();
+                this.renderMedicineInventoryList();
+                this.renderInventorySummary();
+                this.showToast('Medicine stock updated');
+                
+                // Clear inputs
+                document.getElementById('medName').value = '';
+                document.getElementById('medQty').value = '';
+            }
+
+            deleteMedicineItem(id) {
+                if (confirm('Remove this item from inventory?')) {
+                    this.state.medicineInventory = this.state.medicineInventory.filter(i => i.id !== id);
+                    this.saveMedicineInventory();
+                    this.renderMedicineInventoryList();
+                    this.renderInventorySummary();
+                }
+            }
+
             // ===== FEED ROUND (BULK) =====
             openFeedRoundModal() {
                 const currentFarmId = this.state.settings.currentFarmId;
@@ -4557,6 +4708,7 @@
                     this.state.inventory.totalKg = currentStock - totalAmount;
                     this.saveFeedEntries();
                     this.saveInventory();
+                    this.renderInventorySummary();
                     this.closeAllModals();
                     this.renderAll();
                     this.showToast(`Saved ${count} feed entries. Check trays in 2 hours!`);
@@ -4666,6 +4818,8 @@
                     if (!entry) return;
 
                     const tank = this.getTankById(entry.tankId);
+                    const doc = Math.floor((new Date() - new Date(tank.stockingDate)) / (1000 * 60 * 60 * 24));
+                    
                     let newAmount = entry.amount;
                     let reason = "Keep same";
                     let reasonColor = "var(--gray)";
@@ -4677,17 +4831,34 @@
                     else if (trayResults.includes('little')) worstResult = 'little';
 
                     if (worstResult === 'empty') {
-                        newAmount = (entry.amount * 1.05).toFixed(1);
+                        newAmount = entry.amount * 1.05;
                         reason = `+5% (was ${entry.amount}kg)`;
                         reasonColor = "var(--success)";
                     } else if (worstResult === 'half') {
-                        newAmount = (entry.amount * 0.9).toFixed(1);
+                        newAmount = entry.amount * 0.9;
                         reason = `-10% (was ${entry.amount}kg)`;
                         reasonColor = "var(--warning-dark)";
                     } else if (worstResult === 'too-much') {
-                        newAmount = (entry.amount * 0.8).toFixed(1);
+                        newAmount = entry.amount * 0.8;
                         reason = `-20% (was ${entry.amount}kg)`;
                         reasonColor = "var(--danger)";
+                    }
+
+                    // AI Adjustments: Weather & DOC
+                    if (this.currentWeatherCode !== null && this.currentWeatherCode >= 50) {
+                        // Rain/Bad Weather Logic
+                        if (worstResult === 'empty') {
+                            newAmount = entry.amount; // Cancel increase
+                            reason = "🌧️ Rain: Hold amount (Safety)";
+                            reasonColor = "var(--warning)";
+                        } else {
+                            newAmount = newAmount * 0.9; // Further reduce
+                            reason = "🌧️ Rain: Extra -10% reduction";
+                            reasonColor = "var(--danger)";
+                        }
+                    } else if (doc > 90 && worstResult !== 'empty') {
+                        // High Biomass Caution
+                        reason += " (High DOC Caution)";
                     }
 
                     suggestions.push({
@@ -4696,7 +4867,7 @@
                         tankName: tank.name,
                         trayResults: trayResults,
                         notes: notesInput.value,
-                        newAmount: parseFloat(newAmount),
+                        newAmount: parseFloat(newAmount.toFixed(1)),
                         reason,
                         reasonColor
                     });
@@ -6097,6 +6268,7 @@
                     samplingEntries: this.state.samplingEntries,
                     tasks: this.state.tasks,
                     inventory: this.state.inventory,
+                    medicineInventory: this.state.medicineInventory,
                     settings: this.state.settings,
                     prices: this.state.prices,
                     exportDate: new Date().toISOString(),
@@ -6137,6 +6309,7 @@
                             localStorage.setItem('aquabook_sampling', JSON.stringify(data.samplingEntries || []));
                             localStorage.setItem('aquabook_tasks', JSON.stringify(data.tasks || []));
                             localStorage.setItem('aquabook_inventory', JSON.stringify(data.inventory));
+                            localStorage.setItem('aquabook_medicine', JSON.stringify(data.medicineInventory || []));
                             localStorage.setItem('aquabook_settings', JSON.stringify(data.settings));
                             localStorage.setItem('aquabook_prices', JSON.stringify(data.prices || []));
                             
