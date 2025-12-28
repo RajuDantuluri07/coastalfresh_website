@@ -2776,10 +2776,22 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-success" id="saveFarmBtn">
-                    <i class="fas fa-save"></i>
-                    Save Farm
-                </button>
+                <div id="farmDeleteConfirm" style="display: none; width: 100%; align-items: center; justify-content: space-between; gap: 10px;">
+                    <div style="color: var(--danger); font-weight: 600; font-size: 13px; line-height: 1.2;">Permanently delete farm & all data?</div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-sm btn-secondary" onclick="app.cancelDeleteFarm()">Cancel</button>
+                        <button class="btn btn-sm btn-danger" id="confirmDeleteFarmBtn">Confirm</button>
+                    </div>
+                </div>
+                <div id="farmModalActions" style="display: flex; gap: 12px; width: 100%; justify-content: flex-end;">
+                    <button class="btn btn-danger" id="deleteFarmBtn" style="display: none; margin-right: auto;">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                    <button class="btn btn-success" id="saveFarmBtn">
+                        <i class="fas fa-save"></i>
+                        Save Farm
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -3441,9 +3453,6 @@
                                 </div>
                                 <button class="btn btn-sm btn-secondary" onclick="app.editFarm('${farm.id}')">
                                     <i class="fas fa-edit"></i> Edit
-                                </button>
-                                <button class="btn btn-sm btn-danger" onclick="app.deleteFarm('${farm.id}')">
-                                    <i class="fas fa-trash"></i> Delete
                                 </button>
                                 <button class="btn btn-sm btn-primary" onclick="app.openTankModal('${farm.id}')">
                                     <i class="fas fa-plus"></i> Add Tank
@@ -4245,6 +4254,9 @@
                 document.getElementById('farmPhone').value = '';
                 document.getElementById('farmLat').value = '';
                 document.getElementById('farmLng').value = '';
+                document.getElementById('deleteFarmBtn').style.display = 'none';
+                document.getElementById('farmDeleteConfirm').style.display = 'none';
+                document.getElementById('farmModalActions').style.display = 'flex';
                 document.querySelector('#farmModal h3').innerHTML = '<i class="fas fa-plus-circle"></i> Add New Farm';
                 document.getElementById('saveFarmBtn').innerHTML = '<i class="fas fa-save"></i> Save Farm';
                 document.getElementById('farmModal').classList.add('active');
@@ -4262,6 +4274,12 @@
                 document.getElementById('farmLat').value = farm.lat || '';
                 document.getElementById('farmLng').value = farm.lng || '';
                 
+                const deleteBtn = document.getElementById('deleteFarmBtn');
+                deleteBtn.style.display = 'inline-flex';
+                deleteBtn.onclick = () => this.showDeleteConfirmation(id);
+                document.getElementById('farmDeleteConfirm').style.display = 'none';
+                document.getElementById('farmModalActions').style.display = 'flex';
+
                 document.querySelector('#farmModal h3').innerHTML = '<i class="fas fa-edit"></i> Edit Farm';
                 document.getElementById('saveFarmBtn').innerHTML = '<i class="fas fa-save"></i> Update Farm';
                 document.getElementById('farmModal').classList.add('active');
@@ -5298,34 +5316,44 @@
                 this.editingFarmId = null;
             }
 
+            showDeleteConfirmation(id) {
+                document.getElementById('farmModalActions').style.display = 'none';
+                document.getElementById('farmDeleteConfirm').style.display = 'flex';
+                document.getElementById('confirmDeleteFarmBtn').onclick = () => this.deleteFarm(id);
+            }
+
+            cancelDeleteFarm() {
+                document.getElementById('farmDeleteConfirm').style.display = 'none';
+                document.getElementById('farmModalActions').style.display = 'flex';
+            }
+
             deleteFarm(id) {
-                if (confirm('Are you sure you want to delete this farm? This will also delete all associated tanks, feed logs, and other data. This action cannot be undone.')) {
-                    const farmId = String(id);
+                const farmId = String(id);
 
-                    // Find tanks to be deleted
-                    const tanksToDelete = this.state.tanks.filter(t => t.farmId === farmId);
-                    const tankIdsToDelete = tanksToDelete.map(t => t.id);
+                // Find tanks to be deleted
+                const tanksToDelete = this.state.tanks.filter(t => t.farmId === farmId);
+                const tankIdsToDelete = tanksToDelete.map(t => t.id);
 
-                    // Filter out associated data
-                    this.state.tanks = this.state.tanks.filter(t => t.farmId !== farmId);
-                    this.state.feedEntries = this.state.feedEntries.filter(e => !tankIdsToDelete.includes(e.tankId));
-                    this.state.waterEntries = this.state.waterEntries.filter(e => !tankIdsToDelete.includes(e.tankId));
-                    this.state.harvests = this.state.harvests.filter(h => !tankIdsToDelete.includes(h.tankId));
-                    this.state.expenses = this.state.expenses.filter(e => e.farmId !== farmId);
+                // Filter out associated data
+                this.state.tanks = this.state.tanks.filter(t => t.farmId !== farmId);
+                this.state.feedEntries = this.state.feedEntries.filter(e => !tankIdsToDelete.includes(e.tankId));
+                this.state.waterEntries = this.state.waterEntries.filter(e => !tankIdsToDelete.includes(e.tankId));
+                this.state.harvests = this.state.harvests.filter(h => !tankIdsToDelete.includes(h.tankId));
+                this.state.expenses = this.state.expenses.filter(e => e.farmId !== farmId);
 
-                    // Filter out the farm itself
-                    this.state.farms = this.state.farms.filter(f => f.id !== farmId);
+                // Filter out the farm itself
+                this.state.farms = this.state.farms.filter(f => f.id !== farmId);
 
-                    // Check if the deleted farm was the current one
-                    if (this.state.settings.currentFarmId === farmId) {
-                        this.state.settings.currentFarmId = this.state.farms.length > 0 ? this.state.farms[0].id : null;
-                    }
-
-                    this.saveAllData();
-                    this.checkFirstTimeUser();
-                    this.renderAll();
-                    this.showToast('Farm deleted successfully', 'warning');
+                // Check if the deleted farm was the current one
+                if (this.state.settings.currentFarmId === farmId) {
+                    this.state.settings.currentFarmId = this.state.farms.length > 0 ? this.state.farms[0].id : null;
                 }
+
+                this.saveAllData();
+                this.checkFirstTimeUser();
+                this.renderAll();
+                this.closeAllModals();
+                this.showToast('Farm deleted successfully', 'warning');
             }
 
             saveTank() {
