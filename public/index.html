@@ -3530,18 +3530,19 @@
             }
 
             async completeAppInitialization() {
+                // Attach listeners early so UI is responsive even if data load fails
+                if (!this.listenersAttached) {
+                    this.setupEventListeners();
+                    this.listenersAttached = true;
+                    window.addEventListener('online', () => this.showToast('You are back online!', 'success'));
+                    window.addEventListener('offline', () => this.showToast('You are offline. Maps may not work.', 'warning'));
+                }
+
                 try {
                     await this.loadAllData(); // Load data from Firestore
                     this.setupUI();
                     this.checkFirstTimeUser();
                     this.renderAll();
-                    
-                    if (!this.listenersAttached) {
-                        this.setupEventListeners();
-                        this.listenersAttached = true;
-                        window.addEventListener('online', () => this.showToast('You are back online!', 'success'));
-                        window.addEventListener('offline', () => this.showToast('You are offline. Maps may not work.', 'warning'));
-                    }
                     
                     this.initWeather();
 
@@ -3554,6 +3555,8 @@
                     console.error("App initialization failed:", error);
                     this.showLoading(false);
                     this.showToast("Something went wrong. Please refresh.", "error");
+                    // Ensure lock screen logic runs even on error to prevent broken state
+                    this.checkFirstTimeUser();
                 }
             }
 
@@ -4089,6 +4092,9 @@
                         <i class="fas fa-water"></i>
                         <h3>No Farms Found</h3>
                         <p>Add your first farm to start tracking.</p>
+                        <button class="btn btn-primary mt-20" onclick="app.openFarmModal()">
+                            <i class="fas fa-plus"></i> Add New Farm
+                        </button>
                     </div>`;
                     return;
                 }
