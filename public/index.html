@@ -3415,6 +3415,7 @@
                 this.taskFilter = 'all'; // all, pending, completed
                 this.logViewType = 'matrix'; // 'matrix' or 'list'
                 this.tempTrayResult = null; // Temporary storage for single tray update
+                this.listenersAttached = false; // Prevent duplicate listeners
                 
                 this.currentUser = null; // Will hold user info after login
                 this.firestoreListeners = []; // To hold unsubscribe functions for cleanup
@@ -3490,7 +3491,12 @@
                 this.auth.onAuthStateChanged(user => {
                     if (user) {
                         // User is signed in.
-                        this.handleSignIn(user);
+                        this.handleSignIn(user).catch(err => {
+                            console.error("Sign In Error:", err);
+                            this.showLoading(false);
+                            this.showToast("Error signing in. Please try again.", "error");
+                            this.handleSignOut();
+                        });
                     } else {
                         // User is signed out.
                         this.handleSignOut();
@@ -3515,21 +3521,29 @@
                 if (hasInvite) {
                     // The invitation flow will take over. Don't initialize the main app yet.
                     this.showLoading(false);
+                    this.handleInvitations(user);
                     return;
                 }
 
                 this.currentUser = userProfile;
-                
+                await this.completeAppInitialization();
+            }
+
+            async completeAppInitialization() {
                 try {
                     await this.loadAllData(); // Load data from Firestore
                     this.setupUI();
                     this.checkFirstTimeUser();
                     this.renderAll();
-                    this.setupEventListeners();
+                    
+                    if (!this.listenersAttached) {
+                        this.setupEventListeners();
+                        this.listenersAttached = true;
+                        window.addEventListener('online', () => this.showToast('You are back online!', 'success'));
+                        window.addEventListener('offline', () => this.showToast('You are offline. Maps may not work.', 'warning'));
+                    }
+                    
                     this.initWeather();
-
-                    window.addEventListener('online', () => this.showToast('You are back online!', 'success'));
-                    window.addEventListener('offline', () => this.showToast('You are offline. Maps may not work.', 'warning'));
 
                     setTimeout(() => {
                         this.showLoading(false);
@@ -3637,8 +3651,16 @@
                 this.state.medicineApplications = [];
 
                 // Fetch farms owned by the user
-                const farmsQuery = await this.db.collection('farms').where('ownerId', '==', userId).get();
-                this.state.farms = farmsQuery.docs.map(doc => doc.data());
+                const farmsQueryOwner = await this.db.collection('farms').where('ownerId', '==', userId).get();
+                // Fetch farms where user is a member
+                const farmsQueryMember = await this.db.collection('farms').where('memberIds', 'array-contains', userId).get();
+                
+                // Merge results
+                const farmMap = new Map();
+                farmsQueryOwner.docs.forEach(doc => farmMap.set(doc.id, doc.data()));
+                farmsQueryMember.docs.forEach(doc => farmMap.set(doc.id, doc.data()));
+                
+                this.state.farms = Array.from(farmMap.values());
 
                 if (this.state.farms.length > 0) {
                     const farmIds = this.state.farms.map(f => f.id);
@@ -4960,6 +4982,42 @@
                 return null;
             }
 
+            async handleInvitations(user) {
+                try {
+                    const q = await this.db.collection('invitations').where('invitedPhone', '==', user.phoneNumber).where('status', '==', 'pending').get();
+                    if (q.empty) {
+                        this.completeAppInitialization();
+                        return;
+                    }
+
+                    const inviteDoc = q.docs[0];
+                    const invite = inviteDoc.data();
+
+                    if (confirm(`You have been invited to join "${invite.farmName}" as a ${invite.role}. Accept invitation?`)) {
+                        this.showLoading(true);
+                        
+                        // 1. Update Invitation Status
+                        await this.db.collection('invitations').doc(inviteDoc.id).update({ status: 'accepted' });
+
+                        // 2. Add user to Farm members
+                        const updateData = {};
+                        updateData[`members.${user.uid}`] = invite.role;
+                        updateData['memberIds'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
+                        updateData['pendingInvites'] = firebase.firestore.FieldValue.arrayRemove(user.phoneNumber);
+                        await this.db.collection('farms').doc(invite.farmId).update(updateData);
+
+                        this.showToast('Invitation accepted!');
+                    } else {
+                        await this.db.collection('invitations').doc(inviteDoc.id).update({ status: 'rejected' });
+                        this.showToast('Invitation declined.');
+                    }
+                    this.completeAppInitialization();
+                } catch (e) {
+                    console.error("Invite Error", e);
+                    this.completeAppInitialization();
+                }
+            }
+
             async checkForInvitations(user) {
                 try {
                     const q = await this.db.collection('invitations').where('invitedPhone', '==', user.phoneNumber).where('status', '==', 'pending').get();
@@ -5033,7 +5091,8 @@
                 // Set current user and close modal
                 this.currentUser = { uid: user.uid, ...userProfile };
                 this.closeAllModals();
-                this.showLoading(false);
+                
+                await this.completeAppInitialization();
                 // Guide the new user to add their first farm directly.
                 this.openFarmModal();
             }
@@ -5049,10 +5108,15 @@
                 document.getElementById('farmPhone').value = farm.phone || '';
                 document.getElementById('farmLat').value = farm.lat || '';
                 document.getElementById('farmLng').value = farm.lng || '';
-                
+
                 const deleteBtn = document.getElementById('deleteFarmBtn');
-                deleteBtn.style.display = 'inline-flex';
-                deleteBtn.onclick = () => this.showDeleteConfirmation(id);
+                // Only show delete button if the current user is the owner
+                if (farm.ownerId === this.currentUser.uid) {
+                    deleteBtn.style.display = 'inline-flex';
+                    deleteBtn.onclick = () => this.showDeleteConfirmation(id);
+                } else {
+                    deleteBtn.style.display = 'none';
+                }
                 document.getElementById('farmDeleteConfirm').style.display = 'none';
                 document.getElementById('farmModalActions').style.display = 'flex';
 
@@ -6401,6 +6465,7 @@
                     return;
                 }
 
+                try {
                 this.showLoading(true);
                 if (this.editingFarmId) {
                     const farm = this.getFarmById(this.editingFarmId);
@@ -6419,6 +6484,8 @@
                         id: Date.now().toString(),
                         name,
                         ownerId,
+                        memberIds: [ownerId],
+                        members: { [ownerId]: 'owner' },
                         location,
                         contact,
                         phone,
@@ -6433,7 +6500,7 @@
                     // Set as current if first
                     if (this.state.farms.length === 1) {
                         this.state.settings.currentFarmId = newFarm.id;
-                        this.saveSettings();
+                        await this.saveSettings();
                     }
                     this.showToast('Farm added successfully');
                 }
@@ -6451,6 +6518,11 @@
                 document.getElementById('farmLat').value = '';
                 document.getElementById('farmLng').value = '';
                 this.editingFarmId = null;
+                } catch (e) {
+                    console.error(e);
+                    this.showLoading(false);
+                    this.showToast('Error saving farm: ' + e.message, 'error');
+                }
             }
 
             showDeleteConfirmation(id) {
@@ -6467,9 +6539,34 @@
             async deleteFarm(id) {
                 const farmId = String(id);
 
+                try {
+                this.showLoading(true);
+
                 // Find tanks to be deleted
                 const tanksToDelete = this.state.tanks.filter(t => t.farmId === farmId);
                 const tankIdsToDelete = tanksToDelete.map(t => t.id);
+
+                // 1. Delete associated data (Feed, Water, Harvests)
+                // We use the helper to avoid batch limits
+                if (tankIdsToDelete.length > 0) {
+                    // Firestore 'in' query is limited to 10. We must loop if many tanks.
+                    // For simplicity, we delete by farmId if possible, but our collections use tankId mostly.
+                    // Actually, our collections DO have farmId. Let's use that.
+                    await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('farmId', '==', farmId));
+                    await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('farmId', '==', farmId));
+                    await this.deleteCollectionByQuery(this.db.collection('harvests').where('farmId', '==', farmId));
+                    await this.deleteCollectionByQuery(this.db.collection('expenses').where('farmId', '==', farmId));
+                    await this.deleteCollectionByQuery(this.db.collection('tasks').where('farmId', '==', farmId));
+                    await this.deleteCollectionByQuery(this.db.collection('sampling').where('farmId', '==', farmId));
+                    await this.deleteCollectionByQuery(this.db.collection('medicineApplications').where('farmId', '==', farmId));
+                    await this.deleteCollectionByQuery(this.db.collection('medicineInventory').where('farmId', '==', farmId));
+                }
+
+                // 2. Delete Tanks
+                await this.deleteCollectionByQuery(this.db.collection('tanks').where('farmId', '==', farmId));
+
+                // 3. Delete Farm Document
+                await this.db.collection('farms').doc(farmId).delete();
 
                 // Filter out associated data
                 this.state.tanks = this.state.tanks.filter(t => t.farmId !== farmId);
@@ -6481,19 +6578,21 @@
                 // Filter out the farm itself
                 this.state.farms = this.state.farms.filter(f => f.id !== farmId);
                 
-                // Delete from Firestore
-                await this.db.collection('farms').doc(farmId).delete();
-                // Note: In a real app, you'd want a Cloud Function to recursively delete sub-collections/related docs
-
                 // Check if the deleted farm was the current one
                 if (this.state.settings.currentFarmId === farmId) {
                     this.state.settings.currentFarmId = this.state.farms.length > 0 ? this.state.farms[0].id : null;
                 }
 
+                this.showLoading(false);
                 this.checkFirstTimeUser();
                 this.renderAll();
                 this.closeAllModals();
                 this.showToast('Farm deleted successfully', 'warning');
+                } catch (e) {
+                    console.error(e);
+                    this.showLoading(false);
+                    this.showToast('Error deleting farm: ' + e.message, 'error');
+                }
             }
 
             async saveTank() {
@@ -6560,13 +6659,23 @@
 
             async deleteTank(id) {
                 if(confirm('Are you sure you want to delete this tank? All associated data (feed, water tests, etc.) will be permanently deleted.')) {
+                    this.showLoading(true);
                     const tankId = String(id);
+                    
+                    // Use helper to delete large collections
+                    await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('tankId', '==', tankId));
+                    await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tankId));
+                    await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tankId));
+                    
+                    // Delete tank
                     await this.db.collection('tanks').doc(tankId).delete();
+
                     this.state.tanks = this.state.tanks.filter(t => t.id !== tankId);
                     this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId !== tankId);
                     this.state.waterEntries = this.state.waterEntries.filter(e => e.tankId !== tankId);
                     this.state.harvests = this.state.harvests.filter(h => h.tankId !== tankId);
                     
+                    this.showLoading(false);
                     this.renderAll();
                     this.closeAllModals();
                     this.showToast('Tank deleted', 'warning');
@@ -6874,6 +6983,12 @@
 
                 const invitation = { farmId, farmName: farm.name, invitedByUid: this.currentUser.uid, invitedByName: this.currentUser.name, invitedPhone: phone, role, status: 'pending', createdAt: new Date() };
                 await this.db.collection('invitations').add(invitation);
+                
+                // Add to farm's pendingInvites to allow the user to update the farm doc later
+                await this.db.collection('farms').doc(farmId).update({
+                    pendingInvites: firebase.firestore.FieldValue.arrayUnion(phone)
+                });
+
                 this.showToast(`Invitation sent to ${phone}!`, 'success');
             }
 
@@ -7018,18 +7133,10 @@
 
                 this.showLoading(true);
 
-                // Delete associated data from Firestore using Batch
-                const batch = this.db.batch();
-                
-                // We need to query and delete. Since batch has limit, we'll do simple deletes for MVP or assume low volume
-                // For this snippet, we'll just update local state and assume a backend function handles cleanup or we do it iteratively
-                // Correct approach:
-                const feedQuery = await this.db.collection('feedEntries').where('tankId', '==', tankId).get();
-                feedQuery.forEach(doc => batch.delete(doc.ref));
-                const waterQuery = await this.db.collection('waterEntries').where('tankId', '==', tankId).get();
-                waterQuery.forEach(doc => batch.delete(doc.ref));
-                const harvestQuery = await this.db.collection('harvests').where('tankId', '==', tankId).get();
-                harvestQuery.forEach(doc => batch.delete(doc.ref));
+                // Delete associated data using helper
+                await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('tankId', '==', tankId));
+                await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tankId));
+                await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tankId));
 
                 this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId != tankId);
                 this.state.waterEntries = this.state.waterEntries.filter(e => e.tankId != tankId);
@@ -7281,45 +7388,29 @@
             }
 
             importData(input) {
-                const file = input.files[0];
-                if (!file) return;
+                alert("Data Restore is currently disabled for Cloud Sync mode to prevent data conflicts. Please contact support if you need to migrate data.");
+                input.value = '';
+            }
 
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        
-                        // Validate basic structure
-                        if (!data.farms || !data.tanks) {
-                            throw new Error("Invalid backup file format");
-                        }
-
-                        if (confirm(`Restore data from ${new Date(data.exportDate).toLocaleDateString()}? This will overwrite current data.`)) {
-                            localStorage.setItem('aquabook_farms', JSON.stringify(data.farms));
-                            localStorage.setItem('aquabook_tanks', JSON.stringify(data.tanks));
-                            localStorage.setItem('aquabook_entries', JSON.stringify(data.feedEntries));
-                            localStorage.setItem('aquabook_harvests', JSON.stringify(data.harvests));
-                            localStorage.setItem('aquabook_water', JSON.stringify(data.waterEntries || []));
-                            localStorage.setItem('aquabook_expenses', JSON.stringify(data.expenses || []));
-                            localStorage.setItem('aquabook_sampling', JSON.stringify(data.samplingEntries || []));
-                            localStorage.setItem('aquabook_tasks', JSON.stringify(data.tasks || []));
-                            localStorage.setItem('aquabook_inventory', JSON.stringify(data.inventory));
-                            localStorage.setItem('aquabook_medicine', JSON.stringify(data.medicineInventory || []));
-                            localStorage.setItem('aquabook_med_apps', JSON.stringify(data.medicineApplications || []));
-                            localStorage.setItem('aquabook_settings', JSON.stringify(data.settings));
-                            localStorage.setItem('aquabook_prices', JSON.stringify(data.prices || []));
-                            
-                            alert('Data restored successfully! The app will now reload.');
-                            window.location.reload();
-                        }
-                    } catch (err) {
-                        console.error(err);
-                        this.showToast('Failed to restore data. Invalid file.', 'error');
+            // Helper to delete large collections in chunks
+            async deleteCollectionByQuery(query) {
+                const snapshot = await query.get();
+                const batchSize = 400; // Safe limit below 500
+                const chunks = [];
+                let batch = this.db.batch();
+                let count = 0;
+                
+                snapshot.docs.forEach((doc) => {
+                    batch.delete(doc.ref);
+                    count++;
+                    if (count === batchSize) {
+                        chunks.push(batch.commit());
+                        batch = this.db.batch();
+                        count = 0;
                     }
-                    // Reset input
-                    input.value = '';
-                };
-                reader.readAsText(file);
+                });
+                if (count > 0) chunks.push(batch.commit());
+                await Promise.all(chunks);
             }
         }
 
