@@ -3624,6 +3624,17 @@
                 console.log("Fetching all user data from Firestore...");
 
                 const userId = this.currentUser.uid;
+                
+                // Initialize arrays to prevent undefined errors if no farms exist
+                this.state.tanks = [];
+                this.state.feedEntries = [];
+                this.state.waterEntries = [];
+                this.state.expenses = [];
+                this.state.harvests = [];
+                this.state.samplingEntries = [];
+                this.state.tasks = [];
+                this.state.medicineInventory = [];
+                this.state.medicineApplications = [];
 
                 // Fetch farms owned by the user
                 const farmsQuery = await this.db.collection('farms').where('ownerId', '==', userId).get();
@@ -3660,11 +3671,53 @@
                     this.state.waterEntries = waterEntriesQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     const expensesQuery = await this.db.collection('expenses').where('farmId', 'in', farmIds).get();
                     this.state.expenses = expensesQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    
+                    // Fetch Harvests
+                    const harvestsQuery = await this.db.collection('harvests').where('farmId', 'in', farmIds).get();
+                    this.state.harvests = harvestsQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                    // Fetch Sampling
+                    const samplingQuery = await this.db.collection('sampling').where('farmId', 'in', farmIds).get();
+                    this.state.samplingEntries = samplingQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                    // Fetch Tasks
+                    const tasksQuery = await this.db.collection('tasks').where('farmId', 'in', farmIds).get();
+                    this.state.tasks = tasksQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                    // Fetch Medicine Inventory
+                    const medInvQuery = await this.db.collection('medicineInventory').where('farmId', 'in', farmIds).get();
+                    this.state.medicineInventory = medInvQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                    // Fetch Medicine Applications
+                    const medAppQuery = await this.db.collection('medicineApplications').where('farmId', 'in', farmIds).get();
+                    this.state.medicineApplications = medAppQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                    // Fetch Inventory (Feed Stock) - Assuming one doc per farm or user. Using farmId for now.
+                    // For simplicity in this MVP, we'll check the first farm's inventory or a specific collection
+                    if (this.state.settings.currentFarmId) {
+                        const invDoc = await this.db.collection('inventory').doc(this.state.settings.currentFarmId).get();
+                        if (invDoc.exists) {
+                            this.state.inventory = invDoc.data();
+                        }
+                    }
                 }
 
                 // Load settings from user profile or use defaults
                 this.state.settings.currentFarmId = this.currentUser.settings?.currentFarmId || (this.state.farms[0]?.id || null);
-                // ... load other settings
+                if (this.currentUser.settings) {
+                    this.state.settings = { ...this.state.settings, ...this.currentUser.settings };
+                }
+                // Initialize default prices if empty
+                if (this.state.prices.length === 0) {
+                    this.state.prices = [
+                        { count: 30, price: 480, change: '+10', trend: 'up' },
+                        { count: 40, price: 380, change: '+5', trend: 'up' },
+                        { count: 50, price: 310, change: '0', trend: 'stable' },
+                        { count: 60, price: 260, change: '-5', trend: 'down' },
+                        { count: 70, price: 230, change: '-10', trend: 'down' },
+                        { count: 80, price: 200, change: '0', trend: 'stable' }
+                    ];
+                }
 
                 console.log("Data loaded from Firestore.");
             }
@@ -3737,8 +3790,13 @@
                 localStorage.setItem('aquabook_prices', JSON.stringify(this.state.prices));
             }
             
-            saveSettings() {
+            async saveSettings() {
                 localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
+                if (this.currentUser) {
+                    await this.db.collection('users').doc(this.currentUser.uid).update({
+                        settings: this.state.settings
+                    });
+                }
             }
             
             // ===== FEED RECOMMENDATION LOGIC =====
@@ -4902,6 +4960,16 @@
                 return null;
             }
 
+            async checkForInvitations(user) {
+                try {
+                    const q = await this.db.collection('invitations').where('invitedPhone', '==', user.phoneNumber).where('status', '==', 'pending').get();
+                    return !q.empty;
+                } catch (e) {
+                    console.error("Error checking invitations", e);
+                    return false;
+                }
+            }
+
             showPhoneStep() {
                 document.getElementById('otp-step').style.display = 'none';
                 document.getElementById('phone-step').style.display = 'block';
@@ -4993,6 +5061,26 @@
                 document.getElementById('farmModal').classList.add('active');
             }
 
+            initiatePayment() {
+                this.showToast('Payment gateway integration required.', 'info');
+            }
+
+            async removeMember(uid) {
+                if (!confirm('Remove this member?')) return;
+                const farmId = this.state.settings.currentFarmId;
+                try {
+                    // Assuming 'members' is a map field on the farm document
+                    await this.db.collection('farms').doc(farmId).update({
+                        [`members.${uid}`]: firebase.firestore.FieldValue.delete()
+                    });
+                    this.showToast('Member removed.');
+                    this.openTeamManagement(); // Refresh list
+                } catch (e) {
+                    console.error(e);
+                    this.showToast('Failed to remove member', 'error');
+                }
+            }
+
             openFarmSelector() {
                 const list = document.getElementById('farmsListModal');
                 list.innerHTML = '';
@@ -5007,8 +5095,14 @@
                     div.onclick = () => {
                         this.state.settings.currentFarmId = farm.id;
                         this.saveSettings();
-                        this.renderAll();
-                        this.closeAllModals();
+                        
+                        // Fetch inventory for the selected farm
+                        this.db.collection('inventory').doc(farm.id).get().then(doc => {
+                            if (doc.exists) this.state.inventory = doc.data();
+                            else this.state.inventory = { totalKg: 0 };
+                            this.renderAll();
+                            this.closeAllModals();
+                        });
                     };
                     list.appendChild(div);
                 });
@@ -5042,14 +5136,18 @@
                 document.getElementById('inventoryModal').classList.add('active');
             }
 
-            saveStock() {
+            async saveStock() {
                 const bags = parseFloat(document.getElementById('stockBags').value) || 0;
                 const weight = parseFloat(document.getElementById('bagWeight').value) || 25;
+                const currentFarmId = this.state.settings.currentFarmId;
                 
-                if (bags > 0) {
+                if (bags > 0 && currentFarmId) {
                     const addedKg = bags * weight;
                     this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + addedKg;
-                    this.saveInventory();
+                    
+                    // Save to Firestore
+                    await this.db.collection('inventory').doc(currentFarmId).set(this.state.inventory, { merge: true });
+                    
                     this.renderOverallStats();
                     this.closeAllModals();
                     this.showToast(`Added ${addedKg} kg to stock`);
@@ -5087,7 +5185,7 @@
                 `).join('');
             }
 
-            saveMedicineStock() {
+            async saveMedicineStock() {
                 const name = document.getElementById('medName').value.trim();
                 const qty = parseFloat(document.getElementById('medQty').value);
                 const unit = document.getElementById('medUnit').value;
@@ -5097,13 +5195,21 @@
                     return;
                 }
 
+                const currentFarmId = this.state.settings.currentFarmId;
+                let itemToSave = null;
+
                 const existing = this.state.medicineInventory.find(i => i.name.toLowerCase() === name.toLowerCase() && i.unit === unit);
                 if (existing) {
                     existing.quantity += qty;
+                    itemToSave = existing;
                 } else {
-                    this.state.medicineInventory.push({ id: Date.now().toString(), name, quantity: qty, unit });
+                    itemToSave = { id: Date.now().toString(), farmId: currentFarmId, name, quantity: qty, unit };
+                    this.state.medicineInventory.push(itemToSave);
                 }
-                this.saveMedicineInventory();
+                
+                // Save to Firestore
+                await this.db.collection('medicineInventory').doc(itemToSave.id).set(itemToSave);
+
                 this.renderMedicineInventoryList();
                 this.renderInventorySummary();
                 this.showToast('Medicine stock updated');
@@ -5113,10 +5219,10 @@
                 document.getElementById('medQty').value = '';
             }
 
-            deleteMedicineItem(id) {
+            async deleteMedicineItem(id) {
                 if (confirm('Remove this item from inventory?')) {
+                    await this.db.collection('medicineInventory').doc(id).delete();
                     this.state.medicineInventory = this.state.medicineInventory.filter(i => i.id !== id);
-                    this.saveMedicineInventory();
                     this.renderMedicineInventoryList();
                     this.renderInventorySummary();
                 }
@@ -5161,7 +5267,7 @@
                 }
             }
 
-            saveMedicineApplication() {
+            async saveMedicineApplication() {
                 const tankId = this.editingTankId;
                 const tank = this.getTankById(tankId);
                 const medId = document.getElementById('applyMedSelect').value;
@@ -5189,7 +5295,7 @@
                 inventoryItem.quantity -= amount;
                 
                 // Record
-                const app = {
+                const medApp = {
                     id: Date.now(),
                     tankId,
                     farmId: tank.farmId,
@@ -5201,10 +5307,12 @@
                     remarks
                 };
                 
-                this.state.medicineApplications.push(app);
+                this.state.medicineApplications.push(medApp);
                 
-                this.saveMedicineInventory();
-                this.saveMedicineApplications();
+                // Firestore updates
+                await this.db.collection('medicineInventory').doc(inventoryItem.id).update({ quantity: inventoryItem.quantity });
+                await this.db.collection('medicineApplications').doc(medApp.id.toString()).set(medApp);
+
                 this.renderInventorySummary(); // Update home screen stats
                 this.closeAllModals();
                 this.showToast('Medicine applied and stock deducted');
@@ -5308,7 +5416,6 @@
                     `;
                     list.appendChild(row);
                 });
-                this.saveTanks(); // Save the cleared suggestions
 
                 document.getElementById('feedRoundModal').classList.add('active');
             }
@@ -5361,7 +5468,11 @@
                     await batch.commit();
 
                     this.state.inventory.totalKg = currentStock - totalAmount;
-                    this.saveInventory();
+                    // Update inventory in Firestore
+                    if (this.state.settings.currentFarmId) {
+                        await this.db.collection('inventory').doc(this.state.settings.currentFarmId).set(this.state.inventory, { merge: true });
+                    }
+                    
                     this.renderInventorySummary();
                     this.closeAllModals();
                     // No need to call renderAll() here, the onSnapshot listener will handle UI updates.
@@ -5663,7 +5774,7 @@
                 document.getElementById('suggestionModal').classList.add('active');
             }
 
-            acceptSuggestions() {
+            async acceptSuggestions() {
                 if (!this.pendingSuggestions) return;
 
                 this.pendingSuggestions.forEach(s => {
@@ -5688,8 +5799,31 @@
                     }
                 });
                 
-                this.saveFeedEntries();
-                this.saveTanks();
+                // No need to call saveFeedEntries/saveTanks as we updated Firestore in the loop (if implemented correctly)
+                // But wait, the loop above only updated local state in the provided snippet?
+                // The provided snippet for acceptSuggestions was incomplete in the original code regarding Firestore.
+                // Let's fix it to write to Firestore.
+                
+                const batch = this.db.batch();
+                this.pendingSuggestions.forEach(s => {
+                    const entryRef = this.db.collection('feedEntries').doc(s.entryId.toString());
+                    batch.update(entryRef, {
+                        trayResults: s.trayResults,
+                        notes: s.notes,
+                        trayResult: s.trayResult,
+                        observations: s.observations,
+                        riskScore: s.riskScore,
+                        riskLevel: s.riskLevel
+                    });
+                    
+                    const tankRef = this.db.collection('tanks').doc(s.tankId);
+                    batch.update(tankRef, {
+                        nextSuggestedFeed: { amount: s.newAmount, reason: s.reason }
+                    });
+                });
+                
+                await batch.commit();
+
                 this.closeAllModals();
                 this.renderAll();
                 this.showToast('Plan for next feed is updated!', 'success');
@@ -5708,7 +5842,9 @@
                 // Using standard FCR of 1.2 for estimation
                 const estimatedFCR = 1.2;
                 tank.biomass = Math.max(0, parseFloat(((totalFeed / estimatedFCR) - totalHarvested).toFixed(1)));
-                this.saveTanks();
+                
+                // Update Firestore
+                this.db.collection('tanks').doc(tankId).update({ biomass: tank.biomass });
             }
 
             // ===== WATER ANALYSIS =====
@@ -5882,7 +6018,7 @@
                 resultContainer.scrollIntoView({ behavior: 'smooth' });
             }
 
-            saveWaterResult() {
+            async saveWaterResult() {
                 const tankId = document.getElementById('waterTankSelect').value;
                 const tank = this.getTankById(tankId);
                 const date = document.getElementById('waterDate').value || this.currentDate;
@@ -5915,7 +6051,8 @@
                 };
 
                 this.state.waterEntries.push(entry);
-                this.saveWaterEntries();
+                await this.db.collection('waterEntries').doc(entry.id.toString()).set(entry);
+                
                 this.renderWaterHistory(tankId);
                 this.renderWaterChart(tankId);
                 this.showToast('Water test result saved!');
@@ -6020,12 +6157,12 @@
                 });
             }
 
-            deleteWaterEntry(id) {
+            async deleteWaterEntry(id) {
                 if (confirm('Delete this water test record?')) {
+                    await this.db.collection('waterEntries').doc(id.toString()).delete();
                     const entry = this.state.waterEntries.find(e => e.id === id);
                     const tankId = entry ? entry.tankId : null;
                     this.state.waterEntries = this.state.waterEntries.filter(e => e.id !== id);
-                    this.saveWaterEntries();
                     if (tankId) {
                         this.renderWaterHistory(tankId);
                         this.renderWaterChart(tankId);
@@ -6117,7 +6254,7 @@
                 });
             }
 
-            addExpense() {
+            async addExpense() {
                 const currentFarmId = this.state.settings.currentFarmId;
                 if (!currentFarmId) {
                     this.showToast('Please select a farm first', 'error');
@@ -6136,7 +6273,7 @@
 
                 const expense = { id: Date.now(), farmId: currentFarmId, category, amount, date, description };
                 this.state.expenses.push(expense);
-                this.saveExpenses();
+                await this.db.collection('expenses').doc(expense.id.toString()).set(expense);
                 this.renderExpenses();
                 this.showToast('Expense added');
                 
@@ -6145,10 +6282,10 @@
                 document.getElementById('expenseDesc').value = '';
             }
 
-            deleteExpense(id) {
+            async deleteExpense(id) {
                 if (confirm('Delete this expense record?')) {
+                    await this.db.collection('expenses').doc(id.toString()).delete();
                     this.state.expenses = this.state.expenses.filter(e => e.id !== id);
-                    this.saveExpenses();
                     this.renderExpenses();
                     this.showToast('Expense deleted');
                 }
@@ -6197,7 +6334,7 @@
                 }).join('');
             }
 
-            addTask() {
+            async addTask() {
                 const desc = document.getElementById('taskDesc').value;
                 const date = document.getElementById('taskDate').value;
                 const priority = document.getElementById('taskPriority').value;
@@ -6207,27 +6344,28 @@
                     return;
                 }
 
-                const task = { id: Date.now(), description: desc, dueDate: date, priority: priority, status: 'pending' };
+                const currentFarmId = this.state.settings.currentFarmId;
+                const task = { id: Date.now(), farmId: currentFarmId, description: desc, dueDate: date, priority: priority, status: 'pending' };
                 this.state.tasks.push(task);
-                this.saveTasks();
+                await this.db.collection('tasks').doc(task.id.toString()).set(task);
                 this.renderTasks();
                 this.showToast('Task added');
                 document.getElementById('taskDesc').value = '';
             }
 
-            toggleTask(id) {
+            async toggleTask(id) {
                 const task = this.state.tasks.find(t => t.id === id);
                 if (task) {
                     task.status = task.status === 'completed' ? 'pending' : 'completed';
-                    this.saveTasks();
+                    await this.db.collection('tasks').doc(id.toString()).update({ status: task.status });
                     this.renderTasks();
                 }
             }
 
-            deleteTask(id) {
+            async deleteTask(id) {
                 if (confirm('Delete this task?')) {
+                    await this.db.collection('tasks').doc(id.toString()).delete();
                     this.state.tasks = this.state.tasks.filter(t => t.id !== id);
-                    this.saveTasks();
                     this.renderTasks();
                 }
             }
@@ -6326,7 +6464,7 @@
                 document.getElementById('farmModalActions').style.display = 'flex';
             }
 
-            deleteFarm(id) {
+            async deleteFarm(id) {
                 const farmId = String(id);
 
                 // Find tanks to be deleted
@@ -6342,20 +6480,23 @@
 
                 // Filter out the farm itself
                 this.state.farms = this.state.farms.filter(f => f.id !== farmId);
+                
+                // Delete from Firestore
+                await this.db.collection('farms').doc(farmId).delete();
+                // Note: In a real app, you'd want a Cloud Function to recursively delete sub-collections/related docs
 
                 // Check if the deleted farm was the current one
                 if (this.state.settings.currentFarmId === farmId) {
                     this.state.settings.currentFarmId = this.state.farms.length > 0 ? this.state.farms[0].id : null;
                 }
 
-                this.saveAllData();
                 this.checkFirstTimeUser();
                 this.renderAll();
                 this.closeAllModals();
                 this.showToast('Farm deleted successfully', 'warning');
             }
 
-            saveTank() {
+            async saveTank() {
                 const farmId = document.getElementById('tankFarmSelect').value;
                 const name = document.getElementById('tankNameInput').value;
                 const size = parseFloat(document.getElementById('tankSize').value);
@@ -6377,6 +6518,7 @@
                         tank.stockingDate = stockingDate;
                         tank.initialSeed = initialSeed;
                         tank.checkTrays = checkTrays;
+                        await this.db.collection('tanks').doc(tank.id).set(tank, { merge: true });
                         this.showToast('Tank updated successfully');
                     }
                 } else {
@@ -6393,10 +6535,10 @@
                         status: 'active'
                     };
                     this.state.tanks.push(newTank);
+                    await this.db.collection('tanks').doc(newTank.id).set(newTank);
                     this.showToast('Tank added successfully');
                 }
 
-                this.saveTanks();
                 this.closeAllModals();
                 this.renderAll();
                 this.editingTankId = null;
@@ -6416,15 +6558,15 @@
                 document.querySelector('#tankModal h3').innerHTML = '<i class="fas fa-edit"></i> Edit Tank';
             }
 
-            deleteTank(id) {
+            async deleteTank(id) {
                 if(confirm('Are you sure you want to delete this tank? All associated data (feed, water tests, etc.) will be permanently deleted.')) {
                     const tankId = String(id);
+                    await this.db.collection('tanks').doc(tankId).delete();
                     this.state.tanks = this.state.tanks.filter(t => t.id !== tankId);
                     this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId !== tankId);
                     this.state.waterEntries = this.state.waterEntries.filter(e => e.tankId !== tankId);
                     this.state.harvests = this.state.harvests.filter(h => h.tankId !== tankId);
                     
-                    this.saveAllData();
                     this.renderAll();
                     this.closeAllModals();
                     this.showToast('Tank deleted', 'warning');
@@ -6513,7 +6655,7 @@
 
                 // Adjust inventory
                 this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) - diff;
-                this.saveInventory();
+                if (this.state.settings.currentFarmId) await this.db.collection('inventory').doc(this.state.settings.currentFarmId).set(this.state.inventory, { merge: true });
 
                 this.recalculateTankBiomass(entry.tankId);
                 this.showLoading(false);
@@ -6536,7 +6678,7 @@
                 
                 // Refund inventory
                 this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + amount;
-                this.saveInventory();
+                if (this.state.settings.currentFarmId) await this.db.collection('inventory').doc(this.state.settings.currentFarmId).set(this.state.inventory, { merge: true });
 
                 if (tankId) this.recalculateTankBiomass(tankId);
                 this.closeAllModals();
@@ -6809,7 +6951,7 @@
                 document.getElementById('endCropModal').classList.add('active');
             }
 
-            saveEndCrop() {
+            async saveEndCrop() {
                 const tankId = this.currentHarvestTankId;
                 const date = document.getElementById('endCropDate').value;
                 const weight = parseFloat(document.getElementById('endCropWeight').value);
@@ -6838,11 +6980,11 @@
                     type: 'final'
                 };
                 this.state.harvests.push(harvest);
-                this.saveHarvests();
+                await this.db.collection('harvests').doc(harvest.id.toString()).set(harvest);
 
                 // Update tank status
                 tank.status = 'inactive';
-                this.saveTanks();
+                await this.db.collection('tanks').doc(tank.id).update({ status: 'inactive' });
 
                 this.closeAllModals();
                 this.renderAll();
@@ -6857,7 +6999,7 @@
                 document.getElementById('startNewCropModal').classList.add('active');
             }
 
-            saveNewCrop() {
+            async saveNewCrop() {
                 const tankId = this.editingTankId;
                 const newStockingDate = document.getElementById('newStockingDate').value;
                 const newInitialSeed = parseInt(document.getElementById('newInitialSeed').value);
@@ -6874,7 +7016,21 @@
                     return;
                 }
 
-                // Delete associated data
+                this.showLoading(true);
+
+                // Delete associated data from Firestore using Batch
+                const batch = this.db.batch();
+                
+                // We need to query and delete. Since batch has limit, we'll do simple deletes for MVP or assume low volume
+                // For this snippet, we'll just update local state and assume a backend function handles cleanup or we do it iteratively
+                // Correct approach:
+                const feedQuery = await this.db.collection('feedEntries').where('tankId', '==', tankId).get();
+                feedQuery.forEach(doc => batch.delete(doc.ref));
+                const waterQuery = await this.db.collection('waterEntries').where('tankId', '==', tankId).get();
+                waterQuery.forEach(doc => batch.delete(doc.ref));
+                const harvestQuery = await this.db.collection('harvests').where('tankId', '==', tankId).get();
+                harvestQuery.forEach(doc => batch.delete(doc.ref));
+
                 this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId != tankId);
                 this.state.waterEntries = this.state.waterEntries.filter(e => e.tankId != tankId);
                 this.state.harvests = this.state.harvests.filter(h => h.tankId != tankId);
@@ -6887,7 +7043,11 @@
                 tank.biomass = 0;
                 tank.nextSuggestedFeed = null;
 
-                this.saveAllData();
+                const tankRef = this.db.collection('tanks').doc(tankId);
+                batch.update(tankRef, { status: 'active', stockingDate: newStockingDate, initialSeed: newInitialSeed, currentSeed: newInitialSeed, biomass: 0, nextSuggestedFeed: null });
+
+                await batch.commit();
+                this.showLoading(false);
                 this.closeAllModals();
                 this.renderAll();
                 this.showToast(`New crop cycle started for ${tank.name}!`, 'success');
@@ -6919,7 +7079,7 @@
                 document.getElementById('samplingModal').classList.add('active');
             }
 
-            saveSampling() {
+            async saveSampling() {
                 const tankId = this.editingTankId;
                 const tank = this.getTankById(tankId);
                 const date = document.getElementById('sampleDate').value;
@@ -6929,11 +7089,12 @@
                 if(!weight || !count) { this.showToast('Invalid input', 'error'); return; }
 
                 const abw = parseFloat((weight/count).toFixed(2));
-                this.state.samplingEntries.push({
+                const sample = {
                     id: Date.now(), tankId, farmId: tank.farmId, date, weight, count, abw
-                });
+                };
+                this.state.samplingEntries.push(sample);
                 
-                this.saveSamplingEntries();
+                await this.db.collection('sampling').doc(sample.id.toString()).set(sample);
                 this.closeAllModals();
                 this.showToast(`Sample logged! ABW: ${abw}g`);
                 if(tankId) this.openTankDetail(tankId);
@@ -6997,7 +7158,7 @@
                 document.getElementById('partialHarvestModal').classList.add('active');
             }
 
-            savePartialHarvest() {
+            async savePartialHarvest() {
                 const tankId = this.currentHarvestTankId;
                 const date = document.getElementById('harvestDate').value;
                 const weight = parseFloat(document.getElementById('harvestWeight').value);
@@ -7020,7 +7181,7 @@
                     count
                 };
                 this.state.harvests.push(harvest);
-                this.saveHarvests();
+                await this.db.collection('harvests').doc(harvest.id.toString()).set(harvest);
 
                 // Update Tank Stats
                 // 1. Update Biomass
@@ -7035,7 +7196,7 @@
                 if (!tank.currentSeed) tank.currentSeed = tank.initialSeed;
                 tank.currentSeed = Math.max(0, Math.floor(tank.currentSeed - harvestedPcs));
 
-                this.saveTanks();
+                await this.db.collection('tanks').doc(tank.id).update({ biomass: newBiomass, currentSeed: tank.currentSeed });
 
                 // Generate Plan
                 this.renderHarvestPlan(tank, weight, count, newBiomass, tank.currentSeed);
