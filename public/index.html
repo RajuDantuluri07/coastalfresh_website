@@ -3491,12 +3491,7 @@
                 this.auth.onAuthStateChanged(user => {
                     if (user) {
                         // User is signed in.
-                        this.handleSignIn(user).catch(err => {
-                            console.error("Sign In Error:", err);
-                            this.showLoading(false);
-                            this.showToast("Error signing in. Please try again.", "error");
-                            this.handleSignOut();
-                        });
+                        this.handleSignIn(user);
                     } else {
                         // User is signed out.
                         this.handleSignOut();
@@ -3530,19 +3525,18 @@
             }
 
             async completeAppInitialization() {
-                // Attach listeners early so UI is responsive even if data load fails
-                if (!this.listenersAttached) {
-                    this.setupEventListeners();
-                    this.listenersAttached = true;
-                    window.addEventListener('online', () => this.showToast('You are back online!', 'success'));
-                    window.addEventListener('offline', () => this.showToast('You are offline. Maps may not work.', 'warning'));
-                }
-
                 try {
                     await this.loadAllData(); // Load data from Firestore
                     this.setupUI();
                     this.checkFirstTimeUser();
                     this.renderAll();
+                    
+                    if (!this.listenersAttached) {
+                        this.setupEventListeners();
+                        this.listenersAttached = true;
+                        window.addEventListener('online', () => this.showToast('You are back online!', 'success'));
+                        window.addEventListener('offline', () => this.showToast('You are offline. Maps may not work.', 'warning'));
+                    }
                     
                     this.initWeather();
 
@@ -3555,8 +3549,6 @@
                     console.error("App initialization failed:", error);
                     this.showLoading(false);
                     this.showToast("Something went wrong. Please refresh.", "error");
-                    // Ensure lock screen logic runs even on error to prevent broken state
-                    this.checkFirstTimeUser();
                 }
             }
 
@@ -4092,9 +4084,6 @@
                         <i class="fas fa-water"></i>
                         <h3>No Farms Found</h3>
                         <p>Add your first farm to start tracking.</p>
-                        <button class="btn btn-primary mt-20" onclick="app.openFarmModal()">
-                            <i class="fas fa-plus"></i> Add New Farm
-                        </button>
                     </div>`;
                     return;
                 }
@@ -5009,7 +4998,6 @@
                         const updateData = {};
                         updateData[`members.${user.uid}`] = invite.role;
                         updateData['memberIds'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
-                        updateData['pendingInvites'] = firebase.firestore.FieldValue.arrayRemove(user.phoneNumber);
                         await this.db.collection('farms').doc(invite.farmId).update(updateData);
 
                         this.showToast('Invitation accepted!');
@@ -5114,15 +5102,10 @@
                 document.getElementById('farmPhone').value = farm.phone || '';
                 document.getElementById('farmLat').value = farm.lat || '';
                 document.getElementById('farmLng').value = farm.lng || '';
-
+                
                 const deleteBtn = document.getElementById('deleteFarmBtn');
-                // Only show delete button if the current user is the owner
-                if (farm.ownerId === this.currentUser.uid) {
-                    deleteBtn.style.display = 'inline-flex';
-                    deleteBtn.onclick = () => this.showDeleteConfirmation(id);
-                } else {
-                    deleteBtn.style.display = 'none';
-                }
+                deleteBtn.style.display = 'inline-flex';
+                deleteBtn.onclick = () => this.showDeleteConfirmation(id);
                 document.getElementById('farmDeleteConfirm').style.display = 'none';
                 document.getElementById('farmModalActions').style.display = 'flex';
 
@@ -6545,34 +6528,18 @@
             async deleteFarm(id) {
                 const farmId = String(id);
 
-                try {
                 this.showLoading(true);
+                const batch = this.db.batch();
 
                 // Find tanks to be deleted
                 const tanksToDelete = this.state.tanks.filter(t => t.farmId === farmId);
                 const tankIdsToDelete = tanksToDelete.map(t => t.id);
 
-                // 1. Delete associated data (Feed, Water, Harvests)
-                // We use the helper to avoid batch limits
-                if (tankIdsToDelete.length > 0) {
-                    // Firestore 'in' query is limited to 10. We must loop if many tanks.
-                    // For simplicity, we delete by farmId if possible, but our collections use tankId mostly.
-                    // Actually, our collections DO have farmId. Let's use that.
-                    await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('farmId', '==', farmId));
-                    await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('farmId', '==', farmId));
-                    await this.deleteCollectionByQuery(this.db.collection('harvests').where('farmId', '==', farmId));
-                    await this.deleteCollectionByQuery(this.db.collection('expenses').where('farmId', '==', farmId));
-                    await this.deleteCollectionByQuery(this.db.collection('tasks').where('farmId', '==', farmId));
-                    await this.deleteCollectionByQuery(this.db.collection('sampling').where('farmId', '==', farmId));
-                    await this.deleteCollectionByQuery(this.db.collection('medicineApplications').where('farmId', '==', farmId));
-                    await this.deleteCollectionByQuery(this.db.collection('medicineInventory').where('farmId', '==', farmId));
-                }
+                // Delete farm document
+                batch.delete(this.db.collection('farms').doc(farmId));
 
-                // 2. Delete Tanks
-                await this.deleteCollectionByQuery(this.db.collection('tanks').where('farmId', '==', farmId));
-
-                // 3. Delete Farm Document
-                await this.db.collection('farms').doc(farmId).delete();
+                // Delete tanks
+                tanksToDelete.forEach(t => batch.delete(this.db.collection('tanks').doc(t.id)));
 
                 // Filter out associated data
                 this.state.tanks = this.state.tanks.filter(t => t.farmId !== farmId);
@@ -6594,11 +6561,6 @@
                 this.renderAll();
                 this.closeAllModals();
                 this.showToast('Farm deleted successfully', 'warning');
-                } catch (e) {
-                    console.error(e);
-                    this.showLoading(false);
-                    this.showToast('Error deleting farm: ' + e.message, 'error');
-                }
             }
 
             async saveTank() {
@@ -6614,39 +6576,47 @@
                     return;
                 }
 
-                if (this.editingTankId) {
-                    const tank = this.getTankById(this.editingTankId);
-                    if (tank) {
-                        tank.farmId = farmId;
-                        tank.name = name;
-                        tank.size = size;
-                        tank.stockingDate = stockingDate;
-                        tank.initialSeed = initialSeed;
-                        tank.checkTrays = checkTrays;
-                        await this.db.collection('tanks').doc(tank.id).set(tank, { merge: true });
-                        this.showToast('Tank updated successfully');
+                try {
+                    this.showLoading(true);
+                    if (this.editingTankId) {
+                        const tank = this.getTankById(this.editingTankId);
+                        if (tank) {
+                            tank.farmId = farmId;
+                            tank.name = name;
+                            tank.size = size;
+                            tank.stockingDate = stockingDate;
+                            tank.initialSeed = initialSeed;
+                            tank.checkTrays = checkTrays;
+                            await this.db.collection('tanks').doc(tank.id).set(tank, { merge: true });
+                            this.showToast('Tank updated successfully');
+                        }
+                    } else {
+                        const newTank = {
+                            id: Date.now().toString(),
+                            farmId,
+                            name,
+                            size,
+                            stockingDate: stockingDate || this.currentDate,
+                            initialSeed: initialSeed || 0,
+                            checkTrays,
+                            biomass: 0, // Initial biomass
+                            nextSuggestedFeed: null,
+                            status: 'active'
+                        };
+                        await this.db.collection('tanks').doc(newTank.id).set(newTank);
+                        this.state.tanks.push(newTank);
+                        this.showToast('Tank added successfully');
                     }
-                } else {
-                    const newTank = {
-                        id: Date.now().toString(),
-                        farmId,
-                        name,
-                        size,
-                        stockingDate: stockingDate || this.currentDate,
-                        initialSeed: initialSeed || 0,
-                        checkTrays,
-                        biomass: 0, // Initial biomass
-                        nextSuggestedFeed: null,
-                        status: 'active'
-                    };
-                    this.state.tanks.push(newTank);
-                    await this.db.collection('tanks').doc(newTank.id).set(newTank);
-                    this.showToast('Tank added successfully');
-                }
 
-                this.closeAllModals();
-                this.renderAll();
-                this.editingTankId = null;
+                    this.closeAllModals();
+                    this.renderAll();
+                    this.editingTankId = null;
+                } catch (error) {
+                    console.error("Error saving tank:", error);
+                    this.showToast("Failed to save tank. Please try again.", "error");
+                } finally {
+                    this.showLoading(false);
+                }
             }
 
             editTank(id) {
@@ -6668,13 +6638,18 @@
                     this.showLoading(true);
                     const tankId = String(id);
                     
-                    // Use helper to delete large collections
-                    await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('tankId', '==', tankId));
-                    await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tankId));
-                    await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tankId));
-                    
-                    // Delete tank
-                    await this.db.collection('tanks').doc(tankId).delete();
+                    const batch = this.db.batch();
+                    batch.delete(this.db.collection('tanks').doc(tankId));
+
+                    // Cleanup associated data
+                    const feedQ = await this.db.collection('feedEntries').where('tankId', '==', tankId).get();
+                    feedQ.forEach(doc => batch.delete(doc.ref));
+                    const waterQ = await this.db.collection('waterEntries').where('tankId', '==', tankId).get();
+                    waterQ.forEach(doc => batch.delete(doc.ref));
+                    const harvestQ = await this.db.collection('harvests').where('tankId', '==', tankId).get();
+                    harvestQ.forEach(doc => batch.delete(doc.ref));
+
+                    await batch.commit();
 
                     this.state.tanks = this.state.tanks.filter(t => t.id !== tankId);
                     this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId !== tankId);
@@ -6989,12 +6964,6 @@
 
                 const invitation = { farmId, farmName: farm.name, invitedByUid: this.currentUser.uid, invitedByName: this.currentUser.name, invitedPhone: phone, role, status: 'pending', createdAt: new Date() };
                 await this.db.collection('invitations').add(invitation);
-                
-                // Add to farm's pendingInvites to allow the user to update the farm doc later
-                await this.db.collection('farms').doc(farmId).update({
-                    pendingInvites: firebase.firestore.FieldValue.arrayUnion(phone)
-                });
-
                 this.showToast(`Invitation sent to ${phone}!`, 'success');
             }
 
@@ -7139,10 +7108,18 @@
 
                 this.showLoading(true);
 
-                // Delete associated data using helper
-                await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('tankId', '==', tankId));
-                await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tankId));
-                await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tankId));
+                // Delete associated data from Firestore using Batch
+                const batch = this.db.batch();
+                
+                // We need to query and delete. Since batch has limit, we'll do simple deletes for MVP or assume low volume
+                // For this snippet, we'll just update local state and assume a backend function handles cleanup or we do it iteratively
+                // Correct approach:
+                const feedQuery = await this.db.collection('feedEntries').where('tankId', '==', tankId).get();
+                feedQuery.forEach(doc => batch.delete(doc.ref));
+                const waterQuery = await this.db.collection('waterEntries').where('tankId', '==', tankId).get();
+                waterQuery.forEach(doc => batch.delete(doc.ref));
+                const harvestQuery = await this.db.collection('harvests').where('tankId', '==', tankId).get();
+                harvestQuery.forEach(doc => batch.delete(doc.ref));
 
                 this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId != tankId);
                 this.state.waterEntries = this.state.waterEntries.filter(e => e.tankId != tankId);
@@ -7156,10 +7133,10 @@
                 tank.biomass = 0;
                 tank.nextSuggestedFeed = null;
 
-                const tankRef = this.db.collection('tanks').doc(tankId);
-                batch.update(tankRef, { status: 'active', stockingDate: newStockingDate, initialSeed: newInitialSeed, currentSeed: newInitialSeed, biomass: 0, nextSuggestedFeed: null });
+                await this.db.collection('tanks').doc(tankId).update({ 
+                    status: 'active', stockingDate: newStockingDate, initialSeed: newInitialSeed, currentSeed: newInitialSeed, biomass: 0, nextSuggestedFeed: null 
+                });
 
-                await batch.commit();
                 this.showLoading(false);
                 this.closeAllModals();
                 this.renderAll();
@@ -7396,27 +7373,6 @@
             importData(input) {
                 alert("Data Restore is currently disabled for Cloud Sync mode to prevent data conflicts. Please contact support if you need to migrate data.");
                 input.value = '';
-            }
-
-            // Helper to delete large collections in chunks
-            async deleteCollectionByQuery(query) {
-                const snapshot = await query.get();
-                const batchSize = 400; // Safe limit below 500
-                const chunks = [];
-                let batch = this.db.batch();
-                let count = 0;
-                
-                snapshot.docs.forEach((doc) => {
-                    batch.delete(doc.ref);
-                    count++;
-                    if (count === batchSize) {
-                        chunks.push(batch.commit());
-                        batch = this.db.batch();
-                        count = 0;
-                    }
-                });
-                if (count > 0) chunks.push(batch.commit());
-                await Promise.all(chunks);
             }
         }
 
