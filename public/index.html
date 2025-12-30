@@ -2026,7 +2026,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- 
+    <!--
         =================================================================
         !!! IMPORTANT - ACTION REQUIRED !!!
         Google Maps will not work until you replace 'YOUR_GOOGLE_MAPS_API_KEY' 
@@ -2034,6 +2034,10 @@
         =================================================================
     -->
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places" async defer></script>
+    <!-- Firebase SDKs (v9 compat for easier integration with existing code) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -2663,6 +2667,32 @@
         </div>
     </div>
 
+    <!-- Pro Subscription Modal (NEW) -->
+    <div class="modal-overlay" id="proSubModal">
+        <div class="modal-content" style="max-width: 420px; text-align: center;">
+            <div class="modal-header" style="justify-content: center;">
+                <h3><i class="fas fa-gem" style="color: #9c27b0;"></i> Go Pro!</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px 30px;">
+                <p style="font-size: 16px; margin-bottom: 15px;">To add more than one farm, please subscribe to our <strong>Pro Pack</strong>.</p>
+                <div style="background: #f3e5f5; padding: 20px; border-radius: var(--radius); margin-bottom: 20px;">
+                    <div style="font-size: 36px; font-weight: 800; color: #7b1fa2;">₹999</div>
+                    <div style="font-size: 14px; color: #7b1fa2;">per year</div>
+                </div>
+                <ul style="text-align: left; font-size: 14px; color: var(--gray); line-height: 1.8; padding-left: 20px; margin-bottom: 0;">
+                    <li>✅ Add Unlimited Farms & Tanks</li>
+                    <li>✅ Cloud Data Backup & Sync</li>
+                    <li>✅ Access from any device</li>
+                </ul>
+            </div>
+            <div class="modal-footer" style="flex-direction: column; gap: 10px;">
+                <button class="btn btn-primary" style="width: 100%; background: #9c27b0;" onclick="app.initiatePayment()">Pay ₹999 & Unlock</button>
+                <button class="btn btn-secondary" style="width: 100%; border: none; background: transparent;" onclick="app.closeAllModals()">Maybe Later</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Suggestion Modal -->
     <div class="modal-overlay" id="suggestionModal">
         <div class="modal-content" style="max-width: 600px;">
@@ -2864,6 +2894,35 @@
                     </button>
                     <input type="file" id="importFile" style="display: none;" accept=".json" onchange="app.importData(this)">
                 </div>
+
+                <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+                <h4 style="margin-bottom: 12px; color: var(--dark);">Team Management</h4>
+                <div class="farm-form" style="padding: 16px; margin-bottom: 20px; border: 1px solid var(--border);">
+                    <h5 style="margin-bottom: 12px; font-size: 14px;">Invite New Member</h5>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="tel" id="invitePhone" class="form-control" placeholder="+91 XXXXX XXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select id="inviteRole" class="form-control">
+                            <option value="worker">Worker</option>
+                            <option value="supervisor">Supervisor</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="app.inviteMember()">Send Invitation</button>
+                </div>
+
+                <div id="teamManagementSection">
+                    <h5 style="margin-bottom: 12px; font-size: 14px;">Current Team</h5>
+                    <div class="settings-list" id="teamMembersList">
+                        <!-- Team members will be rendered here -->
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="btn btn-secondary" onclick="app.signOut()">Sign Out</button>
             </div>
         </div>
     </div>
@@ -3132,6 +3191,63 @@
         </div>
     </div>
 
+    <!-- Login/Auth Modal (NEW - Firebase Ready) -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header" style="justify-content: center;">
+                <h3><i class="fas fa-sign-in-alt"></i> Login or Signup</h3>
+            </div>
+            <div class="modal-body">
+                <div id="phone-step">
+                    <p class="text-muted" style="margin-bottom: 20px; text-align: center;">Enter your mobile number with country code to receive an OTP.</p>
+                    <div class="form-group">
+                        <label>Mobile Number</label>
+                        <input type="tel" id="phoneInput" class="form-control" placeholder="+91 XXXXX XXXXX">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="app.sendOTP()">Send OTP</button>
+                </div>
+                <div id="otp-step" style="display: none;">
+                    <p class="text-muted" style="margin-bottom: 20px; text-align: center;">Enter the 6-digit OTP sent to <strong id="otp-phone-display"></strong>.</p>
+                    <div class="form-group">
+                        <label>OTP</label>
+                        <input type="number" id="otpInput" class="form-control" placeholder="XXXXXX" maxlength="6">
+                    </div>
+                    <button class="btn btn-success" style="width: 100%;" onclick="app.verifyOTP()">Verify & Login</button>
+                    <button class="btn btn-secondary" style="width: 100%; margin-top: 8px; border: none; background: transparent; color: var(--gray);" onclick="app.showPhoneStep()">Back</button>
+                </div>
+                <div id="recaptcha-container" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Selection Modal (NEW) -->
+    <div class="modal-overlay" id="roleModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-user-tie"></i> Welcome! Tell Us About Yourself</h3>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted" style="margin-bottom: 20px;">This will help us tailor your experience.</p>
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="userNameInput" class="form-control" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label>Your Role</label>
+                    <select id="userRoleSelect" class="form-control">
+                        <option value="farmer">Farmer / Owner</option>
+                        <option value="supervisor">Supervisor</option>
+                        <option value="worker">Worker</option>
+                        <option value="technician">Technician</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" style="width: 100%;" onclick="app.saveUserRole()">Get Started</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notifications -->
     <div class="toast" id="successToast">
         <i class="fas fa-check-circle"></i>
@@ -3159,28 +3275,7 @@
 
         class AquaBookPro {
             constructor() {
-                this.state = {
-                    farms: [],           // Array of farm objects
-                    tanks: [],           // Array of tank objects (belonging to farms)
-                    feedEntries: [],     // All feed entries
-                    harvests: [],        // Harvest records
-                    waterEntries: [],    // Water test history
-                    expenses: [],        // Expense records
-                    samplingEntries: [], // Growth sampling records
-                    tasks: [],           // Task records
-                    prices: [],          // Market prices
-                    inventory: { totalKg: 0 }, // Inventory
-                    medicineInventory: [], // Medicine inventory array
-                    medicineApplications: [], // Medicine application records
-                    settings: {
-                        currentFarmId: null,
-                        currency: 'INR',
-                        logView: 'detailed', // or 'summary'
-                        supplements: ['Gut Probiotic', 'Gill Health', 'Growth Booster', 'Vitamin C', 'Mineral Mix', 'Binder'],
-                        feedsPerDay: 4,
-                        feedTypes: ['Pellet 1.0mm', 'Pellet 1.2mm', 'Pellet 1.4mm', 'Pellet 1.6mm', 'Pellet 2.0mm']
-                    }
-                };
+                this.state = this.getInitialState();
 
                 // Observation Configuration
                 this.OBSERVATION_CONFIG = {
@@ -3237,6 +3332,8 @@
                 this.logViewType = 'matrix'; // 'matrix' or 'list'
                 this.tempTrayResult = null; // Temporary storage for single tray update
                 
+                this.currentUser = null; // Will hold user info after login
+                this.firestoreListeners = []; // To hold unsubscribe functions for cleanup
                 // Initialize when DOM is ready
                 if (document.readyState === 'loading') {
                     document.addEventListener('DOMContentLoaded', () => this.init());
@@ -3244,34 +3341,110 @@
                     this.init();
                 }
             }
+
+            getInitialState() {
+                this.state = {
+                    farms: [],           // Array of farm objects
+                    tanks: [],           // Array of tank objects (belonging to farms)
+                    feedEntries: [],     // All feed entries
+                    harvests: [],        // Harvest records
+                    waterEntries: [],    // Water test history
+                    expenses: [],        // Expense records
+                    samplingEntries: [], // Growth sampling records
+                    tasks: [],           // Task records
+                    prices: [],          // Market prices
+                    inventory: { totalKg: 0 }, // Inventory
+                    medicineInventory: [], // Medicine inventory array
+                    medicineApplications: [], // Medicine application records
+                    settings: {
+                        currentFarmId: null,
+                        currency: 'INR',
+                        logView: 'detailed', // or 'summary'
+                        supplements: ['Gut Probiotic', 'Gill Health', 'Growth Booster', 'Vitamin C', 'Mineral Mix', 'Binder'],
+                        feedsPerDay: 4,
+                        feedTypes: ['Pellet 1.0mm', 'Pellet 1.2mm', 'Pellet 1.4mm', 'Pellet 1.6mm', 'Pellet 2.0mm']
+                    }
+                };
+                return this.state;
+            }
             
             init() {
+                this.initFirebase();
+            }
+
+            initFirebase() {
+                // --- ACTION REQUIRED ---
+                // Replace this with your actual Firebase project configuration.
+                const firebaseConfig = {
+                    apiKey: "YOUR_API_KEY",
+                    authDomain: "YOUR_AUTH_DOMAIN",
+                    projectId: "YOUR_PROJECT_ID",
+                    storageBucket: "YOUR_STORAGE_BUCKET",
+                    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+                    appId: "YOUR_APP_ID"
+                };
+
+                // Initialize Firebase
+                firebase.initializeApp(firebaseConfig);
+                this.auth = firebase.auth();
+                this.db = firebase.firestore();
+
+                // --- ENABLE OFFLINE PERSISTENCE (NEW) ---
+                this.db.enablePersistence()
+                    .catch((err) => {
+                        if (err.code == 'failed-precondition') {
+                            // This happens if multiple tabs are open. Persistence can only be enabled in one tab at a time.
+                            console.warn('Firestore persistence failed: multiple tabs open.');
+                        } else if (err.code == 'unimplemented') {
+                            // The browser is likely too old to support persistence.
+                            console.warn('Firestore persistence not available in this browser.');
+                        }
+                    });
+
+                // Listen for authentication state changes
+                this.auth.onAuthStateChanged(user => {
+                    if (user) {
+                        // User is signed in.
+                        this.handleSignIn(user);
+                    } else {
+                        // User is signed out.
+                        this.handleSignOut();
+                    }
+                });
+            }
+
+            async handleSignIn(user) {
+                this.showLoading(true);
+                const userProfile = await this.getUserProfile(user);
+
+                if (!userProfile) {
+                    // This is a new user, show the role selection modal.
+                    this.showLoading(false);
+                    document.getElementById('roleModal').classList.add('active');
+                    return;
+                }
+
+                // Check for pending invitations for this new user.
+                const hasInvite = await this.checkForInvitations(user);
+                if (hasInvite) {
+                    // The invitation flow will take over. Don't initialize the main app yet.
+                    this.showLoading(false);
+                    return;
+                }
+
+                this.currentUser = userProfile;
+                
                 try {
-                    this.showLoading(true);
-                    
-                    // Load all data
-                    this.loadAllData();
-                    
-                    // Setup UI
+                    await this.loadAllData(); // Load data from Firestore
                     this.setupUI();
-                    
-                    // Check first-time user lock
                     this.checkFirstTimeUser();
-                    
-                    // Render initial data
                     this.renderAll();
-                    
-                    // Setup event listeners
                     this.setupEventListeners();
-                    
-                    // Initialize Weather
                     this.initWeather();
-                    
-                    // Network Listeners
+
                     window.addEventListener('online', () => this.showToast('You are back online!', 'success'));
                     window.addEventListener('offline', () => this.showToast('You are offline. Maps may not work.', 'warning'));
 
-                    // Simulate loading delay
                     setTimeout(() => {
                         this.showLoading(false);
                         this.initialized = true;
@@ -3282,6 +3455,28 @@
                     this.showLoading(false);
                     this.showToast("Something went wrong. Please refresh.", "error");
                 }
+            }
+
+            handleSignOut() {
+                this.detachFirestoreListeners();
+                this.currentUser = null;
+                this.state = this.getInitialState(); // Reset state
+                this.closeAllModals();
+                document.getElementById('authModal').classList.add('active');
+                document.getElementById('firstTimeLock').classList.add('hidden');
+                this.showLoading(false);
+            }
+
+            signOut() {
+                if (confirm('Are you sure you want to sign out?')) {
+                    this.auth.signOut();
+                }
+            }
+
+            detachFirestoreListeners() {
+                console.log("Detaching all Firestore listeners...");
+                this.firestoreListeners.forEach(unsubscribe => unsubscribe());
+                this.firestoreListeners = [];
             }
             
             // ===== FIRST TIME USER LOCK =====
@@ -3321,89 +3516,54 @@
             }
             
             // ===== DATA MANAGEMENT =====
-            loadAllData() {
-                // Helper for safe parsing
-                const safeParse = (key, fallback) => {
-                    try {
-                        const data = localStorage.getItem(key);
-                        const parsed = data ? JSON.parse(data) : fallback;
-                        return parsed !== null ? parsed : fallback;
-                    } catch (e) {
-                        console.error(`Error parsing ${key}:`, e);
-                        return fallback;
-                    }
-                };
+            async loadAllData() {
+                if (!this.currentUser) return;
+                console.log("Fetching all user data from Firestore...");
 
-                // Helper to ensure array and filter invalid items
-                const safeArray = (data) => Array.isArray(data) ? data.filter(item => item !== null && item !== undefined) : [];
+                const userId = this.currentUser.uid;
 
-                // Load farms
-                this.state.farms = safeArray(safeParse('aquabook_farms', []));
-                
-                // Load tanks
-                this.state.tanks = safeArray(safeParse('aquabook_tanks', []));
-                
-                this.state.tanks.forEach(tank => {
-                    if (tank.nextSuggestedFeed === undefined) tank.nextSuggestedFeed = null;
-                });
+                // Fetch farms owned by the user
+                const farmsQuery = await this.db.collection('farms').where('ownerId', '==', userId).get();
+                this.state.farms = farmsQuery.docs.map(doc => doc.data());
 
-                // Load feed entries
-                this.state.feedEntries = safeArray(safeParse('aquabook_entries', []));
-                // Load harvests
-                this.state.harvests = safeArray(safeParse('aquabook_harvests', []));
-                // Load water entries
-                this.state.waterEntries = safeArray(safeParse('aquabook_water', []));
-                // Load expenses
-                this.state.expenses = safeArray(safeParse('aquabook_expenses', []));
-                // Load sampling
-                this.state.samplingEntries = safeArray(safeParse('aquabook_sampling', []));
-                // Load tasks
-                this.state.tasks = safeArray(safeParse('aquabook_tasks', []));
-                
-                // Load inventory
-                this.state.inventory = safeParse('aquabook_inventory', { totalKg: 0 });
-                if (!this.state.inventory || typeof this.state.inventory !== 'object') {
-                    this.state.inventory = { totalKg: 0 };
+                if (this.state.farms.length > 0) {
+                    const farmIds = this.state.farms.map(f => f.id);
+
+                    // Fetch static data once
+                    const tanksQuery = await this.db.collection('tanks').where('farmId', 'in', farmIds).get();
+                    this.state.tanks = tanksQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                    // --- REAL-TIME LISTENER FOR FEED ENTRIES ---
+                    const feedEntriesQuery = this.db.collection('feedEntries').where('farmId', 'in', farmIds);
+                    const feedListener = feedEntriesQuery.onSnapshot(querySnapshot => {
+                        console.log("Real-time: Received feed entries update.");
+                        this.state.feedEntries = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        
+                        // Re-render parts of the UI that depend on feed entries
+                        if (this.initialized) {
+                            this.renderLogBook();
+                            this.checkPendingTrays();
+                            this.renderOverallStats();
+                            this.renderFeedTrendChart();
+                        }
+                    }, error => {
+                        console.error("Error with feed entries listener: ", error);
+                        this.showToast("Error syncing feed data.", "error");
+                    });
+                    this.firestoreListeners.push(feedListener); // Store the unsubscribe function for cleanup
+
+                    // Fetch other data (can also be converted to listeners if needed)
+                    const waterEntriesQuery = await this.db.collection('waterEntries').where('farmId', 'in', farmIds).get();
+                    this.state.waterEntries = waterEntriesQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    const expensesQuery = await this.db.collection('expenses').where('farmId', 'in', farmIds).get();
+                    this.state.expenses = expensesQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 }
-                // Load medicine inventory
-                this.state.medicineInventory = safeArray(safeParse('aquabook_medicine', []));
-                // Load medicine applications
-                this.state.medicineApplications = safeArray(safeParse('aquabook_med_apps', []));
 
-                // Load prices
-                const savedPrices = safeParse('aquabook_prices', null);
-                if (savedPrices && Array.isArray(savedPrices)) {
-                    this.state.prices = savedPrices;
-                } else {
-                    // Default market prices
-                    this.state.prices = [
-                        { count: 30, price: 450, change: '+2.5%', trend: 'up' },
-                        { count: 40, price: 400, change: '+1.8%', trend: 'up' },
-                        { count: 50, price: 380, change: '+0.5%', trend: 'up' },
-                        { count: 60, price: 350, change: '-1.2%', trend: 'down' },
-                        { count: 70, price: 320, change: '-2.0%', trend: 'down' },
-                        { count: 80, price: 300, change: '0%', trend: 'stable' }
-                    ];
-                    this.savePrices();
-                }
-                
-                // Load settings
-                const savedSettings = safeParse('aquabook_settings', null);
-                if (savedSettings && typeof savedSettings === 'object') {
-                    this.state.settings = { ...this.state.settings, ...savedSettings };
-                    // Ensure supplements exist
-                    if (!this.state.settings.supplements || !Array.isArray(this.state.settings.supplements)) {
-                        this.state.settings.supplements = ['Gut Probiotic', 'Gill Health', 'Growth Booster', 'Vitamin C', 'Mineral Mix', 'Binder'];
-                    }
-                    if (!this.state.settings.feedsPerDay) {
-                        this.state.settings.feedsPerDay = 4;
-                    }
-                    if (!this.state.settings.feedTypes || !Array.isArray(this.state.settings.feedTypes)) {
-                        this.state.settings.feedTypes = ['Pellet 1.0mm', 'Pellet 1.2mm', 'Pellet 1.4mm', 'Pellet 1.6mm', 'Pellet 2.0mm'];
-                    }
-                } else {
-                    this.saveSettings();
-                }
+                // Load settings from user profile or use defaults
+                this.state.settings.currentFarmId = this.currentUser.settings?.currentFarmId || (this.state.farms[0]?.id || null);
+                // ... load other settings
+
+                console.log("Data loaded from Firestore.");
             }
             
             saveAllData() {
@@ -3422,8 +3582,13 @@
             }
             
             saveFarms() {
-                localStorage.setItem('aquabook_farms', JSON.stringify(this.state.farms));
+                // This is now handled by individual saveFarm calls
+                console.warn("saveFarms() is deprecated. Use individual doc saves.");
             }
+
+            // ... other save functions like saveTanks, saveFeedEntries etc.
+            // will be refactored to save individual documents to Firestore
+            // instead of saving the whole array.
             
             saveTanks() {
                 localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
@@ -4624,6 +4789,79 @@
                 document.getElementById('farmModal').classList.add('active');
             }
 
+            // ===== AUTHENTICATION FLOW (NEW) =====
+            async getUserProfile(user) {
+                const userRef = this.db.collection('users').doc(user.uid);
+                const doc = await userRef.get();
+                if (doc.exists) {
+                    return { uid: user.uid, ...doc.data() };
+                }
+                return null;
+            }
+
+            showPhoneStep() {
+                document.getElementById('otp-step').style.display = 'none';
+                document.getElementById('phone-step').style.display = 'block';
+            }
+
+            sendOTP() {
+                const phone = document.getElementById('phoneInput').value;
+                if (!/^\+?[1-9]\d{1,14}$/.test(phone)) {
+                    this.showToast('Please enter a valid mobile number with country code.', 'error');
+                    return;
+                }
+                
+                this.showLoading(true);
+                
+                // Set up reCAPTCHA verifier
+                window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                    'size': 'invisible',
+                    'callback': (response) => { /* reCAPTCHA solved */ }
+                });
+
+                this.auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
+                    .then((confirmationResult) => {
+                        window.confirmationResult = confirmationResult;
+                        this.showLoading(false);
+                        this.showToast(`OTP sent to ${phone}`, 'info');
+                        document.getElementById('otp-phone-display').textContent = phone;
+                        document.getElementById('phone-step').style.display = 'none';
+                        document.getElementById('otp-step').style.display = 'block';
+                    }).catch((error) => {
+                        this.showLoading(false);
+                        console.error("OTP Error:", error);
+                        this.showToast('Failed to send OTP. Please try again.', 'error');
+                        window.recaptchaVerifier.render().then(widgetId => grecaptcha.reset(widgetId));
+                    });
+            }
+
+            verifyOTP() {
+                const otp = document.getElementById('otpInput').value;
+                if (otp.length < 6) { this.showToast('Please enter a valid 6-digit OTP.', 'error'); return; }
+
+                this.showLoading(true);
+                window.confirmationResult.confirm(otp).catch((error) => {
+                    this.showLoading(false);
+                    this.showToast('Invalid OTP. Please try again.', 'error');
+                });
+                // onAuthStateChanged will handle the successful login
+            }
+
+            async saveUserRole() {
+                const name = document.getElementById('userNameInput').value;
+                const role = document.getElementById('userRoleSelect').value;
+                if (!name) { this.showToast('Please enter your name.', 'error'); return; }
+
+                const user = this.auth.currentUser;
+                if (!user) return;
+
+                const userProfile = { name, role, phone: user.phoneNumber, createdAt: new Date(), isPro: false };
+                await this.db.collection('users').doc(user.uid).set(userProfile);
+                
+                this.closeAllModals();
+                this.handleSignIn(user); // Re-trigger the sign-in flow now that profile exists
+            }
+
             editFarm(id) {
                 const farm = this.getFarmById(id);
                 if (!farm) return;
@@ -4817,6 +5055,7 @@
 
             saveMedicineApplication() {
                 const tankId = this.editingTankId;
+                const tank = this.getTankById(tankId);
                 const medId = document.getElementById('applyMedSelect').value;
                 const amount = parseFloat(document.getElementById('applyMedAmount').value);
                 const date = document.getElementById('applyMedDate').value;
@@ -4845,6 +5084,7 @@
                 const app = {
                     id: Date.now(),
                     tankId,
+                    farmId: tank.farmId,
                     medId,
                     medName: inventoryItem.name,
                     amount,
@@ -4965,31 +5205,37 @@
                 document.getElementById('feedRoundModal').classList.add('active');
             }
 
-            saveFeedRound() { 
+            async saveFeedRound() { 
                 const inputs = document.querySelectorAll('.feed-round-input');
-                let count = 0;
                 let totalAmount = 0;
                 
                 // Get selected supplements for this round
                 const supplements = Array.from(document.querySelectorAll('#roundSupplements .supplement-option.selected'))
                     .map(el => el.textContent.trim());
                 
+                const batch = this.db.batch();
+                let entriesToAdd = [];
+
                 inputs.forEach(input => {
                     const amount = parseFloat(input.value);
                     if (amount > 0) {
                         const tankId = input.dataset.tankId;
+                        const tank = this.getTankById(tankId);
+                        const entryId = (Date.now() + entriesToAdd.length).toString();
                         const newEntry = {
-                            id: Date.now() + count, // Ensure unique IDs
+                            id: entryId,
                             tankId,
+                            farmId: tank.farmId,
                             date: this.currentDate,
                             time: new Date().toLocaleTimeString(),
                             amount,
                             trayResult: 'pending', // Mark as pending check
                             supplements: supplements
                         };
-                        this.state.feedEntries.push(newEntry);
-                        this.recalculateTankBiomass(tankId);
-                        count++;
+                        
+                        const docRef = this.db.collection('feedEntries').doc(entryId);
+                        batch.set(docRef, newEntry);
+                        entriesToAdd.push(newEntry);
                         totalAmount += amount;
                     }
                 });
@@ -4998,20 +5244,21 @@
                 const currentStock = this.state.inventory.totalKg || 0;
                 if (totalAmount > currentStock) {
                     if (!confirm(`⚠️ Low Inventory Warning\n\nYou are about to feed ${totalAmount.toFixed(1)}kg, but you only have ${currentStock.toFixed(1)}kg in stock.\n\nProceed anyway?`)) {
-                        // Rollback state changes (remove added entries)
-                        this.state.feedEntries.splice(this.state.feedEntries.length - count, count);
                         return;
                     }
                 }
 
-                if (count > 0) {
+                if (entriesToAdd.length > 0) {
+                    this.showLoading(true);
+                    await batch.commit();
+
                     this.state.inventory.totalKg = currentStock - totalAmount;
-                    this.saveFeedEntries();
                     this.saveInventory();
                     this.renderInventorySummary();
                     this.closeAllModals();
-                    this.renderAll();
-                    this.showToast(`Saved ${count} feed entries. Check trays in 2 hours!`);
+                    // No need to call renderAll() here, the onSnapshot listener will handle UI updates.
+                    this.showLoading(false);
+                    this.showToast(`Saved ${entriesToAdd.length} feed entries. Check trays in 2 hours!`);
                 } else {
                     this.showToast('No feed amounts entered', 'error');
                 }
@@ -5243,30 +5490,37 @@
                 `;
             }
 
-            saveSingleTrayResult() {
+            async saveSingleTrayResult() {
                 const data = this.tempTrayResult;
                 if (!data) return;
 
-                const entry = this.state.feedEntries.find(e => e.id === data.entryId);
-                if (entry) {
-                    entry.trayResult = data.trayResult;
-                    entry.trayResults = data.trayResults;
-                    entry.observations = data.observations;
-                    entry.riskScore = data.riskScore;
-                    entry.riskLevel = data.riskLevel;
-                    entry.notes = data.notes;
-                }
+                this.showLoading(true);
 
+                // Update the feed entry in Firestore
+                const entryRef = this.db.collection('feedEntries').doc(data.entryId.toString());
+                await entryRef.update({
+                    trayResult: data.trayResult,
+                    trayResults: data.trayResults,
+                    observations: data.observations,
+                    riskScore: data.riskScore,
+                    riskLevel: data.riskLevel,
+                    notes: data.notes
+                });
+
+                // Update the tank's suggested feed in Firestore
+                const entry = this.state.feedEntries.find(e => e.id == data.entryId);
                 const tank = this.getTankById(entry.tankId);
                 if (tank) {
-                    tank.nextSuggestedFeed = {
+                    const tankRef = this.db.collection('tanks').doc(tank.id);
+                    await tankRef.update({
+                        nextSuggestedFeed: {
                         amount: data.newAmount,
                         reason: data.reason
-                    };
+                        }
+                    });
                 }
 
-                this.saveFeedEntries();
-                this.saveTanks();
+                this.showLoading(false);
                 this.showToast('Tray result updated!');
                 this.tempTrayResult = null;
                 
@@ -5522,6 +5776,7 @@
 
             saveWaterResult() {
                 const tankId = document.getElementById('waterTankSelect').value;
+                const tank = this.getTankById(tankId);
                 const date = document.getElementById('waterDate').value || this.currentDate;
                 const doc = parseInt(document.getElementById('waterDoc').value) || 0;
                 
@@ -5544,6 +5799,7 @@
                 const entry = {
                     id: Date.now(),
                     tankId,
+                    farmId: tank.farmId,
                     date,
                     doc,
                     ph, alk, ca, mg, amm, no2,
@@ -5876,19 +6132,30 @@
             }
 
             // CRUD Operations
-            saveFarm() {
+            async saveFarm() {
                 const name = document.getElementById('farmNameInput').value;
                 const location = document.getElementById('farmLocation').value;
                 const contact = document.getElementById('farmContact').value;
                 const phone = document.getElementById('farmPhone').value;
                 const lat = document.getElementById('farmLat').value;
                 const lng = document.getElementById('farmLng').value;
+                const ownerId = this.currentUser.uid;
 
                 if (!name) {
                     this.showToast('Farm name is required', 'error');
                     return;
                 }
 
+                // Subscription Check
+                // Check if this is not the first farm and if the user is not a pro subscriber.
+                if (this.state.farms.length > 0 && (!this.currentUser || !this.currentUser.isPro)) {
+                    this.showToast('Please subscribe to add more than one farm.', 'warning');
+                    this.closeAllModals(); // Close the farm modal first
+                    document.getElementById('proSubModal').classList.add('active');
+                    return;
+                }
+
+                this.showLoading(true);
                 if (this.editingFarmId) {
                     const farm = this.getFarmById(this.editingFarmId);
                     if (farm) {
@@ -5898,12 +6165,14 @@
                         farm.phone = phone;
                         farm.lat = lat ? parseFloat(lat) : null;
                         farm.lng = lng ? parseFloat(lng) : null;
+                        await this.db.collection('farms').doc(farm.id).set(farm, { merge: true });
                         this.showToast('Farm updated successfully');
                     }
                 } else {
                     const newFarm = {
                         id: Date.now().toString(),
                         name,
+                        ownerId,
                         location,
                         contact,
                         phone,
@@ -5912,6 +6181,7 @@
                         created: new Date().toISOString()
                     };
 
+                    await this.db.collection('farms').doc(newFarm.id).set(newFarm);
                     this.state.farms.push(newFarm);
                     
                     // Set as current if first
@@ -5922,8 +6192,7 @@
                     this.showToast('Farm added successfully');
                 }
 
-                this.saveFarms();
-
+                this.showLoading(false);
                 this.closeAllModals();
                 this.checkFirstTimeUser();
                 this.renderAll();
@@ -6103,7 +6372,7 @@
                 document.getElementById('editFeedModal').classList.add('active');
             }
 
-            updateFeedEntry() {
+            async updateFeedEntry() {
                 if (!this.editingEntryId) return;
 
                 const amount = parseFloat(document.getElementById('editFeedAmount').value);
@@ -6111,46 +6380,51 @@
                 const supplements = Array.from(document.querySelectorAll('#editFeedSupplements .supplement-option.selected'))
                     .map(el => el.textContent.trim());
                 const newTrayResults = Array.from(document.querySelectorAll('.edit-tray-select')).map(sel => sel.value);
+                
+                const entry = this.state.feedEntries.find(e => e.id == this.editingEntryId);
+                if (!entry) return;
 
-                const index = this.state.feedEntries.findIndex(e => e.id === this.editingEntryId);
-                if (index !== -1) {
-                    const oldAmount = this.state.feedEntries[index].amount;
-                    const diff = amount - oldAmount;
+                const oldAmount = entry.amount;
+                const diff = amount - oldAmount;
 
-                    this.state.feedEntries[index].amount = amount;
-                    this.state.feedEntries[index].date = date;
-                    this.state.feedEntries[index].supplements = supplements;
-                    this.state.feedEntries[index].trayResults = newTrayResults;
+                // Update single trayResult for backward compatibility
+                let worstResult = 'empty';
+                if (newTrayResults.includes('too-much')) worstResult = 'too-much';
+                else if (newTrayResults.includes('half')) worstResult = 'half';
+                else if (newTrayResults.includes('little')) worstResult = 'little';
 
-                    // Update single trayResult for backward compatibility
-                    let worstResult = 'empty';
-                    if (newTrayResults.includes('too-much')) worstResult = 'too-much';
-                    else if (newTrayResults.includes('half')) worstResult = 'half';
-                    else if (newTrayResults.includes('little')) worstResult = 'little';
-                    this.state.feedEntries[index].trayResult = worstResult;
-                    
-                    this.saveFeedEntries();
-                    
-                    // Adjust inventory
-                    this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) - diff;
-                    this.saveInventory();
+                this.showLoading(true);
+                const entryRef = this.db.collection('feedEntries').doc(this.editingEntryId.toString());
+                await entryRef.update({
+                    amount: amount,
+                    date: date,
+                    supplements: supplements,
+                    trayResults: newTrayResults,
+                    trayResult: worstResult
+                });
 
-                    this.recalculateTankBiomass(this.state.feedEntries[index].tankId);
-                    this.closeAllModals();
-                    this.renderAll();
-                    this.showToast('Entry updated');
-                }
+                // Adjust inventory
+                this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) - diff;
+                this.saveInventory();
+
+                this.recalculateTankBiomass(entry.tankId);
+                this.showLoading(false);
+                this.closeAllModals();
+                // No need to call renderAll(), onSnapshot will handle it.
+                this.showToast('Entry updated');
             }
 
-            deleteCurrentFeedEntry() {
+            async deleteCurrentFeedEntry() {
                 if (!this.editingEntryId) return;
                 
-                const entry = this.state.feedEntries.find(e => e.id === this.editingEntryId);
+                if (!confirm('Are you sure you want to delete this feed entry?')) return;
+
+                const entry = this.state.feedEntries.find(e => e.id == this.editingEntryId);
                 const tankId = entry ? entry.tankId : null;
                 const amount = entry ? entry.amount : 0;
 
-                this.state.feedEntries = this.state.feedEntries.filter(e => e.id !== this.editingEntryId);
-                this.saveFeedEntries();
+                this.showLoading(true);
+                await this.db.collection('feedEntries').doc(this.editingEntryId.toString()).delete();
                 
                 // Refund inventory
                 this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + amount;
@@ -6158,7 +6432,8 @@
 
                 if (tankId) this.recalculateTankBiomass(tankId);
                 this.closeAllModals();
-                this.renderAll();
+                this.showLoading(false);
+                // No need to call renderAll(), onSnapshot will handle it.
                 this.showToast('Entry deleted', 'warning');
             }
 
@@ -6300,6 +6575,58 @@
                 document.getElementById('settingsModal').classList.add('active');
             }
 
+            async openTeamManagement() {
+                const list = document.getElementById('teamMembersList');
+                const section = document.getElementById('teamManagementSection');
+                const currentFarm = this.getFarmById(this.state.settings.currentFarmId);
+
+                if (!currentFarm || this.currentUser.uid !== currentFarm.ownerId) {
+                    section.style.display = 'none';
+                    return;
+                }
+                section.style.display = 'block';
+                list.innerHTML = '<div class="text-muted">Loading team...</div>';
+
+                const members = currentFarm.members || {};
+                let html = '';
+                for (const uid in members) {
+                    if (uid === currentFarm.ownerId) continue; // Don't list the owner themselves
+
+                    const userProfile = await this.getUserProfile({ uid });
+                    const name = userProfile ? userProfile.name : 'Invited User';
+                    const phone = userProfile ? userProfile.phone : '...';
+
+                    html += `
+                        <div class="settings-item">
+                            <div>
+                                <span style="font-weight: 600;">${name}</span>
+                                <span style="font-size: 12px; color: var(--gray); display: block;">${phone} - <strong>${members[uid]}</strong></span>
+                            </div>
+                            <button class="btn-icon" style="color: var(--danger);" onclick="app.removeMember('${uid}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+                list.innerHTML = html || '<div class="text-muted">No other members on this farm.</div>';
+            }
+
+            async inviteMember() {
+                const phone = document.getElementById('invitePhone').value;
+                const role = document.getElementById('inviteRole').value;
+                const farmId = this.state.settings.currentFarmId;
+                const farm = this.getFarmById(farmId);
+
+                if (!/^\+?[1-9]\d{1,14}$/.test(phone)) {
+                    this.showToast('Please enter a valid phone number with country code.', 'error');
+                    return;
+                }
+
+                const invitation = { farmId, farmName: farm.name, invitedByUid: this.currentUser.uid, invitedByName: this.currentUser.name, invitedPhone: phone, role, status: 'pending', createdAt: new Date() };
+                await this.db.collection('invitations').add(invitation);
+                this.showToast(`Invitation sent to ${phone}!`, 'success');
+            }
+
             renderSettingsSupplements() {
                 const list = document.getElementById('settingsSupplementsList');
                 list.innerHTML = this.state.settings.supplements.map(s => `
@@ -6396,6 +6723,7 @@
                 const harvest = {
                     id: Date.now(),
                     tankId,
+                    farmId: tank.farmId,
                     date,
                     weight,
                     count,
@@ -6485,6 +6813,7 @@
 
             saveSampling() {
                 const tankId = this.editingTankId;
+                const tank = this.getTankById(tankId);
                 const date = document.getElementById('sampleDate').value;
                 const weight = parseFloat(document.getElementById('sampleWeight').value);
                 const count = parseFloat(document.getElementById('sampleCount').value);
@@ -6493,7 +6822,7 @@
 
                 const abw = parseFloat((weight/count).toFixed(2));
                 this.state.samplingEntries.push({
-                    id: Date.now(), tankId, date, weight, count, abw
+                    id: Date.now(), tankId, farmId: tank.farmId, date, weight, count, abw
                 });
                 
                 this.saveSamplingEntries();
@@ -6577,6 +6906,7 @@
                 const harvest = {
                     id: Date.now(),
                     tankId,
+                    farmId: tank.farmId,
                     date,
                     weight,
                     count
