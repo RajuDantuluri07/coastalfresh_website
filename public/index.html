@@ -1942,6 +1942,63 @@
         .tank-summary-card.inactive:hover {
             opacity: 1;
         }
+
+        /* ===== NEW TRAY CHECK STYLES ===== */
+        .observation-section {
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 10px;
+            background: #f8f9fa;
+        }
+        .observation-category-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--gray);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .observation-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 6px;
+        }
+        .observation-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 8px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+        .observation-checkbox.checked {
+            background: #e3f2fd;
+            border-color: var(--primary);
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+        .tray-radio.selected.status-empty { background: #e8f5e8; border-color: var(--success); color: #1b5e20; }
+        .tray-radio.selected.status-little { background: #fff3e0; border-color: var(--warning); color: #e65100; }
+        .tray-radio.selected.status-half { background: #fff8e1; border-color: #ffb300; color: #ff6f00; }
+        .tray-radio.selected.status-full { background: #ffebee; border-color: var(--danger); color: #b71c1c; }
+        
+        .risk-badge {
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-top: 4px;
+        }
+        .risk-normal { background: #e8f5e8; color: #2e7d32; }
+        .risk-watch { background: #fff3e0; color: #ef6c00; }
+        .risk-action { background: #ffebee; color: #c62828; }
     </style>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -3102,6 +3159,53 @@
                         feedTypes: ['Pellet 1.0mm', 'Pellet 1.2mm', 'Pellet 1.4mm', 'Pellet 1.6mm', 'Pellet 2.0mm']
                     }
                 };
+
+                // Observation Configuration
+                this.OBSERVATION_CONFIG = {
+                    shrimpHealth: {
+                        title: "A. Shrimp Health",
+                        options: [
+                            { id: 'red_legs', label: "Red legs", score: 3 },
+                            { id: 'white_gut', label: "White gut", score: 2 },
+                            { id: 'black_gill', label: "Black gill", score: 3 },
+                            { id: 'soft_shell', label: "Soft / loose shell", score: 0 },
+                            { id: 'weak_movement', label: "Weak / slow movement", score: 0 }
+                        ]
+                    },
+                    moulting: {
+                        title: "B. Moulting & Growth",
+                        options: [
+                            { id: 'moulting_observed', label: "Moulting observed", score: 0 },
+                            { id: 'frequent_moulting', label: "Frequent moulting", score: 0 },
+                            { id: 'uneven_size', label: "Uneven size shrimp", score: 0 }
+                        ]
+                    },
+                    mortality: {
+                        title: "C. Mortality",
+                        options: [
+                            { id: 'dead_1_2', label: "Dead shrimp (1–2)", score: 2 },
+                            { id: 'dead_more_2', label: "Dead shrimp (> 2)", score: 4 }
+                        ]
+                    },
+                    feeding: {
+                        title: "D. Feeding Behaviour",
+                        options: [
+                            { id: 'feed_fully_eaten', label: "Feed fully eaten", score: 0 },
+                            { id: 'feed_partially_left', label: "Feed partially left", score: 2 },
+                            { id: 'feed_untouched', label: "Feed untouched", score: 3 },
+                            { id: 'shrimp_not_coming', label: "Shrimp not coming", score: 0 }
+                        ]
+                    },
+                    environment: {
+                        title: "E. Waste / Environment",
+                        options: [
+                            { id: 'white_fecal', label: "White fecal strings", score: 0 },
+                            { id: 'feed_powder', label: "Feed powder accum.", score: 0 },
+                            { id: 'bad_smell', label: "Bad smell near tray", score: 0 },
+                            { id: 'excess_sludge', label: "Excess sludge", score: 0 }
+                        ]
+                    }
+                };
                 
                 this.currentDate = this.getFormattedDate();
                 this.initialized = false;
@@ -4148,7 +4252,22 @@
                     else if (entry.trayResult === 'too-much') { badgeColor = 'var(--danger)'; badgeBg = '#ffebee'; label = 'Waste'; }
                     else if (entry.trayResult === 'pending') { badgeColor = 'var(--gray)'; badgeBg = '#f5f5f5'; label = 'Pending'; }
 
-                    const trayBadge = `<span style="padding:4px 8px; border-radius:12px; font-size:11px; font-weight:600; background:${badgeBg}; color:${badgeColor}; border:1px solid ${badgeColor};">${label}</span>`;
+                    const trayBadge = `<span style="padding:4px 8px; border-radius:12px; font-size:11px; font-weight:600; background:${badgeBg}; color:${badgeColor}; border:1px solid ${badgeColor}; white-space:nowrap;">${label}</span>`;
+
+                    // Risk Badge
+                    let riskBadge = '';
+                    if (entry.riskLevel) {
+                        const riskClass = entry.riskLevel === 'Action Required' ? 'risk-action' : entry.riskLevel === 'Watch' ? 'risk-watch' : 'risk-normal';
+                        riskBadge = `<span class="risk-badge ${riskClass}">${entry.riskLevel}</span>`;
+                    }
+
+                    // Observations Summary
+                    let obsSummary = '';
+                    if (entry.observations && entry.observations.length > 0) {
+                        // Map IDs back to labels if possible, or just use ID
+                        const obsLabels = entry.observations.map(obsId => this.getObservationLabel(obsId)).join(', ');
+                        obsSummary = `<div style="font-size:11px; color:var(--dark); margin-top:6px; line-height:1.4;"><i class="fas fa-clipboard-check" style="color:var(--gray); margin-right:4px;"></i> ${obsLabels}</div>`;
+                    }
 
                     const card = document.createElement('div');
                     card.className = 'timeline-card';
@@ -4170,13 +4289,15 @@
                         </div>
                         
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
-                            <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                            <div style="display:flex; gap:4px; flex-wrap:wrap; align-items:center;">
                                 ${entry.supplements && entry.supplements.length > 0 ? 
                                     entry.supplements.map(s => `<span style="background:#e3f2fd; color:var(--primary-dark); font-size:10px; padding:3px 8px; border-radius:10px; font-weight:600;"><i class="fas fa-flask"></i> ${s}</span>`).join('') 
                                     : '<span style="font-size:11px; color:var(--gray); font-style:italic;">No supplements</span>'}
+                                ${riskBadge}
                             </div>
                             ${trayBadge}
                         </div>
+                        ${obsSummary}
                     `;
                     
                     card.onclick = () => app.editFeedEntry(entry.id);
@@ -4186,6 +4307,15 @@
                 });
                 
                 parent.appendChild(timelineContainer);
+            }
+            
+            getObservationLabel(id) {
+                for (const cat in this.OBSERVATION_CONFIG) {
+                    const found = this.OBSERVATION_CONFIG[cat].options.find(opt => opt.id === id);
+                    if (found) return found.label;
+                }
+                // Fallback for legacy or direct strings
+                return id.replace(/_/g, ' ');
             }
 
             checkPendingTrays() {
@@ -4886,33 +5016,59 @@
                 pending.forEach(entry => {
                     const tank = this.getTankById(entry.tankId);
                     if (tank) {
-                        const trayCount = tank.checkTrays || 1;
                         const div = document.createElement('div');
-                        div.className = 'feed-round-row';
-                        div.style.gridTemplateColumns = '1fr 1.5fr 1fr';
+                        div.className = 'tank-check-entry';
+                        div.style.borderBottom = '2px solid var(--border)';
+                        div.style.paddingBottom = '20px';
+                        div.style.marginBottom = '20px';
                         div.dataset.entryId = entry.id;
+                        
+                        // Generate Observation Checkboxes
+                        let observationHTML = '';
+                        for (const [key, category] of Object.entries(this.OBSERVATION_CONFIG)) {
+                            observationHTML += `
+                                <div class="observation-section">
+                                    <div class="observation-category-title">${category.title}</div>
+                                    <div class="observation-grid">
+                                        ${category.options.map(opt => `
+                                            <div class="observation-checkbox" onclick="this.classList.toggle('checked')" data-obs-id="${opt.id}" data-score="${opt.score}">
+                                                <i class="far fa-square"></i>
+                                                <span>${opt.label}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }
+
                         div.innerHTML = `
-                            <div>
-                                <div style="font-weight:700;">${tank.name}</div>
-                                <div style="font-size:11px; color:var(--gray);">Fed: ${entry.amount}kg @ ${entry.time}</div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                <div>
+                                    <div style="font-weight:700; font-size:16px; color:var(--primary-dark);">${tank.name}</div>
+                                    <div style="font-size:12px; color:var(--gray);">Fed: ${entry.amount}kg @ ${entry.time}</div>
+                                </div>
+                                <div class="risk-badge risk-normal" id="risk-badge-${entry.id}">Normal Risk</div>
                             </div>
-                            <div class="tray-multi-input-wrapper">
-                                ${Array.from({length: trayCount}, (_, i) => `
-                                    <div style="display: flex; align-items: center; gap: 10px; ${i > 0 ? 'margin-top: 5px;' : ''}">
-                                        <label style="font-size: 12px; width: 50px; color: var(--gray);">Tray ${i + 1}</label>
-                                        <div class="tray-btn-group" data-tray-index="${i}">
-                                            <div class="tray-btn-sm" onclick="this.parentElement.querySelectorAll('.tray-btn-sm').forEach(b=>b.classList.remove('selected')); this.classList.add('selected');">Empty</div>
-                                            <div class="tray-btn-sm" onclick="this.parentElement.querySelectorAll('.tray-btn-sm').forEach(b=>b.classList.remove('selected')); this.classList.add('selected');">Little</div>
-                                            <div class="tray-btn-sm" onclick="this.parentElement.querySelectorAll('.tray-btn-sm').forEach(b=>b.classList.remove('selected')); this.classList.add('selected');">Half</div>
-                                            <div class="tray-btn-sm" onclick="this.parentElement.querySelectorAll('.tray-btn-sm').forEach(b=>b.classList.remove('selected')); this.classList.add('selected');">Waste</div>
-                                        </div>
-                                    </div>`).join('')}
+
+                            <label style="font-size:13px; font-weight:600; display:block; margin-bottom:8px;">Mandatory Tray Status <span style="color:red">*</span></label>
+                            <div class="tray-status-radios" id="tray-radios-${entry.id}">
+                                <div class="tray-radio status-empty" onclick="app.selectTrayRadio('${entry.id}', this, 'empty')">🟢<br>Empty</div>
+                                <div class="tray-radio status-little" onclick="app.selectTrayRadio('${entry.id}', this, 'little')">🟡<br>Little</div>
+                                <div class="tray-radio status-half" onclick="app.selectTrayRadio('${entry.id}', this, 'half')">🟠<br>Half</div>
+                                <div class="tray-radio status-full" onclick="app.selectTrayRadio('${entry.id}', this, 'too-much')">🔴<br>Full</div>
                             </div>
-                            <input type="text" class="form-control" placeholder="Notes..." style="font-size:12px; padding: 6px;">
+
+                            <label style="font-size:13px; font-weight:600; display:block; margin-bottom:8px;">Observations (Select all that apply)</label>
+                            ${observationHTML}
+
+                            <input type="text" class="form-control" placeholder="Any extra observation (optional)" maxlength="50" style="font-size:13px; margin-top:10px;">
                         `;
                         list.appendChild(div);
                     }
                 });
+                
+                // Add logic to update risk badge on checkbox click
+                // This is handled by global event delegation or inline onclicks in the HTML above
 
                 document.getElementById('trayCheckModal').classList.add('active');
             }
@@ -4940,29 +5096,42 @@
                 this.openFeedRoundModal();
             }
 
+            selectTrayRadio(entryId, el, value) {
+                const container = document.getElementById(`tray-radios-${entryId}`);
+                container.querySelectorAll('.tray-radio').forEach(r => r.classList.remove('selected'));
+                el.classList.add('selected');
+                el.dataset.value = value;
+            }
+
             processTrayResultsForSuggestion() {
-                const rows = document.querySelectorAll('#trayCheckList .feed-round-row');
+                const rows = document.querySelectorAll('#trayCheckList .tank-check-entry');
                 const suggestions = [];
                 let allSelected = true;
 
                 rows.forEach(row => {
                     const entryId = parseInt(row.dataset.entryId);
-                    const notesInput = row.querySelector('input');
-                    const trayGroups = row.querySelectorAll('.tray-btn-group');
-                    const trayResults = [];
+                    const notesInput = row.querySelector('input[type="text"]');
                     
-                    trayGroups.forEach(group => {
-                        const selectedBtn = group.querySelector('.tray-btn-sm.selected');
-                        if (selectedBtn) {
-                            const statusMap = { 'Empty': 'empty', 'Little': 'little', 'Half': 'half', 'Waste': 'too-much' };
-                            trayResults.push(statusMap[selectedBtn.textContent]);
-                        }
-                    });
-
-                    if (trayResults.length !== trayGroups.length) {
+                    // Get Tray Status
+                    const selectedRadio = row.querySelector('.tray-radio.selected');
+                    if (!selectedRadio) {
                         allSelected = false; return;
                     }
+                    const trayStatus = selectedRadio.dataset.value;
+                    
+                    // Get Observations
+                    const checkedBoxes = row.querySelectorAll('.observation-checkbox.checked');
+                    const observations = [];
+                    let riskScore = 0;
+                    
+                    checkedBoxes.forEach(box => {
+                        observations.push(box.dataset.obsId);
+                        riskScore += parseInt(box.dataset.score || 0);
+                    });
 
+                    // Calculate Risk Level
+                    let riskLevel = riskScore >= 6 ? 'Action Required' : riskScore >= 3 ? 'Watch' : 'Normal';
+                    
                     const entry = this.state.feedEntries.find(e => e.id === entryId);
                     if (!entry) return;
 
@@ -4972,22 +5141,19 @@
                     let newAmount = entry.amount;
                     let reason = "Keep same";
                     let reasonColor = "var(--gray)";
+                    
+                    // Map single status to array for compatibility
+                    const trayResults = [trayStatus];
 
-                    // Suggestion logic based on worst result
-                    let worstResult = 'empty';
-                    if (trayResults.includes('too-much')) worstResult = 'too-much';
-                    else if (trayResults.includes('half')) worstResult = 'half';
-                    else if (trayResults.includes('little')) worstResult = 'little';
-
-                    if (worstResult === 'empty') {
+                    if (trayStatus === 'empty') {
                         newAmount = entry.amount * 1.05;
                         reason = `+5% (was ${entry.amount}kg)`;
                         reasonColor = "var(--success)";
-                    } else if (worstResult === 'half') {
+                    } else if (trayStatus === 'half') {
                         newAmount = entry.amount * 0.9;
                         reason = `-10% (was ${entry.amount}kg)`;
                         reasonColor = "var(--warning-dark)";
-                    } else if (worstResult === 'too-much') {
+                    } else if (trayStatus === 'too-much') {
                         newAmount = entry.amount * 0.8;
                         reason = `-20% (was ${entry.amount}kg)`;
                         reasonColor = "var(--danger)";
@@ -4996,7 +5162,7 @@
                     // AI Adjustments: Weather & DOC
                     if (this.currentWeatherCode !== null && this.currentWeatherCode >= 50) {
                         // Rain/Bad Weather Logic
-                        if (worstResult === 'empty') {
+                        if (trayStatus === 'empty') {
                             newAmount = entry.amount; // Cancel increase
                             reason = "🌧️ Rain: Hold amount (Safety)";
                             reasonColor = "var(--warning)";
@@ -5005,7 +5171,7 @@
                             reason = "🌧️ Rain: Extra -10% reduction";
                             reasonColor = "var(--danger)";
                         }
-                    } else if (doc > 90 && worstResult !== 'empty') {
+                    } else if (doc > 90 && trayStatus !== 'empty') {
                         // High Biomass Caution
                         reason += " (High DOC Caution)";
                     }
@@ -5015,10 +5181,14 @@
                         tankId: entry.tankId,
                         tankName: tank.name,
                         trayResults: trayResults,
+                        trayResult: trayStatus, // Single status
                         notes: notesInput.value,
                         newAmount: parseFloat(newAmount.toFixed(1)),
                         reason,
-                        reasonColor
+                        reasonColor,
+                        observations,
+                        riskScore,
+                        riskLevel
                     });
                 });
 
@@ -5066,13 +5236,10 @@
                     if (entry) {
                         entry.trayResults = s.trayResults;
                         entry.notes = s.notes;
-
-                        // Set single trayResult to worst for backward compatibility
-                        let worstResult = 'empty';
-                        if (s.trayResults.includes('too-much')) worstResult = 'too-much';
-                        else if (s.trayResults.includes('half')) worstResult = 'half';
-                        else if (s.trayResults.includes('little')) worstResult = 'little';
-                        entry.trayResult = worstResult;
+                        entry.trayResult = s.trayResult; // Updated single status
+                        entry.observations = s.observations;
+                        entry.riskScore = s.riskScore;
+                        entry.riskLevel = s.riskLevel;
                     }
 
                     // Update the tank with the next suggested feed amount
