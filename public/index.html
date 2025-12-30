@@ -2022,6 +2022,82 @@
         .risk-watch { background: #fff3e0; color: #ef6c00; }
         .risk-action { background: #ffebee; color: #c62828; }
     </style>
+    <style>
+        /* ===== NEW AUTH SCREEN STYLES ===== */
+        .auth-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            z-index: 9999;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .auth-box {
+            background: white;
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .auth-header {
+            margin-bottom: 30px;
+        }
+
+        .auth-logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+
+        .auth-header h2 {
+            font-size: 24px;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .auth-header p {
+            color: var(--gray);
+            font-size: 15px;
+        }
+
+        .auth-form .form-group {
+            text-align: left;
+        }
+
+        .auth-form .btn {
+            margin-top: 10px;
+        }
+
+        .auth-footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        #otp-step .btn-secondary {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: var(--gray) !important;
+        }
+    </style>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
@@ -3191,31 +3267,39 @@
         </div>
     </div>
 
-    <!-- Login/Auth Modal (NEW - Firebase Ready) -->
-    <div class="modal-overlay" id="authModal">
-        <div class="modal-content" style="max-width: 400px;">
-            <div class="modal-header" style="justify-content: center;">
-                <h3><i class="fas fa-sign-in-alt"></i> Login or Signup</h3>
+    <!-- Login/Auth Screen (NEW Enhanced UI) -->
+    <div class="auth-container" id="authContainer" style="display: flex;">
+        <div class="auth-box">
+            <div class="auth-header">
+                <div class="auth-logo">🐟</div>
+                <h2>Get Started with AquaBook</h2>
+                <p>Enter your phone number to sign up or log in.</p>
             </div>
-            <div class="modal-body">
+
+            <div class="auth-form">
                 <div id="phone-step">
-                    <p class="text-muted" style="margin-bottom: 20px; text-align: center;">Enter your mobile number with country code to receive an OTP.</p>
                     <div class="form-group">
                         <label>Mobile Number</label>
                         <input type="tel" id="phoneInput" class="form-control" placeholder="+91 XXXXX XXXXX">
                     </div>
-                    <button class="btn btn-primary" style="width: 100%;" onclick="app.sendOTP()">Send OTP</button>
+                    <button class="btn btn-primary" style="width: 100%;" onclick="app.sendOTP()">Continue</button>
                 </div>
+
                 <div id="otp-step" style="display: none;">
-                    <p class="text-muted" style="margin-bottom: 20px; text-align: center;">Enter the 6-digit OTP sent to <strong id="otp-phone-display"></strong>.</p>
                     <div class="form-group">
                         <label>OTP</label>
                         <input type="number" id="otpInput" class="form-control" placeholder="XXXXXX" maxlength="6">
                     </div>
+                    <p class="text-muted" style="font-size: 13px; margin-top: -10px; margin-bottom: 15px;">Enter the 6-digit code sent to <strong id="otp-phone-display"></strong>.</p>
                     <button class="btn btn-success" style="width: 100%;" onclick="app.verifyOTP()">Verify & Login</button>
                     <button class="btn btn-secondary" style="width: 100%; margin-top: 8px; border: none; background: transparent; color: var(--gray);" onclick="app.showPhoneStep()">Back</button>
                 </div>
+
                 <div id="recaptcha-container" style="margin-top: 20px;"></div>
+            </div>
+
+            <div class="auth-footer">
+                By continuing, you agree to our <a href="#">Terms of Service</a>.
             </div>
         </div>
     </div>
@@ -3415,6 +3499,7 @@
             }
 
             async handleSignIn(user) {
+                document.getElementById('authContainer').style.display = 'none';
                 this.showLoading(true);
                 const userProfile = await this.getUserProfile(user);
 
@@ -3463,7 +3548,7 @@
                 this.currentUser = null;
                 this.state = this.getInitialState(); // Reset state
                 this.closeAllModals();
-                document.getElementById('authModal').classList.add('active');
+                document.getElementById('authContainer').style.display = 'flex';
                 document.getElementById('firstTimeLock').classList.add('hidden');
                 this.showLoading(false);
 
@@ -4874,10 +4959,15 @@
                 if (!user) return;
 
                 const userProfile = { name, role, phone: user.phoneNumber, createdAt: new Date(), isPro: false };
+                this.showLoading(true);
                 await this.db.collection('users').doc(user.uid).set(userProfile);
                 
+                // Set current user and close modal
+                this.currentUser = { uid: user.uid, ...userProfile };
                 this.closeAllModals();
-                this.handleSignIn(user); // Re-trigger the sign-in flow now that profile exists
+                this.showLoading(false);
+                // Guide the new user to add their first farm directly.
+                this.openFarmModal();
             }
 
             editFarm(id) {
