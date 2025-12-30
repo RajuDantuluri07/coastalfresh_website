@@ -43,6 +43,9 @@
             overscroll-behavior: none;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            padding-top: env(safe-area-inset-top);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
         }
 
         /* ===== APP CONTAINER ===== */
@@ -2982,6 +2985,43 @@
         </div>
     </div>
 
+    <!-- Apply Medicine Modal -->
+    <div class="modal-overlay" id="applyMedicineModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-syringe"></i> Apply Medicine</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Medicine</label>
+                    <select id="applyMedSelect" class="form-control" onchange="app.updateMedStockDisplay()">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <div class="stat-card" style="margin-bottom: 16px; background: #f1f8e9; border: none; padding: 10px;">
+                    <div class="stat-label">Available Stock</div>
+                    <div class="stat-value" id="applyMedStockDisplay" style="font-size: 18px; color: var(--success-dark);">--</div>
+                </div>
+                <div class="form-group">
+                    <label>Amount to Apply</label>
+                    <input type="number" id="applyMedAmount" class="form-control" placeholder="0.0">
+                </div>
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" id="applyMedDate" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Remarks (Optional)</label>
+                    <input type="text" id="applyMedRemarks" class="form-control" placeholder="e.g. Weekly dose">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="app.saveMedicineApplication()">Apply & Deduct Stock</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Sampling Modal -->
     <div class="modal-overlay" id="samplingModal">
         <div class="modal-content">
@@ -3027,6 +3067,17 @@
     <!-- JavaScript Application -->
     <script>
         // ===== AQUABOOK PRO - MVP ENHANCED =====
+        
+        // Global Error Handler to prevent white screens
+        window.onerror = function(msg, url, line, col, error) {
+            console.error("App Error:", msg, error);
+            // Try to notify the user if the app object exists
+            if (window.app && window.app.showToast) {
+                window.app.showToast("An unexpected error occurred. Please restart.", "error");
+            }
+            return false;
+        };
+
         class AquaBookPro {
             constructor() {
                 this.state = {
@@ -3041,6 +3092,7 @@
                     prices: [],          // Market prices
                     inventory: { totalKg: 0 }, // Inventory
                     medicineInventory: [], // Medicine inventory array
+                    medicineApplications: [], // Medicine application records
                     settings: {
                         currentFarmId: null,
                         currency: 'INR',
@@ -3097,6 +3149,10 @@
                     // Initialize Weather
                     this.initWeather();
                     
+                    // Network Listeners
+                    window.addEventListener('online', () => this.showToast('You are back online!', 'success'));
+                    window.addEventListener('offline', () => this.showToast('You are offline. Maps may not work.', 'warning'));
+
                     // Simulate loading delay
                     setTimeout(() => {
                         this.showLoading(false);
@@ -3193,6 +3249,8 @@
                 }
                 // Load medicine inventory
                 this.state.medicineInventory = safeArray(safeParse('aquabook_medicine', []));
+                // Load medicine applications
+                this.state.medicineApplications = safeArray(safeParse('aquabook_med_apps', []));
 
                 // Load prices
                 const savedPrices = safeParse('aquabook_prices', null);
@@ -3241,6 +3299,7 @@
                 localStorage.setItem('aquabook_tasks', JSON.stringify(this.state.tasks));
                 localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
                 localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
+                localStorage.setItem('aquabook_med_apps', JSON.stringify(this.state.medicineApplications));
                 localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
             }
             
@@ -3282,6 +3341,10 @@
 
             saveMedicineInventory() {
                 localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
+            }
+
+            saveMedicineApplications() {
+                localStorage.setItem('aquabook_med_apps', JSON.stringify(this.state.medicineApplications));
             }
 
             savePrices() {
@@ -4560,6 +4623,92 @@
                     this.renderMedicineInventoryList();
                     this.renderInventorySummary();
                 }
+            }
+
+            // ===== MEDICINE APPLICATION =====
+            openApplyMedicineModal(tankId) {
+                if (tankId) this.editingTankId = tankId;
+                
+                const select = document.getElementById('applyMedSelect');
+                select.innerHTML = '<option value="">Select Product...</option>';
+                
+                if (this.state.medicineInventory.length === 0) {
+                    this.showToast('No medicines in inventory. Add stock first.', 'warning');
+                    return;
+                }
+
+                this.state.medicineInventory.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = `${item.name} (${item.unit})`;
+                    select.appendChild(option);
+                });
+
+                document.getElementById('applyMedAmount').value = '';
+                document.getElementById('applyMedDate').value = this.currentDate;
+                document.getElementById('applyMedRemarks').value = '';
+                document.getElementById('applyMedStockDisplay').textContent = '--';
+                
+                document.getElementById('applyMedicineModal').classList.add('active');
+            }
+
+            updateMedStockDisplay() {
+                const medId = document.getElementById('applyMedSelect').value;
+                const display = document.getElementById('applyMedStockDisplay');
+                const item = this.state.medicineInventory.find(i => i.id === medId);
+                
+                if (item) {
+                    display.textContent = `${item.quantity} ${item.unit}`;
+                } else {
+                    display.textContent = '--';
+                }
+            }
+
+            saveMedicineApplication() {
+                const tankId = this.editingTankId;
+                const medId = document.getElementById('applyMedSelect').value;
+                const amount = parseFloat(document.getElementById('applyMedAmount').value);
+                const date = document.getElementById('applyMedDate').value;
+                const remarks = document.getElementById('applyMedRemarks').value;
+
+                if (!medId || !amount || amount <= 0) {
+                    this.showToast('Invalid input', 'error');
+                    return;
+                }
+
+                const inventoryItem = this.state.medicineInventory.find(i => i.id === medId);
+                if (!inventoryItem) {
+                    this.showToast('Medicine not found in inventory', 'error');
+                    return;
+                }
+
+                if (inventoryItem.quantity < amount) {
+                    this.showToast(`Insufficient stock. Available: ${inventoryItem.quantity} ${inventoryItem.unit}`, 'error');
+                    return;
+                }
+
+                // Deduct
+                inventoryItem.quantity -= amount;
+                
+                // Record
+                const app = {
+                    id: Date.now(),
+                    tankId,
+                    medId,
+                    medName: inventoryItem.name,
+                    amount,
+                    unit: inventoryItem.unit,
+                    date,
+                    remarks
+                };
+                
+                this.state.medicineApplications.push(app);
+                
+                this.saveMedicineInventory();
+                this.saveMedicineApplications();
+                this.renderInventorySummary(); // Update home screen stats
+                this.closeAllModals();
+                this.showToast('Medicine applied and stock deducted');
             }
 
             // ===== FEED ROUND (BULK) =====
@@ -5878,9 +6027,14 @@
                     `;
                 } else {
                     footer.innerHTML = `
-                        <button class="btn btn-primary" style="width: 100%; margin-bottom: 8px;" onclick="app.openSamplingModal('${tank.id}')">
-                            <i class="fas fa-balance-scale"></i> Log Growth Sample
-                        </button>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom: 8px;">
+                             <button class="btn btn-primary" onclick="app.openSamplingModal('${tank.id}')">
+                                <i class="fas fa-balance-scale"></i> Sample
+                            </button>
+                             <button class="btn btn-info" style="background-color: var(--info); color: white;" onclick="app.openApplyMedicineModal('${tank.id}')">
+                                <i class="fas fa-syringe"></i> Medicine
+                            </button>
+                        </div>
                         <div style="display:flex; gap:8px; width:100%;">
                             <button class="btn btn-danger" style="flex:1;" onclick="app.openEndCropModal('${tank.id}')">
                                 <i class="fas fa-flag-checkered"></i> End Crop
@@ -6269,6 +6423,7 @@
                     tasks: this.state.tasks,
                     inventory: this.state.inventory,
                     medicineInventory: this.state.medicineInventory,
+                    medicineApplications: this.state.medicineApplications,
                     settings: this.state.settings,
                     prices: this.state.prices,
                     exportDate: new Date().toISOString(),
@@ -6310,6 +6465,7 @@
                             localStorage.setItem('aquabook_tasks', JSON.stringify(data.tasks || []));
                             localStorage.setItem('aquabook_inventory', JSON.stringify(data.inventory));
                             localStorage.setItem('aquabook_medicine', JSON.stringify(data.medicineInventory || []));
+                            localStorage.setItem('aquabook_med_apps', JSON.stringify(data.medicineApplications || []));
                             localStorage.setItem('aquabook_settings', JSON.stringify(data.settings));
                             localStorage.setItem('aquabook_prices', JSON.stringify(data.prices || []));
                             
