@@ -3465,6 +3465,23 @@
                 document.getElementById('authModal').classList.add('active');
                 document.getElementById('firstTimeLock').classList.add('hidden');
                 this.showLoading(false);
+
+                // Initialize reCAPTCHA here, as the container is now visible.
+                // This prevents errors from trying to render into a hidden element.
+                if (!window.recaptchaVerifier) {
+                    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                        'size': 'invisible',
+                        'callback': (response) => {
+                            // This callback is often used for auto-sending the OTP after reCAPTCHA is solved.
+                            // Since we have a manual button click, we can just log it.
+                            console.log("reCAPTCHA solved.");
+                        }
+                    });
+                    // Render the verifier and store the widget ID for later resets if needed.
+                    window.recaptchaVerifier.render().then((widgetId) => {
+                        window.recaptchaWidgetId = widgetId;
+                    });
+                }
             }
 
             signOut() {
@@ -4813,13 +4830,9 @@
                 
                 this.showLoading(true);
                 
-                // Set up reCAPTCHA verifier
-                window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-                    'size': 'invisible',
-                    'callback': (response) => { /* reCAPTCHA solved */ }
-                });
+                const appVerifier = window.recaptchaVerifier;
 
-                this.auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
+                this.auth.signInWithPhoneNumber(phone, appVerifier)
                     .then((confirmationResult) => {
                         window.confirmationResult = confirmationResult;
                         this.showLoading(false);
@@ -4830,8 +4843,12 @@
                     }).catch((error) => {
                         this.showLoading(false);
                         console.error("OTP Error:", error);
-                        this.showToast('Failed to send OTP. Please try again.', 'error');
-                        window.recaptchaVerifier.render().then(widgetId => grecaptcha.reset(widgetId));
+                        this.showToast(`Failed to send OTP: ${error.message}`, 'error');
+                        // If an error occurs (e.g. network error), reset the reCAPTCHA
+                        // so the user can try again without reloading the page.
+                        if (window.grecaptcha && window.recaptchaWidgetId) {
+                            grecaptcha.reset(window.recaptchaWidgetId);
+                        }
                     });
             }
 
