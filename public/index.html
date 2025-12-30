@@ -2026,7 +2026,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Google Maps - IMPORTANT: Replace YOUR_GOOGLE_MAPS_API_KEY with your actual key -->
+    <!-- 
+        =================================================================
+        !!! IMPORTANT - ACTION REQUIRED !!!
+        Google Maps will not work until you replace 'YOUR_GOOGLE_MAPS_API_KEY' 
+        with a valid Google Maps JavaScript API key.
+        =================================================================
+    -->
     <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places" async defer></script>
 </head>
 <body>
@@ -2720,13 +2726,7 @@
                 <div id="trayCheckList" style="max-height: 60vh; overflow-y: auto;"></div>
             </div>
             <div class="modal-footer" style="flex-direction: column;">
-                <button class="btn btn-primary" style="width: 100%;" onclick="app.processTrayResultsForSuggestion()">
-                    Generate Plan
-                    <i class="fas fa-arrow-right"></i>
-                </button>
-                <button class="btn btn-secondary" style="width: 100%; margin-top: 8px; border: none; background: transparent; color: var(--gray);" onclick="app.skipTrayChecks()">
-                    Skip & Log Feed Immediately
-                </button>
+                <!-- Dynamically populated by JS -->
             </div>
         </div>
     </div>
@@ -3235,6 +3235,7 @@
                 this.viewMode = 'today'; // today, yesterday, 7days, 30days, all
                 this.taskFilter = 'all'; // all, pending, completed
                 this.logViewType = 'matrix'; // 'matrix' or 'list'
+                this.tempTrayResult = null; // Temporary storage for single tray update
                 
                 // Initialize when DOM is ready
                 if (document.readyState === 'loading') {
@@ -4409,6 +4410,13 @@
                 // Inventory
                 document.getElementById('saveStockBtn').addEventListener('click', () => this.saveStock());
 
+                // Edit Feed Modal Buttons
+                document.getElementById('updateFeedBtn').addEventListener('click', () => this.updateFeedEntry());
+                document.getElementById('deleteFeedBtn').addEventListener('click', () => this.deleteCurrentFeedEntry());
+
+                // Price Calculator
+                document.getElementById('calculateHarvest').addEventListener('click', () => this.calculateHarvestValue());
+
                 // Close menus on click outside
                 document.addEventListener('click', (e) => {
                     if (!e.target.closest('.tank-action-menu')) {
@@ -4855,7 +4863,7 @@
             }
 
             // ===== FEED ROUND (BULK) =====
-            openFeedRoundModal() {
+            openFeedRoundModal() { 
                 const currentFarmId = this.state.settings.currentFarmId;
                 if (!currentFarmId) {
                     this.showToast('Please select a farm first', 'error');
@@ -4957,7 +4965,7 @@
                 document.getElementById('feedRoundModal').classList.add('active');
             }
 
-            saveFeedRound() {
+            saveFeedRound() { 
                 const inputs = document.querySelectorAll('.feed-round-input');
                 let count = 0;
                 let totalAmount = 0;
@@ -5020,66 +5028,105 @@
 
                 if (pending.length === 0) {
                     this.showToast('No pending tray checks found', 'info');
+                    this.closeAllModals();
                     return;
                 }
 
+                const modal = document.getElementById('trayCheckModal');
                 const list = document.getElementById('trayCheckList');
-                list.innerHTML = '';
+                const footer = modal.querySelector('.modal-footer');
+                const header = modal.querySelector('.modal-header h3');
 
+                header.innerHTML = '<i class="fas fa-tasks"></i> Pending Tray Checks';
+                list.innerHTML = '<div style="padding: 16px;"></div>'; // Container for list
+                const listContainer = list.querySelector('div');
+                
                 pending.forEach(entry => {
                     const tank = this.getTankById(entry.tankId);
-                    if (tank) {
-                        const div = document.createElement('div');
-                        div.className = 'tank-check-entry';
-                        div.style.borderBottom = '2px solid var(--border)';
-                        div.style.paddingBottom = '20px';
-                        div.style.marginBottom = '20px';
-                        div.dataset.entryId = entry.id;
-                        
-                        // Generate Observation Checkboxes
-                        let observationHTML = '<div class="observation-chip-grid">';
-                        for (const [key, category] of Object.entries(this.OBSERVATION_CONFIG)) {
-                            if (key === 'feeding') continue; // Skip feeding category
-                            observationHTML += category.options.map(opt => {
-                                const isCritical = key === 'mortality';
-                                return `
-                                    <div class="observation-chip ${isCritical ? 'critical' : ''}" onclick="this.classList.toggle('selected')" data-obs-id="${opt.id}" data-score="${opt.score}">
-                                        <span>${opt.label}</span>
-                                    </div>
-                                `;
-                            }).join('');
-                        }
-                        observationHTML += '</div>';
-                        div.innerHTML = `
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                                <div>
-                                    <div style="font-weight:700; font-size:16px; color:var(--primary-dark);">${tank.name}</div>
-                                    <div style="font-size:12px; color:var(--gray);">Fed: ${entry.amount}kg @ ${entry.time}</div>
-                                </div>
-                                <div class="risk-badge risk-normal" id="risk-badge-${entry.id}">Normal Risk</div>
+                    const div = document.createElement('div');
+                    div.className = 'feed-schedule-item';
+                    div.style.marginBottom = '12px';
+                    div.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div class="status-icon" style="background:var(--warning); color: white;"><i class="fas fa-clock"></i></div>
+                            <div>
+                                <div class="feed-time" style="font-size:16px;">${tank.name}</div>
+                                <div class="feed-label">Fed ${entry.amount}kg @ ${entry.time}</div>
                             </div>
-
-                            <label style="font-size:13px; font-weight:600; display:block; margin-bottom:8px;">Mandatory Tray Status <span style="color:red">*</span></label>
-                            <div class="tray-status-radios" id="tray-radios-${entry.id}">
-                                <div class="tray-radio status-empty" onclick="app.selectTrayRadio('${entry.id}', this, 'empty')" data-score="0">🟢<br>Empty</div>
-                                <div class="tray-radio status-little" onclick="app.selectTrayRadio('${entry.id}', this, 'little')" data-score="1">🟡<br>Little Left</div>
-                                <div class="tray-radio status-half" onclick="app.selectTrayRadio('${entry.id}', this, 'half')" data-score="2">🟠<br>Half Left</div>
-                                <div class="tray-radio status-full" onclick="app.selectTrayRadio('${entry.id}', this, 'too-much')" data-score="3">🔴<br>Full / Untouched</div>
-                            </div>
-
-                            <label style="font-size:13px; font-weight:600; display:block; margin-bottom:8px; margin-top: 20px;">Add Observations (Optional)</label>
-                            ${observationHTML}
-
-                            <input type="text" class="form-control" placeholder="Any extra observation (optional)" maxlength="50" style="font-size:13px; margin-top:10px;">
-                        `;
-                        list.appendChild(div);
-                    }
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="font-size:12px; color:var(--primary); font-weight:600;">Update</span>
+                            <i class="fas fa-chevron-right" style="color:var(--gray); font-size:12px;"></i>
+                        </div>
+                    `;
+                    div.onclick = () => this.openSingleTrayCheckForm(entry.id);
+                    listContainer.appendChild(div);
                 });
                 
-                // Add logic to update risk badge on checkbox click
-                // This is handled by global event delegation or inline onclicks in the HTML above
+                // Clear footer for list view
+                footer.innerHTML = `
+                    <button class="btn btn-secondary" style="width: 100%; border: none; background: transparent; color: var(--gray);" onclick="app.skipTrayChecks()">
+                        Skip Remaining & Log Feed
+                    </button>
+                `;
+                
+                modal.classList.add('active');
+            }
 
-                document.getElementById('trayCheckModal').classList.add('active');
+            openSingleTrayCheckForm(entryId) {
+                const entry = this.state.feedEntries.find(e => e.id === entryId);
+                if (!entry) return;
+                const tank = this.getTankById(entry.tankId);
+
+                const modal = document.getElementById('trayCheckModal');
+                const list = document.getElementById('trayCheckList');
+                const footer = modal.querySelector('.modal-footer');
+                const header = modal.querySelector('.modal-header h3');
+
+                header.innerHTML = `<i class="fas fa-search"></i> Check: ${tank.name}`;
+                
+                // Generate Observation Chips
+                let observationHTML = '<div class="observation-chip-grid">';
+                for (const [key, category] of Object.entries(this.OBSERVATION_CONFIG)) {
+                    if (key === 'feeding') continue;
+                    observationHTML += category.options.map(opt => {
+                        const isCritical = key === 'mortality';
+                        return `
+                            <div class="observation-chip ${isCritical ? 'critical' : ''}" onclick="this.classList.toggle('selected')" data-obs-id="${opt.id}" data-score="${opt.score}">
+                                <span>${opt.label}</span>
+                            </div>
+                        `;
+                    }).join('');
+                }
+                observationHTML += '</div>';
+
+                list.innerHTML = `
+                    <div style="padding: 16px;" id="singleTrayForm" data-entry-id="${entry.id}">
+                        <div style="background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: var(--primary-dark);">
+                            <strong>Last Feed:</strong> ${entry.amount} kg @ ${entry.time}
+                        </div>
+
+                        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:8px;">Mandatory Tray Status <span style="color:red">*</span></label>
+                        <div class="tray-status-radios" id="tray-radios-${entry.id}">
+                            <div class="tray-radio status-empty" onclick="app.selectTrayRadio('${entry.id}', this, 'empty')" data-score="0">🟢<br>Empty</div>
+                            <div class="tray-radio status-little" onclick="app.selectTrayRadio('${entry.id}', this, 'little')" data-score="1">🟡<br>Little Left</div>
+                            <div class="tray-radio status-half" onclick="app.selectTrayRadio('${entry.id}', this, 'half')" data-score="2">🟠<br>Half Left</div>
+                            <div class="tray-radio status-full" onclick="app.selectTrayRadio('${entry.id}', this, 'too-much')" data-score="3">🔴<br>Full / Untouched</div>
+                        </div>
+
+                        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:8px; margin-top: 20px;">Add Observations (Optional)</label>
+                        ${observationHTML}
+
+                        <input type="text" class="form-control" placeholder="Any extra observation (optional)" maxlength="50" style="font-size:13px; margin-top:10px;">
+                    </div>
+                `;
+
+                footer.innerHTML = `
+                    <div style="display:grid; grid-template-columns: 1fr 2fr; gap: 10px; width: 100%;">
+                        <button class="btn btn-secondary" onclick="app.openTrayCheckModal()">Back</button>
+                        <button class="btn btn-primary" onclick="app.processSingleTrayResult(${entry.id})">Save Result</button>
+                    </div>
+                `;
             }
 
             skipTrayChecks() {
@@ -5112,102 +5159,119 @@
                 el.dataset.value = value;
             }
 
-            processTrayResultsForSuggestion() {
-                const rows = document.querySelectorAll('#trayCheckList .tank-check-entry');
-                const suggestions = [];
-                let allSelected = true;
+            processSingleTrayResult(entryId) {
+                const container = document.getElementById('singleTrayForm');
+                if (!container) return;
 
-                rows.forEach(row => {
-                    const entryId = parseInt(row.dataset.entryId);
-                    const notesInput = row.querySelector('input[type="text"]');
-                    
-                    // Get Tray Status
-                    const selectedRadio = row.querySelector('.tray-radio.selected');
-                    if (!selectedRadio) {
-                        allSelected = false; return;
-                    }
-                    const trayStatus = selectedRadio.dataset.value;
-                    
-                    // Get Observations
-                    const checkedBoxes = row.querySelectorAll('.observation-chip.selected');
-                    const observations = [];
-                    let riskScore = 0;
-                    
-                    checkedBoxes.forEach(box => {
-                        observations.push(box.dataset.obsId);
-                        riskScore += parseInt(box.dataset.score || 0);
-                    });
-                    riskScore += parseInt(selectedRadio.dataset.score || 0);
-
-                    // Calculate Risk Level
-                    let riskLevel = riskScore >= 6 ? 'Action Required' : riskScore >= 3 ? 'Watch' : 'Normal';
-                    
-                    const entry = this.state.feedEntries.find(e => e.id === entryId);
-                    if (!entry) return;
-
-                    const tank = this.getTankById(entry.tankId);
-                    const doc = Math.floor((new Date() - new Date(tank.stockingDate)) / (1000 * 60 * 60 * 24));
-                    
-                    let newAmount = entry.amount;
-                    let reason = "Keep same";
-                    let reasonColor = "var(--gray)";
-                    
-                    // Map single status to array for compatibility
-                    const trayResults = [trayStatus];
-
-                    if (trayStatus === 'empty') {
-                        newAmount = entry.amount * 1.05;
-                        reason = `+5% (was ${entry.amount}kg)`;
-                        reasonColor = "var(--success)";
-                    } else if (trayStatus === 'half') {
-                        newAmount = entry.amount * 0.9;
-                        reason = `-10% (was ${entry.amount}kg)`;
-                        reasonColor = "var(--warning-dark)";
-                    } else if (trayStatus === 'too-much') {
-                        newAmount = entry.amount * 0.8;
-                        reason = `-20% (was ${entry.amount}kg)`;
-                        reasonColor = "var(--danger)";
-                    }
-
-                    // AI Adjustments: Weather & DOC
-                    if (this.currentWeatherCode !== null && this.currentWeatherCode >= 50) {
-                        // Rain/Bad Weather Logic
-                        if (trayStatus === 'empty') {
-                            newAmount = entry.amount; // Cancel increase
-                            reason = "🌧️ Rain: Hold amount (Safety)";
-                            reasonColor = "var(--warning)";
-                        } else {
-                            newAmount = newAmount * 0.9; // Further reduce
-                            reason = "🌧️ Rain: Extra -10% reduction";
-                            reasonColor = "var(--danger)";
-                        }
-                    } else if (doc > 90 && trayStatus !== 'empty') {
-                        // High Biomass Caution
-                        reason += " (High DOC Caution)";
-                    }
-
-                    suggestions.push({
-                        entryId: entry.id,
-                        tankId: entry.tankId,
-                        tankName: tank.name,
-                        trayResults: trayResults,
-                        trayResult: trayStatus, // Single status
-                        notes: notesInput.value,
-                        newAmount: parseFloat(newAmount.toFixed(1)),
-                        reason,
-                        reasonColor,
-                        observations,
-                        riskScore,
-                        riskLevel
-                    });
-                });
-
-                if (!allSelected) {
-                    this.showToast('Please select a tray result for all tanks.', 'error');
+                // Get Tray Status
+                const selectedRadio = container.querySelector('.tray-radio.selected');
+                if (!selectedRadio) {
+                    this.showToast('Please select a tray status.', 'error');
                     return;
                 }
+                const trayStatus = selectedRadio.dataset.value;
+                
+                // Get Observations
+                const checkedBoxes = container.querySelectorAll('.observation-chip.selected');
+                const observations = [];
+                let riskScore = 0;
+                
+                checkedBoxes.forEach(box => {
+                    observations.push(box.dataset.obsId);
+                    riskScore += parseInt(box.dataset.score || 0);
+                });
+                riskScore += parseInt(selectedRadio.dataset.score || 0);
 
-                this.renderSuggestionModal(suggestions);
+                // Calculate Risk Level
+                let riskLevel = riskScore >= 6 ? 'Action Required' : riskScore >= 3 ? 'Watch' : 'Normal';
+                
+                const entry = this.state.feedEntries.find(e => e.id === entryId);
+                
+                // Logic for suggestion
+                let newAmount = entry.amount;
+                let reason = "Keep same";
+                
+                if (trayStatus === 'empty') {
+                    newAmount = entry.amount * 1.05;
+                    reason = `+5% (was ${entry.amount}kg)`;
+                } else if (trayStatus === 'half') {
+                    newAmount = entry.amount * 0.9;
+                    reason = `-10% (was ${entry.amount}kg)`;
+                } else if (trayStatus === 'too-much') {
+                    newAmount = entry.amount * 0.8;
+                    reason = `-20% (was ${entry.amount}kg)`;
+                }
+
+                // Prepare data object
+                this.tempTrayResult = {
+                    entryId,
+                    trayResult: trayStatus,
+                    trayResults: [trayStatus],
+                    observations,
+                    riskScore,
+                    riskLevel,
+                    notes: container.querySelector('input').value,
+                    newAmount: parseFloat(newAmount.toFixed(1)),
+                    reason
+                };
+
+                // Show Confirmation View
+                const list = document.getElementById('trayCheckList');
+                const footer = document.querySelector('#trayCheckModal .modal-footer');
+                
+                list.innerHTML = `
+                    <div style="padding: 20px; text-align: center;">
+                        <div style="font-size: 16px; font-weight: 700; margin-bottom: 10px;">Result Recorded</div>
+                        <div style="margin-bottom: 20px;">
+                            <span class="log-status ${trayStatus}" style="font-size: 14px; padding: 6px 12px;">${trayStatus.toUpperCase()}</span>
+                        </div>
+                        
+                        <div style="background: #f1f8e9; padding: 16px; border-radius: 12px; border: 1px solid #c8e6c9; margin-bottom: 20px;">
+                            <div style="font-size: 12px; color: #2e7d32; margin-bottom: 4px;">Suggested Next Feed</div>
+                            <div style="font-size: 24px; font-weight: 800; color: #2e7d32;">${this.tempTrayResult.newAmount} kg</div>
+                            <div style="font-size: 12px; color: #2e7d32;">${reason}</div>
+                        </div>
+
+                        <p style="font-size: 13px; color: var(--gray);">Confirm to save this result and update the feed plan.</p>
+                    </div>
+                `;
+
+                footer.innerHTML = `
+                    <button class="btn btn-success" style="width: 100%;" onclick="app.saveSingleTrayResult()">
+                        Confirm & Finish
+                    </button>
+                `;
+            }
+
+            saveSingleTrayResult() {
+                const data = this.tempTrayResult;
+                if (!data) return;
+
+                const entry = this.state.feedEntries.find(e => e.id === data.entryId);
+                if (entry) {
+                    entry.trayResult = data.trayResult;
+                    entry.trayResults = data.trayResults;
+                    entry.observations = data.observations;
+                    entry.riskScore = data.riskScore;
+                    entry.riskLevel = data.riskLevel;
+                    entry.notes = data.notes;
+                }
+
+                const tank = this.getTankById(entry.tankId);
+                if (tank) {
+                    tank.nextSuggestedFeed = {
+                        amount: data.newAmount,
+                        reason: data.reason
+                    };
+                }
+
+                this.saveFeedEntries();
+                this.saveTanks();
+                this.showToast('Tray result updated!');
+                this.tempTrayResult = null;
+                
+                // Go back to list
+                this.openTrayCheckModal();
             }
 
             renderSuggestionModal(suggestions) {
