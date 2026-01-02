@@ -3506,7 +3506,15 @@
                     return;
                 }
 
-                const userProfile = await this.getUserProfile(user);
+                let userProfile = null;
+                try {
+                    userProfile = await this.getUserProfile(user);
+                } catch (e) {
+                    console.error("Login error", e);
+                    this.showLoading(false);
+                    this.showToast("Login failed. Please check connection.", "error");
+                    return;
+                }
 
                 if (!userProfile) {
                     // This is a new user, show the role selection modal.
@@ -3682,6 +3690,33 @@
                 this.firestoreListeners = [];
             }
             
+            setupFeedListener() {
+                // Detach existing listeners to prevent duplicates
+                this.detachFirestoreListeners();
+
+                const farmIds = this.state.farms.map(f => f.id);
+                if (farmIds.length > 0) {
+                    // For MVP stability, listen to first 10 farms only to avoid 'in' query limit in onSnapshot
+                    const listenerFarmIds = farmIds.slice(0, 10);
+                    const feedEntriesQuery = this.db.collection('feedEntries').where('farmId', 'in', listenerFarmIds);
+                    const feedListener = feedEntriesQuery.onSnapshot(querySnapshot => {
+                        console.log("Real-time: Received feed entries update.");
+                        this.state.feedEntries = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        
+                        // Re-render parts of the UI that depend on feed entries
+                        if (this.initialized) {
+                            this.renderLogBook();
+                            this.checkPendingTrays();
+                            this.renderOverallStats();
+                            this.renderFeedTrendChart();
+                        }
+                    }, error => {
+                        console.error("Error with feed entries listener: ", error);
+                    });
+                    this.firestoreListeners.push(feedListener);
+                }
+            }
+
             // ===== DATA MANAGEMENT =====
             async loadAllData() {
                 if (this.isGuest) {
@@ -3734,27 +3769,7 @@
                     this.state.tanks = await fetchInChunks('tanks', 'farmId', farmIds);
 
                     // --- REAL-TIME LISTENER FOR FEED ENTRIES ---
-                    if (farmIds.length > 0) {
-                        // For MVP stability, listen to first 10 farms only to avoid 'in' query limit in onSnapshot
-                        const listenerFarmIds = farmIds.slice(0, 10);
-                        const feedEntriesQuery = this.db.collection('feedEntries').where('farmId', 'in', listenerFarmIds);
-                        const feedListener = feedEntriesQuery.onSnapshot(querySnapshot => {
-                            console.log("Real-time: Received feed entries update.");
-                            this.state.feedEntries = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                            
-                            // Re-render parts of the UI that depend on feed entries
-                            if (this.initialized) {
-                                this.renderLogBook();
-                                this.checkPendingTrays();
-                                this.renderOverallStats();
-                                this.renderFeedTrendChart();
-                            }
-                        }, error => {
-                            console.error("Error with feed entries listener: ", error);
-                            // Suppress toast on init to avoid confusion, just log
-                        });
-                        this.firestoreListeners.push(feedListener); // Store the unsubscribe function for cleanup
-                    }
+                    this.setupFeedListener();
 
                     // Fetch other collections safely
                     this.state.waterEntries = await fetchInChunks('waterEntries', 'farmId', farmIds);
@@ -5104,7 +5119,7 @@
                 const user = this.auth.currentUser;
                 if (!user) return;
 
-                const userProfile = { name, role, phone: user.phoneNumber, createdAt: new Date(), isPro: false };
+                const userProfile = { name, role, phone: user.phoneNumber, createdAt: new Date(), isPro: true };
                 this.showLoading(true);
                 await this.db.collection('users').doc(user.uid).set(userProfile);
                 
@@ -6594,16 +6609,15 @@
                         this.state.settings.currentFarmId = newFarm.id;
                         await this.saveSettings();
                     }
+                    
+                    // FIX: Refresh listeners so the new farm is included in real-time updates
+                    if (!this.isGuest) this.setupFeedListener();
+
                     this.showToast('Farm added successfully');
                 }
                 
                 if (this.isGuest) {
                     this.saveGuestData();
-                    this.renderAll();
-                } else {
-                // Refresh listeners to include the new farm in real-time updates
-                this.detachFirestoreListeners();
-                await this.loadAllData();
                 }
 
                 this.showLoading(false);
