@@ -5119,19 +5119,26 @@
                 const user = this.auth.currentUser;
                 if (!user) return;
 
-                const userProfile = { name, role, phone: user.phoneNumber, createdAt: new Date(), isPro: true };
                 this.showLoading(true);
-                await this.db.collection('users').doc(user.uid).set(userProfile);
-                
-                // Set current user and close modal
-                this.currentUser = { uid: user.uid, ...userProfile };
-                // Check for guest data to sync
-                await this.checkForGuestDataAndSync(user);
-                this.closeAllModals();
-                
-                await this.completeAppInitialization();
-                // Guide the new user to add their first farm directly.
-                this.openFarmModal();
+                try {
+                    const userProfile = { name, role, phone: user.phoneNumber || '', createdAt: new Date(), isPro: true };
+                    await this.db.collection('users').doc(user.uid).set(userProfile);
+                    
+                    // Set current user and close modal
+                    this.currentUser = { uid: user.uid, ...userProfile };
+                    // Check for guest data to sync
+                    await this.checkForGuestDataAndSync(user);
+                    this.closeAllModals();
+                    
+                    await this.completeAppInitialization();
+                    // Guide the new user to add their first farm directly.
+                    this.openFarmModal();
+                } catch (e) {
+                    console.error("Save Role Error:", e);
+                    this.showToast('Error saving profile: ' + e.message, 'error');
+                } finally {
+                    this.showLoading(false);
+                }
             }
 
             editFarm(id) {
@@ -6555,6 +6562,12 @@
                 const phone = document.getElementById('farmPhone').value;
                 const lat = document.getElementById('farmLat').value;
                 const lng = document.getElementById('farmLng').value;
+                
+                // Ensure currentUser is set
+                if (!this.currentUser) {
+                    this.showToast('You must be logged in to save a farm.', 'error');
+                    return;
+                }
                 const ownerId = this.currentUser.uid;
 
                 if (!name) {
@@ -6564,8 +6577,14 @@
 
                 // MVP: Unlimited farms allowed for everyone
 
-                try {
                 this.showLoading(true);
+                try {
+                    // Parse coordinates safely to avoid NaN which crashes Firestore
+                    const latVal = lat ? parseFloat(lat) : null;
+                    const lngVal = lng ? parseFloat(lng) : null;
+                    const safeLat = isNaN(latVal) ? null : latVal;
+                    const safeLng = isNaN(lngVal) ? null : lngVal;
+
                 if (this.editingFarmId) {
                     const farm = this.getFarmById(this.editingFarmId);
                     if (farm) {
@@ -6573,8 +6592,8 @@
                         farm.location = location;
                         farm.contact = contact;
                         farm.phone = phone;
-                        farm.lat = lat ? parseFloat(lat) : null;
-                        farm.lng = lng ? parseFloat(lng) : null;
+                        farm.lat = safeLat;
+                        farm.lng = safeLng;
                         if (!this.isGuest) await this.db.collection('farms').doc(farm.id).set(farm, { merge: true });
                         this.showToast('Farm updated successfully');
                     }
@@ -6596,8 +6615,8 @@
                         location,
                         contact,
                         phone,
-                        lat: lat ? parseFloat(lat) : null,
-                        lng: lng ? parseFloat(lng) : null,
+                        lat: safeLat,
+                        lng: safeLng,
                         created: new Date().toISOString()
                     };
 
@@ -6607,11 +6626,21 @@
                     // Set as current if first
                     if (this.state.farms.length === 1) {
                         this.state.settings.currentFarmId = newFarm.id;
-                        await this.saveSettings();
+                        try {
+                            await this.saveSettings();
+                        } catch (err) {
+                            console.warn("Failed to save settings:", err);
+                        }
                     }
                     
                     // FIX: Refresh listeners so the new farm is included in real-time updates
-                    if (!this.isGuest) this.setupFeedListener();
+                    if (!this.isGuest) {
+                        try {
+                            this.setupFeedListener();
+                        } catch (err) {
+                            console.warn("Failed to setup listeners:", err);
+                        }
+                    }
 
                     this.showToast('Farm added successfully');
                 }
@@ -6620,9 +6649,6 @@
                     this.saveGuestData();
                 }
 
-                this.showLoading(false);
-                this.closeAllModals();
-                this.renderAll();
                 
                 // Clear inputs
                 document.getElementById('farmNameInput').value = '';
@@ -6632,10 +6658,20 @@
                 document.getElementById('farmLat').value = '';
                 document.getElementById('farmLng').value = '';
                 this.editingFarmId = null;
+                
+                // Close modal BEFORE rendering to ensure it closes even if render fails
+                this.closeAllModals();
+
+                try {
+                    this.renderAll();
+                } catch (renderErr) {
+                    console.error("Render error:", renderErr);
+                }
                 } catch (e) {
                     console.error(e);
-                    this.showLoading(false);
                     this.showToast('Error saving farm: ' + e.message, 'error');
+                } finally {
+                    this.showLoading(false);
                 }
             }
 
@@ -6694,9 +6730,9 @@
             async saveTank() {
                 const farmId = document.getElementById('tankFarmSelect').value;
                 const name = document.getElementById('tankNameInput').value;
-                const size = parseFloat(document.getElementById('tankSize').value);
+                const size = parseFloat(document.getElementById('tankSize').value) || 0;
                 const stockingDate = document.getElementById('stockingDate').value;
-                const initialSeed = parseInt(document.getElementById('initialSeed').value);
+                const initialSeed = parseInt(document.getElementById('initialSeed').value) || 0;
                 const checkTrays = parseInt(document.getElementById('tankCheckTrays').value) || 2;
 
                 if (!name || !farmId) {
@@ -6741,6 +6777,7 @@
                         this.renderAll();
                     }
 
+                    // Close modal first
                     this.closeAllModals();
                     this.renderAll();
                     this.editingTankId = null;
