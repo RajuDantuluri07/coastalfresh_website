@@ -3295,7 +3295,10 @@
                 <div id="phone-step">
                     <div class="form-group">
                         <label>Mobile Number</label>
-                        <input type="tel" id="phoneInput" class="form-control" placeholder="+91 XXXXX XXXXX">
+                        <div style="display: flex; align-items: center;">
+                            <span style="padding: 12px; background: #eee; border: 2px solid var(--border); border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm); color: var(--dark); font-weight: 600;">+91</span>
+                            <input type="tel" id="phoneInput" class="form-control" placeholder="Enter 10-digit number" maxlength="10" style="border-radius: 0 var(--radius-sm) var(--radius-sm) 0;">
+                        </div>
                     </div>
                     <button class="btn btn-primary" style="width: 100%;" onclick="app.sendOTP()">Continue</button>
                 </div>
@@ -5171,22 +5174,26 @@
             }
 
             sendOTP() {
-                const phone = document.getElementById('phoneInput').value;
-                if (!/^\+?[1-9]\d{1,14}$/.test(phone)) {
-                    this.showToast('Please enter a valid mobile number with country code.', 'error');
+                let phone = document.getElementById('phoneInput').value.trim();
+                // Remove any non-digit characters
+                phone = phone.replace(/\D/g, '');
+
+                if (phone.length !== 10) {
+                    this.showToast('Please enter a valid 10-digit mobile number.', 'error');
                     return;
                 }
                 
+                const formattedPhone = '+91' + phone;
                 this.showLoading(true);
                 
                 const appVerifier = window.recaptchaVerifier;
 
-                this.auth.signInWithPhoneNumber(phone, appVerifier)
+                this.auth.signInWithPhoneNumber(formattedPhone, appVerifier)
                     .then((confirmationResult) => {
                         window.confirmationResult = confirmationResult;
                         this.showLoading(false);
-                        this.showToast(`OTP sent to ${phone}`, 'info');
-                        document.getElementById('otp-phone-display').textContent = phone;
+                        this.showToast(`OTP sent to ${formattedPhone}`, 'info');
+                        document.getElementById('otp-phone-display').textContent = formattedPhone;
                         document.getElementById('phone-step').style.display = 'none';
                         document.getElementById('otp-step').style.display = 'block';
                         this.startResendTimer();
