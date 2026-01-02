@@ -3668,6 +3668,13 @@
                 if (!this.currentUser) return;
                 console.log("Fetching all user data from Firestore...");
 
+                // --- FIX: Re-fetch user profile to get the latest settings ---
+                // This prevents using stale data (e.g., after adding the first farm).
+                const userProfile = await this.getUserProfile(this.auth.currentUser);
+                if (userProfile) {
+                    this.currentUser = userProfile;
+                }
+
                 const userId = this.currentUser.uid;
                 
                 // Initialize arrays to prevent undefined errors if no farms exist
@@ -3704,15 +3711,19 @@
                     if (farmIds.length > 0) {
                         const feedEntriesQuery = this.db.collection('feedEntries').where('farmId', 'in', farmIds);
                         const feedListener = feedEntriesQuery.onSnapshot(querySnapshot => {
-                            console.log("Real-time: Received feed entries update.");
-                            this.state.feedEntries = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                            
-                            // Re-render parts of the UI that depend on feed entries
-                            if (this.initialized) {
-                                this.renderLogBook();
-                                this.checkPendingTrays();
-                                this.renderOverallStats();
-                                this.renderFeedTrendChart();
+                            try {
+                                console.log("Real-time: Received feed entries update.");
+                                this.state.feedEntries = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                                
+                                // Re-render parts of the UI that depend on feed entries
+                                if (this.initialized) {
+                                    this.renderLogBook();
+                                    this.checkPendingTrays();
+                                    this.renderOverallStats();
+                                    this.renderFeedTrendChart();
+                                }
+                            } catch (e) {
+                                console.error("Error during real-time feed update render:", e);
                             }
                         }, error => {
                             console.error("Error with feed entries listener: ", error);
@@ -4185,7 +4196,8 @@
             }
 
             getTankCardHTML(tank) {
-                const doc = Math.floor((new Date() - new Date(tank.stockingDate)) / (1000 * 60 * 60 * 24));
+                const stockingDate = new Date(tank.stockingDate);
+                const doc = stockingDate.getTime() ? Math.floor((new Date() - stockingDate) / (1000 * 60 * 60 * 24)) : 0;
                 const isInactive = tank.status === 'inactive';
                 const status = doc > 75 ? 'danger' : doc > 50 ? 'warning' : 'good';
                 
@@ -4492,7 +4504,7 @@
                             }
 
                             return `
-                                <div onclick="app.editFeedEntry(${e.id})" title="${suppTitle}" style="cursor:pointer; width:100%;">
+                                <div onclick="app.editFeedEntry('${e.id}')" title="${suppTitle}" style="cursor:pointer; width:100%;">
                                     <div class="log-feed-value">${e.amount} kg</div>
                                     ${trayHTML}
                                 </div> 
@@ -4581,7 +4593,7 @@
                                     }
 
                                     return `
-                                        <div onclick="app.editFeedEntry(${e.id})" title="${suppTitle}" style="cursor:pointer; width:100%;">
+                                        <div onclick="app.editFeedEntry('${e.id}')" title="${suppTitle}" style="cursor:pointer; width:100%;">
                                             <div class="log-feed-value">${e.amount} kg</div>
                                             <span class="log-status ${badgeClass}">${badgeText}</span>
                                             ${suppHTML}
@@ -6750,38 +6762,46 @@
 
                 const tank = this.getTankById(entry.tankId);
                 this.editingEntryId = id;
-                document.getElementById('editFeedAmount').value = entry.amount;
-                document.getElementById('editTrayStatus').value = entry.trayResult;
-                document.getElementById('editFeedDate').value = entry.date;
-
+                const amountInput = document.getElementById('editFeedAmount');
+                const dateInput = document.getElementById('editFeedDate');
                 const suppContainer = document.getElementById('editFeedSupplements');
+                const trayStatusGroup = document.getElementById('editTrayStatusGroup');
+
+                if (!amountInput || !dateInput || !suppContainer || !trayStatusGroup) {
+                    console.error("Edit modal elements not found!");
+                    return;
+                }
+
+                amountInput.value = entry.amount;
+                dateInput.value = entry.date;
+
+                // Rebuild tray status inputs every time to prevent DOM state bugs
+                const trayCount = tank ? tank.checkTrays || 1 : 1;
+                const trayResults = entry.trayResults || [entry.trayResult]; // Fallback for old data
+                let trayEditHTML = '';
+                for (let i = 0; i < trayCount; i++) {
+                    const currentResult = trayResults[i] || 'pending';
+                    trayEditHTML += `
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label style="font-size: 13px;">Tray ${i + 1} Status</label>
+                            <select class="form-control edit-tray-select">
+                                <option value="pending" ${currentResult === 'pending' ? 'selected' : ''}>Pending Check</option>
+                                <option value="empty" ${currentResult === 'empty' ? 'selected' : ''}>Empty</option>
+                                <option value="little" ${currentResult === 'little' ? 'selected' : ''}>Little Left</option>
+                                <option value="half" ${currentResult === 'half' ? 'selected' : ''}>Half Full</option>
+                                <option value="too-much" ${currentResult === 'too-much' ? 'selected' : ''}>Too Much</option>
+                                <option value="unknown" ${currentResult === 'unknown' ? 'selected' : ''}>Unknown</option>
+                            </select>
+                        </div>`;
+                }
+                trayStatusGroup.innerHTML = trayEditHTML;
+
                 suppContainer.innerHTML = this.state.settings.supplements.map(s => {
                     const isSelected = entry.supplements && entry.supplements.includes(s);
                     return `
                         <div class="supplement-option ${isSelected ? 'selected' : ''}" onclick="this.classList.toggle('selected')"><i class="fas ${isSelected ? 'fa-check' : 'fa-plus'}"></i> ${s}</div>
                     `;
                 }).join('');
-
-                // Handle multiple tray results
-                const trayStatusGroup = document.getElementById('editTrayStatusGroup');
-                const trayCount = tank ? tank.checkTrays || 1 : 1;
-                const trayResults = entry.trayResults || [entry.trayResult];
-                let trayEditHTML = '';
-                for (let i = 0; i < trayCount; i++) {
-                    trayEditHTML += `
-                        <div class="form-group" style="margin-bottom: 10px;">
-                            <label style="font-size: 13px;">Tray ${i + 1} Status</label>
-                            <select class="form-control edit-tray-select">
-                                <option value="pending" ${trayResults[i] === 'pending' ? 'selected' : ''}>Pending Check</option>
-                                <option value="empty" ${trayResults[i] === 'empty' ? 'selected' : ''}>Empty</option>
-                                <option value="little" ${trayResults[i] === 'little' ? 'selected' : ''}>Little Left</option>
-                                <option value="half" ${trayResults[i] === 'half' ? 'selected' : ''}>Half Full</option>
-                                <option value="too-much" ${trayResults[i] === 'too-much' ? 'selected' : ''}>Too Much</option>
-                                <option value="unknown" ${trayResults[i] === 'unknown' ? 'selected' : ''}>Unknown</option>
-                            </select>
-                        </div>`;
-                }
-                trayStatusGroup.innerHTML = trayEditHTML;
                 
                 document.getElementById('editFeedModal').classList.add('active');
             }
@@ -6886,23 +6906,7 @@
             openTankDetail(tankId) {
                 const tank = this.getTankById(tankId);
                 if (!tank) return;
-
-                // Restore the original structure for editTrayStatus if it was replaced
-                const trayStatusGroup = document.getElementById('editTrayStatusGroup');
-                if (!trayStatusGroup.querySelector('#editTrayStatus')) {
-                    trayStatusGroup.innerHTML = `
-                        <label>Tray Status</label>
-                        <select id="editTrayStatus" class="form-control">
-                            <option value="pending">Pending Check</option>
-                            <option value="empty">Empty</option>
-                            <option value="little">Little Left</option>
-                            <option value="half">Half Full</option>
-                            <option value="too-much">Too Much</option>
-                            <option value="unknown">Unknown</option>
-                        </select>
-                    `;
-                }
-
+                
                 const farm = this.getFarmById(tank.farmId);
                 const entries = this.state.feedEntries.filter(e => e.tankId == tankId);
                 const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
@@ -6913,6 +6917,9 @@
 
                 const content = document.getElementById('tankDetailContent');
                 this.editingTankId = tankId; // Important for footer actions
+
+                const stockingDateObj = new Date(tank.stockingDate);
+                const stockingDateStr = stockingDateObj.getTime() ? stockingDateObj.toLocaleDateString() : 'N/A';
 
                 content.innerHTML = `
                     <div class="form-group">
@@ -6925,7 +6932,7 @@
                     </div>
                     <div class="form-group">
                         <label>Stocking Date</label>
-                        <div class="form-control" style="background: #f8f9fa;">${new Date(tank.stockingDate).toLocaleDateString()}</div>
+                        <div class="form-control" style="background: #f8f9fa;">${stockingDateStr}</div>
                     </div>
                     <div class="overall-stats" style="margin-top: 20px;">
                         <div class="stat-card">
@@ -6987,6 +6994,7 @@
             openSettingsModal() {
                 this.renderSettingsSupplements();
                 this.renderSettingsFeedTypes();
+                this.openTeamManagement();
                 document.getElementById('settingFeedsPerDay').value = this.state.settings.feedsPerDay || 4;
                 document.getElementById('settingsModal').classList.add('active');
             }
@@ -7004,27 +7012,35 @@
                 list.innerHTML = '<div class="text-muted">Loading team...</div>';
 
                 const members = currentFarm.members || {};
-                let html = '';
-                for (const uid in members) {
-                    if (uid === currentFarm.ownerId) continue; // Don't list the owner themselves
+                const memberIds = Object.keys(members).filter(uid => uid !== currentFarm.ownerId);
 
-                    const userProfile = await this.getUserProfile({ uid });
+                if (memberIds.length === 0) {
+                    list.innerHTML = '<div class="text-muted" style="padding: 10px 0;">No other members on this farm.</div>';
+                    return;
+                }
+
+                const userProfilePromises = memberIds.map(uid => this.getUserProfile({ uid }));
+                const userProfiles = await Promise.all(userProfilePromises);
+
+                const html = userProfiles.map((userProfile, index) => {
+                    const uid = memberIds[index];
                     const name = userProfile ? userProfile.name : 'Invited User';
                     const phone = userProfile ? userProfile.phone : '...';
+                    const role = members[uid];
 
-                    html += `
+                    return `
                         <div class="settings-item">
                             <div>
                                 <span style="font-weight: 600;">${name}</span>
-                                <span style="font-size: 12px; color: var(--gray); display: block;">${phone} - <strong>${members[uid]}</strong></span>
+                                <span style="font-size: 12px; color: var(--gray); display: block;">${phone} - <strong>${role}</strong></span>
                             </div>
                             <button class="btn-icon" style="color: var(--danger);" onclick="app.removeMember('${uid}')">
                                 <i class="fas fa-trash"></i>
                             </button>
-                        </div>
-                    `;
-                }
-                list.innerHTML = html || '<div class="text-muted">No other members on this farm.</div>';
+                        </div>`;
+                }).join('');
+
+                list.innerHTML = html;
             }
 
             async inviteMember() {
