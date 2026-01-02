@@ -2117,21 +2117,6 @@
         <div class="loading-text">Loading AquaBook...</div>
     </div>
 
-    <!-- First Time User Lock -->
-    <div class="first-time-lock" id="firstTimeLock">
-        <div class="lock-icon">
-            <i class="fas fa-farm"></i>
-        </div>
-        <div class="lock-message">
-            <h2>Welcome to AquaBook Pro! 🎉</h2>
-            <p>To get started, you need to add your first farm. This will unlock all features including feed tracking, applications, and price monitoring.</p>
-        </div>
-        <button class="btn btn-primary" id="addFirstFarmBtn">
-            <i class="fas fa-plus"></i>
-            Add Your First Farm
-        </button>
-    </div>
-
     <!-- Main App -->
     <div id="app">
         <!-- Header -->
@@ -2143,6 +2128,9 @@
                     <i class="fas fa-chevron-down"></i>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
+                    <button class="btn-icon" style="color: white; background: rgba(255,255,255,0.2);" onclick="app.openFarmModal()">
+                        <i class="fas fa-plus"></i>
+                    </button>
                     <div class="current-date" id="currentDate"></div>
                     <button class="btn-icon" style="color: white; background: rgba(255,255,255,0.2);" onclick="app.openSettingsModal()">
                         <i class="fas fa-cog"></i>
@@ -3648,7 +3636,6 @@
                 try {
                     await this.loadAllData(); // Load data from Firestore
                     this.setupUI();
-                    this.checkFirstTimeUser();
                     this.renderAll();
                     
                     if (!this.listenersAttached) {
@@ -3679,7 +3666,6 @@
                 this.state = this.getInitialState(); // Reset state
                 this.closeAllModals();
                 document.getElementById('authContainer').style.display = 'flex';
-                document.getElementById('firstTimeLock').classList.add('hidden');
                 this.showLoading(false);
 
                 // Initialize reCAPTCHA here, as the container is now visible.
@@ -3710,42 +3696,6 @@
                 console.log("Detaching all Firestore listeners...");
                 this.firestoreListeners.forEach(unsubscribe => unsubscribe());
                 this.firestoreListeners = [];
-            }
-            
-            // ===== FIRST TIME USER LOCK =====
-            checkFirstTimeUser() {
-                const hasFarms = this.state.farms.length > 0;
-                const lock = document.getElementById('firstTimeLock');
-                const navTabs = document.querySelector('.nav-tabs');
-                const mainApp = document.getElementById('app');
-                
-                if (!hasFarms && !this.isGuest) {
-                    // Show lock screen
-                    lock.classList.remove('hidden');
-                    // Disable main app navigation
-                    if (navTabs) navTabs.style.display = 'none';
-                    if (mainApp) mainApp.style.opacity = '0.5';
-                    // Disable farm selector
-                    const farmSelector = document.getElementById('farmSelector');
-                    if (farmSelector) farmSelector.style.pointerEvents = 'none';
-                    // Disable all nav buttons
-                    document.querySelectorAll('.nav-btn').forEach(btn => {
-                        btn.classList.add('disabled');
-                    });
-                } else {
-                    // Hide lock screen
-                    lock.classList.add('hidden');
-                    // Enable main app
-                    if (navTabs) navTabs.style.display = 'grid';
-                    if (mainApp) mainApp.style.opacity = '1';
-                    // Enable farm selector
-                    const farmSelector = document.getElementById('farmSelector');
-                    if (farmSelector) farmSelector.style.pointerEvents = 'auto';
-                    // Enable all nav buttons
-                    document.querySelectorAll('.nav-btn').forEach(btn => {
-                        btn.classList.remove('disabled');
-                    });
-                }
             }
             
             // ===== DATA MANAGEMENT =====
@@ -4842,11 +4792,6 @@
                 // Screen navigation
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     btn.addEventListener('click', () => this.switchScreen(btn.dataset.screen));
-                });
-
-                // Add First Farm
-                document.getElementById('addFirstFarmBtn').addEventListener('click', () => {
-                    this.openFarmModal();
                 });
 
                 // Farm Selector
@@ -6720,8 +6665,9 @@
                         this.showToast('Farm updated successfully');
                     }
                 } else {
+                    const newId = this.isGuest ? Date.now().toString() : this.db.collection('farms').doc().id;
                     const newFarm = {
-                        id: Date.now().toString(),
+                        id: newId,
                         name,
                         ownerId,
                         memberIds: [ownerId],
@@ -6756,7 +6702,6 @@
 
                 this.showLoading(false);
                 this.closeAllModals();
-                this.checkFirstTimeUser();
                 this.renderAll();
                 
                 // Clear inputs
@@ -6821,7 +6766,6 @@
                 await this.loadAllData();
 
                 this.showLoading(false);
-                this.checkFirstTimeUser();
                 this.renderAll();
                 this.closeAllModals();
                 this.showToast('Farm deleted successfully', 'warning');
