@@ -3303,13 +3303,20 @@
                 <div id="otp-step" style="display: none;">
                     <div class="form-group">
                         <label>OTP</label>
-                        <input type="number" id="otpInput" class="form-control" placeholder="XXXXXX" maxlength="6">
+                        <input type="number" id="otpInput" class="form-control" placeholder="XXXXXX" maxlength="6" autocomplete="one-time-code">
                     </div>
                     <p class="text-muted" style="font-size: 13px; margin-top: -10px; margin-bottom: 15px;">Enter the 6-digit code sent to <strong id="otp-phone-display"></strong>.</p>
                     <button class="btn btn-success" style="width: 100%;" onclick="app.verifyOTP()">Verify & Login</button>
-                    <button class="btn btn-secondary" style="width: 100%; margin-top: 8px; border: none; background: transparent; color: var(--gray);" onclick="app.showPhoneStep()">Back</button>
+                    <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                        <button class="btn btn-secondary" style="padding: 0; border: none; background: transparent; color: var(--gray); font-size: 13px;" onclick="app.showPhoneStep()">Change Number</button>
+                        <button id="resendOtpBtn" class="btn btn-secondary" style="padding: 0; border: none; background: transparent; color: var(--gray); font-size: 13px;" onclick="app.resendOTP()" disabled>Resend in <span id="resendTimer">30</span>s</button>
+                    </div>
                 </div>
 
+                <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px; text-align: center;">
+                    <button class="btn btn-secondary" style="width: 100%; background: #f8f9fa; color: #666; border: 1px solid #ddd;" onclick="app.handleGuestLogin()"><i class="fas fa-user-secret"></i> Continue as Guest</button>
+                    <p style="font-size: 11px; color: #aaa; margin-top: 8px;">Guest data is saved on this device only.</p>
+                </div>
                 <div id="recaptcha-container" style="margin-top: 20px;"></div>
             </div>
 
@@ -3517,6 +3524,8 @@
                 });
             }
 
+            get isGuest() { return this.currentUser && this.currentUser.uid === 'guest'; }
+
             async handleSignIn(user) {
                 document.getElementById('authContainer').style.display = 'none';
                 this.showLoading(true);
@@ -3549,7 +3558,87 @@
                 }
 
                 this.currentUser = userProfile;
+                // Check for guest data to sync
+                await this.checkForGuestDataAndSync(user);
                 await this.completeAppInitialization();
+            }
+
+            handleGuestLogin() {
+                this.currentUser = { uid: 'guest', name: 'Guest Farmer', role: 'owner', isPro: true };
+                document.getElementById('authContainer').style.display = 'none';
+                this.showToast('Welcome Guest! You are in demo mode.', 'info');
+                this.completeAppInitialization();
+            }
+            
+            startGuestSync() {
+                this.closeAllModals();
+                document.getElementById('authContainer').style.display = 'flex';
+                this.showToast('Please log in to sync your data.', 'info');
+            }
+
+            async checkForGuestDataAndSync(user) {
+                const stored = localStorage.getItem('aquabook_guest_data');
+                if (stored) {
+                    if (confirm('We found data from your Guest session. Do you want to sync it to your account?')) {
+                        await this.syncGuestDataToCloud(user, JSON.parse(stored));
+                    } else {
+                        if (confirm('Discard guest data? Click OK to delete it, or Cancel to keep it locally.')) {
+                            localStorage.removeItem('aquabook_guest_data');
+                        }
+                    }
+                }
+            }
+
+            async syncGuestDataToCloud(user, data) {
+                this.showLoading(true);
+                try {
+                    const batch = this.db.batch();
+                    
+                    // 1. Farms (Update Owner)
+                    if (data.farms) {
+                        data.farms.forEach(f => {
+                            f.ownerId = user.uid;
+                            f.memberIds = [user.uid];
+                            f.members = { [user.uid]: 'owner' };
+                            batch.set(this.db.collection('farms').doc(f.id), f);
+                        });
+                    }
+                    
+                    // 2. Collections that just need uploading
+                    const collections = [
+                        { key: 'tanks', col: 'tanks' },
+                        { key: 'feedEntries', col: 'feedEntries' },
+                        { key: 'waterEntries', col: 'waterEntries' },
+                        { key: 'harvests', col: 'harvests' },
+                        { key: 'expenses', col: 'expenses' },
+                        { key: 'samplingEntries', col: 'sampling' },
+                        { key: 'tasks', col: 'tasks' },
+                        { key: 'medicineInventory', col: 'medicineInventory' },
+                        { key: 'medicineApplications', col: 'medicineApplications' }
+                    ];
+
+                    collections.forEach(map => {
+                        if (data[map.key]) {
+                            data[map.key].forEach(item => {
+                                batch.set(this.db.collection(map.col).doc(item.id.toString()), item);
+                            });
+                        }
+                    });
+
+                    // 3. Inventory
+                    if (data.inventory && data.farms && data.farms.length > 0) {
+                        const farmId = data.farms[0].id;
+                        batch.set(this.db.collection('inventory').doc(farmId), data.inventory);
+                    }
+
+                    await batch.commit();
+                    localStorage.removeItem('aquabook_guest_data');
+                    this.showToast('Guest data synced successfully!', 'success');
+                } catch (e) {
+                    console.error("Sync error:", e);
+                    this.showToast('Error syncing data: ' + e.message, 'error');
+                }
+                this.showLoading(false);
             }
 
             async completeAppInitialization() {
@@ -3627,7 +3716,7 @@
                 const navTabs = document.querySelector('.nav-tabs');
                 const mainApp = document.getElementById('app');
                 
-                if (!hasFarms) {
+                if (!hasFarms && !this.isGuest) {
                     // Show lock screen
                     lock.classList.remove('hidden');
                     // Disable main app navigation
@@ -3658,6 +3747,11 @@
             
             // ===== DATA MANAGEMENT =====
             async loadAllData() {
+                if (this.isGuest) {
+                    this.loadGuestData();
+                    return;
+                }
+
                 if (!this.currentUser) return;
                 console.log("Fetching all user data from Firestore...");
 
@@ -3768,6 +3862,26 @@
                 }
 
                 console.log("Data loaded from Firestore.");
+            }
+
+            loadGuestData() {
+                const stored = localStorage.getItem('aquabook_guest_data');
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    // Merge stored data into state
+                    this.state = { ...this.state, ...data };
+                }
+            }
+
+            saveGuestData() {
+                if (!this.isGuest) return;
+                // Persist entire state to local storage
+                localStorage.setItem('aquabook_guest_data', JSON.stringify({
+                    farms: this.state.farms,
+                    tanks: this.state.tanks,
+                    feedEntries: this.state.feedEntries,
+                    inventory: this.state.inventory
+                }));
             }
             
             saveAllData() {
@@ -4115,6 +4229,9 @@
                         <i class="fas fa-water"></i>
                         <h3>No Farms Found</h3>
                         <p>Add your first farm to start tracking.</p>
+                        <button class="btn btn-primary mt-20" onclick="app.openFarmModal()">
+                            <i class="fas fa-plus"></i> Add Farm
+                        </button>
                     </div>`;
                     return;
                 }
@@ -4971,6 +5088,12 @@
             }
 
             openFarmModal() {
+                if (this.isGuest) {
+                    this.closeAllModals();
+                    document.getElementById('authContainer').style.display = 'flex';
+                    this.showToast('Please log in to add a farm.', 'info');
+                    return;
+                }
                 this.editingFarmId = null;
                 document.getElementById('farmNameInput').value = '';
                 document.getElementById('farmLocation').value = '';
@@ -5042,6 +5165,7 @@
             }
 
             showPhoneStep() {
+                if (this.resendTimerInterval) clearInterval(this.resendTimerInterval);
                 document.getElementById('otp-step').style.display = 'none';
                 document.getElementById('phone-step').style.display = 'block';
             }
@@ -5065,6 +5189,29 @@
                         document.getElementById('otp-phone-display').textContent = phone;
                         document.getElementById('phone-step').style.display = 'none';
                         document.getElementById('otp-step').style.display = 'block';
+                        this.startResendTimer();
+
+                        // --- AUTO-FILL & AUTO-SUBMIT LOGIC ---
+                        const otpInput = document.getElementById('otpInput');
+                        otpInput.value = '';
+                        otpInput.focus();
+
+                        // 1. Auto-submit when 6 digits are entered
+                        otpInput.oninput = () => {
+                            if (otpInput.value.length === 6) {
+                                this.verifyOTP();
+                            }
+                        };
+
+                        // 2. WebOTP API: Attempt to auto-read SMS (Android)
+                        if ('OTPCredential' in window) {
+                            const ac = new AbortController();
+                            navigator.credentials.get({ otp: { transport:['sms'] }, signal: ac.signal })
+                                .then(otp => {
+                                    otpInput.value = otp.code;
+                                    this.verifyOTP(); // Auto-submit
+                                }).catch(err => console.log('WebOTP not available or timed out', err));
+                        }
                     }).catch((error) => {
                         this.showLoading(false);
                         console.error("OTP Error:", error);
@@ -5075,6 +5222,41 @@
                             grecaptcha.reset(window.recaptchaWidgetId);
                         }
                     });
+            }
+
+            startResendTimer() {
+                const btn = document.getElementById('resendOtpBtn');
+                if (!btn) return;
+
+                let timeLeft = 30;
+                btn.disabled = true;
+                btn.style.color = 'var(--gray)';
+                btn.style.cursor = 'not-allowed';
+                btn.innerHTML = `Resend in <span id="resendTimer">${timeLeft}</span>s`;
+
+                if (this.resendTimerInterval) clearInterval(this.resendTimerInterval);
+
+                this.resendTimerInterval = setInterval(() => {
+                    timeLeft--;
+                    const span = document.getElementById('resendTimer');
+                    if (span) span.textContent = timeLeft;
+
+                    if (timeLeft <= 0) {
+                        clearInterval(this.resendTimerInterval);
+                        btn.disabled = false;
+                        btn.style.color = 'var(--primary)';
+                        btn.style.cursor = 'pointer';
+                        btn.innerHTML = `<i class="fas fa-redo"></i> Resend OTP`;
+                    }
+                }, 1000);
+            }
+
+            resendOTP() {
+                // Reset reCAPTCHA if needed before resending
+                if (window.grecaptcha && window.recaptchaWidgetId) {
+                    grecaptcha.reset(window.recaptchaWidgetId);
+                }
+                this.sendOTP();
             }
 
             verifyOTP() {
@@ -5103,6 +5285,8 @@
                 
                 // Set current user and close modal
                 this.currentUser = { uid: user.uid, ...userProfile };
+                // Check for guest data to sync
+                await this.checkForGuestDataAndSync(user);
                 this.closeAllModals();
                 
                 await this.completeAppInitialization();
@@ -5193,6 +5377,12 @@
             }
 
             openTankModal(farmId) {
+                if (this.isGuest) {
+                    this.closeAllModals();
+                    document.getElementById('authContainer').style.display = 'flex';
+                    this.showToast('Please log in to add a tank.', 'info');
+                    return;
+                }
                 this.editingTankId = null;
                 document.getElementById('tankNameInput').value = '';
                 document.getElementById('tankSize').value = '';
@@ -5546,6 +5736,17 @@
                     }
                 }
 
+                if (this.isGuest) {
+                    entriesToAdd.forEach(e => this.state.feedEntries.push(e));
+                    this.state.inventory.totalKg = currentStock - totalAmount;
+                    this.saveGuestData();
+                    this.renderLogBook();
+                    this.renderOverallStats();
+                    this.closeAllModals();
+                    this.showToast(`Saved ${entriesToAdd.length} entries (Guest Mode)`);
+                    return;
+                }
+
                 if (entriesToAdd.length > 0) {
                     this.showLoading(true);
                     await batch.commit();
@@ -5825,6 +6026,14 @@
                     localEntry.riskScore = data.riskScore;
                     localEntry.riskLevel = data.riskLevel;
                     localEntry.notes = data.notes;
+                }
+
+                if (this.isGuest) {
+                    this.saveGuestData();
+                    this.showLoading(false);
+                    this.showToast('Tray result updated (Guest)');
+                    this.openTrayCheckModal();
+                    return;
                 }
 
                 this.showLoading(false);
@@ -6500,7 +6709,7 @@
                         farm.phone = phone;
                         farm.lat = lat ? parseFloat(lat) : null;
                         farm.lng = lng ? parseFloat(lng) : null;
-                        await this.db.collection('farms').doc(farm.id).set(farm, { merge: true });
+                        if (!this.isGuest) await this.db.collection('farms').doc(farm.id).set(farm, { merge: true });
                         this.showToast('Farm updated successfully');
                     }
                 } else {
@@ -6518,7 +6727,7 @@
                         created: new Date().toISOString()
                     };
 
-                    await this.db.collection('farms').doc(newFarm.id).set(newFarm);
+                    if (!this.isGuest) await this.db.collection('farms').doc(newFarm.id).set(newFarm);
                     this.state.farms.push(newFarm);
                     
                     // Set as current if first
@@ -6529,9 +6738,14 @@
                     this.showToast('Farm added successfully');
                 }
                 
+                if (this.isGuest) {
+                    this.saveGuestData();
+                    this.renderAll();
+                } else {
                 // Refresh listeners to include the new farm in real-time updates
                 this.detachFirestoreListeners();
                 await this.loadAllData();
+                }
 
                 this.showLoading(false);
                 this.closeAllModals();
@@ -6630,7 +6844,7 @@
                             tank.stockingDate = stockingDate;
                             tank.initialSeed = initialSeed;
                             tank.checkTrays = checkTrays;
-                            await this.db.collection('tanks').doc(tank.id).set(tank, { merge: true });
+                            if (!this.isGuest) await this.db.collection('tanks').doc(tank.id).set(tank, { merge: true });
                             this.showToast('Tank updated successfully');
                         }
                     } else {
@@ -6646,9 +6860,14 @@
                             nextSuggestedFeed: null,
                             status: 'active'
                         };
-                        await this.db.collection('tanks').doc(newTank.id).set(newTank);
+                        if (!this.isGuest) await this.db.collection('tanks').doc(newTank.id).set(newTank);
                         this.state.tanks.push(newTank);
                         this.showToast('Tank added successfully');
+                    }
+
+                    if (this.isGuest) {
+                        this.saveGuestData();
+                        this.renderAll();
                     }
 
                     this.closeAllModals();
@@ -6963,6 +7182,20 @@
                 this.renderSettingsSupplements();
                 this.renderSettingsFeedTypes();
                 document.getElementById('settingFeedsPerDay').value = this.state.settings.feedsPerDay || 4;
+                
+                // Guest Sync Button
+                const footer = document.querySelector('#settingsModal .modal-footer');
+                if (this.isGuest) {
+                    footer.innerHTML = `
+                        <button class="btn btn-success" style="width: 100%; margin-bottom: 10px;" onclick="app.startGuestSync()">
+                            <i class="fas fa-cloud-upload-alt"></i> Sync Data to Cloud
+                        </button>
+                        <button class="btn btn-secondary" style="width: 100%;" onclick="app.signOut()">Exit Guest Mode</button>
+                    `;
+                } else {
+                    footer.innerHTML = `<button class="btn btn-secondary" onclick="app.signOut()">Sign Out</button>`;
+                }
+                
                 document.getElementById('settingsModal').classList.add('active');
             }
 
