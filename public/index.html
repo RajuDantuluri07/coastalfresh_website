@@ -3530,26 +3530,33 @@
                     return;
                 }
 
-                const userProfile = await this.getUserProfile(user);
+                try {
+                    const userProfile = await this.getUserProfile(user);
 
-                if (!userProfile) {
-                    // This is a new user, show the role selection modal.
+                    if (!userProfile) {
+                        // This is a new user, show the role selection modal.
+                        this.showLoading(false);
+                        document.getElementById('roleModal').classList.add('active');
+                        return;
+                    }
+
+                    // Check for pending invitations for this new user.
+                    const hasInvite = await this.checkForInvitations(user);
+                    if (hasInvite) {
+                        // The invitation flow will take over. Don't initialize the main app yet.
+                        this.showLoading(false);
+                        this.handleInvitations(user);
+                        return;
+                    }
+
+                    this.currentUser = userProfile;
+                    await this.completeAppInitialization();
+                } catch (error) {
+                    console.error("Sign-in error:", error);
                     this.showLoading(false);
-                    document.getElementById('roleModal').classList.add('active');
-                    return;
+                    this.showToast("Login failed. Please try again.", "error");
+                    this.auth.signOut(); // Reset state
                 }
-
-                // Check for pending invitations for this new user.
-                const hasInvite = await this.checkForInvitations(user);
-                if (hasInvite) {
-                    // The invitation flow will take over. Don't initialize the main app yet.
-                    this.showLoading(false);
-                    this.handleInvitations(user);
-                    return;
-                }
-
-                this.currentUser = userProfile;
-                await this.completeAppInitialization();
             }
 
             async completeAppInitialization() {
@@ -4326,6 +4333,18 @@
             }
 
             renderLogBook() {
+                // Ensure table structure exists (it might have been removed by List View)
+                const container = document.querySelector('.log-table-container');
+                if (!document.getElementById('logTable')) {
+                    container.innerHTML = `
+                        <table class="log-table" id="logTable">
+                            <thead></thead>
+                            <tbody id="logTableBody"></tbody>
+                            <tfoot id="logTableFoot"></tfoot>
+                        </table>
+                    `;
+                }
+
                 const tableHead = document.querySelector('#logTable thead');
                 const tableBody = document.getElementById('logTableBody');
                 const tableFoot = document.getElementById('logTableFoot');
@@ -4403,7 +4422,7 @@
 
                 // Branch to List View if selected
                 if (this.logViewType === 'list') {
-                    this.renderLogTimeline(tableBody.parentElement.parentElement, tanksToShow, isDateInRange); // Pass container
+                    this.renderLogTimeline(null, tanksToShow, isDateInRange); // Pass container
                     return;
                 }
 
@@ -6801,6 +6820,7 @@
                 this.recalculateTankBiomass(entry.tankId);
                 this.showLoading(false);
                 this.closeAllModals();
+                this.renderInventorySummary();
                 // No need to call renderAll(), onSnapshot will handle it.
                 this.showToast('Entry updated');
             }
@@ -6824,6 +6844,7 @@
                 if (tankId) this.recalculateTankBiomass(tankId);
                 this.closeAllModals();
                 this.showLoading(false);
+                this.renderInventorySummary();
                 // No need to call renderAll(), onSnapshot will handle it.
                 this.showToast('Entry deleted', 'warning');
             }
