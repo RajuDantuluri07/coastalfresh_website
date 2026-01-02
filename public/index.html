@@ -4027,9 +4027,13 @@
             }
             
             renderInventorySummary() {
-                const feedStock = this.state.inventory.totalKg || 0;
-                document.getElementById('displayFeedStock').innerHTML = `${feedStock.toFixed(1)} <span class="unit">kg</span>`;
-                document.getElementById('displayMedStock').innerHTML = `${this.state.medicineInventory.length} <span class="unit">Items</span>`;
+                const feedStock = this.state.inventory?.totalKg || 0;
+                const medCount = this.state.medicineInventory?.length || 0;
+                const stockEl = document.getElementById('displayFeedStock');
+                const medEl = document.getElementById('displayMedStock');
+                
+                if (stockEl) stockEl.innerHTML = `${feedStock.toFixed(1)} <span class="unit">kg</span>`;
+                if (medEl) medEl.innerHTML = `${medCount} <span class="unit">Items</span>`;
             }
 
             renderFeedTrendChart() {
@@ -5558,7 +5562,7 @@
                 });
 
                 // Inventory Check
-                const currentStock = this.state.inventory.totalKg || 0;
+                const currentStock = this.state.inventory?.totalKg || 0;
                 if (totalAmount > currentStock) {
                     if (!confirm(`⚠️ Low Inventory Warning\n\nYou are about to feed ${totalAmount.toFixed(1)}kg, but you only have ${currentStock.toFixed(1)}kg in stock.\n\nProceed anyway?`)) {
                         return;
@@ -5686,7 +5690,7 @@
                 footer.innerHTML = `
                     <div style="display:grid; grid-template-columns: 1fr 2fr; gap: 10px; width: 100%;">
                         <button class="btn btn-secondary" onclick="app.openTrayCheckModal()">Back</button>
-                        <button class="btn btn-primary" onclick="app.processSingleTrayResult(${entry.id})">Save Result</button>
+                        <button class="btn btn-primary" onclick="app.processSingleTrayResult('${entry.id}')">Save Result</button>
                     </div>
                 `;
             }
