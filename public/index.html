@@ -5160,23 +5160,27 @@
             }
 
             async switchFarm(farmId) {
-                if (this.state.settings.currentFarmId === farmId) return;
+                if (this.state.settings.currentFarmId === farmId && this.initialized) return;
 
                 this.showLoading(true);
-                this.state.settings.currentFarmId = farmId;
-                await this.saveSettings();
-                
-                // Fetch inventory for the selected farm
                 try {
+                    this.state.settings.currentFarmId = farmId;
+                    await this.saveSettings();
+                    
+                    // Fetch inventory for the selected farm
                     if (this.isGuest) {
                         this.state.inventory = this.state.inventory || { totalKg: 0 };
                     } else {
                         const invDoc = await this.db.collection('inventory').doc(farmId).get();
                         this.state.inventory = invDoc.exists ? invDoc.data() : { totalKg: 0 };
                     }
+                    // Re-render everything to reflect the new farm context
+                    this.renderAll();
                 } catch (e) {
-                    console.error("Error switching farm inventory:", e);
-                    this.state.inventory = { totalKg: 0 };
+                    console.error("Error switching farm:", e);
+                    this.showToast('Failed to switch farm.', 'error');
+                } finally {
+                    this.showLoading(false);
                 }
             }
 
@@ -6660,8 +6664,9 @@
                     if (!this.isGuest) await this.db.collection('farms').doc(newFarm.id).set(newFarm);
                     this.state.farms.push(newFarm);
                     
-                    // Always switch to the new farm
+                    // Switch to the new farm and reset inventory
                     this.state.settings.currentFarmId = newFarm.id;
+                    this.state.inventory = { totalKg: 0 };
                     try {
                         await this.saveSettings();
                     } catch (err) {
