@@ -133,6 +133,45 @@
             align-items: center;
         }
 
+        /* NEW DROPDOWN STYLES */
+        .farm-selector-container {
+            position: relative;
+        }
+
+        .farm-dropdown {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 0;
+            background: white;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow);
+            z-index: 101;
+            min-width: 250px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .farm-dropdown.show {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .farm-dropdown-item {
+            padding: 12px 16px;
+            color: var(--dark);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .farm-dropdown-item:last-child { border-bottom: none; }
+        .farm-dropdown-item:hover { background: var(--light); }
+        .farm-dropdown-item.active { background: #e3f2fd; color: var(--primary-dark); font-weight: 600; }
+
         .farm-selector {
             display: flex;
             align-items: center;
@@ -2122,10 +2161,13 @@
         <!-- Header -->
         <header class="app-header">
             <div class="header-content">
-                <div class="farm-selector" id="farmSelector">
-                    <i class="fas fa-farm"></i>
-                    <span id="currentFarmName">Select Farm</span>
-                    <i class="fas fa-chevron-down"></i>
+                <div class="farm-selector-container">
+                    <div class="farm-selector" id="farmSelector">
+                        <i class="fas fa-farm"></i>
+                        <span id="currentFarmName">Select Farm</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="farm-dropdown" id="farmDropdown"></div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <button class="btn-icon" style="color: white; background: rgba(255,255,255,0.2);" onclick="app.openFarmModal()">
@@ -2661,31 +2703,6 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-success" onclick="app.saveNewCrop()">Confirm & Start New Cycle</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modals -->
-    <!-- Farm Selector Modal -->
-    <div class="modal-overlay" id="farmSelectorModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>
-                    <i class="fas fa-farm"></i>
-                    Select Farm
-                </h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div id="farmsListModal">
-                    <!-- Farms list for selection -->
-                </div>
-                <div class="text-center mt-20">
-                    <button class="btn btn-primary" id="addFarmFromSelector">
-                        <i class="fas fa-plus"></i>
-                        Add New Farm
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -4752,10 +4769,6 @@
                     this.openFarmSelector();
                 });
 
-                document.getElementById('addFarmFromSelector').addEventListener('click', () => {
-                    this.openFarmModal();
-                });
-                
                 // Close Modals
                 document.querySelectorAll('.close-modal').forEach(btn => {
                     btn.addEventListener('click', () => this.closeAllModals());
@@ -4800,6 +4813,11 @@
                 document.addEventListener('click', (e) => {
                     if (!e.target.closest('.tank-action-menu')) {
                         document.querySelectorAll('.tank-menu-dropdown').forEach(el => el.classList.remove('show'));
+                    }
+                    // NEW: Close farm dropdown
+                    if (!e.target.closest('.farm-selector-container')) {
+                        const farmDropdown = document.getElementById('farmDropdown');
+                        if (farmDropdown) farmDropdown.classList.remove('show');
                     }
                 });
 
@@ -5141,6 +5159,27 @@
                 }
             }
 
+            async switchFarm(farmId) {
+                if (this.state.settings.currentFarmId === farmId) return;
+
+                this.showLoading(true);
+                this.state.settings.currentFarmId = farmId;
+                await this.saveSettings();
+                
+                // Fetch inventory for the selected farm
+                try {
+                    if (this.isGuest) {
+                        this.state.inventory = this.state.inventory || { totalKg: 0 };
+                    } else {
+                        const invDoc = await this.db.collection('inventory').doc(farmId).get();
+                        this.state.inventory = invDoc.exists ? invDoc.data() : { totalKg: 0 };
+                    }
+                } catch (e) {
+                    console.error("Error switching farm inventory:", e);
+                    this.state.inventory = { totalKg: 0 };
+                }
+            }
+
             editFarm(id) {
                 const farm = this.getFarmById(id);
                 if (!farm) return;
@@ -5187,31 +5226,32 @@
             }
 
             openFarmSelector() {
-                const list = document.getElementById('farmsListModal');
-                list.innerHTML = '';
+                const dropdown = document.getElementById('farmDropdown');
+                if (!dropdown) return;
+
+                // Populate dropdown
+                dropdown.innerHTML = '';
                 this.state.farms.forEach(farm => {
                     const div = document.createElement('div');
-                    div.className = 'feed-schedule-item';
-                    if (farm.id === this.state.settings.currentFarmId) div.classList.add('completed');
-                    div.innerHTML = `
-                        <div class="feed-time">${farm.name}</div>
-                        <div class="feed-label">${farm.location}</div>
-                    `;
+                    div.className = 'farm-dropdown-item';
+                    if (farm.id === this.state.settings.currentFarmId) div.classList.add('active');
+                    div.innerHTML = `<i class="fas fa-tractor"></i> ${farm.name}`;
                     div.onclick = () => {
-                        this.state.settings.currentFarmId = farm.id;
-                        this.saveSettings();
-                        
-                        // Fetch inventory for the selected farm
-                        this.db.collection('inventory').doc(farm.id).get().then(doc => {
-                            if (doc.exists) this.state.inventory = doc.data();
-                            else this.state.inventory = { totalKg: 0 };
-                            this.renderAll();
-                            this.closeAllModals();
-                        });
+                        dropdown.classList.remove('show');
+                        this.switchFarm(farm.id);
                     };
-                    list.appendChild(div);
+                    dropdown.appendChild(div);
                 });
-                document.getElementById('farmSelectorModal').classList.add('active');
+
+                // Add 'Add New Farm' button
+                const addBtn = document.createElement('div');
+                addBtn.className = 'farm-dropdown-item';
+                addBtn.style.borderTop = '1px solid var(--border)';
+                addBtn.innerHTML = `<i class="fas fa-plus-circle"></i> Add New Farm`;
+                addBtn.onclick = () => { dropdown.classList.remove('show'); this.openFarmModal(); };
+                dropdown.appendChild(addBtn);
+
+                dropdown.classList.toggle('show');
             }
 
             openTankModal(farmId) {
@@ -6598,13 +6638,10 @@
                         this.showToast('Farm updated successfully');
                     }
                 } else {
-                    // ID Generation Strategy for Security Rules:
-                    // Free User -> ID must be their UID (Enforces 1 farm limit)
-                    // Pro User -> Random ID (Unlimited farms)
+                    // MVP: Always generate a random ID to allow unlimited farms
                     let newId;
                     if (this.isGuest) newId = Date.now().toString();
-                    else if (this.currentUser.isPro) newId = this.db.collection('farms').doc().id;
-                    else newId = this.currentUser.uid;
+                    else newId = this.db.collection('farms').doc().id;
 
                     const newFarm = {
                         id: newId,
@@ -6623,14 +6660,12 @@
                     if (!this.isGuest) await this.db.collection('farms').doc(newFarm.id).set(newFarm);
                     this.state.farms.push(newFarm);
                     
-                    // Set as current if first
-                    if (this.state.farms.length === 1) {
-                        this.state.settings.currentFarmId = newFarm.id;
-                        try {
-                            await this.saveSettings();
-                        } catch (err) {
-                            console.warn("Failed to save settings:", err);
-                        }
+                    // Always switch to the new farm
+                    this.state.settings.currentFarmId = newFarm.id;
+                    try {
+                        await this.saveSettings();
+                    } catch (err) {
+                        console.warn("Failed to save settings:", err);
                     }
                     
                     // FIX: Refresh listeners so the new farm is included in real-time updates
