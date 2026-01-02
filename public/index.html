@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AquaBook Pro - Multi-Farm Management</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐟</text></svg>">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#2196F3">
     <style>
         /* ===== RESET & BASE STYLES ===== */
         * {
@@ -2106,6 +2108,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-functions-compat.js"></script>
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -2704,24 +2707,23 @@
     <div class="modal-overlay" id="proSubModal">
         <div class="modal-content" style="max-width: 420px; text-align: center;">
             <div class="modal-header" style="justify-content: center;">
-                <h3><i class="fas fa-gem" style="color: #9c27b0;"></i> Go Pro!</h3>
+                <h3><i class="fas fa-gift" style="color: #E91E63;"></i> Early Bird Offer!</h3>
                 <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body" style="padding: 20px 30px;">
-                <p style="font-size: 16px; margin-bottom: 15px;">To add more than one farm, please subscribe to our <strong>Pro Pack</strong>.</p>
-                <div style="background: #f3e5f5; padding: 20px; border-radius: var(--radius); margin-bottom: 20px;">
-                    <div style="font-size: 36px; font-weight: 800; color: #7b1fa2;">FREE</div>
-                    <div style="font-size: 14px; color: #7b1fa2;">during Beta Period</div>
+                <p style="font-size: 16px; margin-bottom: 15px;">Congratulations! You are one of our first 100 farmers.</p>
+                <div style="background: #fce4ec; padding: 20px; border-radius: var(--radius); margin-bottom: 20px;">
+                    <div style="font-size: 36px; font-weight: 800; color: #E91E63;">FREE</div>
+                    <div style="font-size: 14px; color: #E91E63; text-decoration: line-through;">₹999 / year</div>
                 </div>
                 <ul style="text-align: left; font-size: 14px; color: var(--gray); line-height: 1.8; padding-left: 20px; margin-bottom: 0;">
-                    <li>✅ Add Unlimited Farms & Tanks</li>
+                    <li>✅ <strong>Unlimited Farms & Tanks</strong> (1 Year)</li>
                     <li>✅ Cloud Data Backup & Sync</li>
-                    <li>✅ Access from any device</li>
+                    <li>✅ Priority Support</li>
                 </ul>
             </div>
             <div class="modal-footer" style="flex-direction: column; gap: 10px;">
-                <button class="btn btn-primary" style="width: 100%; background: #9c27b0;" onclick="app.initiatePayment()">Unlock Pro (Free Beta)</button>
-                <button class="btn btn-secondary" style="width: 100%; border: none; background: transparent;" onclick="app.closeAllModals()">Maybe Later</button>
+                <button class="btn btn-primary" style="width: 100%; background: #E91E63;" onclick="app.closeAllModals()">Claim Offer & Continue</button>
             </div>
         </div>
     </div>
@@ -2943,7 +2945,10 @@
                             <option value="supervisor">Supervisor</option>
                         </select>
                     </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <button class="btn btn-success" style="background-color: #25D366; border-color: #25D366; grid-column: span 2;" onclick="app.shareViaWhatsApp()">
+                        <i class="fab fa-whatsapp"></i> Invite via WhatsApp
+                    </button>
                     <button class="btn btn-primary" onclick="app.inviteMember()">Send SMS</button>
                     <button class="btn btn-secondary" onclick="app.generateInviteLink()"><i class="fas fa-link"></i> Share Link</button>
                 </div>
@@ -3460,6 +3465,7 @@
                 // 'LOCAL' persistence persists state even when the browser window is closed
                 this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
                 this.db = firebase.firestore();
+                this.functions = firebase.functions();
 
                 // --- ENABLE OFFLINE PERSISTENCE (NEW) ---
                 this.db.enablePersistence()
@@ -3764,6 +3770,16 @@
                 this.state.settings.currentFarmId = this.currentUser.settings?.currentFarmId || (this.state.farms[0]?.id || null);
                 if (this.currentUser.settings) {
                     this.state.settings = { ...this.state.settings, ...this.currentUser.settings };
+                }
+
+                // Fetch Market Prices from Firestore
+                try {
+                    const pricesDoc = await this.db.collection('marketPrices').doc('current').get();
+                    if (pricesDoc.exists && pricesDoc.data().items) {
+                        this.state.prices = pricesDoc.data().items;
+                    }
+                } catch (e) {
+                    console.error("Error fetching market prices:", e);
                 }
 
                 // Fetch Inventory AFTER settings are loaded (Fixes null ID crash)
@@ -5127,18 +5143,9 @@
             }
 
             async initiatePayment() {
-                // BETA: Grant free Pro access immediately
-                if (!this.currentUser) return;
-                this.showLoading(true);
-                try {
-                    await this.db.collection('users').doc(this.currentUser.uid).update({ isPro: true });
-                    this.currentUser.isPro = true;
-                    this.showToast('Welcome to Pro! (Beta Access Granted)', 'success');
-                    this.closeAllModals();
-                } catch (e) {
-                    this.showToast('Error upgrading account', 'error');
-                }
-                this.showLoading(false);
+                // MVP: Payments disabled. Offer is active.
+                this.showToast("Early Bird Offer Active: Pro features are FREE!", "success");
+                this.closeAllModals();
             }
 
             async removeMember(uid) {
@@ -6540,14 +6547,7 @@
                     return;
                 }
 
-                // Subscription Check
-                // Check if this is not the first farm and if the user is not a pro subscriber.
-                if (this.state.farms.length > 0 && (!this.currentUser || !this.currentUser.isPro)) {
-                    this.showToast('Please subscribe to add more than one farm.', 'warning');
-                    this.closeAllModals(); // Close the farm modal first
-                    document.getElementById('proSubModal').classList.add('active');
-                    return;
-                }
+                // MVP: Unlimited farms allowed for everyone
 
                 try {
                 this.showLoading(true);
@@ -6564,7 +6564,14 @@
                         this.showToast('Farm updated successfully');
                     }
                 } else {
-                    const newId = this.isGuest ? Date.now().toString() : this.db.collection('farms').doc().id;
+                    // ID Generation Strategy for Security Rules:
+                    // Free User -> ID must be their UID (Enforces 1 farm limit)
+                    // Pro User -> Random ID (Unlimited farms)
+                    let newId;
+                    if (this.isGuest) newId = Date.now().toString();
+                    else if (this.currentUser.isPro) newId = this.db.collection('farms').doc().id;
+                    else newId = this.currentUser.uid;
+
                     const newFarm = {
                         id: newId,
                         name,
@@ -7141,6 +7148,40 @@
                 this.showLoading(false);
             }
 
+            async shareViaWhatsApp() {
+                const role = document.getElementById('inviteRole').value;
+                const farmId = this.state.settings.currentFarmId;
+                const farm = this.getFarmById(farmId);
+                
+                if (!farm) return;
+
+                this.showLoading(true);
+                try {
+                    const invitation = {
+                        farmId,
+                        farmName: farm.name,
+                        invitedByUid: this.currentUser.uid,
+                        invitedByName: this.currentUser.name,
+                        role,
+                        type: 'link',
+                        status: 'pending',
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    const docRef = await this.db.collection('invitations').add(invitation);
+                    const link = `${window.location.origin}${window.location.pathname}?invite=${docRef.id}`;
+                    const message = `Hello! I'm inviting you to join ${farm.name} as a ${role} on AquaBook Pro. Click here: ${link}`;
+                    
+                    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+                    window.open(whatsappUrl, '_blank');
+                    
+                } catch (e) {
+                    console.error(e);
+                    this.showToast('Error creating WhatsApp link', 'error');
+                }
+                this.showLoading(false);
+            }
+
             async processLinkInvitation(inviteId, user) {
                 try {
                     const docRef = this.db.collection('invitations').doc(inviteId);
@@ -7611,6 +7652,15 @@
         document.addEventListener('DOMContentLoaded', () => {
             window.app = new AquaBookPro();
         });
+
+        // Register Service Worker for PWA (Offline Support)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed', err));
+            });
+        }
     </script>
 </body>
 </html>
