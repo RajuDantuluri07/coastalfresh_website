@@ -1969,10 +1969,10 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        .tray-radio.status-empty.selected { background: #e8f5e9; border-color: var(--success); color: #1b5e20; }
-        .tray-radio.status-little.selected { background: #fff3e0; border-color: var(--warning); color: #e65100; }
-        .tray-radio.status-half.selected { background: #fff8e1; border-color: #ffb300; color: #ff6f00; }
-        .tray-radio.status-full.selected { background: #ffebee; border-color: var(--danger); color: #b71c1c; }
+        .tray-radio.status-empty.selected { background: #e8f5e9; border-color: var(--success); color: var(--success-dark); }
+        .tray-radio.status-little.selected { background: #fff3e0; border-color: var(--warning); color: var(--warning-dark); }
+        .tray-radio.status-half.selected { background: #fff8e1; border-color: #ffb300; color: #e65100; }
+        .tray-radio.status-full.selected { background: #ffebee; border-color: var(--danger); color: var(--danger); }
 
         .observation-chip-grid {
             display: flex;
@@ -2102,14 +2102,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!--
-        =================================================================
-        !!! IMPORTANT - ACTION REQUIRED !!!
-        Google Maps will not work until you replace 'YOUR_GOOGLE_MAPS_API_KEY' 
-        with a valid Google Maps JavaScript API key.
-        =================================================================
-    -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places" async defer></script>
+    <!-- Leaflet Maps (Free Alternative) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Firebase SDKs (v9 compat for easier integration with existing code) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -2208,8 +2203,8 @@
                     </div>
                 </div>
 
-                <!-- Farms Map -->
-                <div id="farmsMapContainer" class="chart-container" style="height: 300px; margin-bottom: 24px; background: #eee; border: 2px solid var(--border); border-radius: var(--radius); padding: 0; display: none; overflow: hidden;">
+                <!-- Farms Map (Leaflet) -->
+                <div id="farmsMapContainer" class="chart-container" style="height: 300px; margin-bottom: 24px; background: #eee; border: 2px solid var(--border); border-radius: var(--radius); padding: 0; display: none; overflow: hidden; z-index: 1;">
                     <div id="farmsMap" style="height: 100%; width: 100%;"></div>
                 </div>
 
@@ -2631,6 +2626,26 @@
         </main>
     </div>
 
+    <!-- Map Modal (Leaflet) -->
+    <div class="modal-overlay" id="mapModal">
+        <div class="modal-content" style="max-width: 95%; width: 95%; height: 90vh;">
+            <div class="modal-header">
+                <h3><i class="fas fa-map-marked-alt"></i> Select Location</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 0; position: relative; height: calc(100% - 140px);">
+                <div id="mapContainer" style="height: 100%; width: 100%; background: #eee; z-index: 1;"></div>
+                <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: white; padding: 8px 16px; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); font-size: 12px; font-weight: 600; z-index: 1000;">
+                    Tap map to move marker
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="document.getElementById('mapModal').classList.remove('active'); document.getElementById('farmModal').classList.add('active');">Cancel</button>
+                <button class="btn btn-success" onclick="app.confirmMapLocation()">Confirm Location</button>
+            </div>
+        </div>
+    </div>
+
     <!-- End Crop Modal -->
     <div class="modal-overlay" id="endCropModal">
         <div class="modal-content">
@@ -2683,24 +2698,6 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-success" onclick="app.saveNewCrop()">Confirm & Start New Cycle</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Map Modal -->
-    <div class="modal-overlay" id="mapModal">
-        <div class="modal-content" style="max-width: 95%; width: 95%; height: 90vh;">
-            <div class="modal-header">
-                <h3><i class="fas fa-map-marked-alt"></i> Select Farm Location</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body" style="padding: 0; position: relative; height: calc(100% - 140px);">
-                <input id="mapSearchInput" class="form-control" type="text" placeholder="Search for a location..." style="position: absolute; top: 10px; left: 10px; width: calc(100% - 20px); z-index: 5; max-width: 400px;">
-                <div id="mapContainer" style="height: 100%; width: 100%; background: #eee;"></div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="document.getElementById('mapModal').classList.remove('active'); document.getElementById('farmModal').classList.add('active');">Cancel</button>
-                <button class="btn btn-success" onclick="app.confirmMapLocation()">Confirm This Location</button>
             </div>
         </div>
     </div>
@@ -3111,6 +3108,24 @@
         </div>
     </div>
 
+    <!-- Delete Tank Confirmation Modal -->
+    <div class="modal-overlay" id="deleteTankModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 style="color: var(--danger);"><i class="fas fa-exclamation-triangle"></i> Delete Tank?</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="deleteTankName"></strong>?</p>
+                <p class="text-muted" style="font-size: 13px; margin-top: 10px;">This action cannot be undone. All feed logs, water tests, and harvest records associated with this tank will be permanently removed.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="app.closeAllModals()">Cancel</button>
+                <button class="btn btn-danger" id="confirmDeleteTankBtn">Delete Permanently</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Tank Detail Modal -->
     <div class="modal-overlay" id="tankDetailModal">
         <div class="modal-content">
@@ -3473,6 +3488,9 @@
                 // Initialize Firebase
                 firebase.initializeApp(firebaseConfig);
                 this.auth = firebase.auth();
+                // Ensure user stays logged in indefinitely until explicit logout
+                // 'LOCAL' persistence persists state even when the browser window is closed
+                this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
                 this.db = firebase.firestore();
 
                 // --- ENABLE OFFLINE PERSISTENCE (NEW) ---
@@ -3502,6 +3520,16 @@
             async handleSignIn(user) {
                 document.getElementById('authContainer').style.display = 'none';
                 this.showLoading(true);
+
+                // Check for session timeout (30 days)
+                const lastActivity = localStorage.getItem('aquabook_last_activity');
+                const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+                if (lastActivity && (Date.now() - parseInt(lastActivity) > thirtyDays)) {
+                    this.auth.signOut();
+                    this.showToast("Session expired due to inactivity.", "warning");
+                    return;
+                }
+
                 const userProfile = await this.getUserProfile(user);
 
                 if (!userProfile) {
@@ -3533,6 +3561,7 @@
                     
                     if (!this.listenersAttached) {
                         this.setupEventListeners();
+                        this.setupSessionTracking();
                         this.listenersAttached = true;
                         window.addEventListener('online', () => this.showToast('You are back online!', 'success'));
                         window.addEventListener('offline', () => this.showToast('You are offline. Maps may not work.', 'warning'));
@@ -3665,23 +3694,25 @@
                     this.state.tanks = tanksQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
                     // --- REAL-TIME LISTENER FOR FEED ENTRIES ---
-                    const feedEntriesQuery = this.db.collection('feedEntries').where('farmId', 'in', farmIds);
-                    const feedListener = feedEntriesQuery.onSnapshot(querySnapshot => {
-                        console.log("Real-time: Received feed entries update.");
-                        this.state.feedEntries = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        
-                        // Re-render parts of the UI that depend on feed entries
-                        if (this.initialized) {
-                            this.renderLogBook();
-                            this.checkPendingTrays();
-                            this.renderOverallStats();
-                            this.renderFeedTrendChart();
-                        }
-                    }, error => {
-                        console.error("Error with feed entries listener: ", error);
-                        this.showToast("Error syncing feed data.", "error");
-                    });
-                    this.firestoreListeners.push(feedListener); // Store the unsubscribe function for cleanup
+                    if (farmIds.length > 0) {
+                        const feedEntriesQuery = this.db.collection('feedEntries').where('farmId', 'in', farmIds);
+                        const feedListener = feedEntriesQuery.onSnapshot(querySnapshot => {
+                            console.log("Real-time: Received feed entries update.");
+                            this.state.feedEntries = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                            
+                            // Re-render parts of the UI that depend on feed entries
+                            if (this.initialized) {
+                                this.renderLogBook();
+                                this.checkPendingTrays();
+                                this.renderOverallStats();
+                                this.renderFeedTrendChart();
+                            }
+                        }, error => {
+                            console.error("Error with feed entries listener: ", error);
+                            this.showToast("Error syncing feed data.", "error");
+                        });
+                        this.firestoreListeners.push(feedListener); // Store the unsubscribe function for cleanup
+                    }
 
                     // Fetch other data (can also be converted to listeners if needed)
                     const waterEntriesQuery = await this.db.collection('waterEntries').where('farmId', 'in', farmIds).get();
@@ -4210,7 +4241,7 @@
                                         <button class="tank-menu-item" onclick="app.editTank('${tank.id}'); event.stopPropagation();">
                                             <i class="fas fa-edit"></i> Edit Tank
                                         </button>
-                                        <button class="tank-menu-item delete" onclick="app.deleteTank('${tank.id}'); event.stopPropagation();">
+                                        <button class="tank-menu-item delete" onclick="app.openDeleteTankConfirmation('${tank.id}'); event.stopPropagation();">
                                             <i class="fas fa-trash"></i> Delete Tank
                                         </button>
                                     </div>
@@ -4246,13 +4277,13 @@
                 const mapDiv = document.getElementById('farmsMap');
                 if (!container || !mapDiv) return;
 
-                if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+                // Check for Leaflet
+                if (typeof L === 'undefined') {
                     container.style.display = 'none';
                     return;
                 }
 
                 const locatedFarms = this.state.farms.filter(f => f.lat && f.lng);
-
                 if (locatedFarms.length === 0) {
                     container.style.display = 'none';
                     return;
@@ -4260,51 +4291,38 @@
 
                 container.style.display = 'block';
 
-                // Clear existing markers
-                this.farmMarkers.forEach(marker => marker.setMap(null));
+                // Initialize map if needed
+                if (!this.farmsMap) {
+                    this.farmsMap = L.map('farmsMap').setView([locatedFarms[0].lat, locatedFarms[0].lng], 10);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(this.farmsMap);
+                }
+
+                // Clear existing markers (Simple approach: remove all layers except tiles)
+                this.farmsMap.eachLayer((layer) => {
+                    if (layer instanceof L.Marker) {
+                        this.farmsMap.removeLayer(layer);
+                    }
+                });
                 this.farmMarkers = [];
 
-                const bounds = new google.maps.LatLngBounds();
-
-                // Initialize map if it doesn't exist
-                if (!this.farmsMap) {
-                    this.farmsMap = new google.maps.Map(mapDiv, {
-                        zoom: 8,
-                        center: { lat: locatedFarms[0].lat, lng: locatedFarms[0].lng },
-                        mapTypeControl: false,
-                        streetViewControl: false,
-                    });
-                }
-
-                // Add markers
+                const bounds = L.latLngBounds();
                 locatedFarms.forEach(farm => {
-                    const position = { lat: farm.lat, lng: farm.lng };
-                    const marker = new google.maps.Marker({
-                        position,
-                        map: this.farmsMap,
-                        title: farm.name,
-                        animation: google.maps.Animation.DROP
-                    });
-
-                    const infowindow = new google.maps.InfoWindow({
-                        content: `<strong>${farm.name}</strong><br>${farm.location || ''}`,
-                    });
-
-                    marker.addListener('click', () => {
-                        infowindow.open({ anchor: marker, map: this.farmsMap, shouldFocus: false });
-                    });
-
+                    const marker = L.marker([farm.lat, farm.lng]).addTo(this.farmsMap)
+                        .bindPopup(`<b>${farm.name}</b><br>${farm.location || ''}`);
                     this.farmMarkers.push(marker);
-                    bounds.extend(position);
+                    bounds.extend([farm.lat, farm.lng]);
                 });
 
-                // Adjust map view
                 if (locatedFarms.length > 1) {
-                    this.farmsMap.fitBounds(bounds);
-                } else {
-                    this.farmsMap.setCenter(bounds.getCenter());
-                    this.farmsMap.setZoom(12);
+                    this.farmsMap.fitBounds(bounds, { padding: [50, 50] });
                 }
+                
+                // Fix for map not rendering correctly in hidden container initially
+                setTimeout(() => {
+                    this.farmsMap.invalidateSize();
+                }, 100);
             }
 
             renderLogBook() {
@@ -4777,6 +4795,39 @@
                 });
             }
 
+            // ===== SESSION TRACKING =====
+            setupSessionTracking() {
+                const update = () => {
+                    const now = Date.now();
+                    const last = localStorage.getItem('aquabook_last_activity');
+                    const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+
+                    // Check if session expired while app was open
+                    if (last && (now - parseInt(last) > thirtyDays)) {
+                        if (this.currentUser) {
+                            this.auth.signOut();
+                            this.showToast("Session expired due to inactivity.", "warning");
+                        }
+                        return;
+                    }
+
+                    // Throttle updates to once per minute
+                    if (!this.lastActivityUpdate || (now - this.lastActivityUpdate > 60000)) {
+                        localStorage.setItem('aquabook_last_activity', now.toString());
+                        this.lastActivityUpdate = now;
+                    }
+                };
+                
+                ['click', 'touchstart', 'keydown', 'scroll'].forEach(evt => 
+                    document.addEventListener(evt, update, { passive: true })
+                );
+                
+                // Initialize if missing
+                if (!localStorage.getItem('aquabook_last_activity')) {
+                    localStorage.setItem('aquabook_last_activity', Date.now().toString());
+                }
+            }
+
             // ===== UTILITY FUNCTIONS =====
             getFormattedDate(date = new Date()) {
                 const d = date instanceof Date ? date : new Date(date);
@@ -4857,95 +4908,63 @@
             openMapModal() {
                 this.closeAllModals();
                 document.getElementById('mapModal').classList.add('active');
-                
-                // Lazy load map
-                if (!this.map) {
-                    this.initGoogleMap();
-                } else {
-                    // If map already exists, just update marker position
-                    const lat = parseFloat(document.getElementById('farmLat').value) || 14.4426; // Default to Nellore if no value
-                    const lng = parseFloat(document.getElementById('farmLng').value) || 79.9865;
-                    const position = new google.maps.LatLng(lat, lng);
-                    this.map.setCenter(position);
-                    this.mapMarker.setPosition(position);
-                }
+                setTimeout(() => {
+                    this.initLeafletMap();
+                }, 300); // Wait for modal transition
             }
 
-            initGoogleMap() {
-                if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-                    this.showToast('Google Maps not loaded. Check your internet or API key.', 'error');
-                    document.getElementById('mapContainer').innerHTML = '<div class="empty-state" style="padding: 40px;"><p>Could not load map. Please ensure you have an internet connection and a valid Google Maps API key.</p></div>';
+            initLeafletMap() {
+                if (typeof L === 'undefined') {
+                    this.showToast('Leaflet library not loaded.', 'error');
                     return;
                 }
 
                 const lat = parseFloat(document.getElementById('farmLat').value) || 14.4426; // Default to Nellore
                 const lng = parseFloat(document.getElementById('farmLng').value) || 79.9865;
-                const initialPos = { lat, lng };
 
-                this.map = new google.maps.Map(document.getElementById('mapContainer'), {
-                    center: initialPos,
-                    zoom: 12,
-                    mapTypeControl: false,
-                    streetViewControl: false,
-                });
+                if (!this.map) {
+                    this.map = L.map('mapContainer').setView([lat, lng], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(this.map);
 
-                this.mapMarker = new google.maps.Marker({
-                    position: initialPos,
-                    map: this.map,
-                    draggable: true,
-                    title: "Drag to set location"
-                });
-
-                // Search Box
-                const input = document.getElementById('mapSearchInput');
-                this.mapSearchBox = new google.maps.places.SearchBox(input);
-
-                this.map.addListener('bounds_changed', () => {
-                    this.mapSearchBox.setBounds(this.map.getBounds());
-                });
-
-                this.mapSearchBox.addListener('places_changed', () => {
-                    const places = this.mapSearchBox.getPlaces();
-                    if (places.length == 0) return;
-
-                    const place = places[0];
-                    if (!place.geometry || !place.geometry.location) return;
-
-                    this.map.setCenter(place.geometry.location);
-                    this.map.setZoom(15);
-                    this.mapMarker.setPosition(place.geometry.location);
-                    input.value = ''; // Clear search
-                });
-                
-                // Geocoder for reverse lookup
-                this.geocoder = new google.maps.Geocoder();
+                    this.mapMarker = L.marker([lat, lng], { draggable: true }).addTo(this.map);
+                    
+                    // Update marker on click
+                    this.map.on('click', (e) => {
+                        this.mapMarker.setLatLng(e.latlng);
+                    });
+                } else {
+                    this.map.setView([lat, lng], 13);
+                    this.mapMarker.setLatLng([lat, lng]);
+                    this.map.invalidateSize();
+                }
             }
 
-            confirmMapLocation() {
-                if (!this.mapMarker) {
-                    this.showToast('Map not initialized correctly', 'error');
-                    return;
-                }
-                const position = this.mapMarker.getPosition();
-                const lat = position.lat();
-                const lng = position.lng();
+            async confirmMapLocation() {
+                if (!this.mapMarker) return;
+                const { lat, lng } = this.mapMarker.getLatLng();
 
                 document.getElementById('farmLat').value = lat;
                 document.getElementById('farmLng').value = lng;
 
-                // Geocode to get address
-                this.geocoder.geocode({ 'location': position }, (results, status) => {
-                    if (status === 'OK') {
-                        if (results[0]) {
-                            document.getElementById('farmLocation').value = results[0].formatted_address;
-                        } else {
-                            document.getElementById('farmLocation').value = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
-                        }
+                this.showLoading(true);
+                try {
+                    // Reverse Geocoding using free Nominatim API
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                    const data = await response.json();
+                    if (data && data.display_name) {
+                        // Simplify address (first 3 parts)
+                        const parts = data.display_name.split(', ');
+                        const simpleAddress = parts.slice(0, 3).join(', ');
+                        document.getElementById('farmLocation').value = simpleAddress;
                     } else {
-                        console.error('Geocoder failed due to: ' + status);
                         document.getElementById('farmLocation').value = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
                     }
-                });
+                } catch (e) {
+                    document.getElementById('farmLocation').value = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+                }
+                this.showLoading(false);
 
                 this.closeAllModals();
                 document.getElementById('farmModal').classList.add('active'); // Re-open farm modal
@@ -5114,8 +5133,19 @@
                 document.getElementById('farmModal').classList.add('active');
             }
 
-            initiatePayment() {
-                this.showToast('Payment gateway integration required.', 'info');
+            async initiatePayment() {
+                // BETA: Grant free Pro access immediately
+                if (!this.currentUser) return;
+                this.showLoading(true);
+                try {
+                    await this.db.collection('users').doc(this.currentUser.uid).update({ isPro: true });
+                    this.currentUser.isPro = true;
+                    this.showToast('Welcome to Pro! (Beta Access Granted)', 'success');
+                    this.closeAllModals();
+                } catch (e) {
+                    this.showToast('Error upgrading account', 'error');
+                }
+                this.showLoading(false);
             }
 
             async removeMember(uid) {
@@ -5604,21 +5634,6 @@
 
                 header.innerHTML = `<i class="fas fa-search"></i> Check: ${tank.name}`;
                 
-                // Generate Observation Chips
-                let observationHTML = '<div class="observation-chip-grid">';
-                for (const [key, category] of Object.entries(this.OBSERVATION_CONFIG)) {
-                    if (key === 'feeding') continue;
-                    observationHTML += category.options.map(opt => {
-                        const isCritical = key === 'mortality';
-                        return `
-                            <div class="observation-chip ${isCritical ? 'critical' : ''}" onclick="this.classList.toggle('selected')" data-obs-id="${opt.id}" data-score="${opt.score}">
-                                <span>${opt.label}</span>
-                            </div>
-                        `;
-                    }).join('');
-                }
-                observationHTML += '</div>';
-
                 list.innerHTML = `
                     <div style="padding: 16px;" id="singleTrayForm" data-entry-id="${entry.id}">
                         <div style="background: #e3f2fd; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: var(--primary-dark);">
@@ -5627,16 +5642,25 @@
 
                         <label style="font-size:13px; font-weight:600; display:block; margin-bottom:8px;">Mandatory Tray Status <span style="color:red">*</span></label>
                         <div class="tray-status-radios" id="tray-radios-${entry.id}">
-                            <div class="tray-radio status-empty" onclick="app.selectTrayRadio('${entry.id}', this, 'empty')" data-score="0">🟢<br>Empty</div>
-                            <div class="tray-radio status-little" onclick="app.selectTrayRadio('${entry.id}', this, 'little')" data-score="1">🟡<br>Little Left</div>
-                            <div class="tray-radio status-half" onclick="app.selectTrayRadio('${entry.id}', this, 'half')" data-score="2">🟠<br>Half Left</div>
-                            <div class="tray-radio status-full" onclick="app.selectTrayRadio('${entry.id}', this, 'too-much')" data-score="3">🔴<br>Full / Untouched</div>
+                            <div class="tray-radio status-empty" onclick="app.selectTrayRadio('${entry.id}', this, 'empty')" data-score="0">
+                                <i class="fas fa-check-circle" style="font-size: 24px; margin-bottom: 8px; color: var(--success);"></i><br>
+                                Empty<br><span style="font-size:10px; font-weight:400; color: var(--gray);">Fully Consumed</span>
+                            </div>
+                            <div class="tray-radio status-little" onclick="app.selectTrayRadio('${entry.id}', this, 'little')" data-score="1">
+                                <i class="fas fa-thumbs-up" style="font-size: 24px; margin-bottom: 8px; color: var(--warning);"></i><br>
+                                Little Left<br><span style="font-size:10px; font-weight:400; color: var(--gray);">Ideal Feeding</span>
+                            </div>
+                            <div class="tray-radio status-half" onclick="app.selectTrayRadio('${entry.id}', this, 'half')" data-score="2">
+                                <i class="fas fa-adjust" style="font-size: 24px; margin-bottom: 8px; color: #ff9800;"></i><br>
+                                Half Left<br><span style="font-size:10px; font-weight:400; color: var(--gray);">Overfeeding</span>
+                            </div>
+                            <div class="tray-radio status-full" onclick="app.selectTrayRadio('${entry.id}', this, 'too-much')" data-score="3">
+                                <i class="fas fa-times-circle" style="font-size: 24px; margin-bottom: 8px; color: var(--danger);"></i><br>
+                                Too Much<br><span style="font-size:10px; font-weight:400; color: var(--gray);">Serious Waste</span>
+                            </div>
                         </div>
 
-                        <label style="font-size:13px; font-weight:600; display:block; margin-bottom:8px; margin-top: 20px;">Add Observations (Optional)</label>
-                        ${observationHTML}
-
-                        <input type="text" class="form-control" placeholder="Any extra observation (optional)" maxlength="50" style="font-size:13px; margin-top:10px;">
+                        <input type="text" class="form-control" placeholder="Quick note (e.g. Rain, Aerator off...)" maxlength="50" style="font-size:13px; margin-top:20px;">
                     </div>
                 `;
 
@@ -5790,6 +5814,17 @@
                         reason: data.reason
                         }
                     });
+                }
+
+                // Optimistic Update: Update local state immediately to prevent UI lag
+                const localEntry = this.state.feedEntries.find(e => e.id == data.entryId);
+                if (localEntry) {
+                    localEntry.trayResult = data.trayResult;
+                    localEntry.trayResults = data.trayResults;
+                    localEntry.observations = data.observations;
+                    localEntry.riskScore = data.riskScore;
+                    localEntry.riskLevel = data.riskLevel;
+                    localEntry.notes = data.notes;
                 }
 
                 this.showLoading(false);
@@ -6493,6 +6528,10 @@
                     }
                     this.showToast('Farm added successfully');
                 }
+                
+                // Refresh listeners to include the new farm in real-time updates
+                this.detachFirestoreListeners();
+                await this.loadAllData();
 
                 this.showLoading(false);
                 this.closeAllModals();
@@ -6555,6 +6594,10 @@
                 if (this.state.settings.currentFarmId === farmId) {
                     this.state.settings.currentFarmId = this.state.farms.length > 0 ? this.state.farms[0].id : null;
                 }
+                
+                // Refresh listeners to stop listening to deleted farm
+                this.detachFirestoreListeners();
+                await this.loadAllData();
 
                 this.showLoading(false);
                 this.checkFirstTimeUser();
@@ -6633,23 +6676,27 @@
                 document.querySelector('#tankModal h3').innerHTML = '<i class="fas fa-edit"></i> Edit Tank';
             }
 
+            openDeleteTankConfirmation(id) {
+                const tank = this.getTankById(id);
+                if (!tank) return;
+                
+                document.getElementById('deleteTankName').textContent = tank.name;
+                document.getElementById('confirmDeleteTankBtn').onclick = () => this.deleteTank(id);
+                document.getElementById('deleteTankModal').classList.add('active');
+            }
+
             async deleteTank(id) {
-                if(confirm('Are you sure you want to delete this tank? All associated data (feed, water tests, etc.) will be permanently deleted.')) {
-                    this.showLoading(true);
-                    const tankId = String(id);
+                this.showLoading(true);
+                const tankId = String(id);
+                
+                try {
+                    // Use helper to delete large collections safely
+                    await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('tankId', '==', tankId));
+                    await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tankId));
+                    await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tankId));
                     
-                    const batch = this.db.batch();
-                    batch.delete(this.db.collection('tanks').doc(tankId));
-
-                    // Cleanup associated data
-                    const feedQ = await this.db.collection('feedEntries').where('tankId', '==', tankId).get();
-                    feedQ.forEach(doc => batch.delete(doc.ref));
-                    const waterQ = await this.db.collection('waterEntries').where('tankId', '==', tankId).get();
-                    waterQ.forEach(doc => batch.delete(doc.ref));
-                    const harvestQ = await this.db.collection('harvests').where('tankId', '==', tankId).get();
-                    harvestQ.forEach(doc => batch.delete(doc.ref));
-
-                    await batch.commit();
+                    // Delete tank document
+                    await this.db.collection('tanks').doc(tankId).delete();
 
                     this.state.tanks = this.state.tanks.filter(t => t.id !== tankId);
                     this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId !== tankId);
@@ -6660,6 +6707,10 @@
                     this.renderAll();
                     this.closeAllModals();
                     this.showToast('Tank deleted', 'warning');
+                } catch (error) {
+                    console.error("Error deleting tank:", error);
+                    this.showLoading(false);
+                    this.showToast("Failed to delete tank. Please try again.", "error");
                 }
             }
             toggleTankMenu(id) {
@@ -7108,18 +7159,10 @@
 
                 this.showLoading(true);
 
-                // Delete associated data from Firestore using Batch
-                const batch = this.db.batch();
-                
-                // We need to query and delete. Since batch has limit, we'll do simple deletes for MVP or assume low volume
-                // For this snippet, we'll just update local state and assume a backend function handles cleanup or we do it iteratively
-                // Correct approach:
-                const feedQuery = await this.db.collection('feedEntries').where('tankId', '==', tankId).get();
-                feedQuery.forEach(doc => batch.delete(doc.ref));
-                const waterQuery = await this.db.collection('waterEntries').where('tankId', '==', tankId).get();
-                waterQuery.forEach(doc => batch.delete(doc.ref));
-                const harvestQuery = await this.db.collection('harvests').where('tankId', '==', tankId).get();
-                harvestQuery.forEach(doc => batch.delete(doc.ref));
+                // Delete associated data safely using helper
+                await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('tankId', '==', tankId));
+                await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tankId));
+                await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tankId));
 
                 this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId != tankId);
                 this.state.waterEntries = this.state.waterEntries.filter(e => e.tankId != tankId);
@@ -7373,6 +7416,29 @@
             importData(input) {
                 alert("Data Restore is currently disabled for Cloud Sync mode to prevent data conflicts. Please contact support if you need to migrate data.");
                 input.value = '';
+            }
+
+            // Helper to delete large collections in chunks
+            async deleteCollectionByQuery(query) {
+                const snapshot = await query.get();
+                const batchSize = 400; // Safe limit below 500
+                if (snapshot.size === 0) return;
+
+                let batch = this.db.batch();
+                let count = 0;
+                
+                for (const doc of snapshot.docs) {
+                    batch.delete(doc.ref);
+                    count++;
+                    if (count >= batchSize) {
+                        await batch.commit();
+                        batch = this.db.batch();
+                        count = 0;
+                    }
+                }
+                if (count > 0) {
+                    await batch.commit();
+                }
             }
         }
 
