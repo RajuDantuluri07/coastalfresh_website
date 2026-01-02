@@ -58,62 +58,6 @@
             overflow-x: hidden;
         }
 
-        /* ===== FIRST TIME USER LOCK ===== */
-        .first-time-lock {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: white;
-            z-index: 9998;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            text-align: center;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .first-time-lock.hidden {
-            display: none;
-        }
-
-        .lock-icon {
-            width: 80px;
-            height: 80px;
-            background: var(--light);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-            border: 3px solid var(--primary);
-        }
-
-        .lock-icon i {
-            font-size: 36px;
-            color: var(--primary);
-        }
-
-        .lock-message {
-            max-width: 400px;
-            margin-bottom: 30px;
-        }
-
-        .lock-message h2 {
-            color: var(--dark);
-            margin-bottom: 10px;
-            font-size: 24px;
-        }
-
-        .lock-message p {
-            color: var(--gray);
-            line-height: 1.6;
-            font-size: 15px;
-        }
-
         /* ===== HEADER ===== */
         .app-header {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
@@ -2117,21 +2061,6 @@
         <div class="loading-text">Loading AquaBook...</div>
     </div>
 
-    <!-- First Time User Lock -->
-    <div class="first-time-lock" id="firstTimeLock">
-        <div class="lock-icon">
-            <i class="fas fa-farm"></i>
-        </div>
-        <div class="lock-message">
-            <h2>Welcome to AquaBook Pro! 🎉</h2>
-            <p>To get started, you need to add your first farm. This will unlock all features including feed tracking, applications, and price monitoring.</p>
-        </div>
-        <button class="btn btn-primary" id="addFirstFarmBtn">
-            <i class="fas fa-plus"></i>
-            Add Your First Farm
-        </button>
-    </div>
-
     <!-- Main App -->
     <div id="app">
         <!-- Header -->
@@ -2952,23 +2881,6 @@
                 </div>
                 <div class="settings-list" id="settingsFeedTypesList"></div>
                 <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-                <h4 style="margin-bottom: 12px; color: var(--dark);">Data Management</h4>
-                <div class="alert-card" style="background: #e3f2fd; border-left-color: var(--info); margin-bottom: 15px;">
-                    <div style="font-size: 12px; color: var(--dark);">
-                        <i class="fas fa-info-circle"></i> Your data is stored on this device. Backup regularly to avoid data loss.
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <button class="btn btn-secondary" onclick="app.exportData()">
-                        <i class="fas fa-download"></i> Backup Data
-                    </button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">
-                        <i class="fas fa-upload"></i> Restore Data
-                    </button>
-                    <input type="file" id="importFile" style="display: none;" accept=".json" onchange="app.importData(this)">
-                </div>
-
-                <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
                 <h4 style="margin-bottom: 12px; color: var(--dark);">Team Management</h4>
                 <div class="farm-form" style="padding: 16px; margin-bottom: 20px; border: 1px solid var(--border);">
                     <h5 style="margin-bottom: 12px; font-size: 14px;">Invite New Member</h5>
@@ -3563,7 +3475,6 @@
                 try {
                     await this.loadAllData(); // Load data from Firestore
                     this.setupUI();
-                    this.checkFirstTimeUser();
                     this.renderAll();
                     
                     if (!this.listenersAttached) {
@@ -3594,7 +3505,6 @@
                 this.state = this.getInitialState(); // Reset state
                 this.closeAllModals();
                 document.getElementById('authContainer').style.display = 'flex';
-                document.getElementById('firstTimeLock').classList.add('hidden');
                 this.showLoading(false);
 
                 // Initialize reCAPTCHA here, as the container is now visible.
@@ -3709,7 +3619,15 @@
 
                     // --- REAL-TIME LISTENER FOR FEED ENTRIES ---
                     if (farmIds.length > 0) {
-                        const feedEntriesQuery = this.db.collection('feedEntries').where('farmId', 'in', farmIds);
+                        // PERFORMANCE: Limit to last 60 days to prevent loading entire history
+                        const limitDate = new Date();
+                        limitDate.setDate(limitDate.getDate() - 60);
+                        const limitDateStr = this.getFormattedDate(limitDate);
+
+                        const feedEntriesQuery = this.db.collection('feedEntries')
+                            .where('farmId', 'in', farmIds)
+                            .where('date', '>=', limitDateStr);
+                            
                         const feedListener = feedEntriesQuery.onSnapshot(querySnapshot => {
                             try {
                                 console.log("Real-time: Received feed entries update.");
@@ -3763,7 +3681,7 @@
                     if (this.state.settings.currentFarmId) {
                         const invDoc = await this.db.collection('inventory').doc(this.state.settings.currentFarmId).get();
                         if (invDoc.exists) {
-                            this.state.inventory = invDoc.data();
+                            this.state.inventory = invDoc.data() || { totalKg: 0 };
                         }
                     }
                 }
@@ -3788,76 +3706,7 @@
                 console.log("Data loaded from Firestore.");
             }
             
-            saveAllData() {
-                localStorage.setItem('aquabook_farms', JSON.stringify(this.state.farms));
-                localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
-                localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
-                localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
-                localStorage.setItem('aquabook_water', JSON.stringify(this.state.waterEntries));
-                localStorage.setItem('aquabook_expenses', JSON.stringify(this.state.expenses));
-                localStorage.setItem('aquabook_sampling', JSON.stringify(this.state.samplingEntries));
-                localStorage.setItem('aquabook_tasks', JSON.stringify(this.state.tasks));
-                localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
-                localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
-                localStorage.setItem('aquabook_med_apps', JSON.stringify(this.state.medicineApplications));
-                localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
-            }
-            
-            saveFarms() {
-                // This is now handled by individual saveFarm calls
-                console.warn("saveFarms() is deprecated. Use individual doc saves.");
-            }
-
-            // ... other save functions like saveTanks, saveFeedEntries etc.
-            // will be refactored to save individual documents to Firestore
-            // instead of saving the whole array.
-            
-            saveTanks() {
-                localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
-            }
-            
-            saveFeedEntries() {
-                localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
-            }
-
-            saveHarvests() {
-                localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
-            }
-            
-            saveWaterEntries() {
-                localStorage.setItem('aquabook_water', JSON.stringify(this.state.waterEntries));
-            }
-
-            saveExpenses() {
-                localStorage.setItem('aquabook_expenses', JSON.stringify(this.state.expenses));
-            }
-
-            saveSamplingEntries() {
-                localStorage.setItem('aquabook_sampling', JSON.stringify(this.state.samplingEntries));
-            }
-
-            saveTasks() {
-                localStorage.setItem('aquabook_tasks', JSON.stringify(this.state.tasks));
-            }
-
-            saveInventory() {
-                localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
-            }
-
-            saveMedicineInventory() {
-                localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
-            }
-
-            saveMedicineApplications() {
-                localStorage.setItem('aquabook_med_apps', JSON.stringify(this.state.medicineApplications));
-            }
-
-            savePrices() {
-                localStorage.setItem('aquabook_prices', JSON.stringify(this.state.prices));
-            }
-            
             async saveSettings() {
-                localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
                 if (this.currentUser) {
                     await this.db.collection('users').doc(this.currentUser.uid).update({
                         settings: this.state.settings
@@ -3874,12 +3723,15 @@
                 if (this.currentWeatherCode !== null && this.currentWeatherCode >= 50) {
                     return {
                         text: "🌧️ Weather Alert: Rain or overcast conditions detected. Dissolved Oxygen may drop.",
-                        action: "Reduce feed by 10-20% to prevent waste."
+                        action: "Reduce feed by 10-20%."
                     };
                 }
 
                 // Get today's feed entries
                 const todayEntries = this.state.feedEntries.filter(entry => entry.date === today);
+                
+                // FIX: Analyze per tank to avoid bad aggregation
+                // For MVP, we simply warn if ANY tank is having issues
                 
                 if (todayEntries.length === 0) {
                     // No entries today, check yesterday
@@ -3894,7 +3746,7 @@
                     
                     if (emptyCount >= 2) {
                         return {
-                            text: "Yesterday, 2 or more feed trays were empty. Consider increasing feed by 5-10%.",
+                            text: `Yesterday, ${emptyCount} trays were empty. Check individual tanks.`,
                             action: "Increase feed by 5-10% today"
                         };
                     }
@@ -3905,14 +3757,14 @@
                     
                     if (emptyCount >= 2) {
                         return {
-                            text: `Today, ${emptyCount} feed trays were empty. Consider increasing feed.`,
+                            text: `Today, ${emptyCount} trays were empty. Check specific tanks.`,
                             action: "Increase next feed by 5-10%"
                         };
                     }
                     
                     if (tooMuchCount >= 1) {
                         return {
-                            text: `Today, ${tooMuchCount} feed tray had too much feed. Consider decreasing feed.`,
+                            text: `Today, ${tooMuchCount} trays had too much feed. Reduce feed immediately.`,
                             action: "Decrease next feed by 5-10%"
                         };
                     }
@@ -4126,6 +3978,17 @@
                 });
             }
 
+            // ===== SECURITY HELPER =====
+            escapeHtml(text) {
+                if (!text) return '';
+                return text.toString()
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
             renderFarmsList() {
                 const container = document.getElementById('farmsList');
                 const headerContainer = document.getElementById('farmHeaderContainer');
@@ -4167,7 +4030,7 @@
                         <div class="farm-header" style="border: 2px solid var(--border); border-radius: var(--radius);">
                             <div class="farm-name">
                                 <i class="fas fa-tractor"></i>
-                                ${farm.name}
+                                ${this.escapeHtml(farm.name)}
                             </div>
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 <div class="farm-stats">
@@ -4253,7 +4116,7 @@
                     <div class="tank-summary-card ${status} ${isInactive ? 'inactive' : ''}" onclick="app.openTankDetail('${tank.id}')">
                         ${statusDot}
                         <div class="tank-summary-header">
-                            <div class="tank-summary-name">${tank.name}</div>
+                            <div class="tank-summary-name">${this.escapeHtml(tank.name)}</div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <div class="tank-summary-doc">DOC: ${doc}</div>
                                 <div class="tank-action-menu">
@@ -4460,8 +4323,11 @@
 
                     // Helper to generate cell HTML
                     const getCell = (index) => {
-                        if (entries[index]) {
-                            const e = entries[index];
+                        // FIX: Use 'round' property if available to place in correct column
+                        // Fallback to index for legacy data
+                        const e = entries.find(entry => entry.round === index + 1) || (entries.every(entry => !entry.round) ? entries[index] : null);
+                        
+                        if (e) {
                             colTotals[index] += e.amount;
                             
                             let badgeClass = 'unknown';
@@ -4518,7 +4384,7 @@
                         <td>
                             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                                 <div>
-                                    <div class="log-pond-name">${tank.name}</div>
+                                    <div class="log-pond-name">${this.escapeHtml(tank.name)}</div>
                                     <div class="log-farm-name">${farm ? farm.name : ''}</div>
                                 </div>
                             </div>
@@ -4550,7 +4416,7 @@
                         const headerRow = document.createElement('tr');
                         headerRow.innerHTML = `<td colspan="${feedsCount + 1}" style="background:#e3f2fd; font-weight:700; color:var(--primary-dark);">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span>${tank.name}</span>
+                                <span>${this.escapeHtml(tank.name)}</span>
                             </div>
                         </td>`;
                         tableBody.appendChild(headerRow);
@@ -4690,7 +4556,7 @@
                     card.innerHTML = `
                         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                             <div>
-                                <div style="font-weight:700; font-size:15px; color:var(--dark);">${entry._tankName}</div>
+                                <div style="font-weight:700; font-size:15px; color:var(--dark);">${this.escapeHtml(entry._tankName)}</div>
                                 <div style="font-size:12px; color:var(--gray); margin-top:2px;">${dateDisplay} • ${entry.time}</div>
                             </div>
                             <div style="text-align:right;">
@@ -4757,11 +4623,6 @@
                 // Screen navigation
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     btn.addEventListener('click', () => this.switchScreen(btn.dataset.screen));
-                });
-
-                // Add First Farm
-                document.getElementById('addFirstFarmBtn').addEventListener('click', () => {
-                    this.openFarmModal();
                 });
 
                 // Farm Selector
@@ -5264,7 +5125,8 @@
                     this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + addedKg;
                     
                     // Save to Firestore
-                    await this.db.collection('inventory').doc(currentFarmId).set(this.state.inventory, { merge: true });
+                    // FIX: Use atomic increment to prevent race conditions
+                    await this.db.collection('inventory').doc(currentFarmId).set({ totalKg: firebase.firestore.FieldValue.increment(addedKg) }, { merge: true });
                     
                     this.renderOverallStats();
                     this.closeAllModals();
@@ -5475,6 +5337,9 @@
                 });
                 const roundNumber = maxEntries + 1;
                 
+                // Store round number for saving
+                document.getElementById('feedRoundModal').dataset.round = roundNumber;
+                
                 document.querySelector('#feedRoundModal .modal-header h3').innerHTML = `<i class="fas fa-utensils"></i> Log Feed (Round ${roundNumber})`;
 
                 // Populate Supplements for Bulk Entry
@@ -5522,7 +5387,7 @@
                     row.className = 'feed-round-row';
                     row.innerHTML = `
                         <div>
-                            <div style="font-weight:600;">${tank.name}</div>
+                            <div style="font-weight:600;">${this.escapeHtml(tank.name)}</div>
                             <div class="suggestion-text">Tray: ${checkTrayGrams}g</div>
                         </div>
                         <div style="font-size:12px; color:var(--dark); font-weight:500;">${lastAmount}kg${lastTimeStr}</div>
@@ -5546,6 +5411,9 @@
                 const supplements = Array.from(document.querySelectorAll('#roundSupplements .supplement-option.selected'))
                     .map(el => el.textContent.trim());
                 
+                const date = this.currentDate;
+                const round = parseInt(document.getElementById('feedRoundModal').dataset.round) || 1;
+                
                 const batch = this.db.batch();
                 let entriesToAdd = [];
 
@@ -5553,17 +5421,29 @@
                     const amount = parseFloat(input.value);
                     if (amount > 0) {
                         const tankId = input.dataset.tankId;
+
+                        // --- CHECK FOR DUPLICATES ---
+                        const existingEntry = this.state.feedEntries.find(
+                            e => e.tankId == tankId && e.date === date && e.round === round
+                        );
+
+                        if (existingEntry) {
+                            this.showToast(`Entry for ${this.getTankById(tankId).name} (Round ${round}) already exists.`, 'warning');
+                            return; // Skips this iteration
+                        }
+
                         const tank = this.getTankById(tankId);
                         const entryId = (Date.now() + entriesToAdd.length).toString();
                         const newEntry = {
                             id: entryId,
                             tankId,
                             farmId: tank.farmId,
-                            date: this.currentDate,
+                            date: date,
                             time: new Date().toLocaleTimeString(),
                             amount,
                             trayResult: 'pending', // Mark as pending check
-                            supplements: supplements
+                            supplements: supplements,
+                            round: round // Save the round number
                         };
                         
                         const docRef = this.db.collection('feedEntries').doc(entryId);
@@ -5588,7 +5468,8 @@
                     this.state.inventory.totalKg = currentStock - totalAmount;
                     // Update inventory in Firestore
                     if (this.state.settings.currentFarmId) {
-                        await this.db.collection('inventory').doc(this.state.settings.currentFarmId).set(this.state.inventory, { merge: true });
+                        // FIX: Use atomic increment
+                        batch.set(this.db.collection('inventory').doc(this.state.settings.currentFarmId), { totalKg: firebase.firestore.FieldValue.increment(-totalAmount) }, { merge: true });
                     }
                     
                     this.renderInventorySummary();
@@ -5793,32 +5674,8 @@
                     reason
                 };
 
-                // Show Confirmation View
-                const list = document.getElementById('trayCheckList');
-                const footer = document.querySelector('#trayCheckModal .modal-footer');
-                
-                list.innerHTML = `
-                    <div style="padding: 20px; text-align: center;">
-                        <div style="font-size: 16px; font-weight: 700; margin-bottom: 10px;">Result Recorded</div>
-                        <div style="margin-bottom: 20px;">
-                            <span class="log-status ${trayStatus}" style="font-size: 14px; padding: 6px 12px;">${trayStatus.toUpperCase()}</span>
-                        </div>
-                        
-                        <div style="background: #f1f8e9; padding: 16px; border-radius: 12px; border: 1px solid #c8e6c9; margin-bottom: 20px;">
-                            <div style="font-size: 12px; color: #2e7d32; margin-bottom: 4px;">Suggested Next Feed</div>
-                            <div style="font-size: 24px; font-weight: 800; color: #2e7d32;">${this.tempTrayResult.newAmount} kg</div>
-                            <div style="font-size: 12px; color: #2e7d32;">${reason}</div>
-                        </div>
-
-                        <p style="font-size: 13px; color: var(--gray);">Confirm to save this result and update the feed plan.</p>
-                    </div>
-                `;
-
-                footer.innerHTML = `
-                    <button class="btn btn-success" style="width: 100%;" onclick="app.saveSingleTrayResult()">
-                        Confirm & Finish
-                    </button>
-                `;
+                // FIX: Save immediately to improve usability (remove extra click)
+                this.saveSingleTrayResult();
             }
 
             async saveSingleTrayResult() {
@@ -5863,7 +5720,7 @@
                 }
 
                 this.showLoading(false);
-                this.showToast('Tray result updated!');
+                this.showToast(`Saved: ${data.trayResult.toUpperCase()}`);
                 this.tempTrayResult = null;
                 
                 // Go back to list
@@ -5880,7 +5737,7 @@
                     row.className = 'suggestion-row';
                     row.innerHTML = `
                         <div>
-                            <div style="font-weight: 700;">${s.tankName}</div>
+                            <div style="font-weight: 700;">${this.escapeHtml(s.tankName)}</div>
                         </div>
                         <div>
                             <span class="tray-badge ${s.trayResults.join(' ')}">${s.trayResults.map(r => r.charAt(0).toUpperCase()).join(', ')}</span>
@@ -5956,16 +5813,23 @@
             recalculateTankBiomass(tankId) {
                 const tank = this.getTankById(tankId);
                 if (!tank) return;
-                
-                const entries = this.state.feedEntries.filter(e => e.tankId == tankId);
-                const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
-                const tankHarvests = this.state.harvests.filter(h => h.tankId == tankId);
-                const totalHarvested = tankHarvests.reduce((sum, h) => sum + h.weight, 0);
-                
-                // Using standard FCR of 1.2 for estimation
-                const estimatedFCR = 1.2;
-                tank.biomass = Math.max(0, parseFloat(((totalFeed / estimatedFCR) - totalHarvested).toFixed(1)));
-                
+
+                // Get latest sample
+                const latestSample = this.state.samplingEntries
+                    .filter(s => s.tankId == tankId)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
+                const survivalRate = 0.85; // Assume 85% survival
+                const currentSeed = tank.currentSeed || tank.initialSeed || 0;
+
+                let newBiomass = 0;
+                if (latestSample && latestSample.abw > 0 && currentSeed > 0) {
+                    // ABW is in grams, convert to kg
+                    newBiomass = (latestSample.abw / 1000) * currentSeed * survivalRate;
+                }
+
+                tank.biomass = parseFloat(newBiomass.toFixed(1));
+
                 // Update Firestore
                 this.db.collection('tanks').doc(tankId).update({ biomass: tank.biomass });
             }
@@ -6443,7 +6307,7 @@
                                         ${isDone ? '<i class="fas fa-check" style="color:white; font-size:12px;"></i>' : ''}
                                     </div>
                                     <div>
-                                        <div style="font-weight:700; font-size:14px; color:var(--dark); text-decoration: ${isDone ? 'line-through' : 'none'}">${t.description}</div>
+                                        <div style="font-weight:700; font-size:14px; color:var(--dark); text-decoration: ${isDone ? 'line-through' : 'none'}">${this.escapeHtml(t.description)}</div>
                                         <div style="font-size:12px; color:var(--gray); margin-top:2px;">
                                             <i class="far fa-calendar"></i> ${new Date(t.dueDate).toLocaleDateString()} 
                                             <span style="margin-left:8px; font-weight:600; color:${priorityColor}">${t.priority}</span>
@@ -6570,7 +6434,6 @@
 
                 this.showLoading(false);
                 this.closeAllModals();
-                this.checkFirstTimeUser();
                 this.renderAll();
                 
                 // Clear inputs
@@ -6635,7 +6498,6 @@
                 await this.loadAllData();
 
                 this.showLoading(false);
-                this.checkFirstTimeUser();
                 this.renderAll();
                 this.closeAllModals();
                 this.showToast('Farm deleted successfully', 'warning');
@@ -6730,11 +6592,10 @@
                     await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tankId));
                     await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tankId));
                     
-                    // Delete tank document
                     await this.db.collection('tanks').doc(tankId).delete();
 
+                    // Manually filter local state for non-listener collections
                     this.state.tanks = this.state.tanks.filter(t => t.id !== tankId);
-                    this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId !== tankId);
                     this.state.waterEntries = this.state.waterEntries.filter(e => e.tankId !== tankId);
                     this.state.harvests = this.state.harvests.filter(h => h.tankId !== tankId);
                     
@@ -6749,9 +6610,6 @@
                 }
             }
             toggleTankMenu(id) {
-                document.querySelectorAll('.tank-menu-dropdown').forEach(el => {
-                    if(el.id !== `tank-menu-${id}`) el.classList.remove('show');
-                });
                 const menu = document.getElementById(`tank-menu-${id}`);
                 if(menu) menu.classList.toggle('show');
             }
@@ -7204,10 +7062,12 @@
                 await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('tankId', '==', tankId));
                 await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tankId));
                 await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tankId));
+                await this.deleteCollectionByQuery(this.db.collection('sampling').where('tankId', '==', tankId)); // FIX: Delete sampling data
 
-                this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId != tankId);
+                // Manually filter local state for non-listener collections
                 this.state.waterEntries = this.state.waterEntries.filter(e => e.tankId != tankId);
                 this.state.harvests = this.state.harvests.filter(h => h.tankId != tankId);
+                this.state.samplingEntries = this.state.samplingEntries.filter(s => s.tankId != tankId);
 
                 // Update tank
                 tank.status = 'active';
@@ -7278,6 +7138,12 @@
                 const ctx = document.getElementById('growthChart');
                 const container = document.getElementById('growthChartContainer');
                 if (!ctx || !container) return;
+                
+                // FIX: Always destroy previous chart to prevent memory leaks/ghost charts
+                if (this.growthChart) {
+                    this.growthChart.destroy();
+                    this.growthChart = null;
+                }
 
                 const samples = this.state.samplingEntries
                     .filter(s => s.tankId == tankId)
@@ -7291,8 +7157,6 @@
 
                 const labels = samples.map(s => new Date(s.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }));
                 const data = samples.map(s => s.abw);
-
-                if (this.growthChart) this.growthChart.destroy();
 
                 this.growthChart = new Chart(ctx, {
                     type: 'line',
@@ -7422,41 +7286,6 @@
                         this.showToast('App link copied to clipboard!');
                     });
                 }
-            }
-
-            // ===== DATA BACKUP & RESTORE =====
-            exportData() {
-                const data = {
-                    farms: this.state.farms,
-                    tanks: this.state.tanks,
-                    feedEntries: this.state.feedEntries,
-                    harvests: this.state.harvests,
-                    waterEntries: this.state.waterEntries,
-                    expenses: this.state.expenses,
-                    samplingEntries: this.state.samplingEntries,
-                    tasks: this.state.tasks,
-                    inventory: this.state.inventory,
-                    medicineInventory: this.state.medicineInventory,
-                    medicineApplications: this.state.medicineApplications,
-                    settings: this.state.settings,
-                    prices: this.state.prices,
-                    exportDate: new Date().toISOString(),
-                    version: '1.0'
-                };
-
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-                const downloadAnchorNode = document.createElement('a');
-                downloadAnchorNode.setAttribute("href", dataStr);
-                downloadAnchorNode.setAttribute("download", "aquabook_backup_" + this.getFormattedDate() + ".json");
-                document.body.appendChild(downloadAnchorNode); // required for firefox
-                downloadAnchorNode.click();
-                downloadAnchorNode.remove();
-                this.showToast('Backup file downloaded successfully');
-            }
-
-            importData(input) {
-                alert("Data Restore is currently disabled for Cloud Sync mode to prevent data conflicts. Please contact support if you need to migrate data.");
-                input.value = '';
             }
 
             // Helper to delete large collections in chunks
