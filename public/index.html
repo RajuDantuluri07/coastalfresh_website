@@ -2744,6 +2744,10 @@
                     <input type="file" id="importFile" style="display: none;" accept=".json" onchange="app.importData(this)">
                 </div>
 
+                <button class="btn btn-danger" style="width: 100%; margin-top: 15px; background-color: #d32f2f;" onclick="app.hardReset()">
+                    <i class="fas fa-sync-alt"></i> Reset App (Fix Issues)
+                </button>
+
                 <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
                 <h4 style="margin-bottom: 12px; color: var(--dark);">Team Management</h4>
                 <div class="farm-form" style="padding: 16px; margin-bottom: 20px; border: 1px solid var(--border);">
@@ -3230,6 +3234,15 @@
                 }
             }
 
+            hardReset() {
+                if (confirm("⚠️ RESET APP?\n\nThis will clear all local data and reload the app. Use this if you are experiencing issues like being unable to add farms.\n\nYour cloud data (Firestore) will NOT be deleted.")) {
+                    localStorage.clear();
+                    // Unregister service workers to ensure fresh code load
+                    if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister())); }
+                    window.location.reload();
+                }
+            }
+
             getInitialState() {
                 this.state = {
                     farms: [],           // Array of farm objects
@@ -3620,6 +3633,18 @@
                     }
                 } catch (e) {
                     console.error("Error fetching market prices:", e);
+                }
+
+                // Validate currentFarmId - Fixes "stuck" state if farm was deleted
+                if (this.state.farms.length > 0) {
+                    const exists = this.state.farms.find(f => f.id === this.state.settings.currentFarmId);
+                    if (!exists) {
+                        console.warn("Current farm ID not found, resetting to first farm.");
+                        this.state.settings.currentFarmId = this.state.farms[0].id;
+                        this.saveSettings();
+                    }
+                } else {
+                    this.state.settings.currentFarmId = null;
                 }
 
                 // Fetch Inventory AFTER settings are loaded (Fixes null ID crash)
@@ -6152,79 +6177,82 @@
 
             // CRUD Operations
             async saveFarm() {
-                const name = document.getElementById('farmNameInput').value;
-                const location = document.getElementById('farmLocation').value;
-                const contact = document.getElementById('farmContact').value;
-                const phone = document.getElementById('farmPhone').value;
-                const ownerId = this.currentUser.uid;
-
-                if (!name) {
-                    this.showToast('Farm name is required', 'error');
-                    return;
-                }
-
-                // MVP: Unlimited farms allowed for everyone
-
                 try {
-                this.showLoading(true);
-                if (this.editingFarmId) {
-                    const farm = this.getFarmById(this.editingFarmId);
-                    if (farm) {
-                        farm.name = name;
-                        farm.location = location;
-                        farm.contact = contact;
-                        farm.phone = phone;
-                        if (!this.isGuest) await this.db.collection('farms').doc(farm.id).set(farm, { merge: true });
-                        this.showToast('Farm updated successfully');
+                    this.showLoading(true);
+                    
+                    if (!this.currentUser) throw new Error("User not logged in");
+
+                    const name = document.getElementById('farmNameInput').value;
+                    const location = document.getElementById('farmLocation').value;
+                    const contact = document.getElementById('farmContact').value;
+                    const phone = document.getElementById('farmPhone').value;
+                    const ownerId = this.currentUser.uid;
+
+                    if (!name) {
+                        this.showLoading(false);
+                        this.showToast('Farm name is required', 'error');
+                        return;
                     }
-                } else {
-                    let newId;
-                    if (this.isGuest) newId = Date.now().toString();
-                    else newId = this.db.collection('farms').doc().id; // Always use random ID to prevent overwrite
 
-                    const newFarm = {
-                        id: newId,
-                        name,
-                        ownerId,
-                        memberIds: [ownerId],
-                        members: { [ownerId]: 'owner' },
-                        location,
-                        contact,
-                        phone,
-                        created: new Date().toISOString()
-                    };
+                    if (this.editingFarmId) {
+                        const farm = this.getFarmById(this.editingFarmId);
+                        if (farm) {
+                            farm.name = name;
+                            farm.location = location;
+                            farm.contact = contact;
+                            farm.phone = phone;
+                            if (!this.isGuest) await this.db.collection('farms').doc(farm.id).set(farm, { merge: true });
+                            this.showToast('Farm updated successfully');
+                        }
+                    } else {
+                        let newId;
+                        if (this.isGuest) newId = Date.now().toString();
+                        else newId = this.db.collection('farms').doc().id;
 
-                    if (!this.isGuest) await this.db.collection('farms').doc(newFarm.id).set(newFarm);
-                    this.state.farms.push(newFarm);
+                        const newFarm = {
+                            id: newId,
+                            name,
+                            ownerId,
+                            memberIds: [ownerId],
+                            members: { [ownerId]: 'owner' },
+                            location,
+                            contact,
+                            phone,
+                            created: new Date().toISOString()
+                        };
+
+                        if (!this.isGuest) await this.db.collection('farms').doc(newFarm.id).set(newFarm);
+                        
+                        // Safe push
+                        if (!this.state.farms) this.state.farms = [];
+                        this.state.farms.push(newFarm);
+                        
+                        this.state.settings.currentFarmId = newFarm.id;
+                        await this.saveSettings();
+                        
+                        if (!this.isGuest) this.setupFeedListener();
+
+                        this.showToast('Farm added successfully');
+                    }
                     
-                    // Always switch to the new farm so the user sees it immediately
-                    this.state.settings.currentFarmId = newFarm.id;
-                    await this.saveSettings();
+                    if (this.isGuest) {
+                        this.saveGuestData();
+                    }
+
+                    this.renderAll();
+                    this.closeAllModals();
                     
-                    // FIX: Refresh listeners so the new farm is included in real-time updates
-                    if (!this.isGuest) this.setupFeedListener();
-
-                    this.showToast('Farm added successfully');
-                }
-                
-                if (this.isGuest) {
-                    this.saveGuestData();
-                }
-
-                this.showLoading(false);
-                this.closeAllModals();
-                this.renderAll();
-                
-                // Clear inputs
-                document.getElementById('farmNameInput').value = '';
-                document.getElementById('farmLocation').value = '';
-                document.getElementById('farmContact').value = '';
-                document.getElementById('farmPhone').value = '';
-                this.editingFarmId = null;
+                    // Clear inputs
+                    document.getElementById('farmNameInput').value = '';
+                    document.getElementById('farmLocation').value = '';
+                    document.getElementById('farmContact').value = '';
+                    document.getElementById('farmPhone').value = '';
+                    this.editingFarmId = null;
                 } catch (e) {
                     console.error(e);
-                    this.showLoading(false);
                     this.showToast('Error saving farm: ' + e.message, 'error');
+                } finally {
+                    this.showLoading(false);
                 }
             }
 
