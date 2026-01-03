@@ -2690,6 +2690,14 @@
             }
 
             async completeAppInitialization() {
+                if (!this.listenersAttached) {
+                    this.setupEventListeners();
+                    this.setupSessionTracking();
+                    this.listenersAttached = true;
+                    window.addEventListener('online', () => this.showToast('You are back online!', 'success'));
+                    window.addEventListener('offline', () => this.showToast('You are offline. Maps may not work.', 'warning'));
+                }
+
                 try {
                     await this.loadAllData(); // Load data from Firestore
                     
@@ -2702,14 +2710,6 @@
 
                     this.setupUI();
                     this.renderAll();
-                    
-                    if (!this.listenersAttached) {
-                        this.setupEventListeners();
-                        this.setupSessionTracking();
-                        this.listenersAttached = true;
-                        window.addEventListener('online', () => this.showToast('You are back online!', 'success'));
-                        window.addEventListener('offline', () => this.showToast('You are offline. Maps may not work.', 'warning'));
-                    }
 
                     setTimeout(() => {
                         this.showLoading(false);
@@ -2785,11 +2785,8 @@
                             this.state.feedEntries = [...this.state.feedEntries, ...chunkEntries];
                             
                             // Re-render parts of the UI that depend on feed entries
-                            if (this.initialized) {
-                                this.renderLogBook();
-                                this.checkPendingTrays();
-                                // this.renderOverallStats(); // Removed for MVP
-                            }
+                            this.renderLogBook();
+                            this.checkPendingTrays();
                         }, error => {
                             console.error("Error with feed entries listener: ", error);
                         });
