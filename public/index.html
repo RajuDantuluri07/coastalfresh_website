@@ -4173,44 +4173,45 @@
             }
 
             async saveFeedRound() { 
+                const functions = firebase.functions();
+                const createFeedRound = functions.httpsCallable('createFeedRound');
+
                 const inputs = document.querySelectorAll('.feed-round-input');
                 let totalAmount = 0;
                 
-                // Get selected supplements for this round
                 const supplements = Array.from(document.querySelectorAll('#roundSupplements .supplement-option.selected'))
                     .map(el => el.textContent.trim());
                 
-                const batch = this.db.batch();
                 let entriesToAdd = [];
 
                 inputs.forEach(input => {
                     const amount = parseFloat(input.value);
                     if (amount > 0) {
                         const tankId = input.dataset.tankId;
-                        const tank = this.getTankById(tankId);
-                        
-                        // Use Firestore auto-ID to prevent collisions
-                        const docRef = this.db.collection('feedEntries').doc();
                         
                         const newEntry = {
-                            id: docRef.id,
                             tankId,
-                            farmId: tank.farmId,
-                            date: this.currentDate,
-                            time: new Date().toLocaleTimeString(),
                             amount,
-                            trayResult: 'pending', // Mark as pending check
-                            supplements: supplements
+                            supplements
                         };
                         
-                        batch.set(docRef, newEntry);
                         entriesToAdd.push(newEntry);
                         totalAmount += amount;
                     }
                 });
 
                 if (this.isGuest) {
-                    entriesToAdd.forEach(e => this.state.feedEntries.push(e));
+                    entriesToAdd.forEach(e => {
+                        const tank = this.getTankById(e.tankId);
+                        this.state.feedEntries.push({
+                            id: Date.now().toString(),
+                            ...e,
+                            farmId: tank.farmId,
+                            date: this.currentDate,
+                            time: new Date().toLocaleTimeString(),
+                            trayResult: 'pending',
+                        })
+                    });
                     this.saveGuestData();
                     this.renderLogBook();
                     this.closeAllModals();
@@ -4221,12 +4222,18 @@
                 if (entriesToAdd.length > 0) {
                     this.showLoading(true);
                     
-                    await batch.commit();
+                    const promises = entriesToAdd.map(entry => createFeedRound(entry));
 
-                    this.closeAllModals();
-                    // No need to call renderAll() here, the onSnapshot listener will handle UI updates.
-                    this.showLoading(false);
-                    this.showToast(`Saved ${entriesToAdd.length} feed entries. Check trays in 2 hours!`);
+                    try {
+                        await Promise.all(promises);
+                        this.closeAllModals();
+                        this.showLoading(false);
+                        this.showToast(`Saved ${entriesToAdd.length} feed entries. Check trays in 2 hours!`);
+                    } catch (error) {
+                        this.showLoading(false);
+                        this.showToast(`Error saving feed entries: ${error.message}`, 'error');
+                    }
+                    
                 } else {
                     this.showToast('No feed amounts entered', 'error');
                 }
@@ -4571,18 +4578,20 @@
                 this.db.collection('tanks').doc(tankId).update({ biomass: tank.biomass });
             }
 
-            // CRUD Operations
             async saveFarm() {
+                const functions = firebase.functions();
+                const createFarm = functions.httpsCallable('createFarm');
+                const deleteFarmFunc = functions.httpsCallable('deleteFarm');
+
                 try {
                     this.showLoading(true);
-                    
+
                     if (!this.currentUser) throw new Error("User not logged in");
 
                     const name = document.getElementById('farmNameInput').value;
                     const location = document.getElementById('farmLocation').value;
                     const contact = document.getElementById('farmContact').value;
                     const phone = document.getElementById('farmPhone').value;
-                    const ownerId = this.currentUser.uid;
 
                     if (!name) {
                         this.showLoading(false);
@@ -4597,48 +4606,49 @@
                             farm.location = location;
                             farm.contact = contact;
                             farm.phone = phone;
+                            
+                            // NOTE: We need an 'updateFarm' function for this to be secure.
+                            // For now, we'll continue to use the client-side SDK for updates.
                             if (!this.isGuest) await this.db.collection('farms').doc(farm.id).set(farm, { merge: true });
                             this.showToast('Farm updated successfully');
                         }
                     } else {
-                        let newId;
-                        if (this.isGuest) newId = Date.now().toString();
-                        else newId = this.db.collection('farms').doc().id;
-
-                        const newFarm = {
-                            id: newId,
+                        const newFarmData = {
                             name,
-                            ownerId,
-                            memberIds: [ownerId],
-                            members: { [ownerId]: 'owner' },
                             location,
                             contact,
                             phone,
+                        };
+
+                        const result = await createFarm(newFarmData);
+
+                        const newFarm = {
+                            id: result.data.id,
+                            ...newFarmData,
+                            ownerId: this.currentUser.uid,
+                            memberIds: [this.currentUser.uid],
+                            members: { [this.currentUser.uid]: 'owner' },
                             created: new Date().toISOString()
                         };
 
-                        if (!this.isGuest) await this.db.collection('farms').doc(newFarm.id).set(newFarm);
-                        
-                        // Safe push
                         if (!this.state.farms) this.state.farms = [];
                         this.state.farms.push(newFarm);
-                        
+
                         this.state.settings.currentFarmId = newFarm.id;
                         await this.saveSettings();
-                        
+
                         if (!this.isGuest) this.setupFeedListener();
 
                         this.showToast('Farm added successfully');
                     }
-                    
+
                     if (this.isGuest) {
                         this.saveGuestData();
                     }
 
                     this.renderAll();
                     this.closeAllModals();
-                    
-                    // Clear inputs
+
                     document.getElementById('farmNameInput').value = '';
                     document.getElementById('farmLocation').value = '';
                     document.getElementById('farmContact').value = '';
@@ -4654,45 +4664,32 @@
 
             async deleteFarm(id) {
                 const farmId = String(id);
+                const functions = firebase.functions();
+                const deleteFarmFunc = functions.httpsCallable('deleteFarm');
 
-                // SECURITY: Require user to type farm name to confirm deletion
                 const farm = this.getFarmById(farmId);
                 const confirmName = prompt(`⚠️ DANGER ZONE ⚠️\n\nTo permanently delete "${farm.name}" and ALL associated data (tanks, logs, expenses, etc.), type the farm name below:\n\nThis action cannot be undone.`);
-                
+
                 if (confirmName !== farm.name) {
                     this.showToast('Farm name did not match. Deletion cancelled.', 'info');
                     return;
                 }
 
                 this.showLoading(true);
-                
+
                 try {
-                    // 1. Delete all associated sub-data collections
-                    // We query by farmId to ensure we catch everything
-                    const collections = [
-                        'feedEntries', 'invitations'
-                    ];
-
-                    await Promise.all(collections.map(col => 
-                        this.deleteCollectionByQuery(this.db.collection(col).where('farmId', '==', farmId))
-                    ));
-
-                    // 2. Delete Tanks
-                    await this.deleteCollectionByQuery(this.db.collection('tanks').where('farmId', '==', farmId));
-
-                    // 4. Delete Farm Document
-                    await this.db.collection('farms').doc(farmId).delete();
+                    await deleteFarmFunc({ farmId });
 
                     // 5. Update Local State
                     this.state.farms = this.state.farms.filter(f => f.id !== farmId);
                     this.state.tanks = this.state.tanks.filter(t => t.farmId !== farmId);
-                    
+
                     // Check if the deleted farm was the current one
                     if (this.state.settings.currentFarmId === farmId) {
                         this.state.settings.currentFarmId = this.state.farms.length > 0 ? this.state.farms[0].id : null;
                         await this.saveSettings();
                     }
-                    
+
                     // Refresh listeners and data
                     this.detachFirestoreListeners();
                     await this.loadAllData();
@@ -4710,6 +4707,9 @@
             }
 
             async saveTank() {
+                const functions = firebase.functions();
+                const createTank = functions.httpsCallable('createTank');
+
                 const farmId = document.getElementById('tankFarmSelect').value;
                 const name = document.getElementById('tankNameInput').value;
                 const size = parseFloat(document.getElementById('tankSize').value);
@@ -4734,12 +4734,13 @@
                             tank.stockingDate = stockingDate;
                             tank.initialSeed = initialSeed;
                             tank.checkTrays = checkTrays;
+                            // NOTE: We need an 'updateTank' function for this to be secure.
+                            // For now, we'll continue to use the client-side SDK for updates.
                             if (!this.isGuest) await this.db.collection('tanks').doc(tank.id).set(tank, { merge: true });
                             this.showToast('Tank updated successfully');
                         }
                     } else {
-                        const newTank = {
-                            id: Date.now().toString(),
+                        const newTankData = {
                             farmId,
                             name,
                             size,
@@ -4747,11 +4748,18 @@
                             stockingDate: stockingDate || this.currentDate,
                             initialSeed: initialSeed || 0,
                             checkTrays,
-                            biomass: 0, // Initial biomass
+                            biomass: 0,
                             nextSuggestedFeed: null,
                             status: 'active'
                         };
-                        if (!this.isGuest) await this.db.collection('tanks').doc(newTank.id).set(newTank);
+
+                        const result = await createTank(newTankData);
+                        
+                        const newTank = {
+                            id: result.data.id,
+                            ...newTankData
+                        };
+
                         this.state.tanks.push(newTank);
                         this.showToast('Tank added successfully');
                     }
