@@ -77,9 +77,13 @@
     </div>
 
     <script>
+        // Wrap in IIFE to prevent global access to admin functions from console
+        (function() {
         // Initialize Firestore
         const db = firebase.firestore();
         let currentPrices = [];
+        let lastUserDoc = null;
+        const USERS_PER_PAGE = 20;
 
         // Listen for authentication state changes
         firebase.auth().onAuthStateChanged(async (user) => {
@@ -115,47 +119,8 @@
                 }
                 renderPriceEditor();
 
-                // 2. Load Farmers, Farms, Tanks
-                const farmersSnap = await db.collection('users').get(); // Assuming users collection holds profiles
-                const farmsSnap = await db.collection('farms').get();
-                const tanksSnap = await db.collection('tanks').get();
-
-                const farms = farmsSnap.docs.map(d => ({id: d.id, ...d.data()}));
-                const tanks = tanksSnap.docs.map(d => ({id: d.id, ...d.data()}));
-
-                const farmersList = document.getElementById('farmers-list');
-                farmersList.innerHTML = '';
-
-                farmersSnap.forEach(doc => {
-                    const farmer = doc.data();
-                    const farmerFarms = farms.filter(f => f.ownerId === doc.id);
-                    
-                    let farmsHTML = '';
-                    farmerFarms.forEach(f => {
-                        const fTanks = tanks.filter(t => t.farmId === f.id);
-                        farmsHTML += `
-                            <div class="farm-tag">
-                                <i class="fas fa-tractor"></i> ${f.name} (${f.location || 'No Loc'})
-                                <br>
-                                ${fTanks.map(t => `<span class="tank-tag">${t.name}</span>`).join('')}
-                            </div>
-                        `;
-                    });
-
-                    const div = document.createElement('div');
-                    div.className = 'farmer-item';
-                    div.innerHTML = `
-                        <div class="farmer-header" onclick="this.nextElementSibling.classList.toggle('show')">
-                            <span>${farmer.name || 'Unknown'}</span>
-                            <span style="color:#666; font-weight:400;">${farmer.phone || ''} <i class="fas fa-chevron-down"></i></span>
-                        </div>
-                        <div class="farmer-details">
-                            <p style="margin:5px 0; font-size:13px; color:#666;">Role: ${farmer.role || 'Farmer'}</p>
-                            ${farmsHTML || '<div style="font-size:12px; color:#999;">No farms added yet</div>'}
-                        </div>
-                    `;
-                    farmersList.appendChild(div);
-                });
+                // 2. Load Farmers (Paginated)
+                await loadMoreFarmers(true);
 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('dashboard-content').style.display = 'grid';
@@ -163,6 +128,97 @@
             } catch (error) {
                 console.error("Error loading dashboard:", error);
                 alert("Error loading data. Check console.");
+            }
+        }
+
+        async function loadMoreFarmers(reset = false) {
+            const list = document.getElementById('farmers-list');
+            if (reset) {
+                list.innerHTML = '';
+                lastUserDoc = null;
+            }
+
+            let query = db.collection('users').limit(USERS_PER_PAGE);
+            if (lastUserDoc) {
+                query = query.startAfter(lastUserDoc);
+            }
+
+            const snapshot = await query.get();
+            if (!snapshot.empty) {
+                lastUserDoc = snapshot.docs[snapshot.docs.length - 1];
+                snapshot.forEach(doc => renderFarmerRow(doc));
+                
+                // Add/Update Load More Button
+                let btn = document.getElementById('load-more-btn');
+                if (!btn) {
+                    btn = document.createElement('button');
+                    btn.id = 'load-more-btn';
+                    btn.innerText = 'Load More Farmers';
+                    btn.style.width = '100%';
+                    btn.style.marginTop = '15px';
+                    btn.onclick = () => loadMoreFarmers();
+                    list.parentNode.appendChild(btn);
+                }
+                
+                if (snapshot.docs.length < USERS_PER_PAGE) btn.style.display = 'none';
+            }
+        }
+
+        function renderFarmerRow(doc) {
+            const farmer = doc.data();
+            const div = document.createElement('div');
+            div.className = 'farmer-item';
+            div.innerHTML = `
+                <div class="farmer-header" onclick="toggleFarmerDetails('${doc.id}')">
+                    <span>${farmer.name || 'Unknown'}</span>
+                    <span style="color:#666; font-weight:400;">${farmer.phone || ''} <i class="fas fa-chevron-down"></i></span>
+                </div>
+                <div class="farmer-details" id="details-${doc.id}">
+                    <p style="margin:5px 0; font-size:13px; color:#666;">Role: ${farmer.role || 'Farmer'}</p>
+                    <div class="farms-container-mini">Loading...</div>
+                </div>
+            `;
+            document.getElementById('farmers-list').appendChild(div);
+        }
+
+        async function toggleFarmerDetails(userId) {
+            const detailsDiv = document.getElementById(`details-${userId}`);
+            detailsDiv.classList.toggle('show');
+            
+            if (detailsDiv.classList.contains('show') && !detailsDiv.dataset.loaded) {
+                const container = detailsDiv.querySelector('.farms-container-mini');
+                try {
+                    const farmsSnap = await db.collection('farms').where('ownerId', '==', userId).get();
+                    if (farmsSnap.empty) {
+                        container.innerHTML = '<div style="font-size:12px; color:#999;">No farms added yet</div>';
+                    } else {
+                        const farms = farmsSnap.docs.map(d => ({id: d.id, ...d.data()}));
+                        const farmIds = farms.map(f => f.id);
+                        
+                        // Batch fetch tanks to reduce reads (chunks of 10)
+                        let allTanks = [];
+                        for (let i = 0; i < farmIds.length; i += 10) {
+                            const chunk = farmIds.slice(i, i + 10);
+                            const snap = await db.collection('tanks').where('farmId', 'in', chunk).get();
+                            allTanks = [...allTanks, ...snap.docs.map(d => d.data())];
+                        }
+
+                        const html = farms.map(farm => {
+                            const fTanks = allTanks.filter(t => t.farmId === farm.id);
+                            return `
+                                <div class="farm-tag">
+                                    <i class="fas fa-tractor"></i> ${farm.name}
+                                    <br>
+                                    ${fTanks.map(t => `<span class="tank-tag">${t.name}</span>`).join('')}
+                                </div>
+                            `;
+                        }).join('');
+                        container.innerHTML = html;
+                    }
+                    detailsDiv.dataset.loaded = 'true';
+                } catch (e) {
+                    container.innerHTML = 'Error loading details';
+                }
             }
         }
 
@@ -201,11 +257,12 @@
             }
         }
 
-        function logout() {
+        window.logout = function() {
             firebase.auth().signOut().then(() => {
                 window.location.href = "/index.html";
             });
         }
+        })();
     </script>
 </body>
 </html>

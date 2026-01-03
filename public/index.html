@@ -1677,6 +1677,14 @@
             margin-bottom: 16px;
             gap: 10px;
         }
+        .search-bar {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 13px;
+            width: 100%;
+            max-width: 200px;
+        }
         .tank-section-header {
             background: #e3f2fd;
             padding: 10px 14px;
@@ -1830,7 +1838,7 @@
         /* ===== FEED ROUND STYLES ===== */
         .feed-round-row {
             display: grid;
-            grid-template-columns: 1.2fr 0.8fr 1fr 1.2fr;
+            grid-template-columns: 1.2fr 1fr 0.8fr 1.2fr;
             gap: 8px;
             padding: 12px 8px;
             border-bottom: 1px solid var(--border);
@@ -2899,6 +2907,10 @@
                         <option value="6">6 Feeds</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Standard FCR (for Biomass Est.)</label>
+                    <input type="number" id="settingTargetFCR" class="form-control" step="0.1" min="0.5" max="3.0" onchange="app.updateTargetFCR(this.value)">
+                </div>
                 <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
                 <h4 style="margin-bottom: 12px; color: var(--dark);">Manage Supplements</h4>
                 <div class="form-group" style="display: flex; gap: 8px;">
@@ -3047,7 +3059,13 @@
                 </div>
                 <div class="form-group">
                     <label>Size (acres)</label>
-                    <input type="number" id="tankSize" class="form-control" placeholder="e.g., 1.5" step="0.1" min="0.1">
+                    <div style="display: flex; gap: 8px;">
+                        <input type="number" id="tankSize" class="form-control" placeholder="e.g., 1.5" step="0.1" min="0.1">
+                        <select id="tankSizeUnit" class="form-control" style="width: 100px;">
+                            <option value="acres">Acres</option>
+                            <option value="hectares">Hectares</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Number of Check Trays</label>
@@ -3160,6 +3178,14 @@
                         <datalist id="supplementList">
                             <!-- Populated by JS -->
                         </datalist>
+                    </div>
+                    <div class="form-group">
+                        <label>Action</label>
+                        <select id="medAction" class="form-control">
+                            <option value="add">Add (Purchase)</option>
+                            <option value="remove">Remove (Correction)</option>
+                            <option value="set">Set Total (Audit)</option>
+                        </select>
                     </div>
                     <div class="form-row" style="margin-bottom: 0;">
                         <div class="form-group">
@@ -3402,6 +3428,7 @@
                 this.taskFilter = 'all'; // all, pending, completed
                 this.logViewType = 'matrix'; // 'matrix' or 'list'
                 this.tempTrayResult = null; // Temporary storage for single tray update
+                this.logSearchQuery = ''; // Search query for log book
                 this.listenersAttached = false; // Prevent duplicate listeners
                 
                 this.pendingInviteId = new URLSearchParams(window.location.search).get('invite');
@@ -3435,7 +3462,8 @@
                         logView: 'detailed', // or 'summary'
                         supplements: ['Gut Probiotic', 'Gill Health', 'Growth Booster', 'Vitamin C', 'Mineral Mix', 'Binder'],
                         feedsPerDay: 4,
-                        feedTypes: ['Pellet 1.0mm', 'Pellet 1.2mm', 'Pellet 1.4mm', 'Pellet 1.6mm', 'Pellet 2.0mm']
+                        feedTypes: ['Pellet 1.0mm', 'Pellet 1.2mm', 'Pellet 1.4mm', 'Pellet 1.6mm', 'Pellet 2.0mm'],
+                        targetFCR: 1.2
                     }
                 };
                 return this.state;
@@ -3541,6 +3569,7 @@
             handleGuestLogin() {
                 this.currentUser = { uid: 'guest', name: 'Guest Farmer', role: 'owner', isPro: true };
                 document.getElementById('authContainer').style.display = 'none';
+                alert("⚠️ GUEST MODE WARNING ⚠️\n\nData is stored locally in your browser. Clearing cache or history will permanently delete your farm data.\n\nPlease sign up to save data to the cloud.");
                 this.showToast('Welcome Guest! You are in demo mode.', 'info');
                 this.completeAppInitialization();
             }
@@ -3595,7 +3624,7 @@
                     collections.forEach(map => {
                         if (data[map.key]) {
                             data[map.key].forEach(item => {
-                                batch.set(this.db.collection(map.col).doc(item.id.toString()), item);
+                                batch.set(this.db.collection(map.col).doc(item.id.toString()), item, { merge: true });
                             });
                         }
                     });
@@ -3603,7 +3632,7 @@
                     // 3. Inventory
                     if (data.inventory && data.farms && data.farms.length > 0) {
                         const farmId = data.farms[0].id;
-                        batch.set(this.db.collection('inventory').doc(farmId), data.inventory);
+                        batch.set(this.db.collection('inventory').doc(farmId), data.inventory, { merge: true });
                     }
 
                     await batch.commit();
@@ -3696,24 +3725,33 @@
 
                 const farmIds = this.state.farms.map(f => f.id);
                 if (farmIds.length > 0) {
-                    // For MVP stability, listen to first 10 farms only to avoid 'in' query limit in onSnapshot
-                    const listenerFarmIds = farmIds.slice(0, 10);
-                    const feedEntriesQuery = this.db.collection('feedEntries').where('farmId', 'in', listenerFarmIds);
-                    const feedListener = feedEntriesQuery.onSnapshot(querySnapshot => {
-                        console.log("Real-time: Received feed entries update.");
-                        this.state.feedEntries = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                        
-                        // Re-render parts of the UI that depend on feed entries
-                        if (this.initialized) {
-                            this.renderLogBook();
-                            this.checkPendingTrays();
-                            this.renderOverallStats();
-                            this.renderFeedTrendChart();
-                        }
-                    }, error => {
-                        console.error("Error with feed entries listener: ", error);
+                    // Chunk farmIds into groups of 10 to handle Firestore 'in' query limit
+                    const chunks = [];
+                    for (let i = 0; i < farmIds.length; i += 10) {
+                        chunks.push(farmIds.slice(i, i + 10));
+                    }
+
+                    chunks.forEach(chunk => {
+                        const feedEntriesQuery = this.db.collection('feedEntries').where('farmId', 'in', chunk);
+                        const feedListener = feedEntriesQuery.onSnapshot(querySnapshot => {
+                            const chunkEntries = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                            
+                            // Update state: remove old entries for this chunk's farms, add new ones
+                            this.state.feedEntries = this.state.feedEntries.filter(e => !chunk.includes(e.farmId));
+                            this.state.feedEntries = [...this.state.feedEntries, ...chunkEntries];
+                            
+                            // Re-render parts of the UI that depend on feed entries
+                            if (this.initialized) {
+                                this.renderLogBook();
+                                this.checkPendingTrays();
+                                this.renderOverallStats();
+                                this.renderFeedTrendChart();
+                            }
+                        }, error => {
+                            console.error("Error with feed entries listener: ", error);
+                        });
+                        this.firestoreListeners.push(feedListener);
                     });
-                    this.firestoreListeners.push(feedListener);
                 }
             }
 
@@ -3786,7 +3824,10 @@
                 if (this.currentUser.settings) {
                     this.state.settings = { ...this.state.settings, ...this.currentUser.settings };
                 }
-
+                // Ensure targetFCR is initialized to prevent biomass calc errors
+                if (!this.state.settings.targetFCR) {
+                    this.state.settings.targetFCR = 1.2;
+                }
                 // Fetch Market Prices from Firestore
                 try {
                     const pricesDoc = await this.db.collection('marketPrices').doc('current').get();
@@ -4006,30 +4047,43 @@
             initWeather() {
                 const weatherWidget = document.getElementById('weatherWidget');
                 if (!weatherWidget) return;
+                
+                const fetchWeather = async (lat, lng, locationName) => {
+                    try {
+                        // Using Open-Meteo (Free, no API key required)
+                        const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
+                        const data = await response.json();
+                        
+                        if (data.current_weather) {
+                            this.currentWeatherCode = data.current_weather.weathercode;
+                            document.getElementById('weatherTemp').textContent = `${Math.round(data.current_weather.temperature)}°`;
+                            document.getElementById('weatherCondition').textContent = this.getWeatherCondition(data.current_weather.weathercode);
+                            document.getElementById('weatherLoc').textContent = locationName;
+                            document.getElementById('weatherAdvice').innerHTML = `<i class="fas fa-info-circle"></i> ${this.getWeatherAdvice(data.current_weather.weathercode)}`;
+                            weatherWidget.style.display = 'flex';
+                        }
+                    } catch (e) {
+                        console.error("Weather fetch failed", e);
+                    }
+                };
+
+                const useFarmLocation = () => {
+                    const currentFarmId = this.state.settings.currentFarmId;
+                    const farm = this.getFarmById(currentFarmId);
+                    if (farm && farm.lat && farm.lng) {
+                        fetchWeather(farm.lat, farm.lng, farm.name);
+                    }
+                };
 
                 if ("geolocation" in navigator) {
                     navigator.geolocation.getCurrentPosition(async (position) => {
-                        try {
-                            const lat = position.coords.latitude;
-                            const lon = position.coords.longitude;
-                            // Using Open-Meteo (Free, no API key required)
-                            const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-                            const data = await response.json();
-                            
-                            if (data.current_weather) {
-                                this.currentWeatherCode = data.current_weather.weathercode;
-                                document.getElementById('weatherTemp').textContent = `${Math.round(data.current_weather.temperature)}°`;
-                                document.getElementById('weatherCondition').textContent = this.getWeatherCondition(data.current_weather.weathercode);
-                                document.getElementById('weatherLoc').textContent = "Local Farm";
-                                document.getElementById('weatherAdvice').innerHTML = `<i class="fas fa-info-circle"></i> ${this.getWeatherAdvice(data.current_weather.weathercode)}`;
-                                weatherWidget.style.display = 'flex';
-                            }
-                        } catch (e) {
-                            console.error("Weather fetch failed", e);
-                        }
+                        fetchWeather(position.coords.latitude, position.coords.longitude, "Local Farm");
                     }, (err) => {
                         console.log("Geolocation denied or error", err);
+                        useFarmLocation();
                     });
+                } else {
+                    useFarmLocation();
                 }
             }
 
@@ -4128,7 +4182,8 @@
                         entriesToSum = entriesToSum.filter(e => farmTankIds.some(id => id == e.tankId));
                     }
 
-                    const dayFeed = entriesToSum.reduce((sum, e) => sum + e.amount, 0);
+                    // Use null if no entries exist to show gap, otherwise sum (even if 0)
+                    const dayFeed = entriesToSum.length > 0 ? entriesToSum.reduce((sum, e) => sum + e.amount, 0) : null;
                     dataPoints.push(dayFeed);
                 }
 
@@ -4349,6 +4404,18 @@
             }
 
             renderLogBook() {
+                // Fix: Restore table structure if it was wiped by List View
+                const logContainer = document.querySelector('.log-table-container');
+                if (!document.getElementById('logTable')) {
+                    logContainer.innerHTML = `
+                        <table class="log-table" id="logTable">
+                            <thead></thead>
+                            <tbody id="logTableBody"></tbody>
+                            <tfoot id="logTableFoot"></tfoot>
+                        </table>
+                    `;
+                }
+
                 const tableHead = document.querySelector('#logTable thead');
                 const tableBody = document.getElementById('logTableBody');
                 const tableFoot = document.getElementById('logTableFoot');
@@ -4358,6 +4425,21 @@
 
                 // Update Toggle Button Text
                 if (toggleBtn) toggleBtn.innerHTML = this.logViewType === 'matrix' ? '<i class="fas fa-list"></i>' : '<i class="fas fa-th"></i>';
+
+                // Add Search Bar if not present
+                if (!document.getElementById('logSearchBar')) {
+                    const toolbar = document.querySelector('.log-toolbar');
+                    const searchInput = document.createElement('input');
+                    searchInput.id = 'logSearchBar';
+                    searchInput.type = 'text';
+                    searchInput.placeholder = 'Search Tank...';
+                    searchInput.className = 'search-bar';
+                    searchInput.onkeyup = (e) => {
+                        this.logSearchQuery = e.target.value.toLowerCase();
+                        this.renderLogBook();
+                    };
+                    toolbar.insertBefore(searchInput, toolbar.firstChild);
+                }
 
                 // Generate Feed Labels
                 let feedLabels = [];
@@ -4382,6 +4464,11 @@
                 let tanksToShow = this.state.tanks.filter(t => t.status !== 'inactive');
                 if (this.state.settings.currentFarmId) {
                     tanksToShow = this.state.tanks.filter(t => t.farmId === this.state.settings.currentFarmId);
+                }
+
+                // Apply Search Filter
+                if (this.logSearchQuery) {
+                    tanksToShow = tanksToShow.filter(t => t.name.toLowerCase().includes(this.logSearchQuery));
                 }
 
                 if (tanksToShow.length === 0) {
@@ -4717,11 +4804,8 @@
             }
 
             checkPendingTrays() {
-                const currentFarmId = this.state.settings.currentFarmId;
-                if (!currentFarmId) return;
-                
-                const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId).map(t => t.id);
-                const pending = this.state.feedEntries.filter(e => farmTanks.includes(String(e.tankId)) && e.trayResult === 'pending');
+                // Check all feed entries for pending status, regardless of current farm view
+                const pending = this.state.feedEntries.filter(e => e.trayResult === 'pending');
                 
                 const banner = document.getElementById('pendingChecksBanner');
                 if (banner) banner.style.display = pending.length > 0 ? 'flex' : 'none';
@@ -4815,44 +4899,52 @@
 
             // ===== SESSION TRACKING =====
             setupSessionTracking() {
-                const update = () => {
-                    const now = Date.now();
-                    const last = localStorage.getItem('aquabook_last_activity');
-                    const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+                try {
+                    const update = () => {
+                        const now = Date.now();
+                        const last = localStorage.getItem('aquabook_last_activity');
+                        const thirtyDays = 30 * 24 * 60 * 60 * 1000;
 
-                    // Check if session expired while app was open
-                    if (last && (now - parseInt(last) > thirtyDays)) {
-                        if (this.currentUser) {
-                            this.auth.signOut();
-                            this.showToast("Session expired due to inactivity.", "warning");
+                        // Check if session expired while app was open
+                        if (last && (now - parseInt(last) > thirtyDays)) {
+                            if (this.currentUser) {
+                                this.auth.signOut();
+                                this.showToast("Session expired due to inactivity.", "warning");
+                            }
+                            return;
                         }
-                        return;
-                    }
 
-                    // Throttle updates to once per minute
-                    if (!this.lastActivityUpdate || (now - this.lastActivityUpdate > 60000)) {
+                        // Throttle updates to once per minute
+                        if (!this.lastActivityUpdate || (now - this.lastActivityUpdate > 60000)) {
+                            localStorage.setItem('aquabook_last_activity', now.toString());
+                            this.lastActivityUpdate = now;
+                        }
+                    };
+                    
+                    ['click', 'touchstart', 'keydown', 'scroll'].forEach(evt => 
+                        document.addEventListener(evt, update, { passive: true })
+                    );
+                    
+                    // Initialize if missing
+                    if (!localStorage.getItem('aquabook_last_activity')) {
                         localStorage.setItem('aquabook_last_activity', now.toString());
-                        this.lastActivityUpdate = now;
                     }
-                };
-                
-                ['click', 'touchstart', 'keydown', 'scroll'].forEach(evt => 
-                    document.addEventListener(evt, update, { passive: true })
-                );
-                
-                // Initialize if missing
-                if (!localStorage.getItem('aquabook_last_activity')) {
-                    localStorage.setItem('aquabook_last_activity', Date.now().toString());
+                } catch (e) {
+                    console.warn("Session tracking disabled: localStorage not available", e);
                 }
             }
 
             // ===== UTILITY FUNCTIONS =====
             getFormattedDate(date = new Date()) {
-                const d = date instanceof Date ? date : new Date(date);
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
+                // Fix: Force 'Asia/Kolkata' timezone to prevent logs appearing on wrong day
+                // when user is in a different timezone. 'en-CA' outputs YYYY-MM-DD.
+                try {
+                    return new Date(date).toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+                } catch (e) {
+                    // Fallback for older browsers
+                    const d = date instanceof Date ? date : new Date(date);
+                    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                }
             }
 
             // ===== MISSING METHODS IMPLEMENTATION =====
@@ -4895,7 +4987,7 @@
 
             updateFarmSelector() {
                 const selector = document.getElementById('currentFarmName');
-                if (this.state.farms.length > 0) {
+                if (this.state.farms && this.state.farms.length > 0) {
                     const currentFarm = this.state.settings.currentFarmId 
                         ? this.state.farms.find(f => f.id === this.state.settings.currentFarmId) 
                         : this.state.farms[0];
@@ -4963,25 +5055,22 @@
                         return;
                     }
 
-                    const inviteDoc = q.docs[0];
-                    const invite = inviteDoc.data();
-
-                    if (confirm(`You have been invited to join "${invite.farmName}" as a ${invite.role}. Accept invitation?`)) {
-                        this.showLoading(true);
-                        
-                        // 1. Update Invitation Status
-                        await this.db.collection('invitations').doc(inviteDoc.id).update({ status: 'accepted' });
-
-                        // 2. Add user to Farm members
-                        const updateData = {};
-                        updateData[`members.${user.uid}`] = invite.role;
-                        updateData['memberIds'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
-                        await this.db.collection('farms').doc(invite.farmId).update(updateData);
-
-                        this.showToast('Invitation accepted!');
-                    } else {
-                        await this.db.collection('invitations').doc(inviteDoc.id).update({ status: 'rejected' });
-                        this.showToast('Invitation declined.');
+                    // Process all invites
+                    for (const inviteDoc of q.docs) {
+                        const invite = inviteDoc.data();
+                        if (confirm(`You have been invited to join "${invite.farmName}" as a ${invite.role}. Accept invitation?`)) {
+                            this.showLoading(true);
+                            // 1. Update Invitation Status
+                            await this.db.collection('invitations').doc(inviteDoc.id).update({ status: 'accepted' });
+                            // 2. Add user to Farm members
+                            const updateData = {};
+                            updateData[`members.${user.uid}`] = invite.role;
+                            updateData['memberIds'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
+                            await this.db.collection('farms').doc(invite.farmId).update(updateData);
+                            this.showToast(`Joined ${invite.farmName} successfully!`);
+                        } else {
+                            await this.db.collection('invitations').doc(inviteDoc.id).update({ status: 'rejected' });
+                        }
                     }
                     this.completeAppInitialization();
                 } catch (e) {
@@ -5250,7 +5339,9 @@
                     this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + addedKg;
                     
                     // Save to Firestore
-                    await this.db.collection('inventory').doc(currentFarmId).set(this.state.inventory, { merge: true });
+                    await this.db.collection('inventory').doc(currentFarmId).set({
+                        totalKg: firebase.firestore.FieldValue.increment(addedKg)
+                    }, { merge: true });
                     
                     this.renderOverallStats();
                     this.closeAllModals();
@@ -5293,9 +5384,10 @@
                 const name = document.getElementById('medName').value.trim();
                 const qty = parseFloat(document.getElementById('medQty').value);
                 const unit = document.getElementById('medUnit').value;
+                const action = document.getElementById('medAction').value;
 
-                if (!name || isNaN(qty)) {
-                    this.showToast('Please enter valid name and quantity', 'error');
+                if (!name || isNaN(qty) || qty < 0) {
+                    this.showToast('Please enter valid name and positive quantity', 'error');
                     return;
                 }
 
@@ -5304,9 +5396,22 @@
 
                 const existing = this.state.medicineInventory.find(i => i.name.toLowerCase() === name.toLowerCase() && i.unit === unit);
                 if (existing) {
-                    existing.quantity += qty;
+                    if (action === 'add') {
+                        existing.quantity += qty;
+                    } else if (action === 'remove') {
+                        existing.quantity = Math.max(0, existing.quantity - qty);
+                    } else if (action === 'set') {
+                        existing.quantity = qty;
+                    }
                     itemToSave = existing;
                 } else {
+                    // Check for unit mismatch
+                    const sameNameDifferentUnit = this.state.medicineInventory.find(i => i.name.toLowerCase() === name.toLowerCase() && i.unit !== unit);
+                    if (sameNameDifferentUnit) {
+                        if (!confirm(`Warning: You already have "${name}" in ${sameNameDifferentUnit.unit}. Do you want to add it as a separate item in ${unit}?`)) {
+                            return;
+                        }
+                    }
                     itemToSave = { id: Date.now().toString(), farmId: currentFarmId, name, quantity: qty, unit };
                     this.state.medicineInventory.push(itemToSave);
                 }
@@ -5321,6 +5426,7 @@
                 // Clear inputs
                 document.getElementById('medName').value = '';
                 document.getElementById('medQty').value = '';
+                document.getElementById('medAction').value = 'add';
             }
 
             async deleteMedicineItem(id) {
@@ -5476,6 +5582,11 @@
                 const list = document.getElementById('feedRoundList');
                 list.innerHTML = '';
 
+                // Calculate Yesterday's Date for context
+                const todayDate = new Date();
+                todayDate.setDate(todayDate.getDate() - 1);
+                const yestDateStr = this.getFormattedDate(todayDate);
+
                 activeTanks.forEach(tank => {
                     // Get last feed info
                     const entries = this.state.feedEntries.filter(e => e.tankId == tank.id).sort((a, b) => b.id - a.id);
@@ -5487,6 +5598,10 @@
                         // Extract HH:MM roughly or use existing string
                         lastTimeStr = ` <span style="font-size:10px; color:var(--gray);">(${lastEntry.time})</span>`;
                     }
+
+                    // Calculate Yesterday's Total
+                    const yestEntries = this.state.feedEntries.filter(e => e.tankId == tank.id && e.date === yestDateStr);
+                    const yestTotal = yestEntries.reduce((sum, e) => sum + e.amount, 0);
 
                     let suggestion = lastAmount;
                     let reason = "Same as last";
@@ -5504,14 +5619,25 @@
                     // Check Tray Grams Suggestion (e.g. 10g per kg)
                     const checkTrayGrams = Math.ceil(suggestion * 10); 
 
+                    // Tray Result Badge
+                    let trayBadge = '';
+                    if (lastEntry && lastEntry.trayResult) {
+                        const tr = lastEntry.trayResult;
+                        let color = tr === 'empty' ? 'green' : tr === 'too-much' ? 'red' : 'orange';
+                        trayBadge = `<span style="font-size:10px; color:${color}; font-weight:600;">[${tr.toUpperCase()}]</span>`;
+                    }
+
                     const row = document.createElement('div');
                     row.className = 'feed-round-row';
                     row.innerHTML = `
                         <div>
                             <div style="font-weight:600;">${tank.name}</div>
-                            <div class="suggestion-text">Tray: ${checkTrayGrams}g</div>
+                            <div class="suggestion-text">Check: ${checkTrayGrams}g</div>
                         </div>
-                        <div style="font-size:12px; color:var(--dark); font-weight:500;">${lastAmount}kg${lastTimeStr}</div>
+                        <div style="font-size:11px; line-height:1.3;">
+                            <div>Last: <b>${lastAmount}</b> ${trayBadge}</div>
+                            <div style="color:var(--gray);">Yest: ${yestTotal.toFixed(1)}kg</div>
+                        </div>
                         <div>
                             <div style="font-weight:600; color:var(--primary); font-size:13px;">${suggestion}</div>
                             <div class="suggestion-text">${reason}</div>
@@ -5540,9 +5666,12 @@
                     if (amount > 0) {
                         const tankId = input.dataset.tankId;
                         const tank = this.getTankById(tankId);
-                        const entryId = (Date.now() + entriesToAdd.length).toString();
+                        
+                        // Use Firestore auto-ID to prevent collisions
+                        const docRef = this.db.collection('feedEntries').doc();
+                        
                         const newEntry = {
-                            id: entryId,
+                            id: docRef.id,
                             tankId,
                             farmId: tank.farmId,
                             date: this.currentDate,
@@ -5552,7 +5681,6 @@
                             supplements: supplements
                         };
                         
-                        const docRef = this.db.collection('feedEntries').doc(entryId);
                         batch.set(docRef, newEntry);
                         entriesToAdd.push(newEntry);
                         totalAmount += amount;
@@ -5562,9 +5690,8 @@
                 // Inventory Check
                 const currentStock = this.state.inventory.totalKg || 0;
                 if (totalAmount > currentStock) {
-                    if (!confirm(`⚠️ Low Inventory Warning\n\nYou are about to feed ${totalAmount.toFixed(1)}kg, but you only have ${currentStock.toFixed(1)}kg in stock.\n\nProceed anyway?`)) {
-                        return;
-                    }
+                    this.showToast(`Insufficient inventory! Available: ${currentStock.toFixed(1)}kg, Required: ${totalAmount.toFixed(1)}kg`, 'error');
+                    return;
                 }
 
                 if (this.isGuest) {
@@ -5580,13 +5707,18 @@
 
                 if (entriesToAdd.length > 0) {
                     this.showLoading(true);
+                    
+                    // Add inventory update to batch for atomicity
+                    if (this.state.settings.currentFarmId) {
+                        const invRef = this.db.collection('inventory').doc(this.state.settings.currentFarmId);
+                        batch.set(invRef, {
+                            totalKg: firebase.firestore.FieldValue.increment(-totalAmount)
+                        }, { merge: true });
+                    }
+
                     await batch.commit();
 
                     this.state.inventory.totalKg = currentStock - totalAmount;
-                    // Update inventory in Firestore
-                    if (this.state.settings.currentFarmId) {
-                        await this.db.collection('inventory').doc(this.state.settings.currentFarmId).set(this.state.inventory, { merge: true });
-                    }
                     
                     this.renderInventorySummary();
                     this.closeAllModals();
@@ -5599,12 +5731,9 @@
             }
 
             openTrayCheckModal() {
-                const currentFarmId = this.state.settings.currentFarmId;
-                const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId).map(t => t.id);
-                
-                // Find pending entries for today (or recent)
+                // Find pending entries for ALL farms (matching the global banner)
                 const pending = this.state.feedEntries
-                    .filter(e => farmTanks.includes(String(e.tankId)) && e.trayResult === 'pending')
+                    .filter(e => e.trayResult === 'pending')
                     .sort((a, b) => b.id - a.id);
 
                 if (pending.length === 0) {
@@ -5624,6 +5753,7 @@
                 
                 pending.forEach(entry => {
                     const tank = this.getTankById(entry.tankId);
+                    const farm = this.getFarmById(tank.farmId);
                     const div = document.createElement('div');
                     div.className = 'feed-schedule-item';
                     div.style.marginBottom = '12px';
@@ -5631,7 +5761,7 @@
                         <div style="display:flex; align-items:center; gap:12px;">
                             <div class="status-icon" style="background:var(--warning); color: white;"><i class="fas fa-clock"></i></div>
                             <div>
-                                <div class="feed-time" style="font-size:16px;">${tank.name}</div>
+                                <div class="feed-time" style="font-size:16px;">${tank.name} <span style="font-size:11px; color:var(--gray); font-weight:400;">(${farm.name})</span></div>
                                 <div class="feed-label">Fed ${entry.amount}kg @ ${entry.time}</div>
                             </div>
                         </div>
@@ -5967,8 +6097,8 @@
                 const tankHarvests = this.state.harvests.filter(h => h.tankId == tankId);
                 const totalHarvested = tankHarvests.reduce((sum, h) => sum + h.weight, 0);
                 
-                // Using standard FCR of 1.2 for estimation
-                const estimatedFCR = 1.2;
+                // Using configured FCR or default to 1.2
+                const estimatedFCR = this.state.settings.targetFCR || 1.2;
                 tank.biomass = Math.max(0, parseFloat(((totalFeed / estimatedFCR) - totalHarvested).toFixed(1)));
                 
                 // Update Firestore
@@ -6024,6 +6154,8 @@
                 const tankId = document.getElementById('waterTankSelect').value;
                 const tank = this.getTankById(tankId);
                 const acre = tank ? tank.size : 1;
+                // Convert to acres if needed for dosage calc (1 hectare = 2.47 acres)
+                const sizeInAcres = (tank && tank.sizeUnit === 'hectares') ? tank.size * 2.47 : acre;
                 
                 const ph = parseFloat(document.getElementById('waterPh').value);
                 const alk = parseFloat(document.getElementById('waterAlk').value);
@@ -6073,7 +6205,7 @@
                 if (!isNaN(mg)) {
                     if (mg < 700) {
                         score -= 25; issues++;
-                        const dose = Math.round(acre * 25);
+                        const dose = Math.round(sizeInAcres * 25);
                         html += createCard("danger", "Magnesium Critical", `Apply MgSO₄: <b>${dose} kg</b>. Split dose morning & evening.`);
                     } else if (mg < 900) {
                         score -= 10; issues++;
@@ -6120,6 +6252,7 @@
                 // Score Display
                 let scoreColor = "var(--success)";
                 let statusMsg = "Excellent Water Quality";
+                score = Math.max(0, score); // Prevent negative score
                 if (score < 80) { scoreColor = "var(--warning)"; statusMsg = "Attention Needed"; }
                 if (score < 60) { scoreColor = "var(--danger)"; statusMsg = "Critical Action Required"; }
 
@@ -6235,7 +6368,7 @@
                 const entries = this.state.waterEntries
                     .filter(e => e.tankId == tankId)
                     .sort((a, b) => new Date(a.date) - new Date(b.date) || a.id - b.id) // Ascending for chart
-                    .slice(-10); // Last 10
+                    .slice(-30); // Increased limit to last 30
 
                 if (entries.length < 2) {
                     container.style.display = 'none';
@@ -6276,7 +6409,7 @@
                         responsive: true,
                         maintainAspectRatio: false,
                         interaction: { mode: 'index', intersect: false },
-                        plugins: { title: { display: true, text: 'Water Quality Trend (Last 10 Tests)' } },
+                        plugins: { title: { display: true, text: 'Water Quality Trend (Last 30 Tests)' } },
                         scales: {
                             y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'pH' }, min: 6, max: 10 },
                             y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Ammonia' }, grid: { drawOnChartArea: false }, min: 0 }
@@ -6306,9 +6439,8 @@
                 const currentFarmId = this.state.settings.currentFarmId;
                 
                 // Set default date
-                if (!document.getElementById('expenseDate').value) {
-                    document.getElementById('expenseDate').value = this.currentDate;
-                }
+                // Always update date to current when rendering to avoid stale dates
+                document.getElementById('expenseDate').value = new Date().toISOString().split('T')[0];
 
                 const farmExpenses = this.state.expenses
                     .filter(e => e.farmId === currentFarmId)
@@ -6426,7 +6558,11 @@
                     document.getElementById('taskDate').value = this.currentDate;
                 }
 
-                let filteredTasks = this.state.tasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+                let filteredTasks = this.state.tasks.sort((a, b) => {
+                    const dateA = a.dueDate ? new Date(a.dueDate) : new Date(8640000000000000); // Push no-date to end
+                    const dateB = b.dueDate ? new Date(b.dueDate) : new Date(8640000000000000);
+                    return dateA - dateB;
+                });
                 
                 if (this.taskFilter === 'pending') filteredTasks = filteredTasks.filter(t => t.status !== 'completed');
                 if (this.taskFilter === 'completed') filteredTasks = filteredTasks.filter(t => t.status === 'completed');
@@ -6485,8 +6621,8 @@
                 const task = this.state.tasks.find(t => t.id === id);
                 if (task) {
                     task.status = task.status === 'completed' ? 'pending' : 'completed';
+                    this.renderTasks(); // Optimistic update
                     await this.db.collection('tasks').doc(id.toString()).update({ status: task.status });
-                    this.renderTasks();
                 }
             }
 
@@ -6579,13 +6715,9 @@
                         this.showToast('Farm updated successfully');
                     }
                 } else {
-                    // ID Generation Strategy for Security Rules:
-                    // Free User -> ID must be their UID (Enforces 1 farm limit)
-                    // Pro User -> Random ID (Unlimited farms)
                     let newId;
                     if (this.isGuest) newId = Date.now().toString();
-                    else if (this.currentUser.isPro) newId = this.db.collection('farms').doc().id;
-                    else newId = this.currentUser.uid;
+                    else newId = this.db.collection('farms').doc().id; // Always use random ID to prevent overwrite
 
                     const newFarm = {
                         id: newId,
@@ -6653,42 +6785,62 @@
             async deleteFarm(id) {
                 const farmId = String(id);
 
-                this.showLoading(true);
-                const batch = this.db.batch();
-
-                // Find tanks to be deleted
-                const tanksToDelete = this.state.tanks.filter(t => t.farmId === farmId);
-                const tankIdsToDelete = tanksToDelete.map(t => t.id);
-
-                // Delete farm document
-                batch.delete(this.db.collection('farms').doc(farmId));
-
-                // Delete tanks
-                tanksToDelete.forEach(t => batch.delete(this.db.collection('tanks').doc(t.id)));
-
-                // Filter out associated data
-                this.state.tanks = this.state.tanks.filter(t => t.farmId !== farmId);
-                this.state.feedEntries = this.state.feedEntries.filter(e => !tankIdsToDelete.includes(e.tankId));
-                this.state.waterEntries = this.state.waterEntries.filter(e => !tankIdsToDelete.includes(e.tankId));
-                this.state.harvests = this.state.harvests.filter(h => !tankIdsToDelete.includes(h.tankId));
-                this.state.expenses = this.state.expenses.filter(e => e.farmId !== farmId);
-
-                // Filter out the farm itself
-                this.state.farms = this.state.farms.filter(f => f.id !== farmId);
+                // SECURITY: Require user to type farm name to confirm deletion
+                const farm = this.getFarmById(farmId);
+                const confirmName = prompt(`SECURITY CHECK:\n\nTo permanently delete "${farm.name}" and all its data, please type the farm name below:`);
                 
-                // Check if the deleted farm was the current one
-                if (this.state.settings.currentFarmId === farmId) {
-                    this.state.settings.currentFarmId = this.state.farms.length > 0 ? this.state.farms[0].id : null;
+                if (confirmName !== farm.name) {
+                    this.showToast('Farm name did not match. Deletion cancelled.', 'info');
+                    return;
                 }
-                
-                // Refresh listeners to stop listening to deleted farm
-                this.detachFirestoreListeners();
-                await this.loadAllData();
 
-                this.showLoading(false);
-                this.renderAll();
-                this.closeAllModals();
-                this.showToast('Farm deleted successfully', 'warning');
+                this.showLoading(true);
+                
+                try {
+                    // 1. Delete all associated sub-data collections
+                    // We query by farmId to ensure we catch everything
+                    const collections = [
+                        'feedEntries', 'waterEntries', 'harvests', 'expenses', 
+                        'sampling', 'tasks', 'medicineInventory', 'medicineApplications'
+                    ];
+
+                    await Promise.all(collections.map(col => 
+                        this.deleteCollectionByQuery(this.db.collection(col).where('farmId', '==', farmId))
+                    ));
+
+                    // 2. Delete Tanks
+                    await this.deleteCollectionByQuery(this.db.collection('tanks').where('farmId', '==', farmId));
+
+                    // 3. Delete Inventory Document
+                    await this.db.collection('inventory').doc(farmId).delete();
+
+                    // 4. Delete Farm Document
+                    await this.db.collection('farms').doc(farmId).delete();
+
+                    // 5. Update Local State
+                    this.state.farms = this.state.farms.filter(f => f.id !== farmId);
+                    this.state.tanks = this.state.tanks.filter(t => t.farmId !== farmId);
+                    
+                    // Check if the deleted farm was the current one
+                    if (this.state.settings.currentFarmId === farmId) {
+                        this.state.settings.currentFarmId = this.state.farms.length > 0 ? this.state.farms[0].id : null;
+                        await this.saveSettings();
+                    }
+                    
+                    // Refresh listeners and data
+                    this.detachFirestoreListeners();
+                    await this.loadAllData();
+
+                    this.showToast('Farm and all data deleted successfully', 'warning');
+
+                } catch (error) {
+                    console.error("Error deleting farm:", error);
+                    this.showToast("Error deleting farm data", "error");
+                } finally {
+                    this.showLoading(false);
+                    this.renderAll();
+                    this.closeAllModals();
+                }
             }
 
             async saveTank() {
@@ -6712,6 +6864,7 @@
                             tank.farmId = farmId;
                             tank.name = name;
                             tank.size = size;
+                            tank.sizeUnit = document.getElementById('tankSizeUnit').value;
                             tank.stockingDate = stockingDate;
                             tank.initialSeed = initialSeed;
                             tank.checkTrays = checkTrays;
@@ -6724,6 +6877,7 @@
                             farmId,
                             name,
                             size,
+                            sizeUnit: document.getElementById('tankSizeUnit').value,
                             stockingDate: stockingDate || this.currentDate,
                             initialSeed: initialSeed || 0,
                             checkTrays,
@@ -6760,6 +6914,7 @@
                 this.openTankModal(tank.farmId);
                 document.getElementById('tankNameInput').value = tank.name;
                 document.getElementById('tankSize').value = tank.size;
+                document.getElementById('tankSizeUnit').value = tank.sizeUnit || 'acres';
                 document.getElementById('stockingDate').value = tank.stockingDate;
                 document.getElementById('initialSeed').value = tank.initialSeed;
                 document.getElementById('tankCheckTrays').value = tank.checkTrays || 2;
@@ -6776,6 +6931,15 @@
             }
 
             async deleteTank(id) {
+                // SECURITY: Require user to type tank name to confirm deletion
+                const tank = this.getTankById(id);
+                const confirmName = prompt(`SECURITY CHECK:\n\nTo permanently delete "${tank.name}", please type the tank name below:`);
+                
+                if (confirmName !== tank.name) {
+                    this.showToast('Tank name did not match. Deletion cancelled.', 'info');
+                    return;
+                }
+
                 this.showLoading(true);
                 const tankId = String(id);
                 
@@ -6886,7 +7050,11 @@
 
                 // Adjust inventory
                 this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) - diff;
-                if (this.state.settings.currentFarmId) await this.db.collection('inventory').doc(this.state.settings.currentFarmId).set(this.state.inventory, { merge: true });
+                if (this.state.settings.currentFarmId) {
+                    await this.db.collection('inventory').doc(this.state.settings.currentFarmId).set({
+                        totalKg: firebase.firestore.FieldValue.increment(-diff)
+                    }, { merge: true });
+                }
 
                 this.recalculateTankBiomass(entry.tankId);
                 this.showLoading(false);
@@ -6909,7 +7077,11 @@
                 
                 // Refund inventory
                 this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + amount;
-                if (this.state.settings.currentFarmId) await this.db.collection('inventory').doc(this.state.settings.currentFarmId).set(this.state.inventory, { merge: true });
+                if (this.state.settings.currentFarmId) {
+                    await this.db.collection('inventory').doc(this.state.settings.currentFarmId).set({
+                        totalKg: firebase.firestore.FieldValue.increment(amount)
+                    }, { merge: true });
+                }
 
                 if (tankId) this.recalculateTankBiomass(tankId);
                 this.closeAllModals();
@@ -7053,6 +7225,7 @@
                 this.renderSettingsSupplements();
                 this.renderSettingsFeedTypes();
                 document.getElementById('settingFeedsPerDay').value = this.state.settings.feedsPerDay || 4;
+                document.getElementById('settingTargetFCR').value = this.state.settings.targetFCR || 1.2;
                 
                 // Guest Sync Button
                 const footer = document.querySelector('#settingsModal .modal-footer');
@@ -7199,41 +7372,52 @@
             async processLinkInvitation(inviteId, user) {
                 try {
                     const docRef = this.db.collection('invitations').doc(inviteId);
-                    const doc = await docRef.get();
                     
-                    if (!doc.exists) {
-                        this.showToast('Invalid invitation link', 'error');
-                        return;
-                    }
-                    
-                    const invite = doc.data();
-                    if (invite.status !== 'pending') {
-                        this.showToast('This invitation has already been used', 'warning');
-                        return;
-                    }
-                    
-                    // Check if already a member
-                    const farmDoc = await this.db.collection('farms').doc(invite.farmId).get();
-                    if (farmDoc.exists) {
-                        const farm = farmDoc.data();
-                        if (farm.memberIds && farm.memberIds.includes(user.uid)) {
-                            return; // Already a member, silently ignore
-                        }
-                    }
+                    // 1. Pre-check (outside transaction) to show UI
+                    const snapshot = await docRef.get();
+                    if (!snapshot.exists) { this.showToast('Invalid invitation link', 'error'); return; }
+                    const inviteData = snapshot.data();
+                    if (inviteData.status !== 'pending') { this.showToast('This invitation has already been used', 'warning'); return; }
 
-                    if (confirm(`Accept invitation to join "${invite.farmName}" as a ${invite.role}?`)) {
-                        this.showLoading(true);
-                        await docRef.update({ status: 'accepted', claimedByUid: user.uid, claimedByName: user.name, claimedAt: new Date().toISOString() });
-                        const updateData = {};
-                        updateData[`members.${user.uid}`] = invite.role;
-                        updateData['memberIds'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
-                        await this.db.collection('farms').doc(invite.farmId).update(updateData);
-                        this.showToast('Joined farm successfully!', 'success');
-                        await this.loadAllData(); // Reload to see new farm
-                    }
+                    if (!confirm(`Accept invitation to join "${inviteData.farmName}" as a ${inviteData.role}?`)) return;
+
+                    this.showLoading(true);
+                    
+                    await this.db.runTransaction(async (transaction) => {
+                        const doc = await transaction.get(docRef);
+                        if (!doc.exists) throw "Invalid link";
+                        
+                        const invite = doc.data();
+                        if (invite.status !== 'pending') throw "Invite already used";
+
+                        // Update Invite
+                        transaction.update(docRef, { 
+                            status: 'accepted', 
+                            claimedByUid: user.uid, 
+                            claimedByName: user.name, 
+                            claimedAt: new Date().toISOString() 
+                        });
+
+                        // Update Farm
+                        const farmRef = this.db.collection('farms').doc(invite.farmId);
+                        const farmDoc = await transaction.get(farmRef);
+                        
+                        if (farmDoc.exists) {
+                            const farm = farmDoc.data();
+                            if (!farm.memberIds || !farm.memberIds.includes(user.uid)) {
+                                const updateData = {};
+                                updateData[`members.${user.uid}`] = invite.role;
+                                updateData['memberIds'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
+                                transaction.update(farmRef, updateData);
+                            }
+                        }
+                    });
+
+                    this.showToast('Joined farm successfully!', 'success');
+                    await this.loadAllData();
                 } catch (e) {
                     console.error("Link Invite Error", e);
-                    this.showToast('Error processing invitation', 'error');
+                    this.showToast(typeof e === 'string' ? e : 'Error processing invitation', 'error');
                 }
                 this.showLoading(false);
             }
@@ -7266,6 +7450,22 @@
                 this.state.settings.feedsPerDay = parseInt(val);
                 this.saveSettings();
                 this.renderLogBook();
+            }
+
+            updateTargetFCR(val) {
+                const fcr = parseFloat(val);
+                if (fcr > 0) {
+                    this.state.settings.targetFCR = fcr;
+                    this.saveSettings();
+                    // Recalculate for all active tanks
+                    this.state.tanks.forEach(tank => {
+                        if (tank.status !== 'inactive') {
+                            this.recalculateTankBiomass(tank.id);
+                        }
+                    });
+                    this.renderOverallStats();
+                    this.showToast('FCR updated & biomass recalculated');
+                }
             }
 
             addNewSupplement() {
@@ -7417,10 +7617,12 @@
                 const calcABW = () => {
                     const w = parseFloat(document.getElementById('sampleWeight').value);
                     const c = parseFloat(document.getElementById('sampleCount').value);
-                    if(w && c) {
+                    if(w > 0 && c > 0) {
                         const abw = (w/c).toFixed(2);
                         document.getElementById('calculatedABW').textContent = `${abw}g`;
                         document.getElementById('abwResultCard').style.display = 'block';
+                    } else {
+                        document.getElementById('abwResultCard').style.display = 'none';
                     }
                 };
                 document.getElementById('sampleWeight').onkeyup = calcABW;
@@ -7439,7 +7641,7 @@
                 const weight = parseFloat(document.getElementById('sampleWeight').value);
                 const count = parseFloat(document.getElementById('sampleCount').value);
 
-                if(!weight || !count) { this.showToast('Invalid input', 'error'); return; }
+                if(isNaN(weight) || weight <= 0 || isNaN(count) || count <= 0) { this.showToast('Please enter valid positive numbers', 'error'); return; }
 
                 const abw = parseFloat((weight/count).toFixed(2));
                 const sample = {
@@ -7677,4 +7879,4 @@
         }
     </script>
 </body>
-</html>
+</html>       
