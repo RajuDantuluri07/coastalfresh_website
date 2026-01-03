@@ -257,6 +257,10 @@
             }
         }
 
+        // Expose functions to global scope so HTML onclick attributes can access them
+        window.toggleFarmerDetails = toggleFarmerDetails;
+        window.saveMarketPrices = saveMarketPrices;
+
         window.logout = function() {
             firebase.auth().signOut().then(() => {
                 window.location.href = "/index.html";

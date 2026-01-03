@@ -1,12 +1,13 @@
-const CACHE_NAME = 'aquabook-v1';
+const CACHE_NAME = 'aquabook-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
+  '/dashboard.html',
   '/manifest.json',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js',
-  'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js',
-  'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js'
+  'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
+  'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js',
+  'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js'
 ];
 
 // Install Event - Cache Assets
