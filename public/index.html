@@ -3577,14 +3577,14 @@
                     const results = await Promise.all(chunks.map(chunk => 
                         this.db.collection(collectionName).where(field, 'in', chunk).get()
                     ));
-        
-        // Fix: Use concat instead of flatMap for better browser compatibility
-        let allDocs = [];
-        results.forEach(snap => {
-            const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            allDocs = allDocs.concat(docs);
-        });
-        return allDocs;
+                    
+                    // Fix: Use concat instead of flatMap for better browser compatibility
+                    let allDocs = [];
+                    results.forEach(snap => {
+                        const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        allDocs = allDocs.concat(docs);
+                    });
+                    return allDocs;
                 };
 
                 // Fetch farms owned by the user
