@@ -157,7 +157,7 @@
         /* ===== NAVIGATION - REDUCED TO 4 TABS ===== */
         .nav-tabs {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             background: white;
             position: fixed;
             bottom: 0;
@@ -171,7 +171,7 @@
 
         @media (max-width: 768px) {
             .nav-tabs {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(2, 1fr);
                 bottom: 0;
             }
         }
@@ -833,169 +833,6 @@
         .tray-btn-large[data-value="empty"].selected i { color: var(--danger); }
         .tray-btn-large[data-value="half"].selected { border-color: var(--success); background: var(--success-light); }
         .tray-btn-large[data-value="half"].selected i { color: var(--success); }
-
-        /* ===== APPLICATIONS - ENHANCED ===== */
-        .applications-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 8px;
-        }
-
-        .application-tab {
-            padding: 10px 20px;
-            border: 2px solid var(--border);
-            border-radius: 20px;
-            background: white;
-            cursor: pointer;
-            transition: var(--transition);
-            white-space: nowrap;
-            font-size: 13px;
-        }
-
-        .application-tab.active {
-            border-color: var(--primary);
-            background: var(--primary);
-            color: white;
-        }
-
-        .applications-grid {
-            display: grid;
-            gap: 16px;
-        }
-
-        .application-card {
-            background: white;
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            padding: 20px;
-            transition: var(--transition);
-        }
-
-        .application-card:hover {
-            border-color: var(--primary);
-            transform: translateX(4px);
-        }
-
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .app-date {
-            color: var(--gray);
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .app-type {
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .app-type.probiotic { background: var(--primary-light); color: var(--primary); }
-        .app-type.mineral { background: var(--warning-light); color: var(--warning); }
-        .app-type.supplement { background: var(--success-light); color: var(--success); }
-        .app-type.medicine { background: var(--danger-light); color: var(--danger); }
-
-        .app-details {
-            display: grid;
-            gap: 8px;
-        }
-
-        .app-product {
-            font-weight: 700;
-            color: var(--dark);
-            font-size: 16px;
-        }
-
-        .app-tank {
-            color: var(--gray);
-            font-size: 13px;
-        }
-
-        .app-remarks {
-            color: var(--gray);
-            font-size: 13px;
-            font-style: italic;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px dashed var(--border);
-        }
-
-        /* ===== PRICES - ENHANCED ===== */
-        .prices-container {
-            background: white;
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-
-        .price-header {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            background: linear-gradient(135deg, var(--light) 0%, var(--border) 100%);
-            padding: 16px;
-            font-weight: 700;
-            color: var(--dark);
-            border-bottom: 2px solid var(--border);
-            font-size: 13px;
-        }
-
-        .price-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-            transition: var(--transition);
-            align-items: center;
-        }
-
-        .price-row:active {
-            background: var(--light);
-        }
-
-        .price-row:last-child {
-            border-bottom: none;
-        }
-
-        .price-count {
-            font-weight: 600;
-            color: var(--dark);
-        }
-
-        .price-value {
-            color: var(--success);
-            font-weight: 700;
-            font-size: 15px;
-        }
-
-        .price-change {
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .price-change.up { color: var(--success); }
-        .price-change.down { color: var(--danger); }
-
-        .price-trend {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 12px;
-        }
-
-        .trend-up { color: var(--success); }
-        .trend-down { color: var(--danger); }
-        .trend-stable { color: var(--gray); }
 
         /* ===== FARM MANAGEMENT ===== */
         .farms-management {
@@ -1915,53 +1752,6 @@
         .tray-radio.status-half.selected { background: #fff8e1; border-color: #ffb300; color: #e65100; }
         .tray-radio.status-full.selected { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
 
-        .observation-chip-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            padding: 10px;
-            background: var(--light);
-            border-radius: var(--radius-sm);
-            margin-bottom: 16px;
-        }
-        .observation-chip {
-            padding: 8px 14px;
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: var(--transition);
-            background: white;
-            color: var(--dark);
-        }
-        .observation-chip.selected {
-            background: var(--primary-light);
-            border-color: var(--primary);
-            color: var(--primary-dark);
-            font-weight: 600;
-        }
-        .observation-chip.critical {
-            border-color: #ffb300; /* Warning color for attention */
-        }
-        .observation-chip.critical.selected {
-            background: var(--danger-light);
-            border-color: var(--danger);
-            color: var(--danger);
-            font-weight: 600;
-        }
-        
-        .risk-badge {
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            display: inline-block;
-            margin-top: 4px;
-        }
-        .risk-normal { background: var(--success-light); color: #2e7d32; }
-        .risk-watch { background: var(--warning-light); color: #ef6c00; }
-        .risk-action { background: var(--danger-light); color: #c62828; }
     </style>
     <style>
         /* ===== NEW AUTH SCREEN STYLES ===== */
@@ -2071,8 +1861,6 @@
     </style>
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Firebase SDKs (v9 compat for easier integration with existing code) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -2119,14 +1907,6 @@
                 <i class="fas fa-book"></i>
                 <span>Log Book</span>
             </button>
-            <button class="nav-btn" data-screen="water">
-                <i class="fas fa-tint"></i>
-                <span>Lab</span>
-            </button>
-            <button class="nav-btn" data-screen="prices">
-                <i class="fas fa-chart-line"></i>
-                <span>Prices</span>
-            </button>
         </nav>
 
         <!-- Screens -->
@@ -2143,186 +1923,14 @@
                     <!-- Farms will be loaded here -->
                 </div>
 
-                <div class="screen-header">
-                    <h2 class="screen-title">
-                        <i class="fas fa-chart-pie"></i>
-                        Overall Farm Summary
-                    </h2>
-                </div>
-
-                <!-- Feed Recommendation -->
-                <div class="feed-recommendation" id="feedRecommendation">
-                    <div class="recommendation-header">
-                        <i class="fas fa-lightbulb"></i>
-                        <h4>Feed Recommendation</h4>
-                    </div>
-                    <div class="recommendation-text" id="recommendationText">
-                        Based on recent feed checks, here's our suggestion:
-                    </div>
-                    <div class="recommendation-action" id="recommendationAction">
-                        Adjust feed as suggested
-                    </div>
-                </div>
-
-                <!-- Overall Stats -->
-                <div class="overall-stats">
-                    <div class="stat-card loading">
-                        <div class="stat-value" id="totalTanks">0</div>
-                        <div class="stat-label">Total Tanks</div>
-                    </div>
-                    <div class="stat-card loading">
-                        <div class="stat-value" id="totalFeed">0 kg</div>
-                        <div class="stat-label">Feed Consumed</div>
-                    </div>
-                    <div class="stat-card loading">
-                        <div class="stat-value" id="avgFCR">0.00</div>
-                        <div class="stat-label">Avrg FCR</div>
-                    </div>
-                    <div class="stat-card loading">
-                        <div class="stat-value" id="totalBiomass">0 kg</div>
-                        <div class="stat-label">Total Biomass</div>
-                    </div>
-                    <div class="stat-card loading">
-                        <div class="stat-value" id="feedToday">0 kg</div>
-                        <div class="stat-label">Feed Today</div>
-                    </div>
-                    <div class="stat-card loading">
-                        <div class="stat-value" id="feedWaste">0%</div>
-                        <div class="stat-label">
-                            Feed Waste % 
-                            <i class="fas fa-info-circle" style="font-size: 11px; margin-left: 4px; color: var(--gray); cursor: help;" title="Percentage of tray checks reported as 'Half' or 'Too Much' (indicating overfeeding)"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Inventory Section -->
-                <div class="screen-header" style="margin-top: 24px;">
-                    <h2 class="screen-title">
-                        <i class="fas fa-boxes"></i>
-                        Inventory
-                    </h2>
-                </div>
-                <div class="overall-stats" style="grid-template-columns: 1fr 1fr;">
-                    <div class="stat-card">
-                        <div class="stat-value" id="displayFeedStock">0 kg</div>
-                        <div class="stat-label">Feed Stock</div>
-                        <button class="btn btn-sm btn-secondary mt-20" onclick="app.openInventoryModal()" style="margin-top: 10px; width: 100%;">
-                            <i class="fas fa-plus"></i> Add Stock
-                        </button>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="displayMedStock">0 Items</div>
-                        <div class="stat-label">Medicine & Minerals</div>
-                        <button class="btn btn-sm btn-secondary mt-20" onclick="app.openMedicineInventoryModal()" style="margin-top: 10px; width: 100%;">
-                            <i class="fas fa-pills"></i> Manage
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Feed Trend Chart -->
-                <div class="chart-container" style="height: 300px; margin-bottom: 24px; background: white; border: 2px solid var(--border); border-radius: var(--radius); padding: 16px;">
-                    <canvas id="feedTrendChart"></canvas>
-                </div>
-
                 <div class="text-center text-muted">
-                    <small>Tap on any tank to view details or edit</small>
+                    <small>Tap on any tank to view details</small>
                     <div style="margin-top: 15px; font-size: 12px; opacity: 0.8; display: flex; align-items: center; justify-content: center; gap: 10px;">
                         <span>With ❤️ - Built by Farmer - Built for Farmers</span>
                         <button class="btn btn-sm btn-primary" onclick="app.shareApp()" style="padding: 4px 10px; border-radius: 20px; font-size: 11px;">
                             <i class="fas fa-share-alt"></i> Share App
                         </button>
                     </div>
-                </div>
-            </section>
-
-            <!-- Water Lab Screen -->
-            <section id="waterScreen" class="screen">
-                <div class="screen-header">
-                    <h2 class="screen-title">
-                        <i class="fas fa-vial"></i>
-                        Water Analysis
-                    </h2>
-                </div>
-                
-                <!-- File Upload (Optional) -->
-                <div class="card" style="padding: 20px; border: 2px dashed var(--border); border-radius: var(--radius); text-align: center; margin-bottom: 20px; background: white;">
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 24px; color: var(--gray); margin-bottom: 10px;"></i>
-                    <p style="font-size: 13px; color: var(--gray); margin-bottom: 10px;">Upload Lab Report (CSV/Text)</p>
-                    <input type="file" id="labReportUpload" class="form-control" style="display: none;" accept=".csv,.txt">
-                    <button class="btn btn-sm btn-secondary" onclick="document.getElementById('labReportUpload').click()">Choose File</button>
-                </div>
-
-                <!-- Form -->
-                <div class="farm-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Select Tank</label>
-                            <select id="waterTankSelect" class="form-control"></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Date</label>
-                            <input id="waterDate" type="date" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label>Culture Day (DOC)</label>
-                            <input id="waterDoc" type="number" class="form-control" placeholder="e.g. 45">
-                        </div>
-                    </div>
-                    
-                    <h4 style="margin: 15px 0 10px; font-size: 14px; color: var(--primary); border-bottom: 1px solid var(--border); padding-bottom: 5px;">Parameters</h4>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>pH Level</label>
-                            <input id="waterPh" type="number" step="0.1" class="form-control" placeholder="e.g. 7.8">
-                        </div>
-                        <div class="form-group">
-                            <label>Alkalinity (ppm)</label>
-                            <input id="waterAlk" type="number" class="form-control" placeholder="e.g. 150">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Calcium (ppm)</label>
-                            <input id="waterCa" type="number" class="form-control" placeholder="e.g. 400">
-                        </div>
-                        <div class="form-group">
-                            <label>Magnesium (ppm)</label>
-                            <input id="waterMg" type="number" class="form-control" placeholder="e.g. 1200">
-                        </div>
-                    </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Total Ammonia (ppm)</label>
-                            <input id="waterAmm" type="number" step="0.01" class="form-control" placeholder="e.g. 0.0">
-                        </div>
-                        <div class="form-group">
-                            <label>Nitrite (ppm)</label>
-                            <input id="waterNo2" type="number" step="0.01" class="form-control" placeholder="e.g. 0.0">
-                        </div>
-                    </div>
-
-                    <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.analyzeWater()">
-                        <i class="fas fa-microscope"></i> Analyze Results
-                    </button>
-                </div>
-
-                <!-- Results Container -->
-                <div id="waterAnalysisResult" style="margin-top: 20px; display: none;"></div>
-
-                <!-- Water Chart -->
-                <div class="chart-container" style="height: 300px; margin-top: 30px; background: white; border: 2px solid var(--border); border-radius: var(--radius); padding: 16px; display: none;" id="waterChartContainer">
-                    <canvas id="waterTrendChart"></canvas>
-                </div>
-
-                <!-- History Container -->
-                <div style="margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;">
-                    <h3 style="font-size: 16px; margin-bottom: 15px; color: var(--dark);">
-                        <i class="fas fa-history"></i> Recent History
-                    </h3>
-                    <div id="waterHistoryList" class="timeline-container"></div>
                 </div>
             </section>
 
@@ -2385,124 +1993,7 @@
                 </div>
             </section>
 
-            <!-- Prices Screen -->
-            <section id="pricesScreen" class="screen">
-                <div class="screen-header">
-                    <h2 class="screen-title">
-                        <i class="fas fa-rupee-sign"></i>
-                        Vannamei Prices
-                    </h2>
-                    <div class="text-muted">
-                        Updated: <span id="priceUpdateDate">Today</span>
-                    </div>
-                </div>
-
-                <div class="prices-container">
-                    <div class="price-header">
-                        <div>Count (per kg)</div>
-                        <div>Price (₹/kg)</div>
-                        <div>Weekly Change</div>
-                        <div>Trend</div>
-                    </div>
-                    <div class="price-rows" id="priceRows">
-                        <!-- Prices will be loaded here -->
-                    </div>
-                </div>
-
-                <!-- Price Calculator -->
-                <div class="farm-form mt-20">
-                    <h4 class="screen-title mb-0">
-                        <i class="fas fa-calculator"></i>
-                        Harvest Value Calculator
-                    </h4>
-                    <div class="form-row mt-20">
-                        <div class="form-group">
-                            <label>Expected Yield (kg)</label>
-                            <input type="number" id="harvestYield" class="form-control" placeholder="e.g., 5000" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Shrimp Size (count/kg)</label>
-                            <select id="harvestSize" class="form-control">
-                                <option value="30">30 count</option>
-                                <option value="40">40 count</option>
-                                <option value="50">50 count</option>
-                                <option value="60">60 count</option>
-                                <option value="70">70 count</option>
-                                <option value="80">80 count</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>&nbsp;</label>
-                            <button class="btn btn-success" id="calculateHarvest" style="width: 100%;">
-                                <i class="fas fa-calculator"></i>
-                                Calculate Value
-                            </button>
-                        </div>
-                    </div>
-                    <div class="stat-card" id="harvestResult" style="display: none;">
-                        <div class="stat-value" id="harvestValue">₹0</div>
-                        <div class="stat-label">Estimated Harvest Value</div>
-                    </div>
-                </div>
-            </section>
-
         </main>
-    </div>
-
-    <!-- End Crop Modal -->
-    <div class="modal-overlay" id="endCropModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-flag-checkered"></i> End Crop Cycle</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted" style="margin-bottom: 20px;">Log the final harvest details to complete this crop cycle. The tank will be marked as inactive until a new crop is started.</p>
-                <div class="form-group">
-                    <label>Final Harvest Date</label>
-                    <input type="date" id="endCropDate" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Total Harvested Weight (kg)</label>
-                    <input type="number" id="endCropWeight" class="form-control" placeholder="e.g. 4500">
-                </div>
-                <div class="form-group">
-                    <label>Final Count (pcs/kg)</label>
-                    <input type="number" id="endCropCount" class="form-control" placeholder="e.g. 35">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-danger" onclick="app.saveEndCrop()">Confirm & End Cycle</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Start New Crop Modal -->
-    <div class="modal-overlay" id="startNewCropModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-sync-alt"></i> Start New Crop</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="alert-card" style="margin-bottom: 20px;">
-                    <div style="font-size: 13px; color: var(--dark);">
-                        <i class="fas fa-exclamation-triangle"></i> <strong>Warning:</strong> Starting a new crop will permanently delete all previous feed logs, water tests, and harvest records for this tank.
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>New Stocking Date</label>
-                    <input type="date" id="newStockingDate" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Initial Seed Count</label>
-                    <input type="number" id="newInitialSeed" class="form-control" placeholder="e.g., 30000" min="0">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" onclick="app.saveNewCrop()">Confirm & Start New Cycle</button>
-            </div>
-        </div>
     </div>
 
     <!-- Modals -->
@@ -2539,31 +2030,6 @@
                 <p class="text-muted" style="margin-bottom: 20px;">Return to check the feed trays at approximately:</p>
                 <div style="font-size: 28px; font-weight: 800; color: var(--primary);" id="checkTimeDisplay"></div>
                 <button class="btn btn-primary mt-20" style="width: 100%;" onclick="app.closeAllModals()">OK, Got It</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pro Subscription Modal (NEW) -->
-    <div class="modal-overlay" id="proSubModal">
-        <div class="modal-content" style="max-width: 420px; text-align: center;">
-            <div class="modal-header" style="justify-content: center;">
-                <h3><i class="fas fa-gift" style="color: #E91E63;"></i> Early Bird Offer!</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body" style="padding: 20px 30px;">
-                <p style="font-size: 16px; margin-bottom: 15px;">Congratulations! You are one of our first 100 farmers.</p>
-                <div style="background: #fce4ec; padding: 20px; border-radius: var(--radius); margin-bottom: 20px;">
-                    <div style="font-size: 36px; font-weight: 800; color: #E91E63;">FREE</div>
-                    <div style="font-size: 14px; color: #E91E63; text-decoration: line-through;">₹999 / year</div>
-                </div>
-                <ul style="text-align: left; font-size: 14px; color: var(--gray); line-height: 1.8; padding-left: 20px; margin-bottom: 0;">
-                    <li>✅ <strong>Unlimited Farms & Tanks</strong> (1 Year)</li>
-                    <li>✅ Cloud Data Backup & Sync</li>
-                    <li>✅ Priority Support</li>
-                </ul>
-            </div>
-            <div class="modal-footer" style="flex-direction: column; gap: 10px;">
-                <button class="btn btn-primary" style="width: 100%; background: #E91E63;" onclick="app.closeAllModals()">Claim Offer & Continue</button>
             </div>
         </div>
     </div>
@@ -2633,48 +2099,6 @@
             <div class="modal-footer" style="flex-direction: column;">
                 <!-- Dynamically populated by JS -->
             </div>
-        </div>
-    </div>
-    <!-- Partial Harvest Modal -->
-    <div class="modal-overlay" id="partialHarvestModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-weight-hanging"></i> Partial Harvest</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Harvest Date</label>
-                    <input type="date" id="harvestDate" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Harvested Weight (kg)</label>
-                    <input type="number" id="harvestWeight" class="form-control" placeholder="e.g. 500">
-                </div>
-                <div class="form-group">
-                    <label>Count (pcs/kg)</label>
-                    <input type="number" id="harvestCount" class="form-control" placeholder="e.g. 40">
-                </div>
-                <div class="alert-card" style="margin-top: 10px; background: var(--primary-light); border-left-color: var(--info);">
-                    <div style="font-size: 12px; color: var(--dark);">
-                        <i class="fas fa-info-circle"></i> This will update remaining biomass and suggest a new feed plan.
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" onclick="app.savePartialHarvest()">Calculate & Save</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Harvest Plan Modal -->
-    <div class="modal-overlay" id="harvestPlanModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-clipboard-list"></i> Post-Harvest Plan</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body" id="harvestPlanContent"></div>
         </div>
     </div>
 
@@ -2773,24 +2197,6 @@
                         <option value="6">6 Feeds</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Standard FCR (for Biomass Est.)</label>
-                    <input type="number" id="settingTargetFCR" class="form-control" step="0.1" min="0.5" max="3.0" onchange="app.updateTargetFCR(this.value)">
-                </div>
-                <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-                <h4 style="margin-bottom: 12px; color: var(--dark);">Manage Supplements</h4>
-                <div class="form-group" style="display: flex; gap: 8px;">
-                    <input type="text" id="newSupplementInput" class="form-control" placeholder="New supplement name">
-                    <button class="btn btn-primary" onclick="app.addNewSupplement()">Add</button>
-                </div>
-                <div class="settings-list" id="settingsSupplementsList"></div>
-                <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-                <h4 style="margin-bottom: 12px; color: var(--dark);">Manage Feed Types</h4>
-                <div class="form-group" style="display: flex; gap: 8px;">
-                    <input type="text" id="newFeedTypeInput" class="form-control" placeholder="e.g., Pellet 1.2mm">
-                    <button class="btn btn-primary" onclick="app.addNewFeedType()">Add</button>
-                </div>
-                <div class="settings-list" id="settingsFeedTypesList"></div>
                 <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
                 <h4 style="margin-bottom: 12px; color: var(--dark);">Data Management</h4>
                 <div class="alert-card" style="background: var(--primary-light); border-left-color: var(--info); margin-bottom: 15px;">
@@ -2811,37 +2217,6 @@
                 <button class="btn btn-danger" style="width: 100%; margin-top: 15px; background-color: #d32f2f;" onclick="app.hardReset()">
                     <i class="fas fa-sync-alt"></i> Reset App (Fix Issues)
                 </button>
-
-                <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-                <h4 style="margin-bottom: 12px; color: var(--dark);">Team Management</h4>
-                <div class="farm-form" style="padding: 16px; margin-bottom: 20px; border: 1px solid var(--border);">
-                    <h5 style="margin-bottom: 12px; font-size: 14px;">Invite New Member</h5>
-                    <div class="form-group">
-                        <label>Phone Number</label>
-                        <input type="tel" id="invitePhone" class="form-control" placeholder="+91 XXXXX XXXXX">
-                    </div>
-                    <div class="form-group">
-                        <label>Role</label>
-                        <select id="inviteRole" class="form-control">
-                            <option value="worker">Worker</option>
-                            <option value="supervisor">Supervisor</option>
-                        </select>
-                    </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                    <button class="btn btn-success" style="background-color: #25D366; border-color: #25D366; grid-column: span 2;" onclick="app.shareViaWhatsApp()">
-                        <i class="fab fa-whatsapp"></i> Invite via WhatsApp
-                    </button>
-                    <button class="btn btn-primary" onclick="app.inviteMember()">Send SMS</button>
-                    <button class="btn btn-secondary" onclick="app.generateInviteLink()"><i class="fas fa-link"></i> Share Link</button>
-                </div>
-                </div>
-
-                <div id="teamManagementSection">
-                    <h5 style="margin-bottom: 12px; font-size: 14px;">Current Team</h5>
-                    <div class="settings-list" id="teamMembersList">
-                        <!-- Team members will be rendered here -->
-                    </div>
-                </div>
 
             </div>
             <div class="modal-footer" style="justify-content: center;">
@@ -2989,149 +2364,6 @@
         </div>
     </div>
 
-    <!-- Inventory Modal -->
-    <div class="modal-overlay" id="inventoryModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-boxes"></i> Manage Feed Stock</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="stat-card" style="margin-bottom: 20px; background: var(--primary-light); border: none;">
-                    <div class="stat-value" id="modalCurrentStock">0 kg</div>
-                    <div class="stat-label">Current Stock</div>
-                </div>
-                <div class="form-group">
-                    <label>Add Stock (Bags)</label>
-                    <input type="number" id="stockBags" class="form-control" placeholder="Number of bags">
-                </div>
-                <div class="form-group">
-                    <label>Bag Weight (kg)</label>
-                    <input type="number" id="bagWeight" class="form-control" value="25">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" id="saveStockBtn">
-                    <i class="fas fa-plus"></i> Add Stock
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Medicine Inventory Modal -->
-    <div class="modal-overlay" id="medicineInventoryModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-pills"></i> Medicine Inventory</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="farm-form" style="padding: 16px; margin-bottom: 20px; border: 1px solid var(--border);">
-                    <h4 style="margin-bottom: 12px; font-size: 14px;">Add / Update Stock</h4>
-                    <div class="form-group">
-                        <label>Product Name</label>
-                        <input type="text" id="medName" class="form-control" placeholder="e.g. Probiotic A" list="supplementList">
-                        <datalist id="supplementList">
-                            <!-- Populated by JS -->
-                        </datalist>
-                    </div>
-                    <div class="form-group">
-                        <label>Action</label>
-                        <select id="medAction" class="form-control">
-                            <option value="add">Add (Purchase)</option>
-                            <option value="remove">Remove (Correction)</option>
-                            <option value="set">Set Total (Audit)</option>
-                        </select>
-                    </div>
-                    <div class="form-row" style="margin-bottom: 0;">
-                        <div class="form-group">
-                            <label>Quantity</label>
-                            <input type="number" id="medQty" class="form-control" placeholder="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Unit</label>
-                            <select id="medUnit" class="form-control">
-                                <option value="kg">kg</option>
-                                <option value="L">L</option>
-                                <option value="pcs">pcs</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.saveMedicineStock()">Update Stock</button>
-                </div>
-                <div id="medicineList" class="settings-list"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Apply Medicine Modal -->
-    <div class="modal-overlay" id="applyMedicineModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-syringe"></i> Apply Medicine</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Select Medicine</label>
-                    <select id="applyMedSelect" class="form-control" onchange="app.updateMedStockDisplay()">
-                        <!-- Populated by JS -->
-                    </select>
-                </div>
-                <div class="stat-card" style="margin-bottom: 16px; background: var(--success-light); border: none; padding: 10px;">
-                    <div class="stat-label">Available Stock</div>
-                    <div class="stat-value" id="applyMedStockDisplay" style="font-size: 18px; color: var(--success-dark);">--</div>
-                </div>
-                <div class="form-group">
-                    <label>Amount to Apply</label>
-                    <input type="number" id="applyMedAmount" class="form-control" placeholder="0.0">
-                </div>
-                <div class="form-group">
-                    <label>Date</label>
-                    <input type="date" id="applyMedDate" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Remarks (Optional)</label>
-                    <input type="text" id="applyMedRemarks" class="form-control" placeholder="e.g. Weekly dose">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="app.saveMedicineApplication()">Apply & Deduct Stock</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Sampling Modal -->
-    <div class="modal-overlay" id="samplingModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-balance-scale"></i> Log Growth Sample</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Date</label>
-                    <input type="date" id="sampleDate" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Net Weight (grams)</label>
-                    <input type="number" id="sampleWeight" class="form-control" placeholder="Total weight of shrimp in net">
-                </div>
-                <div class="form-group">
-                    <label>Count (number of shrimp)</label>
-                    <input type="number" id="sampleCount" class="form-control" placeholder="Number of shrimp in net">
-                </div>
-                <div class="stat-card" id="abwResultCard" style="display:none; background:var(--success-light); border-color:#4caf50;">
-                    <div class="stat-value" id="calculatedABW" style="color:#2e7d32;">0g</div>
-                    <div class="stat-label">Calculated ABW (Average Body Weight)</div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" onclick="app.saveSampling()">Save Record</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Login/Auth Screen (NEW Enhanced UI) -->
     <div class="auth-container" id="authContainer" style="display: flex;">
         <div class="auth-box">
@@ -3245,52 +2477,13 @@
             constructor() {
                 this.state = this.getInitialState();
 
-                // Observation Configuration
-                this.OBSERVATION_CONFIG = {
-                    shrimpHealth: {
-                        title: "A. Shrimp Health",
-                        options: [
-                            { id: 'red_legs', label: "Red legs", score: 3 },
-                            { id: 'white_gut', label: "White gut", score: 2 },
-                            { id: 'black_gill', label: "Black gill", score: 3 },
-                            { id: 'soft_shell', label: "Soft / loose shell", score: 0 },
-                            { id: 'weak_movement', label: "Weak / slow movement", score: 0 }
-                        ]
-                    },
-                    moulting: {
-                        title: "B. Moulting & Growth",
-                        options: [
-                            { id: 'moulting_observed', label: "Moulting observed", score: 0 },
-                            { id: 'frequent_moulting', label: "Frequent moulting", score: 0 },
-                            { id: 'uneven_size', label: "Uneven size shrimp", score: 0 }
-                        ]
-                    },
-                    mortality: {
-                        title: "C. Mortality",
-                        options: [
-                            { id: 'dead_1_2', label: "Dead shrimp (1–2)", score: 2 },
-                            { id: 'dead_more_2', label: "Dead shrimp (> 2)", score: 4 }
-                        ]
-                    },
-                    environment: {
-                        title: "E. Waste / Environment",
-                        options: [
-                            { id: 'white_fecal', label: "White fecal strings", score: 0 },
-                            { id: 'feed_powder', label: "Feed powder accum.", score: 0 },
-                            { id: 'bad_smell', label: "Bad smell near tray", score: 0 },
-                            { id: 'excess_sludge', label: "Excess sludge", score: 0 }
-                        ]
-                    }
-                };
                 
                 this.currentDate = this.getFormattedDate();
                 this.initialized = false;
-                this.currentWeatherCode = null;
                 this.editingEntryId = null;
                 this.editingFarmId = null;
                 this.editingTankId = null;
                 this.viewMode = 'today'; // today, yesterday, 7days, 30days, all
-                this.taskFilter = 'all'; // all, pending, completed
                 this.logViewType = 'matrix'; // 'matrix' or 'list'
                 this.tempTrayResult = null; // Temporary storage for single tray update
                 this.logSearchQuery = ''; // Search query for log book
@@ -3321,13 +2514,6 @@
                     farms: [],           // Array of farm objects
                     tanks: [],           // Array of tank objects (belonging to farms)
                     feedEntries: [],     // All feed entries
-                    harvests: [],        // Harvest records
-                    waterEntries: [],    // Water test history
-                    samplingEntries: [], // Growth sampling records
-                    prices: [],          // Market prices
-                    inventory: { totalKg: 0 }, // Inventory
-                    medicineInventory: [], // Medicine inventory array
-                    medicineApplications: [], // Medicine application records
                     settings: {
                         currentFarmId: null,
                         currency: 'INR',
@@ -3483,11 +2669,6 @@
                     const collections = [
                         { key: 'tanks', col: 'tanks' },
                         { key: 'feedEntries', col: 'feedEntries' },
-                        { key: 'waterEntries', col: 'waterEntries' },
-                        { key: 'harvests', col: 'harvests' },
-                        { key: 'samplingEntries', col: 'sampling' },
-                        { key: 'medicineInventory', col: 'medicineInventory' },
-                        { key: 'medicineApplications', col: 'medicineApplications' }
                     ];
 
                     collections.forEach(map => {
@@ -3497,12 +2678,6 @@
                             });
                         }
                     });
-
-                    // 3. Inventory
-                    if (data.inventory && data.farms && data.farms.length > 0) {
-                        const farmId = data.farms[0].id;
-                        batch.set(this.db.collection('inventory').doc(farmId), data.inventory, { merge: true });
-                    }
 
                     await batch.commit();
                     localStorage.removeItem('aquabook_guest_data');
@@ -3613,8 +2788,7 @@
                             if (this.initialized) {
                                 this.renderLogBook();
                                 this.checkPendingTrays();
-                                this.renderOverallStats();
-                                this.renderFeedTrendChart();
+                                // this.renderOverallStats(); // Removed for MVP
                             }
                         }, error => {
                             console.error("Error with feed entries listener: ", error);
@@ -3639,11 +2813,6 @@
                 // Initialize arrays to prevent undefined errors if no farms exist
                 this.state.tanks = [];
                 this.state.feedEntries = [];
-                this.state.waterEntries = [];
-                this.state.harvests = [];
-                this.state.samplingEntries = [];
-                this.state.medicineInventory = [];
-                this.state.medicineApplications = [];
 
                 // Helper to fetch data in chunks of 10 (Firestore 'in' query limit)
                 const fetchInChunks = async (collectionName, field, ids) => {
@@ -3682,13 +2851,6 @@
 
                     // --- REAL-TIME LISTENER FOR FEED ENTRIES ---
                     this.setupFeedListener();
-
-                    // Fetch other collections safely
-                    this.state.waterEntries = await fetchInChunks('waterEntries', 'farmId', farmIds);
-                    this.state.harvests = await fetchInChunks('harvests', 'farmId', farmIds);
-                    this.state.samplingEntries = await fetchInChunks('sampling', 'farmId', farmIds);
-                    this.state.medicineInventory = await fetchInChunks('medicineInventory', 'farmId', farmIds);
-                    this.state.medicineApplications = await fetchInChunks('medicineApplications', 'farmId', farmIds);
                 }
 
                 // Load settings from user profile or use defaults
@@ -3699,15 +2861,6 @@
                 // Ensure targetFCR is initialized to prevent biomass calc errors
                 if (!this.state.settings.targetFCR) {
                     this.state.settings.targetFCR = 1.2;
-                }
-                // Fetch Market Prices from Firestore
-                try {
-                    const pricesDoc = await this.db.collection('marketPrices').doc('current').get();
-                    if (pricesDoc.exists && pricesDoc.data().items) {
-                        this.state.prices = pricesDoc.data().items;
-                    }
-                } catch (e) {
-                    console.error("Error fetching market prices:", e);
                 }
 
                 // Validate currentFarmId - Fixes "stuck" state if farm was deleted
@@ -3720,30 +2873,6 @@
                     }
                 } else {
                     this.state.settings.currentFarmId = null;
-                }
-
-                // Fetch Inventory AFTER settings are loaded (Fixes null ID crash)
-                if (this.state.settings.currentFarmId) {
-                    try {
-                        const invDoc = await this.db.collection('inventory').doc(this.state.settings.currentFarmId).get();
-                        if (invDoc.exists) {
-                            this.state.inventory = invDoc.data();
-                        }
-                    } catch (e) {
-                        console.warn("Inventory fetch failed, using default", e);
-                    }
-                }
-
-                // Initialize default prices if empty
-                if (this.state.prices.length === 0) {
-                    this.state.prices = [
-                        { count: 30, price: 480, change: '+10', trend: 'up' },
-                        { count: 40, price: 380, change: '+5', trend: 'up' },
-                        { count: 50, price: 310, change: '0', trend: 'stable' },
-                        { count: 60, price: 260, change: '-5', trend: 'down' },
-                        { count: 70, price: 230, change: '-10', trend: 'down' },
-                        { count: 80, price: 200, change: '0', trend: 'stable' }
-                    ];
                 }
 
                 console.log("Data loaded from Firestore.");
@@ -3764,8 +2893,7 @@
                 localStorage.setItem('aquabook_guest_data', JSON.stringify({
                     farms: this.state.farms,
                     tanks: this.state.tanks,
-                    feedEntries: this.state.feedEntries,
-                    inventory: this.state.inventory
+                    feedEntries: this.state.feedEntries
                 }));
             }
             
@@ -3773,12 +2901,6 @@
                 localStorage.setItem('aquabook_farms', JSON.stringify(this.state.farms));
                 localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
                 localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
-                localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
-                localStorage.setItem('aquabook_water', JSON.stringify(this.state.waterEntries));
-                localStorage.setItem('aquabook_sampling', JSON.stringify(this.state.samplingEntries));
-                localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
-                localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
-                localStorage.setItem('aquabook_med_apps', JSON.stringify(this.state.medicineApplications));
                 localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
             }
             
@@ -3799,34 +2921,6 @@
                 localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
             }
 
-            saveHarvests() {
-                localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
-            }
-            
-            saveWaterEntries() {
-                localStorage.setItem('aquabook_water', JSON.stringify(this.state.waterEntries));
-            }
-
-            saveSamplingEntries() {
-                localStorage.setItem('aquabook_sampling', JSON.stringify(this.state.samplingEntries));
-            }
-
-            saveInventory() {
-                localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
-            }
-
-            saveMedicineInventory() {
-                localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
-            }
-
-            saveMedicineApplications() {
-                localStorage.setItem('aquabook_med_apps', JSON.stringify(this.state.medicineApplications));
-            }
-
-            savePrices() {
-                localStorage.setItem('aquabook_prices', JSON.stringify(this.state.prices));
-            }
-            
             async saveSettings() {
                 localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
                 if (this.currentUser) {
@@ -3901,12 +2995,8 @@
             renderAll() {
                 this.updateFarmSelector();
                 this.renderFarmsList();
-                this.renderOverallStats();
                 this.renderLogBook();
-                this.renderPrices();
                 this.checkPendingTrays();
-                this.renderFeedTrendChart();
-                this.renderInventorySummary();
             }
 
             setupUI() {
@@ -3914,130 +3004,6 @@
             }
             
             renderOverallStats() {
-                // Remove skeleton loading state
-                document.querySelectorAll('.overall-stats .stat-card').forEach(el => el.classList.remove('loading'));
-
-                const currentFarmId = this.state.settings.currentFarmId;
-
-                // Filter tanks and entries by the current farm
-                const farmTanks = currentFarmId ? this.state.tanks.filter(t => t.farmId === currentFarmId) : [];
-                const farmTankIds = farmTanks.map(t => t.id);
-                const farmFeedEntries = currentFarmId ? this.state.feedEntries.filter(e => farmTankIds.some(id => id == e.tankId)) : [];
-
-                document.getElementById('totalTanks').textContent = farmTanks.length;
-
-                const totalFeed = farmFeedEntries.reduce((sum, entry) => sum + entry.amount, 0);
-                document.getElementById('totalFeed').innerHTML = `${totalFeed.toFixed(1)} <span class="unit">kg</span>`;
-
-                const todayFeed = farmFeedEntries
-                    .filter(e => e.date === this.currentDate)
-                    .reduce((sum, e) => sum + e.amount, 0);
-                document.getElementById('feedToday').innerHTML = `${todayFeed.toFixed(1)} <span class="unit">kg</span>`;
-
-                const totalBiomass = farmTanks.reduce((sum, tank) => sum + (tank.biomass || 0), 0);
-                document.getElementById('totalBiomass').innerHTML = `${totalBiomass.toFixed(1)} <span class="unit">kg</span>`;
-
-                const avgFCR = totalBiomass > 0 ? (totalFeed / totalBiomass).toFixed(2) : '0.00';
-                document.getElementById('avgFCR').textContent = avgFCR;
-
-                // Feed Waste % (based on tray results)
-                // Considering 'half' and 'too-much' as waste events
-                const validChecks = farmFeedEntries.filter(e => ['empty', 'little', 'half', 'too-much'].includes(e.trayResult));
-                const wasteChecks = validChecks.filter(e => ['half', 'too-much'].includes(e.trayResult));
-                const wastePctVal = validChecks.length > 0 ? ((wasteChecks.length / validChecks.length) * 100) : 0;
-                const wastePct = wastePctVal.toFixed(1);
-                const feedWasteEl = document.getElementById('feedWaste');
-                feedWasteEl.innerHTML = `${wastePct}<span class="unit">%</span>`;
-
-                if (wastePctVal <= 10) feedWasteEl.style.color = 'var(--success)';
-                else if (wastePctVal <= 20) feedWasteEl.style.color = 'var(--warning)';
-                else feedWasteEl.style.color = 'var(--danger)';
-            }
-            
-            renderInventorySummary() {
-                const feedStock = this.state.inventory.totalKg || 0;
-                document.getElementById('displayFeedStock').innerHTML = `${feedStock.toFixed(1)} <span class="unit">kg</span>`;
-                document.getElementById('displayMedStock').innerHTML = `${this.state.medicineInventory.length} <span class="unit">Items</span>`;
-            }
-
-            renderFeedTrendChart() {
-                const ctx = document.getElementById('feedTrendChart');
-                if (!ctx) return;
-
-                // Check if Chart.js is loaded (prevents crash if offline)
-                if (typeof Chart === 'undefined') {
-                    ctx.parentElement.innerHTML = '<div class="text-center text-muted" style="padding: 40px;">Chart unavailable (Offline)</div>';
-                    return;
-                }
-
-                const currentFarmId = this.state.settings.currentFarmId;
-                const farmTankIds = currentFarmId ? this.state.tanks.filter(t => t.farmId === currentFarmId).map(t => t.id) : [];
-
-                // Prepare data: Last 30 days
-                const labels = [];
-                const dataPoints = [];
-                const today = new Date();
-                
-                for (let i = 29; i >= 0; i--) {
-                    const d = new Date();
-                    d.setDate(today.getDate() - i);
-                    const dateStr = this.getFormattedDate(d);
-                    labels.push(d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }));
-                    
-                    // Sum feed for this date
-                    let entriesToSum = this.state.feedEntries.filter(e => e.date === dateStr);
-                    if (currentFarmId) {
-                        entriesToSum = entriesToSum.filter(e => farmTankIds.some(id => id == e.tankId));
-                    }
-
-                    // Use null if no entries exist to show gap, otherwise sum (even if 0)
-                    const dayFeed = entriesToSum.length > 0 ? entriesToSum.reduce((sum, e) => sum + e.amount, 0) : null;
-                    dataPoints.push(dayFeed);
-                }
-
-                // Destroy existing chart if it exists
-                if (this.feedChart) this.feedChart.destroy();
-
-                this.feedChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Daily Feed (kg)',
-                            data: dataPoints,
-                            borderColor: '#2196F3',
-                            backgroundColor: 'rgba(33, 150, 243, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false },
-                            title: {
-                                display: true,
-                                text: '30-Day Feed Consumption Trend',
-                                align: 'start',
-                                font: { size: 16, weight: 'bold' },
-                                padding: { bottom: 15 }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                grid: { borderDash: [2, 4] }
-                            },
-                            x: {
-                                grid: { display: false },
-                                ticks: { maxTicksLimit: 10 }
-                            }
-                        }
-                    }
-                });
             }
 
             renderFarmsList() {
@@ -4547,21 +3513,6 @@
 
                     const trayBadge = `<span style="padding:4px 8px; border-radius:12px; font-size:11px; font-weight:600; background:${badgeBg}; color:${badgeColor}; border:1px solid ${badgeColor}; white-space:nowrap;">${label}</span>`;
 
-                    // Risk Badge
-                    let riskBadge = '';
-                    if (entry.riskLevel) {
-                        const riskClass = entry.riskLevel === 'Action Required' ? 'risk-action' : entry.riskLevel === 'Watch' ? 'risk-watch' : 'risk-normal';
-                        riskBadge = `<span class="risk-badge ${riskClass}">${entry.riskLevel}</span>`;
-                    }
-
-                    // Observations Summary
-                    let obsSummary = '';
-                    if (entry.observations && entry.observations.length > 0) {
-                        // Map IDs back to labels if possible, or just use ID
-                        const obsLabels = entry.observations.map(obsId => this.getObservationLabel(obsId)).join(', ');
-                        obsSummary = `<div style="font-size:11px; color:var(--dark); margin-top:6px; line-height:1.4;"><i class="fas fa-clipboard-check" style="color:var(--gray); margin-right:4px;"></i> ${obsLabels}</div>`;
-                    }
-
                     const card = document.createElement('div');
                     card.className = 'timeline-card';
                     card.style.padding = '12px';
@@ -4586,11 +3537,9 @@
                                 ${entry.supplements && entry.supplements.length > 0 ? 
                                     entry.supplements.map(s => `<span style="background:var(--primary-light); color:var(--primary-dark); font-size:10px; padding:3px 8px; border-radius:10px; font-weight:600;"><i class="fas fa-flask"></i> ${s}</span>`).join('') 
                                     : '<span style="font-size:11px; color:var(--gray); font-style:italic;">No supplements</span>'}
-                                ${riskBadge}
                             </div>
                             ${trayBadge}
                         </div>
-                        ${obsSummary}
                     `;
                     
                     card.onclick = () => app.editFeedEntry(entry.id);
@@ -4602,14 +3551,6 @@
                 parent.appendChild(timelineContainer);
             }
             
-            getObservationLabel(id) {
-                for (const cat in this.OBSERVATION_CONFIG) {
-                    const found = this.OBSERVATION_CONFIG[cat].options.find(opt => opt.id === id);
-                    if (found) return found.label;
-                }
-                // Fallback for legacy or direct strings
-                return id.replace(/_/g, ' ');
-            }
 
             checkPendingTrays() {
                 // Check all feed entries for pending status, regardless of current farm view
@@ -4637,10 +3578,6 @@
                 // Screen navigation
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     btn.addEventListener('click', () => this.switchScreen(btn.dataset.screen));
-                });
-
-                document.getElementById('addFarmFromSelector').addEventListener('click', () => {
-                    this.openFarmModal();
                 });
                 
                 // Close Modals
@@ -4672,16 +3609,10 @@
                 document.querySelectorAll('.range-tab').forEach(tab => {
                     tab.addEventListener('click', () => this.setViewMode(tab.dataset.range));
                 });
-                
-                // Inventory
-                document.getElementById('saveStockBtn').addEventListener('click', () => this.saveStock());
 
                 // Edit Feed Modal Buttons
                 document.getElementById('updateFeedBtn').addEventListener('click', () => this.updateFeedEntry());
                 document.getElementById('deleteFeedBtn').addEventListener('click', () => this.deleteCurrentFeedEntry());
-
-                // Price Calculator
-                document.getElementById('calculateHarvest').addEventListener('click', () => this.calculateHarvestValue());
 
                 // Close menus on click outside
                 document.addEventListener('click', (e) => {
@@ -4774,10 +3705,6 @@
                     if (btn.dataset.screen === screenName) btn.classList.add('active');
                     else btn.classList.remove('active');
                 });
-
-                if (screenName === 'water') {
-                    this.renderWaterScreen();
-                }
             }
 
             updateFarmSelector() {
@@ -4816,13 +3743,6 @@
                 if (!farmId) return;
                 this.state.settings.currentFarmId = farmId;
                 this.saveSettings();
-                
-                // Fetch inventory for the selected farm
-                this.db.collection('inventory').doc(farmId).get().then(doc => {
-                    if (doc.exists) this.state.inventory = doc.data();
-                    else this.state.inventory = { totalKg: 0 };
-                    this.renderAll();
-                });
             }
 
             getTankById(id) {
@@ -5089,12 +4009,6 @@
                 document.getElementById('farmModal').classList.add('active');
             }
 
-            async initiatePayment() {
-                // MVP: Payments disabled. Offer is active.
-                this.showToast("Early Bird Offer Active: Pro features are FREE!", "success");
-                this.closeAllModals();
-            }
-
             async removeMember(uid) {
                 if (!confirm('Remove this member?')) return;
                 const farmId = this.state.settings.currentFarmId;
@@ -5111,33 +4025,6 @@
                 }
             }
 
-            openFarmSelector() {
-                const list = document.getElementById('farmsListModal');
-                list.innerHTML = '';
-                this.state.farms.forEach(farm => {
-                    const div = document.createElement('div');
-                    div.className = 'feed-schedule-item';
-                    if (farm.id === this.state.settings.currentFarmId) div.classList.add('completed');
-                    div.innerHTML = `
-                        <div class="feed-time">${farm.name}</div>
-                        <div class="feed-label">${farm.location}</div>
-                    `;
-                    div.onclick = () => {
-                        this.state.settings.currentFarmId = farm.id;
-                        this.saveSettings();
-                        
-                        // Fetch inventory for the selected farm
-                        this.db.collection('inventory').doc(farm.id).get().then(doc => {
-                            if (doc.exists) this.state.inventory = doc.data();
-                            else this.state.inventory = { totalKg: 0 };
-                            this.renderAll();
-                            this.closeAllModals();
-                        });
-                    };
-                    list.appendChild(div);
-                });
-                document.getElementById('farmSelectorModal').classList.add('active');
-            }
 
             openTankModal(farmId) {
                 if (this.isGuest) {
@@ -5164,211 +4051,6 @@
                     select.appendChild(option);
                 });
                 document.getElementById('tankModal').classList.add('active');
-            }
-
-            openInventoryModal() {
-                document.getElementById('modalCurrentStock').innerHTML = `${(this.state.inventory.totalKg || 0).toFixed(1)} <span class="unit">kg</span>`;
-                document.getElementById('stockBags').value = '';
-                document.getElementById('inventoryModal').classList.add('active');
-            }
-
-            async saveStock() {
-                const bags = parseFloat(document.getElementById('stockBags').value) || 0;
-                const weight = parseFloat(document.getElementById('bagWeight').value) || 25;
-                const currentFarmId = this.state.settings.currentFarmId;
-                
-                if (bags > 0 && currentFarmId) {
-                    const addedKg = bags * weight;
-                    this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + addedKg;
-                    
-                    // Save to Firestore
-                    await this.db.collection('inventory').doc(currentFarmId).set({
-                        totalKg: firebase.firestore.FieldValue.increment(addedKg)
-                    }, { merge: true });
-                    
-                    this.renderOverallStats();
-                    this.closeAllModals();
-                    this.showToast(`Added ${addedKg} kg to stock`);
-                } else {
-                    this.showToast('Please enter valid quantity', 'error');
-                }
-            }
-
-            // ===== MEDICINE INVENTORY =====
-            openMedicineInventoryModal() {
-                // Populate datalist
-                const datalist = document.getElementById('supplementList');
-                datalist.innerHTML = this.state.settings.supplements.map(s => `<option value="${s}">`).join('');
-                
-                this.renderMedicineInventoryList();
-                document.getElementById('medicineInventoryModal').classList.add('active');
-            }
-
-            renderMedicineInventoryList() {
-                const list = document.getElementById('medicineList');
-                if (this.state.medicineInventory.length === 0) {
-                    list.innerHTML = '<div class="empty-state" style="padding: 20px;"><p>No medicines in stock</p></div>';
-                    return;
-                }
-                list.innerHTML = this.state.medicineInventory.map(item => `
-                    <div class="settings-item">
-                        <div style="display:flex; flex-direction:column;">
-                            <span style="font-weight:600;">${item.name}</span>
-                            <span style="font-size:12px; color:var(--gray);">${item.quantity} ${item.unit}</span>
-                        </div>
-                        <button class="btn-icon" style="color: var(--danger);" onclick="app.deleteMedicineItem('${item.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `).join('');
-            }
-
-            async saveMedicineStock() {
-                const name = document.getElementById('medName').value.trim();
-                const qty = parseFloat(document.getElementById('medQty').value);
-                const unit = document.getElementById('medUnit').value;
-                const action = document.getElementById('medAction').value;
-
-                if (!name || isNaN(qty) || qty < 0) {
-                    this.showToast('Please enter valid name and positive quantity', 'error');
-                    return;
-                }
-
-                const currentFarmId = this.state.settings.currentFarmId;
-                let itemToSave = null;
-
-                const existing = this.state.medicineInventory.find(i => i.name.toLowerCase() === name.toLowerCase() && i.unit === unit);
-                if (existing) {
-                    if (action === 'add') {
-                        existing.quantity += qty;
-                    } else if (action === 'remove') {
-                        existing.quantity = Math.max(0, existing.quantity - qty);
-                    } else if (action === 'set') {
-                        existing.quantity = qty;
-                    }
-                    itemToSave = existing;
-                } else {
-                    // Check for unit mismatch
-                    const sameNameDifferentUnit = this.state.medicineInventory.find(i => i.name.toLowerCase() === name.toLowerCase() && i.unit !== unit);
-                    if (sameNameDifferentUnit) {
-                        if (!confirm(`Warning: You already have "${name}" in ${sameNameDifferentUnit.unit}. Do you want to add it as a separate item in ${unit}?`)) {
-                            return;
-                        }
-                    }
-                    itemToSave = { id: Date.now().toString(), farmId: currentFarmId, name, quantity: qty, unit };
-                    this.state.medicineInventory.push(itemToSave);
-                }
-                
-                // Save to Firestore
-                await this.db.collection('medicineInventory').doc(itemToSave.id).set(itemToSave);
-
-                this.renderMedicineInventoryList();
-                this.renderInventorySummary();
-                this.showToast('Medicine stock updated');
-                
-                // Clear inputs
-                document.getElementById('medName').value = '';
-                document.getElementById('medQty').value = '';
-                document.getElementById('medAction').value = 'add';
-            }
-
-            async deleteMedicineItem(id) {
-                if (confirm('Remove this item from inventory?')) {
-                    await this.db.collection('medicineInventory').doc(id).delete();
-                    this.state.medicineInventory = this.state.medicineInventory.filter(i => i.id !== id);
-                    this.renderMedicineInventoryList();
-                    this.renderInventorySummary();
-                }
-            }
-
-            // ===== MEDICINE APPLICATION =====
-            openApplyMedicineModal(tankId) {
-                if (tankId) this.editingTankId = tankId;
-                
-                const select = document.getElementById('applyMedSelect');
-                select.innerHTML = '<option value="">Select Product...</option>';
-                
-                if (this.state.medicineInventory.length === 0) {
-                    this.showToast('No medicines in inventory. Add stock first.', 'warning');
-                    return;
-                }
-
-                this.state.medicineInventory.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item.id;
-                    option.textContent = `${item.name} (${item.unit})`;
-                    select.appendChild(option);
-                });
-
-                document.getElementById('applyMedAmount').value = '';
-                document.getElementById('applyMedDate').value = this.currentDate;
-                document.getElementById('applyMedRemarks').value = '';
-                document.getElementById('applyMedStockDisplay').textContent = '--';
-                
-                document.getElementById('applyMedicineModal').classList.add('active');
-            }
-
-            updateMedStockDisplay() {
-                const medId = document.getElementById('applyMedSelect').value;
-                const display = document.getElementById('applyMedStockDisplay');
-                const item = this.state.medicineInventory.find(i => i.id === medId);
-                
-                if (item) {
-                    display.textContent = `${item.quantity} ${item.unit}`;
-                } else {
-                    display.textContent = '--';
-                }
-            }
-
-            async saveMedicineApplication() {
-                const tankId = this.editingTankId;
-                const tank = this.getTankById(tankId);
-                const medId = document.getElementById('applyMedSelect').value;
-                const amount = parseFloat(document.getElementById('applyMedAmount').value);
-                const date = document.getElementById('applyMedDate').value;
-                const remarks = document.getElementById('applyMedRemarks').value;
-
-                if (!medId || !amount || amount <= 0) {
-                    this.showToast('Invalid input', 'error');
-                    return;
-                }
-
-                const inventoryItem = this.state.medicineInventory.find(i => i.id === medId);
-                if (!inventoryItem) {
-                    this.showToast('Medicine not found in inventory', 'error');
-                    return;
-                }
-
-                if (inventoryItem.quantity < amount) {
-                    this.showToast(`Insufficient stock. Available: ${inventoryItem.quantity} ${inventoryItem.unit}`, 'error');
-                    return;
-                }
-
-                // Deduct
-                inventoryItem.quantity -= amount;
-                
-                // Record
-                const medApp = {
-                    id: Date.now(),
-                    tankId,
-                    farmId: tank.farmId,
-                    medId,
-                    medName: inventoryItem.name,
-                    amount,
-                    unit: inventoryItem.unit,
-                    date,
-                    remarks
-                };
-                
-                this.state.medicineApplications.push(medApp);
-                
-                // Firestore updates
-                await this.db.collection('medicineInventory').doc(inventoryItem.id).update({ quantity: inventoryItem.quantity });
-                await this.db.collection('medicineApplications').doc(medApp.id.toString()).set(medApp);
-
-                this.renderInventorySummary(); // Update home screen stats
-                this.closeAllModals();
-                this.showToast('Medicine applied and stock deducted');
             }
 
             // ===== FEED ROUND (BULK) =====
@@ -5530,19 +4212,10 @@
                     }
                 });
 
-                // Inventory Check
-                const currentStock = this.state.inventory.totalKg || 0;
-                if (totalAmount > currentStock) {
-                    this.showToast(`Insufficient inventory! Available: ${currentStock.toFixed(1)}kg, Required: ${totalAmount.toFixed(1)}kg`, 'error');
-                    return;
-                }
-
                 if (this.isGuest) {
                     entriesToAdd.forEach(e => this.state.feedEntries.push(e));
-                    this.state.inventory.totalKg = currentStock - totalAmount;
                     this.saveGuestData();
                     this.renderLogBook();
-                    this.renderOverallStats();
                     this.closeAllModals();
                     this.showToast(`Saved ${entriesToAdd.length} entries (Guest Mode)`);
                     return;
@@ -5551,19 +4224,8 @@
                 if (entriesToAdd.length > 0) {
                     this.showLoading(true);
                     
-                    // Add inventory update to batch for atomicity
-                    if (this.state.settings.currentFarmId) {
-                        const invRef = this.db.collection('inventory').doc(this.state.settings.currentFarmId);
-                        batch.set(invRef, {
-                            totalKg: firebase.firestore.FieldValue.increment(-totalAmount)
-                        }, { merge: true });
-                    }
-
                     await batch.commit();
 
-                    this.state.inventory.totalKg = currentStock - totalAmount;
-                    
-                    this.renderInventorySummary();
                     this.closeAllModals();
                     // No need to call renderAll() here, the onSnapshot listener will handle UI updates.
                     this.showLoading(false);
@@ -5719,19 +4381,6 @@
                 }
                 const trayStatus = selectedRadio.dataset.value;
                 
-                // Get Observations
-                const checkedBoxes = container.querySelectorAll('.observation-chip.selected');
-                const observations = [];
-                let riskScore = 0;
-                
-                checkedBoxes.forEach(box => {
-                    observations.push(box.dataset.obsId);
-                    riskScore += parseInt(box.dataset.score || 0);
-                });
-                riskScore += parseInt(selectedRadio.dataset.score || 0);
-
-                // Calculate Risk Level
-                let riskLevel = riskScore >= 6 ? 'Action Required' : riskScore >= 3 ? 'Watch' : 'Normal';
                 
                 const entry = this.state.feedEntries.find(e => e.id === entryId);
                 
@@ -5755,9 +4404,6 @@
                     entryId,
                     trayResult: trayStatus,
                     trayResults: [trayStatus],
-                    observations,
-                    riskScore,
-                    riskLevel,
                     notes: container.querySelector('input').value,
                     newAmount: parseFloat(newAmount.toFixed(1)),
                     reason
@@ -5802,9 +4448,6 @@
                 await entryRef.update({
                     trayResult: data.trayResult,
                     trayResults: data.trayResults,
-                    observations: data.observations,
-                    riskScore: data.riskScore,
-                    riskLevel: data.riskLevel,
                     notes: data.notes
                 });
 
@@ -5826,9 +4469,6 @@
                 if (localEntry) {
                     localEntry.trayResult = data.trayResult;
                     localEntry.trayResults = data.trayResults;
-                    localEntry.observations = data.observations;
-                    localEntry.riskScore = data.riskScore;
-                    localEntry.riskLevel = data.riskLevel;
                     localEntry.notes = data.notes;
                 }
 
@@ -5885,9 +4525,6 @@
                         entry.trayResults = s.trayResults;
                         entry.notes = s.notes;
                         entry.trayResult = s.trayResult; // Updated single status
-                        entry.observations = s.observations;
-                        entry.riskScore = s.riskScore;
-                        entry.riskLevel = s.riskLevel;
                     }
 
                     // Update the tank with the next suggested feed amount
@@ -5900,21 +4537,12 @@
                     }
                 });
                 
-                // No need to call saveFeedEntries/saveTanks as we updated Firestore in the loop (if implemented correctly)
-                // But wait, the loop above only updated local state in the provided snippet?
-                // The provided snippet for acceptSuggestions was incomplete in the original code regarding Firestore.
-                // Let's fix it to write to Firestore.
-                
                 const batch = this.db.batch();
                 this.pendingSuggestions.forEach(s => {
                     const entryRef = this.db.collection('feedEntries').doc(s.entryId.toString());
                     batch.update(entryRef, {
                         trayResults: s.trayResults,
                         notes: s.notes,
-                        trayResult: s.trayResult,
-                        observations: s.observations,
-                        riskScore: s.riskScore,
-                        riskLevel: s.riskLevel
                     });
                     
                     const tankRef = this.db.collection('tanks').doc(s.tankId);
@@ -5937,342 +4565,13 @@
                 
                 const entries = this.state.feedEntries.filter(e => e.tankId == tankId);
                 const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
-                const tankHarvests = this.state.harvests.filter(h => h.tankId == tankId);
-                const totalHarvested = tankHarvests.reduce((sum, h) => sum + h.weight, 0);
                 
                 // Using configured FCR or default to 1.2
                 const estimatedFCR = this.state.settings.targetFCR || 1.2;
-                tank.biomass = Math.max(0, parseFloat(((totalFeed / estimatedFCR) - totalHarvested).toFixed(1)));
+                tank.biomass = Math.max(0, parseFloat((totalFeed / estimatedFCR).toFixed(1)));
                 
                 // Update Firestore
                 this.db.collection('tanks').doc(tankId).update({ biomass: tank.biomass });
-            }
-
-            // ===== WATER ANALYSIS =====
-            renderWaterScreen() {
-                const select = document.getElementById('waterTankSelect');
-                select.innerHTML = '';
-                document.getElementById('waterDate').value = this.currentDate;
-                
-                const currentFarmId = this.state.settings.currentFarmId;
-                const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
-                
-                if (tanks.length === 0) {
-                    select.innerHTML = '<option value="">No tanks found</option>';
-                    return;
-                }
-
-                tanks.forEach(t => {
-                    const option = document.createElement('option');
-                    option.value = t.id;
-                    option.textContent = t.name;
-                    select.appendChild(option);
-                });
-                
-                // Auto-fill DOC if tank selected
-                const updateDoc = () => {
-                    const t = this.getTankById(select.value);
-                    if (t) {
-                        const doc = Math.floor((new Date() - new Date(t.stockingDate)) / (1000 * 60 * 60 * 24));
-                        document.getElementById('waterDoc').value = doc;
-                        this.renderWaterHistory(t.id);
-                        this.renderWaterChart(t.id);
-                    }
-                };
-
-                select.onchange = () => {
-                    updateDoc();
-                };
-                
-                // Trigger once
-                if (tanks.length > 0) {
-                    select.value = tanks[0].id;
-                    updateDoc();
-                } else {
-                    document.getElementById('waterHistoryList').innerHTML = '<div class="empty-state" style="padding:20px;"><p>No tanks available</p></div>';
-                }
-            }
-
-            analyzeWater() {
-                const tankId = document.getElementById('waterTankSelect').value;
-                const tank = this.getTankById(tankId);
-                const acre = tank ? tank.size : 1;
-                // Convert to acres if needed for dosage calc (1 hectare = 2.47 acres)
-                const sizeInAcres = (tank && tank.sizeUnit === 'hectares') ? tank.size * 2.47 : acre;
-                
-                const ph = parseFloat(document.getElementById('waterPh').value);
-                const alk = parseFloat(document.getElementById('waterAlk').value);
-                const ca = parseFloat(document.getElementById('waterCa').value);
-                const mg = parseFloat(document.getElementById('waterMg').value);
-                const amm = parseFloat(document.getElementById('waterAmm').value);
-                const no2 = parseFloat(document.getElementById('waterNo2').value);
-
-                if (isNaN(ph)) {
-                    this.showToast('Please enter at least pH level', 'error');
-                    return;
-                }
-
-                let html = "";
-                let score = 100;
-                let issues = 0;
-
-                // Helper for cards
-                const createCard = (type, title, msg) => {
-                    return `
-                        <div class="lab-result-card ${type}">
-                            <div style="font-weight: 700; margin-bottom: 4px; color: var(--dark);">${title}</div>
-                            <div style="font-size: 13px; color: var(--dark); opacity: 0.8;">${msg}</div>
-                        </div>
-                    `;
-                };
-
-                // pH
-                if (ph >= 7.5 && ph <= 8.5) {
-                    html += createCard("success", "pH Stable", "pH is in safe range (7.5 - 8.5)");
-                } else {
-                    score -= 25; issues++;
-                    html += createCard("danger", "pH Risk", "pH is outside optimal range. May cause stress & ammonia toxicity.");
-                }
-
-                // Alkalinity
-                if (!isNaN(alk)) {
-                    if (alk >= 120 && alk <= 200) {
-                        html += createCard("success", "Alkalinity Good", "Buffering capacity is stable.");
-                    } else {
-                        score -= 10; issues++;
-                        html += createCard("warning", "Alkalinity Attention", "Maintain between 120–200 ppm for stability.");
-                    }
-                }
-
-                // Magnesium
-                if (!isNaN(mg)) {
-                    if (mg < 700) {
-                        score -= 25; issues++;
-                        const dose = Math.round(sizeInAcres * 25);
-                        html += createCard("danger", "Magnesium Critical", `Apply MgSO₄: <b>${dose} kg</b>. Split dose morning & evening.`);
-                    } else if (mg < 900) {
-                        score -= 10; issues++;
-                        html += createCard("warning", "Magnesium Low", "Levels are borderline. Consider supplementing.");
-                    } else {
-                        html += createCard("success", "Magnesium Optimal", "Supports good moulting & growth.");
-                    }
-                }
-
-                // Ca:Mg Ratio
-                if (!isNaN(ca) && !isNaN(mg) && mg > 0) {
-                    const ratio = ca / mg;
-                    if (ratio > 0.6) {
-                        score -= 25; issues++;
-                        html += createCard("danger", "Imbalanced Mineral Ratio", "Ca:Mg ratio is high. Magnesium is too low relative to Calcium.");
-                    } else {
-                        html += createCard("success", "Mineral Ratio Balanced", "Ca:Mg ratio is acceptable.");
-                    }
-                }
-
-                // Ammonia
-                if (!isNaN(amm)) {
-                    if (amm > 0.3 && ph > 8.2) {
-                        score -= 25; issues++;
-                        html += createCard("danger", "Ammonia Toxicity Risk", "High pH + Ammonia = Toxic. Reduce feed, add probiotics, increase aeration.");
-                    } else if (amm > 0.2) {
-                        score -= 10; issues++;
-                        html += createCard("warning", "Ammonia Warning", "Levels rising. Reduce feed by 5–10% and monitor.");
-                    } else {
-                        html += createCard("success", "Ammonia Safe", "Levels are within safe limits.");
-                    }
-                }
-
-                // Nitrite
-                if (!isNaN(no2)) {
-                    if (no2 < 0.1) {
-                        html += createCard("success", "Nitrite Safe", "No toxicity risk detected.");
-                    } else {
-                        score -= 25; issues++;
-                        html += createCard("danger", "Nitrite High", "Toxic to shrimp. Water exchange or nitrite-reducing probiotics required.");
-                    }
-                }
-
-                // Score Display
-                let scoreColor = "var(--success)";
-                let statusMsg = "Excellent Water Quality";
-                score = Math.max(0, score); // Prevent negative score
-                if (score < 80) { scoreColor = "var(--warning)"; statusMsg = "Attention Needed"; }
-                if (score < 60) { scoreColor = "var(--danger)"; statusMsg = "Critical Action Required"; }
-
-                const resultContainer = document.getElementById('waterAnalysisResult');
-                resultContainer.innerHTML = `
-                    <div class="lab-score" style="border-color: ${scoreColor}">
-                        <div class="score-circle" style="color: ${scoreColor}; border-color: ${scoreColor}">${score}</div>
-                        <div style="font-weight: 700; color: var(--dark);">${statusMsg}</div>
-                        <div style="font-size: 12px; color: var(--gray); margin-top: 4px;">${issues} issues detected</div>
-                    </div>
-                    ${html}
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:16px;">
-                        <button class="btn btn-success" onclick="app.saveWaterResult()">
-                            <i class="fas fa-save"></i> Save to Log
-                        </button>
-                        <button class="btn btn-secondary" onclick="document.getElementById('waterAnalysisResult').style.display='none'">
-                            Close
-                        </button>
-                    </div>
-                `;
-                resultContainer.style.display = 'block';
-                
-                // Scroll to results
-                resultContainer.scrollIntoView({ behavior: 'smooth' });
-            }
-
-            async saveWaterResult() {
-                const tankId = document.getElementById('waterTankSelect').value;
-                const tank = this.getTankById(tankId);
-                const date = document.getElementById('waterDate').value || this.currentDate;
-                const doc = parseInt(document.getElementById('waterDoc').value) || 0;
-                
-                const ph = parseFloat(document.getElementById('waterPh').value);
-                const alk = parseFloat(document.getElementById('waterAlk').value);
-                const ca = parseFloat(document.getElementById('waterCa').value);
-                const mg = parseFloat(document.getElementById('waterMg').value);
-                const amm = parseFloat(document.getElementById('waterAmm').value);
-                const no2 = parseFloat(document.getElementById('waterNo2').value);
-
-                // Simple score recalc for storage
-                let score = 100;
-                if (ph < 7.5 || ph > 8.5) score -= 25;
-                if (!isNaN(alk) && (alk < 120 || alk > 200)) score -= 10;
-                if (!isNaN(mg)) { if (mg < 700) score -= 25; else if (mg < 900) score -= 10; }
-                if (!isNaN(ca) && !isNaN(mg) && mg > 0 && (ca/mg) > 0.6) score -= 25;
-                if (!isNaN(amm)) { if (amm > 0.3 && ph > 8.2) score -= 25; else if (amm > 0.2) score -= 10; }
-                if (!isNaN(no2) && no2 >= 0.1) score -= 25;
-                
-                const entry = {
-                    id: Date.now(),
-                    tankId,
-                    farmId: tank.farmId,
-                    date,
-                    doc,
-                    ph, alk, ca, mg, amm, no2,
-                    score: Math.max(0, score)
-                };
-
-                this.state.waterEntries.push(entry);
-                await this.db.collection('waterEntries').doc(entry.id.toString()).set(entry);
-                
-                this.renderWaterHistory(tankId);
-                this.renderWaterChart(tankId);
-                this.showToast('Water test result saved!');
-                document.getElementById('waterAnalysisResult').style.display = 'none';
-            }
-
-            renderWaterHistory(tankId) {
-                const container = document.getElementById('waterHistoryList');
-                const entries = this.state.waterEntries
-                    .filter(e => e.tankId == tankId)
-                    .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
-
-                if (entries.length === 0) {
-                    container.innerHTML = '<div class="text-center text-muted" style="padding:20px; font-size:13px;">No history available for this tank.</div>';
-                    return;
-                }
-
-                container.innerHTML = entries.map(e => {
-                    let scoreColor = "var(--success)";
-                    if (e.score < 80) scoreColor = "var(--warning)";
-                    if (e.score < 60) scoreColor = "var(--danger)";
-
-                    return `
-                        <div class="timeline-card" style="border-left-color: ${scoreColor}; padding: 12px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                <div style="font-weight:700; font-size:14px;">${new Date(e.date).toLocaleDateString()} <span style="font-weight:400; color:var(--gray); font-size:12px;">(DOC ${e.doc})</span></div>
-                                <div style="display:flex; align-items:center; gap:10px;">
-                                    <div style="font-weight:800; color:${scoreColor};">${e.score}/100</div>
-                                    <i class="fas fa-trash" style="color:var(--gray); cursor:pointer; font-size:12px;" onclick="app.deleteWaterEntry(${e.id})"></i>
-                                </div>
-                            </div>
-                            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; font-size:12px;">
-                                <div>pH: <b>${e.ph}</b></div>
-                                <div>Alk: <b>${e.alk || '-'}</b></div>
-                                <div>Mg: <b>${e.mg || '-'}</b></div>
-                                <div>Amm: <b>${e.amm || '-'}</b></div>
-                                <div>NO2: <b>${e.no2 || '-'}</b></div>
-                                <div>Ca: <b>${e.ca || '-'}</b></div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            renderWaterChart(tankId) {
-                const ctx = document.getElementById('waterTrendChart');
-                const container = document.getElementById('waterChartContainer');
-                
-                if (!ctx) return;
-
-                // Filter entries for this tank
-                const entries = this.state.waterEntries
-                    .filter(e => e.tankId == tankId)
-                    .sort((a, b) => new Date(a.date) - new Date(b.date) || a.id - b.id) // Ascending for chart
-                    .slice(-30); // Increased limit to last 30
-
-                if (entries.length < 2) {
-                    container.style.display = 'none';
-                    return;
-                }
-                container.style.display = 'block';
-
-                const labels = entries.map(e => new Date(e.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }));
-                const phData = entries.map(e => e.ph);
-                const ammData = entries.map(e => e.amm || 0);
-
-                if (this.waterChart) this.waterChart.destroy();
-
-                this.waterChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            {
-                                label: 'pH',
-                                data: phData,
-                                borderColor: '#4CAF50',
-                                backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                                yAxisID: 'y',
-                                tension: 0.3
-                            },
-                            {
-                                label: 'Ammonia (ppm)',
-                                data: ammData,
-                                borderColor: '#F44336',
-                                backgroundColor: 'rgba(244, 67, 54, 0.1)',
-                                yAxisID: 'y1',
-                                tension: 0.3
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        interaction: { mode: 'index', intersect: false },
-                        plugins: { title: { display: true, text: 'Water Quality Trend (Last 30 Tests)' } },
-                        scales: {
-                            y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'pH' }, min: 6, max: 10 },
-                            y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Ammonia' }, grid: { drawOnChartArea: false }, min: 0 }
-                        }
-                    }
-                });
-            }
-
-            async deleteWaterEntry(id) {
-                if (confirm('Delete this water test record?')) {
-                    await this.db.collection('waterEntries').doc(id.toString()).delete();
-                    const entry = this.state.waterEntries.find(e => e.id === id);
-                    const tankId = entry ? entry.tankId : null;
-                    this.state.waterEntries = this.state.waterEntries.filter(e => e.id !== id);
-                    if (tankId) {
-                        this.renderWaterHistory(tankId);
-                        this.renderWaterChart(tankId);
-                    }
-                    this.showToast('Record deleted');
-                }
             }
 
             // CRUD Operations
@@ -6374,9 +4673,7 @@
                     // 1. Delete all associated sub-data collections
                     // We query by farmId to ensure we catch everything
                     const collections = [
-                        'feedEntries', 'waterEntries', 'harvests', 
-                        'sampling', 'medicineInventory', 'medicineApplications',
-                        'invitations'
+                        'feedEntries', 'invitations'
                     ];
 
                     await Promise.all(collections.map(col => 
@@ -6385,9 +4682,6 @@
 
                     // 2. Delete Tanks
                     await this.deleteCollectionByQuery(this.db.collection('tanks').where('farmId', '==', farmId));
-
-                    // 3. Delete Inventory Document
-                    await this.db.collection('inventory').doc(farmId).delete();
 
                     // 4. Delete Farm Document
                     await this.db.collection('farms').doc(farmId).delete();
@@ -6521,16 +4815,12 @@
                 try {
                     // Use helper to delete large collections safely
                     await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('tankId', '==', tankId));
-                    await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tankId));
-                    await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tankId));
                     
                     // Delete tank document
                     await this.db.collection('tanks').doc(tankId).delete();
 
                     this.state.tanks = this.state.tanks.filter(t => t.id !== tankId);
                     this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId !== tankId);
-                    this.state.waterEntries = this.state.waterEntries.filter(e => e.tankId !== tankId);
-                    this.state.harvests = this.state.harvests.filter(h => h.tankId !== tankId);
                     
                     this.showLoading(false);
                     this.renderAll();
@@ -6623,13 +4913,6 @@
                     trayResult: worstResult
                 });
 
-                // Adjust inventory
-                this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) - diff;
-                if (this.state.settings.currentFarmId) {
-                    await this.db.collection('inventory').doc(this.state.settings.currentFarmId).set({
-                        totalKg: firebase.firestore.FieldValue.increment(-diff)
-                    }, { merge: true });
-                }
 
                 this.recalculateTankBiomass(entry.tankId);
                 this.showLoading(false);
@@ -6650,49 +4933,11 @@
                 this.showLoading(true);
                 await this.db.collection('feedEntries').doc(this.editingEntryId.toString()).delete();
                 
-                // Refund inventory
-                this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + amount;
-                if (this.state.settings.currentFarmId) {
-                    await this.db.collection('inventory').doc(this.state.settings.currentFarmId).set({
-                        totalKg: firebase.firestore.FieldValue.increment(amount)
-                    }, { merge: true });
-                }
-
                 if (tankId) this.recalculateTankBiomass(tankId);
                 this.closeAllModals();
                 this.showLoading(false);
                 // No need to call renderAll(), onSnapshot will handle it.
                 this.showToast('Entry deleted', 'warning');
-            }
-
-            // Prices
-            renderPrices() {
-                const container = document.getElementById('priceRows');
-                container.innerHTML = this.state.prices.map(p => `
-                    <div class="price-row">
-                        <div class="price-count">${p.count}c</div>
-                        <div class="price-value">₹${p.price}</div>
-                        <div class="price-change ${p.change.includes('+') ? 'up' : 'down'}">${p.change}</div>
-                        <div class="price-trend">
-                            <i class="fas fa-arrow-${p.trend === 'up' ? 'up' : p.trend === 'down' ? 'down' : 'right'} trend-${p.trend}"></i>
-                            <span class="trend-${p.trend}">${p.trend.toUpperCase()}</span>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            calculateHarvestValue() {
-                const yieldVal = parseFloat(document.getElementById('harvestYield').value);
-                const size = parseInt(document.getElementById('harvestSize').value);
-                
-                if (!yieldVal) return;
-
-                const priceObj = this.state.prices.find(p => p.count == size);
-                if (priceObj) {
-                    const total = yieldVal * priceObj.price;
-                    document.getElementById('harvestValue').textContent = `₹${total.toLocaleString()}`;
-                    document.getElementById('harvestResult').style.display = 'block';
-                }
             }
 
             openTankDetail(tankId) {
@@ -6719,9 +4964,6 @@
                 const entries = this.state.feedEntries.filter(e => e.tankId == tankId);
                 const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
 
-                // Get latest ABW
-                const samples = this.state.samplingEntries.filter(s => s.tankId == tankId).sort((a,b) => new Date(b.date) - new Date(a.date));
-                const latestABW = samples.length > 0 ? samples[0].abw : 0;
 
                 const content = document.getElementById('tankDetailContent');
                 this.editingTankId = tankId; // Important for footer actions
@@ -6748,51 +4990,14 @@
                             <div class="stat-value">${entries.length}</div>
                             <div class="stat-label">Feed Entries</div>
                         </div>
-                        <div class="stat-card" style="border-color: var(--info);">
-                            <div class="stat-value" style="color: var(--info);">${latestABW}g</div>
-                            <div class="stat-label">Current ABW</div>
-                        </div>
-                    </div>
-
-                    <!-- Growth Chart -->
-                    <div class="chart-container" style="height: 250px; margin-top: 20px; background: white; border: 2px solid var(--border); border-radius: var(--radius); padding: 10px; display: none;" id="growthChartContainer">
-                        <canvas id="growthChart"></canvas>
                     </div>
                 `;
                 
                 const footer = document.getElementById('tankDetailFooter');
-                const isInactive = tank.status === 'inactive';
-
-                if (isInactive) {
-                    footer.innerHTML = `
-                        <button class="btn btn-success" style="width: 100%;" onclick="app.openStartNewCropModal('${tank.id}')">
-                            <i class="fas fa-sync-alt"></i> Start New Crop
-                        </button>
-                    `;
-                } else {
-                    footer.innerHTML = `
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-bottom: 8px;">
-                             <button class="btn btn-primary" onclick="app.openSamplingModal('${tank.id}')">
-                                <i class="fas fa-balance-scale"></i> Sample
-                            </button>
-                             <button class="btn btn-info" style="background-color: var(--info); color: white;" onclick="app.openApplyMedicineModal('${tank.id}')">
-                                <i class="fas fa-syringe"></i> Medicine
-                            </button>
-                        </div>
-                        <div style="display:flex; gap:8px; width:100%;">
-                            <button class="btn btn-danger" style="flex:1;" onclick="app.openEndCropModal('${tank.id}')">
-                                <i class="fas fa-flag-checkered"></i> End Crop
-                            </button>
-                            <button class="btn btn-warning" style="flex:1;" onclick="app.openPartialHarvestModal('${tank.id}')">
-                                <i class="fas fa-weight-hanging"></i> Partial
-                            </button>
-                        </div>
-                    `;
-                }
+                footer.innerHTML = ''; // No extra actions for MVP
 
                 document.getElementById('tankDetailTitle').textContent = tank.name;
                 document.getElementById('tankDetailModal').classList.add('active');
-                this.renderGrowthChart(tankId);
             }
 
             // Settings
@@ -6822,10 +5027,7 @@
                     `;
                 }
 
-                this.renderSettingsSupplements();
-                this.renderSettingsFeedTypes();
                 document.getElementById('settingFeedsPerDay').value = this.state.settings.feedsPerDay || 4;
-                document.getElementById('settingTargetFCR').value = this.state.settings.targetFCR || 1.2;
                 
                 // Guest Sync Button
                 const footer = document.querySelector('#settingsModal .modal-footer');
@@ -6915,42 +5117,6 @@
                         this.showLoading(false);
                         this.showToast(error.message, 'error');
                     });
-            }
-
-            async openTeamManagement() {
-                const list = document.getElementById('teamMembersList');
-                const section = document.getElementById('teamManagementSection');
-                const currentFarm = this.getFarmById(this.state.settings.currentFarmId);
-
-                if (!currentFarm || this.currentUser.uid !== currentFarm.ownerId) {
-                    section.style.display = 'none';
-                    return;
-                }
-                section.style.display = 'block';
-                list.innerHTML = '<div class="text-muted">Loading team...</div>';
-
-                const members = currentFarm.members || {};
-                let html = '';
-                for (const uid in members) {
-                    if (uid === currentFarm.ownerId) continue; // Don't list the owner themselves
-
-                    const userProfile = await this.getUserProfile({ uid });
-                    const name = userProfile ? userProfile.name : 'Invited User';
-                    const phone = userProfile ? userProfile.phone : '...';
-
-                    html += `
-                        <div class="settings-item">
-                            <div>
-                                <span style="font-weight: 600;">${name}</span>
-                                <span style="font-size: 12px; color: var(--gray); display: block;">${phone} - <strong>${members[uid]}</strong></span>
-                            </div>
-                            <button class="btn-icon" style="color: var(--danger);" onclick="app.removeMember('${uid}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                }
-                list.innerHTML = html || '<div class="text-muted">No other members on this farm.</div>';
             }
 
             async inviteMember() {
@@ -7096,373 +5262,10 @@
                 this.showLoading(false);
             }
 
-            renderSettingsSupplements() {
-                const list = document.getElementById('settingsSupplementsList');
-                list.innerHTML = this.state.settings.supplements.map(s => `
-                    <div class="settings-item">
-                        <span>${s}</span>
-                        <button class="btn-icon" style="color: var(--danger);" onclick="app.removeSupplement('${s}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `).join('');
-            }
-
-            renderSettingsFeedTypes() {
-                const list = document.getElementById('settingsFeedTypesList');
-                list.innerHTML = this.state.settings.feedTypes.map(s => `
-                    <div class="settings-item">
-                        <span>${s}</span>
-                        <button class="btn-icon" style="color: var(--danger);" onclick="app.removeFeedType('${s}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `).join('');
-            }
-
             updateFeedsPerDay(val) {
                 this.state.settings.feedsPerDay = parseInt(val);
                 this.saveSettings();
                 this.renderLogBook();
-            }
-
-            updateTargetFCR(val) {
-                const fcr = parseFloat(val);
-                if (fcr > 0) {
-                    this.state.settings.targetFCR = fcr;
-                    this.saveSettings();
-                    // Recalculate for all active tanks
-                    this.state.tanks.forEach(tank => {
-                        if (tank.status !== 'inactive') {
-                            this.recalculateTankBiomass(tank.id);
-                        }
-                    });
-                    this.renderOverallStats();
-                    this.showToast('FCR updated & biomass recalculated');
-                }
-            }
-
-            addNewSupplement() {
-                const input = document.getElementById('newSupplementInput');
-                const name = input.value.trim();
-                if (name && !this.state.settings.supplements.includes(name)) {
-                    this.state.settings.supplements.push(name);
-                    this.saveSettings();
-                    this.renderSettingsSupplements();
-                    input.value = '';
-                }
-            }
-
-            removeSupplement(name) {
-                this.state.settings.supplements = this.state.settings.supplements.filter(s => s !== name);
-                this.saveSettings();
-                this.renderSettingsSupplements();
-            }
-
-            addNewFeedType() {
-                const input = document.getElementById('newFeedTypeInput');
-                const name = input.value.trim();
-                if (name && !this.state.settings.feedTypes.includes(name)) {
-                    this.state.settings.feedTypes.push(name);
-                    this.saveSettings();
-                    this.renderSettingsFeedTypes();
-                    input.value = '';
-                }
-            }
-
-            removeFeedType(name) {
-                this.state.settings.feedTypes = this.state.settings.feedTypes.filter(s => s !== name);
-                this.saveSettings();
-                this.renderSettingsFeedTypes();
-            }
-
-            // ===== CROP CYCLE MANAGEMENT =====
-            openEndCropModal(tankId) {
-                this.currentHarvestTankId = tankId;
-                document.getElementById('endCropDate').value = this.currentDate;
-                document.getElementById('endCropWeight').value = '';
-                document.getElementById('endCropCount').value = '';
-                this.closeAllModals();
-                document.getElementById('endCropModal').classList.add('active');
-            }
-
-            async saveEndCrop() {
-                const tankId = this.currentHarvestTankId;
-                const date = document.getElementById('endCropDate').value;
-                const weight = parseFloat(document.getElementById('endCropWeight').value);
-                const count = parseFloat(document.getElementById('endCropCount').value);
-
-                if (!weight || !count) {
-                    this.showToast('Please enter final weight and count', 'error');
-                    return;
-                }
-
-                const tank = this.getTankById(tankId);
-                if (!tank) return;
-
-                if (!confirm(`Are you sure you want to end the crop cycle for "${tank.name}"? The tank will become inactive.`)) {
-                    return;
-                }
-
-                // Create final harvest record
-                const harvest = {
-                    id: Date.now(),
-                    tankId,
-                    farmId: tank.farmId,
-                    date,
-                    weight,
-                    count,
-                    type: 'final'
-                };
-                this.state.harvests.push(harvest);
-                await this.db.collection('harvests').doc(harvest.id.toString()).set(harvest);
-
-                // Update tank status
-                tank.status = 'inactive';
-                await this.db.collection('tanks').doc(tank.id).update({ status: 'inactive' });
-
-                this.closeAllModals();
-                this.renderAll();
-                this.showToast(`Crop cycle for ${tank.name} ended.`, 'success');
-            }
-
-            openStartNewCropModal(tankId) {
-                this.editingTankId = tankId;
-                document.getElementById('newStockingDate').value = this.currentDate;
-                document.getElementById('newInitialSeed').value = '';
-                this.closeAllModals();
-                document.getElementById('startNewCropModal').classList.add('active');
-            }
-
-            async saveNewCrop() {
-                const tankId = this.editingTankId;
-                const newStockingDate = document.getElementById('newStockingDate').value;
-                const newInitialSeed = parseInt(document.getElementById('newInitialSeed').value);
-
-                if (!newStockingDate || !newInitialSeed || newInitialSeed <= 0) {
-                    this.showToast('Please provide a valid stocking date and seed count.', 'error');
-                    return;
-                }
-
-                const tank = this.getTankById(tankId);
-                if (!tank) return;
-
-                if (!confirm(`FINAL WARNING:\n\nAll existing data for "${tank.name}" (feed logs, water tests, harvests) will be permanently deleted. This cannot be undone.\n\nAre you sure you want to start a new crop cycle?`)) {
-                    return;
-                }
-
-                this.showLoading(true);
-
-                // Delete associated data safely using helper
-                await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('tankId', '==', tankId));
-                await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tankId));
-                await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tankId));
-
-                this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId != tankId);
-                this.state.waterEntries = this.state.waterEntries.filter(e => e.tankId != tankId);
-                this.state.harvests = this.state.harvests.filter(h => h.tankId != tankId);
-
-                // Update tank
-                tank.status = 'active';
-                tank.stockingDate = newStockingDate;
-                tank.initialSeed = newInitialSeed;
-                tank.currentSeed = newInitialSeed;
-                tank.biomass = 0;
-                tank.nextSuggestedFeed = null;
-
-                await this.db.collection('tanks').doc(tankId).update({ 
-                    status: 'active', stockingDate: newStockingDate, initialSeed: newInitialSeed, currentSeed: newInitialSeed, biomass: 0, nextSuggestedFeed: null 
-                });
-
-                this.showLoading(false);
-                this.closeAllModals();
-                this.renderAll();
-                this.showToast(`New crop cycle started for ${tank.name}!`, 'success');
-            }
-
-            // ===== SAMPLING & GROWTH CHART =====
-            openSamplingModal(tankId) {
-                if(tankId) this.editingTankId = tankId;
-                document.getElementById('sampleDate').value = this.currentDate;
-                document.getElementById('sampleWeight').value = '';
-                document.getElementById('sampleCount').value = '';
-                document.getElementById('abwResultCard').style.display = 'none';
-                
-                const calcABW = () => {
-                    const w = parseFloat(document.getElementById('sampleWeight').value);
-                    const c = parseFloat(document.getElementById('sampleCount').value);
-                    if(w > 0 && c > 0) {
-                        const abw = (w/c).toFixed(2);
-                        document.getElementById('calculatedABW').textContent = `${abw}g`;
-                        document.getElementById('abwResultCard').style.display = 'block';
-                    } else {
-                        document.getElementById('abwResultCard').style.display = 'none';
-                    }
-                };
-                document.getElementById('sampleWeight').onkeyup = calcABW;
-                document.getElementById('sampleCount').onkeyup = calcABW;
-                document.getElementById('sampleWeight').onchange = calcABW;
-                document.getElementById('sampleCount').onchange = calcABW;
-
-                this.closeAllModals();
-                document.getElementById('samplingModal').classList.add('active');
-            }
-
-            async saveSampling() {
-                const tankId = this.editingTankId;
-                const tank = this.getTankById(tankId);
-                const date = document.getElementById('sampleDate').value;
-                const weight = parseFloat(document.getElementById('sampleWeight').value);
-                const count = parseFloat(document.getElementById('sampleCount').value);
-
-                if(isNaN(weight) || weight <= 0 || isNaN(count) || count <= 0) { this.showToast('Please enter valid positive numbers', 'error'); return; }
-
-                const abw = parseFloat((weight/count).toFixed(2));
-                const sample = {
-                    id: Date.now(), tankId, farmId: tank.farmId, date, weight, count, abw
-                };
-                this.state.samplingEntries.push(sample);
-                
-                await this.db.collection('sampling').doc(sample.id.toString()).set(sample);
-                this.closeAllModals();
-                this.showToast(`Sample logged! ABW: ${abw}g`);
-                if(tankId) this.openTankDetail(tankId);
-            }
-
-            renderGrowthChart(tankId) {
-                const ctx = document.getElementById('growthChart');
-                const container = document.getElementById('growthChartContainer');
-                if (!ctx || !container) return;
-
-                const samples = this.state.samplingEntries
-                    .filter(s => s.tankId == tankId)
-                    .sort((a, b) => new Date(a.date) - new Date(b.date));
-
-                if (samples.length < 2) {
-                    container.style.display = 'none';
-                    return;
-                }
-                container.style.display = 'block';
-
-                const labels = samples.map(s => new Date(s.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }));
-                const data = samples.map(s => s.abw);
-
-                if (this.growthChart) this.growthChart.destroy();
-
-                this.growthChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'ABW (g)',
-                            data: data,
-                            borderColor: '#9C27B0',
-                            backgroundColor: 'rgba(156, 39, 176, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            title: { display: true, text: 'Growth Trend (ABW)' },
-                            legend: { display: false }
-                        },
-                        scales: {
-                            y: { beginAtZero: false }
-                        }
-                    }
-                });
-            }
-
-            // ===== PARTIAL HARVEST =====
-            openPartialHarvestModal(tankId) {
-                this.currentHarvestTankId = tankId;
-                document.getElementById('harvestDate').value = this.currentDate;
-                document.getElementById('harvestWeight').value = '';
-                document.getElementById('harvestCount').value = '';
-                this.closeAllModals();
-                document.getElementById('partialHarvestModal').classList.add('active');
-            }
-
-            async savePartialHarvest() {
-                const tankId = this.currentHarvestTankId;
-                const date = document.getElementById('harvestDate').value;
-                const weight = parseFloat(document.getElementById('harvestWeight').value);
-                const count = parseFloat(document.getElementById('harvestCount').value);
-
-                if (!weight || !count) {
-                    this.showToast('Please enter weight and count', 'error');
-                    return;
-                }
-
-                const tank = this.getTankById(tankId);
-                
-                // Record Harvest
-                const harvest = {
-                    id: Date.now(),
-                    tankId,
-                    farmId: tank.farmId,
-                    date,
-                    weight,
-                    count
-                };
-                this.state.harvests.push(harvest);
-                await this.db.collection('harvests').doc(harvest.id.toString()).set(harvest);
-
-                // Update Tank Stats
-                // 1. Update Biomass
-                const oldBiomass = tank.biomass || 0;
-                const newBiomass = Math.max(0, oldBiomass - weight);
-                tank.biomass = newBiomass;
-
-                // 2. Update Seed Count (Approximate)
-                // Harvested pieces = Weight (kg) * Count (pcs/kg)
-                const harvestedPcs = weight * count;
-                // If we don't have currentSeed, assume initialSeed is the start
-                if (!tank.currentSeed) tank.currentSeed = tank.initialSeed;
-                tank.currentSeed = Math.max(0, Math.floor(tank.currentSeed - harvestedPcs));
-
-                await this.db.collection('tanks').doc(tank.id).update({ biomass: newBiomass, currentSeed: tank.currentSeed });
-
-                // Generate Plan
-                this.renderHarvestPlan(tank, weight, count, newBiomass, tank.currentSeed);
-                
-                this.closeAllModals();
-                document.getElementById('harvestPlanModal').classList.add('active');
-                this.renderAll();
-            }
-
-            renderHarvestPlan(tank, hWeight, hCount, remBiomass, remSeed) {
-                const content = document.getElementById('harvestPlanContent');
-                // Simple feed logic: 2% of biomass for maintenance/growth after stress
-                const suggestedFeed = (remBiomass * 0.02).toFixed(1); 
-
-                content.innerHTML = `
-                    <div class="stat-card" style="margin-bottom:16px; border-color:var(--success);">
-                        <div class="stat-label">Harvest Recorded</div>
-                        <div class="stat-value" style="color:var(--success);">${hWeight} kg <span style="font-size:14px; color:var(--gray);">@ ${hCount}c</span></div>
-                    </div>
-                    
-                    <div class="plan-card">
-                        <div class="plan-title"><i class="fas fa-chart-line"></i> Status Update</div>
-                        <p><strong>Remaining Biomass:</strong> ${remBiomass.toFixed(1)} kg</p>
-                        <p><strong>Est. Remaining Stock:</strong> ${remSeed.toLocaleString()} pcs</p>
-                        <p><strong>New Feed Target:</strong> ~${suggestedFeed} kg/day</p>
-                    </div>
-
-                    <div class="plan-card" style="background:var(--warning-light); border-color:#ff9800;">
-                        <div class="plan-title" style="color:#e65100;"><i class="fas fa-exclamation-circle"></i> Immediate Actions</div>
-                        <ul style="padding-left:20px; font-size:13px; line-height:1.6;">
-                            <li><strong>Stop Feed:</strong> Skip the next scheduled feed to allow tank to settle.</li>
-                            <li><strong>Check Bottom:</strong> Harvesting disturbs sludge. Apply <strong>Probiotics</strong> (Soil/Water) immediately to prevent ammonia spikes.</li>
-                            <li><strong>Monitor Oxygen:</strong> Ensure aerators are running full capacity tonight.</li>
-                            <li><strong>Resume Feeding:</strong> Start with 50% of the new target (${(suggestedFeed/2).toFixed(1)} kg) tomorrow and increase gradually.</li>
-                        </ul>
-                    </div>
-                `;
             }
 
             shareApp() {

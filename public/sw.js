@@ -4,7 +4,6 @@ const ASSETS_TO_CACHE = [
   '/index.html',
   '/manifest.json',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-  'https://cdn.jsdelivr.net/npm/chart.js',
   'https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js',
   'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js',
   'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js'
