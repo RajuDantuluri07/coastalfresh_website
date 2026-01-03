@@ -2689,6 +2689,39 @@
         </div>
     </div>
 
+    <!-- Link Phone Modal -->
+    <div class="modal-overlay" id="linkPhoneModal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-mobile-alt"></i> Link Phone Number</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="link-phone-step">
+                    <p class="text-muted" style="font-size: 13px; margin-bottom: 15px;">Link your phone number to enable SMS notifications and alternative login.</p>
+                    <div class="form-group">
+                        <label>Mobile Number</label>
+                        <div style="display: flex; align-items: center;">
+                            <span style="padding: 12px; background: #eee; border: 2px solid var(--border); border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm); color: var(--dark); font-weight: 600;">+91</span>
+                            <input type="tel" id="linkPhoneInput" class="form-control" placeholder="Enter 10-digit number" maxlength="10" style="border-radius: 0 var(--radius-sm) var(--radius-sm) 0;">
+                        </div>
+                    </div>
+                    <div id="link-recaptcha-container"></div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 10px;" onclick="app.sendLinkOTP()">Send OTP</button>
+                </div>
+
+                <div id="link-otp-step" style="display: none;">
+                    <div class="form-group">
+                        <label>OTP</label>
+                        <input type="number" id="linkOtpInput" class="form-control" placeholder="XXXXXX" maxlength="6">
+                    </div>
+                    <p class="text-muted" style="font-size: 13px; margin-top: -10px; margin-bottom: 15px;">Enter code sent to your phone.</p>
+                    <button class="btn btn-success" style="width: 100%;" onclick="app.verifyLinkOTP()">Verify & Link</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Settings Modal -->
     <div class="modal-overlay" id="settingsModal">
         <div class="modal-content">
@@ -2697,6 +2730,7 @@
                 <button class="close-modal">&times;</button>
             </div>
             <div class="modal-body">
+                <div id="settingsProfileSection"></div>
                 <h4 style="margin-bottom: 12px; color: var(--dark);">General</h4>
                 <div class="form-group">
                     <label>Feeds per Day</label>
@@ -3087,6 +3121,14 @@
                         </div>
                     </div>
                     <button class="btn btn-primary" style="width: 100%;" onclick="app.sendOTP()">Continue</button>
+                    
+                    <div style="margin-top: 20px; position: relative; text-align: center;">
+                        <span style="background: white; padding: 0 10px; color: var(--gray); font-size: 12px; position: relative; z-index: 1;">OR</span>
+                        <div style="position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #eee; z-index: 0;"></div>
+                    </div>
+                    <button class="btn btn-secondary" style="width: 100%; margin-top: 20px; background: white; color: #333; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; gap: 10px;" onclick="app.signInWithGoogle()">
+                        <i class="fab fa-google" style="color: #DB4437;"></i> Sign in with Google
+                    </button>
                 </div>
 
                 <div id="otp-step" style="display: none;">
@@ -4794,6 +4836,10 @@
             }
 
             async handleInvitations(user) {
+                if (!user.phoneNumber) {
+                    this.completeAppInitialization();
+                    return;
+                }
                 try {
                     const q = await this.db.collection('invitations').where('invitedPhone', '==', user.phoneNumber).where('status', '==', 'pending').get();
                     if (q.empty) {
@@ -4826,6 +4872,7 @@
             }
 
             async checkForInvitations(user) {
+                if (!user.phoneNumber) return false;
                 try {
                     const q = await this.db.collection('invitations').where('invitedPhone', '==', user.phoneNumber).where('status', '==', 'pending').get();
                     return !q.empty;
@@ -4839,6 +4886,19 @@
                 if (this.resendTimerInterval) clearInterval(this.resendTimerInterval);
                 document.getElementById('otp-step').style.display = 'none';
                 document.getElementById('phone-step').style.display = 'block';
+            }
+
+            signInWithGoogle() {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                this.showLoading(true);
+                this.auth.signInWithPopup(provider)
+                    .then((result) => {
+                        // Success handled by onAuthStateChanged
+                    }).catch((error) => {
+                        this.showLoading(false);
+                        console.error("Google Sign In Error", error);
+                        this.showToast(error.message, 'error');
+                    });
             }
 
             sendOTP() {
@@ -4954,7 +5014,14 @@
                 const user = this.auth.currentUser;
                 if (!user) return;
 
-                const userProfile = { name, role, phone: user.phoneNumber, createdAt: new Date(), isPro: true };
+                const userProfile = { 
+                    name, 
+                    role, 
+                    phone: user.phoneNumber || null, 
+                    email: user.email || null,
+                    createdAt: new Date(), 
+                    isPro: true 
+                };
                 this.showLoading(true);
                 await this.db.collection('users').doc(user.uid).set(userProfile);
                 
@@ -6697,6 +6764,31 @@
 
             // Settings
             openSettingsModal() {
+                // Render Profile Section
+                const profileContainer = document.getElementById('settingsProfileSection');
+                if (profileContainer && this.currentUser) {
+                    profileContainer.innerHTML = `
+                        <h4 style="margin-bottom: 12px; color: var(--dark);">Profile</h4>
+                        <div class="settings-item">
+                            <div>
+                                <span style="font-weight: 600; display:block;">${this.currentUser.name || 'User'}</span>
+                                <span style="font-size: 12px; color: var(--gray);">${this.currentUser.email || ''}</span>
+                            </div>
+                        </div>
+                        <div class="settings-item">
+                            <div>
+                                <span style="font-size: 13px; color: var(--gray);">Phone</span>
+                                <div style="font-weight: 600;">${this.currentUser.phone || 'Not Linked'}</div>
+                            </div>
+                            ${!this.currentUser.phone ? 
+                                `<button class="btn btn-sm btn-primary" onclick="app.openLinkPhoneModal()">Link</button>` : 
+                                `<i class="fas fa-check-circle" style="color: var(--success);"></i>`
+                            }
+                        </div>
+                        <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+                    `;
+                }
+
                 this.renderSettingsSupplements();
                 this.renderSettingsFeedTypes();
                 document.getElementById('settingFeedsPerDay').value = this.state.settings.feedsPerDay || 4;
@@ -6716,6 +6808,80 @@
                 }
                 
                 document.getElementById('settingsModal').classList.add('active');
+            }
+
+            openLinkPhoneModal() {
+                document.getElementById('linkPhoneInput').value = '';
+                document.getElementById('linkOtpInput').value = '';
+                document.getElementById('link-phone-step').style.display = 'block';
+                document.getElementById('link-otp-step').style.display = 'none';
+                
+                this.closeAllModals();
+                document.getElementById('linkPhoneModal').classList.add('active');
+                
+                // Initialize Recaptcha for linking if not exists
+                if (!window.linkRecaptchaVerifier) {
+                    window.linkRecaptchaVerifier = new firebase.auth.RecaptchaVerifier('link-recaptcha-container', {
+                        'size': 'invisible'
+                    });
+                }
+            }
+
+            sendLinkOTP() {
+                let phone = document.getElementById('linkPhoneInput').value.trim();
+                phone = phone.replace(/\D/g, '');
+                if (phone.length !== 10) {
+                    this.showToast('Enter valid 10-digit number', 'error');
+                    return;
+                }
+                const formattedPhone = '+91' + phone;
+                
+                this.showLoading(true);
+                const appVerifier = window.linkRecaptchaVerifier;
+                
+                this.auth.currentUser.linkWithPhoneNumber(formattedPhone, appVerifier)
+                    .then((confirmationResult) => {
+                        window.linkConfirmationResult = confirmationResult;
+                        this.showLoading(false);
+                        this.showToast('OTP Sent');
+                        document.getElementById('link-phone-step').style.display = 'none';
+                        document.getElementById('link-otp-step').style.display = 'block';
+                    }).catch((error) => {
+                        this.showLoading(false);
+                        console.error("Link Error", error);
+                        let msg = error.message;
+                        if (error.code === 'auth/credential-already-in-use') {
+                            msg = 'Phone number already linked to another account.';
+                        }
+                        this.showToast(msg, 'error');
+                        if (window.linkRecaptchaVerifier) window.linkRecaptchaVerifier.clear();
+                    });
+            }
+
+            verifyLinkOTP() {
+                const otp = document.getElementById('linkOtpInput').value;
+                if (otp.length < 6) return;
+                
+                this.showLoading(true);
+                window.linkConfirmationResult.confirm(otp)
+                    .then(async (result) => {
+                        const user = result.user;
+                        // Update Firestore
+                        await this.db.collection('users').doc(user.uid).update({
+                            phone: user.phoneNumber
+                        });
+                        
+                        // Update local state
+                        this.currentUser.phone = user.phoneNumber;
+                        
+                        this.showLoading(false);
+                        this.closeAllModals();
+                        this.showToast('Phone linked successfully!', 'success');
+                        this.openSettingsModal();
+                    }).catch((error) => {
+                        this.showLoading(false);
+                        this.showToast(error.message, 'error');
+                    });
             }
 
             async openTeamManagement() {
