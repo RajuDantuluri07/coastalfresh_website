@@ -133,20 +133,6 @@
             align-items: center;
         }
 
-        .farm-selector {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.2);
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-
-        .farm-selector i {
-            font-size: 14px;
-        }
-
         .app-title {
             font-size: 20px;
             font-weight: 700;
@@ -2130,10 +2116,11 @@
         <!-- Header -->
         <header class="app-header">
             <div class="header-content">
-                <div class="farm-selector" id="farmSelector">
-                    <i class="fas fa-farm"></i>
-                    <span id="currentFarmName">Select Farm</span>
-                    <i class="fas fa-chevron-down"></i>
+                <div style="position: relative;">
+                    <select id="farmSelector" onchange="app.switchFarm(this.value)" style="appearance: none; -webkit-appearance: none; background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 32px 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; cursor: pointer; outline: none; min-width: 150px;">
+                        <option value="" style="color: #333;">Select Farm</option>
+                    </select>
+                    <i class="fas fa-chevron-down" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: white; pointer-events: none; font-size: 12px;"></i>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <button class="btn-icon" style="color: white; background: rgba(255,255,255,0.2);" onclick="app.openFarmModal()">
@@ -3016,13 +3003,6 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <div id="farmDeleteConfirm" style="display: none; width: 100%; align-items: center; justify-content: space-between; gap: 10px;">
-                    <div style="color: var(--danger); font-weight: 600; font-size: 13px; line-height: 1.2;">Permanently delete farm & all data?</div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-sm btn-secondary" onclick="app.cancelDeleteFarm()">Cancel</button>
-                        <button class="btn btn-sm btn-danger" id="confirmDeleteFarmBtn">Confirm</button>
-                    </div>
-                </div>
                 <div id="farmModalActions" style="display: flex; gap: 12px; width: 100%; justify-content: flex-end;">
                     <button class="btn btn-danger" id="deleteFarmBtn" style="display: none; margin-right: auto;">
                         <i class="fas fa-trash"></i> Delete
@@ -3493,7 +3473,6 @@
                 // 'LOCAL' persistence persists state even when the browser window is closed
                 this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
                 this.db = firebase.firestore();
-                this.functions = firebase.functions();
 
                 // --- ENABLE OFFLINE PERSISTENCE (NEW) ---
                 this.db.enablePersistence()
@@ -3785,7 +3764,14 @@
                     const results = await Promise.all(chunks.map(chunk => 
                         this.db.collection(collectionName).where(field, 'in', chunk).get()
                     ));
-                    return results.flatMap(snap => snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        
+        // Fix: Use concat instead of flatMap for better browser compatibility
+        let allDocs = [];
+        results.forEach(snap => {
+            const docs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            allDocs = allDocs.concat(docs);
+        });
+        return allDocs;
                 };
 
                 // Fetch farms owned by the user
@@ -3822,7 +3808,7 @@
                 // Load settings from user profile or use defaults
                 this.state.settings.currentFarmId = this.currentUser.settings?.currentFarmId || (this.state.farms[0]?.id || null);
                 if (this.currentUser.settings) {
-                    this.state.settings = { ...this.state.settings, ...this.currentUser.settings };
+                    this.state.settings = { ...(this.state.settings || {}), ...this.currentUser.settings };
                 }
                 // Ensure targetFCR is initialized to prevent biomass calc errors
                 if (!this.state.settings.targetFCR) {
@@ -4406,7 +4392,7 @@
             renderLogBook() {
                 // Fix: Restore table structure if it was wiped by List View
                 const logContainer = document.querySelector('.log-table-container');
-                if (!document.getElementById('logTable')) {
+                if (logContainer && !document.getElementById('logTable')) {
                     logContainer.innerHTML = `
                         <table class="log-table" id="logTable">
                             <thead></thead>
@@ -4463,7 +4449,7 @@
                 // Filter tanks based on current farm
                 let tanksToShow = this.state.tanks.filter(t => t.status !== 'inactive');
                 if (this.state.settings.currentFarmId) {
-                    tanksToShow = this.state.tanks.filter(t => t.farmId === this.state.settings.currentFarmId);
+                    tanksToShow = tanksToShow.filter(t => t.farmId === this.state.settings.currentFarmId);
                 }
 
                 // Apply Search Filter
@@ -4831,11 +4817,6 @@
                     btn.addEventListener('click', () => this.switchScreen(btn.dataset.screen));
                 });
 
-                // Farm Selector
-                document.getElementById('farmSelector').addEventListener('click', () => {
-                    this.openFarmSelector();
-                });
-
                 document.getElementById('addFarmFromSelector').addEventListener('click', () => {
                     this.openFarmModal();
                 });
@@ -4986,20 +4967,48 @@
             }
 
             updateFarmSelector() {
-                const selector = document.getElementById('currentFarmName');
+                const selector = document.getElementById('farmSelector');
+                if (!selector) return;
+                
+                selector.innerHTML = '';
+                
                 if (this.state.farms && this.state.farms.length > 0) {
-                    const currentFarm = this.state.settings.currentFarmId 
-                        ? this.state.farms.find(f => f.id === this.state.settings.currentFarmId) 
-                        : this.state.farms[0];
+                    this.state.farms.forEach(farm => {
+                        const option = document.createElement('option');
+                        option.value = farm.id;
+                        option.textContent = farm.name;
+                        option.style.color = '#333';
+                        if (farm.id === this.state.settings.currentFarmId) {
+                            option.selected = true;
+                        }
+                        selector.appendChild(option);
+                    });
                     
-                    if (currentFarm) {
-                        selector.textContent = currentFarm.name;
-                        this.state.settings.currentFarmId = currentFarm.id;
+                    // Ensure currentFarmId is set correctly if not already
+                    if (!this.state.settings.currentFarmId) {
+                        this.state.settings.currentFarmId = this.state.farms[0].id;
                         this.saveSettings();
+                        selector.value = this.state.farms[0].id;
                     }
                 } else {
-                    selector.textContent = "Select Farm";
+                    const option = document.createElement('option');
+                    option.textContent = "No Farms";
+                    option.style.color = '#333';
+                    selector.appendChild(option);
                 }
+            }
+
+            switchFarm(farmId) {
+                if (!farmId) return;
+                this.state.settings.currentFarmId = farmId;
+                this.saveSettings();
+                
+                // Fetch inventory for the selected farm
+                this.db.collection('inventory').doc(farmId).get().then(doc => {
+                    if (doc.exists) this.state.inventory = doc.data();
+                    else this.state.inventory = { totalKg: 0 };
+                    this.renderAll();
+                });
             }
 
             getTankById(id) {
@@ -5237,8 +5246,7 @@
                 
                 const deleteBtn = document.getElementById('deleteFarmBtn');
                 deleteBtn.style.display = 'inline-flex';
-                deleteBtn.onclick = () => this.showDeleteConfirmation(id);
-                document.getElementById('farmDeleteConfirm').style.display = 'none';
+                deleteBtn.onclick = () => this.deleteFarm(id);
                 document.getElementById('farmModalActions').style.display = 'flex';
 
                 document.querySelector('#farmModal h3').innerHTML = '<i class="fas fa-edit"></i> Edit Farm';
@@ -6736,11 +6744,9 @@
                     if (!this.isGuest) await this.db.collection('farms').doc(newFarm.id).set(newFarm);
                     this.state.farms.push(newFarm);
                     
-                    // Set as current if first
-                    if (this.state.farms.length === 1) {
-                        this.state.settings.currentFarmId = newFarm.id;
-                        await this.saveSettings();
-                    }
+                    // Always switch to the new farm so the user sees it immediately
+                    this.state.settings.currentFarmId = newFarm.id;
+                    await this.saveSettings();
                     
                     // FIX: Refresh listeners so the new farm is included in real-time updates
                     if (!this.isGuest) this.setupFeedListener();
@@ -6771,23 +6777,12 @@
                 }
             }
 
-            showDeleteConfirmation(id) {
-                document.getElementById('farmModalActions').style.display = 'none';
-                document.getElementById('farmDeleteConfirm').style.display = 'flex';
-                document.getElementById('confirmDeleteFarmBtn').onclick = () => this.deleteFarm(id);
-            }
-
-            cancelDeleteFarm() {
-                document.getElementById('farmDeleteConfirm').style.display = 'none';
-                document.getElementById('farmModalActions').style.display = 'flex';
-            }
-
             async deleteFarm(id) {
                 const farmId = String(id);
 
                 // SECURITY: Require user to type farm name to confirm deletion
                 const farm = this.getFarmById(farmId);
-                const confirmName = prompt(`SECURITY CHECK:\n\nTo permanently delete "${farm.name}" and all its data, please type the farm name below:`);
+                const confirmName = prompt(`⚠️ DANGER ZONE ⚠️\n\nTo permanently delete "${farm.name}" and ALL associated data (tanks, logs, expenses, etc.), type the farm name below:\n\nThis action cannot be undone.`);
                 
                 if (confirmName !== farm.name) {
                     this.showToast('Farm name did not match. Deletion cancelled.', 'info');
@@ -6801,7 +6796,8 @@
                     // We query by farmId to ensure we catch everything
                     const collections = [
                         'feedEntries', 'waterEntries', 'harvests', 'expenses', 
-                        'sampling', 'tasks', 'medicineInventory', 'medicineApplications'
+                        'sampling', 'tasks', 'medicineInventory', 'medicineApplications',
+                        'invitations'
                     ];
 
                     await Promise.all(collections.map(col => 
@@ -6831,7 +6827,7 @@
                     this.detachFirestoreListeners();
                     await this.loadAllData();
 
-                    this.showToast('Farm and all data deleted successfully', 'warning');
+                    this.showToast('Farm deleted successfully', 'success');
 
                 } catch (error) {
                     console.error("Error deleting farm:", error);

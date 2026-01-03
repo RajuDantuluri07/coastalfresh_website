@@ -3,7 +3,7 @@
   "short_name": "AquaBook",
   "start_url": "/index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#2196F3",
   "theme_color": "#2196F3",
   "orientation": "portrait",
   "icons": [
