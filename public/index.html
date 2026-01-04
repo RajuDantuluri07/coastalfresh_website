@@ -6782,11 +6782,10 @@
 
                     if (confirm(`Accept invitation to join "${invite.farmName}" as a ${invite.role}?`)) {
                         this.showLoading(true);
-                        await docRef.update({ status: 'accepted', claimedByUid: user.uid, claimedByName: user.name, claimedAt: new Date().toISOString() });
-                        const updateData = {};
-                        updateData[`members.${user.uid}`] = invite.role;
-                        updateData['memberIds'] = firebase.firestore.FieldValue.arrayUnion(user.uid);
-                        await this.db.collection('farms').doc(invite.farmId).update(updateData);
+                        
+                        const acceptFn = this.functions.httpsCallable('acceptInvitation');
+                        await acceptFn({ inviteId: inviteId });
+                        
                         this.showToast('Joined farm successfully!', 'success');
                         await this.loadAllData(); // Reload to see new farm
                     }

@@ -116,3 +116,36 @@ exports.deleteFarm = functions.https.onCall(async (data, context) => {
   
   return { success: true };
 });
+
+exports.acceptInvitation = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError("unauthenticated", "Must be logged in.");
+  }
+
+  const inviteRef = db.collection("invitations").doc(data.inviteId);
+  const inviteDoc = await inviteRef.get();
+
+  if (!inviteDoc.exists) {
+    throw new functions.https.HttpsError("not-found", "Invitation not found.");
+  }
+
+  const invite = inviteDoc.data();
+  if (invite.status !== "pending") {
+    throw new functions.https.HttpsError("failed-precondition", "Invitation already used.");
+  }
+
+  const batch = db.batch();
+  
+  // 1. Mark invitation as accepted
+  batch.update(inviteRef, { status: "accepted", claimedByUid: context.auth.uid, claimedAt: admin.firestore.FieldValue.serverTimestamp() });
+
+  // 2. Add user to farm
+  const farmRef = db.collection("farms").doc(invite.farmId);
+  const updateData = {};
+  updateData[`members.${context.auth.uid}`] = invite.role;
+  updateData['memberIds'] = admin.firestore.FieldValue.arrayUnion(context.auth.uid);
+  batch.update(farmRef, updateData);
+
+  await batch.commit();
+  return { success: true };
+});

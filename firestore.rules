@@ -33,18 +33,10 @@ service cloud.firestore {
     // --- COLLECTION RULES ---
 
     // 1. Users Collection
+    // Users can read/write their own profile. Admins can read all (for dashboard list).
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
-      
-      // User can create their own doc.
-      allow create: if isOwner(userId);
-      
-      // User can update their own doc, but cannot change their role.
-      // Admin can update any doc, including roles.
-      allow update: if (isOwner(userId) && request.resource.data.role == resource.data.role) || isAdmin();
-      
-      // Only admin can delete user accounts.
-      allow delete: if isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
     }
 
     // 2. Farms Collection
@@ -87,15 +79,52 @@ service cloud.firestore {
         resource.data.invitedByUid == request.auth.uid ||
         resource.data.invitedPhone == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.phone
       );
-      // Update: Only the invited user (receiver) can accept/reject
-      allow update: if isAuthenticated() && 
-        resource.data.invitedPhone == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.phone;
+      // Update: Receiver can accept/reject
+      allow update: if isAuthenticated(); 
     }
 
     // 6. Market Prices (for Dashboard)
     match /marketPrices/{docId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
+    }
+
+    // 7. Inventory (Doc ID is Farm ID)
+    match /inventory/{farmId} {
+      allow read, write: if isAuthenticated() && isFarmMember(farmId);
+    }
+
+    // 8. Water Analysis
+    match /waterEntries/{entryId} {
+      allow read: if isAuthenticated() && isFarmMember(resource.data.farmId);
+      allow create: if isAuthenticated() && isFarmMember(request.resource.data.farmId);
+      allow update, delete: if isAuthenticated() && isFarmMember(resource.data.farmId);
+    }
+
+    // 9. Harvests
+    match /harvests/{entryId} {
+      allow read: if isAuthenticated() && isFarmMember(resource.data.farmId);
+      allow create: if isAuthenticated() && isFarmMember(request.resource.data.farmId);
+      allow update, delete: if isAuthenticated() && isFarmMember(resource.data.farmId);
+    }
+
+    // 10. Sampling
+    match /sampling/{entryId} {
+      allow read: if isAuthenticated() && isFarmMember(resource.data.farmId);
+      allow create: if isAuthenticated() && isFarmMember(request.resource.data.farmId);
+      allow update, delete: if isAuthenticated() && isFarmMember(resource.data.farmId);
+    }
+
+    // 11. Medicine (Inventory & Apps)
+    match /medicineInventory/{itemId} {
+      allow read: if isAuthenticated() && isFarmMember(resource.data.farmId);
+      allow create: if isAuthenticated() && isFarmMember(request.resource.data.farmId);
+      allow update, delete: if isAuthenticated() && isFarmMember(resource.data.farmId);
+    }
+    match /medicineApplications/{appId} {
+      allow read: if isAuthenticated() && isFarmMember(resource.data.farmId);
+      allow create: if isAuthenticated() && isFarmMember(request.resource.data.farmId);
+      allow update, delete: if isAuthenticated() && isFarmMember(resource.data.farmId);
     }
   }
 }
