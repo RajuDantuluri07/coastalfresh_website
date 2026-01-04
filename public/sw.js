@@ -1,8 +1,7 @@
-const CACHE_NAME = 'aquabook-v2';
+const CACHE_NAME = 'aquabook-v4';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/dashboard.html',
   '/manifest.json',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
   'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
@@ -12,6 +11,7 @@ const ASSETS_TO_CACHE = [
 
 // Install Event - Cache Assets
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
@@ -21,6 +21,7 @@ self.addEventListener('install', (event) => {
 
 // Activate Event - Cleanup Old Caches
 self.addEventListener('activate', (event) => {
+  event.waitUntil(clients.claim());
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(

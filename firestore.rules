@@ -1,132 +1,92 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
+
     // --- HELPER FUNCTIONS ---
-    
-    // Get farm document safely
-    function farmDoc(farmId) {
-      return get(/databases/$(database)/documents/farms/$(farmId));
+
+    // Check if user is logged in
+    function isAuthenticated() {
+      return request.auth != null;
     }
 
-    // Check if user is Pro (Required for 1-Farm Limit)
-    function isPro() {
-      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
-      return userDoc != null && userDoc.data.isPro == true;
+    // Check if user is accessing their own document
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Check if the authenticated user is the owner or a member of the specific farm
-    function canAccessFarm(farmId) {
-      let farm = farmDoc(farmId);
-      return farm != null && (
-        farm.data.ownerId == request.auth.uid || 
-        (farm.data.members != null && farm.data.members[request.auth.uid] != null)
+    // Check if user has 'admin' role (for Dashboard access)
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Check if user is a member of the farm (Owner or in memberIds array)
+    // This looks up the parent farm document to verify access for Tanks/Feeds
+    function isFarmMember(farmId) {
+      let farmData = get(/databases/$(database)/documents/farms/$(farmId)).data;
+      return isAuthenticated() && (
+        farmData.ownerId == request.auth.uid || 
+        (farmData.memberIds != null && farmData.memberIds.hasAny([request.auth.uid]))
       );
-    }
-
-    // Get role of current user in a farm
-    function getUserRole(farmId) {
-      return farmDoc(farmId).data.members[request.auth.uid];
-    }
-
-    // Check if role is manager (Owner, Farmer, or Supervisor)
-    function isManager(farmId) {
-      let role = getUserRole(farmId);
-      return role in ['owner', 'farmer', 'supervisor'];
     }
 
     // --- COLLECTION RULES ---
 
-    // Users: Users can only read/write their own profile
+    // 1. Users Collection
+    // Users can read/write their own profile. Admins can read all (for dashboard list).
     match /users/{userId} {
-      allow create, read, update: if request.auth != null && request.auth.uid == userId;
-      allow delete: if false;
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) || isAdmin();
     }
 
-    // Farms Collection
+    // 2. Farms Collection
     match /farms/{farmId} {
-      // CREATE: Enforce 1-Farm Limit
-      // If user is Pro, they can create any ID.
-      // If user is Free, they can ONLY create a farm if the ID matches their UID.
-      allow create: if request.auth != null &&
-        request.auth.uid == request.resource.data.ownerId &&
-        (isPro() || farmId == request.auth.uid);
-
-      // READ: Members can read
-      allow read: if request.auth != null &&
-        (resource.data.ownerId == request.auth.uid || resource.data.members[request.auth.uid] != null);
-
-      // UPDATE/DELETE: Only Owner
-      allow update, delete: if request.auth != null &&
-        resource.data.ownerId == request.auth.uid;
-    }
-
-    // Invitations
-    match /invitations/{inviteId} {
-      // Only owner can invite
-      allow create: if request.auth != null &&
-        farmDoc(request.resource.data.farmId).data.ownerId == request.auth.uid;
-
-      // Owner OR invited phone can read
-      allow read: if request.auth != null &&
-        (
-          farmDoc(resource.data.farmId).data.ownerId == request.auth.uid ||
-          request.auth.token.phone_number == resource.data.invitedPhone
-        );
-
-      // Invited user can accept
-      allow update: if request.auth != null &&
-        request.auth.token.phone_number == resource.data.invitedPhone;
-
-      allow delete: if false;
-    }
-
-    /* =========================
-       🐟 GENERIC FARM DATA
-       (tanks, logs, expenses, etc.)
-    ========================== */
-    match /{collection}/{docId} {
-
-      function isFarmCollection() {
-        return collection in [
-          'tanks',
-          'feedEntries',
-          'waterEntries',
-          'expenses',
-          'harvests',
-          'sampling',            
-          'medicineApplications',
-          'medicineInventory',   
-          'tasks'
-        ];
-      }
+      // Anyone logged in can create a farm
+      allow create: if isAuthenticated();
       
-      // READ
-      allow read: if request.auth != null &&
-        isFarmCollection() &&
-        canAccessFarm(resource.data.farmId);
-
-      // CREATE
-      allow create: if request.auth != null &&
-        isFarmCollection() &&
-        canAccessFarm(request.resource.data.farmId);
-
-      // UPDATE (prevent farmId hijack)
-      allow update: if request.auth != null &&
-        isFarmCollection() &&
-        canAccessFarm(resource.data.farmId) &&
-        resource.data.farmId == request.resource.data.farmId;
-
-      // DELETE (only owner or managers)
-      allow delete: if request.auth != null &&
-        isFarmCollection() &&
-        (farmDoc(resource.data.farmId).data.ownerId == request.auth.uid || isManager(resource.data.farmId));
+      // Read/Update if you are the owner or a member
+      allow read, update: if isAuthenticated() && (
+        resource.data.ownerId == request.auth.uid || 
+        resource.data.memberIds.hasAny([request.auth.uid])
+      );
+      
+      // Only Owner can delete
+      allow delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
     }
 
-    // Inventory (ID matches Farm ID)
-    match /inventory/{farmId} {
-      allow read, write: if request.auth != null &&
-        canAccessFarm(farmId);
+    // 3. Tanks Collection
+    // Access depends on the parent Farm's membership (via farmId field)
+    match /tanks/{tankId} {
+      allow read: if isAuthenticated() && isFarmMember(resource.data.farmId);
+      allow create: if isAuthenticated() && isFarmMember(request.resource.data.farmId);
+      allow update, delete: if isAuthenticated() && isFarmMember(resource.data.farmId);
+    }
+
+    // 4. Feed Entries Collection
+    // Access depends on the parent Farm's membership
+    match /feedEntries/{entryId} {
+      allow read: if isAuthenticated() && isFarmMember(resource.data.farmId);
+      allow create: if isAuthenticated() && isFarmMember(request.resource.data.farmId);
+      allow update, delete: if isAuthenticated() && isFarmMember(resource.data.farmId);
+    }
+
+    // 5. Invitations Collection
+    match /invitations/{inviteId} {
+      // Create: Must be a member of the farm being invited to
+      allow create: if isAuthenticated() && isFarmMember(request.resource.data.farmId);
+      // Read: Sender or Receiver (checked via phone number in User profile)
+      allow read: if isAuthenticated() && (
+        resource.data.invitedByUid == request.auth.uid ||
+        resource.data.invitedPhone == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.phone
+      );
+      // Update: Receiver can accept/reject
+      allow update: if isAuthenticated(); 
+    }
+
+    // 6. Market Prices (for Dashboard)
+    match /marketPrices/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
     }
   }
 }
