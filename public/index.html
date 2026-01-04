@@ -2023,54 +2023,6 @@
         .risk-normal { background: #e8f5e8; color: #2e7d32; }
         .risk-watch { background: #fff3e0; color: #ef6c00; }
         .risk-action { background: #ffebee; color: #c62828; }
-
-        /* ===== DAILY SUMMARY ===== */
-        .daily-summary-card {
-            background: white;
-            border-radius: var(--radius);
-            padding: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            margin-bottom: 24px;
-            border: 1px solid var(--border);
-            animation: slideIn 0.3s ease;
-        }
-        .summary-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .summary-title {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--dark);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .summary-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        .summary-item {
-            background: var(--light);
-            padding: 12px;
-            border-radius: var(--radius-sm);
-        }
-        .summary-label {
-            font-size: 11px;
-            color: var(--gray);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
-            font-weight: 600;
-        }
-        .summary-value {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--dark);
-        }
     </style>
     <style>
         /* ===== NEW AUTH SCREEN STYLES ===== */
@@ -2159,7 +2111,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-functions-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -2186,23 +2137,13 @@
                     <button class="btn-icon" style="color: white; background: rgba(255,255,255,0.2);" onclick="app.openFarmModal()">
                         <i class="fas fa-plus"></i>
                     </button>
+                    <div class="current-date" id="currentDate"></div>
                     <button class="btn-icon" style="color: white; background: rgba(255,255,255,0.2);" onclick="app.openSettingsModal()">
                         <i class="fas fa-cog"></i>
                     </button>
                 </div>
             </div>
         </header>
-
-        <!-- Date Display (Moved below header) -->
-        <div style="background: #f8f9fa; color: var(--gray); padding: 8px 0; display: flex; justify-content: center; align-items: center; gap: 20px; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border);">
-            <button class="btn-icon" style="color: var(--primary); padding: 4px 8px;" onclick="app.changeDate(-1)"><i class="fas fa-chevron-left"></i></button>
-            <div style="position: relative; display: flex; align-items: center; cursor: pointer;">
-                <input type="date" id="datePicker" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; z-index: 10; cursor: pointer;" onchange="app.pickDate(this.value)">
-                <i class="far fa-calendar-alt" style="margin-right: 6px; color: var(--primary);"></i> 
-                <span id="currentDate"></span>
-            </div>
-            <button class="btn-icon" style="color: var(--primary); padding: 4px 8px;" onclick="app.changeDate(1)"><i class="fas fa-chevron-right"></i></button>
-        </div>
 
         <!-- Navigation - Reduced to 4 tabs -->
         <nav class="nav-tabs">
@@ -2221,14 +2162,6 @@
             <button class="nav-btn" data-screen="prices">
                 <i class="fas fa-chart-line"></i>
                 <span>Prices</span>
-            </button>
-            <button class="nav-btn" data-screen="history">
-                <i class="fas fa-history"></i>
-                <span>History</span>
-            </button>
-            <button class="nav-btn" data-screen="expenses">
-                <i class="fas fa-wallet"></i>
-                <span>Wallet</span>
             </button>
         </nav>
 
@@ -2258,12 +2191,6 @@
 
                 <!-- Farm Header Block -->
                 <div id="farmHeaderContainer" style="margin-bottom: 20px;"></div>
-
-                <!-- Alerts Section -->
-                <div id="activeAlertsContainer" class="alert-container" style="display:none; margin-bottom: 20px;"></div>
-
-                <!-- Daily Summary Section -->
-                <div id="dailySummaryContainer"></div>
 
                 <!-- Farms List -->
                 <div class="farms-container" id="farmsList">
@@ -2572,48 +2499,6 @@
                     </div>
                 </div>
             </section>
-
-            <!-- History Screen -->
-            <section id="historyScreen" class="screen">
-                <div class="screen-header">
-                    <h2 class="screen-title">
-                        <i class="fas fa-history"></i>
-                        Crop History
-                    </h2>
-                </div>
-                <div id="cropHistoryList" class="timeline-container"></div>
-            </section>
-
-            <!-- Expenses Screen -->
-            <section id="expensesScreen" class="screen">
-                <div class="screen-header">
-                    <h2 class="screen-title">
-                        <i class="fas fa-wallet"></i>
-                        Farm Finances
-                    </h2>
-                    <button class="btn btn-primary" onclick="app.openExpenseModal()">
-                        <i class="fas fa-plus"></i> Log Expense
-                    </button>
-                </div>
-
-                <!-- Financial Overview Cards -->
-                <div class="overall-stats">
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalExpenses">₹0</div>
-                        <div class="stat-label">Total Expenses</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="estRevenue" style="color: var(--success);">₹0</div>
-                        <div class="stat-label">Est. Revenue</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="avgCOP">₹0</div>
-                        <div class="stat-label">Avg Cost/kg</div>
-                    </div>
-                </div>
-
-                <div id="expensesList" class="timeline-container" style="margin-top: 20px;"></div>
-            </section>
         </main>
     </div>
 
@@ -2907,11 +2792,6 @@
                         <option value="6">6 Feeds</option>
                     </select>
                 </div>
-                <div class="settings-item" style="margin-top: 10px;">
-                    <span><i class="fas fa-bell"></i> Push Notifications</span>
-                    <button class="btn btn-sm btn-primary" id="enableNotifBtn" onclick="app.enableNotifications()">Enable</button>
-                    <button class="btn btn-sm btn-success" id="notifEnabledBtn" style="display:none; cursor: default;"><i class="fas fa-check"></i> Active</button>
-                </div>
                 <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
                 <h4 style="margin-bottom: 12px; color: var(--dark);">Manage Supplements</h4>
                 <div class="form-group" style="display: flex; gap: 8px;">
@@ -3144,10 +3024,6 @@
                     <label>Bag Weight (kg)</label>
                     <input type="number" id="bagWeight" class="form-control" value="25">
                 </div>
-                <div class="form-group">
-                    <label>Cost per Bag (₹)</label>
-                    <input type="number" id="bagCost" class="form-control" placeholder="e.g. 1800">
-                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-success" id="saveStockBtn">
@@ -3336,48 +3212,6 @@
         </div>
     </div>
 
-    <!-- Log Expense Modal -->
-    <div class="modal-overlay" id="expenseModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-receipt"></i> Log Expense</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Category</label>
-                    <select id="expCategory" class="form-control">
-                        <option value="Labor">Labor</option>
-                        <option value="Fuel">Fuel / Electricity</option>
-                        <option value="Medicine">Medicine / Probiotics</option>
-                        <option value="Seed">Seed Stocking</option>
-                        <option value="Maintenance">Maintenance</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Amount (₹)</label>
-                    <input type="number" id="expAmount" class="form-control" placeholder="0.00">
-                </div>
-                <div class="form-group">
-                    <label>Link to Tank (Optional)</label>
-                    <select id="expTankSelect" class="form-control"></select>
-                </div>
-                <div class="form-group">
-                    <label>Date</label>
-                    <input type="date" id="expDate" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <input type="text" id="expNote" class="form-control" placeholder="Details...">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" onclick="app.saveExpense()">Save Expense</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Toast Notifications -->
     <div class="toast" id="successToast">
         <i class="fas fa-check-circle"></i>
@@ -3475,10 +3309,6 @@
                     feedEntries: [],     // All feed entries
                     harvests: [],        // Harvest records
                     waterEntries: [],    // Water test history
-                    cropCycles: [],      // Closed crop cycles
-                    expenses: [],        // Expense records
-                    alerts: [],          // Smart alerts
-                    fcmToken: null,      // Push notification token
                     samplingEntries: [], // Growth sampling records
                     prices: [],          // Market prices
                     inventory: { totalKg: 0 }, // Inventory
@@ -3523,18 +3353,6 @@
                 this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
                 this.db = firebase.firestore();
                 this.functions = firebase.functions();
-                
-                // Initialize Messaging
-                try {
-                    this.messaging = firebase.messaging();
-                    // Handle foreground messages
-                    this.messaging.onMessage((payload) => {
-                        console.log('Message received. ', payload);
-                        this.showToast(`${payload.notification.title}: ${payload.notification.body}`, 'info');
-                    });
-                } catch (e) {
-                    console.log('Firebase Messaging not supported in this environment.');
-                }
 
                 // --- ENABLE OFFLINE PERSISTENCE (NEW) ---
                 this.db.enablePersistence()
@@ -3739,9 +3557,6 @@
                     // Fetch other collections safely
                     this.state.waterEntries = await fetchInChunks('waterEntries', 'farmId', farmIds);
                     this.state.harvests = await fetchInChunks('harvests', 'farmId', farmIds);
-                    this.state.cropCycles = await fetchInChunks('cropCycles', 'farmId', farmIds);
-                    this.state.expenses = await fetchInChunks('expenses', 'farmId', farmIds);
-                    this.state.alerts = await fetchInChunks('alerts', 'farmId', farmIds);
                     this.state.samplingEntries = await fetchInChunks('sampling', 'farmId', farmIds);
                     this.state.medicineInventory = await fetchInChunks('medicineInventory', 'farmId', farmIds);
                     this.state.medicineApplications = await fetchInChunks('medicineApplications', 'farmId', farmIds);
@@ -3796,9 +3611,6 @@
                 localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
                 localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
                 localStorage.setItem('aquabook_water', JSON.stringify(this.state.waterEntries));
-                localStorage.setItem('aquabook_cycles', JSON.stringify(this.state.cropCycles));
-                localStorage.setItem('aquabook_expenses', JSON.stringify(this.state.expenses));
-                localStorage.setItem('aquabook_alerts', JSON.stringify(this.state.alerts));
                 localStorage.setItem('aquabook_sampling', JSON.stringify(this.state.samplingEntries));
                 localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
                 localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
@@ -3884,159 +3696,6 @@
                 }
             }
 
-            // ===== NOTIFICATIONS =====
-            async enableNotifications() {
-                if (!this.messaging) {
-                    this.showToast('Notifications not supported on this device.', 'error');
-                    return;
-                }
-                try {
-                    // Request permission
-                    const permission = await Notification.requestPermission();
-                    if (permission === 'granted') {
-                        // Get Token
-                        // IMPORTANT: Replace this with your actual VAPID key from the Firebase Console.
-                        // Go to Project Settings > Cloud Messaging > Web configuration.
-                        // The key is under "Web Push certificates".
-                        const token = await this.messaging.getToken({ vapidKey: 'BBVKpOXnP5lq1tVGX0lAhnnsIzt9uET8jzdE98ocBBnO3-vlS7IDLRInG2iJ3COVkK5ycZ-toAE68kZdDpUuH_g' });
-                        
-                        if (token) {
-                            this.state.fcmToken = token;
-                            await this.saveDeviceToken(token);
-                            this.showToast('Notifications enabled!', 'success');
-                            this.updateNotificationUI(true);
-                        } else {
-                            this.showToast('Failed to get token.', 'error');
-                        }
-                    } else {
-                        this.showToast('Permission denied.', 'warning');
-                    }
-                } catch (error) {
-                    console.error('Notification error:', error);
-                    this.showToast('Error enabling notifications.', 'error');
-                }
-            }
-
-            async saveDeviceToken(token) {
-                if (!this.currentUser) return;
-                // Save token to user profile for backend targeting
-                await this.db.collection('users').doc(this.currentUser.uid).collection('fcmTokens').doc(token).set({
-                    token: token,
-                    createdAt: new Date().toISOString(),
-                    userAgent: navigator.userAgent
-                });
-            }
-
-            updateNotificationUI(enabled) {
-                const btn = document.getElementById('enableNotifBtn');
-                const label = document.getElementById('notifEnabledBtn');
-                if (btn && label) {
-                    if (enabled) {
-                        btn.style.display = 'none';
-                        label.style.display = 'inline-block';
-                    } else {
-                        btn.style.display = 'inline-block';
-                        label.style.display = 'none';
-                    }
-                }
-            }
-
-            // ===== SMART ALERTS SYSTEM =====
-            async checkSmartAlerts() {
-                const currentFarmId = this.state.settings.currentFarmId;
-                if (!currentFarmId) return;
-                
-                const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId && t.status === 'active');
-                const today = this.currentDate;
-                
-                for (const tank of tanks) {
-                    // A. Disease Risk (3 consecutive leftovers)
-                    // Interpreting "Empty tray -> Disease" from prompt as "Leftover/Too Much" (Anorexia)
-                    const tankFeeds = this.state.feedEntries
-                        .filter(e => e.tankId === tank.id)
-                        .sort((a, b) => b.id - a.id); // Newest first
-                        
-                    if (tankFeeds.length >= 3) {
-                        const last3 = tankFeeds.slice(0, 3);
-                        const isRisk = last3.every(e => e.trayResult === 'too-much');
-                        
-                        if (isRisk) {
-                            await this.createAlert({
-                                tankId: tank.id,
-                                farmId: tank.farmId,
-                                type: 'disease_risk',
-                                level: 'critical',
-                                message: `Disease Risk: 3 consecutive feeds with leftovers in ${tank.name}. Check shrimp health immediately.`,
-                                date: today
-                            });
-                        }
-                    }
-                    
-                    // B. Crash Risk (Rising Ammonia + Increasing Feed)
-                    const tankWater = this.state.waterEntries
-                        .filter(e => e.tankId === tank.id)
-                        .sort((a, b) => new Date(b.date) - new Date(a.date));
-                        
-                    if (tankWater.length >= 2) {
-                        const current = tankWater[0];
-                        const prev = tankWater[1];
-                        
-                        if ((current.amm || 0) > (prev.amm || 0) && (current.amm || 0) > 0) {
-                            const feedToday = tankFeeds.filter(e => e.date === today).reduce((sum, e) => sum + e.amount, 0);
-                            const yesterday = this.getFormattedDate(new Date(Date.now() - 86400000));
-                            const feedYesterday = tankFeeds.filter(e => e.date === yesterday).reduce((sum, e) => sum + e.amount, 0);
-                            
-                            if (feedToday > feedYesterday) {
-                                await this.createAlert({
-                                    tankId: tank.id,
-                                    farmId: tank.farmId,
-                                    type: 'crash_risk',
-                                    level: 'critical',
-                                    message: `Crash Risk: Ammonia rising while feed increased in ${tank.name}. Reduce feed and apply probiotics.`,
-                                    date: today
-                                });
-                            }
-                        }
-                    }
-                    
-                    // C. Overfeeding Risk (Jump > 10% in 48hrs)
-                    const twoDaysAgo = this.getFormattedDate(new Date(Date.now() - 172800000));
-                    const feedToday = tankFeeds.filter(e => e.date === today).reduce((sum, e) => sum + e.amount, 0);
-                    const feed2DaysAgo = tankFeeds.filter(e => e.date === twoDaysAgo).reduce((sum, e) => sum + e.amount, 0);
-                    
-                    if (feed2DaysAgo > 0 && feedToday > (feed2DaysAgo * 1.10)) {
-                         await this.createAlert({
-                            tankId: tank.id,
-                            farmId: tank.farmId,
-                            type: 'overfeed_risk',
-                            level: 'warning',
-                            message: `Overfeeding Risk: Feed increased >10% in 48hrs for ${tank.name}. Monitor trays closely.`,
-                            date: today
-                        });
-                    }
-                }
-                this.renderAlerts();
-            }
-
-            async createAlert(alertData) {
-                const id = `${alertData.type}_${alertData.tankId}_${alertData.date}`;
-                const exists = this.state.alerts.find(a => a.id === id);
-                if (exists) return;
-                
-                const alert = { id, ...alertData, status: 'new', createdAt: new Date().toISOString() };
-                this.state.alerts.push(alert);
-                this.db.collection('alerts').doc(id).set(alert);
-            }
-
-            dismissAlert(id) {
-                const alert = this.state.alerts.find(a => a.id === id);
-                if (alert) {
-                    alert.status = 'read';
-                    this.db.collection('alerts').doc(id).update({ status: 'read' });
-                    this.renderAlerts();
-                }
-            }
-
             // ===== RENDERING =====
             renderAll() {
                 this.updateFarmSelector();
@@ -4045,114 +3704,10 @@
                 this.renderLogBook();
                 this.renderPrices();
                 this.checkPendingTrays();
-                this.renderDailySummary(); // New Daily Summary
-                this.checkSmartAlerts(); // Check and render alerts
                 this.renderFeedTrendChart();
                 this.renderInventorySummary();
             }
-
-            renderAlerts() {
-                const container = document.getElementById('activeAlertsContainer');
-                if (!container) return;
-                
-                const currentFarmId = this.state.settings.currentFarmId;
-                const activeAlerts = this.state.alerts
-                    .filter(a => a.farmId === currentFarmId && a.status === 'new')
-                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    
-                if (activeAlerts.length === 0) {
-                    container.style.display = 'none';
-                    return;
-                }
-                
-                container.style.display = 'flex';
-                container.innerHTML = activeAlerts.map(a => `
-                    <div class="alert-card" style="border-left-color: ${a.level === 'critical' ? 'var(--danger)' : 'var(--warning)'}; background: ${a.level === 'critical' ? '#ffebee' : '#fff3e0'}; width: 100%;">
-                        <div style="flex: 1;">
-                            <div style="font-weight: 700; font-size: 13px; color: var(--dark); margin-bottom: 2px;">
-                                <i class="fas fa-exclamation-triangle" style="color: ${a.level === 'critical' ? 'var(--danger)' : 'var(--warning)'};"></i> ${a.type.replace('_', ' ').toUpperCase()}
-                            </div>
-                            <div style="font-size: 12px; color: var(--dark);">${a.message}</div>
-                        </div>
-                        <button class="btn-icon" onclick="app.dismissAlert('${a.id}')"><i class="fas fa-times"></i></button>
-                    </div>
-                `).join('');
-            }
             
-            renderDailySummary() {
-                const container = document.getElementById('dailySummaryContainer');
-                if (!container) return;
-
-                const currentFarmId = this.state.settings.currentFarmId;
-                if (!currentFarmId) {
-                    container.innerHTML = '';
-                    return;
-                }
-
-                // Dates
-                const today = new Date();
-                const yesterday = new Date(today);
-                yesterday.setDate(yesterday.getDate() - 1);
-                const yesterdayStr = this.getFormattedDate(yesterday);
-                
-                // Data Filtering
-                const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
-                const tankIds = farmTanks.map(t => t.id);
-                
-                const yesterdayEntries = this.state.feedEntries.filter(e => 
-                    tankIds.includes(String(e.tankId)) && e.date === yesterdayStr
-                );
-
-                // 1. Yesterday Feed
-                const totalFeedYesterday = yesterdayEntries.reduce((sum, e) => sum + e.amount, 0);
-
-                // 2. Tray Status (Yesterday)
-                let trayIssues = { empty: 0, full: 0 };
-                yesterdayEntries.forEach(e => {
-                    if (e.trayResult === 'empty') trayIssues.empty++;
-                    else if (e.trayResult === 'too-much') trayIssues.full++;
-                });
-
-                // 3. Suggestion
-                const recommendation = this.calculateFeedRecommendation(); 
-                let suggestionText = "Maintain current feed levels.";
-                let suggestionColor = "var(--success)";
-                
-                if (recommendation) {
-                    suggestionText = recommendation.action;
-                    if (suggestionText.includes("Reduce") || suggestionText.includes("Decrease")) suggestionColor = "var(--danger)";
-                    else if (suggestionText.includes("Increase")) suggestionColor = "var(--primary)";
-                }
-
-                container.innerHTML = `
-                    <div class="daily-summary-card">
-                        <div class="summary-header">
-                            <div class="summary-title"><i class="fas fa-sun" style="color: #FF9800;"></i> Daily Briefing</div>
-                            <div style="font-size: 12px; color: var(--gray);">${yesterday.toLocaleDateString('en-IN', {weekday: 'short', day: 'numeric'})}</div>
-                        </div>
-                        <div class="summary-grid">
-                            <div class="summary-item">
-                                <div class="summary-label">Yesterday's Feed</div>
-                                <div class="summary-value">${totalFeedYesterday.toFixed(1)} <span style="font-size:12px; color:var(--gray);">kg</span></div>
-                            </div>
-                            <div class="summary-item">
-                                <div class="summary-label">Tray Status</div>
-                                <div style="font-size: 13px; font-weight: 600; margin-top: 4px;">
-                                    <span style="color: var(--success);"><i class="fas fa-check"></i> ${trayIssues.empty} Empty</span><br>
-                                    <span style="color: var(--danger);"><i class="fas fa-times"></i> ${trayIssues.full} Leftover</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #eee;">
-                            <div class="summary-label">Today's Strategy</div>
-                            <div style="font-size: 15px; font-weight: 700; color: ${suggestionColor}; display: flex; align-items: center; gap: 8px;">
-                                <i class="fas fa-lightbulb"></i> ${suggestionText}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
             // ===== WEATHER WIDGET =====
             initWeather() {
                 const weatherWidget = document.getElementById('weatherWidget');
@@ -4587,7 +4142,7 @@
                 let startDate, endDate;
                 
                 if (this.viewMode === 'today') {
-                    startDate = this.currentDate;
+                    startDate = this.getFormattedDate(today);
                     endDate = startDate;
                 } else if (this.viewMode === 'yesterday') {
                     const y = new Date(today); y.setDate(y.getDate() - 1);
@@ -4926,19 +4481,11 @@
 
             setViewMode(mode) {
                 this.viewMode = mode;
-                if (mode === 'today') {
-                    // Reset to real today when clicking "Today" tab
-                    this.currentDate = this.getFormattedDate(new Date());
-                    this.refreshDate();
-                    this.renderAll();
-                } else {
-                    this.renderLogBook();
-                }
-                
                 document.querySelectorAll('.range-tab').forEach(t => {
                     if (t.dataset.range === mode) t.classList.add('active');
                     else t.classList.remove('active');
                 });
+                this.renderLogBook();
             }
 
             toggleLogView() {
@@ -5060,47 +4607,10 @@
                 return `${year}-${month}-${day}`;
             }
 
-            changeDate(offset) {
-                const d = new Date(this.currentDate);
-                d.setDate(d.getDate() + offset);
-                this.currentDate = this.getFormattedDate(d);
-                
-                // Switch to 'today' view mode (which now means "Selected Date")
-                this.viewMode = 'today';
-                document.querySelectorAll('.range-tab').forEach(t => {
-                    if (t.dataset.range === 'today') t.classList.add('active');
-                    else t.classList.remove('active');
-                });
-
-                this.refreshDate();
-                this.renderAll();
-            }
-
-            pickDate(dateStr) {
-                if (!dateStr) return;
-                this.currentDate = dateStr;
-                
-                // Switch to 'today' view mode (which now means "Selected Date")
-                this.viewMode = 'today';
-                document.querySelectorAll('.range-tab').forEach(t => {
-                    if (t.dataset.range === 'today') t.classList.add('active');
-                    else t.classList.remove('active');
-                });
-
-                this.refreshDate();
-                this.renderAll();
-            }
-
             refreshDate() {
+                this.currentDate = this.getFormattedDate();
                 const dateEl = document.getElementById('currentDate');
-                const picker = document.getElementById('datePicker');
-                if (dateEl) {
-                    const d = new Date(this.currentDate);
-                    dateEl.textContent = d.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                }
-                if (picker) {
-                    picker.value = this.currentDate;
-                }
+                if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             }
 
             // ===== MISSING METHODS IMPLEMENTATION =====
@@ -5131,10 +4641,6 @@
                 if (screenName === 'water') {
                     this.refreshDate();
                     this.renderWaterScreen();
-                } else if (screenName === 'history') {
-                    this.renderHistoryScreen();
-                } else if (screenName === 'expenses') {
-                    this.renderExpensesScreen();
                 }
             }
 
@@ -5472,7 +4978,6 @@
             openInventoryModal() {
                 document.getElementById('modalCurrentStock').innerHTML = `${(this.state.inventory.totalKg || 0).toFixed(1)} <span class="unit">kg</span>`;
                 document.getElementById('stockBags').value = '';
-                document.getElementById('bagCost').value = '';
                 document.getElementById('inventoryModal').classList.add('active');
             }
 
@@ -5480,26 +4985,17 @@
                 const bags = parseFloat(document.getElementById('stockBags').value) || 0;
                 const weight = parseFloat(document.getElementById('bagWeight').value) || 25;
                 const currentFarmId = this.state.settings.currentFarmId;
-                const costPerBag = parseFloat(document.getElementById('bagCost').value) || 0;
                 
                 if (bags > 0 && currentFarmId) {
                     const addedKg = bags * weight;
-                    const totalCost = bags * costPerBag;
-                    
-                    // Calculate weighted average price
-                    const currentKg = this.state.inventory.totalKg || 0;
-                    const currentAvg = this.state.inventory.avgPrice || 0;
-                    const newAvg = ((currentKg * currentAvg) + totalCost) / (currentKg + addedKg);
                     
                     // Fix: Use atomic increment for offline support
                     const invRef = this.db.collection('inventory').doc(currentFarmId);
                     await invRef.set({ 
-                        totalKg: firebase.firestore.FieldValue.increment(addedKg),
-                        avgPrice: newAvg
+                        totalKg: firebase.firestore.FieldValue.increment(addedKg) 
                     }, { merge: true });
                     
                     this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + addedKg;
-                    this.state.inventory.avgPrice = newAvg;
                     
                     this.renderOverallStats();
                     this.closeAllModals();
@@ -7031,7 +6527,6 @@
             openTankDetail(tankId) {
                 const tank = this.getTankById(tankId);
                 if (!tank) return;
-                const fin = this.getTankFinancials(tankId);
 
                 // Restore the original structure for editTrayStatus if it was replaced
                 const trayStatusGroup = document.getElementById('editTrayStatusGroup');
@@ -7088,20 +6583,6 @@
                         </div>
                     </div>
 
-                    <!-- Financials -->
-                    <div class="stat-card" style="margin-top: 12px; background: #fff8e1; border-color: #ffc107;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-                            <span style="font-size:12px; font-weight:600; color:#ff6f00;">Cost of Production</span>
-                            <span style="font-weight:700; color:#ff6f00;">₹${Math.round(fin.costPerKg)}/kg</span>
-                        </div>
-                        <div style="display:flex; justify-content:space-between;">
-                            <span style="font-size:12px; font-weight:600; color:var(--success);">Est. Profit</span>
-                            <span style="font-weight:700; color:var(--success);">
-                                ${fin.marketPrice > fin.costPerKg ? '+' : ''}₹${Math.round((fin.marketPrice - fin.costPerKg) * (tank.biomass||0)).toLocaleString()}
-                            </span>
-                        </div>
-                    </div>
-
                     <!-- Growth Chart -->
                     <div class="chart-container" style="height: 250px; margin-top: 20px; background: white; border: 2px solid var(--border); border-radius: var(--radius); padding: 10px; display: none;" id="growthChartContainer">
                         <canvas id="growthChart"></canvas>
@@ -7148,13 +6629,6 @@
                 this.renderSettingsSupplements();
                 this.renderSettingsFeedTypes();
                 document.getElementById('settingFeedsPerDay').value = this.state.settings.feedsPerDay || 4;
-                
-                // Check notification permission status
-                if (Notification.permission === 'granted') {
-                    this.updateNotificationUI(true);
-                } else {
-                    this.updateNotificationUI(false);
-                }
                 
                 // Guest Sync Button
                 const footer = document.querySelector('#settingsModal .modal-footer');
@@ -7423,9 +6897,7 @@
                     return;
                 }
 
-                this.showLoading(true);
-
-                // 1. Prepare Final Harvest Record
+                // Create final harvest record
                 const harvest = {
                     id: Date.now(),
                     tankId,
@@ -7435,77 +6907,16 @@
                     count,
                     type: 'final'
                 };
-
-                // 2. Calculate Crop Cycle Stats (System of Record)
-                const tankFeedEntries = this.state.feedEntries.filter(e => e.tankId === tankId);
-                const totalFeed = tankFeedEntries.reduce((sum, e) => sum + e.amount, 0);
-                
-                const tankHarvests = this.state.harvests.filter(h => h.tankId === tankId);
-                // Calculate total pieces and weight including previous partial harvests
-                let totalHarvestWeight = weight;
-                let totalPieces = weight * count;
-                
-                tankHarvests.forEach(h => {
-                    totalHarvestWeight += h.weight;
-                    totalPieces += (h.weight * h.count);
-                });
-
-                const fcr = totalHarvestWeight > 0 ? (totalFeed / totalHarvestWeight).toFixed(2) : 0;
-                const survivalRate = tank.initialSeed > 0 ? ((totalPieces / tank.initialSeed) * 100).toFixed(1) : 0;
-                const durationDays = Math.floor((new Date(date) - new Date(tank.stockingDate)) / (1000 * 60 * 60 * 24));
-
-                const cropCycle = {
-                    id: `crop_${tankId}_${Date.now()}`,
-                    tankId,
-                    farmId: tank.farmId,
-                    tankName: tank.name,
-                    startDate: tank.stockingDate,
-                    closedAt: date,
-                    durationDays,
-                    initialSeed: tank.initialSeed,
-                    totalFeed: parseFloat(totalFeed.toFixed(1)),
-                    totalHarvest: parseFloat(totalHarvestWeight.toFixed(1)),
-                    finalBiomass: weight,
-                    finalCount: count,
-                    fcr: parseFloat(fcr),
-                    survivalRate: parseFloat(survivalRate),
-                    status: 'closed',
-                    createdAt: new Date().toISOString()
-                };
-
-                // 3. Batch Write
-                const batch = this.db.batch();
-                
-                const harvestRef = this.db.collection('harvests').doc(harvest.id.toString());
-                batch.set(harvestRef, harvest);
-
-                const cycleRef = this.db.collection('cropCycles').doc(cropCycle.id);
-                batch.set(cycleRef, cropCycle);
-
-                const tankRef = this.db.collection('tanks').doc(tank.id);
-                batch.update(tankRef, { 
-                    status: 'inactive',
-                    biomass: 0,
-                    currentSeed: 0
-                });
-
-                await batch.commit();
-
-                // 4. Update Local State
                 this.state.harvests.push(harvest);
-                this.state.cropCycles.push(cropCycle);
+                await this.db.collection('harvests').doc(harvest.id.toString()).set(harvest);
 
-                const tIndex = this.state.tanks.findIndex(t => t.id === tank.id);
-                if (tIndex > -1) {
-                    this.state.tanks[tIndex].status = 'inactive';
-                    this.state.tanks[tIndex].biomass = 0;
-                    this.state.tanks[tIndex].currentSeed = 0;
-                }
+                // Update tank status
+                tank.status = 'inactive';
+                await this.db.collection('tanks').doc(tank.id).update({ status: 'inactive' });
 
-                this.showLoading(false);
                 this.closeAllModals();
                 this.renderAll();
-                this.showToast(`Crop cycle ended. FCR: ${fcr}`, 'success');
+                this.showToast(`Crop cycle for ${tank.name} ended.`, 'success');
             }
 
             openStartNewCropModal(tankId) {
@@ -7789,210 +7200,6 @@
                 downloadAnchorNode.click();
                 downloadAnchorNode.remove();
                 this.showToast('Backup file downloaded successfully');
-            }
-
-            // ===== EXPENSES & ECONOMICS =====
-            openExpenseModal() {
-                this.refreshDate();
-                document.getElementById('expDate').value = this.currentDate;
-                document.getElementById('expAmount').value = '';
-                document.getElementById('expNote').value = '';
-                
-                const select = document.getElementById('expTankSelect');
-                select.innerHTML = '<option value="">Entire Farm (Shared Cost)</option>';
-                const currentFarmId = this.state.settings.currentFarmId;
-                this.state.tanks.filter(t => t.farmId === currentFarmId).forEach(t => {
-                    select.innerHTML += `<option value="${t.id}">${t.name}</option>`;
-                });
-                
-                document.getElementById('expenseModal').classList.add('active');
-            }
-
-            async saveExpense() {
-                const category = document.getElementById('expCategory').value;
-                const amount = parseFloat(document.getElementById('expAmount').value);
-                const tankId = document.getElementById('expTankSelect').value || null;
-                const date = document.getElementById('expDate').value;
-                const note = document.getElementById('expNote').value;
-                const farmId = this.state.settings.currentFarmId;
-
-                if (!amount || amount <= 0) {
-                    this.showToast('Please enter a valid amount', 'error');
-                    return;
-                }
-
-                const expense = {
-                    id: Date.now().toString(),
-                    farmId,
-                    tankId,
-                    category,
-                    amount,
-                    date,
-                    note,
-                    createdAt: new Date().toISOString()
-                };
-
-                this.showLoading(true);
-                await this.db.collection('expenses').doc(expense.id).set(expense);
-                this.state.expenses.push(expense);
-                
-                this.showLoading(false);
-                this.closeAllModals();
-                this.renderExpensesScreen();
-                this.showToast('Expense logged successfully');
-            }
-
-            getTankFinancials(tankId) {
-                const tank = this.getTankById(tankId);
-                if (!tank) return null;
-
-                // 1. Feed Cost
-                const tankFeedEntries = this.state.feedEntries.filter(e => e.tankId === tankId);
-                const totalFeedKg = tankFeedEntries.reduce((sum, e) => sum + e.amount, 0);
-                // Use current inventory avg price as approximation
-                const feedCost = totalFeedKg * (this.state.inventory.avgPrice || 0);
-
-                // 2. Direct Expenses
-                const directExpenses = this.state.expenses
-                    .filter(e => e.tankId === tankId)
-                    .reduce((sum, e) => sum + e.amount, 0);
-
-                // 3. Shared Expenses (Allocated by active tanks count)
-                const activeTanksCount = this.state.tanks.filter(t => t.farmId === tank.farmId && t.status === 'active').length || 1;
-                const sharedExpenses = this.state.expenses
-                    .filter(e => e.farmId === tank.farmId && !e.tankId)
-                    .reduce((sum, e) => sum + e.amount, 0);
-                const allocatedShared = sharedExpenses / activeTanksCount;
-
-                const totalCost = feedCost + directExpenses + allocatedShared;
-                const biomass = tank.biomass || 1; // Avoid div/0
-                const costPerKg = totalCost / biomass;
-
-                // 4. Est Revenue
-                // Find price based on current estimated count. If no count, assume 50.
-                // We need estimated count. Use last sampling or default.
-                const lastSample = this.state.samplingEntries
-                    .filter(s => s.tankId === tankId)
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-                
-                // Estimate count from ABW: 1000 / ABW
-                let currentCount = 50;
-                if (lastSample && lastSample.abw > 0) currentCount = Math.round(1000 / lastSample.abw);
-                
-                // Find closest price bucket
-                const priceObj = this.state.prices.reduce((prev, curr) => 
-                    Math.abs(curr.count - currentCount) < Math.abs(prev.count - currentCount) ? curr : prev
-                , this.state.prices[0]);
-                
-                const marketPrice = priceObj ? priceObj.price : 0;
-                const estRevenue = biomass * marketPrice;
-
-                return { totalCost, costPerKg, estRevenue, feedCost, directExpenses, allocatedShared, marketPrice, currentCount };
-            }
-
-            renderExpensesScreen() {
-                const container = document.getElementById('expensesList');
-                const currentFarmId = this.state.settings.currentFarmId;
-                const farmExpenses = this.state.expenses.filter(e => e.farmId === currentFarmId).sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                // Calculate Totals
-                let totalExp = 0;
-                let totalRev = 0;
-                let totalBiomass = 0;
-
-                const activeTanks = this.state.tanks.filter(t => t.farmId === currentFarmId && t.status === 'active');
-                activeTanks.forEach(t => {
-                    const fin = this.getTankFinancials(t.id);
-                    totalExp += fin.totalCost;
-                    totalRev += fin.estRevenue;
-                    totalBiomass += (t.biomass || 0);
-                });
-
-                const avgCOP = totalBiomass > 0 ? (totalExp / totalBiomass).toFixed(2) : 0;
-
-                document.getElementById('totalExpenses').textContent = `₹${Math.round(totalExp).toLocaleString()}`;
-                document.getElementById('estRevenue').textContent = `₹${Math.round(totalRev).toLocaleString()}`;
-                document.getElementById('avgCOP').textContent = `₹${avgCOP}`;
-
-                if (farmExpenses.length === 0) {
-                    container.innerHTML = '<div class="empty-state"><p>No expenses logged yet.</p></div>';
-                    return;
-                }
-
-                container.innerHTML = farmExpenses.map(e => {
-                    const tankName = e.tankId ? (this.getTankById(e.tankId)?.name || 'Unknown Tank') : 'Farm Wide';
-                    return `
-                        <div class="timeline-card" style="border-left-color: var(--danger);">
-                            <div style="display:flex; justify-content:space-between;">
-                                <div style="font-weight:700;">${e.category}</div>
-                                <div style="font-weight:700; color:var(--danger);">-₹${e.amount}</div>
-                            </div>
-                            <div style="font-size:12px; color:var(--gray); margin-top:4px;">
-                                ${new Date(e.date).toLocaleDateString()} • ${tankName}
-                                <br>${e.note || ''}
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            renderHistoryScreen() {
-                const container = document.getElementById('cropHistoryList');
-                const currentFarmId = this.state.settings.currentFarmId;
-                
-                // Filter by farm and sort by closed date (newest first)
-                const cycles = this.state.cropCycles
-                    .filter(c => c.farmId === currentFarmId)
-                    .sort((a, b) => new Date(b.closedAt) - new Date(a.closedAt));
-
-                if (cycles.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-history"></i>
-                            <h3>No History Yet</h3>
-                            <p>Completed crop cycles will appear here.</p>
-                        </div>`;
-                    return;
-                }
-
-                container.innerHTML = cycles.map(c => {
-                    // Color code FCR
-                    const fcrColor = c.fcr < 1.4 ? 'var(--success)' : c.fcr < 1.8 ? 'var(--warning)' : 'var(--danger)';
-                    
-                    return `
-                        <div class="timeline-card">
-                            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
-                                <div>
-                                    <div style="font-weight:700; font-size:16px; color:var(--dark);">${c.tankName}</div>
-                                    <div style="font-size:12px; color:var(--gray); margin-top:2px;">${new Date(c.startDate).toLocaleDateString()} — ${new Date(c.closedAt).toLocaleDateString()}</div>
-                                </div>
-                                <div style="text-align:right;">
-                                    <div style="font-weight:800; font-size:16px; color:var(--primary);">${c.durationDays} Days</div>
-                                    <div style="font-size:11px; color:var(--gray);">Duration</div>
-                                </div>
-                            </div>
-                            
-                            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; background:#f8f9fa; padding:12px; border-radius:8px;">
-                                <div style="text-align:center;">
-                                    <div style="font-size:11px; color:var(--gray); margin-bottom:2px;">Total Yield</div>
-                                    <div style="font-weight:700; color:var(--dark);">${c.totalHarvest} kg</div>
-                                </div>
-                                <div style="text-align:center;">
-                                    <div style="font-size:11px; color:var(--gray); margin-bottom:2px;">FCR</div>
-                                    <div style="font-weight:700; color:${fcrColor};">${c.fcr}</div>
-                                </div>
-                                <div style="text-align:center;">
-                                    <div style="font-size:11px; color:var(--gray); margin-bottom:2px;">Survival</div>
-                                    <div style="font-weight:700; color:var(--dark);">${c.survivalRate}%</div>
-                                </div>
-                            </div>
-                            <div style="margin-top:10px; font-size:12px; color:var(--gray); display:flex; justify-content:space-between;">
-                                <span>Seed: ${c.initialSeed.toLocaleString()}</span>
-                                <span>Feed: ${c.totalFeed} kg</span>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
             }
 
             // Helper to delete large collections in chunks
