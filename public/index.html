@@ -3167,10 +3167,6 @@
                     </div>
                 </div>
 
-                <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px; text-align: center;">
-                    <button class="btn btn-secondary" style="width: 100%; background: #f8f9fa; color: #666; border: 1px solid #ddd;" onclick="app.handleGuestLogin()"><i class="fas fa-user-secret"></i> Continue as Guest</button>
-                    <p style="font-size: 11px; color: #aaa; margin-top: 8px;">Guest data is saved on this device only.</p>
-                </div>
                 <div id="recaptcha-container" style="margin-top: 20px;"></div>
             </div>
 
@@ -3372,8 +3368,6 @@
                 });
             }
 
-            get isGuest() { return this.currentUser && this.currentUser.uid === 'guest'; }
-
             async handleSignIn(user) {
                 document.getElementById('authContainer').style.display = 'none';
                 this.showLoading(true);
@@ -3406,85 +3400,7 @@
                 }
 
                 this.currentUser = userProfile;
-                // Check for guest data to sync
-                await this.checkForGuestDataAndSync(user);
                 await this.completeAppInitialization();
-            }
-
-            handleGuestLogin() {
-                this.currentUser = { uid: 'guest', name: 'Guest Farmer', role: 'owner', isPro: true };
-                document.getElementById('authContainer').style.display = 'none';
-                this.showToast('Welcome Guest! You are in demo mode.', 'info');
-                this.completeAppInitialization();
-            }
-            
-            startGuestSync() {
-                this.closeAllModals();
-                document.getElementById('authContainer').style.display = 'flex';
-                this.showToast('Please log in to sync your data.', 'info');
-            }
-
-            async checkForGuestDataAndSync(user) {
-                const stored = localStorage.getItem('aquabook_guest_data');
-                if (stored) {
-                    if (confirm('We found data from your Guest session. Do you want to sync it to your account?')) {
-                        await this.syncGuestDataToCloud(user, JSON.parse(stored));
-                    } else {
-                        if (confirm('Discard guest data? Click OK to delete it, or Cancel to keep it locally.')) {
-                            localStorage.removeItem('aquabook_guest_data');
-                        }
-                    }
-                }
-            }
-
-            async syncGuestDataToCloud(user, data) {
-                this.showLoading(true);
-                try {
-                    const batch = this.db.batch();
-                    
-                    // 1. Farms (Update Owner)
-                    if (data.farms) {
-                        data.farms.forEach(f => {
-                            f.ownerId = user.uid;
-                            f.memberIds = [user.uid];
-                            f.members = { [user.uid]: 'owner' };
-                            batch.set(this.db.collection('farms').doc(f.id), f);
-                        });
-                    }
-                    
-                    // 2. Collections that just need uploading
-                    const collections = [
-                        { key: 'tanks', col: 'tanks' },
-                        { key: 'feedEntries', col: 'feedEntries' },
-                        { key: 'waterEntries', col: 'waterEntries' },
-                        { key: 'harvests', col: 'harvests' },
-                        { key: 'samplingEntries', col: 'sampling' },
-                        { key: 'medicineInventory', col: 'medicineInventory' },
-                        { key: 'medicineApplications', col: 'medicineApplications' }
-                    ];
-
-                    collections.forEach(map => {
-                        if (data[map.key]) {
-                            data[map.key].forEach(item => {
-                                batch.set(this.db.collection(map.col).doc(item.id.toString()), item);
-                            });
-                        }
-                    });
-
-                    // 3. Inventory
-                    if (data.inventory && data.farms && data.farms.length > 0) {
-                        const farmId = data.farms[0].id;
-                        batch.set(this.db.collection('inventory').doc(farmId), data.inventory);
-                    }
-
-                    await batch.commit();
-                    localStorage.removeItem('aquabook_guest_data');
-                    this.showToast('Guest data synced successfully!', 'success');
-                } catch (e) {
-                    console.error("Sync error:", e);
-                    this.showToast('Error syncing data: ' + e.message, 'error');
-                }
-                this.showLoading(false);
             }
 
             async completeAppInitialization() {
@@ -3492,7 +3408,7 @@
                     await this.loadAllData(); // Load data from Firestore
                     
                     // Check for pending link invitation
-                    if (this.pendingInviteId && this.currentUser && !this.isGuest) {
+                    if (this.pendingInviteId && this.currentUser) {
                         await this.processLinkInvitation(this.pendingInviteId, this.currentUser);
                         this.pendingInviteId = null;
                         window.history.replaceState({}, document.title, window.location.pathname);
@@ -3563,11 +3479,6 @@
             
             // ===== DATA MANAGEMENT =====
             async loadAllData() {
-                if (this.isGuest) {
-                    this.loadGuestData();
-                    return;
-                }
-
                 if (!this.currentUser) return;
                 console.log("Fetching all user data from Firestore...");
 
@@ -3684,31 +3595,6 @@
                 console.log("Data loaded from Firestore.");
             }
 
-            loadGuestData() {
-                const stored = localStorage.getItem('aquabook_guest_data');
-                if (stored) {
-                    const data = JSON.parse(stored);
-                    // Merge stored data into state
-                    this.state = { ...this.state, ...data };
-                }
-            }
-
-            saveGuestData() {
-                if (!this.isGuest) return;
-                // Persist entire state to local storage
-                localStorage.setItem('aquabook_guest_data', JSON.stringify({
-                    farms: this.state.farms,
-                    tanks: this.state.tanks,
-                    feedEntries: this.state.feedEntries,
-                    harvests: this.state.harvests,
-                    waterEntries: this.state.waterEntries,
-                    samplingEntries: this.state.samplingEntries,
-                    inventory: this.state.inventory,
-                    medicineInventory: this.state.medicineInventory,
-                    medicineApplications: this.state.medicineApplications
-                }));
-            }
-            
             saveAllData() {
                 localStorage.setItem('aquabook_farms', JSON.stringify(this.state.farms));
                 localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
@@ -3901,7 +3787,10 @@
                 const totalBiomass = farmTanks.reduce((sum, tank) => sum + (tank.biomass || 0), 0);
                 document.getElementById('totalBiomass').innerHTML = `${totalBiomass.toFixed(1)} <span class="unit">kg</span>`;
 
-                const avgFCR = totalBiomass > 0 ? (totalFeed / totalBiomass).toFixed(2) : '0.00';
+                const farmHarvests = currentFarmId ? this.state.harvests.filter(h => h.farmId === currentFarmId) : [];
+                const totalHarvested = farmHarvests.reduce((sum, h) => sum + h.weight, 0);
+                const totalProduction = totalBiomass + totalHarvested;
+                const avgFCR = totalProduction > 0 ? (totalFeed / totalProduction).toFixed(2) : '0.00';
                 document.getElementById('avgFCR').textContent = avgFCR;
 
                 // Feed Waste % (based on tray results)
@@ -4174,6 +4063,21 @@
                 `;
             }
 
+            getFeedSlotIndex(timestamp, feedsPerDay) {
+                const hour = new Date(parseInt(timestamp)).getHours();
+                if (feedsPerDay === 1) return 0;
+                if (feedsPerDay === 2) return hour < 14 ? 0 : 1;
+                if (feedsPerDay === 3) {
+                    if (hour < 11) return 0;
+                    return hour < 16 ? 1 : 2;
+                }
+                // Default 4 (Standard: 6-10, 10-14, 14-18, 18-22)
+                if (hour < 10) return 0;
+                if (hour < 14) return 1;
+                if (hour < 18) return 2;
+                return 3;
+            }
+
             renderLogBook() {
                 const tableHead = document.querySelector('#logTable thead');
                 const tableBody = document.getElementById('logTableBody');
@@ -4266,16 +4170,21 @@
                     tanksToShow.forEach(tank => {
                         const farm = this.getFarmById(tank.farmId);
                         const entries = this.state.feedEntries
-                            .filter(e => e.tankId == tank.id && e.date === dateStr)
-                            .sort((a, b) => a.id - b.id);
+                            .filter(e => e.tankId == tank.id && e.date === dateStr);
+                        
+                        const slots = new Array(feedsCount).fill(null);
+                        entries.forEach(e => {
+                            const slotIdx = this.getFeedSlotIndex(e.id, feedsCount);
+                            if (slotIdx < feedsCount) slots[slotIdx] = e;
+                        });
 
                     const total = entries.reduce((sum, e) => sum + e.amount, 0);
                     grandTotal += total;
 
                     // Helper to generate cell HTML
                     const getCell = (index) => {
-                        if (entries[index]) {
-                            const e = entries[index];
+                        if (slots[index]) {
+                            const e = slots[index];
                             colTotals[index] += e.amount;
                             
                             let badgeClass = 'unknown';
@@ -4380,13 +4289,20 @@
                         const sortedDates = Object.keys(entriesByDate).sort().reverse();
 
                         sortedDates.forEach(date => {
-                            const entries = entriesByDate[date].sort((a, b) => a.id - b.id);
+                            const entries = entriesByDate[date];
+                            
+                            const slots = new Array(feedsCount).fill(null);
+                            entries.forEach(e => {
+                                const slotIdx = this.getFeedSlotIndex(e.id, feedsCount);
+                                if (slotIdx < feedsCount) slots[slotIdx] = e;
+                            });
+
                             const total = entries.reduce((sum, e) => sum + e.amount, 0);
                             
                             // Helper to get cell (similar to above but simplified)
                             const getCell = (index) => {
-                                if (entries[index]) {
-                                    const e = entries[index];
+                                if (slots[index]) {
+                                    const e = slots[index];
                                     let badgeClass = 'unknown';
                                     let badgeText = e.trayResult;
                                     if (e.trayResult === 'too-much') badgeText = 'Too Much';
@@ -4742,12 +4658,6 @@
             }
 
             openFarmModal() {
-                if (this.isGuest) {
-                    this.closeAllModals();
-                    document.getElementById('authContainer').style.display = 'flex';
-                    this.showToast('Please log in to add a farm.', 'info');
-                    return;
-                }
                 this.editingFarmId = null;
                 document.getElementById('farmNameInput').value = '';
                 document.getElementById('farmLocation').value = '';
@@ -4943,8 +4853,6 @@
                 
                 // Set current user and close modal
                 this.currentUser = { uid: user.uid, ...userProfile };
-                // Check for guest data to sync
-                await this.checkForGuestDataAndSync(user);
                 this.closeAllModals();
                 
                 await this.completeAppInitialization();
@@ -5030,12 +4938,6 @@
             }
 
             openTankModal(farmId) {
-                if (this.isGuest) {
-                    this.closeAllModals();
-                    document.getElementById('authContainer').style.display = 'flex';
-                    this.showToast('Please log in to add a tank.', 'info');
-                    return;
-                }
                 this.editingTankId = null;
                 document.getElementById('tankNameInput').value = '';
                 document.getElementById('tankSize').value = '';
@@ -5069,10 +4971,18 @@
                 
                 if (bags > 0 && currentFarmId) {
                     const addedKg = bags * weight;
-                    this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + addedKg;
                     
-                    // Save to Firestore
-                    await this.db.collection('inventory').doc(currentFarmId).set(this.state.inventory, { merge: true });
+                    // Fix: Inventory Race Condition via Transaction
+                    await this.db.runTransaction(async (transaction) => {
+                        const invRef = this.db.collection('inventory').doc(currentFarmId);
+                        const invDoc = await transaction.get(invRef);
+                        let newTotal = addedKg;
+                        if (invDoc.exists) {
+                            newTotal += (invDoc.data().totalKg || 0);
+                        }
+                        transaction.set(invRef, { totalKg: newTotal }, { merge: true });
+                        this.state.inventory.totalKg = newTotal;
+                    });
                     
                     this.renderOverallStats();
                     this.closeAllModals();
@@ -5146,6 +5056,12 @@
             }
 
             async deleteMedicineItem(id) {
+                // Fix: Check usage before delete
+                const used = this.state.medicineApplications.some(a => a.medId === id);
+                if (used) {
+                    this.showToast('Cannot delete: Item has been used in applications.', 'error');
+                    return;
+                }
                 if (confirm('Remove this item from inventory?')) {
                     await this.db.collection('medicineInventory').doc(id).delete();
                     this.state.medicineInventory = this.state.medicineInventory.filter(i => i.id !== id);
@@ -5298,6 +5214,10 @@
                 const list = document.getElementById('feedRoundList');
                 list.innerHTML = '';
 
+                // Fix: Suggestion Baseline (Find same slot yesterday)
+                // This ensures Morning feed is compared to yesterday's Morning feed, not yesterday's Evening feed.
+                const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
                 activeTanks.forEach(tank => {
                     // Get last feed info
                     const entries = this.state.feedEntries.filter(e => e.tankId == tank.id).sort((a, b) => b.id - a.id);
@@ -5347,6 +5267,11 @@
             }
 
             async saveFeedRound() { 
+                // Fix: Disable button to prevent double submission
+                const btn = document.querySelector('#feedRoundModal .btn-primary');
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
                 const inputs = document.querySelectorAll('.feed-round-input');
                 let totalAmount = 0;
                 
@@ -5362,7 +5287,8 @@
                     if (amount > 0) {
                         const tankId = input.dataset.tankId;
                         const tank = this.getTankById(tankId);
-                        const entryId = (Date.now() + entriesToAdd.length).toString();
+                        // Fix: Ensure unique IDs even in fast loops
+                        const entryId = Date.now().toString() + '_' + entriesToAdd.length;
                         const newEntry = {
                             id: entryId,
                             tankId,
@@ -5385,29 +5311,25 @@
                 const currentStock = this.state.inventory.totalKg || 0;
                 if (totalAmount > currentStock) {
                     if (!confirm(`⚠️ Low Inventory Warning\n\nYou are about to feed ${totalAmount.toFixed(1)}kg, but you only have ${currentStock.toFixed(1)}kg in stock.\n\nProceed anyway?`)) {
+                        btn.disabled = false;
+                        btn.innerHTML = 'Save All Entries';
                         return;
                     }
-                }
-
-                if (this.isGuest) {
-                    entriesToAdd.forEach(e => this.state.feedEntries.push(e));
-                    this.state.inventory.totalKg = currentStock - totalAmount;
-                    this.saveGuestData();
-                    this.renderLogBook();
-                    this.renderOverallStats();
-                    this.closeAllModals();
-                    this.showToast(`Saved ${entriesToAdd.length} entries (Guest Mode)`);
-                    return;
                 }
 
                 if (entriesToAdd.length > 0) {
                     this.showLoading(true);
                     await batch.commit();
 
-                    this.state.inventory.totalKg = currentStock - totalAmount;
-                    // Update inventory in Firestore
+                    // Fix: Transaction for Inventory Update
                     if (this.state.settings.currentFarmId) {
-                        await this.db.collection('inventory').doc(this.state.settings.currentFarmId).set(this.state.inventory, { merge: true });
+                        await this.db.runTransaction(async (t) => {
+                            const ref = this.db.collection('inventory').doc(this.state.settings.currentFarmId);
+                            const doc = await t.get(ref);
+                            const newTotal = (doc.exists ? doc.data().totalKg : 0) - totalAmount;
+                            t.set(ref, { totalKg: newTotal }, { merge: true });
+                            this.state.inventory.totalKg = newTotal;
+                        });
                     }
                     
                     this.renderInventorySummary();
@@ -5416,6 +5338,8 @@
                     this.showLoading(false);
                     this.showToast(`Saved ${entriesToAdd.length} feed entries. Check trays in 2 hours!`);
                 } else {
+                    btn.disabled = false;
+                    btn.innerHTML = 'Save All Entries';
                     this.showToast('No feed amounts entered', 'error');
                 }
             }
@@ -5513,6 +5437,11 @@
                                 Too Much<br><span style="font-size:10px; font-weight:400; color: var(--gray);">Serious Waste</span>
                             </div>
                         </div>
+                        
+                        <div class="form-group" style="margin-top:15px;">
+                            <label style="font-size:13px;">Mortality (Dead Shrimp)</label>
+                            <input type="number" id="mortalityInput" class="form-control" placeholder="0" min="0">
+                        </div>
 
                         <input type="text" class="form-control" placeholder="Quick note (e.g. Rain, Aerator off...)" maxlength="50" style="font-size:13px; margin-top:20px;">
                     </div>
@@ -5601,6 +5530,14 @@
                     reason = `-20% (was ${entry.amount}kg)`;
                 }
 
+                // Smart Recommendation: Weather Integration
+                // If weather is bad (Rain/Storm), suggest reducing feed to prevent waste/ammonia spikes
+                if (this.currentWeatherCode !== null && this.currentWeatherCode >= 50) {
+                    const weatherFactor = 0.9; // Reduce by 10%
+                    newAmount = newAmount * weatherFactor;
+                    reason += " + Weather Adj.";
+                }
+
                 // Prepare data object
                 this.tempTrayResult = {
                     entryId: id,
@@ -5686,14 +5623,6 @@
                     localEntry.riskScore = data.riskScore;
                     localEntry.riskLevel = data.riskLevel;
                     localEntry.notes = data.notes;
-                }
-
-                if (this.isGuest) {
-                    this.saveGuestData();
-                    this.showLoading(false);
-                    this.showToast('Tray result updated (Guest)');
-                    this.openTrayCheckModal();
-                    return;
                 }
 
                 this.showLoading(false);
@@ -5787,21 +5716,34 @@
                 this.pendingSuggestions = null;
             }
 
-            recalculateTankBiomass(tankId) {
+            async recalculateTankBiomass(tankId) {
                 const tank = this.getTankById(tankId);
                 if (!tank) return;
                 
-                const entries = this.state.feedEntries.filter(e => e.tankId == tankId);
-                const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
-                const tankHarvests = this.state.harvests.filter(h => h.tankId == tankId);
-                const totalHarvested = tankHarvests.reduce((sum, h) => sum + h.weight, 0);
+                // 1. Try to calculate based on Sampling (Most Accurate)
+                const samples = this.state.samplingEntries
+                    .filter(s => s.tankId == tankId)
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
                 
-                // Using standard FCR of 1.2 for estimation
-                const estimatedFCR = 1.2;
-                tank.biomass = Math.max(0, parseFloat(((totalFeed / estimatedFCR) - totalHarvested).toFixed(1)));
+                if (samples.length > 0) {
+                    const lastSample = samples[0];
+                    // Biomass = Current Seed * ABW. (Divide by 1000 for kg)
+                    const currentSeed = tank.currentSeed || tank.initialSeed || 0;
+                    tank.biomass = parseFloat(((currentSeed * lastSample.abw) / 1000).toFixed(1));
+                } else {
+                    // 2. Fallback to FCR Estimation if no samples yet
+                    const entries = this.state.feedEntries.filter(e => e.tankId == tankId);
+                    const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
+                    const tankHarvests = this.state.harvests.filter(h => h.tankId == tankId);
+                    const totalHarvested = tankHarvests.reduce((sum, h) => sum + h.weight, 0);
+                    
+                    // Using standard FCR of 1.2 for estimation
+                    const estimatedFCR = 1.2;
+                    tank.biomass = Math.max(0, parseFloat(((totalFeed / estimatedFCR) - totalHarvested).toFixed(1)));
+                }
                 
                 // Update Firestore
-                this.db.collection('tanks').doc(tankId).update({ biomass: tank.biomass });
+                await this.db.collection('tanks').doc(tankId).update({ biomass: tank.biomass });
             }
 
             // ===== WATER ANALYSIS =====
@@ -6198,13 +6140,11 @@
                         farm.phone = phone;
                         farm.lat = lat ? parseFloat(lat) : null;
                         farm.lng = lng ? parseFloat(lng) : null;
-                        if (!this.isGuest) await this.db.collection('farms').doc(farm.id).set(farm, { merge: true });
+                        await this.db.collection('farms').doc(farm.id).set(farm, { merge: true });
                         this.showToast('Farm updated successfully');
                     }
                 } else {
-                    let newId;
-                    if (this.isGuest) newId = Date.now().toString();
-                    else newId = this.db.collection('farms').doc().id; // Always random ID for unlimited farms
+                    const newId = this.db.collection('farms').doc().id; // Always random ID for unlimited farms
 
                     const newFarm = {
                         id: newId,
@@ -6220,7 +6160,7 @@
                         created: new Date().toISOString()
                     };
 
-                    if (!this.isGuest) await this.db.collection('farms').doc(newFarm.id).set(newFarm);
+                    await this.db.collection('farms').doc(newFarm.id).set(newFarm);
                     this.state.farms.push(newFarm);
                     
                     // Set as current if first
@@ -6231,14 +6171,9 @@
                     this.showToast('Farm added successfully');
                 }
                 
-                if (this.isGuest) {
-                    this.saveGuestData();
-                    this.renderAll();
-                } else {
                 // Refresh listeners to include the new farm in real-time updates
                 this.detachFirestoreListeners();
                 await this.loadAllData();
-                }
 
                 this.showLoading(false);
                 this.closeAllModals();
@@ -6345,7 +6280,7 @@
                             tank.stockingDate = stockingDate;
                             tank.initialSeed = initialSeed;
                             tank.checkTrays = checkTrays;
-                            if (!this.isGuest) await this.db.collection('tanks').doc(tank.id).set(tank, { merge: true });
+                            await this.db.collection('tanks').doc(tank.id).set(tank, { merge: true });
                             this.showToast('Tank updated successfully');
                         }
                     } else {
@@ -6361,14 +6296,9 @@
                             nextSuggestedFeed: null,
                             status: 'active'
                         };
-                        if (!this.isGuest) await this.db.collection('tanks').doc(newTank.id).set(newTank);
+                        await this.db.collection('tanks').doc(newTank.id).set(newTank);
                         this.state.tanks.push(newTank);
                         this.showToast('Tank added successfully');
-                    }
-
-                    if (this.isGuest) {
-                        this.saveGuestData();
-                        this.renderAll();
                     }
 
                     this.closeAllModals();
@@ -6686,16 +6616,7 @@
                 
                 // Guest Sync Button
                 const footer = document.querySelector('#settingsModal .modal-footer');
-                if (this.isGuest) {
-                    footer.innerHTML = `
-                        <button class="btn btn-success" style="width: 100%; margin-bottom: 10px;" onclick="app.startGuestSync()">
-                            <i class="fas fa-cloud-upload-alt"></i> Sync Data to Cloud
-                        </button>
-                        <button class="btn btn-secondary" style="width: 100%;" onclick="app.signOut()">Exit Guest Mode</button>
-                    `;
-                } else {
-                    footer.innerHTML = `<button class="btn btn-secondary" onclick="app.signOut()">Sign Out</button>`;
-                }
+                footer.innerHTML = `<button class="btn btn-secondary" onclick="app.signOut()">Sign Out</button>`;
                 
                 document.getElementById('settingsModal').classList.add('active');
             }
@@ -7078,6 +6999,7 @@
                 this.state.samplingEntries.push(sample);
                 
                 await this.db.collection('sampling').doc(sample.id.toString()).set(sample);
+                await this.recalculateTankBiomass(tankId); // Update biomass based on new ABW
                 this.closeAllModals();
                 this.showToast(`Sample logged! ABW: ${abw}g`);
                 if(tankId) this.openTankDetail(tankId);
