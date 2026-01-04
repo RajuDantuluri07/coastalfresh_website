@@ -2157,14 +2157,6 @@
                 <i class="fas fa-chart-line"></i>
                 <span>Prices</span>
             </button>
-            <button class="nav-btn" data-screen="expenses">
-                <i class="fas fa-wallet"></i>
-                <span>Expenses</span>
-            </button>
-            <button class="nav-btn" data-screen="tasks">
-                <i class="fas fa-tasks"></i>
-                <span>Tasks</span>
-            </button>
         </nav>
 
         <!-- Screens -->
@@ -2501,111 +2493,6 @@
                     </div>
                 </div>
             </section>
-
-            <!-- Expenses Screen -->
-            <section id="expensesScreen" class="screen">
-                <div class="screen-header">
-                    <h2 class="screen-title">
-                        <i class="fas fa-wallet"></i>
-                        Expenses
-                    </h2>
-                    <div class="text-muted" style="font-weight: 700; color: var(--danger);">Total: <span id="totalExpensesDisplay">₹0</span></div>
-                </div>
-                
-                <!-- Expense Form -->
-                <div class="farm-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Category</label>
-                            <select id="expenseCategory" class="form-control">
-                                <option value="Feed">Feed</option>
-                                <option value="Seed">Seed</option>
-                                <option value="Electricity">Electricity</option>
-                                <option value="Labor">Labor</option>
-                                <option value="Medicine">Medicine</option>
-                                <option value="Fuel">Fuel</option>
-                                <option value="Maintenance">Maintenance</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Amount (₹)</label>
-                            <input type="number" id="expenseAmount" class="form-control" placeholder="0.00">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Date</label>
-                            <input type="date" id="expenseDate" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label>Description (Optional)</label>
-                            <input type="text" id="expenseDesc" class="form-control" placeholder="e.g. Bill #123">
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" style="width:100%" onclick="app.addExpense()">
-                        <i class="fas fa-plus"></i> Add Expense
-                    </button>
-                </div>
-
-                <!-- Expense Chart -->
-                <div class="chart-container" id="expensesChartContainer" style="height: 300px; margin-top: 20px; background: white; border: 2px solid var(--border); border-radius: var(--radius); padding: 16px; display: none;">
-                    <canvas id="expensesPieChart"></canvas>
-                </div>
-
-                <!-- Expense List -->
-                <div style="margin-top: 20px;">
-                    <h3 style="font-size: 16px; margin-bottom: 15px; color: var(--dark);">Recent Expenses</h3>
-                    <div id="expensesList" class="timeline-container"></div>
-                </div>
-            </section>
-
-            <!-- Tasks Screen -->
-            <section id="tasksScreen" class="screen">
-                <div class="screen-header">
-                    <h2 class="screen-title">
-                        <i class="fas fa-check-square"></i>
-                        Farm Tasks
-                    </h2>
-                </div>
-                
-                <div class="farm-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Task Description</label>
-                            <input type="text" id="taskDesc" class="form-control" placeholder="e.g. Check Aerators">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Due Date</label>
-                            <input type="date" id="taskDate" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label>Priority</label>
-                            <select id="taskPriority" class="form-control">
-                                <option value="Normal">Normal</option>
-                                <option value="High">High</option>
-                                <option value="Urgent">Urgent</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" style="width:100%" onclick="app.addTask()">
-                        <i class="fas fa-plus"></i> Add Task
-                    </button>
-                </div>
-
-                <div style="margin-top: 20px;">
-                    <div class="log-toolbar">
-                        <div class="log-range-tabs" id="taskTabs">
-                            <button class="range-tab active" onclick="app.setTaskFilter('all', this)">All</button>
-                            <button class="range-tab" onclick="app.setTaskFilter('pending', this)">Pending</button>
-                            <button class="range-tab" onclick="app.setTaskFilter('completed', this)">Completed</button>
-                        </div>
-                    </div>
-                    <div id="tasksList" class="timeline-container"></div>
-                </div>
-            </section>
         </main>
     </div>
 
@@ -2924,10 +2811,6 @@
                     <button class="btn btn-secondary" onclick="app.exportData()">
                         <i class="fas fa-download"></i> Backup Data
                     </button>
-                    <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">
-                        <i class="fas fa-upload"></i> Restore Data
-                    </button>
-                    <input type="file" id="importFile" style="display: none;" accept=".json" onchange="app.importData(this)">
                 </div>
 
                 <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
@@ -3422,9 +3305,7 @@
                     feedEntries: [],     // All feed entries
                     harvests: [],        // Harvest records
                     waterEntries: [],    // Water test history
-                    expenses: [],        // Expense records
                     samplingEntries: [], // Growth sampling records
-                    tasks: [],           // Task records
                     prices: [],          // Market prices
                     inventory: { totalKg: 0 }, // Inventory
                     medicineInventory: [], // Medicine inventory array
@@ -3577,9 +3458,7 @@
                         { key: 'feedEntries', col: 'feedEntries' },
                         { key: 'waterEntries', col: 'waterEntries' },
                         { key: 'harvests', col: 'harvests' },
-                        { key: 'expenses', col: 'expenses' },
                         { key: 'samplingEntries', col: 'sampling' },
-                        { key: 'tasks', col: 'tasks' },
                         { key: 'medicineInventory', col: 'medicineInventory' },
                         { key: 'medicineApplications', col: 'medicineApplications' }
                     ];
@@ -3698,10 +3577,8 @@
                 this.state.tanks = [];
                 this.state.feedEntries = [];
                 this.state.waterEntries = [];
-                this.state.expenses = [];
                 this.state.harvests = [];
                 this.state.samplingEntries = [];
-                this.state.tasks = [];
                 this.state.medicineInventory = [];
                 this.state.medicineApplications = [];
 
@@ -3758,10 +3635,8 @@
 
                     // Fetch other collections safely
                     this.state.waterEntries = await fetchInChunks('waterEntries', 'farmId', farmIds);
-                    this.state.expenses = await fetchInChunks('expenses', 'farmId', farmIds);
                     this.state.harvests = await fetchInChunks('harvests', 'farmId', farmIds);
                     this.state.samplingEntries = await fetchInChunks('sampling', 'farmId', farmIds);
-                    this.state.tasks = await fetchInChunks('tasks', 'farmId', farmIds);
                     this.state.medicineInventory = await fetchInChunks('medicineInventory', 'farmId', farmIds);
                     this.state.medicineApplications = await fetchInChunks('medicineApplications', 'farmId', farmIds);
                 }
@@ -3825,7 +3700,12 @@
                     farms: this.state.farms,
                     tanks: this.state.tanks,
                     feedEntries: this.state.feedEntries,
-                    inventory: this.state.inventory
+                    harvests: this.state.harvests,
+                    waterEntries: this.state.waterEntries,
+                    samplingEntries: this.state.samplingEntries,
+                    inventory: this.state.inventory,
+                    medicineInventory: this.state.medicineInventory,
+                    medicineApplications: this.state.medicineApplications
                 }));
             }
             
@@ -3835,66 +3715,11 @@
                 localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
                 localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
                 localStorage.setItem('aquabook_water', JSON.stringify(this.state.waterEntries));
-                localStorage.setItem('aquabook_expenses', JSON.stringify(this.state.expenses));
                 localStorage.setItem('aquabook_sampling', JSON.stringify(this.state.samplingEntries));
-                localStorage.setItem('aquabook_tasks', JSON.stringify(this.state.tasks));
                 localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
                 localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
                 localStorage.setItem('aquabook_med_apps', JSON.stringify(this.state.medicineApplications));
                 localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
-            }
-            
-            saveFarms() {
-                // This is now handled by individual saveFarm calls
-                console.warn("saveFarms() is deprecated. Use individual doc saves.");
-            }
-
-            // ... other save functions like saveTanks, saveFeedEntries etc.
-            // will be refactored to save individual documents to Firestore
-            // instead of saving the whole array.
-            
-            saveTanks() {
-                localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
-            }
-            
-            saveFeedEntries() {
-                localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
-            }
-
-            saveHarvests() {
-                localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
-            }
-            
-            saveWaterEntries() {
-                localStorage.setItem('aquabook_water', JSON.stringify(this.state.waterEntries));
-            }
-
-            saveExpenses() {
-                localStorage.setItem('aquabook_expenses', JSON.stringify(this.state.expenses));
-            }
-
-            saveSamplingEntries() {
-                localStorage.setItem('aquabook_sampling', JSON.stringify(this.state.samplingEntries));
-            }
-
-            saveTasks() {
-                localStorage.setItem('aquabook_tasks', JSON.stringify(this.state.tasks));
-            }
-
-            saveInventory() {
-                localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
-            }
-
-            saveMedicineInventory() {
-                localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
-            }
-
-            saveMedicineApplications() {
-                localStorage.setItem('aquabook_med_apps', JSON.stringify(this.state.medicineApplications));
-            }
-
-            savePrices() {
-                localStorage.setItem('aquabook_prices', JSON.stringify(this.state.prices));
             }
             
             async saveSettings() {
@@ -3992,6 +3817,18 @@
                 const weatherWidget = document.getElementById('weatherWidget');
                 if (!weatherWidget) return;
 
+                // Optimization: Check Cache (1 hour validity)
+                const cached = localStorage.getItem('aquabook_weather');
+                if (cached) {
+                    try {
+                        const { data, timestamp } = JSON.parse(cached);
+                        if (Date.now() - timestamp < 3600000) { // 1 hour
+                            this.renderWeatherWidget(data, weatherWidget);
+                            return;
+                        }
+                    } catch(e) { localStorage.removeItem('aquabook_weather'); }
+                }
+
                 if ("geolocation" in navigator) {
                     navigator.geolocation.getCurrentPosition(async (position) => {
                         try {
@@ -4000,21 +3837,25 @@
                             // Using Open-Meteo (Free, no API key required)
                             const response = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
                             const data = await response.json();
-                            
-                            if (data.current_weather) {
-                                this.currentWeatherCode = data.current_weather.weathercode;
-                                document.getElementById('weatherTemp').textContent = `${Math.round(data.current_weather.temperature)}°`;
-                                document.getElementById('weatherCondition').textContent = this.getWeatherCondition(data.current_weather.weathercode);
-                                document.getElementById('weatherLoc').textContent = "Local Farm";
-                                document.getElementById('weatherAdvice').innerHTML = `<i class="fas fa-info-circle"></i> ${this.getWeatherAdvice(data.current_weather.weathercode)}`;
-                                weatherWidget.style.display = 'flex';
-                            }
+                            localStorage.setItem('aquabook_weather', JSON.stringify({ data, timestamp: Date.now() }));
+                            this.renderWeatherWidget(data, weatherWidget);
                         } catch (e) {
                             console.error("Weather fetch failed", e);
                         }
                     }, (err) => {
                         console.log("Geolocation denied or error", err);
                     });
+                }
+            }
+
+            renderWeatherWidget(data, widget) {
+                if (data.current_weather) {
+                    this.currentWeatherCode = data.current_weather.weathercode;
+                    document.getElementById('weatherTemp').textContent = `${Math.round(data.current_weather.temperature)}°`;
+                    document.getElementById('weatherCondition').textContent = this.getWeatherCondition(data.current_weather.weathercode);
+                    document.getElementById('weatherLoc').textContent = "Local Farm";
+                    document.getElementById('weatherAdvice').innerHTML = `<i class="fas fa-info-circle"></i> ${this.getWeatherAdvice(data.current_weather.weathercode)}`;
+                    widget.style.display = 'flex';
                 }
             }
 
@@ -4366,7 +4207,7 @@
                 // Filter tanks based on current farm
                 let tanksToShow = this.state.tanks.filter(t => t.status !== 'inactive');
                 if (this.state.settings.currentFarmId) {
-                    tanksToShow = this.state.tanks.filter(t => t.farmId === this.state.settings.currentFarmId);
+                    tanksToShow = tanksToShow.filter(t => t.farmId === this.state.settings.currentFarmId);
                 }
 
                 if (tanksToShow.length === 0) {
@@ -4868,14 +4709,6 @@
                 if (screenName === 'water') {
                     this.renderWaterScreen();
                 }
-
-                if (screenName === 'expenses') {
-                    this.renderExpenses();
-                }
-
-                if (screenName === 'tasks') {
-                    this.renderTasks();
-                }
             }
 
             updateFarmSelector() {
@@ -5175,17 +5008,21 @@
                         <div class="feed-time">${farm.name}</div>
                         <div class="feed-label">${farm.location}</div>
                     `;
-                    div.onclick = () => {
+                    div.onclick = async () => {
                         this.state.settings.currentFarmId = farm.id;
-                        this.saveSettings();
+                        await this.saveSettings();
                         
                         // Fetch inventory for the selected farm
-                        this.db.collection('inventory').doc(farm.id).get().then(doc => {
+                        try {
+                            const doc = await this.db.collection('inventory').doc(farm.id).get();
                             if (doc.exists) this.state.inventory = doc.data();
                             else this.state.inventory = { totalKg: 0 };
-                            this.renderAll();
-                            this.closeAllModals();
-                        });
+                        } catch (e) {
+                            console.error("Inventory fetch failed", e);
+                            this.state.inventory = { totalKg: 0 };
+                        }
+                        this.renderAll();
+                        this.closeAllModals();
                     };
                     list.appendChild(div);
                 });
@@ -5684,7 +5521,7 @@
                 footer.innerHTML = `
                     <div style="display:grid; grid-template-columns: 1fr 2fr; gap: 10px; width: 100%;">
                         <button class="btn btn-secondary" onclick="app.openTrayCheckModal()">Back</button>
-                        <button class="btn btn-primary" onclick="app.processSingleTrayResult(${entry.id})">Save Result</button>
+                        <button class="btn btn-primary" onclick="app.processSingleTrayResult('${entry.id}')">Save Result</button>
                     </div>
                 `;
             }
@@ -5720,6 +5557,8 @@
             }
 
             processSingleTrayResult(entryId) {
+                // Ensure ID is treated as string for comparison
+                const id = String(entryId);
                 const container = document.getElementById('singleTrayForm');
                 if (!container) return;
 
@@ -5745,7 +5584,7 @@
                 // Calculate Risk Level
                 let riskLevel = riskScore >= 6 ? 'Action Required' : riskScore >= 3 ? 'Watch' : 'Normal';
                 
-                const entry = this.state.feedEntries.find(e => e.id === entryId);
+                const entry = this.state.feedEntries.find(e => e.id == id);
                 
                 // Logic for suggestion
                 let newAmount = entry.amount;
@@ -5764,7 +5603,7 @@
 
                 // Prepare data object
                 this.tempTrayResult = {
-                    entryId,
+                    entryId: id,
                     trayResult: trayStatus,
                     trayResults: [trayStatus],
                     observations,
@@ -5822,6 +5661,11 @@
 
                 // Update the tank's suggested feed in Firestore
                 const entry = this.state.feedEntries.find(e => e.id == data.entryId);
+                if (!entry) {
+                    this.showToast("Error: Entry not found. Please refresh.", "error");
+                    this.showLoading(false);
+                    return;
+                }
                 const tank = this.getTankById(entry.tankId);
                 if (tank) {
                     const tankRef = this.db.collection('tanks').doc(tank.id);
@@ -6284,212 +6128,6 @@
                 }
             }
 
-            // ===== EXPENSES =====
-            renderExpenses() {
-                const container = document.getElementById('expensesList');
-                const totalDisplay = document.getElementById('totalExpensesDisplay');
-                const currentFarmId = this.state.settings.currentFarmId;
-                
-                // Set default date
-                if (!document.getElementById('expenseDate').value) {
-                    document.getElementById('expenseDate').value = this.currentDate;
-                }
-
-                const farmExpenses = this.state.expenses
-                    .filter(e => e.farmId === currentFarmId)
-                    .sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
-
-                const total = farmExpenses.reduce((sum, e) => sum + e.amount, 0);
-                totalDisplay.textContent = `₹${total.toLocaleString()}`;
-
-                this.renderExpensesChart();
-
-                if (farmExpenses.length === 0) {
-                    container.innerHTML = '<div class="empty-state" style="padding:20px;"><p>No expenses recorded for this farm.</p></div>';
-                    return;
-                }
-
-                container.innerHTML = farmExpenses.map(e => `
-                    <div class="timeline-card" style="border-left-color: var(--danger); padding: 12px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                            <div style="font-weight:700; font-size:14px; color:var(--dark);">${e.category}</div>
-                            <div style="font-weight:800; color:var(--danger);">₹${e.amount.toLocaleString()}</div>
-                        </div>
-                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--gray);">
-                            <div>${new Date(e.date).toLocaleDateString()} ${e.description ? '• ' + e.description : ''}</div>
-                            <i class="fas fa-trash" style="cursor:pointer;" onclick="app.deleteExpense(${e.id})"></i>
-                        </div>
-                    </div>
-                `).join('');
-            }
-
-            renderExpensesChart() {
-                const ctx = document.getElementById('expensesPieChart');
-                const container = document.getElementById('expensesChartContainer');
-                if (!ctx || !container) return;
-
-                const currentFarmId = this.state.settings.currentFarmId;
-                const farmExpenses = this.state.expenses.filter(e => e.farmId === currentFarmId);
-
-                if (farmExpenses.length === 0) {
-                    container.style.display = 'none';
-                    return;
-                }
-                container.style.display = 'block';
-
-                // Group by category
-                const totals = {};
-                farmExpenses.forEach(e => {
-                    totals[e.category] = (totals[e.category] || 0) + e.amount;
-                });
-
-                const labels = Object.keys(totals);
-                const data = Object.values(totals);
-                const colors = ['#2196F3', '#4CAF50', '#FFC107', '#F44336', '#9C27B0', '#00BCD4', '#795548', '#607D8B'];
-
-                if (this.expensesChart) this.expensesChart.destroy();
-
-                this.expensesChart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: data,
-                            backgroundColor: colors.slice(0, labels.length),
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: { legend: { position: 'right' }, title: { display: true, text: 'Cost Distribution' } }
-                    }
-                });
-            }
-
-            async addExpense() {
-                const currentFarmId = this.state.settings.currentFarmId;
-                if (!currentFarmId) {
-                    this.showToast('Please select a farm first', 'error');
-                    return;
-                }
-
-                const category = document.getElementById('expenseCategory').value;
-                const amount = parseFloat(document.getElementById('expenseAmount').value);
-                const date = document.getElementById('expenseDate').value;
-                const description = document.getElementById('expenseDesc').value;
-
-                if (!amount || amount <= 0) {
-                    this.showToast('Please enter a valid amount', 'error');
-                    return;
-                }
-
-                const expense = { id: Date.now(), farmId: currentFarmId, category, amount, date, description };
-                this.state.expenses.push(expense);
-                await this.db.collection('expenses').doc(expense.id.toString()).set(expense);
-                this.renderExpenses();
-                this.showToast('Expense added');
-                
-                // Clear form
-                document.getElementById('expenseAmount').value = '';
-                document.getElementById('expenseDesc').value = '';
-            }
-
-            async deleteExpense(id) {
-                if (confirm('Delete this expense record?')) {
-                    await this.db.collection('expenses').doc(id.toString()).delete();
-                    this.state.expenses = this.state.expenses.filter(e => e.id !== id);
-                    this.renderExpenses();
-                    this.showToast('Expense deleted');
-                }
-            }
-
-            // ===== TASKS =====
-            renderTasks() {
-                const container = document.getElementById('tasksList');
-                if (!document.getElementById('taskDate').value) {
-                    document.getElementById('taskDate').value = this.currentDate;
-                }
-
-                let filteredTasks = this.state.tasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-                
-                if (this.taskFilter === 'pending') filteredTasks = filteredTasks.filter(t => t.status !== 'completed');
-                if (this.taskFilter === 'completed') filteredTasks = filteredTasks.filter(t => t.status === 'completed');
-
-                if (filteredTasks.length === 0) {
-                    container.innerHTML = '<div class="empty-state" style="padding:20px;"><p>No tasks found.</p></div>';
-                    return;
-                }
-
-                container.innerHTML = filteredTasks.map(t => {
-                    const isDone = t.status === 'completed';
-                    const priorityColor = t.priority === 'Urgent' ? 'var(--danger)' : t.priority === 'High' ? 'var(--warning)' : 'var(--success)';
-                    
-                    return `
-                        <div class="timeline-card" style="border-left-color: ${priorityColor}; padding: 12px; opacity: ${isDone ? 0.6 : 1};">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <div style="display:flex; align-items:center; gap:12px;">
-                                    <div onclick="app.toggleTask(${t.id})" style="width:24px; height:24px; border-radius:50%; border:2px solid ${isDone ? 'var(--success)' : 'var(--gray)'}; display:flex; align-items:center; justify-content:center; cursor:pointer; background:${isDone ? 'var(--success)' : 'white'}">
-                                        ${isDone ? '<i class="fas fa-check" style="color:white; font-size:12px;"></i>' : ''}
-                                    </div>
-                                    <div>
-                                        <div style="font-weight:700; font-size:14px; color:var(--dark); text-decoration: ${isDone ? 'line-through' : 'none'}">${t.description}</div>
-                                        <div style="font-size:12px; color:var(--gray); margin-top:2px;">
-                                            <i class="far fa-calendar"></i> ${new Date(t.dueDate).toLocaleDateString()} 
-                                            <span style="margin-left:8px; font-weight:600; color:${priorityColor}">${t.priority}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <i class="fas fa-trash" style="cursor:pointer; color:var(--gray);" onclick="app.deleteTask(${t.id})"></i>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            }
-
-            async addTask() {
-                const desc = document.getElementById('taskDesc').value;
-                const date = document.getElementById('taskDate').value;
-                const priority = document.getElementById('taskPriority').value;
-
-                if (!desc) {
-                    this.showToast('Please enter a task description', 'error');
-                    return;
-                }
-
-                const currentFarmId = this.state.settings.currentFarmId;
-                const task = { id: Date.now(), farmId: currentFarmId, description: desc, dueDate: date, priority: priority, status: 'pending' };
-                this.state.tasks.push(task);
-                await this.db.collection('tasks').doc(task.id.toString()).set(task);
-                this.renderTasks();
-                this.showToast('Task added');
-                document.getElementById('taskDesc').value = '';
-            }
-
-            async toggleTask(id) {
-                const task = this.state.tasks.find(t => t.id === id);
-                if (task) {
-                    task.status = task.status === 'completed' ? 'pending' : 'completed';
-                    await this.db.collection('tasks').doc(id.toString()).update({ status: task.status });
-                    this.renderTasks();
-                }
-            }
-
-            async deleteTask(id) {
-                if (confirm('Delete this task?')) {
-                    await this.db.collection('tasks').doc(id.toString()).delete();
-                    this.state.tasks = this.state.tasks.filter(t => t.id !== id);
-                    this.renderTasks();
-                }
-            }
-
-            setTaskFilter(filter, btn) {
-                this.taskFilter = filter;
-                document.querySelectorAll('#taskTabs .range-tab').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                this.renderTasks();
-            }
-
             getCurrentLocation() {
                 if (!navigator.geolocation) {
                     this.showToast('Geolocation is not supported by your browser', 'error');
@@ -6564,13 +6202,9 @@
                         this.showToast('Farm updated successfully');
                     }
                 } else {
-                    // ID Generation Strategy for Security Rules:
-                    // Free User -> ID must be their UID (Enforces 1 farm limit)
-                    // Pro User -> Random ID (Unlimited farms)
                     let newId;
                     if (this.isGuest) newId = Date.now().toString();
-                    else if (this.currentUser.isPro) newId = this.db.collection('farms').doc().id;
-                    else newId = this.currentUser.uid;
+                    else newId = this.db.collection('farms').doc().id; // Always random ID for unlimited farms
 
                     const newFarm = {
                         id: newId,
@@ -6640,24 +6274,34 @@
                 const farmId = String(id);
 
                 this.showLoading(true);
-                const batch = this.db.batch();
 
                 // Find tanks to be deleted
                 const tanksToDelete = this.state.tanks.filter(t => t.farmId === farmId);
                 const tankIdsToDelete = tanksToDelete.map(t => t.id);
 
+                // Delete all sub-data for these tanks first (Clean up orphaned data)
+                for (const tank of tanksToDelete) {
+                    await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('tankId', '==', tank.id));
+                    await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tank.id));
+                    await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tank.id));
+                    await this.deleteCollectionByQuery(this.db.collection('sampling').where('tankId', '==', tank.id));
+                    await this.deleteCollectionByQuery(this.db.collection('medicineApplications').where('tankId', '==', tank.id));
+                }
+
+                const batch = this.db.batch();
                 // Delete farm document
                 batch.delete(this.db.collection('farms').doc(farmId));
-
                 // Delete tanks
                 tanksToDelete.forEach(t => batch.delete(this.db.collection('tanks').doc(t.id)));
+                // Delete inventory
+                batch.delete(this.db.collection('inventory').doc(farmId));
+                
+                await batch.commit();
 
-                // Filter out associated data
                 this.state.tanks = this.state.tanks.filter(t => t.farmId !== farmId);
                 this.state.feedEntries = this.state.feedEntries.filter(e => !tankIdsToDelete.includes(e.tankId));
                 this.state.waterEntries = this.state.waterEntries.filter(e => !tankIdsToDelete.includes(e.tankId));
                 this.state.harvests = this.state.harvests.filter(h => !tankIdsToDelete.includes(h.tankId));
-                this.state.expenses = this.state.expenses.filter(e => e.farmId !== farmId);
 
                 // Filter out the farm itself
                 this.state.farms = this.state.farms.filter(f => f.id !== farmId);
@@ -7597,9 +7241,7 @@
                     feedEntries: this.state.feedEntries,
                     harvests: this.state.harvests,
                     waterEntries: this.state.waterEntries,
-                    expenses: this.state.expenses,
                     samplingEntries: this.state.samplingEntries,
-                    tasks: this.state.tasks,
                     inventory: this.state.inventory,
                     medicineInventory: this.state.medicineInventory,
                     medicineApplications: this.state.medicineApplications,
@@ -7617,11 +7259,6 @@
                 downloadAnchorNode.click();
                 downloadAnchorNode.remove();
                 this.showToast('Backup file downloaded successfully');
-            }
-
-            importData(input) {
-                alert("Data Restore is currently disabled for Cloud Sync mode to prevent data conflicts. Please contact support if you need to migrate data.");
-                input.value = '';
             }
 
             // Helper to delete large collections in chunks

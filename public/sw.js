@@ -1,4 +1,4 @@
-const CACHE_NAME = 'aquabook-v5';
+const CACHE_NAME = 'aquabook-v10';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
