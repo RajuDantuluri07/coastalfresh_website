@@ -77,7 +77,7 @@ exports.createFeedRound = functions.https.onCall(async (data, context) => {
     timestamp: admin.firestore.FieldValue.serverTimestamp(),
   };
 
-  const feedRoundRef = await db.collection("feedRounds").add(feedRound);
+  const feedRoundRef = await db.collection("feedEntries").add(feedRound);
   return { id: feedRoundRef.id };
 });
 
@@ -92,19 +92,27 @@ exports.deleteFarm = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError("permission-denied", "You do not have permission to delete this farm.");
   }
 
-  const batch = db.batch();
+  // Fix: Handle batch limits (max 500 ops) by committing in chunks
+  let batch = db.batch();
+  let count = 0;
+  const MAX_BATCH_SIZE = 400;
 
   const tanksSnapshot = await db.collection("tanks").where("farmId", "==", data.farmId).get();
-  tanksSnapshot.forEach(async (tankDoc) => {
-    const feedRoundsSnapshot = await db.collection("feedRounds").where("tankId", "==", tankDoc.id).get();
-    feedRoundsSnapshot.forEach((feedRoundDoc) => {
+  
+  for (const tankDoc of tanksSnapshot.docs) {
+    const feedEntriesSnapshot = await db.collection("feedEntries").where("tankId", "==", tankDoc.id).get();
+    for (const feedRoundDoc of feedEntriesSnapshot.docs) {
       batch.delete(feedRoundDoc.ref);
-    });
+      count++;
+      if (count >= MAX_BATCH_SIZE) { await batch.commit(); batch = db.batch(); count = 0; }
+    }
     batch.delete(tankDoc.ref);
-  });
+    count++;
+    if (count >= MAX_BATCH_SIZE) { await batch.commit(); batch = db.batch(); count = 0; }
+  }
 
   batch.delete(farmRef);
-
-  await batch.commit();
+  if (count > 0 || tanksSnapshot.size === 0) await batch.commit();
+  
   return { success: true };
 });

@@ -3336,7 +3336,9 @@
                 };
 
                 // Initialize Firebase
-                firebase.initializeApp(firebaseConfig);
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
                 this.auth = firebase.auth();
                 // Ensure user stays logged in indefinitely until explicit logout
                 // 'LOCAL' persistence persists state even when the browser window is closed
@@ -4972,17 +4974,13 @@
                 if (bags > 0 && currentFarmId) {
                     const addedKg = bags * weight;
                     
-                    // Fix: Inventory Race Condition via Transaction
-                    await this.db.runTransaction(async (transaction) => {
-                        const invRef = this.db.collection('inventory').doc(currentFarmId);
-                        const invDoc = await transaction.get(invRef);
-                        let newTotal = addedKg;
-                        if (invDoc.exists) {
-                            newTotal += (invDoc.data().totalKg || 0);
-                        }
-                        transaction.set(invRef, { totalKg: newTotal }, { merge: true });
-                        this.state.inventory.totalKg = newTotal;
-                    });
+                    // Fix: Use atomic increment for offline support
+                    const invRef = this.db.collection('inventory').doc(currentFarmId);
+                    await invRef.set({ 
+                        totalKg: firebase.firestore.FieldValue.increment(addedKg) 
+                    }, { merge: true });
+                    
+                    this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + addedKg;
                     
                     this.renderOverallStats();
                     this.closeAllModals();
@@ -5287,10 +5285,11 @@
                     if (amount > 0) {
                         const tankId = input.dataset.tankId;
                         const tank = this.getTankById(tankId);
-                        // Fix: Ensure unique IDs even in fast loops
-                        const entryId = Date.now().toString() + '_' + entriesToAdd.length;
+                        
+                        // Fix: Use Firestore Auto-ID for safety
+                        const docRef = this.db.collection('feedEntries').doc();
                         const newEntry = {
-                            id: entryId,
+                            id: docRef.id,
                             tankId,
                             farmId: tank.farmId,
                             date: this.currentDate,
@@ -5300,12 +5299,19 @@
                             supplements: supplements
                         };
                         
-                        const docRef = this.db.collection('feedEntries').doc(entryId);
                         batch.set(docRef, newEntry);
                         entriesToAdd.push(newEntry);
                         totalAmount += amount;
                     }
                 });
+
+                // Fix: Add inventory update to the same batch for atomicity and offline support
+                if (entriesToAdd.length > 0 && this.state.settings.currentFarmId) {
+                    const invRef = this.db.collection('inventory').doc(this.state.settings.currentFarmId);
+                    batch.set(invRef, { 
+                        totalKg: firebase.firestore.FieldValue.increment(-totalAmount) 
+                    }, { merge: true });
+                }
 
                 // Inventory Check
                 const currentStock = this.state.inventory.totalKg || 0;
@@ -5321,16 +5327,8 @@
                     this.showLoading(true);
                     await batch.commit();
 
-                    // Fix: Transaction for Inventory Update
-                    if (this.state.settings.currentFarmId) {
-                        await this.db.runTransaction(async (t) => {
-                            const ref = this.db.collection('inventory').doc(this.state.settings.currentFarmId);
-                            const doc = await t.get(ref);
-                            const newTotal = (doc.exists ? doc.data().totalKg : 0) - totalAmount;
-                            t.set(ref, { totalKg: newTotal }, { merge: true });
-                            this.state.inventory.totalKg = newTotal;
-                        });
-                    }
+                    // Update local state
+                    this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) - totalAmount;
                     
                     this.renderInventorySummary();
                     this.closeAllModals();
