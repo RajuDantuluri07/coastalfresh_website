@@ -4599,6 +4599,12 @@
                 return `${year}-${month}-${day}`;
             }
 
+            refreshDate() {
+                this.currentDate = this.getFormattedDate();
+                const dateEl = document.getElementById('currentDate');
+                if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            }
+
             // ===== MISSING METHODS IMPLEMENTATION =====
             
             showLoading(show) {
@@ -4625,6 +4631,7 @@
                 });
 
                 if (screenName === 'water') {
+                    this.refreshDate();
                     this.renderWaterScreen();
                 }
             }
@@ -5070,6 +5077,7 @@
 
             // ===== MEDICINE APPLICATION =====
             openApplyMedicineModal(tankId) {
+                this.refreshDate();
                 if (tankId) this.editingTankId = tankId;
                 
                 const select = document.getElementById('applyMedSelect');
@@ -5160,6 +5168,7 @@
 
             // ===== FEED ROUND (BULK) =====
             openFeedRoundModal() { 
+                this.refreshDate();
                 const currentFarmId = this.state.settings.currentFarmId;
                 if (!currentFarmId) {
                     this.showToast('Please select a farm first', 'error');
@@ -5746,6 +5755,7 @@
 
             // ===== WATER ANALYSIS =====
             renderWaterScreen() {
+                this.refreshDate();
                 const select = document.getElementById('waterTankSelect');
                 select.innerHTML = '';
                 document.getElementById('waterDate').value = this.currentDate;
@@ -6853,6 +6863,7 @@
 
             // ===== CROP CYCLE MANAGEMENT =====
             openEndCropModal(tankId) {
+                this.refreshDate();
                 this.currentHarvestTankId = tankId;
                 document.getElementById('endCropDate').value = this.currentDate;
                 document.getElementById('endCropWeight').value = '';
@@ -6902,6 +6913,7 @@
             }
 
             openStartNewCropModal(tankId) {
+                this.refreshDate();
                 this.editingTankId = tankId;
                 document.getElementById('newStockingDate').value = this.currentDate;
                 document.getElementById('newInitialSeed').value = '';
@@ -6957,6 +6969,7 @@
 
             // ===== SAMPLING & GROWTH CHART =====
             openSamplingModal(tankId) {
+                this.refreshDate();
                 if(tankId) this.editingTankId = tankId;
                 document.getElementById('sampleDate').value = this.currentDate;
                 document.getElementById('sampleWeight').value = '';
@@ -7053,6 +7066,7 @@
 
             // ===== PARTIAL HARVEST =====
             openPartialHarvestModal(tankId) {
+                this.refreshDate();
                 this.currentHarvestTankId = tankId;
                 document.getElementById('harvestDate').value = this.currentDate;
                 document.getElementById('harvestWeight').value = '';
