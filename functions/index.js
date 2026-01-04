@@ -137,9 +137,11 @@ exports.onFeedEntryCreate = functions.firestore
             await snap.ref.update({ ownerId: farmData.ownerId });
         }
 
-        await invRef.update({
-            totalKg: admin.firestore.FieldValue.increment(-amount)
-        });
+        // REMOVED: Inventory deduction moved to client-side (app.js) to support offline mode
+        // and prevent double deduction.
+        // await invRef.update({
+        //     totalKg: admin.firestore.FieldValue.increment(-amount)
+        // });
 
         // 4. INTELLIGENCE: Disease Risk Analysis
         const feedQuery = db.collection('feedEntries')
@@ -170,10 +172,11 @@ exports.onFeedEntryDelete = functions.firestore
         const entry = snap.data();
         const { farmId, amount } = entry;
 
-        const invRef = db.collection('inventory').doc(farmId);
-        await invRef.update({
-            totalKg: admin.firestore.FieldValue.increment(amount) // Add back the amount
-        });
+        // REMOVED: Handled client-side
+        // const invRef = db.collection('inventory').doc(farmId);
+        // await invRef.update({
+        //     totalKg: admin.firestore.FieldValue.increment(amount) // Add back the amount
+        // });
         return null;
     });
 
@@ -187,12 +190,13 @@ exports.onFeedEntryUpdate = functions.firestore
         const after = change.after.data();
         const diff = after.amount - before.amount;
 
-        if (diff !== 0) {
-            const invRef = db.collection('inventory').doc(after.farmId);
-            await invRef.update({
-                totalKg: admin.firestore.FieldValue.increment(-diff) // Subtract the difference
-            });
-        }
+        // REMOVED: Handled client-side
+        // if (diff !== 0) {
+        //     const invRef = db.collection('inventory').doc(after.farmId);
+        //     await invRef.update({
+        //         totalKg: admin.firestore.FieldValue.increment(-diff) // Subtract the difference
+        //     });
+        // }
         return null;
     });
 

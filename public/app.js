@@ -94,8 +94,7 @@ class AquaBookPro {
                 supplements: ['Gut Probiotic', 'Gill Health', 'Growth Booster', 'Vitamin C', 'Mineral Mix', 'Binder'],
                 feedsPerDay: 4,
                 feedTypes: ['Pellet 1.0mm', 'Pellet 1.2mm', 'Pellet 1.4mm', 'Pellet 1.6mm', 'Pellet 2.0mm']
-            },
-            oldestLoadedDate: null, // Track pagination cursor
+            }
         };
         return this.state;
     }
@@ -118,25 +117,13 @@ class AquaBookPro {
         };
 
         // Initialize Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        firebase.initializeApp(firebaseConfig);
         this.auth = firebase.auth();
         // Ensure user stays logged in indefinitely until explicit logout
         // 'LOCAL' persistence persists state even when the browser window is closed
         this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         this.db = firebase.firestore();
-
-        // Initialize Messaging for Push Notifications
-        try {
-            this.messaging = firebase.messaging();
-            this.messaging.onMessage((payload) => {
-                console.log('Message received. ', payload);
-                this.showToast(`${payload.notification.title}: ${payload.notification.body}`, 'info');
-            });
-        } catch (e) {
-            console.log('Firebase Messaging not supported in this environment.');
-        }
+        this.functions = firebase.functions();
 
         // --- ENABLE OFFLINE PERSISTENCE (NEW) ---
         this.db.enablePersistence()
@@ -272,21 +259,6 @@ class AquaBookPro {
     }
     
     // ===== DATA MANAGEMENT =====
-    // Helper to fetch data in chunks (Reusable for pagination)
-    async fetchCollectionData(collectionName, field, ids, startDate = null, endDate = null) {
-        const chunks = [];
-        for (let i = 0; i < ids.length; i += 10) chunks.push(ids.slice(i, i + 10));
-        
-        const results = await Promise.all(chunks.map(chunk => {
-            let query = this.db.collection(collectionName).where(field, 'in', chunk);
-            if (startDate) query = query.where('date', '>=', startDate);
-            if (endDate) query = query.where('date', '<', endDate);
-            return query.get();
-        }));
-        
-        return results.flatMap(snap => snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    }
-
     async loadAllData() {
         if (!this.currentUser) return;
         console.log("Fetching all user data from Firestore...");
@@ -302,37 +274,25 @@ class AquaBookPro {
         this.state.medicineInventory = [];
         this.state.medicineApplications = [];
 
-        // FACT 1: DATA TIME BOMB FIX
-        // Only load data from the last 30 days to prevent browser crash.
-        const thirtyDaysAgo = this.getFormattedDate(new Date(Date.now() - (30 * 24 * 60 * 60 * 1000)));
-        this.state.oldestLoadedDate = thirtyDaysAgo;
+        // Helper to fetch data in chunks of 10 (Firestore 'in' query limit)
+        const fetchInChunks = async (collectionName, field, ids) => {
+            const chunks = [];
+            for (let i = 0; i < ids.length; i += 10) chunks.push(ids.slice(i, i + 10));
+            const results = await Promise.all(chunks.map(chunk => 
+                this.db.collection(collectionName).where(field, 'in', chunk).get()
+            ));
+            return results.flatMap(snap => snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        };
 
         // Fetch farms owned by the user
         const farmsQueryOwner = await this.db.collection('farms').where('ownerId', '==', userId).get();
+        // Fetch farms where user is a member
+        const farmsQueryMember = await this.db.collection('farms').where('memberIds', 'array-contains', userId).get();
         
         // Merge results
         const farmMap = new Map();
-        farmsQueryOwner.docs.forEach(doc => farmMap.set(doc.id, { id: doc.id, ...doc.data() }));
-
-        // Fetch farms where user is a member (using Collection Group query for new structure)
-        // This is required after running the `migrate_members.js` script.
-        try {
-            const memberQuery = await this.db.collectionGroup('members').where(firebase.firestore.FieldPath.documentId(), '==', userId).get();
-            const memberFarmIds = memberQuery.docs.map(doc => doc.ref.parent.parent.id);
-            
-            if (memberFarmIds.length > 0) {
-                // Use the existing fetchCollectionData helper for document IDs
-                const memberFarms = await this.fetchCollectionData('farms', firebase.firestore.FieldPath.documentId(), memberFarmIds);
-                memberFarms.forEach(farm => farmMap.set(farm.id, farm));
-            }
-        } catch (e) {
-            console.error("Failed to query member farms (Collection Group query might need an index):", e);
-            // Fallback to old method in case index is not created yet.
-            const farmsQueryMember = await this.db.collection('farms').where('memberIds', 'array-contains', userId).get();
-            farmsQueryMember.docs.forEach(doc => {
-                if (!farmMap.has(doc.id)) farmMap.set(doc.id, { id: doc.id, ...doc.data() });
-            });
-        }
+        farmsQueryOwner.docs.forEach(doc => farmMap.set(doc.id, doc.data()));
+        farmsQueryMember.docs.forEach(doc => farmMap.set(doc.id, doc.data()));
         
         this.state.farms = Array.from(farmMap.values());
 
@@ -340,17 +300,13 @@ class AquaBookPro {
             const farmIds = this.state.farms.map(f => f.id);
 
             // Fetch data using chunk helper to avoid 10-item limit crash
-            this.state.tanks = await this.fetchCollectionData('tanks', 'farmId', farmIds);
+            this.state.tanks = await fetchInChunks('tanks', 'farmId', farmIds);
 
             // --- REAL-TIME LISTENER FOR FEED ENTRIES ---
             if (farmIds.length > 0) {
-                // BUG #1 FIX: Remove the 10-farm limit. Listen to all farms.
-                // Note: Firestore 'in' query limit is 30 as of latest versions. This is safe for now.
-                // Optimization: Only listen to recent entries
-                const feedEntriesQuery = this.db.collection('feedEntries')
-                    .where('farmId', 'in', farmIds)
-                    .where('date', '>=', thirtyDaysAgo);
-
+                // For MVP stability, listen to first 10 farms only to avoid 'in' query limit in onSnapshot
+                const listenerFarmIds = farmIds.slice(0, 10);
+                const feedEntriesQuery = this.db.collection('feedEntries').where('farmId', 'in', listenerFarmIds);
                 const feedListener = feedEntriesQuery.onSnapshot(querySnapshot => {
                     console.log("Real-time: Received feed entries update.");
                     this.state.feedEntries = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -370,11 +326,11 @@ class AquaBookPro {
             }
 
             // Fetch other collections safely
-            this.state.waterEntries = await this.fetchCollectionData('waterEntries', 'farmId', farmIds, thirtyDaysAgo);
-            this.state.harvests = await this.fetchCollectionData('harvests', 'farmId', farmIds);
-            this.state.samplingEntries = await this.fetchCollectionData('sampling', 'farmId', farmIds);
-            this.state.medicineInventory = await this.fetchCollectionData('medicineInventory', 'farmId', farmIds);
-            this.state.medicineApplications = await this.fetchCollectionData('medicineApplications', 'farmId', farmIds);
+            this.state.waterEntries = await fetchInChunks('waterEntries', 'farmId', farmIds);
+            this.state.harvests = await fetchInChunks('harvests', 'farmId', farmIds);
+            this.state.samplingEntries = await fetchInChunks('sampling', 'farmId', farmIds);
+            this.state.medicineInventory = await fetchInChunks('medicineInventory', 'farmId', farmIds);
+            this.state.medicineApplications = await fetchInChunks('medicineApplications', 'farmId', farmIds);
         }
 
         // Load settings from user profile or use defaults
@@ -396,14 +352,10 @@ class AquaBookPro {
         // Fetch Inventory AFTER settings are loaded (Fixes null ID crash)
         if (this.state.settings.currentFarmId) {
             try {
-                // Real-time listener for Inventory (Since backend updates it now)
-                this.db.collection('inventory').doc(this.state.settings.currentFarmId)
-                    .onSnapshot(doc => {
-                        if (doc.exists) {
-                            this.state.inventory = doc.data();
-                            this.renderInventorySummary();
-                        }
-                    });
+                const invDoc = await this.db.collection('inventory').doc(this.state.settings.currentFarmId).get();
+                if (invDoc.exists) {
+                    this.state.inventory = invDoc.data();
+                }
             } catch (e) {
                 console.warn("Inventory fetch failed, using default", e);
             }
@@ -422,40 +374,6 @@ class AquaBookPro {
         }
 
         console.log("Data loaded from Firestore.");
-    }
-
-    async loadOlderData() {
-        if (!this.state.oldestLoadedDate) return;
-        
-        this.showLoading(true);
-        try {
-            const currentOldest = new Date(this.state.oldestLoadedDate);
-            const newStartDateObj = new Date(currentOldest);
-            newStartDateObj.setDate(currentOldest.getDate() - 30);
-            
-            const newStartDate = this.getFormattedDate(newStartDateObj);
-            const endDate = this.state.oldestLoadedDate;
-            
-            const farmIds = this.state.farms.map(f => f.id);
-            if (farmIds.length === 0) { this.showLoading(false); return; }
-
-            // Fetch older data
-            const newFeeds = await this.fetchCollectionData('feedEntries', 'farmId', farmIds, newStartDate, endDate);
-            const newWater = await this.fetchCollectionData('waterEntries', 'farmId', farmIds, newStartDate, endDate);
-            
-            // Append to state
-            this.state.feedEntries = [...this.state.feedEntries, ...newFeeds];
-            this.state.waterEntries = [...this.state.waterEntries, ...newWater];
-            this.state.oldestLoadedDate = newStartDate;
-            
-            // Switch to 'all' view to ensure data is visible
-            this.setViewMode('all'); 
-            this.showToast(`Loaded data back to ${newStartDate}`);
-        } catch (e) {
-            console.error("Error loading older data:", e);
-            this.showToast("Failed to load older data", "error");
-        }
-        this.showLoading(false);
     }
 
     saveAllData() {
@@ -480,61 +398,6 @@ class AquaBookPro {
         }
     }
     
-    // ===== NOTIFICATIONS =====
-    async enableNotifications() {
-        if (!this.messaging) {
-            this.showToast('Notifications not supported on this device.', 'error');
-            return;
-        }
-        try {
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                // IMPORTANT: Get your VAPID key from Firebase Console > Project Settings > Cloud Messaging > Web Push certificates
-                const vapidKey = "BBVKpOXnP5lq1tVGX0lAhnnsIzt9uET8jzdE98ocBBnO3-vlS7IDLRInG2iJ3COVkK5ycZ-toAE68kZdDpUuH_g"; 
-                
-                if (vapidKey.includes("YOUR_VAPID_KEY")) {
-                    this.showToast("Dev Error: VAPID Key not configured!", "error");
-                    console.error("MISSING VAPID KEY: Go to Firebase Console > Project Settings > Cloud Messaging > Web Push certificates");
-                    return;
-                }
-
-                const token = await this.messaging.getToken({ vapidKey: vapidKey });
-                
-                if (token) {
-                    this.state.fcmToken = token;
-                    await this.saveDeviceToken(token);
-                    this.showToast('Notifications enabled!', 'success');
-                    this.updateNotificationUI(true);
-                } else {
-                    this.showToast('Failed to get token.', 'error');
-                }
-            } else {
-                this.showToast('Permission denied.', 'warning');
-            }
-        } catch (error) {
-            console.error('Notification error:', error);
-            this.showToast('Error enabling notifications.', 'error');
-        }
-    }
-
-    async saveDeviceToken(token) {
-        if (!this.currentUser) return;
-        await this.db.collection('users').doc(this.currentUser.uid).collection('fcmTokens').doc(token).set({
-            token: token,
-            createdAt: new Date().toISOString(),
-            userAgent: navigator.userAgent
-        });
-    }
-
-    updateNotificationUI(enabled) {
-        const btn = document.getElementById('enableNotifBtn');
-        const label = document.getElementById('notifEnabledBtn');
-        if (btn && label) {
-            btn.style.display = enabled ? 'none' : 'inline-block';
-            label.style.display = enabled ? 'inline-block' : 'none';
-        }
-    }
-
     // ===== FEED RECOMMENDATION LOGIC =====
     calculateFeedRecommendation() {
         const today = this.currentDate;
@@ -679,13 +542,6 @@ class AquaBookPro {
 
     setupUI() {
         document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-        // Check notification permission status on load
-        if (Notification.permission === 'granted') {
-            this.updateNotificationUI(true);
-        } else {
-            this.updateNotificationUI(false);
-        }
     }
     
     renderOverallStats() {
@@ -942,22 +798,11 @@ class AquaBookPro {
             statusDot = `<div class="tank-feed-status ${statusClass}" title="Last Feed: ${last.trayResult}"></div>`;
         }
 
-        // GAP 3: Reason Badge Logic
-        let reasonBadge = '';
-        if (tank.feedAdjustmentReason) {
-            reasonBadge = `<div style="font-size: 10px; background: #ffebee; color: #c62828; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 2px; border: 1px solid #ffcdd2;">
-                <i class="fas fa-exclamation-circle"></i> ${tank.feedAdjustmentReason} (${tank.feedAdjustmentPct}%)
-            </div>`;
-        }
-
         return `
             <div class="tank-summary-card ${status} ${isInactive ? 'inactive' : ''}" onclick="app.openTankDetail('${tank.id}')">
                 ${statusDot}
                 <div class="tank-summary-header">
-                    <div class="tank-summary-name">
-                        ${tank.name}
-                        ${reasonBadge ? '<br>' + reasonBadge : ''}
-                    </div>
+                    <div class="tank-summary-name">${tank.name}</div>
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <div class="tank-summary-doc">DOC: ${doc}</div>
                         <div class="tank-action-menu">
@@ -1000,10 +845,7 @@ class AquaBookPro {
     }
 
     getFeedSlotIndex(timestamp, feedsPerDay) {
-        // BUG #3 FIX: The timestamp is a string like "167..._0". parseInt() fails.
-        // We must split the string and parse the numeric part.
-        const numericTimestamp = parseInt(String(timestamp).split('_')[0], 10);
-        const hour = new Date(numericTimestamp).getHours();
+        const hour = new Date(parseInt(timestamp)).getHours();
         if (feedsPerDay === 1) return 0;
         if (feedsPerDay === 2) return hour < 14 ? 0 : 1;
         if (feedsPerDay === 3) {
@@ -1022,7 +864,6 @@ class AquaBookPro {
         const tableBody = document.getElementById('logTableBody');
         const tableFoot = document.getElementById('logTableFoot');
         const emptyState = document.getElementById('emptyLog');
-        const tableContainer = document.querySelector('.log-table-container') || document.getElementById('logTable').parentElement;
         const feedsCount = this.state.settings.feedsPerDay || 4;
         const toggleBtn = document.getElementById('toggleViewBtn');
 
@@ -1096,7 +937,7 @@ class AquaBookPro {
 
         // Branch to List View if selected
         if (this.logViewType === 'list') {
-            this.renderLogTimeline(tableContainer, tanksToShow, isDateInRange); // Pass container
+            this.renderLogTimeline(tableBody.parentElement.parentElement, tanksToShow, isDateInRange); // Pass container
             return;
         }
 
@@ -1288,8 +1129,6 @@ class AquaBookPro {
             });
             tableFoot.innerHTML = ''; // No footer for detailed view
         }
-        
-        this.renderLogbookFooter(tableContainer);
     }
 
     renderLogTimeline(container, tanks, dateFilterFn) {
@@ -1388,52 +1227,6 @@ class AquaBookPro {
         });
         
         parent.appendChild(timelineContainer);
-        this.renderLogbookFooter(parent);
-    }
-
-    renderLogbookFooter(container) {
-        // Remove existing button if any
-        const existingFooter = document.getElementById('logbookFooter');
-        if (existingFooter) existingFooter.remove();
-        // Legacy cleanup
-        const oldBtn = document.getElementById('loadMoreLogBtn');
-        if (oldBtn) oldBtn.remove();
-
-        const footer = document.createElement('div');
-        footer.id = 'logbookFooter';
-        footer.style.marginTop = '15px';
-        footer.style.marginBottom = '20px';
-        footer.style.display = 'flex';
-        footer.style.flexDirection = 'column';
-        footer.style.gap = '10px';
-
-        // Only show if we have data and view is appropriate
-        if (this.state.feedEntries.length > 0 && (this.viewMode === 'all' || this.viewMode === '30days')) {
-            const loadBtn = document.createElement('button');
-            loadBtn.id = 'loadMoreLogBtn';
-            loadBtn.className = 'btn btn-secondary';
-            loadBtn.style.width = '100%';
-            loadBtn.innerHTML = '<i class="fas fa-history"></i> Load Older Data (30 Days)';
-            loadBtn.onclick = () => this.loadOlderData();
-            footer.appendChild(loadBtn);
-        }
-
-        // Export CSV Button
-        if (this.state.feedEntries.length > 0) {
-            const exportBtn = document.createElement('button');
-            exportBtn.className = 'btn btn-secondary';
-            exportBtn.style.width = '100%';
-            exportBtn.style.background = '#fff';
-            exportBtn.style.color = 'var(--primary)';
-            exportBtn.style.border = '1px solid var(--primary)';
-            exportBtn.innerHTML = '<i class="fas fa-file-csv"></i> Export to CSV';
-            exportBtn.onclick = () => this.exportLogbookToCSV();
-            footer.appendChild(exportBtn);
-        }
-
-        if (footer.children.length > 0) {
-            container.appendChild(footer);
-        }
     }
     
     getObservationLabel(id) {
@@ -1960,16 +1753,18 @@ class AquaBookPro {
         if (bags > 0 && currentFarmId) {
             const addedKg = bags * weight;
             
-            // FACT 3: OFFLINE FIX
-            // Use simple update/set instead of transaction. 
-            // Use increment to be safe against race conditions without transaction.
-            const invRef = this.db.collection('inventory').doc(currentFarmId);
-            await invRef.set({ 
-                totalKg: firebase.firestore.FieldValue.increment(addedKg) 
-            }, { merge: true });
+            // Fix: Inventory Race Condition via Transaction
+            await this.db.runTransaction(async (transaction) => {
+                const invRef = this.db.collection('inventory').doc(currentFarmId);
+                const invDoc = await transaction.get(invRef);
+                let newTotal = addedKg;
+                if (invDoc.exists) {
+                    newTotal += (invDoc.data().totalKg || 0);
+                }
+                transaction.set(invRef, { totalKg: newTotal }, { merge: true });
+                this.state.inventory.totalKg = newTotal;
+            });
             
-            // Optimistic UI Update
-            this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + addedKg;
             this.renderOverallStats();
             this.closeAllModals();
             this.showToast(`Added ${addedKg} kg to stock`);
@@ -2307,12 +2102,17 @@ class AquaBookPro {
             this.showLoading(true);
             await batch.commit();
 
-            // FACT 2: DOUBLE DIP FIX
-            // Removed frontend inventory deduction. 
-            // The Cloud Function 'onFeedEntryCreate' will handle the deduction safely.
+            // Fix: Transaction for Inventory Update
+            if (this.state.settings.currentFarmId) {
+                await this.db.runTransaction(async (t) => {
+                    const ref = this.db.collection('inventory').doc(this.state.settings.currentFarmId);
+                    const doc = await t.get(ref);
+                    const newTotal = (doc.exists ? doc.data().totalKg : 0) - totalAmount;
+                    t.set(ref, { totalKg: newTotal }, { merge: true });
+                    this.state.inventory.totalKg = newTotal;
+                });
+            }
             
-            // Optimistic UI Update (Visual only)
-            this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) - totalAmount;
             this.renderInventorySummary();
             this.closeAllModals();
             // No need to call renderAll() here, the onSnapshot listener will handle UI updates.
@@ -3133,24 +2933,40 @@ class AquaBookPro {
     }
 
     async deleteFarm(id) {
-        // BUG #2 FIX: Move deletion to a secure Cloud Function.
+        const farmId = String(id);
+
         this.showLoading(true);
-        try {
-            const deleteFarmFunction = firebase.functions().httpsCallable('deleteFarmAndData');
-            const result = await deleteFarmFunction({ farmId: id });
-            
-            if (result.data.status !== 'success') {
-                throw new Error(result.data.message || 'Server-side deletion failed.');
-            }
 
-            // Optimistically update local state
-            this.state.farms = this.state.farms.filter(f => f.id !== id);
-            this.state.tanks = this.state.tanks.filter(t => t.farmId !== id);
+        // Find tanks to be deleted
+        const tanksToDelete = this.state.tanks.filter(t => t.farmId === farmId);
+        const tankIdsToDelete = tanksToDelete.map(t => t.id);
 
-        } catch (error) {
-            console.error("Error calling deleteFarm function:", error);
-            this.showToast(`Failed to delete farm: ${error.message}`, "error");
+        // Delete all sub-data for these tanks first (Clean up orphaned data)
+        for (const tank of tanksToDelete) {
+            await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('tankId', '==', tank.id));
+            await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tank.id));
+            await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tank.id));
+            await this.deleteCollectionByQuery(this.db.collection('sampling').where('tankId', '==', tank.id));
+            await this.deleteCollectionByQuery(this.db.collection('medicineApplications').where('tankId', '==', tank.id));
         }
+
+        const batch = this.db.batch();
+        // Delete farm document
+        batch.delete(this.db.collection('farms').doc(farmId));
+        // Delete tanks
+        tanksToDelete.forEach(t => batch.delete(this.db.collection('tanks').doc(t.id)));
+        // Delete inventory
+        batch.delete(this.db.collection('inventory').doc(farmId));
+        
+        await batch.commit();
+
+        this.state.tanks = this.state.tanks.filter(t => t.farmId !== farmId);
+        this.state.feedEntries = this.state.feedEntries.filter(e => !tankIdsToDelete.includes(e.tankId));
+        this.state.waterEntries = this.state.waterEntries.filter(e => !tankIdsToDelete.includes(e.tankId));
+        this.state.harvests = this.state.harvests.filter(h => !tankIdsToDelete.includes(h.tankId));
+
+        // Filter out the farm itself
+        this.state.farms = this.state.farms.filter(f => f.id !== farmId);
         
         // Check if the deleted farm was the current one
         if (this.state.settings.currentFarmId === farmId) {
@@ -3248,19 +3064,22 @@ class AquaBookPro {
 
     async deleteTank(id) {
         this.showLoading(true);
+        const tankId = String(id);
+        
         try {
-            // BUG #2 FIX: Delegate deletion to the secure Cloud Function.
-            const deleteFarmFunction = firebase.functions().httpsCallable('deleteFarmAndData');
-            // Call the same function, but only provide a tankId. The function will handle it.
-            const result = await deleteFarmFunction({ farmId: this.state.settings.currentFarmId, tankId: id });
+            // Use helper to delete large collections safely
+            await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('tankId', '==', tankId));
+            await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tankId));
+            await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tankId));
+            
+            // Delete tank document
+            await this.db.collection('tanks').doc(tankId).delete();
 
-            if (result.data.status !== 'success') {
-                throw new Error(result.data.message || 'Server-side deletion failed.');
-            }
-
-            // Optimistic update of local state
-            this.state.tanks = this.state.tanks.filter(t => t.id !== id);
-
+            this.state.tanks = this.state.tanks.filter(t => t.id !== tankId);
+            this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId !== tankId);
+            this.state.waterEntries = this.state.waterEntries.filter(e => e.tankId !== tankId);
+            this.state.harvests = this.state.harvests.filter(h => h.tankId !== tankId);
+            
             this.showLoading(false);
             this.renderAll();
             this.closeAllModals();
@@ -3351,9 +3170,10 @@ class AquaBookPro {
             trayResult: worstResult
         });
 
-        // FACT 2: DOUBLE DIP FIX
-        // Removed frontend inventory update. Backend should handle adjustments (requires logic update in backend if amount changes).
-        
+        // Adjust inventory
+        this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) - diff;
+        if (this.state.settings.currentFarmId) await this.db.collection('inventory').doc(this.state.settings.currentFarmId).set(this.state.inventory, { merge: true });
+
         this.recalculateTankBiomass(entry.tankId);
         this.showLoading(false);
         this.closeAllModals();
@@ -3373,8 +3193,9 @@ class AquaBookPro {
         this.showLoading(true);
         await this.db.collection('feedEntries').doc(this.editingEntryId.toString()).delete();
         
-        // FACT 2: DOUBLE DIP FIX
-        // Removed frontend inventory refund. Backend trigger should handle refund on delete.
+        // Refund inventory
+        this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + amount;
+        if (this.state.settings.currentFarmId) await this.db.collection('inventory').doc(this.state.settings.currentFarmId).set(this.state.inventory, { merge: true });
 
         if (tankId) this.recalculateTankBiomass(tankId);
         this.closeAllModals();
@@ -3518,7 +3339,8 @@ class AquaBookPro {
         this.renderSettingsSupplements();
         this.renderSettingsFeedTypes();
         document.getElementById('settingFeedsPerDay').value = this.state.settings.feedsPerDay || 4;
-
+        
+        // Guest Sync Button
         const footer = document.querySelector('#settingsModal .modal-footer');
         footer.innerHTML = `<button class="btn btn-secondary" onclick="app.signOut()">Sign Out</button>`;
         
@@ -4064,50 +3886,6 @@ Are you sure you want to start a new crop cycle?`)) {
     }
 
     // ===== DATA BACKUP & RESTORE =====
-    exportLogbookToCSV() {
-        const currentFarmId = this.state.settings.currentFarmId;
-        if (!currentFarmId) {
-            this.showToast("Please select a farm first.", "error");
-            return;
-        }
-
-        const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
-        const tankMap = {};
-        farmTanks.forEach(t => tankMap[t.id] = t.name);
-        
-        // Filter entries for current farm and sort by date descending
-        const entries = this.state.feedEntries
-            .filter(e => tankMap[e.tankId])
-            .sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
-
-        if (entries.length === 0) {
-            this.showToast("No data to export.", "info");
-            return;
-        }
-
-        // CSV Header
-        let csvContent = "Date,Time,Tank Name,Amount (kg),Tray Result,Supplements,Notes\n";
-
-        entries.forEach(e => {
-            const tankName = tankMap[e.tankId] || "Unknown";
-            const supplements = e.supplements ? `"${e.supplements.join('; ')}"` : "";
-            const notes = e.notes ? `"${e.notes.replace(/"/g, '""')}"` : "";
-            const time = e.time || "";
-            
-            const row = [e.date, time, tankName, e.amount, e.trayResult, supplements, notes].join(",");
-            csvContent += row + "\n";
-        });
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", `aquabook_log_${this.getFormattedDate()}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
     exportData() {
         const data = {
             farms: this.state.farms,
