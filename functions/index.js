@@ -314,3 +314,77 @@ exports.onAdvisoryNoteCreate = functions.firestore
         });
         return Promise.all(tokensToRemove);
     });
+
+/**
+ * BUG #2 FIX: Securely deletes a farm or tank and all its associated data.
+ * This is an HTTP-callable function, making it a secure endpoint.
+ */
+exports.deleteFarmAndData = functions.https.onCall(async (data, context) => {
+    const uid = context.auth.uid;
+    const {farmId, tankId} = data;
+
+    if (!uid) {
+        throw new functions.https.HttpsError("unauthenticated", "You must be logged in to delete data.");
+    }
+
+    if (!farmId) {
+        throw new functions.httpsns.HttpsError("invalid-argument", "A farmId must be provided.");
+    }
+
+    const farmRef = db.collection("farms").doc(farmId);
+    const farmDoc = await farmRef.get();
+
+    if (!farmDoc.exists || farmDoc.data().ownerId !== uid) {
+        throw new functions.https.HttpsError("permission-denied", "You do not have permission to delete this farm.");
+    }
+
+    // Helper to delete a collection by query
+    const deleteCollectionByQuery = async (query, batch) => {
+        const snapshot = await query.get();
+        snapshot.docs.forEach((doc) => batch.delete(doc.ref));
+    };
+
+    const batch = db.batch();
+
+    if (tankId) {
+        // --- TANK DELETION LOGIC ---
+        console.log(`User ${uid} is deleting tank ${tankId} from farm ${farmId}.`);
+        const tankRef = db.collection("tanks").doc(tankId);
+
+        // Delete all sub-collections for this specific tank
+        await deleteCollectionByQuery(db.collection("feedEntries").where("tankId", "==", tankId), batch);
+        await deleteCollectionByQuery(db.collection("waterEntries").where("tankId", "==", tankId), batch);
+        await deleteCollectionByQuery(db.collection("harvests").where("tankId", "==", tankId), batch);
+        await deleteCollectionByQuery(db.collection("sampling").where("tankId", "==", tankId), batch);
+        await deleteCollectionByQuery(db.collection("medicineApplications").where("tankId", "==", tankId), batch);
+
+        batch.delete(tankRef);
+
+    } else {
+        // --- FULL FARM DELETION LOGIC ---
+        console.log(`User ${uid} is deleting farm ${farmId} and all its data.`);
+        const tanksSnapshot = await db.collection("tanks").where("farmId", "==", farmId).get();
+        const tankIds = tanksSnapshot.docs.map((doc) => doc.id);
+
+        if (tankIds.length > 0) {
+            // Delete all sub-collections for all tanks in the farm
+            await deleteCollectionByQuery(db.collection("feedEntries").where("farmId", "==", farmId), batch);
+            await deleteCollectionByQuery(db.collection("waterEntries").where("farmId", "==", farmId), batch);
+            await deleteCollectionByQuery(db.collection("harvests").where("farmId", "==", farmId), batch);
+            await deleteCollectionByQuery(db.collection("sampling").where("farmId", "==", farmId), batch);
+            await deleteCollectionByQuery(db.collection("medicineApplications").where("farmId", "==", farmId), batch);
+        }
+
+        // Delete the tanks themselves
+        tanksSnapshot.docs.forEach((doc) => batch.delete(doc.ref));
+        // Delete farm-level collections
+        await deleteCollectionByQuery(db.collection("inventory").where("farmId", "==", farmId), batch);
+        await deleteCollectionByQuery(db.collection("expenses").where("farmId", "==", farmId), batch);
+        // Delete the farm document
+        batch.delete(farmRef);
+    }
+
+    await batch.commit();
+
+    return {status: "success", message: "Deletion successful."};
+});

@@ -126,7 +126,6 @@ class AquaBookPro {
         // 'LOCAL' persistence persists state even when the browser window is closed
         this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         this.db = firebase.firestore();
-        this.functions = firebase.functions();
 
         // Initialize Messaging for Push Notifications
         try {
@@ -345,11 +344,11 @@ class AquaBookPro {
 
             // --- REAL-TIME LISTENER FOR FEED ENTRIES ---
             if (farmIds.length > 0) {
-                // For MVP stability, listen to first 10 farms only to avoid 'in' query limit in onSnapshot
-                const listenerFarmIds = farmIds.slice(0, 10);
+                // BUG #1 FIX: Remove the 10-farm limit. Listen to all farms.
+                // Note: Firestore 'in' query limit is 30 as of latest versions. This is safe for now.
                 // Optimization: Only listen to recent entries
                 const feedEntriesQuery = this.db.collection('feedEntries')
-                    .where('farmId', 'in', listenerFarmIds)
+                    .where('farmId', 'in', farmIds)
                     .where('date', '>=', thirtyDaysAgo);
 
                 const feedListener = feedEntriesQuery.onSnapshot(querySnapshot => {
@@ -491,7 +490,7 @@ class AquaBookPro {
             const permission = await Notification.requestPermission();
             if (permission === 'granted') {
                 // IMPORTANT: Get your VAPID key from Firebase Console > Project Settings > Cloud Messaging > Web Push certificates
-                const vapidKey = "YOUR_VAPID_KEY_FROM_FIREBASE_CONSOLE"; 
+                const vapidKey = "BBVKpOXnP5lq1tVGX0lAhnnsIzt9uET8jzdE98ocBBnO3-vlS7IDLRInG2iJ3COVkK5ycZ-toAE68kZdDpUuH_g"; 
                 
                 if (vapidKey.includes("YOUR_VAPID_KEY")) {
                     this.showToast("Dev Error: VAPID Key not configured!", "error");
@@ -1001,7 +1000,10 @@ class AquaBookPro {
     }
 
     getFeedSlotIndex(timestamp, feedsPerDay) {
-        const hour = new Date(parseInt(timestamp)).getHours();
+        // BUG #3 FIX: The timestamp is a string like "167..._0". parseInt() fails.
+        // We must split the string and parse the numeric part.
+        const numericTimestamp = parseInt(String(timestamp).split('_')[0], 10);
+        const hour = new Date(numericTimestamp).getHours();
         if (feedsPerDay === 1) return 0;
         if (feedsPerDay === 2) return hour < 14 ? 0 : 1;
         if (feedsPerDay === 3) {
@@ -3131,40 +3133,24 @@ class AquaBookPro {
     }
 
     async deleteFarm(id) {
-        const farmId = String(id);
-
+        // BUG #2 FIX: Move deletion to a secure Cloud Function.
         this.showLoading(true);
+        try {
+            const deleteFarmFunction = firebase.functions().httpsCallable('deleteFarmAndData');
+            const result = await deleteFarmFunction({ farmId: id });
+            
+            if (result.data.status !== 'success') {
+                throw new Error(result.data.message || 'Server-side deletion failed.');
+            }
 
-        // Find tanks to be deleted
-        const tanksToDelete = this.state.tanks.filter(t => t.farmId === farmId);
-        const tankIdsToDelete = tanksToDelete.map(t => t.id);
+            // Optimistically update local state
+            this.state.farms = this.state.farms.filter(f => f.id !== id);
+            this.state.tanks = this.state.tanks.filter(t => t.farmId !== id);
 
-        // Delete all sub-data for these tanks first (Clean up orphaned data)
-        for (const tank of tanksToDelete) {
-            await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('tankId', '==', tank.id));
-            await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tank.id));
-            await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tank.id));
-            await this.deleteCollectionByQuery(this.db.collection('sampling').where('tankId', '==', tank.id));
-            await this.deleteCollectionByQuery(this.db.collection('medicineApplications').where('tankId', '==', tank.id));
+        } catch (error) {
+            console.error("Error calling deleteFarm function:", error);
+            this.showToast(`Failed to delete farm: ${error.message}`, "error");
         }
-
-        const batch = this.db.batch();
-        // Delete farm document
-        batch.delete(this.db.collection('farms').doc(farmId));
-        // Delete tanks
-        tanksToDelete.forEach(t => batch.delete(this.db.collection('tanks').doc(t.id)));
-        // Delete inventory
-        batch.delete(this.db.collection('inventory').doc(farmId));
-        
-        await batch.commit();
-
-        this.state.tanks = this.state.tanks.filter(t => t.farmId !== farmId);
-        this.state.feedEntries = this.state.feedEntries.filter(e => !tankIdsToDelete.includes(e.tankId));
-        this.state.waterEntries = this.state.waterEntries.filter(e => !tankIdsToDelete.includes(e.tankId));
-        this.state.harvests = this.state.harvests.filter(h => !tankIdsToDelete.includes(h.tankId));
-
-        // Filter out the farm itself
-        this.state.farms = this.state.farms.filter(f => f.id !== farmId);
         
         // Check if the deleted farm was the current one
         if (this.state.settings.currentFarmId === farmId) {
@@ -3262,22 +3248,19 @@ class AquaBookPro {
 
     async deleteTank(id) {
         this.showLoading(true);
-        const tankId = String(id);
-        
         try {
-            // Use helper to delete large collections safely
-            await this.deleteCollectionByQuery(this.db.collection('feedEntries').where('tankId', '==', tankId));
-            await this.deleteCollectionByQuery(this.db.collection('waterEntries').where('tankId', '==', tankId));
-            await this.deleteCollectionByQuery(this.db.collection('harvests').where('tankId', '==', tankId));
-            
-            // Delete tank document
-            await this.db.collection('tanks').doc(tankId).delete();
+            // BUG #2 FIX: Delegate deletion to the secure Cloud Function.
+            const deleteFarmFunction = firebase.functions().httpsCallable('deleteFarmAndData');
+            // Call the same function, but only provide a tankId. The function will handle it.
+            const result = await deleteFarmFunction({ farmId: this.state.settings.currentFarmId, tankId: id });
 
-            this.state.tanks = this.state.tanks.filter(t => t.id !== tankId);
-            this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId !== tankId);
-            this.state.waterEntries = this.state.waterEntries.filter(e => e.tankId !== tankId);
-            this.state.harvests = this.state.harvests.filter(h => h.tankId !== tankId);
-            
+            if (result.data.status !== 'success') {
+                throw new Error(result.data.message || 'Server-side deletion failed.');
+            }
+
+            // Optimistic update of local state
+            this.state.tanks = this.state.tanks.filter(t => t.id !== id);
+
             this.showLoading(false);
             this.renderAll();
             this.closeAllModals();
