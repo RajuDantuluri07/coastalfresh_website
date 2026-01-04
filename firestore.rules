@@ -33,10 +33,18 @@ service cloud.firestore {
     // --- COLLECTION RULES ---
 
     // 1. Users Collection
-    // Users can read/write their own profile. Admins can read all (for dashboard list).
     match /users/{userId} {
       allow read: if isOwner(userId) || isAdmin();
-      allow write: if isOwner(userId) || isAdmin();
+      
+      // User can create their own doc.
+      allow create: if isOwner(userId);
+      
+      // User can update their own doc, but cannot change their role.
+      // Admin can update any doc, including roles.
+      allow update: if (isOwner(userId) && request.resource.data.role == resource.data.role) || isAdmin();
+      
+      // Only admin can delete user accounts.
+      allow delete: if isAdmin();
     }
 
     // 2. Farms Collection
@@ -79,8 +87,9 @@ service cloud.firestore {
         resource.data.invitedByUid == request.auth.uid ||
         resource.data.invitedPhone == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.phone
       );
-      // Update: Receiver can accept/reject
-      allow update: if isAuthenticated(); 
+      // Update: Only the invited user (receiver) can accept/reject
+      allow update: if isAuthenticated() && 
+        resource.data.invitedPhone == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.phone;
     }
 
     // 6. Market Prices (for Dashboard)

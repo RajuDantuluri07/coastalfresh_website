@@ -34,6 +34,9 @@
         button.logout { background-color: #f44336; }
         
         .loading { color: #666; font-style: italic; }
+        .toast { position: fixed; top: 20px; right: 20px; padding: 12px 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-size: 14px; z-index: 1000; color: white; }
+        .toast.success { background-color: #4CAF50; }
+        .toast.error { background-color: #f44336; }
     </style>
 
     <!-- Firebase SDKs (App, Auth, Firestore) -->
@@ -43,6 +46,8 @@
     <script src="/__/firebase/init.js"></script>
 </head>
 <body>
+    <div id="notifications"></div>
+
     <div class="container">
         <header>
             <h1><i class="fas fa-fish"></i> AquaBook Admin</h1>
@@ -92,6 +97,22 @@
         let lastUserDoc = null;
         const USERS_PER_PAGE = 20;
 
+        // --- UI Feedback Functions ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('notifications');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function showError(message, error) {
+            console.error(message, error);
+            showToast(message, 'error');
+        }
+
+
         // Listen for authentication state changes
         firebase.auth().onAuthStateChanged(async (user) => {
             if (user) {
@@ -102,8 +123,8 @@
                 if (userDoc.exists && userDoc.data().role === 'admin') {
                     loadDashboardData();
                 } else {
-                    alert("Access Denied: Admin privileges required.");
-                    window.location.href = "/index.html";
+                    showError("Access Denied: Admin privileges required.");
+                    setTimeout(() => window.location.href = "/index.html", 2000);
                 }
             } else {
                 window.location.href = "/index.html";
@@ -133,16 +154,27 @@
                 document.getElementById('dashboard-content').style.display = 'grid';
 
             } catch (error) {
-                console.error("Error loading dashboard:", error);
-                alert("Error loading data. Check console.");
+                showError("Error loading dashboard data.", error);
+                document.getElementById('loading').innerHTML = '<span style="color:red">Could not load dashboard. Please try refreshing.</span>';
             }
         }
 
+        let loadingFarmers = false;
         async function loadMoreFarmers(reset = false) {
+            if (loadingFarmers) return;
+            loadingFarmers = true;
+
             const list = document.getElementById('farmers-list');
+            let btn = document.getElementById('load-more-btn');
+
             if (reset) {
                 list.innerHTML = '';
                 lastUserDoc = null;
+            }
+
+            if(btn) {
+                btn.disabled = true;
+                btn.innerText = 'Loading...';
             }
 
             let query = db.collection('users').limit(USERS_PER_PAGE);
@@ -150,24 +182,35 @@
                 query = query.startAfter(lastUserDoc);
             }
 
-            const snapshot = await query.get();
-            if (!snapshot.empty) {
-                lastUserDoc = snapshot.docs[snapshot.docs.length - 1];
-                snapshot.forEach(doc => renderFarmerRow(doc));
-                
-                // Add/Update Load More Button
-                let btn = document.getElementById('load-more-btn');
-                if (!btn) {
-                    btn = document.createElement('button');
-                    btn.id = 'load-more-btn';
-                    btn.innerText = 'Load More Farmers';
-                    btn.style.width = '100%';
-                    btn.style.marginTop = '15px';
-                    btn.onclick = () => loadMoreFarmers();
-                    list.parentNode.appendChild(btn);
+            try {
+                const snapshot = await query.get();
+                if (!snapshot.empty) {
+                    lastUserDoc = snapshot.docs[snapshot.docs.length - 1];
+                    snapshot.forEach(doc => renderFarmerRow(doc));
+                    
+                    if (!btn) {
+                        btn = document.createElement('button');
+                        btn.id = 'load-more-btn';
+                        btn.style.width = '100%';
+                        btn.style.marginTop = '15px';
+                        btn.onclick = () => loadMoreFarmers();
+                        list.parentNode.appendChild(btn);
+                    }
+                    
+                    if (snapshot.docs.length < USERS_PER_PAGE) {
+                        btn.style.display = 'none';
+                    } else {
+                        btn.style.display = 'block';
+                    }
                 }
-                
-                if (snapshot.docs.length < USERS_PER_PAGE) btn.style.display = 'none';
+            } catch (error) {
+                showError("Error fetching farmers.", error);
+            } finally {
+                loadingFarmers = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'Load More Farmers';
+                }
             }
         }
 
@@ -228,7 +271,8 @@
                     }
                     detailsDiv.dataset.loaded = 'true';
                 } catch (e) {
-                    container.innerHTML = 'Error loading details';
+                    showError("Error loading farm details.", e);
+                    container.innerHTML = '<span style="color:red;">Error loading details.</span>';
                 }
             }
         }
@@ -245,26 +289,43 @@
         }
 
         async function saveMarketPrices() {
-            const newPrices = currentPrices.map((p, index) => {
-                const price = parseInt(document.getElementById(`price-${index}`).value);
-                const change = document.getElementById(`change-${index}`).value;
+            let newPrices = [];
+            for (const [index, p] of currentPrices.entries()) {
+                const priceInput = document.getElementById(`price-${index}`);
+                const changeInput = document.getElementById(`change-${index}`);
+
+                const price = parseInt(priceInput.value);
+                const change = changeInput.value.trim();
+
+                // Validation
+                if (isNaN(price) || price < 0) {
+                    showError(`Invalid price for ${p.count} count. Please enter a valid number.`);
+                    priceInput.focus();
+                    return;
+                }
+
+                if (change !== '0' && !/^[+-]\d+$/.test(change)) {
+                    showError(`Invalid change format for ${p.count} count. Use format like '+10' or '-5'.`);
+                    changeInput.focus();
+                    return;
+                }
+
                 // Simple trend logic
                 let trend = 'stable';
-                if (change.includes('+')) trend = 'up';
-                if (change.includes('-')) trend = 'down';
+                if (change.startsWith('+')) trend = 'up';
+                if (change.startsWith('-')) trend = 'down';
                 
-                return { count: p.count, price, change, trend };
-            });
+                newPrices.push({ count: p.count, price, change, trend });
+            }
 
             try {
                 await db.collection('marketPrices').doc('current').set({
                     items: newPrices,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                alert("Market prices updated successfully! All users will see this.");
+                showToast("Market prices updated successfully!");
             } catch (e) {
-                console.error(e);
-                alert("Failed to update prices.");
+                showError("Failed to update prices.", e);
             }
         }
 
