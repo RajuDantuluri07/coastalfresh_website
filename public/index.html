@@ -2137,13 +2137,23 @@
                     <button class="btn-icon" style="color: white; background: rgba(255,255,255,0.2);" onclick="app.openFarmModal()">
                         <i class="fas fa-plus"></i>
                     </button>
-                    <div class="current-date" id="currentDate"></div>
                     <button class="btn-icon" style="color: white; background: rgba(255,255,255,0.2);" onclick="app.openSettingsModal()">
                         <i class="fas fa-cog"></i>
                     </button>
                 </div>
             </div>
         </header>
+
+        <!-- Date Display (Moved below header) -->
+        <div style="background: #f8f9fa; color: var(--gray); padding: 8px 0; display: flex; justify-content: center; align-items: center; gap: 20px; font-size: 13px; font-weight: 600; border-bottom: 1px solid var(--border);">
+            <button class="btn-icon" style="color: var(--primary); padding: 4px 8px;" onclick="app.changeDate(-1)"><i class="fas fa-chevron-left"></i></button>
+            <div style="position: relative; display: flex; align-items: center; cursor: pointer;">
+                <input type="date" id="datePicker" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; z-index: 10; cursor: pointer;" onchange="app.pickDate(this.value)">
+                <i class="far fa-calendar-alt" style="margin-right: 6px; color: var(--primary);"></i> 
+                <span id="currentDate"></span>
+            </div>
+            <button class="btn-icon" style="color: var(--primary); padding: 4px 8px;" onclick="app.changeDate(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
 
         <!-- Navigation - Reduced to 4 tabs -->
         <nav class="nav-tabs">
@@ -4142,7 +4152,7 @@
                 let startDate, endDate;
                 
                 if (this.viewMode === 'today') {
-                    startDate = this.getFormattedDate(today);
+                    startDate = this.currentDate;
                     endDate = startDate;
                 } else if (this.viewMode === 'yesterday') {
                     const y = new Date(today); y.setDate(y.getDate() - 1);
@@ -4481,11 +4491,19 @@
 
             setViewMode(mode) {
                 this.viewMode = mode;
+                if (mode === 'today') {
+                    // Reset to real today when clicking "Today" tab
+                    this.currentDate = this.getFormattedDate(new Date());
+                    this.refreshDate();
+                    this.renderAll();
+                } else {
+                    this.renderLogBook();
+                }
+                
                 document.querySelectorAll('.range-tab').forEach(t => {
                     if (t.dataset.range === mode) t.classList.add('active');
                     else t.classList.remove('active');
                 });
-                this.renderLogBook();
             }
 
             toggleLogView() {
@@ -4607,10 +4625,47 @@
                 return `${year}-${month}-${day}`;
             }
 
+            changeDate(offset) {
+                const d = new Date(this.currentDate);
+                d.setDate(d.getDate() + offset);
+                this.currentDate = this.getFormattedDate(d);
+                
+                // Switch to 'today' view mode (which now means "Selected Date")
+                this.viewMode = 'today';
+                document.querySelectorAll('.range-tab').forEach(t => {
+                    if (t.dataset.range === 'today') t.classList.add('active');
+                    else t.classList.remove('active');
+                });
+
+                this.refreshDate();
+                this.renderAll();
+            }
+
+            pickDate(dateStr) {
+                if (!dateStr) return;
+                this.currentDate = dateStr;
+                
+                // Switch to 'today' view mode (which now means "Selected Date")
+                this.viewMode = 'today';
+                document.querySelectorAll('.range-tab').forEach(t => {
+                    if (t.dataset.range === 'today') t.classList.add('active');
+                    else t.classList.remove('active');
+                });
+
+                this.refreshDate();
+                this.renderAll();
+            }
+
             refreshDate() {
-                this.currentDate = this.getFormattedDate();
                 const dateEl = document.getElementById('currentDate');
-                if (dateEl) dateEl.textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                const picker = document.getElementById('datePicker');
+                if (dateEl) {
+                    const d = new Date(this.currentDate);
+                    dateEl.textContent = d.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                }
+                if (picker) {
+                    picker.value = this.currentDate;
+                }
             }
 
             // ===== MISSING METHODS IMPLEMENTATION =====
