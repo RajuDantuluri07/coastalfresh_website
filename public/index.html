@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AquaBook Pro - Multi-Farm Management</title>
+    <title>AquaRythu - Shrimp & Aqua Farm Management App</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐟</text></svg>">
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#2196F3">
@@ -2113,8 +2113,9 @@
 <body>
     <!-- Loading Overlay -->
     <div class="loading" id="loading">
+        <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1767525670/Splash.screen_f9jcnc.png" alt="AquaRythu" style="width: 180px; max-width: 50vw; height: auto; margin-bottom: 20px; border-radius: 16px; object-fit: contain;" fetchpriority="high">
         <div class="loading-spinner"></div>
-        <div class="loading-text">Loading AquaBook...</div>
+        <div class="loading-text">Loading AquaRythu...</div>
     </div>
 
     <!-- Main App -->
@@ -2122,10 +2123,13 @@
         <!-- Header -->
         <header class="app-header">
             <div class="header-content">
-                <div class="farm-selector" id="farmSelector">
-                    <i class="fas fa-farm"></i>
-                    <span id="currentFarmName">Select Farm</span>
-                    <i class="fas fa-chevron-down"></i>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1767525962/AquaRythu-removebg-preview_qsfm2e.png" alt="Logo" style="height: 40px; width: auto; object-fit: contain;" loading="lazy">
+                    <div class="farm-selector" id="farmSelector">
+                        <i class="fas fa-farm"></i>
+                        <span id="currentFarmName">Select Farm</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <button class="btn-icon" style="color: white; background: rgba(255,255,255,0.2);" onclick="app.openFarmModal()">
@@ -3137,8 +3141,10 @@
     <div class="auth-container" id="authContainer" style="display: flex;">
         <div class="auth-box">
             <div class="auth-header">
-                <div class="auth-logo">🐟</div>
-                <h2>Get Started with AquaBook</h2>
+                <div class="auth-logo">
+                    <img src="https://res.cloudinary.com/dpyniai9l/image/upload/v1767525739/Signuplogo_qsdjnp.png" alt="AquaRythu" style="width: 150px; max-width: 60%; height: auto; object-fit: contain;" loading="lazy">
+                </div>
+                <h2>Get Started with AquaRythu</h2>
                 <p>Enter your phone number to sign up or log in.</p>
             </div>
 
@@ -3432,7 +3438,7 @@
                     setTimeout(() => {
                         this.showLoading(false);
                         this.initialized = true;
-                        this.showToast('AquaBook Pro is ready!', 'success');
+                        this.showToast('AquaRythu is ready!', 'success');
                     }, 800);
                 } catch (error) {
                     console.error("App initialization failed:", error);
@@ -7155,8 +7161,8 @@
             shareApp() {
                 if (navigator.share) {
                     navigator.share({
-                        title: 'AquaBook Pro',
-                        text: 'Manage your shrimp farm efficiently with AquaBook Pro. Track feed, water quality, and expenses in one place.',
+                        title: 'AquaRythu',
+                        text: 'Manage your shrimp farm efficiently with AquaRythu. Track feed, water quality, and expenses in one place.',
                         url: window.location.href
                     }).catch(console.error);
                 } else {
