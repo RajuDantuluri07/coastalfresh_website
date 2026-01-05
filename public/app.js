@@ -4,9 +4,9 @@
  **************************************/
 
 /* 1️⃣ Firebase SDKs (Compat for simplicity) */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js";
-import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js";
-import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, where, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query, where, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 /* 2️⃣ Firebase Configuration
    👉 REPLACE with YOUR Firebase project config
@@ -71,31 +71,31 @@ phoneInput.addEventListener("input", () => {
   // Regex for E.164 format: starts with '+', followed by 11 to 14 digits.
   // This covers formats like +919876543210.
   const phoneRegex = /^\+\d{11,14}$/;
-  const phoneNumber = phoneInput.value.trim();
+  // Allow spaces/dashes during typing, strip them for validation
+  const phoneNumber = phoneInput.value.trim().replace(/[\s-]/g, '');
   const isValid = phoneRegex.test(phoneNumber);
   // Enable the button only if the phone number is valid
   sendOtpBtn.disabled = !isValid;
 });
 
 /* 5️⃣ Setup reCAPTCHA */
-document.addEventListener("DOMContentLoaded", () => {
-  window.recaptchaVerifier = new RecaptchaVerifier(
-    "recaptcha-container",
-    {
-      size: "normal",
-      callback: () => {
-        console.log("reCAPTCHA solved");
-      }
-    },
-    auth
-  );
-
-  window.recaptchaVerifier.render();
-});
+// Since type="module" is deferred, DOM is ready. We don't need DOMContentLoaded wrapper.
+window.recaptchaVerifier = new RecaptchaVerifier(
+  "recaptcha-container",
+  {
+    size: "normal",
+    callback: () => {
+      console.log("reCAPTCHA solved");
+    }
+  },
+  auth
+);
+window.recaptchaVerifier.render();
 
 /* 6️⃣ Send OTP */
 sendOtpBtn.addEventListener("click", () => {
-  const phoneNumber = phoneInput.value.trim();
+  // Clean phone number (remove spaces/dashes) before sending to Firebase
+  const phoneNumber = phoneInput.value.trim().replace(/[\s-]/g, '');
 
   sendOtpBtn.disabled = true;
   sendOtpBtn.innerText = "Sending...";
@@ -116,7 +116,8 @@ sendOtpBtn.addEventListener("click", () => {
       alert("OTP sent successfully");
     })
     .catch((error) => {
-      console.error(error);
+      // Log the full error object for more details
+      console.error("OTP Send Error:", error);
       alert(error.message);
       sendOtpBtn.disabled = false;
       sendOtpBtn.innerText = "Send OTP";
