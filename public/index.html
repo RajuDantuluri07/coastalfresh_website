@@ -25,6 +25,16 @@ body {
   --red:#C62828; --orange:#EF6C00;
   --bg:#f2f5f4;
 }
+.btn-secondary {
+  background: #eee;
+  color: #333;
+}
+
+/* Utility classes moved from inline styles */
+.muted {
+  color: #666;
+  margin-bottom: 20px;
+}
 
 /* ===== HEADER ===== */
 .header {
@@ -188,6 +198,13 @@ body {
   font-weight: bold;
 }
 
+/* ===== PROOF SECTION ===== */
+.proof-card { background: #E3F2FD; border: 2px solid #2196F3; padding: 16px; border-radius: 12px; margin-top: 14px; }
+.proof-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+.proof-total { border-top: 1px solid #90CAF9; padding-top: 8px; margin-top: 8px; font-weight: bold; font-size: 16px; color: #0D47A1; }
+.proof-tag { background: #2196F3; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; text-transform: uppercase; }
+
+
 /* ===== NEW FEED TAB STYLES ===== */
 .feed-header{background:#fff;padding:16px;border-radius:12px;margin-bottom:12px}
 .feed-header h2{color:var(--green)}
@@ -323,7 +340,7 @@ body {
 .num-key { background: white; border: none; padding: 20px; font-size: 20px; font-weight: bold; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; }
 .num-key:active { background: #f0f0f0; }
 .setup-form { width: 100%; max-width: 400px; background: white; padding: 20px; border-radius: 12px; }
-.tank-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
+.tank-row { display: grid; grid-template-columns: 1.5fr 1fr 1.2fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
 .remove-tank { color: var(--red); cursor: pointer; font-size: 18px; }
 .next-feed-card {
   background: #263238; color: white; padding: 20px; border-radius: 16px;
@@ -358,6 +375,18 @@ body {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* OTP input moved from inline styles */
+.otp-input {
+  font-size: 24px;
+  text-align: center;
+  letter-spacing: 4px;
+}
+/* Custom styles for specific inputs */
+#phoneInput {
+  font-size: 18px;
+  text-align: center;
+}
 </style>
 </head>
 
@@ -372,18 +401,17 @@ body {
 <div id="authScreen" class="screen active">
   <div class="auth-container">
     <h2>🦐 Aquarythu</h2>
-    <p style="color:#666;margin-bottom:20px">Farm Login</p>
+    <p class="muted">Farm Login</p>
     <div id="recaptcha-container"></div>
-    <input type="tel" id="phoneInput" class="input" placeholder="+91 98765 43210" style="font-size:18px;text-align:center">
+    <input type="tel" id="phoneInput" class="input" placeholder="+91 98765 43210">
     <button class="btn" onclick="sendOTP()">Get OTP</button>
   </div>
 </div>
 
-<!-- ===== OTP SCREEN ===== -->
 <div id="otpScreen" class="screen">
   <div class="auth-container">
     <h3>Enter OTP</h3>
-    <input type="number" id="otpInput" class="input" placeholder="123456" style="font-size:24px;text-align:center;letter-spacing:4px">
+    <input type="number" id="otpInput" class="input otp-input" placeholder="123456">
     <button class="btn" onclick="verifyOTP()">Verify</button>
   </div>
 </div>
@@ -397,9 +425,16 @@ body {
     <label>Farm Name</label>
     <input id="setupFarmName" class="input" placeholder="e.g. Raju Prawns">
     
+    <label>Previous Crop Baseline (Proof)</label>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+      <input id="setupPrevFeed" type="number" class="input" placeholder="Total Feed (kg)">
+      <input id="setupPrevDays" type="number" class="input" placeholder="Days (e.g. 120)">
+    </div>
+    <input id="setupFeedPrice" type="number" class="input" placeholder="Feed Price (₹/kg)" value="120">
+
     <label>Tanks</label>
     <div id="setupTanksList"></div>
-    <button class="btn" style="background:#eee;color:#333;margin-bottom:16px" onclick="addSetupTank()">+ Add Tank</button>
+    <button class="btn btn-secondary" style="margin-bottom:16px" onclick="addSetupTank()">+ Add Tank</button>
     
     <button class="btn" onclick="saveSetup()">💾 Save Farm</button>
   </div>
@@ -459,6 +494,50 @@ body {
     <div class="card"><h4>DOC</h4><p>68</p></div>
   </div>
 
+  <!-- PROOF SECTION (OWNER ONLY) -->
+  <div id="proofSection" class="proof-card hidden">
+    <h3 style="color:#0D47A1; margin-bottom:12px">🛡️ Crop Savings Proof</h3>
+    <div class="proof-row"><span>Proof Method</span><strong id="proofMethod">--</strong></div>
+    <div class="proof-row"><span>📉 Baseline Feed (Std)</span><strong id="proofBaseline">0 kg</strong></div>
+    <div class="proof-row"><span>🦐 Actual Feed (You)</span><strong id="proofActual">0 kg</strong></div>
+    <div class="proof-row"><span>💰 Feed Reduced</span><strong id="proofReduced" style="color:var(--green)">0 kg</strong></div>
+    <div class="proof-total">
+      <div style="display:flex;justify-content:space-between">
+        <span>Total Saved:</span> <span id="proofSavedMoney">₹0</span>
+      </div>
+    </div>
+    <p style="font-size:12px;color:#555;margin-top:10px">
+      ℹ️ Savings calculated using your previous crop feed data.
+      Harvest quantity not reduced.
+    </p>
+  </div>
+
+  <!-- HARVEST PREDICTION (OWNER ONLY) -->
+  <div id="harvestSection" class="section hidden" style="border-left: 5px solid gold;">
+    <h3>🚜 Harvest Prediction (DOC 100)</h3>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; text-align:center">
+      <div style="background:#fff8e1; padding:10px; border-radius:8px">
+        <div style="font-size:12px; color:#f57f17">Est. Date</div>
+        <strong id="predDate" style="font-size:16px">--</strong>
+      </div>
+      <div style="background:#e8f5e9; padding:10px; border-radius:8px">
+        <div style="font-size:12px; color:#2e7d32">Est. Biomass</div>
+        <strong id="predBiomass" style="font-size:16px">-- kg</strong>
+      </div>
+    </div>
+    <div style="margin-top:10px; background:#e3f2fd; padding:12px; border-radius:8px; text-align:center">
+      <div style="font-size:12px; color:#1565c0">Projected Revenue</div>
+      <strong id="predRevenue" style="font-size:20px; color:#0d47a1">₹0</strong>
+    </div>
+  </div>
+
+  <!-- DANGER ZONE (OWNER ONLY) -->
+  <div id="dangerSection" class="section hidden" style="border: 2px solid var(--red); background: #ffebee;">
+    <h3 style="color: var(--red)">⚠️ Danger Zone</h3>
+    <p style="margin-bottom:12px; color:#c62828">End this crop and start over. This deletes all logs and tank data.</p>
+    <button class="btn" style="background:var(--red)" onclick="resetFarm()">🔄 RESET FARM & START NEW CROP</button>
+  </div>
+
   <!-- CHART SECTION -->
   <div class="section">
     <h3>📈 Feed Trend (Today)</h3>
@@ -475,7 +554,10 @@ body {
       <h2>Shree Shrimp Farm</h2>
       <input type="date" id="datePicker" class="date-input" onchange="selectDate(this.value)">
     </div>
-    <small id="tankLabel">Tank A</small>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <small id="tankLabel">Tank A</small>
+      <button id="phBtn" class="upgrade hidden" style="font-size:10px;padding:4px 8px;background:#EF6C00;border:none;color:white;cursor:pointer" onclick="triggerPartialHarvest()">✂️ Partial Harvest</button>
+    </div>
   </div>
 
   <!-- TANK SELECTOR -->
@@ -505,13 +587,13 @@ body {
       <h3>Select Tray Result</h3>
 
       <div class="tray-grid">
-        <div class="tray-option" onclick="selectTray('empty')">
+        <div class="tray-option" onclick="selectTray('empty', event)">
           <i class="fas fa-check-circle"></i> 100% Eaten
         </div>
-        <div class="tray-option" onclick="selectTray('little')">
+        <div class="tray-option" onclick="selectTray('little', event)">
           <i class="fas fa-cookie-bite"></i> 75% Eaten
         </div>
-      <div class="tray-option" onclick="selectTray('half')">
+      <div class="tray-option" onclick="selectTray('half', event)">
           <i class="fas fa-adjust"></i> 50% Eaten
       </div>
       <div class="tray-option" onclick="selectTray('waste')">
@@ -579,7 +661,7 @@ const rounds=[
   {id:'night',name:'Night',time:'10:00 PM',icon:'fa-star'}
 ];
 
-let selectedTank=tanks[0].id;
+let selectedTank = null;
 let selectedDate = new Date().toISOString().split('T')[0];
 let logs={}; // Will load from Firestore
 let currentUser=null;
@@ -608,34 +690,63 @@ const ISSUE_MULTIPLIER = {
   'red_legs': 0.8, 'white_gut': 0.7, 'dead_shrimp': 0.8, 'molting': 1.0
 };
 
-function getDOCRules(doc) {
-  if (doc <= 15) return { allowIncrease: false, maxReduction: 0.75 };
-  if (doc <= 30) return { allowIncrease: true, maxReduction: 0.8 };
-  if (doc <= 60) return { allowIncrease: true, maxReduction: 0.85 };
-  if (doc <= 90) return { allowIncrease: false, maxReduction: 0.8 };
-  return { allowIncrease: false, maxReduction: 0.75 };
+// Vannamei Standard Feed Table
+const FEED_TABLE = [
+  { doc: 30, rate: 0.045 }, // 4.5% of body weight
+  { doc: 60, rate: 0.035 }, // 3.5%
+  { doc: 90, rate: 0.025 }, // 2.5%
+  { doc: 120, rate: 0.015 } // 1.5%
+];
+
+function getBiomassFeed(tankId) {
+  if(farmData?.cropBaseline?.baselinePerRound) {
+    return farmData.cropBaseline.baselinePerRound / (tanks.length || 1);
+  }
+
+  const tank = tanks.find(t => t.id === tankId);
+  const doc = calculateDOC(tank.stockingDate);
+  const count = tank.seedCount || 100000; // Default if missing
+
+  // 1. Estimate ABW (Average Body Weight) - Linear approx for demo
+  // DOC 15=1g, DOC 100=25g
+  let abw = 1.0;
+  if(doc > 15) abw = 1.0 + ((doc - 15) * 0.28);
+
+  // 2. Estimate Survival (Linear decay)
+  // 98% at start, 80% at DOC 100
+  const survival = 0.98 - ((doc/100) * 0.18);
+
+  // 3. Calculate Biomass (kg)
+  const biomass = (count * survival * abw) / 1000;
+
+  // 4. Get Feed Rate %
+  let rate = 0.02;
+  const rule = FEED_TABLE.find(r => doc <= r.doc);
+  if(rule) rate = rule.rate;
+  else rate = 0.012;
+
+  // 5. Total Daily Feed -> Per Round
+  return (biomass * rate) / 4;
 }
 
 function getRecommendation(tankId, roundId) {
-  const tank = tanks.find(t => t.id === tankId);
-  const doc = calculateDOC(tank.stockingDate);
+  // Calculate theoretical feed based on biomass
+  const baseFeed = getBiomassFeed(tankId);
   
   // Find previous round
   const rIdx = rounds.findIndex(r => r.id === roundId);
-  if (rIdx === 0) return null; // Morning: No auto-rec from yesterday in this MVP
+  
+  // Morning: Use standard table directly (reset daily cycle)
+  if (rIdx === 0) {
+    return { amount: Math.round(baseFeed * 10) / 10, reason: 'Biomass Std' };
+  }
   
   const prevRound = rounds[rIdx - 1];
   const prevLog = logs[selectedDate]?.[tankId]?.[prevRound.id];
   
   if (!prevLog || !prevLog.checked) return null; // Need previous tray data
 
-  const lastFeed = parseFloat(prevLog.feed);
-  const rules = getDOCRules(doc);
-  
   let mult = TRAY_MULTIPLIER[prevLog.tray] || 1.0;
-  
-  // DOC Safety
-  if (!rules.allowIncrease && mult > 1) mult = 1.0;
   
   // Issues
   if (prevLog.issues) {
@@ -644,11 +755,11 @@ function getRecommendation(tankId, roundId) {
     });
   }
 
-  mult = Math.max(mult, rules.maxReduction);
-  mult = Math.min(mult, 1.05);
-
-  let next = Math.round((lastFeed * mult) * 10) / 10;
-  return { amount: next, reason: prevLog.tray === 'waste' ? 'Tray Leftover' : 'Standard' };
+  // Apply tray multiplier to the BIOMASS BASELINE
+  // This ensures we follow the growth curve but adjust for appetite
+  let next = Math.round((baseFeed * mult) * 10) / 10;
+  
+  return { amount: next, reason: 'Biomass + Tray' };
 }
 
 /* INIT */
@@ -667,6 +778,8 @@ window.addSetupTank = addSetupTank;
 window.saveSetup = saveSetup;
 window.logout = () => signOut(auth);
 window.initiatePinReset = initiatePinReset;
+window.resetFarm = resetFarm;
+window.triggerPartialHarvest = triggerPartialHarvest;
 
 /* ===== AUTH FLOW ===== */
 window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
@@ -780,6 +893,7 @@ function addSetupTank() {
   div.className = 'tank-row';
   div.innerHTML = `
     <input class="input" placeholder="Tank Name (e.g. A1)">
+    <input type="number" class="input" placeholder="Seed Count (e.g. 100000)">
     <input type="date" class="input">
     <i class="fas fa-times remove-tank" onclick="this.parentElement.remove()"></i>
   `;
@@ -788,29 +902,52 @@ function addSetupTank() {
 
 async function saveSetup() {
   const name = document.getElementById('setupFarmName').value;
-  const rows = document.querySelectorAll('.tank-row');
-  const newTanks = [];
-  
-  rows.forEach((r, i) => {
-    const inputs = r.querySelectorAll('input');
-    if(inputs[0].value && inputs[1].value) {
-      newTanks.push({
-        id: 'tank'+(i+1),
-        name: inputs[0].value,
-        stockingDate: inputs[1].value
-      });
-    }
-  });
+  const prevFeed = parseFloat(document.getElementById('setupPrevFeed').value);
+  const prevDays = parseInt(document.getElementById('setupPrevDays').value);
+  const price = parseFloat(document.getElementById('setupFeedPrice').value) || 120;
 
-  if(!name || newTanks.length === 0) return alert("Fill details");
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  try {
+    const rows = document.querySelectorAll('.tank-row');
+    const newTanks = [];
+    
+    rows.forEach((r, i) => {
+      const inputs = r.querySelectorAll('input');
+      if(inputs[0].value && inputs[2].value) {
+        newTanks.push({
+          id: 'tank'+(i+1),
+          name: inputs[0].value,
+          seedCount: parseInt(inputs[1].value) || 100000,
+          stockingDate: inputs[2].value
+        });
+      }
+    });
 
-  await setDoc(doc(db, "farms", currentUser.uid), {
-    farmName: name,
-    tanks: newTanks,
-    logs: {}
-  }, { merge: true });
-  
-  loadData(); // Reload to enter app
+    if(!name || newTanks.length === 0 || !prevFeed || !prevDays) return alert("Fill all details including Previous Crop data");
+
+    const cropBaseline = {
+      baselineFeedKg: prevFeed,
+      cropDays: prevDays,
+      feedPrice: price,
+      baselinePerDay: prevFeed / prevDays,
+      baselinePerRound: (prevFeed / prevDays) / 4,
+      proofMethod: "previous_crop",
+      startedAt: new Date().toISOString()
+    };
+
+    await setDoc(doc(db, "farms", currentUser.uid), {
+      farmName: name,
+      tanks: newTanks,
+      logs: {},
+      cropBaseline: cropBaseline
+    }, { merge: true });
+    
+    loadData(); // Reload to enter app, will hide overlay on success
+  } catch (e) {
+    console.error("Setup save error:", e);
+    alert("Failed to save farm setup. Please try again.");
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
 };
 
 onAuthStateChanged(auth, async (user) => {
@@ -854,16 +991,25 @@ function enterApp() {
     document.querySelector('.bottom-nav').style.display = 'none'; // Hide nav
     switchTab('feed', document.querySelector('button')); // Force feed tab
     document.getElementById('workerNextFeed').classList.remove('hidden');
+    document.getElementById('proofSection').classList.add('hidden');
+    document.getElementById('harvestSection').classList.add('hidden');
+    document.getElementById('dangerSection').classList.add('hidden');
+    document.getElementById('phBtn').classList.add('hidden');
     document.getElementById('datePicker').disabled = true; // Worker only today
     selectedDate = new Date().toISOString().split('T')[0];
   } else {
     document.querySelector('.bottom-nav').style.display = 'flex';
     document.getElementById('workerNextFeed').classList.add('hidden');
+    document.getElementById('proofSection').classList.remove('hidden');
+    document.getElementById('dangerSection').classList.remove('hidden');
+    document.getElementById('phBtn').classList.remove('hidden');
+    // harvestSection visibility handled in updateSavings/renderHarvestPrediction
     document.getElementById('datePicker').disabled = false;
   }
   
   renderTankBar();
   renderRounds();
+  updateSavings(); // Refresh all owner stats
 }
 
 /* UI */
@@ -935,11 +1081,11 @@ function roundCard(r,log){
     const btn = isOwner ? '' : `<button class="action check" onclick="openTrayModal('${r.id}')">🔍 CHECK TRAY</button>`;
     return template(r,'CHECK PENDING','yellow',
       btn,
-      log.feed+' kg','--');
+      (log.feed_actual || log.feed)+' kg','--');
   }
   return template(r,'COMPLETED','green',
     `<div class="done">✅ Completed</div>`,
-    log.feed+' kg',log.tray);
+    (log.feed_actual || log.feed)+' kg',log.tray);
 }
 function template(r,status,cls,action,feed,tray){
   return `
@@ -964,6 +1110,12 @@ function template(r,status,cls,action,feed,tray){
 
 /* ACTIONS */
 function feed(round, recAmount){
+  const existingLog = logs[selectedDate]?.[selectedTank]?.[round];
+  if (existingLog && existingLog.checked) {
+    alert("Feed locked after tray check");
+    return;
+  }
+
   const def = recAmount ? recAmount : '';
   const amtStr=prompt('Feed amount (kg)', def);
   if(!amtStr)return;
@@ -972,28 +1124,46 @@ function feed(round, recAmount){
   logs[selectedDate]??={};
   logs[selectedDate][selectedTank]??={};
   
-  // Calculate Savings (Baseline = Previous Feed)
-  let savedKg = 0;
-  const rIdx = rounds.findIndex(r => r.id === round);
-  if(rIdx > 0) {
-    const prevRound = rounds[rIdx-1];
-    const prevLog = logs[selectedDate][selectedTank][prevRound.id];
-    if(prevLog) {
-      const prevFeed = parseFloat(prevLog.feed);
-      if(amt < prevFeed) {
-        savedKg = prevFeed - amt;
-      }
-    }
+  // 1. Get Baseline (Scientific Standard)
+  const cropBaseline = farmData.cropBaseline;
+  if (!cropBaseline) {
+    alert("Baseline not set. Contact owner.");
+    return;
   }
-
+  const baseline = cropBaseline.baselinePerRound / (tanks.length || 1);
+  
+  // 2. Calculate Savings vs Baseline
+  const savedKg = Math.max(0, baseline - amt);
+  
+  // 3. Store Enhanced Data
   logs[selectedDate][selectedTank][round]={
-    feed:amt, 
+    feed_actual: amt,
+    feed_recommended: recAmount || null,
+    feed_baseline: baseline,
     checked:false, 
-    savedKg: savedKg,
+    saved_vs_baseline: savedKg,
+    saved_vs_recommendation: recAmount ? Math.max(0, recAmount - amt) : 0,
     time: new Date().toISOString(),
     mode: 'WORK'
   };
   save(); updateSavings();
+}
+
+async function triggerPartialHarvest() {
+  const kg = prompt("Harvested Amount (kg):");
+  if(!kg) return;
+  const abw = prompt("Avg Body Weight (g):", "25");
+  if(!abw) return;
+  
+  const tank = tanks.find(t => t.id === selectedTank);
+  if (!tank) return;
+
+  const shrimpRemoved = (parseFloat(kg) * 1000) / parseFloat(abw);
+  tank.seedCount = Math.max(0, (tank.seedCount || 100000) - shrimpRemoved);
+  
+  await setDoc(doc(db, "farms", currentUser.uid), { tanks }, { merge: true });
+  alert(`Partial harvest recorded.\nRemoved ~${Math.round(shrimpRemoved)} shrimp.\nNew Seed Count: ${Math.round(tank.seedCount)}`);
+  selectTank(selectedTank);
 }
 
 /* TRAY MODAL */
@@ -1005,7 +1175,7 @@ function openTrayModal(round){
   document.getElementById('trayModal').classList.add('active');
   document.querySelectorAll('.issue-opt input').forEach(i=>i.checked=false);
 }
-function selectTray(val){
+function selectTray(val, event){
   selectedTray=val;
   document.querySelectorAll('.tray-option')
     .forEach(o=>o.classList.remove('active'));
@@ -1034,6 +1204,26 @@ async function save(){
   } catch(e) {
     console.error("Save error:", e);
     alert("⚠️ Could not save to cloud");
+  }
+}
+
+async function resetFarm() {
+  if(!confirm("⚠️ DANGER: This will delete ALL farm data, logs, and settings.\n\nAre you sure you want to start a new crop?")) return;
+  
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  try {
+    await setDoc(doc(db, "farms", currentUser.uid), {
+      tanks: [],
+      logs: {},
+      cropBaseline: {},
+      farmName: farmData.farmName,
+      pin: farmData.pin
+    });
+    location.reload();
+  } catch(e) {
+    console.error(e);
+    alert("Error resetting: " + e.message);
+    document.getElementById('loadingOverlay').style.display = 'none';
   }
 }
 
@@ -1071,13 +1261,25 @@ function renderChart() {
     let total = 0;
     tanks.forEach(t => {
       const l = logs[selectedDate]?.[t.id]?.[r.id];
-      if(l && l.feed) total += parseFloat(l.feed);
+      if(l) total += parseFloat(l.feed_actual || l.feed || 0);
+    });
+    return total;
+  });
+
+  // Calculate Baseline points
+  const baselinePoints = rounds.map(r => {
+    let total = 0;
+    tanks.forEach(t => {
+      total += getBiomassFeed(t.id);
     });
     return total;
   });
 
   if(feedChart) {
     feedChart.data.datasets[0].data = dataPoints;
+    if(feedChart.data.datasets[1]) {
+      feedChart.data.datasets[1].data = baselinePoints;
+    }
     feedChart.update();
   } else {
     feedChart = new Chart(ctx, {
@@ -1085,12 +1287,21 @@ function renderChart() {
       data: {
         labels: rounds.map(r => r.name),
         datasets: [{
-          label: 'Total Feed (kg)',
+          label: 'Actual Feed (kg)',
           data: dataPoints,
           borderColor: '#0a7cff',
           backgroundColor: 'rgba(10, 124, 255, 0.1)',
           fill: true,
           tension: 0.4
+        },
+        {
+          label: 'Baseline (kg)',
+          data: baselinePoints,
+          borderColor: '#9E9E9E',
+          borderDash: [5, 5],
+          fill: false,
+          tension: 0.4,
+          pointRadius: 0
         }]
       },
       options: {
@@ -1103,16 +1314,103 @@ function renderChart() {
 }
 
 function updateSavings(){
-  let totalKg = 0;
-  const dayLogs = logs[selectedDate] || {};
-  Object.values(dayLogs).forEach(tankLogs => {
-    Object.values(tankLogs).forEach(l => {
-      if(l.savedKg) totalKg += l.savedKg;
+  let todaySaved = 0;
+  let cropBaseline = 0;
+  let cropActual = 0;
+  let cropSaved = 0;
+
+  // Iterate ALL logs for Proof
+  Object.keys(logs).forEach(date => {
+    const isToday = date === selectedDate;
+    Object.values(logs[date]).forEach(tankLogs => {
+      Object.values(tankLogs).forEach(l => {
+        const actual = parseFloat(l.feed_actual || l.feed || 0);
+        // If old data has no baseline, assume baseline = actual (no savings)
+        let baseline = parseFloat(l.feed_baseline || actual);
+        if(farmData?.cropBaseline?.baselinePerRound) {
+          baseline = farmData.cropBaseline.baselinePerRound / (tanks.length || 1);
+        }
+        const saved = Math.max(0, baseline - actual);
+
+        cropBaseline += baseline;
+        cropActual += actual;
+        cropSaved += saved;
+
+        if(isToday) todaySaved += saved;
+      });
     });
   });
-  const totalVal = Math.round(totalKg * FEED_PRICE);
-  document.getElementById('homeSavings').textContent = '₹ ' + totalVal.toLocaleString();
+
+  const price = farmData?.cropBaseline?.feedPrice || FEED_PRICE;
+  // Update UI
+  document.getElementById('homeSavings').textContent = '₹ ' + Math.round(todaySaved * price).toLocaleString();
+  
+  document.getElementById('proofBaseline').textContent = Math.round(cropBaseline).toLocaleString() + ' kg';
+  document.getElementById('proofActual').textContent = Math.round(cropActual).toLocaleString() + ' kg';
+  document.getElementById('proofReduced').textContent = Math.round(cropSaved).toLocaleString() + ' kg';
+  document.getElementById('proofSavedMoney').textContent = '₹ ' + Math.round(cropSaved * price).toLocaleString();
+
+  const method = farmData?.cropBaseline?.proofMethod === 'previous_crop' ? 'Previous Crop Comparison' : 'Standard Growth Model';
+  document.getElementById('proofMethod').textContent = method;
+
   renderChart();
+  renderHarvestPrediction();
+
+  if(farmData?.cropBaseline) {
+    saveSavingsSummary({
+      cropId: "current",
+      baselineFeedKg: farmData.cropBaseline.baselineFeedKg,
+      actualFeedKg: cropActual,
+      feedSavedKg: cropSaved,
+      feedPrice: price,
+      moneySaved: cropSaved * price,
+      proofMethod: farmData.cropBaseline.proofMethod,
+      calculatedAt: new Date().toISOString()
+    });
+  }
+}
+
+async function saveSavingsSummary(summary) {
+  if(!currentUser) return;
+  await setDoc(doc(db, "farms", currentUser.uid, "reports", "savings"), summary);
+}
+
+function renderHarvestPrediction() {
+  if(currentMode !== 'OWNER') {
+    document.getElementById('harvestSection').classList.add('hidden');
+    return;
+  }
+  document.getElementById('harvestSection').classList.remove('hidden');
+
+  const TARGET_DOC = 100;
+  const MARKET_PRICE = 380; // Avg price for 25g count
+  
+  let totalBiomass = 0;
+  let earliestHarvest = null;
+
+  tanks.forEach(t => {
+    // Calculate Harvest Date (Stocking + 100 days)
+    const stock = new Date(t.stockingDate);
+    const harvest = new Date(stock);
+    harvest.setDate(stock.getDate() + TARGET_DOC);
+    
+    if(!earliestHarvest || harvest < earliestHarvest) earliestHarvest = harvest;
+
+    // Calculate Biomass at DOC 100 using standard curve
+    // ABW Formula: 1.0 + ((100 - 15) * 0.28) = 24.8g
+    const abw = 24.8; 
+    // Survival Formula: 0.98 - ((100/100) * 0.18) = 0.80
+    const survival = 0.80;
+    
+    const count = t.seedCount || 100000;
+    totalBiomass += (count * survival * abw) / 1000;
+  });
+
+  if(earliestHarvest) {
+    document.getElementById('predDate').textContent = earliestHarvest.toLocaleDateString('en-GB', {day:'numeric', month:'short'});
+    document.getElementById('predBiomass').textContent = Math.round(totalBiomass).toLocaleString() + ' kg';
+    document.getElementById('predRevenue').textContent = '₹ ' + Math.round(totalBiomass * MARKET_PRICE).toLocaleString();
+  }
 }
 </script>
 
