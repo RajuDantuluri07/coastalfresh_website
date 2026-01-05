@@ -340,8 +340,18 @@ body {
 .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; max-width: 280px; }
 .num-key { background: white; border: none; padding: 20px; font-size: 20px; font-weight: bold; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; }
 .num-key:active { background: #f0f0f0; }
-.setup-form { width: 100%; max-width: 400px; background: white; padding: 20px; border-radius: 12px; }
-.tank-row { display: grid; grid-template-columns: 1.2fr 0.8fr 0.8fr 1.2fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
+.setup-form { width: 100%; max-width: 400px; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+.setup-form h3 { font-size: 22px; color: #1565C0; margin-bottom: 8px; }
+.setup-form label { display: block; margin-top: 16px; margin-bottom: 6px; font-weight: 600; color: #455A64; font-size: 14px; }
+.setup-form .input { background: #F5F7F9; border: 1px solid #CFD8DC; padding: 12px; font-size: 16px; transition: 0.2s; }
+.setup-form .input:focus { border-color: #1565C0; background: #fff; outline: none; }
+
+.fab {
+  position: fixed; bottom: 80px; right: 20px; width: 56px; height: 56px; border-radius: 50%;
+  background: var(--blue); color: white; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  font-size: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100;
+}
+.fab:active { transform: scale(0.95); }
 .remove-tank { color: var(--red); cursor: pointer; font-size: 18px; }
 .next-feed-card {
   background: #263238; color: white; padding: 20px; border-radius: 16px;
@@ -350,6 +360,14 @@ body {
 .next-feed-time { font-size: 2em; font-weight: 900; margin: 10px 0; color: #81D4FA; }
 .next-feed-amt { font-size: 1.5em; font-weight: bold; }
 .hidden { display: none !important; }
+
+/* TANK ACTIONS GRID */
+.tank-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.action-btn { padding: 12px 4px; border: none; border-radius: 8px; color: white; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.action-btn i { font-size: 18px; }
+.btn-blue { background: var(--blue); }
+.btn-orange { background: var(--orange); }
+.btn-red { background: var(--red); }
 
 /* ===== LOADING SPINNER ===== */
 .loading-overlay {
@@ -392,8 +410,6 @@ body {
   font-size: 18px;
   text-align: center;
 }
-/* Water Quality */
-.water-quality-card { background:white; padding:12px; border-radius:12px; margin-bottom:12px; border:1px solid #eee; }
 .do-alert { background:var(--red); color:white; padding:4px 8px; border-radius:4px; font-size:10px; font-weight:bold; animation: pulse 1s infinite; }
 @keyframes pulse { 0% {opacity:1;} 50% {opacity:0.5;} 100% {opacity:1;} }
 </style>
@@ -435,24 +451,22 @@ body {
 <!-- ===== SETUP SCREEN ===== -->
 <div id="setupScreen" class="screen">
   <div class="setup-form">
-    <h3>🚜 Farm Setup</h3>
-    <p style="color:#666;font-size:12px;margin-bottom:16px">One-time setup. Cannot edit later.</p>
+    <h3>🚜 Create Farm Profile</h3>
+    <p style="color:#78909C;font-size:14px;margin-bottom:20px;line-height:1.4">Enter your farm details to get started with smart management.</p>
     
     <label>Farm Name</label>
     <input id="setupFarmName" class="input" placeholder="e.g. Raju Prawns">
     
-    <label>Previous Crop Baseline (Proof)</label>
+    <label>Previous Crop Data (For Savings Proof)</label>
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
       <input id="setupPrevFeed" type="number" class="input" placeholder="Total Feed (kg)">
       <input id="setupPrevDays" type="number" class="input" placeholder="Days (e.g. 120)">
     </div>
+    
+    <label>Feed Cost</label>
     <input id="setupFeedPrice" type="number" class="input" placeholder="Feed Price (₹/kg)" value="120">
 
-    <label>Ponds</label>
-    <div id="setupTanksList"></div>
-    <button class="btn btn-secondary" style="margin-bottom:16px" onclick="addSetupTank()">+ Add Pond</button>
-    
-    <button class="btn" onclick="saveSetup()">💾 Save Farm</button>
+    <button class="btn" style="margin-top:24px; font-weight:bold; font-size:16px" onclick="saveSetup()">Create Farm Profile &rarr;</button>
   </div>
 </div>
 
@@ -471,6 +485,9 @@ body {
 
 <!-- ===== HOME TAB ===== -->
 <div id="home" class="tab active">
+
+  <!-- FAB to Add Pond -->
+  <button class="fab" onclick="openPondModal()">+</button>
 
   <h2 id="homeFarmName" style="margin-bottom:14px;color:#0D47A1;display:none">My Farm</h2>
   <!-- SUMMARY -->
@@ -551,30 +568,22 @@ body {
       <input type="date" id="datePicker" class="date-input" onchange="selectDate(this.value)">
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <small id="tankLabel">Pond A</small>
-      <button id="phBtn" class="upgrade hidden" style="font-size:10px;padding:4px 8px;background:#EF6C00;border:none;color:white;cursor:pointer" onclick="triggerPartialHarvest()">✂️ Partial Harvest</button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <small id="tankLabel">Pond A</small>
+        <i class="fas fa-cog" style="color:#999;cursor:pointer" onclick="openEditTankModal()"></i>
+      </div>
+      <span id="doAlert" class="do-alert hidden">⚠️ LOW OXYGEN</span>
     </div>
   </div>
 
   <!-- TANK SELECTOR -->
-  <div class="tank-bar" id="tankBar"></div>
+  <div class="tank-bar" id="tankBar" style="min-height:50px"></div>
 
-  <!-- WATER QUALITY INPUTS -->
-  <div class="water-quality-card">
-    <div style="display:flex; justify-content:space-between; align-items:center">
-      <h4 style="color:#0D47A1"><i class="fas fa-tint"></i> Water Quality</h4>
-      <span id="doAlert" class="do-alert hidden">⚠️ LOW OXYGEN - STOP FEEDING</span>
-    </div>
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:8px">
-      <div>
-        <label style="font-size:12px; color:#666">pH Level</label>
-        <input type="number" id="inputPH" class="input" placeholder="7.5" step="0.1" onchange="saveWaterQuality()">
-      </div>
-      <div>
-        <label style="font-size:12px; color:#666">D.O. (ppm)</label>
-        <input type="number" id="inputDO" class="input" placeholder="4.0" step="0.1" onchange="saveWaterQuality()">
-      </div>
-    </div>
+  <!-- 3 CTA BUTTONS -->
+  <div class="tank-actions">
+    <button class="action-btn btn-blue" onclick="openWaterModal()"><i class="fas fa-vial"></i> Log Water</button>
+    <button class="action-btn btn-orange" onclick="triggerPartialHarvest()"><i class="fas fa-cut"></i> Partial Harvest</button>
+    <button class="action-btn btn-red" onclick="openEndCropModal()"><i class="fas fa-flag-checkered"></i> End Crop</button>
   </div>
 
   <!-- WORKER HOME: NEXT FEED CARD -->
@@ -628,6 +637,86 @@ body {
   </div>
 </div>
 
+<!-- ===== HISTORY TAB ===== -->
+<div id="history" class="tab">
+  <h2 style="margin-bottom:16px;color:#0D47A1;padding:0 4px">📜 Crop History</h2>
+  <div id="historyList" class="rounds"></div>
+</div>
+
+<!-- ADD POND MODAL -->
+<div class="modal" id="pondModal">
+  <div class="modal-box">
+    <h3>Add New Pond</h3>
+    <label style="font-size:12px;font-weight:bold;color:#555">Pond Name</label>
+    <input id="newPondName" class="input" placeholder="e.g. A1">
+    <label style="font-size:12px;font-weight:bold;color:#555">Seed Count</label>
+    <input id="newPondSeed" type="number" class="input" placeholder="e.g. 100000">
+    <label style="font-size:12px;font-weight:bold;color:#555">Size (Acres)</label>
+    <input id="newPondAcres" type="number" class="input" placeholder="e.g. 1.5" step="0.1">
+    <label style="font-size:12px;font-weight:bold;color:#555">Stocking Date</label>
+    <input id="newPondDate" type="date" class="input">
+    <button class="save-btn" onclick="savePond()">ADD POND</button>
+    <button class="btn btn-secondary" style="margin-top:10px" onclick="document.getElementById('pondModal').classList.remove('active')">Cancel</button>
+  </div>
+</div>
+
+<!-- WATER QUALITY MODAL -->
+<div class="modal" id="waterModal">
+  <div class="modal-box">
+    <h3>💧 Water Quality Log</h3>
+    <label style="font-size:12px; color:#666">pH Level</label>
+    <input type="number" id="inputPH" class="input" placeholder="7.5" step="0.1">
+    
+    <label style="font-size:12px; color:#666">Dissolved Oxygen (ppm)</label>
+    <input type="number" id="inputDO" class="input" placeholder="4.0" step="0.1">
+    
+    <button class="save-btn" onclick="saveWaterQuality()">SAVE LOG</button>
+    <button class="btn btn-secondary" style="margin-top:10px" onclick="document.getElementById('waterModal').classList.remove('active')">Close</button>
+  </div>
+</div>
+
+<!-- EDIT TANK MODAL -->
+<div class="modal" id="editTankModal">
+  <div class="modal-box">
+    <h3>⚙️ Edit Pond Details</h3>
+    <label style="font-size:12px;font-weight:bold;color:#555">Pond Name</label>
+    <input id="editTankName" class="input">
+    <label style="font-size:12px;font-weight:bold;color:#555">Seed Count</label>
+    <input id="editTankSeed" type="number" class="input">
+    <label style="font-size:12px;font-weight:bold;color:#555">Size (Acres)</label>
+    <input id="editTankAcres" type="number" class="input" step="0.1">
+    <label style="font-size:12px;font-weight:bold;color:#555">Stocking Date</label>
+    <input id="editTankDate" type="date" class="input">
+    
+    <button class="save-btn" onclick="saveTankEdit()">UPDATE POND</button>
+    <button class="btn" style="background:var(--red);margin-top:10px" onclick="deleteTank()">🗑️ DELETE POND</button>
+    <button class="btn btn-secondary" style="margin-top:10px" onclick="document.getElementById('editTankModal').classList.remove('active')">Cancel</button>
+  </div>
+</div>
+
+<!-- END CROP MODAL -->
+<div class="modal" id="endCropModal">
+  <div class="modal-box">
+    <h3>🏁 End Crop Summary</h3>
+    <p style="font-size:12px;color:#666;margin-bottom:16px">This will archive the pond and calculate final revenue.</p>
+    
+    <label style="font-size:12px;font-weight:bold;color:#555">Harvest Date</label>
+    <input id="endCropDate" type="date" class="input">
+    
+    <label style="font-size:12px;font-weight:bold;color:#555">Total Biomass Harvested (kg)</label>
+    <input id="endCropKg" type="number" class="input" placeholder="e.g. 4500">
+    
+    <label style="font-size:12px;font-weight:bold;color:#555">Avg Body Weight (g)</label>
+    <input id="endCropAbw" type="number" class="input" placeholder="e.g. 25">
+    
+    <label style="font-size:12px;font-weight:bold;color:#555">Sold Price (₹/kg)</label>
+    <input id="endCropPrice" type="number" class="input" placeholder="e.g. 380">
+
+    <button class="save-btn" onclick="saveEndCrop()">CONFIRM & END CROP</button>
+    <button class="btn btn-secondary" style="margin-top:10px" onclick="document.getElementById('endCropModal').classList.remove('active')">Cancel</button>
+  </div>
+</div>
+
 <!-- PROFILE MODAL -->
 <div class="modal" id="profileModal">
   <div class="modal-box" style="text-align:center">
@@ -646,12 +735,13 @@ body {
 <div class="bottom-nav">
   <button onclick="switchTab('home',this)" class="active-tab">🏠 Home</button>
   <button onclick="switchTab('feed',this)">🦐 Log Feed</button>
+  <button onclick="switchTab('history',this)">📜 History</button>
 </div>
 </div> <!-- End Main App -->
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteField, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteField, arrayUnion, enableIndexedDbPersistence, collection, getDocs, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 import { getAuth, signInWithPhoneNumber, RecaptchaVerifier, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -718,6 +808,7 @@ function switchTab(id, btn) {
 
   document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active-tab'));
   btn.classList.add('active-tab');
+  if(id === 'history') loadHistory();
 }
 
 /* FARM DATA */
@@ -855,7 +946,8 @@ window.feedAll = feedAll;
 window.sendOTP = sendOTP;
 window.verifyOTP = verifyOTP;
 window.signInWithGoogle = signInWithGoogle;
-window.addSetupTank = addSetupTank;
+window.openPondModal = openPondModal;
+window.savePond = savePond;
 window.saveSetup = saveSetup;
 window.logout = () => {
   if(confirm("Are you sure you want to logout?")) {
@@ -867,6 +959,12 @@ window.triggerPartialHarvest = triggerPartialHarvest;
 window.setChartView = setChartView;
 window.openProfileModal = openProfileModal;
 window.saveWaterQuality = saveWaterQuality;
+window.openWaterModal = openWaterModal;
+window.openEditTankModal = openEditTankModal;
+window.saveTankEdit = saveTankEdit;
+window.deleteTank = deleteTank;
+window.openEndCropModal = openEndCropModal;
+window.saveEndCrop = saveEndCrop;
 
 /* ===== AUTH FLOW ===== */
 
@@ -960,19 +1058,6 @@ function showScreen(id) {
 }
 
 /* ===== SETUP ===== */
-function addSetupTank() {
-  const div = document.createElement('div');
-  div.className = 'tank-row';
-  div.innerHTML = `
-    <input class="input" placeholder="Pond Name">
-    <input type="number" class="input" placeholder="Seed Count">
-    <input type="number" class="input" placeholder="Acres" step="0.1">
-    <input type="date" class="input">
-    <i class="fas fa-times remove-tank" onclick="this.parentElement.remove()"></i>
-  `;
-  document.getElementById('setupTanksList').appendChild(div);
-}
-
 async function saveSetup() {
   if (!currentUser) return alert("Session expired. Please login again.");
   const name = document.getElementById('setupFarmName').value;
@@ -982,26 +1067,9 @@ async function saveSetup() {
 
   document.getElementById('loadingOverlay').style.display = 'flex';
   try {
-    const rows = document.querySelectorAll('.tank-row');
-    const newTanks = [];
-    
-    rows.forEach((r, i) => {
-      const inputs = r.querySelectorAll('input');
-      // 0:Name, 1:Seed, 2:Acres, 3:Date
-      if(inputs[0].value && inputs[3].value) {
-        newTanks.push({
-          id: 'tank'+(i+1),
-          name: inputs[0].value,
-          seedCount: parseInt(inputs[1].value) || 100000,
-          sizeAcres: parseFloat(inputs[2].value) || 1.0,
-          stockingDate: inputs[3].value
-        });
-      }
-    });
-
-    if(!name || newTanks.length === 0 || isNaN(prevFeed) || !prevDays) {
+    if(!name || isNaN(prevFeed) || !prevDays) {
       document.getElementById('loadingOverlay').style.display = 'none';
-      return alert("Fill all details. Ensure every tank has a Name and Stocking Date.");
+      return alert("Please fill all farm details.");
     }
 
     const cropBaseline = {
@@ -1016,7 +1084,7 @@ async function saveSetup() {
 
     await setDoc(doc(db, "farms", currentUser.uid), {
       farmName: name,
-      tanks: newTanks,
+      tanks: [], // Start with empty tanks
       logs: {},
       cropBaseline: cropBaseline
     }, { merge: true });
@@ -1028,6 +1096,41 @@ async function saveSetup() {
     document.getElementById('loadingOverlay').style.display = 'none';
   }
 };
+
+function openPondModal() {
+  document.getElementById('newPondName').value = '';
+  document.getElementById('newPondSeed').value = '';
+  document.getElementById('newPondAcres').value = '';
+  document.getElementById('newPondDate').value = '';
+  document.getElementById('pondModal').classList.add('active');
+}
+
+async function savePond() {
+  const name = document.getElementById('newPondName').value;
+  const seed = parseInt(document.getElementById('newPondSeed').value);
+  const acres = parseFloat(document.getElementById('newPondAcres').value);
+  const date = document.getElementById('newPondDate').value;
+  
+  if(!name || !seed || !acres || !date) return alert("Fill all fields");
+  
+  const newPond = {
+    id: 'tank_' + Date.now(),
+    name, seedCount: seed, sizeAcres: acres, stockingDate: date
+  };
+  
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  try {
+    await updateDoc(doc(db, "farms", currentUser.uid), {
+      tanks: arrayUnion(newPond)
+    });
+    document.getElementById('pondModal').classList.remove('active');
+    await loadData(); // Reload to refresh UI
+  } catch(e) {
+    console.error(e);
+    alert("Error adding pond");
+    document.getElementById('loadingOverlay').style.display = 'none';
+  }
+}
 
 onAuthStateChanged(auth, async (user) => {
   console.log("Auth State Changed:", user ? "User: " + user.uid : "Logged Out");
@@ -1066,11 +1169,14 @@ function enterApp() {
   document.getElementById('workerNextFeed').classList.remove('hidden');
   document.getElementById('proofSection').classList.remove('hidden');
   document.getElementById('dangerSection').classList.remove('hidden');
-  document.getElementById('phBtn').classList.remove('hidden');
   document.getElementById('datePicker').disabled = false;
   
   renderTankBar();
-  renderRounds();
+  if(tanks.length > 0) {
+    renderRounds();
+  } else {
+    document.getElementById('rounds').innerHTML = '<div style="text-align:center;padding:40px;color:#888">No Ponds Found.<br>Click + on Home Screen to add one.</div>';
+  }
   if(farmData.farmName) {
     document.getElementById('feedFarmName').textContent = farmData.farmName;
     document.getElementById('homeFarmName').textContent = farmData.farmName;
@@ -1083,6 +1189,10 @@ function enterApp() {
 function renderTankBar(){
   const bar=document.getElementById('tankBar');
   bar.innerHTML='';
+  if(tanks.length === 0) {
+    bar.innerHTML = '<span style="padding:10px;color:#666;font-size:12px">No ponds yet.</span>';
+    return;
+  }
   tanks.forEach(t=>{
     const b=document.createElement('div');
     b.className='tank-btn'+(t.id===selectedTank?' active':'');
@@ -1094,6 +1204,7 @@ function renderTankBar(){
 function selectTank(id){
   selectedTank=id;
   const tank = tanks.find(t=>t.id===id);
+  if(!tank) return; // Safety check
   const doc = calculateDOC(tank.stockingDate);
   const acres = tank.sizeAcres || 1.0;
   const density = (tank.seedCount || 100000) / acres;
@@ -1118,15 +1229,12 @@ function selectTank(id){
   
   renderTankBar();
   renderRounds();
-  renderWaterQuality();
-}
-
-function renderWaterQuality() {
+  
+  // Check DO Alert
   const w = logs[selectedDate]?.[selectedTank]?.water || {};
-  document.getElementById('inputPH').value = w.ph || '';
-  document.getElementById('inputDO').value = w.do || '';
   checkDOAlert(w.do);
 }
+
 
 function checkDOAlert(val) {
   const alert = document.getElementById('doAlert');
@@ -1312,6 +1420,13 @@ async function feedAll(roundId) {
   alert(`Fed ${count} tanks.`);
 }
 
+function openWaterModal() {
+  const w = logs[selectedDate]?.[selectedTank]?.water || {};
+  document.getElementById('inputPH').value = w.ph || '';
+  document.getElementById('inputDO').value = w.do || '';
+  document.getElementById('waterModal').classList.add('active');
+}
+
 async function saveWaterQuality() {
   const ph = parseFloat(document.getElementById('inputPH').value);
   const doVal = parseFloat(document.getElementById('inputDO').value);
@@ -1322,6 +1437,7 @@ async function saveWaterQuality() {
   
   checkDOAlert(doVal);
   await save();
+  document.getElementById('waterModal').classList.remove('active');
 }
 
 async function triggerPartialHarvest() {
@@ -1341,6 +1457,133 @@ async function triggerPartialHarvest() {
   alert(`Partial harvest recorded.\nRemoved ~${Math.round(shrimpRemoved)} shrimp.\nNew Seed Count: ${Math.round(tank.seedCount)}`);
   selectTank(selectedTank);
   updateSavings();
+}
+
+/* EDIT / DELETE / END CROP */
+function openEditTankModal() {
+  const t = tanks.find(x => x.id === selectedTank);
+  if(!t) return;
+  document.getElementById('editTankName').value = t.name;
+  document.getElementById('editTankSeed').value = t.seedCount;
+  document.getElementById('editTankAcres').value = t.sizeAcres || 1.0;
+  document.getElementById('editTankDate').value = t.stockingDate;
+  document.getElementById('editTankModal').classList.add('active');
+}
+
+async function saveTankEdit() {
+  const name = document.getElementById('editTankName').value;
+  const seed = parseInt(document.getElementById('editTankSeed').value);
+  const acres = parseFloat(document.getElementById('editTankAcres').value);
+  const date = document.getElementById('editTankDate').value;
+  
+  if(!name || !seed || !acres || !date) return alert("Fill all fields");
+  
+  const tIndex = tanks.findIndex(x => x.id === selectedTank);
+  if(tIndex === -1) return;
+  
+  tanks[tIndex].name = name;
+  tanks[tIndex].seedCount = seed;
+  tanks[tIndex].sizeAcres = acres;
+  tanks[tIndex].stockingDate = date;
+  
+  await setDoc(doc(db, "farms", currentUser.uid), { tanks }, { merge: true });
+  document.getElementById('editTankModal').classList.remove('active');
+  selectTank(selectedTank); // Refresh UI
+}
+
+async function deleteTank() {
+  if(!confirm("Are you sure you want to DELETE this pond? This cannot be undone.")) return;
+  
+  const newTanks = tanks.filter(t => t.id !== selectedTank);
+  await setDoc(doc(db, "farms", currentUser.uid), { tanks: newTanks }, { merge: true });
+  
+  document.getElementById('editTankModal').classList.remove('active');
+  location.reload(); // Reload to reset state safely
+}
+
+function openEndCropModal() {
+  document.getElementById('endCropDate').value = selectedDate;
+  document.getElementById('endCropModal').classList.add('active');
+}
+
+async function saveEndCrop() {
+  const date = document.getElementById('endCropDate').value;
+  const kg = parseFloat(document.getElementById('endCropKg').value);
+  const abw = parseFloat(document.getElementById('endCropAbw').value);
+  const price = parseFloat(document.getElementById('endCropPrice').value);
+  
+  if(!date || isNaN(kg) || isNaN(abw) || isNaN(price)) return alert("Please fill all harvest details");
+  
+  if(!confirm("Confirm End Crop? This will remove the pond from active list.")) return;
+  
+  const tank = tanks.find(t => t.id === selectedTank);
+  const revenue = kg * price;
+  
+  const report = {
+    tankId: selectedTank,
+    tankName: tank.name,
+    harvestDate: date,
+    totalBiomassKg: kg,
+    abw: abw,
+    pricePerKg: price,
+    totalRevenue: revenue,
+    stockingDate: tank.stockingDate,
+    seedCount: tank.seedCount,
+    closedAt: new Date().toISOString()
+  };
+  
+  // Save Report & Remove Tank
+  await setDoc(doc(db, "farms", currentUser.uid, "cropHistory", selectedTank), report);
+  
+  const newTanks = tanks.filter(t => t.id !== selectedTank);
+  await setDoc(doc(db, "farms", currentUser.uid), { tanks: newTanks }, { merge: true });
+  
+  alert(`Crop Ended!\nRevenue: ₹${revenue.toLocaleString()}`);
+  location.reload();
+}
+
+/* HISTORY */
+async function loadHistory() {
+  if(!currentUser) return;
+  const list = document.getElementById('historyList');
+  list.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
+  
+  try {
+    const q = query(collection(db, "farms", currentUser.uid, "cropHistory"));
+    const snap = await getDocs(q);
+    
+    list.innerHTML = '';
+    if(snap.empty) {
+      list.innerHTML = '<div style="text-align:center;padding:40px;color:#888">No history found.</div>';
+      return;
+    }
+    
+    const reports = [];
+    snap.forEach(doc => reports.push(doc.data()));
+    reports.sort((a,b) => new Date(b.closedAt || b.harvestDate) - new Date(a.closedAt || a.harvestDate));
+    
+    reports.forEach(r => {
+      const div = document.createElement('div');
+      div.className = 'round-card';
+      div.style.marginBottom = '10px';
+      div.innerHTML = `
+        <div class="round-header">
+          <div class="round-title">${r.tankName}</div>
+          <div class="status green" style="font-weight:normal;font-size:11px">Ended: ${r.harvestDate}</div>
+        </div>
+        <div class="round-body">
+          <div class="row"><span>Biomass</span><strong>${r.totalBiomassKg} kg</strong></div>
+          <div class="row"><span>Revenue</span><strong style="color:var(--green)">₹${r.totalRevenue.toLocaleString()}</strong></div>
+          <div class="row"><span>ABW</span><strong>${r.abw} g</strong></div>
+          <div class="row"><span>Price</span><strong>₹${r.pricePerKg}</strong></div>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  } catch(e) {
+    console.error(e);
+    list.innerHTML = '<div style="color:red;text-align:center">Error loading history</div>';
+  }
 }
 
 /* TRAY MODAL */
@@ -1425,7 +1668,7 @@ async function loadData() {
       logs = farmData.logs || {};
       tanks = farmData.tanks || [];
       
-      if(tanks.length === 0) {
+      if(!farmData.farmName) {
         showScreen('setupScreen');
       } else {
         enterApp();
