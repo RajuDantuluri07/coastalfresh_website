@@ -69,6 +69,7 @@ body {
   border-radius: 50%;
   object-fit: cover;
   display: none;
+  border: 1px solid #fff;
 }
 
 /* ===== FARM SWITCH (HOME ONLY) ===== */
@@ -382,6 +383,10 @@ body {
   text-align: center;
   letter-spacing: 4px;
 }
+/* Chart Toggle */
+.chart-toggle { background:#eee; padding:4px; border-radius:8px; display:flex; gap:4px; }
+.chart-toggle button { border:none; padding:6px 12px; border-radius:6px; cursor:pointer; background:transparent; color:#666; font-size:12px; }
+.chart-toggle button.active { background:#fff; color:#0a7cff; font-weight:bold; box-shadow:0 1px 2px rgba(0,0,0,0.1); }
 /* Custom styles for specific inputs */
 #phoneInput {
   font-size: 18px;
@@ -405,6 +410,13 @@ body {
     <div id="recaptcha-container"></div>
     <input type="tel" id="phoneInput" class="input" placeholder="+91 98765 43210">
     <button class="btn" onclick="sendOTP()">Get OTP</button>
+    
+    <div style="margin: 20px 0; border-top: 1px solid #eee; position: relative;">
+      <span style="background: white; padding: 0 10px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); color: #999; font-size: 12px;">OR</span>
+    </div>
+    <button class="btn" style="background: white; color: #333; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; gap: 10px;" onclick="signInWithGoogle()">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Sign in with Google
+    </button>
   </div>
 </div>
 
@@ -476,6 +488,7 @@ body {
   <div class="actions">
     <span id="modeBadge" class="upgrade">MODE</span>
     <button class="upgrade" style="background:transparent;border:1px solid #fff;color:#fff" onclick="logout()">Logout</button>
+    <img id="userPic" class="user-pic" onclick="openProfileModal()" style="cursor:pointer">
     <span class="notif">🔔</span>
   </div>
 </div>
@@ -486,12 +499,12 @@ body {
   <!-- SUMMARY -->
   <div class="summary">
     <div class="card"><h4>Today's Savings</h4><p id="homeSavings" class="savings-highlight">₹0</p></div>
-    <div class="card"><h4>Total Feed</h4><p>12,450 kg</p></div>
-    <div class="card"><h4>FCR</h4><p>1.35</p></div>
-    <div class="card"><h4>Biomass</h4><p>8,200 kg</p></div>
-    <div class="card"><h4>Avg Tray</h4><p>🟡 Little Left</p></div>
-    <div class="card"><h4>Survival %</h4><p>82%</p></div>
-    <div class="card"><h4>DOC</h4><p>68</p></div>
+    <div class="card"><h4>Total Feed</h4><p id="homeTotalFeed">0 kg</p></div>
+    <div class="card"><h4>FCR</h4><p id="homeFCR">--</p></div>
+    <div class="card"><h4>Biomass</h4><p id="homeBiomass">-- kg</p></div>
+    <div class="card"><h4>Avg Tray</h4><p id="homeAvgTray">--</p></div>
+    <div class="card"><h4>Survival %</h4><p id="homeSurvival">--%</p></div>
+    <div class="card"><h4>DOC</h4><p id="homeDOC">--</p></div>
   </div>
 
   <!-- PROOF SECTION (OWNER ONLY) -->
@@ -540,7 +553,13 @@ body {
 
   <!-- CHART SECTION -->
   <div class="section">
-    <h3>📈 Feed Trend (Today)</h3>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h3>📈 Feed Trend</h3>
+      <div class="chart-toggle">
+        <button id="btnToday" onclick="setChartView('today')">Today</button>
+        <button id="btnWeek" class="active" onclick="setChartView('week')">Week</button>
+      </div>
+    </div>
     <canvas id="feedChart"></canvas>
   </div>
 
@@ -596,7 +615,7 @@ body {
       <div class="tray-option" onclick="selectTray('half', event)">
           <i class="fas fa-adjust"></i> 50% Eaten
       </div>
-      <div class="tray-option" onclick="selectTray('waste')">
+      <div class="tray-option" onclick="selectTray('waste', event)">
         <i class="fas fa-trash"></i> 50% Left
       </div>
       </div>
@@ -614,6 +633,20 @@ body {
   </div>
 </div>
 
+<!-- PROFILE MODAL -->
+<div class="modal" id="profileModal">
+  <div class="modal-box" style="text-align:center">
+    <h3>👤 User Profile</h3>
+    <img id="profilePicLarge" src="" style="width:80px;height:80px;border-radius:50%;margin:10px auto;display:none;border:2px solid #eee;object-fit:cover">
+    <p id="profileName" style="font-weight:bold;font-size:18px;margin-bottom:4px"></p>
+    <p id="profileContact" style="color:#666;margin-bottom:16px"></p>
+    <div style="background:#f5f5f5;padding:10px;border-radius:8px;font-size:12px;color:#888;word-break:break-all;margin-bottom:16px">
+      UID: <span id="profileUid"></span>
+    </div>
+    <button class="btn" style="background:#666" onclick="document.getElementById('profileModal').classList.remove('active')">Close</button>
+  </div>
+</div>
+
 <!-- ===== BOTTOM NAV ===== -->
 <div class="bottom-nav">
   <button onclick="switchTab('home',this)" class="active-tab">🏠 Home</button>
@@ -624,7 +657,7 @@ body {
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getAuth, signInWithPhoneNumber, RecaptchaVerifier, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInWithPhoneNumber, RecaptchaVerifier, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -640,6 +673,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+// Handle redirect result (catches errors after returning from Google)
+getRedirectResult(auth).catch((error) => {
+  console.error("Redirect Login Error:", error);
+  alert("Login failed: " + error.message);
+});
 
 function switchTab(id, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -672,12 +711,13 @@ let pinMode = "ENTER"; // 'SET' or 'ENTER'
 
 let currentRound=null;
 let feedChart=null;
+let chartView='week';
 let selectedTray=null;
 
 /* SMART ENGINE LOGIC */
-function calculateDOC(stockingDate) {
+function calculateDOC(stockingDate, dateStr) {
   const start = new Date(stockingDate);
-  const today = new Date(selectedDate);
+  const today = dateStr ? new Date(dateStr) : new Date(selectedDate);
   const diff = today - start;
   const doc = Math.floor(diff / (1000 * 60 * 60 * 24));
   return Math.max(doc, 1);
@@ -698,14 +738,15 @@ const FEED_TABLE = [
   { doc: 120, rate: 0.015 } // 1.5%
 ];
 
-function getBiomassFeed(tankId) {
-  if(farmData?.cropBaseline?.baselinePerRound) {
-    return farmData.cropBaseline.baselinePerRound / (tanks.length || 1);
-  }
+function getBiomassFeed(tankId, dateStr) {
+  // Removed static baseline override to allow dynamic updates after Partial Harvest
+  // if(farmData?.cropBaseline?.baselinePerRound) {
+  //   return farmData.cropBaseline.baselinePerRound / (tanks.length || 1);
+  // }
 
   const tank = tanks.find(t => t.id === tankId);
-  const doc = calculateDOC(tank.stockingDate);
-  const count = tank.seedCount || 100000; // Default if missing
+  const doc = calculateDOC(tank.stockingDate, dateStr);
+  const count = (tank.seedCount !== undefined && tank.seedCount !== null) ? tank.seedCount : 100000;
 
   // 1. Estimate ABW (Average Body Weight) - Linear approx for demo
   // DOC 15=1g, DOC 100=25g
@@ -773,18 +814,26 @@ window.saveTray = saveTray;
 window.selectDate = selectDate;
 window.sendOTP = sendOTP;
 window.verifyOTP = verifyOTP;
+window.signInWithGoogle = signInWithGoogle;
 window.selectMode = selectMode;
 window.addSetupTank = addSetupTank;
 window.saveSetup = saveSetup;
-window.logout = () => signOut(auth);
+window.logout = () => {
+  if(confirm("Are you sure you want to logout?")) {
+    signOut(auth);
+  }
+};
 window.initiatePinReset = initiatePinReset;
 window.resetFarm = resetFarm;
 window.triggerPartialHarvest = triggerPartialHarvest;
+window.setChartView = setChartView;
+window.openProfileModal = openProfileModal;
 
 /* ===== AUTH FLOW ===== */
 window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
   'size': 'normal'
 });
+window.recaptchaVerifier.render();
 
 async function sendOTP() {
   const phone = document.getElementById('phoneInput').value;
@@ -801,12 +850,45 @@ async function sendOTP() {
 
 async function verifyOTP() {
   const code = document.getElementById('otpInput').value;
+  if(!code) return alert("Enter OTP");
+  if(!confirmationResult) return alert("Please request OTP first");
+  
+  document.getElementById('loadingOverlay').style.display = 'flex';
   try {
     await confirmationResult.confirm(code);
     // onAuthStateChanged will handle the rest
   } catch (error) {
+    console.error(error);
+    document.getElementById('loadingOverlay').style.display = 'none';
     alert("Invalid OTP");
   }
+}
+
+async function signInWithGoogle() {
+  const provider = new GoogleAuthProvider();
+  try {
+    await signInWithRedirect(auth, provider);
+  } catch (error) {
+    console.error("Google Sign-In Error:", error);
+    alert("Google Sign-In failed: " + error.message);
+  }
+}
+
+function openProfileModal() {
+  if(!currentUser) return;
+  document.getElementById('profileModal').classList.add('active');
+  
+  const pic = document.getElementById('profilePicLarge');
+  if(currentUser.photoURL) {
+    pic.src = currentUser.photoURL;
+    pic.style.display = 'block';
+  } else {
+    pic.style.display = 'none';
+  }
+  
+  document.getElementById('profileName').textContent = currentUser.displayName || "Farm User";
+  document.getElementById('profileContact').textContent = currentUser.email || currentUser.phoneNumber || "No contact info";
+  document.getElementById('profileUid').textContent = currentUser.uid;
 }
 
 function showScreen(id) {
@@ -901,6 +983,7 @@ function addSetupTank() {
 }
 
 async function saveSetup() {
+  if (!currentUser) return alert("Session expired. Please login again.");
   const name = document.getElementById('setupFarmName').value;
   const prevFeed = parseFloat(document.getElementById('setupPrevFeed').value);
   const prevDays = parseInt(document.getElementById('setupPrevDays').value);
@@ -923,7 +1006,10 @@ async function saveSetup() {
       }
     });
 
-    if(!name || newTanks.length === 0 || !prevFeed || !prevDays) return alert("Fill all details including Previous Crop data");
+    if(!name || newTanks.length === 0 || isNaN(prevFeed) || !prevDays) {
+      document.getElementById('loadingOverlay').style.display = 'none';
+      return alert("Fill all details. Ensure every tank has a Name and Stocking Date.");
+    }
 
     const cropBaseline = {
       baselineFeedKg: prevFeed,
@@ -942,7 +1028,7 @@ async function saveSetup() {
       cropBaseline: cropBaseline
     }, { merge: true });
     
-    loadData(); // Reload to enter app, will hide overlay on success
+    await loadData(); // Reload to enter app, will hide overlay on success
   } catch (e) {
     console.error("Setup save error:", e);
     alert("Failed to save farm setup. Please try again.");
@@ -952,7 +1038,14 @@ async function saveSetup() {
 
 onAuthStateChanged(auth, async (user) => {
   currentUser = user;
+  const userPic = document.getElementById('userPic');
   if (user) {
+    if (user.photoURL) {
+      userPic.src = user.photoURL;
+      userPic.style.display = 'block';
+    } else if (userPic) {
+      userPic.style.display = 'none';
+    }
     const resetPhone = localStorage.getItem('pendingPinResetFor');
     if(resetPhone && user.phoneNumber === resetPhone) {
        // Clear PIN in DB to trigger "Set New PIN" flow
@@ -961,6 +1054,7 @@ onAuthStateChanged(auth, async (user) => {
     }
     loadData();
   } else {
+    if (userPic) userPic.style.display = 'none';
     showScreen('authScreen');
   }
 });
@@ -1125,12 +1219,7 @@ function feed(round, recAmount){
   logs[selectedDate][selectedTank]??={};
   
   // 1. Get Baseline (Scientific Standard)
-  const cropBaseline = farmData.cropBaseline;
-  if (!cropBaseline) {
-    alert("Baseline not set. Contact owner.");
-    return;
-  }
-  const baseline = cropBaseline.baselinePerRound / (tanks.length || 1);
+  const baseline = getBiomassFeed(selectedTank);
   
   // 2. Calculate Savings vs Baseline
   const savedKg = Math.max(0, baseline - amt);
@@ -1159,11 +1248,13 @@ async function triggerPartialHarvest() {
   if (!tank) return;
 
   const shrimpRemoved = (parseFloat(kg) * 1000) / parseFloat(abw);
-  tank.seedCount = Math.max(0, (tank.seedCount || 100000) - shrimpRemoved);
+  const currentCount = (tank.seedCount !== undefined && tank.seedCount !== null) ? tank.seedCount : 100000;
+  tank.seedCount = Math.max(0, currentCount - shrimpRemoved);
   
   await setDoc(doc(db, "farms", currentUser.uid), { tanks }, { merge: true });
   alert(`Partial harvest recorded.\nRemoved ~${Math.round(shrimpRemoved)} shrimp.\nNew Seed Count: ${Math.round(tank.seedCount)}`);
   selectTank(selectedTank);
+  updateSavings();
 }
 
 /* TRAY MODAL */
@@ -1244,6 +1335,10 @@ async function loadData() {
       }
       if(tanks.length > 0) selectedTank = tanks[0].id;
       updateSavings();
+    } else {
+      // New user flow
+      farmData = { logs: {}, tanks: [] };
+      showScreen('setupScreen');
     }
   } catch(e) {
     console.error("Load error:", e);
@@ -1252,32 +1347,74 @@ async function loadData() {
   }
 }
 
+function setChartView(view) {
+  chartView = view;
+  document.getElementById('btnToday').classList.toggle('active', view === 'today');
+  document.getElementById('btnWeek').classList.toggle('active', view === 'week');
+  renderChart();
+}
+
 function renderChart() {
   const ctx = document.getElementById('feedChart');
   if(!ctx) return;
 
-  // Aggregate feed per round across all tanks
-  const dataPoints = rounds.map(r => {
-    let total = 0;
-    tanks.forEach(t => {
-      const l = logs[selectedDate]?.[t.id]?.[r.id];
-      if(l) total += parseFloat(l.feed_actual || l.feed || 0);
-    });
-    return total;
-  });
+  let labels = [];
+  let dataPoints = [];
+  let baselinePoints = [];
+  let labelText = '';
 
-  // Calculate Baseline points
-  const baselinePoints = rounds.map(r => {
-    let total = 0;
-    tanks.forEach(t => {
-      total += getBiomassFeed(t.id);
+  if(chartView === 'week') {
+    labelText = 'Daily Actual (kg)';
+    for(let i=6; i>=0; i--) {
+      const d = new Date(selectedDate);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      
+      labels.push(d.toLocaleDateString('en-GB', {day:'numeric', month:'short'}));
+
+      // 1. Daily Actual
+      let dayActual = 0;
+      tanks.forEach(t => {
+        const dayLogs = logs[dateStr]?.[t.id];
+        if(dayLogs) {
+          Object.values(dayLogs).forEach(l => {
+             dayActual += parseFloat(l.feed_actual || l.feed || 0);
+          });
+        }
+      });
+      dataPoints.push(dayActual);
+
+      // 2. Daily Baseline (Sum of all tanks)
+      let dayBaseline = 0;
+      tanks.forEach(t => {
+        dayBaseline += (getBiomassFeed(t.id, dateStr) * 4);
+      });
+      baselinePoints.push(dayBaseline);
+    }
+  } else {
+    // Today View
+    labelText = 'Round Actual (kg)';
+    labels = rounds.map(r => r.name);
+    
+    rounds.forEach(r => {
+      let roundActual = 0;
+      let roundBaseline = 0;
+      tanks.forEach(t => {
+        const l = logs[selectedDate]?.[t.id]?.[r.id];
+        if(l) roundActual += parseFloat(l.feed_actual || l.feed || 0);
+        roundBaseline += getBiomassFeed(t.id, selectedDate);
+      });
+      dataPoints.push(roundActual);
+      baselinePoints.push(roundBaseline);
     });
-    return total;
-  });
+  }
 
   if(feedChart) {
+    feedChart.data.labels = labels;
+    feedChart.data.datasets[0].label = labelText;
     feedChart.data.datasets[0].data = dataPoints;
     if(feedChart.data.datasets[1]) {
+      feedChart.data.datasets[1].label = chartView === 'week' ? 'Daily Baseline (kg)' : 'Round Baseline (kg)';
       feedChart.data.datasets[1].data = baselinePoints;
     }
     feedChart.update();
@@ -1285,9 +1422,9 @@ function renderChart() {
     feedChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: rounds.map(r => r.name),
+        labels: labels,
         datasets: [{
-          label: 'Actual Feed (kg)',
+          label: labelText,
           data: dataPoints,
           borderColor: '#0a7cff',
           backgroundColor: 'rgba(10, 124, 255, 0.1)',
@@ -1295,7 +1432,7 @@ function renderChart() {
           tension: 0.4
         },
         {
-          label: 'Baseline (kg)',
+          label: 'Daily Baseline (kg)',
           data: baselinePoints,
           borderColor: '#9E9E9E',
           borderDash: [5, 5],
@@ -1318,6 +1455,7 @@ function updateSavings(){
   let cropBaseline = 0;
   let cropActual = 0;
   let cropSaved = 0;
+  let trayCounts = {};
 
   // Iterate ALL logs for Proof
   Object.keys(logs).forEach(date => {
@@ -1327,16 +1465,20 @@ function updateSavings(){
         const actual = parseFloat(l.feed_actual || l.feed || 0);
         // If old data has no baseline, assume baseline = actual (no savings)
         let baseline = parseFloat(l.feed_baseline || actual);
-        if(farmData?.cropBaseline?.baselinePerRound) {
-          baseline = farmData.cropBaseline.baselinePerRound / (tanks.length || 1);
-        }
+        // Removed static override to respect dynamic baseline from logs
+        // if(farmData?.cropBaseline?.baselinePerRound) {
+        //   baseline = farmData.cropBaseline.baselinePerRound / (tanks.length || 1);
+        // }
         const saved = Math.max(0, baseline - actual);
 
         cropBaseline += baseline;
         cropActual += actual;
         cropSaved += saved;
 
-        if(isToday) todaySaved += saved;
+        if(isToday) {
+          todaySaved += saved;
+          if(l.tray) trayCounts[l.tray] = (trayCounts[l.tray] || 0) + 1;
+        }
       });
     });
   });
@@ -1345,10 +1487,58 @@ function updateSavings(){
   // Update UI
   document.getElementById('homeSavings').textContent = '₹ ' + Math.round(todaySaved * price).toLocaleString();
   
+  // Update Avg Tray
+  let maxTray = null;
+  let maxCount = 0;
+  Object.entries(trayCounts).forEach(([k,v]) => {
+    if(v > maxCount) { maxCount = v; maxTray = k; }
+  });
+  const trayLabels = {
+    'empty': '🟢 Clean',
+    'little': '🟡 Little Left',
+    'half': '🟠 Half Left',
+    'waste': '🔴 Excessive'
+  };
+  document.getElementById('homeAvgTray').textContent = maxTray ? trayLabels[maxTray] : "--";
+
+  document.getElementById('homeTotalFeed').textContent = Math.round(cropActual).toLocaleString() + ' kg';
+  
   document.getElementById('proofBaseline').textContent = Math.round(cropBaseline).toLocaleString() + ' kg';
   document.getElementById('proofActual').textContent = Math.round(cropActual).toLocaleString() + ' kg';
   document.getElementById('proofReduced').textContent = Math.round(cropSaved).toLocaleString() + ' kg';
   document.getElementById('proofSavedMoney').textContent = '₹ ' + Math.round(cropSaved * price).toLocaleString();
+
+  // Calculate Real-time Biomass & FCR
+  let currentBiomass = 0;
+  let totalStartCount = 0;
+  let totalCurrentCount = 0;
+  let maxDoc = 0;
+  const now = new Date();
+  tanks.forEach(t => {
+    // Calculate DOC based on TODAY, not selectedDate
+    const start = new Date(t.stockingDate);
+    const diff = now - start;
+    const doc = Math.max(Math.floor(diff / (1000 * 60 * 60 * 24)), 1);
+    if(doc > maxDoc) maxDoc = doc;
+    
+    const count = (t.seedCount !== undefined && t.seedCount !== null) ? t.seedCount : 100000;
+    
+    // ABW & Survival (Same logic as getBiomassFeed)
+    let abw = 1.0;
+    if(doc > 15) abw = 1.0 + ((doc - 15) * 0.28);
+    const survival = 0.98 - ((doc/100) * 0.18);
+    
+    currentBiomass += (count * survival * abw) / 1000;
+    totalStartCount += count;
+    totalCurrentCount += count * survival;
+  });
+
+  const fcr = currentBiomass > 0 ? (cropActual / currentBiomass).toFixed(2) : "0.00";
+  document.getElementById('homeFCR').textContent = fcr;
+  document.getElementById('homeBiomass').textContent = Math.round(currentBiomass).toLocaleString() + " kg";
+  const avgSurvival = totalStartCount > 0 ? ((totalCurrentCount / totalStartCount) * 100).toFixed(1) : "--";
+  document.getElementById('homeSurvival').textContent = avgSurvival + "%";
+  document.getElementById('homeDOC').textContent = maxDoc;
 
   const method = farmData?.cropBaseline?.proofMethod === 'previous_crop' ? 'Previous Crop Comparison' : 'Standard Growth Model';
   document.getElementById('proofMethod').textContent = method;
@@ -1402,7 +1592,7 @@ function renderHarvestPrediction() {
     // Survival Formula: 0.98 - ((100/100) * 0.18) = 0.80
     const survival = 0.80;
     
-    const count = t.seedCount || 100000;
+    const count = (t.seedCount !== undefined && t.seedCount !== null) ? t.seedCount : 100000;
     totalBiomass += (count * survival * abw) / 1000;
   });
 
