@@ -3,7 +3,22 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Match the farms collection where the document ID is the userId
     match /farms/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, delete: if request.auth != null && request.auth.uid == userId;
+      
+      // Create: Allow if authenticated owner
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // Update: Allow if owner + validations
+      allow update: if request.auth != null && request.auth.uid == userId
+                    // 1. Prevent changing farmName (Immutable)
+                    && (!('farmName' in resource.data) || request.resource.data.farmName == resource.data.farmName)
+                    // 2. Validate 'feed' is non-negative number (if present)
+                    && (!('feed' in request.resource.data) || (request.resource.data.feed is number && request.resource.data.feed >= 0));
+      
+      // Explicitly allow access to subcollections (like 'reports')
+      match /{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
   }
 }

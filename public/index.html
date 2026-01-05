@@ -415,7 +415,7 @@ body {
       <span style="background: white; padding: 0 10px; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); color: #999; font-size: 12px;">OR</span>
     </div>
     <button class="btn" style="background: white; color: #333; border: 1px solid #ccc; display: flex; align-items: center; justify-content: center; gap: 10px;" onclick="signInWithGoogle()">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18"> Sign in with Google
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18" alt="Google logo" title="Sign in with Google"> Sign in with Google
     </button>
   </div>
 </div>
@@ -677,6 +677,15 @@ const auth = getAuth(app);
 // 1. Check for pending redirect flag on load to show spinner
 if (sessionStorage.getItem('authRedirecting')) {
   document.getElementById('loadingOverlay').style.display = 'flex';
+  // SAFETY: If redirect takes >10s, force reset so user isn't stuck
+  setTimeout(() => {
+    if (sessionStorage.getItem('authRedirecting')) {
+      sessionStorage.removeItem('authRedirecting');
+      document.getElementById('loadingOverlay').style.display = 'none';
+      showScreen('authScreen');
+      console.warn("Login timed out. Please try again.");
+    }
+  }, 10000);
 }
 
 // Handle redirect result (catches errors after returning from Google)
@@ -849,15 +858,18 @@ window.setChartView = setChartView;
 window.openProfileModal = openProfileModal;
 
 /* ===== AUTH FLOW ===== */
-window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-  'size': 'normal'
-});
-window.recaptchaVerifier.render();
 
 async function sendOTP() {
   let phone = document.getElementById('phoneInput').value.trim();
   if(!phone) return alert("Enter phone number");
   
+  // Initialize reCAPTCHA here to ensure DOM is ready
+  if (!window.recaptchaVerifier) {
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      'size': 'invisible'
+    });
+  }
+
   // Fix: Auto-add +91 if user forgets country code
   if(!phone.startsWith('+')) {
     phone = '+91' + phone;
@@ -872,8 +884,10 @@ async function sendOTP() {
     console.error(error);
     document.getElementById('loadingOverlay').style.display = 'none';
     alert("SMS failed: " + error.message);
-    // Reset ReCaptcha on failure so user can try again
-    window.location.reload(); 
+    // Reset ReCaptcha so user can try again without reloading
+    if(window.grecaptcha && window.recaptchaVerifier) {
+      window.recaptchaVerifier.render().then(id => window.grecaptcha.reset(id));
+    }
   }
 }
 
@@ -889,7 +903,7 @@ async function verifyOTP() {
   } catch (error) {
     console.error(error);
     document.getElementById('loadingOverlay').style.display = 'none';
-    alert("Invalid OTP");
+    alert("Verification failed: " + error.message);
   }
 }
 
@@ -1070,6 +1084,7 @@ async function saveSetup() {
 };
 
 onAuthStateChanged(auth, async (user) => {
+  console.log("Auth State Changed:", user ? "User: " + user.uid : "Logged Out");
   currentUser = user;
   const userPic = document.getElementById('userPic');
   if (user) {
@@ -1083,6 +1098,7 @@ onAuthStateChanged(auth, async (user) => {
     const resetPhone = localStorage.getItem('pendingPinResetFor');
     if(resetPhone && user.phoneNumber === resetPhone) {
        // Clear PIN in DB to trigger "Set New PIN" flow
+       console.log("Resetting PIN...");
        await setDoc(doc(db, "farms", user.uid), { pin: "" }, { merge: true });
        localStorage.removeItem('pendingPinResetFor');
     }
@@ -1357,9 +1373,21 @@ async function resetFarm() {
 
 async function loadData() {
   if (!currentUser) return;
+  console.log("Starting loadData...");
   document.getElementById('loadingOverlay').style.display = 'flex';
   try {
-    const snap = await getDoc(doc(db, "farms", currentUser.uid));
+    // Add 15s timeout to prevent infinite loading
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error("Connection timed out. Check internet.")), 15000)
+    );
+    
+    console.log("Fetching farm data...");
+    const snap = await Promise.race([
+      getDoc(doc(db, "farms", currentUser.uid)),
+      timeoutPromise
+    ]);
+    
+    console.log("Data fetched. Exists:", snap.exists());
     if(snap.exists()) {
       farmData = snap.data();
       logs = farmData.logs || {};
@@ -1379,8 +1407,13 @@ async function loadData() {
     }
   } catch(e) {
     console.error("Load error:", e);
-    alert("Error loading data: " + e.message);
+    if (e.code === 'permission-denied') {
+      alert("⚠️ Access Denied: Firestore Security Rules are blocking this request.\n\nCheck your rules in Firebase Console.");
+    } else {
+      alert("Error loading data: " + e.message);
+    }
   } finally {
+    console.log("loadData finished.");
     document.getElementById('loadingOverlay').style.display = 'none';
   }
 }
