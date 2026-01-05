@@ -674,10 +674,29 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// 1. Check for pending redirect flag on load to show spinner
+if (sessionStorage.getItem('authRedirecting')) {
+  document.getElementById('loadingOverlay').style.display = 'flex';
+}
+
 // Handle redirect result (catches errors after returning from Google)
-getRedirectResult(auth).catch((error) => {
+getRedirectResult(auth).then((result) => {
+  if (result) {
+    sessionStorage.removeItem('authRedirecting');
+    // onAuthStateChanged will handle the rest
+  }
+  // If no result but flag exists, it means redirect finished without login (or wasn't a redirect)
+  else if (sessionStorage.getItem('authRedirecting')) {
+    sessionStorage.removeItem('authRedirecting');
+    document.getElementById('loadingOverlay').style.display = 'none';
+    showScreen('authScreen');
+  }
+}).catch((error) => {
+  sessionStorage.removeItem('authRedirecting');
+  document.getElementById('loadingOverlay').style.display = 'none';
   console.error("Redirect Login Error:", error);
   alert("Login failed: " + error.message);
+  showScreen('authScreen');
 });
 
 function switchTab(id, btn) {
@@ -836,15 +855,25 @@ window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
 window.recaptchaVerifier.render();
 
 async function sendOTP() {
-  const phone = document.getElementById('phoneInput').value;
+  let phone = document.getElementById('phoneInput').value.trim();
   if(!phone) return alert("Enter phone number");
   
+  // Fix: Auto-add +91 if user forgets country code
+  if(!phone.startsWith('+')) {
+    phone = '+91' + phone;
+  }
+
+  document.getElementById('loadingOverlay').style.display = 'flex';
   try {
     confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+    document.getElementById('loadingOverlay').style.display = 'none';
     showScreen('otpScreen');
   } catch (error) {
     console.error(error);
+    document.getElementById('loadingOverlay').style.display = 'none';
     alert("SMS failed: " + error.message);
+    // Reset ReCaptcha on failure so user can try again
+    window.location.reload(); 
   }
 }
 
@@ -865,10 +894,14 @@ async function verifyOTP() {
 }
 
 async function signInWithGoogle() {
+  document.getElementById('loadingOverlay').style.display = 'flex';
+  sessionStorage.setItem('authRedirecting', 'true');
   const provider = new GoogleAuthProvider();
   try {
     await signInWithRedirect(auth, provider);
   } catch (error) {
+    sessionStorage.removeItem('authRedirecting');
+    document.getElementById('loadingOverlay').style.display = 'none';
     console.error("Google Sign-In Error:", error);
     alert("Google Sign-In failed: " + error.message);
   }
@@ -1040,6 +1073,7 @@ onAuthStateChanged(auth, async (user) => {
   currentUser = user;
   const userPic = document.getElementById('userPic');
   if (user) {
+    sessionStorage.removeItem('authRedirecting'); // Clear flag on success
     if (user.photoURL) {
       userPic.src = user.photoURL;
       userPic.style.display = 'block';
@@ -1054,6 +1088,9 @@ onAuthStateChanged(auth, async (user) => {
     }
     loadData();
   } else {
+    // If waiting for redirect, don't show auth screen yet (prevent flicker)
+    if (sessionStorage.getItem('authRedirecting')) return;
+    
     if (userPic) userPic.style.display = 'none';
     showScreen('authScreen');
   }
@@ -1342,6 +1379,7 @@ async function loadData() {
     }
   } catch(e) {
     console.error("Load error:", e);
+    alert("Error loading data: " + e.message);
   } finally {
     document.getElementById('loadingOverlay').style.display = 'none';
   }
