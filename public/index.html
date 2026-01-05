@@ -1,362 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AquaBook Pro</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AquaBook Pro – Dashboard</title>
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="stylesheet" href="style.css" />
+<style>
+/* ===== RESET ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, sans-serif;
+}
+body {
+  background: #f4f6f8;
+  padding-bottom: 70px;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: #0a7cff;
+  color: #fff;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header .logo {
+  font-size: 18px;
+  font-weight: bold;
+}
+.header .actions {
+  display: flex;
+  gap: 10px;
+}
+.upgrade {
+  background: gold;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: bold;
+}
+.notif {
+  font-size: 20px;
+}
+
+/* ===== FARM SWITCH (HOME ONLY) ===== */
+.farm-switch {
+  padding: 12px;
+  display: flex;
+  gap: 10px;
+}
+.farm-switch select,
+.farm-switch button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* ===== TABS ===== */
+.tab {
+  display: none;
+  padding: 12px;
+}
+.tab.active {
+  display: block;
+}
+
+/* ===== SUMMARY GRID ===== */
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.card {
+  background: white;
+  padding: 14px;
+  border-radius: 10px;
+  text-align: center;
+}
+.card h4 {
+  font-size: 13px;
+  color: #666;
+}
+.card p {
+  font-size: 16px;
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+/* ===== SECTION ===== */
+.section {
+  background: white;
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 10px;
+}
+.section h3 {
+  margin-bottom: 10px;
+}
+
+/* ===== INPUTS ===== */
+.input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  background: #0a7cff;
+  color: white;
+  border-radius: 8px;
+  margin-top: 6px;
+}
+
+/* ===== TRAY BUTTONS ===== */
+.tray {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.tray button {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+}
+.empty { background: #4caf50; color: white; }
+.little { background: #ffc107; }
+.half { background: #ff9800; color: white; }
+.too { background: #f44336; color: white; }
+
+/* ===== FEED LOG ===== */
+.log {
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+  padding: 6px 0;
+}
+
+/* ===== BOTTOM NAV ===== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  display: flex;
+  border-top: 1px solid #ddd;
+}
+.bottom-nav button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: none;
+  font-size: 14px;
+}
+.active-tab {
+  color: #0a7cff;
+  font-weight: bold;
+}
+</style>
 </head>
+
 <body>
 
-  <!-- LOGIN VIEW -->
-  <div id="login-view" class="app">
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <div class="logo">🦐 AquaBook</div>
+  <div class="actions">
+    <button class="upgrade">Upgrade</button>
+    <span class="notif">🔔</span>
+  </div>
+</div>
 
-    <!-- HEADER -->
-    <header class="header">
-      <h1>AquaBook Pro</h1>
-      <p>Simple farm records for shrimp farmers</p>
-    </header>
+<!-- ===== HOME TAB ===== -->
+<div id="home" class="tab active">
 
-    <!-- MAIN CONTENT -->
-    <main class="main">
-
-      <!-- LOGIN CARD -->
-      <div id="loginBox" class="card">
-
-        <h2 style="margin-bottom: 16px; text-align:center;">Login</h2>
-
-        <!-- PHONE INPUT -->
-        <input
-          type="tel"
-          id="phone"
-          class="input"
-          placeholder="+91XXXXXXXXXX"
-        />
-
-        <!-- RECAPTCHA -->
-        <div id="recaptcha-container" style="margin-bottom:12px;"></div>
-
-        <!-- SEND OTP -->
-        <button id="sendOtpBtn" class="primary-btn">
-          Send OTP
-        </button>
-
-        <!-- OTP SECTION -->
-        <div id="otpSection" style="display:none;">
-          <input
-            type="text"
-            id="otp"
-            class="input"
-            placeholder="Enter OTP"
-          />
-
-          <button id="verifyOtpBtn" class="primary-btn">
-            Verify OTP
-          </button>
-        </div>
-
-      </div>
-
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="footer">
-      <small>© 2026 AquaBook</small>
-    </footer>
-
+  <!-- FARM SWITCH (ONLY HERE) -->
+  <div class="farm-switch">
+    <select>
+      <option>Raju Farm – Unit A</option>
+      <option disabled>More farms (Pro)</option>
+    </select>
+    <button>+ Add Farm</button>
   </div>
 
-  <!-- DASHBOARD VIEW (Hidden by default) -->
-  <div id="dashboard-view" style="display:none;">
-    
-    <!-- Header -->
-    <header class="app-header">
-        <div class="header-content">
-            <h1 style="font-size: 18px; font-weight: 700;">
-                <i class="fas fa-fish"></i> AquaBook
-            </h1>
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div class="current-date" id="currentDate"></div>
-                <button id="logoutBtn" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
-            </div>
-        </div>
-    </header>
-
-    <!-- Navigation -->
-    <nav class="nav-tabs">
-        <button class="nav-btn active" data-screen="home">
-            <i class="fas fa-home"></i>
-            <span>Dashboard</span>
-        </button>
-        <button class="nav-btn" data-screen="log">
-            <i class="fas fa-book"></i>
-            <span>Log Book</span>
-        </button>
-    </nav>
-
-    <!-- Screens -->
-    <main>
-        <!-- Home Screen -->
-        <section id="homeScreen" class="screen active">
-            <div class="screen-header">
-                <h2 class="screen-title">
-                    <i class="fas fa-chart-pie"></i>
-                    Farm Overview
-                </h2>
-            </div>
-
-            <!-- FCR Display -->
-            <div class="fcr-display">
-                <div class="fcr-value" id="fcrValue">0.00</div>
-                <div class="fcr-label">Current Feed Conversion Ratio</div>
-                <div style="font-size: 12px; color: var(--gray); margin-top: 8px;">
-                    Target: 1.2 • Lower is better
-                </div>
-            </div>
-
-            <!-- Smart Recommendation -->
-            <div class="recommendation-card" id="recommendationCard">
-                <div class="recommendation-header">
-                    <i class="fas fa-lightbulb"></i>
-                    <h4>Smart Recommendation</h4>
-                </div>
-                <div class="recommendation-text" id="recommendationText">
-                    Start logging feed to get recommendations
-                </div>
-                <div class="recommendation-action" id="recommendationAction">
-                    Add your first feed entry
-                </div>
-            </div>
-
-            <!-- Overall Stats -->
-            <div class="overall-stats">
-                <div class="stat-card">
-                    <div class="stat-value" id="totalFeed">0</div>
-                    <div class="stat-label">Total Feed (kg)</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="avgFCR">0.00</div>
-                    <div class="stat-label">Avg FCR</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="feedToday">0</div>
-                    <div class="stat-label">Feed Today (kg)</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="feedWaste">0%</div>
-                    <div class="stat-label">Feed Waste</div>
-                </div>
-            </div>
-
-            <!-- Tanks List -->
-            <div class="screen-header" style="margin-top: 24px;">
-                <h2 class="screen-title">
-                    <i class="fas fa-water"></i>
-                    Your Tanks
-                </h2>
-                <button class="btn btn-primary btn-sm" onclick="app.openTankModal()" style="padding: 8px 12px;">
-                    <i class="fas fa-plus"></i> Add Tank
-                </button>
-            </div>
-
-            <div class="tanks-grid" id="tanksList">
-                <!-- Tanks will be loaded here -->
-            </div>
-        </section>
-
-        <!-- Log Book Screen -->
-        <section id="logScreen" class="screen">
-            <div class="screen-header">
-                <h2 class="screen-title">
-                    <i class="fas fa-history"></i>
-                    Feed Log Book
-                </h2>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="log-actions">
-                <div class="log-btn" onclick="app.openLogFeedModal()">
-                    <i class="fas fa-utensils"></i>
-                    <span>Log Feed</span>
-                    <small style="color: var(--gray); font-size: 11px;">Morning/Evening rounds</small>
-                </div>
-                <div class="log-btn" onclick="app.openTrayCheckModal()">
-                    <i class="fas fa-search"></i>
-                    <span>Check Trays</span>
-                    <small style="color: var(--gray); font-size: 11px;">Empty/Little/Half/Too Much</small>
-                </div>
-            </div>
-
-            <!-- Today's Log -->
-            <h3 style="font-size: 16px; margin-bottom: 12px; color: var(--dark);">
-                <i class="fas fa-calendar-day"></i> Today's Feed Log
-            </h3>
-
-            <div class="log-table-container" id="todayLogTable">
-                <div class="log-row log-header">
-                    <div>Time</div>
-                    <div>Tank</div>
-                    <div>Amount</div>
-                    <div>Tray Result</div>
-                </div>
-                <div id="todayLogRows">
-                    <!-- Today's entries will be loaded here -->
-                </div>
-            </div>
-
-            <!-- Recent Log -->
-            <h3 style="font-size: 16px; margin: 24px 0 12px; color: var(--dark);">
-                <i class="fas fa-history"></i> Recent History
-            </h3>
-
-            <div class="log-table-container" id="recentLogTable">
-                <div class="log-row log-header">
-                    <div>Date</div>
-                    <div>Tank</div>
-                    <div>Amount</div>
-                    <div>Result</div>
-                </div>
-                <div id="recentLogRows">
-                    <!-- Recent entries will be loaded here -->
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- Modals -->
-    <!-- Add Tank Modal -->
-    <div class="modal-overlay" id="tankModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-plus-circle"></i> Add New Tank</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Tank Name</label>
-                    <input type="text" id="tankName" class="form-control" placeholder="e.g., Pond A">
-                </div>
-                <div class="form-group">
-                    <label>Tank Size (acres)</label>
-                    <input type="number" id="tankSize" class="form-control" placeholder="e.g., 1.5" step="0.1" min="0.1">
-                </div>
-                <div class="form-group">
-                    <label>Initial Stocking Count</label>
-                    <input type="number" id="tankStock" class="form-control" placeholder="e.g., 30000">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="app.saveTank()">Save Tank</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Log Feed Modal -->
-    <div class="modal-overlay" id="logFeedModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-utensils"></i> Log Feed</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Select Tank</label>
-                    <select id="feedTankSelect" class="form-control">
-                        <!-- Options will be loaded -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Feed Round</label>
-                    <select id="feedRound" class="form-control">
-                        <option value="morning">Morning</option>
-                        <option value="afternoon">Afternoon</option>
-                        <option value="evening">Evening</option>
-                        <option value="night">Night</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Feed Amount (kg)</label>
-                    <input type="number" id="feedAmount" class="form-control" placeholder="e.g., 10.5" step="0.1" min="0">
-                </div>
-                <div class="form-group">
-                    <label>Feed Type</label>
-                    <select id="feedType" class="form-control">
-                        <option value="pellet_1.2">Pellet 1.2mm</option>
-                        <option value="pellet_1.5">Pellet 1.5mm</option>
-                        <option value="pellet_2.0">Pellet 2.0mm</option>
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" onclick="app.saveFeedEntry()">Save Feed Entry</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tray Check Modal -->
-    <div class="modal-overlay" id="trayCheckModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-search"></i> Check Feed Tray</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Select Feed Entry to Check</label>
-                    <select id="checkEntrySelect" class="form-control">
-                        <!-- Options will be loaded -->
-                    </select>
-                </div>
-                
-                <div style="margin-bottom: 16px; font-size: 14px; color: var(--dark);">
-                    <strong>How much feed remains in the check tray?</strong>
-                </div>
-                
-                <div class="tray-options">
-                    <div class="tray-option" data-value="empty" onclick="app.selectTrayStatus('empty', this)">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Empty</span>
-                        <small>Perfect consumption</small>
-                    </div>
-                    <div class="tray-option" data-value="little" onclick="app.selectTrayStatus('little', this)">
-                        <i class="fas fa-thumbs-up"></i>
-                        <span>Little Left</span>
-                        <small>Good feeding</small>
-                    </div>
-                    <div class="tray-option" data-value="half" onclick="app.selectTrayStatus('half', this)">
-                        <i class="fas fa-adjust"></i>
-                        <span>Half Full</span>
-                        <small>Reduce feed</small>
-                    </div>
-                    <div class="tray-option" data-value="too-much" onclick="app.selectTrayStatus('too-much', this)">
-                        <i class="fas fa-times-circle"></i>
-                        <span>Too Much</span>
-                        <small>Serious waste</small>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Observations (Optional)</label>
-                    <textarea id="trayNotes" class="form-control" placeholder="e.g., Shrimp active, water clear..." rows="2"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" onclick="app.saveTrayCheck()">Save Tray Result</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div class="toast" id="toast">
-        <span id="toastMessage">Operation completed!</span>
-    </div>
-
+  <!-- SUMMARY -->
+  <div class="summary">
+    <div class="card"><h4>Total Feed</h4><p>12,450 kg</p></div>
+    <div class="card"><h4>FCR</h4><p>1.35</p></div>
+    <div class="card"><h4>Biomass</h4><p>8,200 kg</p></div>
+    <div class="card"><h4>Avg Tray</h4><p>🟡 Little Left</p></div>
+    <div class="card"><h4>Survival %</h4><p>82%</p></div>
+    <div class="card"><h4>DOC</h4><p>68</p></div>
   </div>
 
-  <!-- APP LOGIC -->
-  <script type="module" src="app.js"></script>
+</div>
+
+<!-- ===== LOG FEED TAB ===== -->
+<div id="feed" class="tab">
+
+  <!-- LOG FEED -->
+  <div class="section">
+    <h3>➕ Log Feed</h3>
+    <select class="input">
+      <option>Morning</option>
+      <option>Afternoon</option>
+      <option>Evening</option>
+      <option>Night</option>
+    </select>
+    <input class="input" type="number" placeholder="Feed in kg" />
+    <button class="btn">Save Feed</button>
+  </div>
+
+  <!-- FEED CHECKS -->
+  <div class="section">
+    <h3>📋 Tray Check</h3>
+    <div class="tray">
+      <button class="empty">Empty</button>
+      <button class="little">Little Left</button>
+      <button class="half">Half</button>
+      <button class="too">Too Much</button>
+    </div>
+  </div>
+
+  <!-- FEED LOG -->
+  <div class="section">
+    <h3>📊 Feed Log</h3>
+    <div class="log">Morning – 25 kg – 🟡 Little Left</div>
+    <div class="log">Evening – 30 kg – 🟢 Empty</div>
+  </div>
+
+</div>
+
+<!-- ===== WATER TAB ===== -->
+<div id="water" class="tab">
+  <div class="section">
+    <h3>💧 Water Quality</h3>
+    <p>pH, DO, Salinity (next step)</p>
+  </div>
+</div>
+
+<!-- ===== PRICES TAB ===== -->
+<div id="prices" class="tab">
+  <div class="section">
+    <h3>₹ Market Prices</h3>
+    <p>Daily shrimp prices (next step)</p>
+  </div>
+</div>
+
+<!-- ===== BOTTOM NAV ===== -->
+<div class="bottom-nav">
+  <button onclick="switchTab('home',this)" class="active-tab">🏠 Home</button>
+  <button onclick="switchTab('feed',this)">🦐 Log Feed</button>
+  <button onclick="switchTab('water',this)">💧 Water</button>
+  <button onclick="switchTab('prices',this)">₹ Prices</button>
+</div>
+
+<script>
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+
+  document.querySelectorAll('.bottom-nav button').forEach(b => b.classList.remove('active-tab'));
+  btn.classList.add('active-tab');
+}
+</script>
+
 </body>
 </html>
