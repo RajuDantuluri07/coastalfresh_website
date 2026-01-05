@@ -1,8 +1,5 @@
 {
   "projects": {
-    "default": "coastal-fresh---sea-foods",
-    "production": "coastal-fresh---sea-foods"
-  },
-  "targets": {},
-  "etags": {}
+    "default": "coastal-fresh---sea-foods"
+  }
 }
