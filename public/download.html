@@ -176,7 +176,7 @@
         </div>
 
         <div class="button-group">
-            <a href="#" class="download-btn" onclick="downloadAPK(); return false;">
+            <a href="/apk/AquaRythu.apk" class="download-btn" download>
                 📥 Download APK (v1.0.0)
             </a>
             <a href="https://coastal-fresh---sea-foods.web.app" class="web-btn">
@@ -191,14 +191,21 @@
     </div>
 
     <script>
-        function downloadAPK() {
-            // Temporary: Create a blob and download
-            alert('APK Download:\n\n1. Android Studio method:\n   - Open Android Studio\n   - Build → Build Bundle(s)/APK(s)\n   - Select "Build APK(s)"\n   - APK will be in: android/app/build/outputs/apk/debug/\n\n2. Or use PWA Builder at:\n   https://www.pwabuilder.com\n\nWe\'re preparing the APK for download soon!');
-        }
-
-        // Register for notifications when APK is ready
+        // APK download page script
         document.addEventListener('DOMContentLoaded', () => {
             console.log('AquaRythu Download Page Loaded');
+            // Check if APK exists
+            fetch('/apk/AquaRythu.apk', { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        console.log('APK found - download ready!');
+                    } else {
+                        console.log('APK not yet uploaded - download will be available soon');
+                    }
+                })
+                .catch(() => {
+                    console.log('APK download server check: pending');
+                });
         });
     </script>
 </body>
