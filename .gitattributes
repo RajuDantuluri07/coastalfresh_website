@@ -1,0 +1,5 @@
+# Enforce consistent line endings for all text files.
+# This prevents the "LF will be replaced by CRLF" warning on Windows.
+# It tells Git to automatically handle line endings and normalize them to LF (Line Feed)
+# in the repository, which is the standard for web and cross-platform projects.
+* text=auto eol=lf

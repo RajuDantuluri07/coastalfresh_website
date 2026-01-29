@@ -1,0 +1,11 @@
+# Allow all friendly crawlers to access the site.
+User-agent: *
+Allow: /
+
+# Disallow access to admin pages or other private areas.
+Disallow: /admin.html
+Disallow: /admin.css
+Disallow: /admin.js
+
+# Point crawlers to the sitemap for a list of all important pages.
+Sitemap: https://www.coastalfresh.in/sitemap.xml
