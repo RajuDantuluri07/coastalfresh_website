@@ -1,4 +1,3 @@
-Line wrap
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2770,9 +2769,6 @@ Add Your First Farm
 </div>
 <div style="display: flex; align-items: center; gap: 10px;">
 <div class="current-date" id="currentDate"></div>
-<button class="btn-icon" style="color: white; background: rgba(255,255,255,0.2);" onclick="app.openSettingsModal()">
-<i class="fas fa-cog"></i>
-</button>
 </div>
 </div>
 </header>
@@ -3160,7 +3156,7 @@ Analytics & Trends
 <i class="fas fa-farm"></i>
 Select Farm
 </h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div id="farmsListModal">
@@ -3181,7 +3177,7 @@ Add New Farm
 <div class="modal-content">
 <div class="modal-header">
 <h3><i class="fas fa-history"></i> Crop History</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div id="cropHistoryList"></div>
@@ -3197,7 +3193,7 @@ Add New Farm
 <i class="fas fa-plus-circle"></i>
 Add New Farm
 </h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div class="form-group">
@@ -3308,7 +3304,7 @@ Save Farm
 <div class="modal-content" style="max-width: 400px;">
 <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
 <h3 style="font-size: 18px; color: var(--gray);">Log Feed</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <!-- Tank Name & Context -->
@@ -3415,7 +3411,7 @@ Save & Close
 <div class="modal-content">
 <div class="modal-header">
 <h3><i class="fas fa-clipboard-list"></i> Pending Tray Checks</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div class="pending-list" id="pendingList">
@@ -3437,7 +3433,7 @@ Save & Close
 <div id="trayCheckHeader" class="tray-check-header">
 <b>Tray Check</b>
 <span id="trayCheckSubtitle">Tank A · Feed 1 (6:00 AM · 2.0 kg)</span>
-<button class="close-modal" style="margin-left: auto; background: none; border: none; font-size: 24px; color: var(--gray); cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">&times;</button>
+<button class="close-modal" onclick="app.closeAllModals()" style="margin-left: auto; background: none; border: none; font-size: 24px; color: var(--gray); cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">&times;</button>
 </div>
 <div id="trayTabsContainer" class="tray-tabs-container">
 <!-- Filled by JavaScript -->
@@ -3495,7 +3491,7 @@ Save & Next Tray
 <div class="modal-content">
 <div class="modal-header">
 <h3><i class="fas fa-fish"></i> Partial Harvest</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div class="form-group">
@@ -3528,7 +3524,7 @@ Save & Next Tray
 <div class="modal-content">
 <div class="modal-header">
 <h3><i class="fas fa-boxes"></i> Manage Feed Stock</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div class="stat-card" style="margin-bottom: 20px; background: #e3f2fd; border: none;">
@@ -3557,7 +3553,7 @@ Save & Next Tray
 <div class="modal-content">
 <div class="modal-header">
 <h3><i class="fas fa-pills"></i> Medicine & Minerals</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div class="form-group" style="display: flex; gap: 8px;">
@@ -3575,7 +3571,7 @@ Save & Next Tray
 <div class="modal-content" style="max-width: 400px;">
 <div class="modal-header">
 <h3 id="editFeedTitle"><i class="fas fa-edit"></i> Edit Feed Entry</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div class="form-group">
@@ -3617,7 +3613,7 @@ Save & Next Tray
 <div class="modal-content" style="max-width: 400px;">
 <div class="modal-header">
 <h3><i class="fas fa-flask"></i> Log Water Quality</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div class="form-row" style="grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -3664,7 +3660,7 @@ Save & Next Tray
 <div class="modal-content" style="max-width: 400px;">
 <div class="modal-header">
 <h3><i class="fas fa-syringe"></i> Log Application</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div class="form-group">
@@ -3704,7 +3700,7 @@ Save & Next Tray
 <div class="modal-content">
 <div class="modal-header">
 <h3><i class="fas fa-history"></i> Application History</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div id="applicationHistoryList" style="max-height: 400px; overflow-y: auto;"></div>
@@ -3717,7 +3713,7 @@ Save & Next Tray
 <div class="modal-content" style="max-width:520px;">
 <div class="modal-header">
 <h3><i class="fas fa-notes-medical"></i> Disease / Health Log</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div class="form-group">
@@ -3787,7 +3783,7 @@ Save & Next Tray
 <div class="modal-content">
 <div class="modal-header">
 <h3><i class="fas fa-cog"></i> Settings</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <h4 style="margin-bottom: 12px; color: var(--dark);">General</h4>
@@ -3864,7 +3860,7 @@ Save & Next Tray
 <div class="modal-content" style="max-width: 600px;">
 <div class="modal-header">
 <h3><i class="fas fa-balance-scale"></i> Compare Ponds</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div class="comparison-grid" id="comparisonGrid">
@@ -3886,7 +3882,7 @@ Compare up to 4 ponds side by side to spot feed inefficiencies
 <div class="modal-content" style="max-width: 500px;">
 <div class="modal-header">
 <h3><i class="fas fa-download"></i> Export Report</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div class="export-preview" id="exportPreview">
@@ -3917,7 +3913,7 @@ Compare up to 4 ponds side by side to spot feed inefficiencies
 <div class="modal-content">
 <div class="modal-header">
 <h3><i class="fas fa-calendar-alt"></i> Blind Feeding Schedule</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div class="alert-card" style="background: #e3f2fd; border-left: 4px solid #2196F3; padding: 12px; margin-bottom: 16px; border-radius: 4px;">
@@ -3974,7 +3970,7 @@ This schedule is auto-generated based on your stocking density. You can edit spe
 <div class="modal-content">
 <div class="modal-header">
 <h3><i class="fas fa-flag-checkered"></i> End Crop Summary</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div class="alert-card" style="background: #fff3e0; border-left: 4px solid #ff9800; padding: 12px; margin-bottom: 16px; border-radius: 4px;">
@@ -4023,7 +4019,7 @@ This schedule is auto-generated based on your stocking density. You can edit spe
 <div class="modal-content" style="max-width: 400px;">
 <div class="modal-header">
 <h3 id="confirmTitle"><i class="fas fa-exclamation-triangle"></i> Confirm Action</h3>
-<button class="close-modal" onclick="app.closeAllModals()"><button class="close-modal">&times;</button>times;</button>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <p id="confirmMessage">Are you sure you want to proceed?</p>
@@ -4780,11 +4776,10 @@ getFormattedDate(date = new Date()) {
 // Convert to local timezone by adjusting for timezone offset
 // This ensures the date string always matches the user's local date
 const d = date instanceof Date ? date : new Date(date);
-// Adjust for timezone offset to get local date
-const localDate = new Date(d.getTime() + (d.getTimezoneOffset() * -60000));
-const year = localDate.getUTCFullYear();
-const month = String(localDate.getUTCMonth() + 1).padStart(2, '0');
-const day = String(localDate.getUTCDate()).padStart(2, '0');
+// Use local date methods directly instead of UTC with offset adjustment
+const year = d.getFullYear();
+const month = String(d.getMonth() + 1).padStart(2, '0');
+const day = String(d.getDate()).padStart(2, '0');
 return `${year}-${month}-${day}`;
 }
 
@@ -4932,9 +4927,9 @@ fcrTrendEl.style.display = 'inline-block';
 }
 }
 }
-if (!canViewEfficiency) {
+if (!canViewEfficiency && efficiencyCard) {
 efficiencyCard.classList.add('locked');
-} else {
+} else if (efficiencyCard) {
 efficiencyCard.classList.remove('locked');
 }
 }
@@ -5122,8 +5117,11 @@ ${farm.name}
 Tanks
 </div>
 </div>
+<button class="btn btn-sm" style="border: 1px solid var(--border); background: white; color: var(--gray);" onclick="app.openSettingsModal()">
+<i class="fas fa-cog"></i> Farm Settings
+</button>
 <button class="btn btn-sm btn-secondary" onclick="app.editFarm('${farm.id}')">
-<i class="fas fa-edit"></i> Edit
+<i class="fas fa-edit"></i> Edit Farm
 </button>
 <button class="btn btn-sm btn-primary" onclick="app.openTankModal('${farm.id}')">
 <i class="fas fa-plus"></i> Add Tank
@@ -8275,7 +8273,9 @@ ${appHTML}
 if (this.feedChart) {
 this.feedChart.destroy();
 }
-const ctx = document.getElementById('feedHistoryChart').getContext('2d');
+const canvas = document.getElementById('feedHistoryChart');
+if (!canvas) return;
+const ctx = canvas.getContext('2d');
 this.feedChart = new Chart(ctx, {
 type: 'bar',
 data: {
