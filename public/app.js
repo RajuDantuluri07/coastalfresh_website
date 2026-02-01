@@ -1823,7 +1823,7 @@ suppHTML = `
 <div style="margin-top:12px; padding-top:12px; border-top:1px solid #eee;">
 <div style="font-size:11px; color:var(--gray); margin-bottom:6px; font-weight:600; text-transform:uppercase;">Supplements Used</div>
 <div style="display:flex; flex-wrap:wrap; gap:6px;">
-${lastEntry.supplements.map(s => `<span style="background:#e3f2fd; color:#1565c0; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:500;">${s}</span>`).join('')}
+${lastEntry.supplements.map(s => `<span style="background:var(--info-light); color:var(--info-dark); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:500;">${s}</span>`).join('')}
 </div>
 </div>
 `;
@@ -1970,7 +1970,7 @@ const reasonHTML = entry.reason ? `<div class="reason">${this.sanitizeHTML(entry
 const extraFeedBadge = entry.is_extra_feed ? `<div style="background: #ffebee; color: var(--danger); font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-top: 4px; text-transform: uppercase;">Extra Feed</div>` : '';
 
 // Round number badge for Tray Active mode
-const roundBadge = entry.feed_round_number && entry.feeding_mode === 'TRAY' ? `<div style="background: #e3f2fd; color: var(--primary); font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-top: 2px;">R${entry.feed_round_number}</div>` : '';
+const roundBadge = entry.feed_round_number && entry.feeding_mode === 'TRAY' ? `<div style="background: var(--info-light); color: var(--primary); font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-top: 2px;">R${entry.feed_round_number}</div>` : '';
 
 registerHTML += `
 <div class="cell ${highlightClass} ${entry.is_extra_feed ? 'extra-feed' : ''}" onclick="app.editFeedEntry(${entry.id})" style="cursor: pointer; ${entry.is_extra_feed ? 'border: 2px solid var(--danger); background: #fff5f5;' : ''}">
@@ -3436,7 +3436,7 @@ if (todayEntries.length >= totalFeedsForDay) {
   if (isBlindMode) {
     // 🌱 BLIND MODE: Show feed round number and planned amount
     document.getElementById('logFeedContextText').innerHTML = `
-      <span style="background: #FFF3E0; color: #F57C00; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-block; margin-bottom: 4px;">
+      <span style="background: var(--warning-light); color: var(--warning-dark); padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-block; margin-bottom: 4px;">
         🌱 BLIND MODE
       </span><br>
       <span style="color: var(--dark); font-weight: 600;">Round ${feedRoundNumber} of ${totalFeedsForDay}</span> • DOC ${doc}
@@ -3451,7 +3451,7 @@ if (todayEntries.length >= totalFeedsForDay) {
     if (isFirstTrayFeed) {
       // First tray-based feed - no previous tray data to show
       document.getElementById('logFeedContextText').innerHTML = `
-        <span style="background: #E3F2FD; color: #1565C0; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-block; margin-bottom: 4px;">
+        <span style="background: var(--info-light); color: var(--info-dark); padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-block; margin-bottom: 4px;">
           🍽️ TRAY MODE
         </span><br>
         <span style="color: var(--dark); font-weight: 600;">First Tray-Based Feed</span><br>
@@ -3483,7 +3483,7 @@ if (todayEntries.length >= totalFeedsForDay) {
       }
       
       document.getElementById('logFeedContextText').innerHTML = `
-        <span style="background: #E3F2FD; color: #1565C0; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-block; margin-bottom: 4px;">
+        <span style="background: var(--info-light); color: var(--info-dark); padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-block; margin-bottom: 4px;">
           🍽️ TRAY MODE
         </span><br>
         <span style="color: var(--dark); font-weight: 600;">Last Round: ${lastAmount}kg</span> • Tray: <span style="color: ${trayColor};">${trayIcon} ${trayText}</span><br>
@@ -4035,7 +4035,7 @@ summary.innerHTML = `
 <div class="next-feed-amount">${strictResult.amount} kg</div>
 <div class="next-feed-note">${strictResult.reason}</div>
 </div>
-<div style="background: #FFF3E0; border-left: 4px solid #F57C00; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 13px;">
+<div style="background: var(--warning-light); border-left: 4px solid var(--warning); padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 13px;">
 <p style="margin: 0; color: var(--dark);"><strong>⚠️ Authority Rule:</strong> Farmer/Supervisor will set the final feed amount when logging. This is a suggestion based on tray response.</p>
 </div>
 </div>
@@ -4611,11 +4611,11 @@ document.getElementById('blindTransitionText').innerHTML = `
 <h3 style="margin: 0 0 10px 0; color: var(--dark);">Ready for Tray-Based Feeding</h3>
 <p style="color: var(--gray); margin: 0;">${this.sanitizeHTML(tank.name)} • DOC ${doc}</p>
 </div>
-<div style="background: #FFF3E0; border-left: 4px solid #F57C00; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+<div style="background: var(--warning-light); border-left: 4px solid var(--warning); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
 <p style="margin: 0 0 10px 0; font-weight: 600; color: var(--dark);">You are moving from Blind Feeding to Tray-Based Feeding.</p>
 <p style="margin: 0; color: var(--gray); font-size: 14px;">Feed suggestions will now depend on tray response instead of the pre-set schedule.</p>
 </div>
-<div style="background: #E3F2FD; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+<div style="background: var(--info-light); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
 <h4 style="margin: 0 0 10px 0; font-size: 14px; color: var(--dark);">What changes:</h4>
 <ul style="margin: 0; padding-left: 20px; color: var(--gray); font-size: 13px; line-height: 1.8;">
 <li>Tray checks required after each feed</li>

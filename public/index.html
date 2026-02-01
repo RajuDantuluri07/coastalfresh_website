@@ -586,8 +586,8 @@ Save Farm
 <!-- Log Feed Modal (Single Tank) -->
 <div class="modal-overlay" id="feedRoundModal">
 <div class="modal-content" style="max-width: 400px;">
-<div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
-<h3 style="font-size: 18px; color: var(--gray);">Log Feed</h3>
+<div class="modal-header">
+<h3><i class="fas fa-utensils"></i> Log Feed</h3>
 <button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
@@ -679,8 +679,8 @@ Farmer/Supervisor sets final amount
         </div>
       </div>
 </div>
-<div class="modal-footer" style="flex-direction: column; gap: 10px; padding-top: 0; border-top: none; background: white;">
-<button class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 16px; justify-content: center; border-radius: 12px;" onclick="app.saveLogFeed()">
+<div class="modal-footer">
+<button class="btn btn-primary" style="width: 100%;" onclick="app.saveLogFeed()">
 <i class="fas fa-check"></i> Save Feed
 </button>
 </div>
@@ -712,14 +712,16 @@ Farmer/Supervisor sets final amount
 <div class="modal-overlay" id="trayCheckModal">
             <div class="modal-content" style="max-width: 100%; width: 100%; height: 100vh; max-height: 100vh; border-radius: 0; display: flex; flex-direction: column; padding: 0; box-sizing: border-box;">
 <div id="trayCheckHeader" class="tray-check-header">
-<b>Tray Check</b>
-<span id="trayCheckSubtitle">Tank A · Feed 1 (6:00 AM · 2.0 kg)</span>
-<button class="close-modal" onclick="app.closeAllModals()" style="margin-left: auto; background: none; border: none; font-size: 24px; color: var(--gray); cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">&times;</button>
+<div>
+<h3 style="margin: 0; font-size: 18px; font-weight: 600; color: var(--dark);"><i class="fas fa-clipboard-check"></i> Tray Check</h3>
+<span id="trayCheckSubtitle" style="font-size: 13px; color: var(--gray); display: block; margin-top: 4px;">Tank A · Feed 1 (6:00 AM · 2.0 kg)</span>
+</div>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div id="trayTabsContainer" class="tray-tabs-container">
 <!-- Filled by JavaScript -->
 </div>
-<div class="modal-body" id="trayCheckBody" style="background: #f9fafb; padding: 16px; flex: 1; overflow-y: auto; padding-bottom: 80px;">
+<div class="modal-body" id="trayCheckBody" style="background: var(--gray-50); flex: 1; overflow-y: auto; padding-bottom: 80px;">
 <!-- Filled by JavaScript -->
 </div>
 <div class="tray-check-bottom">
@@ -735,12 +737,13 @@ Save & Next Tray
 <div class="modal-content" style="max-width: 450px;">
 <div class="modal-header">
 <h3><i class="fas fa-clipboard-check"></i> Result Recorded</h3>
+<button class="close-modal" onclick="app.closeAllModals()">&times;</button>
 </div>
 <div class="modal-body">
 <div id="resultSummaryContent"></div>
 </div>
 <div class="modal-footer">
-<button class="btn btn-primary" style="width: 100%;" onclick="app.confirmAndFinish()">
+<button class="btn btn-primary" onclick="app.confirmAndFinish()">
 <i class="fas fa-check-circle"></i> Confirm & Finish
 </button>
 </div>
