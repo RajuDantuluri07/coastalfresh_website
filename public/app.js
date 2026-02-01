@@ -3444,36 +3444,52 @@ if (todayEntries.length >= totalFeedsForDay) {
     btnSugg.textContent = `Plan: ${suggestion}kg`;
   } else {
     // 🍽️ TRAY MODE: Show last round summary with tray status
-    const lastTrayStatus = lastEntry?.trayResult || 'pending';
-    let trayIcon = '⏳';
-    let trayText = 'Pending';
-    let trayColor = 'var(--warning)';
+    // Check if this is the first tray-based feed (no previous entries or all previous were blind-fed)
+    const trayEntries = entries.filter(e => e.trayResult && e.trayResult !== 'blind-fed');
+    const isFirstTrayFeed = trayEntries.length === 0;
     
-    if (lastTrayStatus === 'empty') {
-      trayIcon = '✅';
-      trayText = 'Empty';
-      trayColor = 'var(--success)';
-    } else if (lastTrayStatus === 'little') {
-      trayIcon = '⚠️';
-      trayText = 'Little';
-      trayColor = 'var(--warning)';
-    } else if (lastTrayStatus === 'half') {
-      trayIcon = '◐';
-      trayText = 'Half';
-      trayColor = 'var(--error)';
-    } else if (lastTrayStatus === 'too-much') {
-      trayIcon = '❌';
-      trayText = 'Too Much';
-      trayColor = 'var(--error)';
+    if (isFirstTrayFeed) {
+      // First tray-based feed - no previous tray data to show
+      document.getElementById('logFeedContextText').innerHTML = `
+        <span style="background: #E3F2FD; color: #1565C0; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-block; margin-bottom: 4px;">
+          🍽️ TRAY MODE
+        </span><br>
+        <span style="color: var(--dark); font-weight: 600;">First Tray-Based Feed</span><br>
+        <span style="font-size: 12px; color: var(--gray);">Round ${feedRoundNumber} of ${totalFeedsForDay} • DOC ${doc} • Check trays after feeding</span>
+      `;
+    } else {
+      // Show last tray status
+      const lastTrayStatus = lastEntry?.trayResult || 'pending';
+      let trayIcon = '⏳';
+      let trayText = 'Pending';
+      let trayColor = 'var(--warning)';
+      
+      if (lastTrayStatus === 'empty') {
+        trayIcon = '✅';
+        trayText = 'Empty';
+        trayColor = 'var(--success)';
+      } else if (lastTrayStatus === 'little') {
+        trayIcon = '⚠️';
+        trayText = 'Little';
+        trayColor = 'var(--warning)';
+      } else if (lastTrayStatus === 'half') {
+        trayIcon = '◐';
+        trayText = 'Half';
+        trayColor = 'var(--error)';
+      } else if (lastTrayStatus === 'too-much') {
+        trayIcon = '❌';
+        trayText = 'Too Much';
+        trayColor = 'var(--error)';
+      }
+      
+      document.getElementById('logFeedContextText').innerHTML = `
+        <span style="background: #E3F2FD; color: #1565C0; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-block; margin-bottom: 4px;">
+          🍽️ TRAY MODE
+        </span><br>
+        <span style="color: var(--dark); font-weight: 600;">Last Round: ${lastAmount}kg</span> • Tray: <span style="color: ${trayColor};">${trayIcon} ${trayText}</span><br>
+        <span style="font-size: 12px; color: var(--gray);">Round ${feedRoundNumber} of ${totalFeedsForDay} • DOC ${doc}</span>
+      `;
     }
-    
-    document.getElementById('logFeedContextText').innerHTML = `
-      <span style="background: #E3F2FD; color: #1565C0; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-block; margin-bottom: 4px;">
-        🍽️ TRAY MODE
-      </span><br>
-      <span style="color: var(--dark); font-weight: 600;">Last Round: ${lastAmount}kg</span> • Tray: <span style="color: ${trayColor};">${trayIcon} ${trayText}</span><br>
-      <span style="font-size: 12px; color: var(--gray);">Round ${feedRoundNumber} of ${totalFeedsForDay} • DOC ${doc}</span>
-    `;
     btnSugg.textContent = `Sugg: ${suggestion}kg`;
   }
 
@@ -4092,7 +4108,8 @@ btn.disabled = true;
 // Worker executes exactly as set. The amount entered here becomes the FINAL FEED.
 // In TRAY MODE: Suggestion is shown but farmer can accept/edit
 // In BLIND MODE: Plan is shown but farmer can adjust if needed
-saveLogFeed(loadNext = false) {
+// One pond at a time to avoid mistakes with wrong tanks
+saveLogFeed() {
 const tankId = document.getElementById('logFeedTankSelect').value;
 const amount = parseFloat(document.getElementById('logFeedAmount').value);
 const reason = document.getElementById('logFeedReason').value;
@@ -4265,21 +4282,7 @@ this.state.inventory.totalKg = newInventoryTotal;
                 '✅ Daily Feeding Complete'
             );
             this.showToast(`${tankName}: All feeds done for today!`, 'success', 4000);
-            return; // Don't proceed to next tank
-        }
-
-        if (loadNext) {
-            const currentFarmId = this.state.settings.currentFarmId;
-            const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId && t.status !== 'inactive');
-            const currentIndex = tanks.findIndex(t => t.id === tankId);
-            if (currentIndex !== -1 && currentIndex < tanks.length - 1) {
-                const nextTank = tanks[currentIndex + 1];
-                this.openLogFeedModal(nextTank.id);
-                this.showToast(`Saved. Loading ${this.sanitizeHTML(nextTank.name)}...`);
-                return; // Keep modal open
-            } else {
-                this.showToast('All ponds fed!', 'success');
-            }
+            return;
         }
 
         this.showToast('Feed logged successfully');
