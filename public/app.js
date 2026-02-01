@@ -55,6 +55,7 @@ this.currentChartTab = 'feed';
 this.chartDateRange = 30;
 this.isSaving = false;
 this.saveQueue = [];
+this.dynamicModals = [];
 
 if (document.readyState === 'loading') {
 document.addEventListener('DOMContentLoaded', () => this.init());
@@ -627,7 +628,6 @@ saveFarms() {
     try {
       localStorage.setItem('aquabook_farms', JSON.stringify(this.state.farms));
     } catch (e) {
-
       console.error('Failed to save farms:', e);
       if (e.name === 'QuotaExceededError') {
         this.showToast('Storage full! Please export and clear old data.', 'error');
@@ -664,7 +664,6 @@ saveFeedEntries() {
     try {
       localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
     } catch (e) {
-
       console.error('Failed to save feed entries:', e);
       if (e.name === 'QuotaExceededError') {
         this.showToast('Storage full! Please export and clear old data.', 'error');
@@ -683,7 +682,6 @@ saveHarvests() {
     try {
       localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
     } catch (e) {
-
       console.error('Failed to save harvests:', e);
       if (e.name === 'QuotaExceededError') {
         this.showToast('Storage full! Please export and clear old data.', 'error');
@@ -702,7 +700,6 @@ saveWaterQualityData() {
     try {
       localStorage.setItem('aquabook_water_quality', JSON.stringify(this.state.waterQuality));
     } catch (e) {
-
       console.error('Failed to save water quality data:', e);
       if (e.name === 'QuotaExceededError') {
         this.showToast('Storage full! Please export and clear old data.', 'error');
@@ -721,7 +718,6 @@ saveApplications() {
     try {
       localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
     } catch (e) {
-
       console.error('Failed to save applications:', e);
       if (e.name === 'QuotaExceededError') {
         this.showToast('Storage full! Please export and clear old data.', 'error');
@@ -740,7 +736,6 @@ saveInventory() {
     try {
       localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
     } catch (e) {
-
       console.error('Failed to save inventory:', e);
       if (e.name === 'QuotaExceededError') {
         this.showToast('Storage full! Please export and clear old data.', 'error');
@@ -796,7 +791,6 @@ saveSettings() {
     try {
       localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
     } catch (e) {
-
       console.error('Failed to save settings:', e);
       if (e.name === 'QuotaExceededError') {
         this.showToast('Storage full! Please export and clear old data.', 'error');
@@ -816,37 +810,80 @@ if (show) loader.classList.add('active');
 else loader.classList.remove('active');
 }
 
-showToast(message, type = 'success') {
+showToast(message, type = 'success', duration = 3000) {
 const toast = type === 'error' ? document.getElementById('errorToast') : document.getElementById('successToast');
 const msgSpan = toast.querySelector('span');
 msgSpan.textContent = message;
 toast.classList.add('show');
-setTimeout(() => toast.classList.remove('show'), 3000);
+// Apply warning styling if type is warning
+if (type === 'warning') {
+  toast.style.background = '#fff3cd';
+  toast.style.borderLeft = '4px solid #ffc107';
+  toast.style.color = '#856404';
+  const icon = toast.querySelector('i');
+  if (icon) {
+    icon.className = 'fas fa-exclamation-triangle';
+    icon.style.color = '#ffc107';
+  }
+}
+setTimeout(() => {
+  toast.classList.remove('show');
+  // Reset warning styling
+  if (type === 'warning') {
+    toast.style.background = '';
+    toast.style.borderLeft = '';
+    toast.style.color = '';
+    const icon = toast.querySelector('i');
+    if (icon) {
+      icon.className = 'fas fa-check-circle';
+      icon.style.color = '';
+    }
+  }
+}, duration);
 }
 
 
 // Shows a custom alert modal (non-blocking)
 showAlertModal(message, title = 'Alert') {
+const modalId = 'alertModal_' + Date.now();
 const modal = document.createElement('div');
 modal.className = 'modal-overlay active';
-modal.id = 'alertModal_' + Date.now();
+modal.id = modalId;
 modal.innerHTML = `
 <div class="modal-content" style="max-width: 400px;">
 <div class="modal-header">
 <h3>${this.sanitizeHTML(title)}</h3>
-<button class="close-modal" onclick="document.getElementById('${modal.id}').remove()">×</button>
+<button class="close-modal" data-modal-id="${modalId}">×</button>
 </div>
 <div class="modal-body">
 <p style="margin: 0; line-height: 1.6; color: var(--gray-700);">${this.sanitizeHTML(message)}</p>
 </div>
 <div class="modal-footer">
-<button class="btn btn-primary" onclick="document.getElementById('${modal.id}').remove()">OK</button>
+<button class="btn btn-primary" data-modal-id="${modalId}">OK</button>
 </div>
 </div>
 `;
 document.body.appendChild(modal);
+this.dynamicModals.push(modal);
+
+// Add event listeners with proper cleanup
+const closeHandler = (e) => {
+const id = e.target.dataset.modalId;
+const m = document.getElementById(id);
+if (m) {
+m.remove();
+const idx = this.dynamicModals.indexOf(m);
+if (idx > -1) this.dynamicModals.splice(idx, 1);
+}
+};
+
+modal.querySelectorAll('[data-modal-id]').forEach(btn => {
+btn.addEventListener('click', closeHandler);
+});
+
 // Auto-focus OK button for accessibility
-modal.querySelector('.btn-primary').focus();
+const primaryBtn = modal.querySelector('.btn-primary');
+if (primaryBtn) primaryBtn.focus();
 }
 
 // Shows a custom confirmation modal (returns Promise)
@@ -1221,7 +1258,7 @@ headerContainer.innerHTML = `
 <div class="farm-header" style="border: 2px solid var(--border); border-radius: var(--radius);">
 <div class="farm-name">
 <i class="fas fa-tractor"></i>
-<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${farm.name}</span>
+<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${this.sanitizeHTML(farm.name)}</span>
 </div>
 <div class="farm-stats">
 <div class="farm-stat">
@@ -1339,7 +1376,7 @@ statusDot = `<div class="tank-feed-status ${statusClass}" title="Last Feed: ${la
 ${statusDot}
 <div class="tank-summary-header">
 <div class="tank-summary-name">
-${tank.name}
+${this.sanitizeHTML(tank.name)}
     ${phaseLabel ? `<span style="background:#eef2ff; color:#3730a3; font-size:10px; padding:2px 6px; border-radius:999px; font-weight:600; margin-left:6px;">${phaseLabel}</span>` : ''}
 </div>
 <div style="display: flex; align-items: center; gap: 8px;">
@@ -1426,7 +1463,7 @@ tabsContainer.innerHTML = farmTanks.map(tank => `
 <button class="tank-tab ${tank.id === this.activeLogTankId ? 'active' : ''}"
 onclick="app.switchLogTank('${this.escapeAttribute(tank.id)}')">
 <i class="fas fa-water" style="font-size: 18px;"></i>
-<span>${tank.name}</span>
+<span>${this.sanitizeHTML(tank.name)}</span>
 </button>
 `).join('');
 
@@ -1516,12 +1553,66 @@ planSub = 'Start with base amount';
         const remindersDiv = document.createElement('div');
         remindersDiv.style.display = 'none';
 
+// Check if tank is in Tray Active mode
+const isTrayActive = this.isTrayActiveMode(tank);
+
+// TRAY ACTIVE MODE: Show Last Feed Round Summary
+let lastRoundSummaryHTML = '';
+if (isTrayActive) {
+  lastRoundSummaryHTML = this.renderLastFeedRoundSummary(tankId, this.currentDate);
+}
+
+// Check if we can show next feed suggestion
+const canShowSuggestion = this.canShowNextFeedSuggestion(tankId, this.currentDate);
+const allRoundsCompleted = this.areAllRoundsCompleted(tankId, this.currentDate);
+
+// Warning banner for tray status not updated (Tray Active mode only)
+let trayStatusWarningHTML = '';
+if (isTrayActive && !canShowSuggestion && !allRoundsCompleted) {
+  const lastRound = this.getLastCompletedRound(tankId, this.currentDate);
+  if (lastRound) {
+    trayStatusWarningHTML = `
+      <div style="background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; padding: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 24px; color: #f59e0b;"></i>
+        <div style="flex: 1;">
+          <div style="font-size: 14px; font-weight: 700; color: #f59e0b; margin-bottom: 4px;">Update Tray Status to Continue</div>
+          <div style="font-size: 13px; color: var(--gray);">You must update the tray status for Round ${lastRound.roundNumber} before the next feed suggestion can be shown.</div>
+        </div>
+        <button class="btn btn-warning" onclick="app.openTrayCheckPopup('${tankId}', ${lastRound.entry.id})" style="padding: 10px 16px; font-size: 13px; white-space: nowrap;">
+          <i class="fas fa-edit"></i> Update Tray Status
+        </button>
+      </div>
+    `;
+  }
+}
+
+// Warning banner for all rounds completed
+let allRoundsWarningHTML = '';
+if (allRoundsCompleted) {
+  const totalRounds = this.state.settings.feedsPerDay || 4;
+  allRoundsWarningHTML = `
+    <div style="background: #ffebee; border-left: 4px solid var(--danger); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+        <i class="fas fa-times-circle" style="font-size: 24px; color: var(--danger);"></i>
+        <div style="font-size: 16px; font-weight: 700; color: var(--danger);">All Feeding Rounds Completed for Today</div>
+      </div>
+      <div style="font-size: 13px; color: var(--gray); margin-bottom: 12px;">
+        You have completed all ${totalRounds} planned feeding rounds for today. Feeding more may cause overfeeding and feed waste.
+      </div>
+      <div style="background: white; border: 1px solid #ffcdd2; border-radius: 6px; padding: 10px; font-size: 12px; color: var(--gray);">
+        <strong style="color: var(--danger);">⚠️ Warning:</strong> Any additional feed logged today will be marked as <strong>"Extra Feed"</strong> and may negatively impact your FCR.
+      </div>
+    </div>
+  `;
+}
+
 // HERO CARD: "One big number" & "Confirm X kg"
 const todayEntries = this.state.feedEntries.filter(e => e.tankId === tankId && e.date === this.currentDate).sort((a, b) => a.id - b.id);
 const nextFeedIndex = todayEntries.length;
 const totalFeedsForDay = feedsToday.length;
         let heroHTML = '';
-        if (nextFeedIndex < totalFeedsForDay) {
+        // Only show hero card if we can show suggestion (or in blind mode)
+        if (nextFeedIndex < totalFeedsForDay && (canShowSuggestion || !isTrayActive)) {
         const amount = feedsToday[nextFeedIndex];
         const isBlind = doc <= blindDuration && !tank.hasTransitionedFromBlind;
 let explanation = '';
@@ -1598,6 +1689,7 @@ heroHTML = `
 }
 
         let scheduleHTML = '';
+        // BLIND MODE: Show schedule
         if (doc <= blindDuration && !tank.hasTransitionedFromBlind) {
 // Render Daily Schedule List
 scheduleHTML = `
@@ -1764,8 +1856,8 @@ ${suppHTML}
             // Blind feeding: only show the plan card.
             planContainer.innerHTML = scheduleHTML;
         } else {
-            // Tray mode: show "previous feed" card + history header (grid below shows full details).
-            planContainer.innerHTML = scheduleHTML + `
+            // Tray mode: show Last Feed Round Summary + warnings + hero card + history header
+            planContainer.innerHTML = lastRoundSummaryHTML + trayStatusWarningHTML + allRoundsWarningHTML + heroHTML + `
             <div class="history-section-header">
                 <div class="history-title">Recent Activity</div>
             </div>
@@ -1874,12 +1966,20 @@ else if (entry.trayResult === 'blind-fed') { statusText = 'Blind Fed'; }
 const mixHTML = (entry.supplements && entry.supplements.length > 0) ? `<div class="mix">${entry.supplements.map(s => `<span>${this.sanitizeHTML(s)}</span>`).join('')}</div>` : '';
 const reasonHTML = entry.reason ? `<div class="reason">${this.sanitizeHTML(entry.reason)}</div>` : '';
 
+// Extra feed warning badge
+const extraFeedBadge = entry.is_extra_feed ? `<div style="background: #ffebee; color: var(--danger); font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-top: 4px; text-transform: uppercase;">Extra Feed</div>` : '';
+
+// Round number badge for Tray Active mode
+const roundBadge = entry.feed_round_number && entry.feeding_mode === 'TRAY' ? `<div style="background: #e3f2fd; color: var(--primary); font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 4px; margin-top: 2px;">R${entry.feed_round_number}</div>` : '';
+
 registerHTML += `
-<div class="cell ${highlightClass}" onclick="app.editFeedEntry(${entry.id})" style="cursor: pointer;">
+<div class="cell ${highlightClass} ${entry.is_extra_feed ? 'extra-feed' : ''}" onclick="app.editFeedEntry(${entry.id})" style="cursor: pointer; ${entry.is_extra_feed ? 'border: 2px solid var(--danger); background: #fff5f5;' : ''}">
 <span class="qty">${entry.amount} kg</span>
+${roundBadge}
 ${reasonHTML}
 ${mixHTML}
 <span style="color:${statusColor};font-size:11px;font-weight:600;">${statusText}</span>
+${extraFeedBadge}
 </div>
 `;
 } else {
@@ -1936,7 +2036,7 @@ row.innerHTML = `
 <td>
 <div style="display: flex; justify-content: space-between; align-items: flex-start;">
 <div>
-<div style="font-weight: 600; font-size: 14px; color: var(--gray-900);">${tank.name}</div>
+<div style="font-weight: 600; font-size: 14px; color: var(--gray-900);">${this.sanitizeHTML(tank.name)}</div>
 </div>
 </div>
 </td>
@@ -1952,9 +2052,10 @@ const tankEntries = this.state.feedEntries
 if (tankEntries.length === 0) return;
 
 const headerRow = document.createElement('tr');
+// XSS FIX: Sanitize tank name before displaying
 headerRow.innerHTML = `<td colspan="${feedsCount + 1}" style="background:#e3f2fd; font-weight:700; color:var(--primary-dark);">
 <div style="display: flex; justify-content: space-between; align-items: center;">
-<span>${tank.name}</span>
+<span>${this.sanitizeHTML(tank.name)}</span>
 </div>
 </td>`;
 tableBody.appendChild(headerRow);
@@ -2250,11 +2351,11 @@ div.className = 'feed-schedule-item';
 if (farm.id === this.state.settings.currentFarmId) div.classList.add('completed');
 div.innerHTML = `
 <div style="display: flex; flex-direction: column; gap: 4px;">
-  <div class="feed-time" style="font-weight: 600; font-size: 14px;">${farm.name}</div>
+  <div class="feed-time" style="font-weight: 600; font-size: 14px;">${this.sanitizeHTML(farm.name)}</div>
   <div class="feed-label" style="font-size: 12px; color: var(--gray);">
     <i class="fas fa-water"></i> ${pondCount} ${pondCount === 1 ? 'Pond' : 'Ponds'} | Avg DOC ${avgDoc}
   </div>
-  ${farm.location ? `<div class="feed-label" style="font-size: 11px; color: var(--gray-500);">${farm.location}</div>` : ''}
+  ${farm.location ? `<div class="feed-label" style="font-size: 11px; color: var(--gray-500);">${this.sanitizeHTML(farm.location)}</div>` : ''}
 </div>
 `;
 div.onclick = () => {
@@ -2648,8 +2749,12 @@ document.getElementById('inventoryModal').classList.add('active');
 }
 
 saveStock() {
-const bags = parseFloat(document.getElementById('stockBags').value) || 0;
-const weight = parseFloat(document.getElementById('bagWeight').value) || 25;
+const bagsInput = document.getElementById('stockBags');
+const weightInput = document.getElementById('bagWeight');
+if (!bagsInput || !weightInput) return;
+
+const bags = parseFloat(bagsInput.value) || 0;
+const weight = parseFloat(weightInput.value) || 25;
 
 if (bags > 0) {
 const addedKg = bags * weight;
@@ -2742,7 +2847,7 @@ const entryTrayResult = entry.trayResult || 'pending';
 
 this.editingEntryId = id;
 const tank = this.getTankById(entry.tankId);
-document.getElementById('editFeedTitle').textContent = `Edit Feed - ${tank ? tank.name : 'Unknown Tank'}`;
+document.getElementById('editFeedTitle').textContent = `Edit Feed - ${tank ? this.sanitizeHTML(tank.name) : 'Unknown Tank'}`;
 document.getElementById('editFeedDate').textContent = `${entryDate} ${entryTime}`;
 document.getElementById('editFeedAmount').value = entryAmount;
 document.getElementById('editFeedReason').value = entryReason;
@@ -3044,6 +3149,7 @@ this.editingEntryId = null;
 
 adjustFeedAmount(delta) {
 const input = document.getElementById('logFeedAmount');
+if (!input) return;
 let val = parseFloat(input.value) || 0;
 val += delta;
 if (val < 0) val = 0;
@@ -3052,6 +3158,7 @@ input.value = val.toFixed(1);
 
 setFeedAmount(type) {
 const input = document.getElementById('logFeedAmount');
+if (!input) return;
 if (type === 'last') {
 const last = parseFloat(input.getAttribute('data-last')) || 0;
 input.value = last;
@@ -3092,7 +3199,7 @@ if (!selectedId) selectedId = tanks[0].id;
 // Populate Dropdown
 const select = document.getElementById('logFeedTankSelect');
 select.innerHTML = tanks.map(t =>
-`<option value="${t.id}" ${t.id === selectedId ? 'selected' : ''}>${t.name}</option>`
+`<option value="${t.id}" ${t.id === selectedId ? 'selected' : ''}>${this.sanitizeHTML(t.name)}</option>`
 ).join('');
 
 // Reset UI state
@@ -3323,6 +3430,205 @@ if (todayEntries.length >= totalFeedsForDay) {
 }
 }
 
+// ===== TRAY ACTIVE MODE HELPERS =====
+
+// Determine if tank is in Tray Active mode
+isTrayActiveMode(tank) {
+  if (!tank) return false;
+  const doc = this.getDaysOld(tank.stockingDate);
+  const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
+  return doc > blindDuration || tank.hasTransitionedFromBlind;
+}
+
+// Get feed round number for a new feed entry
+getFeedRoundNumber(tankId, date = this.currentDate) {
+  const todayEntries = this.state.feedEntries.filter(e => 
+    e.tankId === tankId && e.date === date
+  ).sort((a, b) => a.id - b.id);
+  return todayEntries.length + 1;
+}
+
+// Get last completed feed round for today
+getLastCompletedRound(tankId, date = this.currentDate) {
+  const todayEntries = this.state.feedEntries.filter(e => 
+    e.tankId === tankId && e.date === date
+  ).sort((a, b) => b.id - a.id);
+  
+  if (todayEntries.length === 0) return null;
+  
+  const lastEntry = todayEntries[0];
+  return {
+    entry: lastEntry,
+    roundNumber: lastEntry.feed_round_number || todayEntries.length,
+    hasTrayStatus: lastEntry.trayResult && lastEntry.trayResult !== 'pending',
+    trayStatus: lastEntry.trayResult,
+    trayResults: lastEntry.trayResults || [],
+    amount: lastEntry.amount,
+    supplements: lastEntry.supplements || [],
+    time: lastEntry.time
+  };
+}
+
+// Check if next feed suggestion can be shown (requires tray status update)
+canShowNextFeedSuggestion(tankId, date = this.currentDate) {
+  const tank = this.getTankById(tankId);
+  if (!tank || !this.isTrayActiveMode(tank)) return true; // Blind mode always shows suggestion
+  
+  const lastRound = this.getLastCompletedRound(tankId, date);
+  if (!lastRound) return true; // No previous round, can show first suggestion
+  
+  // In Tray Active mode, next suggestion requires tray status update
+  return lastRound.hasTrayStatus;
+}
+
+// Check if all planned rounds are completed for today
+areAllRoundsCompleted(tankId, date = this.currentDate) {
+  const tank = this.getTankById(tankId);
+  if (!tank) return false;
+  
+  const doc = this.getDaysOld(tank.stockingDate);
+  const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
+  
+  let totalFeedsForDay = this.state.settings.feedsPerDay || 4;
+  
+  // Check blind schedule if applicable
+  if (tank.blindSchedule && doc <= blindDuration && !tank.hasTransitionedFromBlind) {
+    const scheduleDoc = doc === 0 ? 1 : doc;
+    const schedule = tank.blindSchedule.find(s => s.doc === scheduleDoc);
+    if (schedule && schedule.feeds) {
+      totalFeedsForDay = schedule.feeds.length;
+    }
+  }
+  
+  const todayEntries = this.state.feedEntries.filter(e => 
+    e.tankId === tankId && e.date === date
+  );
+  
+  return todayEntries.length >= totalFeedsForDay;
+}
+
+// Render Last Feed Round Summary for Tray Active Mode
+renderLastFeedRoundSummary(tankId, date = this.currentDate) {
+  const lastRound = this.getLastCompletedRound(tankId, date);
+  
+  if (!lastRound) {
+    return `
+      <div style="background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-bottom: 16px; text-align: center;">
+        <i class="fas fa-info-circle" style="font-size: 24px; color: var(--gray); margin-bottom: 8px;"></i>
+        <div style="font-size: 14px; color: var(--gray); font-weight: 500;">No feed round completed today</div>
+        <div style="font-size: 12px; color: var(--gray-500); margin-top: 4px;">Start your first feed round below</div>
+      </div>
+    `;
+  }
+  
+  const entry = lastRound.entry;
+  const tank = this.getTankById(tankId);
+  const doc = tank ? this.getDaysOld(tank.stockingDate) : 0;
+  
+  // Calculate tray feed per tray
+  const traySettings = this.state.settings.trayCheckPercentages || { range1: 0.3, range2: 0.6, range3: 1.0 };
+  let pct = traySettings.range1;
+  if (doc >= 90) pct = traySettings.range3;
+  else if (doc >= 60) pct = traySettings.range2;
+  const trayFeedKg = entry.amount * (pct / 100);
+  const trayFeedGrams = Math.round(trayFeedKg * 1000);
+  
+  // Tray status icons and colors
+  const getTrayStatusDisplay = (status) => {
+    const statusMap = {
+      'empty': { icon: 'check', color: 'var(--success)', label: 'All Eaten', bg: '#e8f5e9' },
+      'little': { icon: 'utensils', color: '#f59e0b', label: 'Little Left', bg: '#fef3c7' },
+      'half': { icon: 'adjust', color: 'var(--warning)', label: 'Half Left', bg: '#fff3e0' },
+      'too-much': { icon: 'exclamation-triangle', color: 'var(--danger)', label: 'Too Much', bg: '#ffebee' },
+      'pending': { icon: 'clock', color: 'var(--gray)', label: 'Pending', bg: '#f5f5f5' }
+    };
+    return statusMap[status] || statusMap['pending'];
+  };
+  
+  // Build tray results HTML
+  let trayResultsHTML = '';
+  if (lastRound.trayResults && lastRound.trayResults.length > 0) {
+    trayResultsHTML = `
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-top: 12px;">
+        ${lastRound.trayResults.map((status, i) => {
+          const display = getTrayStatusDisplay(status);
+          return `
+            <div style="background: ${display.bg}; border: 1px solid ${display.color}; border-radius: 8px; padding: 8px; text-align: center;">
+              <div style="font-size: 10px; color: var(--gray); font-weight: 600; margin-bottom: 4px;">Tray ${i + 1}</div>
+              <i class="fas fa-${display.icon}" style="font-size: 16px; color: ${display.color}; margin-bottom: 4px;"></i>
+              <div style="font-size: 11px; color: ${display.color}; font-weight: 600;">${display.label}</div>
+              <div style="font-size: 10px; color: var(--gray); margin-top: 2px;">${trayFeedGrams}g</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+  } else if (lastRound.trayStatus && lastRound.trayStatus !== 'pending') {
+    const display = getTrayStatusDisplay(lastRound.trayStatus);
+    trayResultsHTML = `
+      <div style="background: ${display.bg}; border: 1px solid ${display.color}; border-radius: 8px; padding: 12px; margin-top: 12px; display: flex; align-items: center; gap: 12px;">
+        <i class="fas fa-${display.icon}" style="font-size: 24px; color: ${display.color};"></i>
+        <div>
+          <div style="font-size: 13px; font-weight: 600; color: ${display.color};">${display.label}</div>
+          <div style="font-size: 11px; color: var(--gray); margin-top: 2px;">Overall tray status</div>
+        </div>
+      </div>
+    `;
+  } else {
+    trayResultsHTML = `
+      <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 12px; margin-top: 12px; display: flex; align-items: center; gap: 12px;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 20px; color: #f59e0b;"></i>
+        <div style="flex: 1;">
+          <div style="font-size: 13px; font-weight: 600; color: #f59e0b;">Tray Status Not Updated</div>
+          <div style="font-size: 11px; color: var(--gray); margin-top: 2px;">Update tray status to get next feed suggestion</div>
+        </div>
+        <button class="btn btn-sm btn-warning" onclick="app.openTrayCheckPopup('${tankId}', ${entry.id})" style="padding: 6px 12px; font-size: 12px; white-space: nowrap;">
+          <i class="fas fa-edit"></i> Update
+        </button>
+      </div>
+    `;
+  }
+  
+  // Build supplements HTML
+  let supplementsHTML = '';
+  if (lastRound.supplements && lastRound.supplements.length > 0) {
+    supplementsHTML = `
+      <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e0e0e0;">
+        <div style="font-size: 11px; color: var(--gray); font-weight: 600; margin-bottom: 6px; text-transform: uppercase;">Supplements Used</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          ${lastRound.supplements.map(s => `
+            <span style="background: #e3f2fd; color: #1565c0; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 500;">
+              ${this.sanitizeHTML(s)}
+            </span>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+  
+  return `
+    <div style="background: white; border: 2px solid #e3f2fd; border-radius: 12px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+        <div>
+          <div style="font-size: 12px; color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Last Feed Round</div>
+          <div style="font-size: 20px; font-weight: 800; color: var(--dark); margin-top: 4px;">Round ${lastRound.roundNumber}</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 28px; font-weight: 800; color: var(--primary);">${entry.amount} <span style="font-size: 14px; color: var(--gray); font-weight: 600;">kg</span></div>
+          <div style="font-size: 11px; color: var(--gray); margin-top: 2px;">${entry.time}</div>
+        </div>
+      </div>
+      
+      <div style="background: var(--light); border-radius: 8px; padding: 10px; margin-bottom: 8px;">
+        <div style="font-size: 11px; font-weight: 600; color: var(--dark); margin-bottom: 8px;">Check Tray Details</div>
+        ${trayResultsHTML}
+      </div>
+      
+      ${supplementsHTML}
+    </div>
+  `;
+}
+
 // STRICT FEED ALGORITHM (Ticket: Save Feed Waste)
 
 calculateStrictFeed(lastAmount, trayResult, doc) {
@@ -3455,7 +3761,7 @@ const item = document.createElement('div');
 item.className = 'pending-item';
 item.innerHTML = `
 <div class="pending-item-info">
-<h4>${tank.name} (${tank.checkTrays || 2} trays)</h4>
+<h4>${this.sanitizeHTML(tank.name)} (${tank.checkTrays || 2} trays)</h4>
 <p>Fed ${entry.amount} kg @ ${entry.time}</p>
 </div>
 <button class="btn btn-primary btn-sm" onclick="app.openTrayCheckPopup('${entry.tankId}', ${entry.id})">
@@ -3492,7 +3798,7 @@ const feedIndex = this.state.feedEntries.filter(e => e.tankId === tankId && e.da
         let trayPhase = 'Tray Check';
         if (doc <= blindDuration && !tank.hasTransitionedFromBlind) trayPhase = 'Tray Training';
         else if (tank.hasTransitionedFromBlind) trayPhase = 'Tray Active';
-        subtitleEl.textContent = `${tank.name} · Feed ${feedIndex} (${feedTime} · ${feedAmount} kg) · ${trayPhase} · ${tank.checkTrays || 2} trays`;
+        subtitleEl.textContent = `${this.sanitizeHTML(tank.name)} · Feed ${feedIndex} (${feedTime} · ${feedAmount} kg) · ${trayPhase} · ${tank.checkTrays || 2} trays`;
     }
 this.renderTrayCheckTabs();
 
@@ -3699,7 +4005,7 @@ if (!tank) return;
 tank.nextSuggestedFeed = suggestedAmount;
 this.saveTanks();
 
-this.showToast(`Suggestion of ${suggestedAmount}kg applied for ${tank.name}`);
+this.showToast(`Suggestion of ${suggestedAmount}kg applied for ${this.sanitizeHTML(tank.name)}`);
 
 const suggDiv = document.getElementById(`next-feed-sugg-${entryId}`);
 if (suggDiv) {
@@ -3781,6 +4087,12 @@ const feedModalEl = document.getElementById('feedRoundModal');
 const targetDateAttr = feedModalEl ? feedModalEl.getAttribute('data-target-date') : null;
 const entryDate = targetDateAttr || this.currentDate;
 
+const doc = this.getDaysOld(tank.stockingDate);
+const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
+const feedRoundNumber = this.getFeedRoundNumber(tankId, entryDate);
+const feedingMode = doc <= blindDuration && !tank.hasTransitionedFromBlind ? 'BLIND' : 'TRAY';
+const isExtraFeed = this.areAllRoundsCompleted(tankId, entryDate);
+
 const newEntry = {
 id: Date.now(),
 tankId,
@@ -3793,7 +4105,11 @@ reason: reason || null,
             // Health report fields
             healthObserved: !!healthObserved,
             mortality: mortality || 0,
-            disease: diseaseType || null
+            disease: diseaseType || null,
+            // Tray Active Mode fields
+            feed_round_number: feedRoundNumber,
+            feeding_mode: feedingMode,
+            is_extra_feed: isExtraFeed
 };
 
 this.state.feedEntries.push(newEntry);
@@ -3885,7 +4201,7 @@ this.state.inventory.totalKg = newInventoryTotal;
             if (currentIndex !== -1 && currentIndex < tanks.length - 1) {
                 const nextTank = tanks[currentIndex + 1];
                 this.openLogFeedModal(nextTank.id);
-                this.showToast(`Saved. Loading ${nextTank.name}...`);
+                this.showToast(`Saved. Loading ${this.sanitizeHTML(nextTank.name)}...`);
                 return; // Keep modal open
             } else {
                 this.showToast('All ponds fed!', 'success');
@@ -3943,6 +4259,10 @@ if (amount > currentStock) {
 this.showToast(`⚠ Low Inventory: You have ${currentStock.toFixed(1)}kg in stock, feeding ${amount.toFixed(1)}kg.`, 'warning', 4000);
 }
 
+const feedRoundNumber = this.getFeedRoundNumber(tankId, this.currentDate);
+const feedingMode = doc <= blindDuration && !tank.hasTransitionedFromBlind ? 'BLIND' : 'TRAY';
+const isExtraFeed = this.areAllRoundsCompleted(tankId, this.currentDate);
+
 const newEntry = {
 id: Date.now(),
 tankId,
@@ -3950,7 +4270,10 @@ date: this.currentDate,
 time: new Date().toLocaleTimeString(),
 amount,
 trayResult: doc <= blindDuration ? 'blind-fed' : 'pending', // Smart status: 'pending' for active tanks
-supplements: []
+supplements: [],
+feed_round_number: feedRoundNumber,
+feeding_mode: feedingMode,
+is_extra_feed: isExtraFeed
 };
 
 this.state.feedEntries.push(newEntry);
@@ -3973,7 +4296,13 @@ try {
     this.recalculateTankBiomass(tankId, true); // Clear suggestion on log
     this.updateTankLifecycleState(tankId);
     this.renderAll();
-    this.showToast(`Fed ${amount}kg to ${tank.name}`);
+    
+    // Show appropriate toast based on whether this is extra feed
+    if (isExtraFeed) {
+        this.showToast(`⚠️ Extra feed logged: ${amount}kg to ${this.sanitizeHTML(tank.name)}. This may impact FCR.`, 'warning');
+    } else {
+        this.showToast(`Fed ${amount}kg to ${this.sanitizeHTML(tank.name)}`);
+    }
 } catch (e) {
     console.error('Failed to quick log feed:', e);
     this.showToast('Failed to save feed log', 'error');
@@ -4198,7 +4527,7 @@ break; // Show one at a time
 
 openBlindTransitionModal(tank) {
 this.transitionTankId = tank.id;
-document.getElementById('blindTransitionText').textContent = `${tank.name} has completed its blind feeding period (DOC ${this.getDaysOld(tank.stockingDate)}). Switch to check-tray based feeding?`;
+document.getElementById('blindTransitionText').textContent = `${this.sanitizeHTML(tank.name)} has completed its blind feeding period (DOC ${this.getDaysOld(tank.stockingDate)}). Switch to check-tray based feeding?`;
 document.getElementById('blindTransitionModal').classList.add('active');
 }
 
@@ -4219,12 +4548,12 @@ this.saveTanks();
 // Close transition modal first
 this.closeAllModals();
 // Show success message
-this.showToast(`${tank.name} switched to tray-based feeding!`, 'success');
+this.showToast(`${this.sanitizeHTML(tank.name)} switched to tray-based feeding!`, 'success');
 // Automatically open log feed modal for this tank
 // This provides smooth workflow: transition → log first feed with tray check
 setTimeout(() => {
 this.openLogFeedModal(this.transitionTankId, null, null, true);
-this.showToast(`📋 Tray check now required for ${tank.name}`, 'info', 5000);
+this.showToast(`📋 Tray check now required for ${this.sanitizeHTML(tank.name)}`, 'info', 5000);
 }, 400);
 }
 }
@@ -4237,7 +4566,7 @@ if (!tank) return;
 
 this.editingTankId = tankId;
 
-document.getElementById('tankDetailTitle').textContent = tank.name || 'Tank Details';
+document.getElementById('tankDetailTitle').textContent = this.sanitizeHTML(tank.name) || 'Tank Details';
 
 const tabContainer = document.getElementById('tankDetailTabContainer');
 let tabsHTML = `<div class="tank-detail-tabs">`;
@@ -4493,7 +4822,7 @@ container.innerHTML = `
 <div class="tank-detail-tab-content">
 <div class="detail-section">
 <div class="detail-section-header">
-<h3 class="detail-section-title">Performance Trends for ${tank.name}</h3>
+<h3 class="detail-section-title">Performance Trends for ${this.sanitizeHTML(tank.name)}</h3>
 </div>
 <div class="chart-card" style="margin-bottom: 16px;">
 <div class="chart-header">
@@ -5060,7 +5389,7 @@ div.className = 'tank-summary-card'; // Reuse styling
 div.style.marginBottom = '12px';
 div.innerHTML = `
 <div class="tank-summary-header">
-<div class="tank-summary-name" style="font-size: 14px;">${crop.name}</div>
+<div class="tank-summary-name" style="font-size: 14px;">${this.sanitizeHTML(crop.name)}</div>
 </div>
 <div class="tank-summary-stats">
 <div class="tank-summary-stat">
@@ -5152,7 +5481,7 @@ survival = '~' + estSurvivalRate.toFixed(0) + '%';
 }
 
 // Populate Modal
-document.getElementById('endCropTankName').textContent = tank.name;
+document.getElementById('endCropTankName').textContent = this.sanitizeHTML(tank.name);
 document.getElementById('endCropDoc').textContent = `DOC: ${doc}`;
 document.getElementById('endCropTotalFeed').textContent = `${totalFeed.toFixed(1)} kg`;
 document.getElementById('endCropTotalHarvest').textContent = `${totalHarvest.toFixed(1)} kg`;
@@ -5348,7 +5677,7 @@ const tank = this.getTankById(tankId);
 if (!tank) return;
 
 
-this.showConfirmModal(`Start new crop cycle for ${tank.name}? This will reset all data.`, 'Start New Crop').then(confirmed => {
+this.showConfirmModal(`Start new crop cycle for ${this.sanitizeHTML(tank.name)}? This will reset all data.`, 'Start New Crop').then(confirmed => {
 if (confirmed) {
 // Archive old data
 const archiveId = `${tank.id}_crop_${Date.now()}`;
@@ -5357,7 +5686,7 @@ const archivedTank = JSON.parse(JSON.stringify(tank));
 archivedTank.id = archiveId;
 archivedTank.status = 'archived';
 archivedTank.farmId = `${tank.farmId}_archive`; // Hide from current farm lists
-archivedTank.name = `${tank.name} (Ended ${new Date().toLocaleDateString()})`;
+archivedTank.name = `${this.sanitizeHTML(tank.name)} (Ended ${new Date().toLocaleDateString()})`;
 this.state.tanks.push(archivedTank);
 
 // Move feed entries to archive
@@ -5540,7 +5869,7 @@ const todayFeed = entries.filter(e => e.date === this.currentDate).reduce((sum, 
 const card = document.createElement('div');
 card.className = 'comparison-card';
 card.innerHTML = `
-<h4 style="margin-bottom: 12px;">${tank.name}</h4>
+<h4 style="margin-bottom: 12px;">${this.sanitizeHTML(tank.name)}</h4>
 <div style="font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 8px;">${todayFeed.toFixed(1)}kg</div>
 <div style="font-size: 12px; color: var(--gray);">Today's Feed</div>
 <div style="margin-top: 12px; font-size: 11px; color: var(--gray);">
