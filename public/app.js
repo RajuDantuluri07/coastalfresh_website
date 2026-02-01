@@ -1,0 +1,6706 @@
+// ===== CENTRAL APP STATE (Prepared for future use) =====
+const appState = {
+  currentFarmId: null,
+  currentTankId: null,
+  feedingMode: 'BLIND', // BLIND | TRAY
+  todayFeedLogs: []
+};
+
+class AquaRythu {
+constructor() {
+this.state = {
+farms: [],
+tanks: [],
+feedEntries: [],
+harvests: [],
+waterQuality: [],
+applications: [],
+inventory: { totalKg: 0 },
+            // Disease / health logs per tank
+            diseases: [],
+medicineInventory: [],
+            settings: {
+currentFarmId: null,
+feedsPerDay: 4,
+feedPrice: 90,
+marketPrice: 350,
+feedJumpThreshold: 30,
+analyticsEnabled: true,
+            feedTimes: [6, 10, 14, 18], // Default feed times
+            trayCheckPercentages: { range1: 0.3, range2: 0.6, range3: 1.0 }, // 3g to 10g per kg
+            farmType: 'semi',          // extensive | semi | intensive
+            blindFeedingDuration: 30   // global default, can be overridden per tank
+}
+};
+
+
+this.initialized = false;
+this.editingEntryId = null;
+this.editingFarmId = null;
+this.editingTankId = null;
+this.editingScheduleTankId = null;
+this.transitionTankId = null;
+this.activeLogTankId = null;
+this.currentCheck = {};
+this.viewMode = 'today';
+this.analyticsEvents = [];
+this.userId = this.getOrCreateUserId();
+this.feedJumpDetected = {};
+this.pondSwitchCount = 0;
+this.lastPondSwitchTime = null;
+this.pondComparisonTooltipShown = false;
+this.ignoredBlindTransitions = new Set();
+this.charts = {};
+this.currentChartTab = 'feed';
+this.chartDateRange = 30;
+this.isSaving = false;
+this.saveQueue = [];
+
+if (document.readyState === 'loading') {
+document.addEventListener('DOMContentLoaded', () => this.init());
+} else {
+this.init();
+}
+}
+
+get currentDate() {
+return this.getFormattedDate();
+}
+
+// ===== LIFECYCLE AWARENESS SYSTEM =====
+// Pond lifecycle states
+get LIFECYCLE_STATES() {
+return {
+PRE_STOCK: 'PRE_STOCK',
+BLIND_FEED: 'BLIND_FEED',
+TRAY_ACTIVE: 'TRAY_ACTIVE',
+OPTIMIZATION: 'OPTIMIZATION',
+HARVEST_READY: 'HARVEST_READY',
+HARVESTED: 'HARVESTED'
+};
+}
+
+// Lifecycle state configuration
+getLifecycleConfig() {
+return {
+PRE_STOCK: {
+label: 'Pre-Stocking',
+icon: '🔧',
+color: '#9E9E9E',
+bgColor: '#F5F5F5',
+description: 'Pond preparation phase',
+docRange: [null, 0]
+},
+BLIND_FEED: {
+label: 'Blind Feeding',
+icon: '🌱',
+color: '#FF9800',
+bgColor: '#FFF3E0',
+description: 'Initial growth without tray checks',
+docRange: [0, 30]
+},
+TRAY_ACTIVE: {
+label: 'Tray Training',
+icon: '📊',
+color: '#2196F3',
+bgColor: '#E3F2FD',
+description: 'Active tray-based feeding',
+docRange: [30, 60]
+},
+OPTIMIZATION: {
+label: 'Optimization',
+icon: '⚡',
+color: '#4CAF50',
+bgColor: '#E8F5E9',
+description: 'Peak growth optimization',
+docRange: [60, 90]
+},
+HARVEST_READY: {
+label: 'Harvest Ready',
+icon: '🎯',
+color: '#9C27B0',
+bgColor: '#F3E5F5',
+description: 'Ready for harvest',
+docRange: [90, 120]
+},
+HARVESTED: {
+label: 'Harvested',
+icon: '✅',
+color: '#607D8B',
+bgColor: '#ECEFF1',
+description: 'Crop completed',
+docRange: [120, null]
+}
+};
+}
+
+// Calculate lifecycle state based on DOC and tank data
+calculateLifecycleState(tank) {
+if (!tank) return this.LIFECYCLE_STATES.PRE_STOCK;
+
+const doc = this.getDaysOld(tank.stockingDate);
+const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
+const hasTransitioned = tank.hasTransitionedFromBlind;
+const status = tank.status;
+
+if (status === 'harvested' || status === 'archived') {
+return this.LIFECYCLE_STATES.HARVESTED;
+}
+
+if (status === 'inactive') {
+return this.LIFECYCLE_STATES.PRE_STOCK;
+}
+
+if (doc < 0) {
+return this.LIFECYCLE_STATES.PRE_STOCK;
+}
+
+if (doc <= blindDuration && !hasTransitioned) {
+return this.LIFECYCLE_STATES.BLIND_FEED;
+}
+
+const trayEntries = this.state.feedEntries.filter(e => 
+e.tankId === tank.id && 
+e.trayResult && 
+e.trayResult !== 'pending' && 
+e.trayResult !== 'blind-fed'
+);
+
+if (doc <= 60 || trayEntries.length < 20) {
+return this.LIFECYCLE_STATES.TRAY_ACTIVE;
+}
+
+if (doc <= 90) {
+return this.LIFECYCLE_STATES.OPTIMIZATION;
+}
+
+return this.LIFECYCLE_STATES.HARVEST_READY;
+}
+
+// Get lifecycle state info
+getLifecycleStateInfo(state) {
+const config = this.getLifecycleConfig();
+return config[state] || config.PRE_STOCK;
+}
+
+// Update tank lifecycle state
+updateTankLifecycleState(tankId) {
+const tank = this.getTankById(tankId);
+if (!tank) return;
+
+const newState = this.calculateLifecycleState(tank);
+const oldState = tank.lifecycleState;
+
+if (oldState !== newState) {
+tank.lifecycleState = newState;
+tank.lifecycleStateUpdatedAt = new Date().toISOString();
+this.saveTanks();
+this.trackEvent('lifecycle_transition', {
+tank_id: tankId,
+from_state: oldState,
+to_state: newState,
+doc: this.getDaysOld(tank.stockingDate)
+});
+}
+
+return newState;
+}
+
+// Update all tank lifecycle states
+updateAllLifecycleStates() {
+this.state.tanks.forEach(tank => {
+if (tank.status !== 'archived') {
+this.updateTankLifecycleState(tank.id);
+}
+});
+}
+
+// Check if feature is available in current lifecycle state
+isFeatureAvailable(tank, feature) {
+const state = tank.lifecycleState || this.calculateLifecycleState(tank);
+const featureMatrix = {
+PRE_STOCK: {
+canLogFeed: false,
+canCheckTray: false,
+canViewSchedule: false,
+canHarvest: false,
+showBlindSchedule: false
+},
+BLIND_FEED: {
+canLogFeed: true,
+canCheckTray: false,
+canViewSchedule: true,
+canHarvest: false,
+showBlindSchedule: true
+},
+TRAY_ACTIVE: {
+canLogFeed: true,
+canCheckTray: true,
+canViewSchedule: true,
+canHarvest: false,
+showBlindSchedule: false
+},
+OPTIMIZATION: {
+canLogFeed: true,
+canCheckTray: true,
+canViewSchedule: true,
+canHarvest: false,
+showBlindSchedule: false
+},
+HARVEST_READY: {
+canLogFeed: true,
+canCheckTray: true,
+canViewSchedule: true,
+canHarvest: true,
+showBlindSchedule: false
+},
+HARVESTED: {
+canLogFeed: false,
+canCheckTray: false,
+canViewSchedule: false,
+canHarvest: false,
+showBlindSchedule: false
+}
+};
+
+return featureMatrix[state]?.[feature] || false;
+}
+
+
+trackEvent(eventName, metadata = {}) {
+if (!this.state.settings.analyticsEnabled) return;
+const event = {
+event: eventName,
+user_id: this.userId,
+timestamp: new Date().toISOString(),
+...metadata
+};
+this.analyticsEvents.push(event);
+// Save events to localStorage
+this.saveAnalyticsEvents();
+this.handleAnalyticsEvent(eventName, metadata);
+}
+
+saveAnalyticsEvents() {
+  return this.enqueueSave(() => {
+    try {
+      localStorage.setItem('aquabook_analytics', JSON.stringify(this.analyticsEvents));
+    } catch (e) {
+      console.error('Failed to save analytics events:', e);
+      // Do not block main flow; surface a toast for visibility
+      this.showToast('Failed to persist analytics events.', 'warning');
+      throw e;
+    }
+  });
+}
+
+// Lightweight error reporting
+reportError(err, context = {}) {
+  try {
+    const payload = {
+      message: (err && err.message) ? err.message : String(err),
+      stack: err && err.stack ? err.stack : null,
+      user_id: this.userId,
+      ts: new Date().toISOString(),
+      context
+    };
+    // Save to analytics events as an 'error' event for offline collection
+    this.analyticsEvents.push({ event: 'client_error', payload });
+    // Try to send to configured endpoint if provided
+    const endpoint = (this.state && this.state.settings && this.state.settings.errorEndpoint) ? this.state.settings.errorEndpoint : null;
+    if (endpoint) {
+      fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(e => console.warn('Error reporting failed:', e));
+    } else {
+      // fallback: just console.log
+      console.warn('Error reported (no endpoint):', payload);
+    }
+    // Attempt to persist analytics (non-blocking)
+    try { this.saveAnalyticsEvents(); } catch (e) { /* ignore */ }
+  } catch (e) {
+    console.error('reportError failed:', e);
+  }
+}
+
+checkBackupStatus() {
+const banner = document.getElementById('backupWarningBanner');
+if (!banner) return;
+
+const lastBackup = this.state.settings.lastBackupDate;
+const backupText = document.getElementById('backupWarningText');
+if (!backupText) return;
+if (!lastBackup) {
+banner.style.display = 'block';
+backupText.textContent = "You haven't backed up your data yet.";
+return;
+}
+
+const days = this.getDaysOld(lastBackup);
+if (days > 7) {
+banner.style.display = 'block';
+backupText.textContent = `Last backup was ${days} days ago.`;
+} else {
+banner.style.display = 'none';
+}
+}
+
+renderFeedWasteSummary() {
+const card = document.getElementById('feedWasteCard');
+if (card) card.style.display = 'none';
+}
+
+getOrCreateUserId() {
+let userId = localStorage.getItem('aquabook_user_id');
+if (!userId) {
+userId = 'user_' + Math.random().toString(36).substring(2, 11);
+localStorage.setItem('aquabook_user_id', userId);
+}
+return userId;
+}
+
+hasPermission(perm) { return true; }
+can(feature) { return true; }
+
+handleAnalyticsEvent(eventName, metadata) {
+switch(eventName) {
+case 'log_feed':
+break;
+case 'log_feed_7_days':
+break;
+case 'feed_jump_detected':
+this.showFeedJumpBanner(metadata.pond_id);
+break;
+case 'open_performance_tab':
+this.handlePerformanceTabOpen();
+break;
+case 'click_compare_ponds':
+this.handlePondComparisonClick();
+break;
+case 'click_export':
+this.handleExportClick();
+break;
+}
+}
+
+detectFeedJump(tankId, currentAmount) {
+const tank = this.getTankById(tankId);
+if (!tank) return false;
+const yesterday = new Date();
+yesterday.setDate(yesterday.getDate() - 1);
+const yesterdayStr = this.getFormattedDate(yesterday);
+const todayEntries = this.state.feedEntries.filter(e =>
+e.tankId === tankId && e.date === this.currentDate
+);
+const yesterdayEntries = this.state.feedEntries.filter(e =>
+e.tankId === tankId && e.date === yesterdayStr
+);
+const todayTotal = todayEntries.reduce((sum, e) => sum + e.amount, 0);
+const yesterdayTotal = yesterdayEntries.reduce((sum, e) => sum + e.amount, 0);
+if (yesterdayTotal === 0) return false;
+const increasePercentage = ((todayTotal - yesterdayTotal) / yesterdayTotal) * 100;
+const threshold = this.state.settings.feedJumpThreshold || 30;
+if (increasePercentage >= threshold) {
+// Check if we already detected a jump today
+const key = `${tankId}_${this.currentDate}`;
+if (!this.feedJumpDetected[key]) {
+this.feedJumpDetected[key] = true;
+// Track the event
+this.trackEvent('feed_jump_detected', {
+pond_id: tankId,
+increase_percentage: increasePercentage.toFixed(1),
+yesterday_feed: yesterdayTotal,
+today_feed: todayTotal,
+doc: this.getDaysOld(tank.stockingDate)
+});
+return true;
+}
+}
+return false;
+}
+
+
+
+
+showFeedJumpBanner(tankId) {
+const banner = document.getElementById('feedJumpBanner');
+if (banner) {
+banner.classList.add('show');
+// Auto-hide after 10 seconds
+setTimeout(() => {
+banner.classList.remove('show');
+}, 10000);
+}
+}
+
+handlePerformanceTabOpen() {
+// All features available to all users
+}
+
+showPondComparisonTooltip() {
+const tooltip = document.getElementById('pondComparisonTooltip');
+if (tooltip) {
+tooltip.style.display = 'block';
+setTimeout(() => {
+tooltip.style.display = 'none';
+}, 5000);
+}
+}
+
+handleExportClick() {
+this.exportReportData();
+}
+
+loadAnalyticsEvents() {
+try {
+const saved = localStorage.getItem('aquabook_analytics');
+this.analyticsEvents = saved ? JSON.parse(saved) : [];
+} catch (e) {
+this.analyticsEvents = [];
+}
+}
+
+loadAllData() {
+const safeParse = (key, fallback) => {
+try {
+const data = localStorage.getItem(key);
+const parsed = data ? JSON.parse(data) : fallback;
+return parsed !== null ? parsed : fallback;
+} catch (e) {
+console.error(`Error parsing ${key}:`, e);
+return fallback;
+}
+};
+
+const safeArray = (data) => Array.isArray(data) ? data.filter(item => item !== null && item !== undefined) : [];
+
+this.state.users = safeArray(safeParse('aquabook_users', []));
+this.state.farms = safeArray(safeParse('aquabook_farms', []));
+this.state.tanks = safeArray(safeParse('aquabook_tanks', []));
+this.state.feedEntries = safeArray(safeParse('aquabook_entries', []));
+this.state.harvests = safeArray(safeParse('aquabook_harvests', []));
+this.state.waterQuality = safeArray(safeParse('aquabook_water_quality', []));
+this.state.applications = safeArray(safeParse('aquabook_applications', []));
+this.state.inventory = safeParse('aquabook_inventory', { totalKg: 0 });
+this.state.medicineInventory = safeArray(safeParse('aquabook_medicine', []));
+this.state.diseases = safeArray(safeParse('aquabook_diseases', []));
+
+const savedSettings = safeParse('aquabook_settings', null);
+if (savedSettings && typeof savedSettings === 'object') {
+this.state.settings = { ...this.state.settings, ...savedSettings };
+if (!this.state.settings.supplements || !Array.isArray(this.state.settings.supplements)) {
+this.state.settings.supplements = ['Probiotic', 'Mineral Mix', 'Vitamin C'];
+}
+if (!this.state.settings.feedsPerDay) {
+this.state.settings.feedsPerDay = 4;
+}
+if (!this.state.settings.blindFeedingDuration) this.state.settings.blindFeedingDuration = 30;
+if (!this.state.settings.feedPrice) {
+this.state.settings.feedPrice = 90;
+}
+if (!this.state.settings.marketPrice) {
+this.state.settings.marketPrice = 350;
+}
+if (!this.state.settings.feedJumpThreshold) {
+this.state.settings.feedJumpThreshold = 30;
+}
+if (!this.state.settings.trayCheckPercentages) {
+this.state.settings.trayCheckPercentages = { range1: 0.3, range2: 0.6, range3: 1.0 };
+}
+if (!this.state.settings.feedTimes || this.state.settings.feedTimes.length === 0) {
+// Migration: Create default times based on old firstFeedTime or default
+const start = this.state.settings.firstFeedTime || 6;
+const count = this.state.settings.feedsPerDay || 4;
+const interval = 16 / Math.max(1, count);
+this.state.settings.feedTimes = Array.from({length: count}, (_, i) => Math.floor(start + (i * interval)));
+}
+} else {
+this.saveSettings();
+}
+
+// Load backup date separately if not in settings object (migration)
+if (!this.state.settings.lastBackupDate) {
+this.state.settings.lastBackupDate = safeParse('aquabook_last_backup', null);
+}
+
+// LIFECYCLE MIGRATION: Initialize lifecycle states for existing tanks
+this.state.tanks.forEach(tank => {
+if (!tank.lifecycleState) {
+tank.lifecycleState = this.calculateLifecycleState(tank);
+tank.lifecycleStateUpdatedAt = new Date().toISOString();
+}
+});
+}
+
+init() {
+try {
+this.showLoading(true);
+this.loadAllData();
+this.updateAllLifecycleStates();
+this.setupUI();
+this.checkFirstTimeUser();
+this.renderAll();
+this.setupEventListeners();
+
+// Load analytics events
+this.loadAnalyticsEvents();
+
+setTimeout(() => {
+this.showLoading(false);
+this.initialized = true;
+this.showToast(`Welcome to AquaRythu!`, 'success');
+// Track app open
+this.trackEvent('app_open');
+    // Global error capture for client-side issues
+    try {
+      window.addEventListener('error', (ev) => {
+        try { this.reportError(ev.error || ev.message || 'window.error', { filename: ev.filename, lineno: ev.lineno, colno: ev.colno }); } catch (e) { console.error(e); }
+      });
+      window.addEventListener('unhandledrejection', (ev) => {
+        try { this.reportError(ev.reason || 'unhandledrejection', { promise: true }); } catch (e) { console.error(e); }
+      });
+    } catch (e) {
+      console.warn('Global error handlers could not be registered', e);
+    }
+}, 800);
+} catch (error) {
+this.reportError(error, { phase: 'init' });
+this.showLoading(false);
+this.showToast("Something went wrong. Please refresh.", "error");
+}
+}
+
+saveAllData() {
+return this.enqueueSave(() => {
+try {
+localStorage.setItem('aquabook_farms', JSON.stringify(this.state.farms));
+localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
+localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
+localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
+localStorage.setItem('aquabook_water_quality', JSON.stringify(this.state.waterQuality));
+localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
+localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
+localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
+localStorage.setItem('aquabook_diseases', JSON.stringify(this.state.diseases || []));
+localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
+this.saveAnalyticsEvents();
+} catch (e) {
+console.error('Failed to save all data:', e);
+this.showToast('Failed to save data. Check storage.', 'error');
+throw e;
+}
+});
+}
+
+// BUG #2 FIX: Queue-based save system to prevent race conditions
+enqueueSave(saveFn) {
+return new Promise((resolve, reject) => {
+this.saveQueue.push({ fn: saveFn, resolve, reject });
+this.processSaveQueue();
+});
+}
+
+async processSaveQueue() {
+// If already saving, wait for the queue to be processed
+if (this.isSaving) return;
+
+while (this.saveQueue.length > 0) {
+this.isSaving = true;
+const { fn, resolve, reject } = this.saveQueue.shift();
+try {
+  const result = fn();
+  if (result && typeof result.then === 'function') {
+    await result;
+  }
+  resolve();
+} catch (e) {
+reject(e);
+}
+this.isSaving = false;
+}
+}
+
+saveFarms() { 
+  return this.enqueueSave(() => {
+    try {
+      localStorage.setItem('aquabook_farms', JSON.stringify(this.state.farms));
+    } catch (e) {
+
+      console.error('Failed to save farms:', e);
+      if (e.name === 'QuotaExceededError') {
+        this.showToast('Storage full! Please export and clear old data.', 'error');
+      } else if (e instanceof TypeError) {
+        this.showToast('Failed to save farms: Data format error.', 'error');
+      } else {
+        this.showToast('Failed to save farms. Check browser storage settings.', 'error');
+      }
+      throw e;
+    }
+  });
+}
+
+saveTanks() { 
+  return this.enqueueSave(() => {
+    try {
+      localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
+    } catch (e) {
+      console.error('Failed to save tanks:', e);
+      if (e.name === 'QuotaExceededError') {
+        this.showToast('Storage full! Please export and clear old data.', 'error');
+      } else if (e instanceof TypeError) {
+        this.showToast('Failed to save tanks: Data format error.', 'error');
+      } else {
+        this.showToast('Failed to save tanks. Check browser storage settings.', 'error');
+      }
+      throw e;
+    }
+  });
+}
+
+saveFeedEntries() { 
+  return this.enqueueSave(() => {
+    try {
+      localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
+    } catch (e) {
+
+      console.error('Failed to save feed entries:', e);
+      if (e.name === 'QuotaExceededError') {
+        this.showToast('Storage full! Please export and clear old data.', 'error');
+      } else if (e instanceof TypeError) {
+        this.showToast('Failed to save feed entries: Data format error.', 'error');
+      } else {
+        this.showToast('Failed to save feed entries. Check browser storage settings.', 'error');
+      }
+      throw e;
+    }
+  });
+}
+
+saveHarvests() { 
+  return this.enqueueSave(() => {
+    try {
+      localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
+    } catch (e) {
+
+      console.error('Failed to save harvests:', e);
+      if (e.name === 'QuotaExceededError') {
+        this.showToast('Storage full! Please export and clear old data.', 'error');
+      } else if (e instanceof TypeError) {
+        this.showToast('Failed to save harvests: Data format error.', 'error');
+      } else {
+        this.showToast('Failed to save harvests. Check browser storage settings.', 'error');
+      }
+      throw e;
+    }
+  });
+}
+
+saveWaterQualityData() { 
+  return this.enqueueSave(() => {
+    try {
+      localStorage.setItem('aquabook_water_quality', JSON.stringify(this.state.waterQuality));
+    } catch (e) {
+
+      console.error('Failed to save water quality data:', e);
+      if (e.name === 'QuotaExceededError') {
+        this.showToast('Storage full! Please export and clear old data.', 'error');
+      } else if (e instanceof TypeError) {
+        this.showToast('Failed to save water quality data: Data format error.', 'error');
+      } else {
+        this.showToast('Failed to save water quality data. Check browser storage settings.', 'error');
+      }
+      throw e;
+    }
+  });
+}
+
+saveApplications() { 
+  return this.enqueueSave(() => {
+    try {
+      localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
+    } catch (e) {
+
+      console.error('Failed to save applications:', e);
+      if (e.name === 'QuotaExceededError') {
+        this.showToast('Storage full! Please export and clear old data.', 'error');
+      } else if (e instanceof TypeError) {
+        this.showToast('Failed to save applications: Data format error.', 'error');
+      } else {
+        this.showToast('Failed to save applications. Check browser storage settings.', 'error');
+      }
+      throw e;
+    }
+  });
+}
+
+saveInventory() { 
+  return this.enqueueSave(() => {
+    try {
+      localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
+    } catch (e) {
+
+      console.error('Failed to save inventory:', e);
+      if (e.name === 'QuotaExceededError') {
+        this.showToast('Storage full! Please export and clear old data.', 'error');
+      } else if (e instanceof TypeError) {
+        this.showToast('Failed to save inventory: Data format error.', 'error');
+      } else {
+        this.showToast('Failed to save inventory. Check browser storage settings.', 'error');
+      }
+      throw e;
+    }
+  });
+}
+
+saveMedicineInventory() { 
+  return this.enqueueSave(() => {
+    try {
+      localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
+    } catch (e) {
+
+      console.error('Failed to save medicine inventory:', e);
+      if (e.name === 'QuotaExceededError') {
+        this.showToast('Storage full! Please export and clear old data.', 'error');
+      } else if (e instanceof TypeError) {
+        this.showToast('Failed to save medicine inventory: Data format error.', 'error');
+      } else {
+        this.showToast('Failed to save medicine inventory. Check browser storage settings.', 'error');
+      }
+      throw e;
+    }
+  });
+}
+
+saveDiseases() {
+  return this.enqueueSave(() => {
+    try {
+      localStorage.setItem('aquabook_diseases', JSON.stringify(this.state.diseases || []));
+    } catch (e) {
+      console.error('Failed to save diseases:', e);
+      if (e.name === 'QuotaExceededError') {
+        this.showToast('Storage full! Please export and clear old data.', 'error');
+      } else if (e instanceof TypeError) {
+        this.showToast('Failed to save diseases: Data format error.', 'error');
+      } else {
+        this.showToast('Failed to save diseases. Check browser storage settings.', 'error');
+      }
+      throw e;
+    }
+  });
+}
+
+saveSettings() { 
+  return this.enqueueSave(() => {
+    try {
+      localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
+    } catch (e) {
+
+      console.error('Failed to save settings:', e);
+      if (e.name === 'QuotaExceededError') {
+        this.showToast('Storage full! Please export and clear old data.', 'error');
+      } else if (e instanceof TypeError) {
+        this.showToast('Failed to save settings: Data format error.', 'error');
+      } else {
+        this.showToast('Failed to save settings. Check browser storage settings.', 'error');
+      }
+      throw e;
+    }
+  });
+}
+
+showLoading(show) {
+const loader = document.getElementById('loading');
+if (show) loader.classList.add('active');
+else loader.classList.remove('active');
+}
+
+showToast(message, type = 'success') {
+const toast = type === 'error' ? document.getElementById('errorToast') : document.getElementById('successToast');
+const msgSpan = toast.querySelector('span');
+msgSpan.textContent = message;
+toast.classList.add('show');
+setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+
+// Shows a custom alert modal (non-blocking)
+showAlertModal(message, title = 'Alert') {
+const modal = document.createElement('div');
+modal.className = 'modal-overlay active';
+modal.id = 'alertModal_' + Date.now();
+modal.innerHTML = `
+<div class="modal-content" style="max-width: 400px;">
+<div class="modal-header">
+<h3>${this.sanitizeHTML(title)}</h3>
+<button class="close-modal" onclick="document.getElementById('${modal.id}').remove()">×</button>
+</div>
+<div class="modal-body">
+<p style="margin: 0; line-height: 1.6; color: var(--gray-700);">${this.sanitizeHTML(message)}</p>
+</div>
+<div class="modal-footer">
+<button class="btn btn-primary" onclick="document.getElementById('${modal.id}').remove()">OK</button>
+</div>
+</div>
+`;
+document.body.appendChild(modal);
+// Auto-focus OK button for accessibility
+modal.querySelector('.btn-primary').focus();
+}
+
+// Shows a custom confirmation modal (returns Promise)
+showConfirmModal(message, title = 'Confirm', confirmText = 'Yes', cancelText = 'Cancel') {
+return new Promise((resolve) => {
+const modal = document.createElement('div');
+modal.className = 'modal-overlay active';
+modal.id = 'confirmModal_' + Date.now();
+modal.innerHTML = `
+<div class="modal-content" style="max-width: 400px;">
+<div class="modal-header">
+<h3>${this.sanitizeHTML(title)}</h3>
+<button class="close-modal" onclick="document.getElementById('${modal.id}').removeAttribute('class'); setTimeout(() => document.getElementById('${modal.id}').remove(), 300);">×</button>
+</div>
+<div class="modal-body">
+<p style="margin: 0; line-height: 1.6; color: var(--gray-700);">${this.sanitizeHTML(message)}</p>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" onclick="document.getElementById('${modal.id}').removeAttribute('class'); setTimeout(() => { document.getElementById('${modal.id}').remove(); }, 300);">${this.sanitizeHTML(cancelText)}</button>
+<button class="btn btn-primary" onclick="document.getElementById('${modal.id}').removeAttribute('class'); setTimeout(() => { document.getElementById('${modal.id}').remove(); }, 300);">${this.sanitizeHTML(confirmText)}</button>
+</div>
+</div>
+`;
+document.body.appendChild(modal);
+const confirmBtn = modal.querySelectorAll('.btn-primary')[0];
+const cancelBtn = modal.querySelector('.btn-secondary');
+const closeModal = () => {
+modal.removeAttribute('class');
+setTimeout(() => { modal.remove(); }, 300);
+};
+confirmBtn.onclick = () => {
+closeModal();
+resolve(true);
+};
+cancelBtn.onclick = () => {
+closeModal();
+resolve(false);
+};
+confirmBtn.focus();
+});
+}
+
+// BUG #5 FIX: Sanitize HTML to prevent XSS attacks
+sanitizeHTML(str) {
+    if (!str || typeof str !== 'string') return '';
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+// Safe attribute escaping for onclick handlers
+escapeAttribute(str) {
+    if (!str || typeof str !== 'string') return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+// BUG FIX #10: Proper timezone handling to prevent DOC calculation errors
+getFormattedDate(date = new Date()) {
+// Convert to local timezone by adjusting for timezone offset
+// This ensures the date string always matches the user's local date
+const d = date instanceof Date ? date : new Date(date);
+// Use local date methods directly instead of UTC with offset adjustment
+const year = d.getFullYear();
+const month = String(d.getMonth() + 1).padStart(2, '0');
+const day = String(d.getDate()).padStart(2, '0');
+return `${year}-${month}-${day}`;
+}
+
+// BUG FIX #10: Proper timezone-aware date comparison for DOC calculation
+getDaysOld(dateStr = new Date()) {
+// If dateStr is a Date object, use getFormattedDate to get normalized string
+const normalizedDateStr = typeof dateStr === 'string' ? dateStr : this.getFormattedDate(dateStr);
+// Parse the date string as local midnight (not UTC)
+const parts = normalizedDateStr.split('-');
+if (parts.length === 3) {
+const year = parseInt(parts[0], 10);
+const month = parseInt(parts[1], 10) - 1;
+const day = parseInt(parts[2], 10);
+// Create date in local timezone
+const targetDate = new Date(year, month, day, 0, 0, 0, 0);
+// Get today's date at local midnight
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+// Calculate difference in days
+const diffTime = today - targetDate;
+const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+return Math.max(0, diffDays); // Never negative
+} else {
+// Fallback for non-string dates
+const d = dateStr instanceof Date ? dateStr : new Date(dateStr);
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+d.setHours(0, 0, 0, 0);
+const diffTime = today - d;
+const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+return Math.max(0, diffDays);
+}
+}
+
+getLunarPhase(date = new Date()) {
+const knownNewMoon = new Date('2000-01-06T18:14:00Z');
+const synodicMonth = 29.53058867;
+const msPerDay = 86400000;
+const diff = date.getTime() - knownNewMoon.getTime();
+const days = diff / msPerDay;
+const age = (days % synodicMonth + synodicMonth) % synodicMonth; // Age in days
+// Shukla Paksha (Waxing) - Ashtami (8) to Navami (9)
+if (age >= 6.5 && age <= 9.5) return { isEvent: true, name: 'Ashtami/Navami (Waxing)' };
+// Krishna Paksha (Waning) - Ashtami (23) to Navami (24)
+if (age >= 21.0 && age <= 24.0) return { isEvent: true, name: 'Ashtami/Navami (Waning)' };
+return { isEvent: false };
+}
+
+checkFirstTimeUser() {
+const hasFarms = this.state.farms.length > 0;
+const lock = document.getElementById('firstTimeLock');
+const navTabs = document.querySelector('.nav-tabs');
+const mainApp = document.getElementById('app');
+const stickyBtn = document.getElementById('stickyLogFeedBtn');
+
+if (!hasFarms) {
+lock.classList.remove('hidden');
+if (navTabs) navTabs.style.display = 'none';
+if (mainApp) mainApp.style.opacity = '0.5';
+if (stickyBtn) stickyBtn.style.display = 'none';
+const farmSelector = document.getElementById('farmSelector');
+if (farmSelector) farmSelector.style.pointerEvents = 'none';
+document.querySelectorAll('.nav-btn').forEach(btn => {
+btn.classList.add('disabled');
+});
+} else {
+lock.classList.add('hidden');
+if (navTabs) navTabs.style.display = 'grid';
+if (mainApp) mainApp.style.opacity = '1';
+if (stickyBtn) stickyBtn.style.display = 'inline-flex';
+const farmSelector = document.getElementById('farmSelector');
+if (farmSelector) farmSelector.style.pointerEvents = 'auto';
+document.querySelectorAll('.nav-btn').forEach(btn => {
+btn.classList.remove('disabled');
+});
+}
+}
+
+setupUI() {
+const currentDateEl = document.getElementById('currentDate');
+if (currentDateEl) {
+currentDateEl.textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+// Setup pricing toggle
+const pricingOptions = document.querySelectorAll('#pricingToggle .pricing-option');
+pricingOptions.forEach(option => {
+option.addEventListener('click', () => {
+pricingOptions.forEach(opt => opt.classList.remove('active'));
+option.classList.add('active');
+this.updatePricingDisplay();
+});
+});
+}
+
+renderAll() {
+this.updateFarmSelector();
+this.renderFarmsList();
+this.renderOverallStats();
+this.renderLogBook();
+this.renderInventorySummary();
+this.renderPerformanceScreen();
+this.renderFeedRecommendation();
+this.checkBackupStatus();
+// Render charts if on analytics screen
+if (document.getElementById('analyticsScreen')?.classList.contains('active')) {
+this.renderCharts();
+}
+
+// Check for blind feeding transitions
+this.checkBlindFeedingTransitions();
+}
+
+updatePerformanceScreenForPlan() {
+// All features are free in MVP v1
+const fcrCard = document.getElementById('fcrCard');
+if (fcrCard) {
+fcrCard.classList.remove('locked');
+const overlay = fcrCard.querySelector('.preview-overlay');
+if (overlay) overlay.remove();
+}
+const fcrTrendEl = document.getElementById('fcrTrend');
+if (fcrTrendEl) {
+fcrTrendEl.style.display = 'inline-block';
+}
+const efficiencyScoreEl = document.getElementById('efficiencyScore');
+const efficiencyCard = efficiencyScoreEl ? efficiencyScoreEl.closest('.performance-card') : null;
+if (efficiencyCard) {
+efficiencyCard.classList.remove('locked');
+}
+}
+
+renderFeedRecommendation() {
+const card = document.getElementById('feedRecommendation');
+const text = document.getElementById('recommendationText');
+const action = document.getElementById('recommendationAction');
+if (!card || !text || !action) { return; }
+
+const currentFarmId = this.state.settings.currentFarmId;
+if (!currentFarmId) return;
+
+const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId && t.status !== 'inactive');
+if (tanks.length === 0) {
+card.style.display = 'none';
+return;
+}
+
+// Analyze recent tray checks
+let wasteCount = 0;
+let emptyCount = 0;
+let totalChecks = 0;
+let severeWasteCount = 0;
+
+tanks.forEach(tank => {
+// Skip recommendation for tanks in blind feeding
+const doc = this.getDaysOld(tank.stockingDate);
+const blindDuration = this.state.settings.blindFeedingDuration || 30;
+if (doc <= blindDuration) return;
+
+const entries = this.state.feedEntries.filter(e => e.tankId === tank.id).sort((a, b) => b.id - a.id);
+const lastEntry = entries[0];
+// Only consider valid tray checks (exclude pending, skipped, blind-fed)
+if (lastEntry && lastEntry.trayResult && !['pending', 'skipped', 'blind-fed'].includes(lastEntry.trayResult)) {
+totalChecks++;
+if (lastEntry.trayResult === 'half') wasteCount++;
+if (lastEntry.trayResult === 'too-much') { wasteCount++; severeWasteCount++; }
+if (lastEntry.trayResult === 'empty') emptyCount++;
+}
+});
+
+if (totalChecks === 0) {
+card.style.display = 'none';
+return;
+}
+
+card.style.display = 'block';
+
+if (severeWasteCount > 0) {
+text.innerHTML = `<strong>${severeWasteCount} ponds</strong> reported excessive feed waste. Immediate action required.`;
+action.innerHTML = `Cut feed by 40-50% in these ponds to prevent water spoilage.`;
+action.style.color = 'var(--danger)';
+} else if (wasteCount > 0) {
+const pct = Math.round((wasteCount / totalChecks) * 100);
+text.innerHTML = `<strong>${pct}% of ponds</strong> reported leftover feed.`;
+action.innerHTML = `Reduce feed by 10-20% in affected ponds.`;
+action.style.color = 'var(--warning-dark)';
+} else if (emptyCount === totalChecks) {
+text.innerHTML = `All ponds reported <strong>empty trays</strong>. Appetite is strong.`;
+action.innerHTML = `Safe to increase feed by 5% (check water quality first).`;
+action.style.color = 'var(--success-dark)';
+} else {
+text.innerHTML = `Feed consumption is <strong>stable</strong> across most ponds.`;
+action.innerHTML = `Maintain current feeding schedule.`;
+action.style.color = 'var(--primary-dark)';
+}
+}
+
+renderOverallStats() {
+document.querySelectorAll('.overall-stats .stat-card').forEach(el => el.classList.remove('loading'));
+
+const currentFarmId = this.state.settings.currentFarmId;
+const farmTanks = currentFarmId ? this.state.tanks.filter(t => t.farmId === currentFarmId) : [];
+const farmTankIds = farmTanks.map(t => t.id);
+const farmFeedEntries = currentFarmId ? this.state.feedEntries.filter(e => farmTankIds.some(id => id === e.tankId)) : [];
+const farmHarvests = currentFarmId ? this.state.harvests.filter(h => farmTankIds.includes(h.tankId)) : [];
+const totalHarvested = farmHarvests.reduce((sum, h) => sum + h.weight, 0);
+
+document.getElementById('totalTanks').textContent = farmTanks.length;
+
+
+const totalFeed = farmFeedEntries.reduce((sum, entry) => {
+const amount = typeof entry.amount === 'number' && entry.amount >= 0 ? entry.amount : 0;
+return sum + amount;
+}, 0);
+document.getElementById('totalFeed').innerHTML = `${totalFeed.toFixed(1)} <span class="unit">kg</span>`;
+
+const todayFeed = farmFeedEntries
+.filter(e => e.date === this.currentDate)
+.reduce((sum, e) => {
+const amount = typeof e.amount === 'number' && e.amount >= 0 ? e.amount : 0;
+return sum + amount;
+}, 0);
+document.getElementById('feedToday').innerHTML = `${todayFeed.toFixed(1)} <span class="unit">kg</span>`;
+
+const totalBiomass = farmTanks.filter(t => t.status !== 'inactive').reduce((sum, tank) => {
+const biomass = typeof tank.biomass === 'number' && tank.biomass >= 0 ? tank.biomass : 0;
+return sum + biomass;
+}, 0);
+document.getElementById('totalBiomass').innerHTML = `${totalBiomass.toFixed(1)} <span class="unit">kg</span>`;
+
+const totalProduction = totalBiomass + totalHarvested;
+// Ensure all values are valid numbers before calculation
+const validTotalFeed = !isNaN(totalFeed) && totalFeed >= 0 ? totalFeed : 0;
+const validTotalProduction = !isNaN(totalProduction) && totalProduction >= 0 ? totalProduction : 0;
+const avgFCR = validTotalProduction > 0 ? (validTotalFeed / validTotalProduction).toFixed(2) : '0.00';
+const avgFCREl = document.getElementById('avgFCR');
+if (avgFCREl) avgFCREl.textContent = avgFCR;
+
+const validChecks = farmFeedEntries.filter(e => ['empty', 'little', 'half', 'too-much'].includes(e.trayResult));
+const wasteChecks = validChecks.filter(e => ['half', 'too-much'].includes(e.trayResult));
+const wastePctVal = validChecks.length > 0 ? ((wasteChecks.length / validChecks.length) * 100) : 0;
+const wastePct = wastePctVal.toFixed(1);
+const feedWasteEl = document.getElementById('feedWaste');
+if (feedWasteEl) {
+feedWasteEl.innerHTML = `${wastePct}<span class="unit">%</span>`;
+if (wastePctVal <= 10) feedWasteEl.style.color = 'var(--success)';
+else if (wastePctVal <= 20) feedWasteEl.style.color = 'var(--warning)';
+else feedWasteEl.style.color = 'var(--danger)';
+}
+
+// Update Check Trays button with count
+const pendingChecks = farmFeedEntries.filter(e => e.trayResult === 'pending').length;
+const checkBtn = document.querySelector('.quick-actions-grid .btn-info');
+if (checkBtn) {
+if (pendingChecks > 0) {
+checkBtn.innerHTML = `<i class="fas fa-search"></i> Check Trays <span style="background:rgba(0,0,0,0.2); padding:2px 8px; border-radius:10px; font-size:12px; margin-left:4px;">${pendingChecks}</span>`;
+} else {
+checkBtn.innerHTML = `<i class="fas fa-search"></i> Check Trays`;
+}
+}
+}
+
+renderInventorySummary() {
+const feedStock = this.state.inventory.totalKg || 0;
+const displayFeedStock = document.getElementById('displayFeedStock');
+const displayMedStock = document.getElementById('displayMedStock');
+if (displayFeedStock) displayFeedStock.innerHTML = `${feedStock.toFixed(1)} <span class="unit">kg</span>`;
+if (displayMedStock) displayMedStock.innerHTML = `${this.state.medicineInventory.length} <span class="unit">Items</span>`;
+}
+
+renderFarmsList() {
+const container = document.getElementById('farmsList');
+const headerContainer = document.getElementById('farmHeaderContainer');
+container.innerHTML = '';
+if (headerContainer) headerContainer.innerHTML = '';
+
+if (this.state.farms.length === 0) {
+container.innerHTML = `<div class="empty-state">
+<i class="fas fa-water"></i>
+<h3>No Farms Found</h3>
+<p>Add your first farm to start tracking.</p>
+</div>`;
+return;
+}
+
+const currentFarmId = this.state.settings.currentFarmId;
+let farmToRender = this.state.farms.find(f => f.id === currentFarmId);
+
+if (!farmToRender && this.state.farms.length > 0) {
+farmToRender = this.state.farms[0];
+this.state.settings.currentFarmId = farmToRender.id;
+this.saveSettings();
+this.updateFarmSelector();
+}
+
+if (!farmToRender) return;
+
+const farm = farmToRender;
+const farmTanks = this.state.tanks.filter(tank => tank.farmId === farm.id);
+
+if (headerContainer) {
+headerContainer.innerHTML = `
+<div class="farm-header" style="border: 2px solid var(--border); border-radius: var(--radius);">
+<div class="farm-name">
+<i class="fas fa-tractor"></i>
+<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${farm.name}</span>
+</div>
+<div class="farm-stats">
+<div class="farm-stat">
+<span class="farm-stat-value">${farmTanks.length}</span>
+Tanks
+</div>
+</div>
+<div class="farm-actions" style="display: flex; gap: 8px; flex-shrink: 0;">
+<button class="btn btn-sm" style="border: 1px solid var(--border); background: white; color: var(--gray); min-width: 44px; min-height: 44px;" onclick="app.openSettingsModal()">
+<i class="fas fa-cog"></i><span class="action-label" style="margin-left: 6px;">Farm Settings</span>
+</button>
+<button class="btn btn-sm btn-secondary" style="min-width: 44px; min-height: 44px;" onclick="app.editFarm('${farm.id}')">
+<i class="fas fa-edit"></i><span class="action-label" style="margin-left: 6px;">Edit Farm</span>
+</button>
+<button class="btn btn-sm btn-primary" style="min-width: 44px; min-height: 44px;" onclick="app.openTankModal('${farm.id}')">
+<i class="fas fa-plus"></i><span class="action-label" style="margin-left: 6px;">Add Tank</span>
+</button>
+</div>
+</div>
+`;
+}
+
+if (farmTanks.length === 0) {
+container.innerHTML = `
+<div class="empty-state" style="padding: 30px 20px;">
+<i class="fas fa-water" style="font-size: 32px; margin-bottom: 12px; opacity: 0.5;"></i>
+<h3 style="font-size: 16px; margin-bottom: 8px;">No Tanks Yet</h3>
+<p style="font-size: 13px; margin-bottom: 16px;">Add your first tank to start tracking.</p>
+<button class="btn btn-primary" onclick="app.openTankModal('${farm.id}')">
+<i class="fas fa-plus"></i> Add New Tank
+</button>
+</div>
+`;
+} else {
+// Add "Add Tank" card to the grid for easier access
+const addTankCard = `
+<div class="tank-summary-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed var(--border); cursor: pointer; min-height: 180px; background: var(--light);" onclick="app.openTankModal('${farm.id}')">
+<div style="width: 50px; height: 50px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+<i class="fas fa-plus" style="color: var(--primary); font-size: 20px;"></i>
+</div>
+<div style="font-weight: 600; color: var(--gray);">Add New Tank</div>
+</div>
+`;
+container.innerHTML = `
+<div class="tanks-grid" style="padding: 0;">
+${farmTanks.map(tank => this.getTankCardHTML(tank)).join('')}
+${addTankCard}
+</div>
+`;
+}
+}
+
+getTankCardHTML(tank) {
+const doc = this.getDaysOld(tank.stockingDate);
+const isInactive = tank.status === 'inactive';
+const status = doc > 75 ? 'danger' : doc > 50 ? 'warning' : 'good';
+    const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
+    
+    // LIFECYCLE STATE BADGE
+    const lifecycleState = tank.lifecycleState || this.calculateLifecycleState(tank);
+    const lifecycleInfo = this.getLifecycleStateInfo(lifecycleState);
+    const lifecycleBadge = `<span style="background:${lifecycleInfo.bgColor}; color:${lifecycleInfo.color}; font-size:11px; padding:3px 8px; border-radius:999px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">${lifecycleInfo.icon} ${lifecycleInfo.label}</span>`;
+    
+    // Phase labels for first 30 DOC
+    let phaseLabel = '';
+    if (doc <= 3) phaseLabel = 'Phase 1 · Stocking';
+    else if (doc <= 15) phaseLabel = 'Phase 2 · Stabilisation';
+    else if (doc <= 30) phaseLabel = 'Phase 3 · Biomass';
+
+    // Tray mode labels (deprecated in favor of lifecycle state)
+    let trayPhaseLabel = '';
+    if (!isInactive) {
+        if (doc <= blindDuration && !tank.hasTransitionedFromBlind) {
+            trayPhaseLabel = 'Blind Feed Mode';
+        } else if (doc > blindDuration && !tank.hasTransitionedFromBlind) {
+            trayPhaseLabel = 'Tray Training';
+        } else if (tank.hasTransitionedFromBlind) {
+            trayPhaseLabel = 'Tray Active';
+        }
+    }
+
+const allTankEntries = this.state.feedEntries.filter(e => e.tankId === tank.id);
+
+const totalFeed = allTankEntries.reduce((sum, e) => {
+const amount = typeof e.amount === 'number' && e.amount >= 0 ? e.amount : 0;
+return sum + amount;
+}, 0);
+const todayEntries = allTankEntries.filter(e => e.date === this.currentDate);
+const todayFeed = todayEntries.reduce((sum, e) => {
+const amount = typeof e.amount === 'number' && e.amount >= 0 ? e.amount : 0;
+return sum + amount;
+}, 0);
+const currentBiomass = typeof tank.biomass === 'number' && tank.biomass >= 0 ? tank.biomass : 0;
+const tankHarvests = this.state.harvests.filter(h => h.tankId === tank.id);
+const totalHarvested = tankHarvests.reduce((sum, h) => {
+const weight = typeof h.weight === 'number' && h.weight >= 0 ? h.weight : 0;
+return sum + weight;
+}, 0);
+const totalProduction = currentBiomass + totalHarvested;
+const validTotalFeed = !isNaN(totalFeed) ? totalFeed : 0;
+const validTotalProduction = !isNaN(totalProduction) ? totalProduction : 0;
+const estimatedFCR = validTotalProduction > 0 ? (validTotalFeed / validTotalProduction).toFixed(2) : '0.00';
+
+let statusDot = '';
+if (todayEntries.length > 0) {
+const last = todayEntries[todayEntries.length - 1];
+let statusClass = 'status-good';
+if (last.trayResult === 'too-much') statusClass = 'status-bad';
+else if (last.trayResult === 'half' || last.trayResult === 'little') statusClass = 'status-warn';
+statusDot = `<div class="tank-feed-status ${statusClass}" title="Last Feed: ${last.trayResult}"></div>`;
+}
+
+    return `
+    <div class="tank-summary-card ${status} ${isInactive ? 'inactive' : ''}" onclick="app.openTankDetail('${this.escapeAttribute(tank.id)}')">
+${statusDot}
+<div class="tank-summary-header">
+<div class="tank-summary-name">
+${tank.name}
+    ${phaseLabel ? `<span style="background:#eef2ff; color:#3730a3; font-size:10px; padding:2px 6px; border-radius:999px; font-weight:600; margin-left:6px;">${phaseLabel}</span>` : ''}
+</div>
+<div style="display: flex; align-items: center; gap: 8px;">
+    <div class="tank-summary-doc">DOC: ${doc}</div>
+<div class="tank-action-menu">
+<button class="tank-menu-btn" onclick="app.toggleTankMenu('${this.escapeAttribute(tank.id)}'); event.stopPropagation();">
+<i class="fas fa-ellipsis-v"></i>
+</button>
+<div class="tank-menu-dropdown" id="tank-menu-${tank.id}">
+<button class="tank-menu-item" onclick="app.editTank('${this.escapeAttribute(tank.id)}'); event.stopPropagation();">
+<i class="fas fa-edit"></i> Edit Tank
+</button>
+<button class="tank-menu-item delete" onclick="app.deleteTank('${this.escapeAttribute(tank.id)}'); event.stopPropagation();">
+<i class="fas fa-trash"></i> Delete Tank
+</button>
+</div>
+</div>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 12px; font-size: 12px; color: var(--gray);">
+<div>Size: <span style="color: var(--dark); font-weight: 600;">${tank.size || '-'} ac</span></div>
+<div>Est. Stock: <span style="color: var(--dark); font-weight: 600;">${(tank.currentSeed || tank.initialSeed || 0).toLocaleString()}</span></div>
+    <div>Trays: <span style="color: var(--dark); font-weight: 600;">${tank.checkTrays || 2}</span></div>
+</div>
+<div class="tank-summary-stats">
+<div class="tank-summary-stat">
+<span class="tank-summary-label">Feed Today</span>
+<span class="tank-summary-value">${todayFeed.toFixed(1)} kg</span>
+</div>
+<div class="tank-summary-stat">
+<span class="tank-summary-label">Total Feed</span>
+<span class="tank-summary-value">${totalFeed.toFixed(1)} kg</span>
+</div>
+</div>
+
+    <div style="margin-top: 12px; font-size: 12px; color: var(--gray); border-top: 1px solid #eee; padding-top: 8px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+    <span>Biomass: <span style="color: var(--dark); font-weight: 600;">${(tank.biomass || 0).toFixed(0)} kg</span></span>
+    <span>• FCR: <span style="color: var(--primary); font-weight: 600;">${estimatedFCR}</span></span>
+    <span style="margin-left:auto; font-size:10px; color:var(--gray-600);">${lifecycleInfo.description}</span>
+    </div>
+</div>
+`;
+}
+
+renderLogBook() {
+// 1. Setup Container and Tabs
+const logScreen = document.getElementById('logScreen');
+const currentFarmId = this.state.settings.currentFarmId;
+const farmTanks = currentFarmId ? this.state.tanks.filter(t => t.farmId === currentFarmId) : [];
+// Handle Empty State
+const emptyState = document.getElementById('emptyLog');
+if (farmTanks.length === 0) {
+// Hide table container and toolbar
+document.querySelector('.log-toolbar').style.display = 'none';
+document.querySelector('.feed-log-table-container').style.display = 'none';
+emptyState.style.display = 'block';
+emptyState.querySelector('h3').textContent = 'No Tanks Found';
+emptyState.querySelector('p').textContent = 'Add a tank to start logging feed.';
+return;
+}
+emptyState.style.display = 'none';
+document.querySelector('.log-toolbar').style.display = 'flex'; // We'll repurpose or hide this
+document.querySelector('.feed-log-table-container').style.display = 'block';
+
+// 2. Render Tank Tabs (New Logic)
+// We need to inject the tank tabs container if it doesn't exist
+let tabsContainer = document.getElementById('logTankTabs');
+if (!tabsContainer) {
+tabsContainer = document.createElement('div');
+tabsContainer.id = 'logTankTabs';
+tabsContainer.className = 'tank-tabs-wrapper';
+// Insert after screen header
+const header = logScreen.querySelector('.screen-header');
+header.parentNode.insertBefore(tabsContainer, header.nextSibling);
+}
+
+// Set active tank if null or invalid
+if (!this.activeLogTankId || !farmTanks.find(t => t.id === this.activeLogTankId)) {
+this.activeLogTankId = farmTanks[0].id;
+}
+
+// Render Tabs
+tabsContainer.innerHTML = farmTanks.map(tank => `
+<button class="tank-tab ${tank.id === this.activeLogTankId ? 'active' : ''}"
+onclick="app.switchLogTank('${this.escapeAttribute(tank.id)}')">
+<i class="fas fa-water" style="font-size: 18px;"></i>
+<span>${tank.name}</span>
+</button>
+`).join('');
+
+// 3. Render Active Tank Content
+this.renderActiveTankLog(this.activeLogTankId);
+}
+
+switchLogTank(tankId) {
+this.activeLogTankId = tankId;
+this.renderLogBook();
+}
+
+renderActiveTankLog(tankId) {
+const tank = this.getTankById(tankId);
+if (!tank) return;
+
+// Update Toolbar (Date Filters) - Keep existing structure but update context
+// We hide the "Today/Yesterday" global toggle if we want per-tank history,
+// but the prompt says "under that, show last 7 day...".
+// So we keep the toolbar but maybe style it smaller or move it.
+// For now, let's keep the toolbar as is, it controls the list below.
+// 4. Render Feed Plan Card (New)
+// We need a container for this. Let's put it before the toolbar.
+let planContainer = document.getElementById('logFeedPlanContainer');
+if (!planContainer) {
+planContainer = document.createElement('div');
+planContainer.id = 'logFeedPlanContainer';
+const toolbar = document.querySelector('.log-toolbar');
+toolbar.parentNode.insertBefore(planContainer, toolbar);
+}
+
+// Calculate Plan
+const doc = this.getDaysOld(tank.stockingDate);
+const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
+let planAmount = 0;
+let planSource = '';
+let planSub = '';
+let feedsToday = [];
+let planSourceTooltip = '';
+
+// Check Blind Schedule (and ensure not transitioned)
+if (tank.blindSchedule && doc <= blindDuration && !tank.hasTransitionedFromBlind) {
+// Show Day 1 schedule for Day 0 (stocking day)
+const scheduleDoc = doc === 0 ? 1 : doc;
+const schedule = tank.blindSchedule.find(s => s.doc === scheduleDoc);
+if (schedule) {
+planAmount = schedule.amount;
+// Fallback for feeds array if missing (legacy data support)
+const feedsCount = this.state.settings.feedsPerDay || 4;
+feedsToday = schedule.feeds || Array(feedsCount).fill(parseFloat((schedule.amount / feedsCount).toFixed(2)));
+if (schedule.status === 'manual') {
+planSource = `Manual Override`;
+planSourceTooltip = `You have manually set the feed amount for this day.`;
+} else {
+planSource = `Blind feeding based on pond setup`;
+const stockingDensity = (tank.initialSeed && tank.size) ? Math.round(tank.initialSeed / tank.size).toLocaleString() : 'N/A';
+planSourceTooltip = `Based on:\n- Pond Size: ${tank.size || 'N/A'} acres\n- Stocking Density: ${stockingDensity} PL/acre`;
+}
+
+planSub = `${feedsToday.length} feeds: ${feedsToday.map(f => f + 'kg').join(', ')}`;
+}
+}
+// If no blind schedule or past day 30, check last feed/tray
+if (planAmount === 0) {
+const entries = this.state.feedEntries.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
+const lastEntry = entries[0];
+const feedsPerDay = this.state.settings.feedsPerDay || 4;
+
+if (lastEntry) {
+
+const lastAmount = (lastEntry?.amount) ?? 2.0;
+const lastTray = (lastEntry?.trayResult) ?? 'pending';
+const res = this.calculateStrictFeed(lastAmount, lastTray, doc);
+planAmount = res.amount * feedsPerDay;
+feedsToday = Array(feedsPerDay).fill(res.amount);
+planSource = `Suggested Feed`;
+planSub = `Based on last tray: ${lastTray}`;
+} else {
+planAmount = 2.0; // Default start
+feedsToday = Array(feedsPerDay).fill(0.5);
+planSource = 'Initial Feed';
+planSub = 'Start with base amount';
+}
+}
+
+        // 4a. Simplified reminders: do not push water-test / minerals / frequency reminders here.
+        const remindersDiv = document.createElement('div');
+        remindersDiv.style.display = 'none';
+
+// HERO CARD: "One big number" & "Confirm X kg"
+const todayEntries = this.state.feedEntries.filter(e => e.tankId === tankId && e.date === this.currentDate).sort((a, b) => a.id - b.id);
+const nextFeedIndex = todayEntries.length;
+const totalFeedsForDay = feedsToday.length;
+        let heroHTML = '';
+        if (nextFeedIndex < totalFeedsForDay) {
+        const amount = feedsToday[nextFeedIndex];
+        const isBlind = doc <= blindDuration && !tank.hasTransitionedFromBlind;
+let explanation = '';
+if (isBlind) {
+explanation = `Blind feeding (Day ${doc} based on stocking)`;
+} else {
+const entries = this.state.feedEntries.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
+const lastEntry = entries[0];
+let lastResult = lastEntry ? (lastEntry.trayResult || 'None') : 'None';
+if (lastResult === 'too-much') lastResult = 'Too Much';
+else if (lastResult === 'blind-fed') lastResult = 'Blind Fed (Transition)';
+else if (lastResult === 'pending') lastResult = 'Pending Check';
+explanation = `Based on last tray check: <span style="text-transform: capitalize; font-weight: 600;">${lastResult}</span>`;
+
+const traySettings = this.state.settings.trayCheckPercentages || { range1: 0.3, range2: 0.6, range3: 1.0 };
+let pct = traySettings.range1;
+if (doc >= 90) {
+    pct = traySettings.range3;
+} else if (doc >= 60) {
+    pct = traySettings.range2;
+}
+const trayFeedKg = amount * (pct / 100);
+trayFeedGrams = Math.round(trayFeedKg * 1000);
+
+}
+
+heroHTML = `
+<div style="background: white; border: 2px solid ${isBlind ? 'var(--primary)' : 'var(--success)'}; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+<div style="background: ${isBlind ? 'var(--primary)' : 'var(--success)'}; color: white; padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 14px;">
+DOC ${doc}
+</div>
+<div style="font-size: 12px; font-weight: 600; color: var(--gray); text-transform: uppercase;">
+${isBlind ? 'Blind Phase' : 'Tray Phase'}
+</div>
+</div>
+<div style="text-align: center; margin-bottom: 20px;">
+<div style="font-size: 13px; color: var(--gray); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Suggested Feed</div>
+<div style="font-size: 56px; font-weight: 800; color: var(--dark); line-height: 1;">
+${amount} <span style="font-size: 20px; color: var(--gray); font-weight: 600;">kg</span>
+</div>
+${!isBlind && trayFeedGrams > 0 ? `
+<div style="margin-top: 8px; font-size: 16px; font-weight: 600; color: var(--success-dark);">
+    <i class="fas fa-balance-scale"></i>
+    ${trayFeedGrams} grams / check tray
+</div>
+` : ''}
+<div style="font-size: 14px; color: var(--primary); margin-top: 8px; font-weight: 500;">
+${explanation}
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 8px;">
+<button class="btn btn-secondary" onclick="app.skipFeed('${tankId}')" style="justify-content: center; border: 2px solid var(--border); color: var(--gray); padding: 12px 0; width: 100%;">
+Skip
+</button>
+<button class="btn btn-secondary" onclick="app.openLogFeedModal('${tankId}', ${amount}, ${nextFeedIndex})" style="justify-content: center; border: 2px solid var(--border); padding: 12px 0; width: 100%;">
+Edit
+</button>
+<button class="btn btn-primary" onclick="app.quickLogFeed('${tankId}', ${amount})" style="justify-content: center; font-size: 16px; background: ${isBlind ? 'var(--primary)' : 'var(--success)'}; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); width: 100%;">
+Confirm ${amount} kg
+</button>
+</div>
+</div>
+`;
+} else {
+heroHTML = `
+<div style="background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 20px;">
+<i class="fas fa-check-circle" style="font-size: 48px; color: var(--success); margin-bottom: 12px;"></i>
+<h3 style="color: var(--success-dark); margin-bottom: 4px;">All Feeds Completed</h3>
+<p style="color: var(--success-dark); opacity: 0.8; font-size: 14px;">Great job! See you tomorrow.</p>
+</div>
+`;
+}
+
+        let scheduleHTML = '';
+        if (doc <= blindDuration && !tank.hasTransitionedFromBlind) {
+// Render Daily Schedule List
+scheduleHTML = `
+<div class="daily-schedule-card">
+<div class="schedule-header">
+<div>
+<h4 style="margin:0; color:#0D47A1; font-size:15px;">Day ${doc} Plan</h4>
+<small style="color:#1565C0; font-weight:500;" ${planSourceTooltip ? `title="${planSourceTooltip}" style="cursor: help;"` : ''}>
+${planSource}
+${planSourceTooltip ? ` <i class="fas fa-info-circle" style="font-size: 10px; opacity: 0.7;"></i>` : ''}
+</small>
+<div style="margin-top: 4px;">
+${doc <= blindDuration ? `<button class="btn btn-secondary" onclick="app.openFeedSchedule('${tankId}')" style="background: #1565C0; border: none; color: white; padding: 10px 16px; font-size: 13px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"><i class="fas fa-calendar-alt"></i> Feed Plan</button>` : ''}
+</div>
+</div>
+<div style="text-align:right;">
+<div style="font-size:20px; font-weight:800; color:#0D47A1;">${planAmount.toFixed(1)} <span style="font-size:12px;">kg</span></div>
+<small style="color:#1565C0;">Total Target</small>
+</div>
+</div>
+<div class="schedule-list">
+`;
+
+feedsToday.forEach((amount, index) => {
+const entry = todayEntries[index];
+const feedNum = index + 1;
+const isDone = !!entry;
+const isNext = !isDone && index === todayEntries.length;
+// Estimate time label based on feed count
+let timeLabel = '';
+const count = feedsToday.length;
+let scheduleTimes = this.state.settings[`feedSchedule${count}`];
+// Fallback if specific schedule not found
+if (!scheduleTimes || scheduleTimes.length !== count) {
+// Use legacy feedTimes if length matches, else generate default
+if (this.state.settings.feedTimes && this.state.settings.feedTimes.length === count) scheduleTimes = this.state.settings.feedTimes;
+else scheduleTimes = Array.from({length: count}, (_, i) => Math.floor(6 + (i * (16/Math.max(1, count)))));
+}
+
+const hour = scheduleTimes[index] !== undefined ? scheduleTimes[index] : (6 + (index * 4));
+const ampm = hour >= 12 ? 'PM' : 'AM';
+const displayHour = hour > 12 ? hour - 12 : hour;
+timeLabel = `${displayHour}:00 ${ampm}`;
+
+// Simplified schedule row (since Hero Card handles the active action)
+let statusIcon, actionContent, rowClass = 'schedule-row';
+if (isDone) {
+if (entry.trayResult === 'skipped') {
+statusIcon = `<div class="step-circle done" style="background: #f5f5f5; border-color: #e0e0e0; color: #9e9e9e;"><i class="fas fa-ban"></i></div>`;
+rowClass += ' done skipped';
+actionContent = `
+<div style="text-align:right;">
+<div style="font-weight:700; color:var(--gray);">Skipped</div>
+<div class="logged-time">${entry.time}</div>
+</div>`;
+} else {
+statusIcon = `<div class="step-circle done"><i class="fas fa-check"></i></div>`;
+rowClass += ' done';
+actionContent = `
+<div style="text-align:right;">
+<div style="font-weight:700; color:var(--success);">${entry.amount} kg</div>
+<div class="logged-time">${entry.time}</div>
+</div>`;
+}
+} else {
+statusIcon = `<div class="step-circle">${feedNum}</div>`;
+rowClass += ' upcoming';
+actionContent = `<span class="upcoming-amt">${amount} kg</span>`;
+}
+
+scheduleHTML += `
+<div class="${rowClass}">
+<div class="schedule-left">
+${statusIcon}
+<div>
+<div class="feed-label">Feed ${feedNum}</div>
+<div style="font-size: 11px; color: var(--gray);">${timeLabel}</div>
+</div>
+</div>
+<div class="schedule-right">${actionContent}</div>
+</div>
+`;
+});
+scheduleHTML += `</div></div>`;
+} else {
+// TRAY PHASE: Show Last Feed Context instead of Schedule Plan
+const allEntries = this.state.feedEntries.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
+const lastEntry = allEntries[0];
+if (lastEntry) {
+let trayDetails = '';
+            if (lastEntry.trayResults && lastEntry.trayResults.length > 0) {
+trayDetails = `<div style="display:flex; gap:12px; margin-top:8px;">`;
+lastEntry.trayResults.forEach((status, i) => {
+let icon = 'question';
+let color = 'var(--gray)';
+let label = 'Pending';
+if (status === 'empty') { icon = 'check'; color = 'var(--success)'; label = 'Empty'; }
+else if (status === 'little') { icon = 'utensils'; color = 'var(--info)'; label = 'Little'; }
+else if (status === 'half') { icon = 'adjust'; color = 'var(--warning)'; label = 'Half'; }
+else if (status === 'too-much') { icon = 'exclamation-triangle'; color = 'var(--danger)'; label = 'Full'; }
+trayDetails += `
+<div style="text-align:center;">
+<div style="width:32px; height:32px; border-radius:50%; background:${color}20; color:${color}; display:flex; align-items:center; justify-content:center; margin:0 auto 4px auto;">
+<i class="fas fa-${icon}" style="font-size:14px;"></i>
+</div>
+<div style="font-size:10px; color:var(--gray); font-weight:600;">Tray ${i+1}</div>
+<div style="font-size:10px; color:${color};">${label}</div>
+</div>
+`;
+});
+trayDetails += `</div>`;
+            } else {
+                // Simple text result line; if still pending, also show a CTA to update trays now.
+                const isPending = !lastEntry.trayResult || lastEntry.trayResult === 'pending';
+                const baseLabel = lastEntry.trayResult || 'Pending';
+                const updateCTA = isPending
+                    ? `<button class="btn btn-sm btn-secondary" style="margin-left:8px; padding:4px 10px; font-size:11px;"
+                               onclick="event.stopPropagation(); app.openTrayCheckPopup('${tankId}', ${lastEntry.id});">
+                           Update
+                       </button>`
+                    : '';
+                trayDetails = `<div style="font-size:13px; color:var(--gray); margin-top:4px; display:flex; align-items:center;">
+                                   Result: <strong style="text-transform:capitalize; margin-left:4px;">${baseLabel}</strong>
+                                   ${updateCTA}
+                               </div>`;
+}
+
+let suppHTML = '';
+if (lastEntry.supplements && lastEntry.supplements.length > 0) {
+suppHTML = `
+<div style="margin-top:12px; padding-top:12px; border-top:1px solid #eee;">
+<div style="font-size:11px; color:var(--gray); margin-bottom:6px; font-weight:600; text-transform:uppercase;">Supplements Used</div>
+<div style="display:flex; flex-wrap:wrap; gap:6px;">
+${lastEntry.supplements.map(s => `<span style="background:#e3f2fd; color:#1565c0; padding:4px 10px; border-radius:12px; font-size:11px; font-weight:500;">${s}</span>`).join('')}
+</div>
+</div>
+`;
+}
+
+scheduleHTML = `
+<div class="daily-schedule-card" style="padding: 16px;">
+<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #eee;">
+<div>
+<h4 style="margin:0; color:var(--dark); font-size:15px;">Previous Feed</h4>
+<div style="font-size:12px; color:var(--gray); margin-top:2px;">${new Date(lastEntry.date).toLocaleDateString()} &bull; ${lastEntry.time}</div>
+</div>
+<div style="text-align:right;">
+<div style="font-size:20px; font-weight:800; color:var(--dark);">${lastEntry.amount} <span style="font-size:12px; font-weight:600; color:var(--gray);">kg</span></div>
+</div>
+</div>
+<div style="background:var(--light); border-radius:12px; padding:12px;">
+<div style="font-size:12px; font-weight:600; color:var(--dark); margin-bottom:4px;">Tray Check Results</div>
+${trayDetails}
+</div>
+
+${suppHTML}
+</div>
+`;
+}
+}
+
+        const isBlindMode = doc <= blindDuration && !tank.hasTransitionedFromBlind;
+        if (isBlindMode) {
+            // Blind feeding: only show the plan card.
+            planContainer.innerHTML = scheduleHTML;
+        } else {
+            // Tray mode: show "previous feed" card + history header (grid below shows full details).
+            planContainer.innerHTML = scheduleHTML + `
+            <div class="history-section-header">
+                <div class="history-title">Recent Activity</div>
+            </div>
+            `;
+        }
+
+const container = document.getElementById('logTimelineContainer');
+if (!container) return;
+
+// Add a context bar similar to the user's example
+const contextHTML = `
+<div class="context" style="border-bottom: 1px solid var(--border);">
+<div class="chip">DOC ${doc}</div>
+<div class="chip">${doc <= blindDuration && !tank.hasTransitionedFromBlind ? 'Blind Feeding' : 'Tray Feeding'}</div>
+</div>
+`;
+
+// Filter entries based on the viewMode selected in the log-toolbar
+const today = new Date();
+let startDate, endDate;
+
+if (this.viewMode === 'today') {
+startDate = this.getFormattedDate(today);
+endDate = startDate;
+} else if (this.viewMode === 'yesterday') {
+const d = new Date(today); d.setDate(d.getDate() - 1);
+startDate = this.getFormattedDate(d);
+endDate = startDate;
+} else if (this.viewMode === '7days') {
+const d = new Date(today); d.setDate(d.getDate() - 6);
+startDate = this.getFormattedDate(d);
+endDate = this.getFormattedDate(today);
+} else if (this.viewMode === '30days') {
+const d = new Date(today); d.setDate(d.getDate() - 29);
+startDate = this.getFormattedDate(d);
+endDate = this.getFormattedDate(today);
+} else { // 'all'
+startDate = tank.stockingDate;
+endDate = this.getFormattedDate(today);
+}
+
+const isDateInRange = (d) => d >= startDate && d <= endDate;
+const tankEntries = this.state.feedEntries.filter(e => e.tankId === tankId && isDateInRange(e.date));
+
+if (tankEntries.length === 0) {
+container.innerHTML = contextHTML + `
+<div class="empty-state" style="padding: 40px 20px; margin: 0 12px 12px; background: #fff; border: 1px solid var(--border); border-radius: 12px;">
+<i class="fas fa-clipboard-list" style="font-size: 32px; opacity: 0.3; margin-bottom: 12px;"></i>
+<p style="color: var(--gray);">No feed logs for this period.</p>
+</div>
+`;
+return;
+}
+
+const entriesByDate = {};
+tankEntries.forEach(e => { if (!entriesByDate[e.date]) entriesByDate[e.date] = []; entriesByDate[e.date].push(e); });
+
+const sortedDates = Object.keys(entriesByDate).sort().reverse();
+
+let registerHTML = `
+<div class="register">
+<div style="padding:10px 12px;font-size:11px;background:#f8fafc;border-bottom:1px solid var(--border)">
+Tray status:
+<b style="color:var(--success)">Completed</b> ·
+<b style="color:var(--warn, #f59e0b)">Little Left</b> ·
+<b style="color:var(--danger)">Half Left</b> ·
+<b style="color:#64748b">Not Checked</b>
+</div>
+`;
+
+const feedsCount = this.state.settings.feedsPerDay || 4;
+const feedLabels = ['Morning', 'Late Morning', 'Afternoon', 'Evening', 'Night 1', 'Night 2'].slice(0, feedsCount);
+
+sortedDates.forEach(date => {
+const dateObj = new Date(date);
+const isToday = date === this.currentDate;
+const isYesterday = date === this.getFormattedDate(new Date(new Date().setDate(new Date().getDate() - 1)));
+let dateDisplay = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toUpperCase();
+if (isToday) dateDisplay = `TODAY · ${dateDisplay}`;
+if (isYesterday) dateDisplay = `YESTERDAY · ${dateDisplay}`;
+
+registerHTML += `<div style="padding:10px 12px;background:#f1f5f9;font-size:12px;font-weight:600">${dateDisplay}</div>`;
+registerHTML += `<div class="row head" style="grid-template-columns: repeat(${feedsCount}, 1fr);">`;
+feedLabels.forEach(label => { registerHTML += `<div class="cell">${label}</div>`; });
+registerHTML += `</div>`;
+
+const entries = entriesByDate[date].sort((a, b) => a.id - b.id);
+const entryMap = new Map();
+entries.forEach((entry, index) => { entryMap.set(index, entry); });
+
+registerHTML += `<div class="row" style="grid-template-columns: repeat(${feedsCount}, 1fr);">`;
+
+for (let i = 0; i < feedsCount; i++) {
+const entry = entryMap.get(i);
+if (entry) {
+let statusColor = '#64748b', statusText = '– Not Checked', highlightClass = '';
+
+if (entry.trayResult === 'empty') { statusColor = 'var(--success)'; statusText = '✔ Completed'; }
+else if (entry.trayResult === 'little') { statusColor = 'var(--warn, #f59e0b)'; statusText = '● Little Left'; }
+else if (entry.trayResult === 'half') { statusColor = 'var(--danger)'; statusText = '◐ Half Left'; highlightClass = 'highlight'; }
+else if (entry.trayResult === 'too-much') { statusColor = 'var(--danger)'; statusText = '✖ Too Much'; highlightClass = 'highlight'; }
+else if (entry.trayResult === 'pending') { statusText = 'Pending Check'; }
+else if (entry.trayResult === 'skipped') { statusText = 'Skipped'; }
+else if (entry.trayResult === 'blind-fed') { statusText = 'Blind Fed'; }
+
+const mixHTML = (entry.supplements && entry.supplements.length > 0) ? `<div class="mix">${entry.supplements.map(s => `<span>${this.sanitizeHTML(s)}</span>`).join('')}</div>` : '';
+const reasonHTML = entry.reason ? `<div class="reason">${this.sanitizeHTML(entry.reason)}</div>` : '';
+
+registerHTML += `
+<div class="cell ${highlightClass}" onclick="app.editFeedEntry(${entry.id})" style="cursor: pointer;">
+<span class="qty">${entry.amount} kg</span>
+${reasonHTML}
+${mixHTML}
+<span style="color:${statusColor};font-size:11px;font-weight:600;">${statusText}</span>
+</div>
+`;
+} else {
+registerHTML += `<div class="cell done">-</div>`;
+}
+}
+registerHTML += `</div>`;
+});
+
+registerHTML += `</div>`;
+container.innerHTML = contextHTML + registerHTML;
+}
+
+/*
+Legacy renderLogBook logic removed/replaced above.
+The new logic handles the "Tank Tabs" requirement.
+*/
+
+/*
+if (this.viewMode === 'today' || this.viewMode === 'yesterday') {
+const dateStr = startDate;
+const colTotals = [0, 0, 0, 0, 0, 0];
+
+tanksToShow.forEach(tank => {
+const farm = this.getFarmById(tank.farmId);
+const entries = this.state.feedEntries
+.filter(e => e.tankId === tank.id && e.date === dateStr)
+.sort((a, b) => a.id - b.id);
+
+const total = entries.reduce((sum, e) => sum + e.amount, 0);
+
+const getCell = (index) => {
+if (entries[index]) {
+const e = entries[index];
+colTotals[index] += e.amount;
+
+let statusClass = 'status-completed';
+let statusText = 'COMPLETED';
+if (e.trayResult === 'pending') {
+statusClass = 'status-pending';
+statusText = 'PENDING';
+}
+
+return `
+<div style="font-weight: 600; font-size: 14px;">${e.amount} kg</div>
+<div class="status-badge ${statusClass}">${statusText}</div>
+`;
+}
+return `<span style="color: var(--gray-500);">-</span>`;
+};
+
+const row = document.createElement('tr');
+row.innerHTML = `
+<td>
+<div style="display: flex; justify-content: space-between; align-items: flex-start;">
+<div>
+<div style="font-weight: 600; font-size: 14px; color: var(--gray-900);">${tank.name}</div>
+</div>
+</div>
+</td>
+${Array.from({length: feedsCount}, (_, i) => `<td data-label="${feedLabels[i]}">${getCell(i)}</td>`).join('')}
+`;
+tableBody.appendChild(row);
+});
+} else {
+tanksToShow.forEach(tank => {
+const tankEntries = this.state.feedEntries
+.filter(e => e.tankId === tank.id && isDateInRange(e.date));
+
+if (tankEntries.length === 0) return;
+
+const headerRow = document.createElement('tr');
+headerRow.innerHTML = `<td colspan="${feedsCount + 1}" style="background:#e3f2fd; font-weight:700; color:var(--primary-dark);">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+<span>${tank.name}</span>
+</div>
+</td>`;
+tableBody.appendChild(headerRow);
+
+const entriesByDate = {};
+tankEntries.forEach(e => {
+if (!entriesByDate[e.date]) entriesByDate[e.date] = [];
+entriesByDate[e.date].push(e);
+});
+
+const sortedDates = Object.keys(entriesByDate).sort().reverse();
+
+sortedDates.forEach(date => {
+const entries = entriesByDate[date].sort((a, b) => a.id - b.id);
+const total = entries.reduce((sum, e) => sum + e.amount, 0);
+
+const getCell = (index) => {
+if (entries[index]) {
+const e = entries[index];
+let badgeClass = 'unknown';
+let badgeText = e.trayResult;
+if (e.trayResult === 'too-much') badgeText = 'Too Much';
+
+const suppTitle = (e.supplements && e.supplements.length > 0) ? `Supplements: ${e.supplements.join(', ')}` : '';
+
+if (e.trayResult === 'empty') badgeClass = 'empty';
+else if (e.trayResult === 'little') badgeClass = 'little';
+else if (e.trayResult === 'half') badgeClass = 'half';
+else if (e.trayResult === 'too-much') badgeClass = 'too-much';
+else if (e.trayResult === 'pending') badgeClass = 'pending';
+
+let suppHTML = '';
+if (e.supplements && e.supplements.length > 0) {
+suppHTML = `<div style="margin-top:4px; display:flex; flex-wrap:wrap; justify-content:center; gap:2px;">${e.supplements.map(s => `<span style="font-size:9px; color:#1565c0; background:#e3f2fd; padding:1px 4px; border-radius:4px; white-space:nowrap;">${s}</span>`).join('')}</div>`;
+}
+
+return `
+<div onclick="app.editFeedEntry(${e.id})" title="${suppTitle}" style="cursor:pointer; width:100%;">
+<div class="log-feed-value">${e.amount} kg</div>
+<span class="log-status ${badgeClass}">${badgeText}</span>
+${suppHTML}
+</div>
+`;
+}
+return ``;
+};
+
+const row = document.createElement('tr');
+const dateObj = new Date(date);
+const dateDisplay = dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+
+row.innerHTML = `
+<td>
+<div class="log-pond-name" style="font-weight:500;">${dateDisplay}</div>
+</td>
+${Array.from({length: feedsCount}, (_, i) => `<td data-label="${feedLabels[i]}">${getCell(i)}</td>`).join('')}
+`;
+tableBody.appendChild(row);
+});
+});
+} */
+
+renderPerformanceScreen() {
+const currentFarmId = this.state.settings.currentFarmId;
+if (!currentFarmId) return;
+const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
+const farmTankIds = farmTanks.map(t => t.id);
+const farmFeedEntries = this.state.feedEntries.filter(e => farmTankIds.some(id => id === e.tankId));
+const farmHarvests = this.state.harvests.filter(h => farmTankIds.includes(h.tankId));
+// Calculate FCR with input validation (BUG FIX #8)
+const totalFeed = farmFeedEntries.reduce((sum, e) => {
+const amount = typeof e.amount === 'number' && e.amount >= 0 ? e.amount : 0;
+return sum + amount;
+}, 0);
+const totalHarvested = farmHarvests.reduce((sum, h) => {
+const weight = typeof h.weight === 'number' && h.weight >= 0 ? h.weight : 0;
+return sum + weight;
+}, 0);
+const totalBiomass = farmTanks.reduce((sum, tank) => {
+const biomass = typeof tank.biomass === 'number' && tank.biomass >= 0 ? tank.biomass : 0;
+return sum + biomass;
+}, 0);
+const totalProduction = totalBiomass + totalHarvested;
+const validTotalFeed = !isNaN(totalFeed) ? totalFeed : 0;
+const validTotalProduction = !isNaN(totalProduction) ? totalProduction : 0;
+const avgFCR = validTotalProduction > 0 ? (validTotalFeed / validTotalProduction).toFixed(2) : '0.00';
+const fcrValueEl = document.getElementById('fcrValue');
+if (fcrValueEl) fcrValueEl.textContent = avgFCR;
+// Calculate Efficiency Score (simplified)
+const validChecks = farmFeedEntries.filter(e => ['empty', 'little', 'half', 'too-much'].includes(e.trayResult));
+const wasteChecks = validChecks.filter(e => ['half', 'too-much'].includes(e.trayResult));
+const wastePct = validChecks.length > 0 ? (wasteChecks.length / validChecks.length) * 100 : 0;
+const efficiencyScore = Math.max(0, 100 - wastePct);
+const efficiencyScoreEl = document.getElementById('efficiencyScore');
+if (efficiencyScoreEl) efficiencyScoreEl.textContent = Math.round(efficiencyScore);
+// Calculate Growth & Survival Estimates
+let totalADG = 0;
+let activeTankCount = 0;
+let weightedSurvival = 0;
+let totalInitialSeed = 0;
+
+farmTanks.forEach(tank => {
+if (tank.status === 'active') {
+const doc = this.getDaysOld(tank.stockingDate);
+if (doc > 0) {
+// Estimate Survival (Linear decay: 95% start, -0.15% per day approx)
+const estSurvivalRate = Math.max(0.6, 0.95 - ((doc/100) * 0.15));
+const currentPop = tank.initialSeed * estSurvivalRate;
+// Biomass is estimated based on FCR 1.2
+let biomass = tank.biomass || 0;
+if (biomass > 0 && currentPop > 0) {
+const avgWeight = (biomass * 1000) / currentPop; // grams
+const adg = avgWeight / doc; // grams per day
+totalADG += adg;
+activeTankCount++;
+}
+weightedSurvival += estSurvivalRate * tank.initialSeed;
+totalInitialSeed += tank.initialSeed;
+}
+}
+});
+
+const avgADG = activeTankCount > 0 ? (totalADG / activeTankCount) : 0.2;
+const avgGrowthRateWeekly = (avgADG * 7).toFixed(1); // g/week
+const avgSurvival = totalInitialSeed > 0 ? ((weightedSurvival / totalInitialSeed) * 100).toFixed(0) : 85;
+
+const growthRateEl = document.getElementById('growthRate');
+if (growthRateEl) growthRateEl.textContent = `${avgADG.toFixed(2)} g/day`;
+const survivalRateEl = document.getElementById('survivalRate');
+if (survivalRateEl) survivalRateEl.textContent = `${avgSurvival}%`;
+
+// Set trend indicators
+const fcrTrendEl = document.getElementById('fcrTrend');
+if (fcrTrendEl) {
+fcrTrendEl.textContent = avgFCR < 1.5 ? 'Good' : 'High';
+fcrTrendEl.className = avgFCR < 1.5 ? 'performance-trend trend-up' : 'performance-trend trend-down';
+}
+const efficiencyTrendEl = document.getElementById('efficiencyTrend');
+if (efficiencyTrendEl) {
+efficiencyTrendEl.textContent = efficiencyScore > 80 ? 'High' : 'Low';
+efficiencyTrendEl.className = efficiencyScore > 80 ? 'performance-trend trend-up' : 'performance-trend trend-down';
+}
+const growthTrendEl = document.getElementById('growthTrend');
+if (growthTrendEl) {
+growthTrendEl.textContent = avgADG > 0.2 ? 'Fast' : 'Slow';
+growthTrendEl.className = avgADG > 0.2 ? 'performance-trend trend-up' : 'performance-trend trend-neutral';
+}
+const survivalTrendEl = document.getElementById('survivalTrend');
+if (survivalTrendEl) {
+survivalTrendEl.textContent = avgSurvival > 80 ? 'High' : 'Avg';
+survivalTrendEl.className = avgSurvival > 80 ? 'performance-trend trend-up' : 'performance-trend trend-neutral';
+}
+
+// Profit/Loss Calculation
+const feedPrice = this.state.settings.feedPrice || 90;
+const marketPrice = this.state.settings.marketPrice || 350;
+const totalFeedCost = totalFeed * feedPrice;
+// Realized Revenue from Harvests
+const realizedRevenue = farmHarvests.reduce((sum, h) => sum + (h.weight * (h.price || marketPrice)), 0);
+// Estimated Revenue from Standing Biomass
+const estimatedRevenue = totalBiomass * marketPrice;
+const totalRevenue = realizedRevenue + estimatedRevenue;
+const netProfit = totalRevenue - totalFeedCost;
+const profitLossContent = document.getElementById('profitLossContent');
+if (profitLossContent) {
+const profitSign = netProfit >= 0 ? '+' : '';
+profitLossContent.innerHTML = `
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+<div>
+<div style="font-size: 12px; color: var(--gray); margin-bottom: 4px;">Total Feed Cost</div>
+<div style="font-size: 20px; font-weight: 700; color: var(--danger);">₹${Math.round(totalFeedCost).toLocaleString('en-IN')}</div>
+<div style="font-size: 11px; color: var(--gray);">@ ₹${feedPrice}/kg</div>
+</div>
+<div>
+<div style="font-size: 12px; color: var(--gray); margin-bottom: 4px;">Est. Revenue</div>
+<div style="font-size: 20px; font-weight: 700; color: var(--success);">₹${Math.round(totalRevenue).toLocaleString('en-IN')}</div>
+<div style="font-size: 11px; color: var(--gray); display: flex; align-items: center; gap: 4px;">
+@ <input type="number" value="${marketPrice}" style="width: 50px; padding: 2px; border: 1px solid var(--border); border-radius: 4px; font-size: 11px;" onchange="app.updateMarketPrice(this.value)"> ₹/kg
+</div>
+</div>
+</div>
+<div style="background: var(--light); padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+<div style="font-weight: 600; color: var(--dark);">Net Profit (Est.)</div>
+<div style="font-size: 24px; font-weight: 800; color: ${netProfit >= 0 ? 'var(--success)' : 'var(--danger)'};">
+${profitSign}₹${Math.round(netProfit).toLocaleString('en-IN')}
+</div>
+</div>
+`;
+}
+}
+
+switchScreen(screenName) {
+document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+const screenEl = document.getElementById(`${screenName}Screen`);
+if (screenEl) screenEl.classList.add('active');
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+if (btn.dataset.screen === screenName) btn.classList.add('active');
+else btn.classList.remove('active');
+});
+// Render charts when switching to analytics screen
+if (screenName === 'analytics') {
+setTimeout(() => this.renderCharts(), 100);
+}
+// Track screen switch
+this.trackEvent(`open_${screenName}_tab`);
+
+if (screenName === 'performance') {
+this.handlePerformanceTabOpen();
+}
+}
+
+updateFarmSelector() {
+const selector = document.getElementById('currentFarmName');
+if (this.state.farms.length > 0) {
+const currentFarm = this.state.settings.currentFarmId
+? this.state.farms.find(f => f.id === this.state.settings.currentFarmId) : this.state.farms[0];
+
+if (currentFarm) {
+selector.innerHTML = `${this.sanitizeHTML(currentFarm.name)}`;
+this.state.settings.currentFarmId = currentFarm.id;
+this.saveSettings();
+}
+} else {
+selector.textContent = "Select Farm";
+}
+}
+
+getTankById(id) {
+return this.state.tanks.find(t => t.id === id);
+}
+
+getFarmById(id) {
+return this.state.farms.find(f => f.id === id);
+}
+
+closeAllModals() {
+document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+}
+
+openFarmModal() {
+this.editingFarmId = null;
+const farmNameInput = document.getElementById('farmNameInput');
+const farmLocation = document.getElementById('farmLocation');
+const farmContact = document.getElementById('farmContact');
+const farmPhone = document.getElementById('farmPhone');
+const farmModalTitle = document.querySelector('#farmModal h3');
+const saveFarmBtn = document.getElementById('saveFarmBtn');
+const farmModal = document.getElementById('farmModal');
+if (farmNameInput) farmNameInput.value = '';
+if (farmLocation) farmLocation.value = '';
+if (farmContact) farmContact.value = '';
+if (farmPhone) farmPhone.value = '';
+if (farmModalTitle) farmModalTitle.innerHTML = '<i class="fas fa-plus-circle"></i> Add New Farm';
+if (saveFarmBtn) saveFarmBtn.innerHTML = '<i class="fas fa-save"></i> Save Farm';
+if (farmModal) farmModal.classList.add('active');
+}
+
+editFarm(id) {
+const farm = this.getFarmById(id);
+if (!farm) return;
+
+this.editingFarmId = id;
+const farmNameInput = document.getElementById('farmNameInput');
+const farmLocation = document.getElementById('farmLocation');
+const farmContact = document.getElementById('farmContact');
+const farmPhone = document.getElementById('farmPhone');
+const farmModalTitle = document.querySelector('#farmModal h3');
+const saveFarmBtn = document.getElementById('saveFarmBtn');
+const farmModal = document.getElementById('farmModal');
+if (farmNameInput) farmNameInput.value = farm.name;
+if (farmLocation) farmLocation.value = farm.location || '';
+if (farmContact) farmContact.value = farm.contact || '';
+if (farmPhone) farmPhone.value = farm.phone || '';
+if (farmModalTitle) farmModalTitle.innerHTML = '<i class="fas fa-edit"></i> Edit Farm';
+if (saveFarmBtn) saveFarmBtn.innerHTML = '<i class="fas fa-save"></i> Update Farm';
+if (farmModal) farmModal.classList.add('active');
+}
+
+openFarmSelector() {
+const list = document.getElementById('farmsListModal');
+list.innerHTML = '';
+this.state.farms.forEach(farm => {
+// Calculate number of tanks/ponds and average DOC
+const farmTanks = this.state.tanks.filter(t => t.farmId === farm.id && t.status !== 'inactive');
+const pondCount = farmTanks.length;
+const avgDoc = farmTanks.length > 0 
+  ? Math.round(farmTanks.reduce((sum, t) => sum + this.getDaysOld(t.stockingDate), 0) / farmTanks.length)
+  : 0;
+
+const div = document.createElement('div');
+div.className = 'feed-schedule-item';
+if (farm.id === this.state.settings.currentFarmId) div.classList.add('completed');
+div.innerHTML = `
+<div style="display: flex; flex-direction: column; gap: 4px;">
+  <div class="feed-time" style="font-weight: 600; font-size: 14px;">${farm.name}</div>
+  <div class="feed-label" style="font-size: 12px; color: var(--gray);">
+    <i class="fas fa-water"></i> ${pondCount} ${pondCount === 1 ? 'Pond' : 'Ponds'} | Avg DOC ${avgDoc}
+  </div>
+  ${farm.location ? `<div class="feed-label" style="font-size: 11px; color: var(--gray-500);">${farm.location}</div>` : ''}
+</div>
+`;
+div.onclick = () => {
+this.state.settings.currentFarmId = farm.id;
+this.saveSettings();
+this.renderAll();
+this.closeAllModals();
+};
+list.appendChild(div);
+});
+document.getElementById('farmSelectorModal').classList.add('active');
+}
+
+openTankModal(farmId) {
+this.editingTankId = null;
+const tankNameInput = document.getElementById('tankNameInput');
+const tankSize = document.getElementById('tankSize');
+const stockingDate = document.getElementById('stockingDate');
+const initialSeed = document.getElementById('initialSeed');
+const tankCheckTrays = document.getElementById('tankCheckTrays');
+const tankBlindDuration = document.getElementById('tankBlindDuration');
+const tankBlindWeek1 = document.getElementById('tankBlindWeek1');
+const tankBlindStd = document.getElementById('tankBlindStd');
+const titleEl = document.getElementById('tankModalTitle');
+const select = document.getElementById('tankFarmSelect');
+const btn = document.getElementById('saveTankBtn');
+const tankModal = document.getElementById('tankModal');
+if (tankNameInput) tankNameInput.value = '';
+if (tankSize) tankSize.value = '';
+if (stockingDate) stockingDate.value = '';
+if (initialSeed) initialSeed.value = '';
+if (tankCheckTrays) tankCheckTrays.value = 2;
+if (tankBlindDuration) tankBlindDuration.value = 30;
+if (tankBlindWeek1) tankBlindWeek1.value = 2;
+if (tankBlindStd) tankBlindStd.value = 4;
+if (titleEl) titleEl.innerHTML = '<i class="fas fa-water"></i> Add New Tank';
+
+if (select) {
+select.innerHTML = '';
+this.state.farms.forEach(farm => {
+const option = document.createElement('option');
+option.value = farm.id;
+option.textContent = farm.name;
+if (farm.id === farmId) option.selected = true;
+select.appendChild(option);
+});
+}
+if(btn) btn.textContent = 'Save Tank & Generate Feed Plan';
+if (tankModal) tankModal.classList.add('active');
+this.updateBlindFeedPreview();
+}
+
+saveFarm() {
+const name = document.getElementById('farmNameInput').value;
+const location = document.getElementById('farmLocation').value;
+const contact = document.getElementById('farmContact').value;
+const phone = document.getElementById('farmPhone').value;
+
+if (!name) {
+this.showToast('Farm name is required', 'error');
+return;
+}
+
+if (this.editingFarmId) {
+const farm = this.getFarmById(this.editingFarmId);
+if (farm) {
+farm.name = name;
+farm.location = location;
+farm.contact = contact;
+farm.phone = phone;
+this.showToast('Farm updated successfully');
+}
+} else {
+const newFarm = {
+id: Date.now().toString(),
+name,
+location,
+contact,
+phone,
+created: new Date().toISOString()
+};
+
+this.state.farms.push(newFarm);
+
+if (this.state.farms.length === 1) {
+this.state.settings.currentFarmId = newFarm.id;
+this.saveSettings();
+}
+this.showToast('Farm added successfully');
+}
+
+this.saveFarms();
+this.closeAllModals();
+this.checkFirstTimeUser();
+this.renderAll();
+
+document.getElementById('farmNameInput').value = '';
+document.getElementById('farmLocation').value = '';
+document.getElementById('farmContact').value = '';
+document.getElementById('farmPhone').value = '';
+this.editingFarmId = null;
+}
+
+generateBlindFeedingSchedule(initialSeed, stockingDateStr, duration = 30, week1Freq = 2, stdFreq = 4) {
+const schedule = [];
+const stockingDate = new Date(stockingDateStr);
+const scale = initialSeed / 100000;
+// Generate based on duration
+
+for (let doc = 1; doc <= duration; doc++) {
+let baseAmount = 0;
+if (doc <= 7) {
+// Week 1: 2.2kg start, +0.2kg/day
+baseAmount = 2.2 + ((doc - 1) * 0.2);
+} else if (doc <= 14) {
+// Week 2: 3.7kg start, +0.3kg/day
+baseAmount = 3.7 + ((doc - 8) * 0.3);
+} else if (doc <= 21) {
+// Week 3: 5.9kg start, +0.4kg/day
+baseAmount = 5.9 + ((doc - 15) * 0.4);
+} else if (doc <= 28) {
+// Week 4: 8.8kg start, +0.5kg/day
+baseAmount = 8.8 + ((doc - 22) * 0.5);
+} else {
+// Week 5: 12.4kg start, +0.6kg/day
+baseAmount = 12.4 + ((doc - 29) * 0.6);
+}
+
+let dailyAmount = baseAmount * scale;
+// Ensure minimum reasonable amount
+if (dailyAmount < 0.1) dailyAmount = 0.1;
+// Round to 1 decimal
+dailyAmount = Math.round(dailyAmount * 10) / 10;
+
+// Determine feeds for this specific day
+const currentFeedsCount = (doc <= 7) ? week1Freq : stdFreq;
+
+// Calculate per feed amount
+const perFeed = parseFloat((dailyAmount / currentFeedsCount).toFixed(2));
+const feeds = Array(currentFeedsCount).fill(perFeed);
+
+schedule.push({
+doc: doc,
+amount: parseFloat(dailyAmount.toFixed(1)),
+feeds: feeds,
+status: 'auto'
+});
+}
+return schedule;
+}
+
+    async saveTank() {
+        // Robustly determine farmId for the new/edited tank
+        let farmId = '';
+        const farmSelect = document.getElementById('tankFarmSelect');
+        if (farmSelect) {
+            farmId = farmSelect.value;
+        }
+        // Fallback 1: if nothing selected but a current farm is set, use that
+        if (!farmId && this.state && this.state.settings && this.state.settings.currentFarmId) {
+            farmId = this.state.settings.currentFarmId;
+        }
+        // Fallback 2: if still nothing but exactly one farm exists, auto‑attach to it
+        if (!farmId && Array.isArray(this.state?.farms) && this.state.farms.length === 1) {
+            farmId = this.state.farms[0].id;
+        }
+const name = document.getElementById('tankNameInput').value;
+const size = parseFloat(document.getElementById('tankSize').value);
+const stockingDate = document.getElementById('stockingDate').value;
+const initialSeed = parseInt(document.getElementById('initialSeed').value);
+const plSize = document.getElementById('tankPlSize').value;
+const checkTrays = parseInt(document.getElementById('tankCheckTrays').value) || 2;
+const blindDuration = parseInt(document.getElementById('tankBlindDuration').value) || 30;
+const blindWeek1 = parseInt(document.getElementById('tankBlindWeek1').value) || 2;
+const blindStd = parseInt(document.getElementById('tankBlindStd').value) || 4;
+
+        if (!name || name.trim().length === 0) {
+            this.showToast('Tank name is required', 'error');
+            return;
+        }
+
+        if (!farmId) {
+            this.showToast('Please create/select a farm before adding a tank', 'error');
+return;
+}
+
+if (!stockingDate) {
+ this.showToast('Stocking date is required', 'error');
+ return;
+}
+
+// Validate tank size
+if (isNaN(size) || size <= 0 || size > 100) {
+    this.showToast('Tank size must be between 0.01 and 100 acres', 'error');
+    return;
+}
+
+// Validate stocking date (not in future)
+const today = new Date();
+const stockDate = new Date(stockingDate);
+if (stockDate > today) {
+    this.showToast('Stocking date cannot be in the future', 'error');
+    return;
+}
+
+// Validate initial seed count
+if (isNaN(initialSeed) || initialSeed <= 0) {
+    this.showToast('Initial seed count must be greater than 0', 'error');
+    return;
+}
+
+// Validate check trays
+if (isNaN(checkTrays) || checkTrays < 1 || checkTrays > 20) {
+    this.showToast('Number of trays must be between 1 and 20', 'error');
+    return;
+}
+
+// Validate blind duration
+if (isNaN(blindDuration) || blindDuration < 7 || blindDuration > 120) {
+    this.showToast('Blind feeding duration must be between 7 and 120 days', 'error');
+    return;
+}
+
+// Validate blind week 1 amount
+if (isNaN(blindWeek1) || blindWeek1 <= 0 || blindWeek1 > 100) {
+    this.showToast('Week 1 blind amount must be between 0.1 and 100 kg', 'error');
+    return;
+}
+
+// Validate standard blind amount
+if (isNaN(blindStd) || blindStd <= 0 || blindStd > 100) {
+    this.showToast('Standard blind amount must be between 0.1 and 100 kg', 'error');
+    return;
+}
+
+if (this.editingTankId) {
+const tank = this.getTankById(this.editingTankId);
+if (tank) {
+// Regenerate blind schedule if critical parameters change
+if (tank.initialSeed !== initialSeed || tank.stockingDate !== stockingDate ||
+tank.blindDuration !== blindDuration || tank.blindWeek1 !== blindWeek1 || tank.blindStd !== blindStd) {
+tank.blindSchedule = this.generateBlindFeedingSchedule(initialSeed || 0, stockingDate, blindDuration, blindWeek1, blindStd);
+}
+tank.farmId = farmId;
+tank.name = name;
+tank.size = size;
+tank.stockingDate = stockingDate;
+tank.initialSeed = initialSeed;
+tank.plSize = plSize;
+tank.checkTrays = checkTrays;
+tank.blindDuration = blindDuration;
+tank.blindWeek1 = blindWeek1;
+tank.blindStd = blindStd;
+this.showToast('Tank updated successfully');
+}
+} else {
+
+const blindSchedule = this.generateBlindFeedingSchedule(initialSeed || 0, stockingDate, blindDuration, blindWeek1, blindStd);
+
+const newTank = {
+id: Date.now().toString(),
+farmId,
+name,
+size,
+stockingDate: stockingDate,
+initialSeed: initialSeed || 0,
+plSize: plSize || '',
+checkTrays,
+biomass: 0,
+blindDuration,
+blindWeek1,
+blindStd,
+blindSchedule: blindSchedule,
+nextSuggestedFeed: null,
+status: 'active',
+lifecycleState: null,
+lifecycleStateUpdatedAt: null
+};
+this.state.tanks.push(newTank);
+newTank.lifecycleState = this.calculateLifecycleState(newTank);
+newTank.lifecycleStateUpdatedAt = new Date().toISOString();
+this.showToast('Tank added & Blind Schedule generated!');
+}
+
+  try {
+    await this.saveTanks();
+  } catch (e) {
+    console.error('Failed to save tanks:', e);
+    this.showToast('Failed to save tank data. Changes may not be persisted.', 'error');
+  }
+  this.closeAllModals();
+  this.renderAll();
+this.editingTankId = null;
+}
+
+updateBlindFeedPreview() {
+const duration = parseInt(document.getElementById('tankBlindDuration').value) || 30;
+const initialSeed = parseInt(document.getElementById('initialSeed').value) || 0;
+const week1Freq = parseInt(document.getElementById('tankBlindWeek1').value) || 2;
+const stdFreq = parseInt(document.getElementById('tankBlindStd').value) || 4;
+
+const titleEl = document.getElementById('blindFeedPreviewTitle');
+const subtitleEl = document.getElementById('blindFeedPreviewSubtitle');
+
+if (!titleEl || !subtitleEl) return;
+
+titleEl.textContent = `Day 1–${duration} Blind Feeding`;
+subtitleEl.textContent = 'Enter stocking details to see a preview.';
+
+if (initialSeed > 0) {
+const schedule = this.generateBlindFeedingSchedule(initialSeed, this.currentDate, duration, week1Freq, stdFreq);
+if (schedule.length > 0) {
+const day1Feed = schedule[0].amount;
+const lastDayFeed = schedule[schedule.length - 1].amount;
+subtitleEl.textContent = `Starts at ${day1Feed.toFixed(1)} kg/day, ends at ${lastDayFeed.toFixed(1)} kg/day.`;
+document.getElementById('blindFeedCost').textContent = 'Total cost: ₹' + (schedule.reduce((total, item) => total + item.amount, 0) * this.state.settings.feedPrice).toFixed(2);
+}
+}
+}
+
+editTank(id) {
+const tank = this.getTankById(id);
+if (!tank) return;
+
+
+const tankName = tank.name || 'Unnamed Tank';
+const tankSize = typeof tank.size === 'number' ? tank.size : '';
+const stockingDate = tank.stockingDate || this.getFormattedDate();
+const initialSeed = typeof tank.initialSeed === 'number' ? tank.initialSeed : 0;
+const plSize = tank.plSize || '';
+const checkTrays = typeof tank.checkTrays === 'number' ? tank.checkTrays : 2;
+const blindDuration = typeof tank.blindDuration === 'number' ? tank.blindDuration : 30;
+const blindWeek1 = typeof tank.blindWeek1 === 'number' ? tank.blindWeek1 : 2;
+const blindStd = typeof tank.blindStd === 'number' ? tank.blindStd : 4;
+
+this.openTankModal(tank.farmId);
+this.editingTankId = id;
+document.getElementById('tankNameInput').value = tankName;
+document.getElementById('tankSize').value = tankSize;
+document.getElementById('stockingDate').value = stockingDate;
+document.getElementById('initialSeed').value = initialSeed;
+document.getElementById('tankPlSize').value = plSize;
+document.getElementById('tankCheckTrays').value = checkTrays;
+document.getElementById('tankBlindDuration').value = blindDuration;
+document.getElementById('tankBlindWeek1').value = blindWeek1;
+document.getElementById('tankBlindStd').value = blindStd;
+document.getElementById('tankModalTitle').textContent = 'Edit Tank';
+const btn = document.getElementById('saveTankBtn');
+if(btn) btn.textContent = 'Update Tank';
+
+this.updateBlindFeedPreview();
+}
+
+deleteTank(id) {
+this.pendingDeleteTankId = id;
+document.getElementById('confirmTitle').innerHTML = '<i class="fas fa-trash"></i> Delete Tank?';
+document.getElementById('confirmMessage').textContent = 'Are you sure you want to delete this tank? All associated data (feed, water tests, etc.) will be permanently deleted.';
+const btn = document.getElementById('confirmActionBtn');
+btn.textContent = 'Delete Permanently';
+btn.onclick = () => this.executeDeleteTank();
+document.getElementById('confirmationModal').classList.add('active');
+}
+
+executeDeleteTank() {
+const tankId = String(this.pendingDeleteTankId);
+this.state.tanks = this.state.tanks.filter(t => t.id !== tankId);
+this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId !== tankId);
+this.state.harvests = this.state.harvests.filter(h => h.tankId !== tankId);
+this.state.waterQuality = this.state.waterQuality.filter(w => w.tankId !== tankId);
+this.state.applications = this.state.applications.filter(a => a.tankId !== tankId);
+
+this.saveAllData();
+this.renderAll();
+this.closeAllModals();
+this.showToast('Tank deleted', 'warning');
+this.pendingDeleteTankId = null;
+}
+
+toggleTankMenu(id) {
+document.querySelectorAll('.tank-menu-dropdown').forEach(el => {
+if(el.id !== `tank-menu-${id}`) el.classList.remove('show');
+});
+const menu = document.getElementById(`tank-menu-${id}`);
+if(menu) menu.classList.toggle('show');
+}
+
+openInventoryModal() {
+document.getElementById('modalCurrentStock').innerHTML = `${(this.state.inventory.totalKg || 0).toFixed(1)} <span class="unit">kg</span>`;
+document.getElementById('stockBags').value = '';
+document.getElementById('inventoryModal').classList.add('active');
+}
+
+saveStock() {
+const bags = parseFloat(document.getElementById('stockBags').value) || 0;
+const weight = parseFloat(document.getElementById('bagWeight').value) || 25;
+
+if (bags > 0) {
+const addedKg = bags * weight;
+this.state.inventory.totalKg = (this.state.inventory.totalKg || 0) + addedKg;
+this.saveInventory();
+this.renderOverallStats();
+this.closeAllModals();
+this.showToast(`Added ${addedKg} kg to stock`);
+} else {
+this.showToast('Please enter valid quantity', 'error');
+}
+}
+
+openMedicineInventoryModal() {
+this.renderMedicineList();
+document.getElementById('medicineInventoryModal').classList.add('active');
+}
+
+renderMedicineList() {
+const list = document.getElementById('medicineList');
+if (!list) return;
+if (this.state.medicineInventory.length === 0) {
+list.innerHTML = '<div class="text-center text-muted" style="padding: 20px;">No items in inventory</div>';
+return;
+}
+
+list.innerHTML = this.state.medicineInventory.map((item, index) => `
+<div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--border);">
+<div>
+<div style="font-weight: 600;">${this.sanitizeHTML(item.name)}</div>
+<div style="font-size: 12px; color: var(--gray);">Added: ${new Date(item.date).toLocaleDateString()}</div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px;">
+<span style="font-weight: 700;">${item.qty}</span>
+<button class="btn-icon" style="color: var(--danger);" onclick="app.deleteMedicineItem(${index})">
+<i class="fas fa-trash"></i>
+</button>
+</div>
+</div>
+`).join('');
+}
+
+addMedicineItem() {
+const nameInput = document.getElementById('medName');
+const qtyInput = document.getElementById('medQty');
+const name = nameInput.value.trim();
+const qty = parseFloat(qtyInput.value);
+
+if (!name || !qty) {
+this.showToast('Please enter name and quantity', 'error');
+return;
+}
+
+this.state.medicineInventory.push({
+name,
+qty,
+date: new Date().toISOString()
+});
+
+this.saveMedicineInventory();
+this.renderMedicineList();
+this.renderInventorySummary();
+nameInput.value = '';
+qtyInput.value = '';
+this.showToast('Item added');
+}
+
+deleteMedicineItem(index) {
+
+this.showConfirmModal('Remove this item?', 'Confirm Delete').then(confirmed => {
+if (confirmed) {
+this.state.medicineInventory.splice(index, 1);
+this.saveMedicineInventory();
+this.renderMedicineList();
+this.renderInventorySummary();
+}
+});
+}
+
+editFeedEntry(id) {
+const entry = this.state.feedEntries.find(e => e.id === id);
+if (!entry) return;
+
+
+const entryAmount = typeof entry.amount === 'number' ? entry.amount : 0;
+const entryDate = entry.date || this.getFormattedDate();
+const entryTime = entry.time || '';
+const entryReason = entry.reason || '';
+const entryTrayResult = entry.trayResult || 'pending';
+
+this.editingEntryId = id;
+const tank = this.getTankById(entry.tankId);
+document.getElementById('editFeedTitle').textContent = `Edit Feed - ${tank ? tank.name : 'Unknown Tank'}`;
+document.getElementById('editFeedDate').textContent = `${entryDate} ${entryTime}`;
+document.getElementById('editFeedAmount').value = entryAmount;
+document.getElementById('editFeedReason').value = entryReason;
+document.getElementById('editFeedTray').value = entryTrayResult;
+document.getElementById('editFeedModal').classList.add('active');
+}
+
+saveEditedFeedEntry() {
+if (!this.editingEntryId) return;
+const amount = parseFloat(document.getElementById('editFeedAmount').value);
+const trayResult = document.getElementById('editFeedTray').value;
+const reason = document.getElementById('editFeedReason').value;
+
+// Validate feed amount
+if (isNaN(amount) || amount <= 0 || amount > 1000) {
+    this.showToast('Feed amount must be between 0.01 and 1000 kg', 'error');
+    return;
+}
+
+// Validate tray result
+const validTrayResults = ['pending', 'empty', 'little', 'half', 'too-much', 'blind-fed', 'skipped'];
+if (!validTrayResults.includes(trayResult)) {
+    this.showToast('Invalid tray result selected', 'error');
+    return;
+}
+
+// Validate reason if provided
+if (reason && reason.trim().length > 500) {
+    this.showToast('Reason must be less than 500 characters', 'error');
+    return;
+}
+
+const entryIndex = this.state.feedEntries.findIndex(e => e.id === this.editingEntryId);
+if (entryIndex === -1) return;
+
+const oldAmount = this.state.feedEntries[entryIndex].amount;
+const tankId = this.state.feedEntries[entryIndex].tankId;
+// BUG #3 FIX: Update inventory with validation to prevent negative inventory
+const diff = amount - oldAmount;
+const newInventoryTotal = (this.state.inventory.totalKg || 0) - diff;
+
+// Validate inventory won't go negative
+if (newInventoryTotal < 0) {
+    this.showToast(`Cannot reduce amount. Insufficient inventory. Current: ${this.state.inventory.totalKg.toFixed(1)}kg, Diff: ${diff.toFixed(1)}kg`, 'error');
+    return;
+}
+
+this.state.inventory.totalKg = newInventoryTotal;
+this.state.feedEntries[entryIndex].amount = amount;
+this.state.feedEntries[entryIndex].trayResult = trayResult;
+this.state.feedEntries[entryIndex].reason = reason || null;
+
+// BUG #2 FIX: Use async save with proper sequencing
+(async () => {
+    try {
+        await this.saveFeedEntries();
+        await this.saveInventory();
+        this.recalculateTankBiomass(tankId);
+        this.closeAllModals();
+        this.renderAll();
+        this.showToast('Feed entry updated');
+        this.editingEntryId = null;
+    } catch (e) {
+        console.error('Failed to save feed entry:', e);
+        this.showToast('Failed to save changes', 'error');
+    }
+})();
+}
+
+openWaterQualityModal(tankId) {
+this.editingTankId = tankId;
+document.getElementById('waterPh').value = '';
+document.getElementById('waterDo').value = '';
+document.getElementById('waterAmmonia').value = '';
+document.getElementById('waterSalinity').value = '';
+document.getElementById('waterAlkalinity').value = '';
+document.getElementById('waterNitrite').value = '';
+document.getElementById('waterQualityModal').classList.add('active');
+}
+
+saveWaterQuality() {
+const tankId = this.editingTankId;
+const ph = parseFloat(document.getElementById('waterPh').value);
+const doVal = parseFloat(document.getElementById('waterDo').value);
+const ammonia = parseFloat(document.getElementById('waterAmmonia').value);
+const salinity = parseFloat(document.getElementById('waterSalinity').value);
+const alkalinity = parseFloat(document.getElementById('waterAlkalinity').value);
+const nitrite = parseFloat(document.getElementById('waterNitrite').value);
+if (!tankId) return;
+if (isNaN(ph) && isNaN(doVal) && isNaN(ammonia) && isNaN(salinity) && isNaN(alkalinity) && isNaN(nitrite)) {
+this.showToast('Please enter at least one value', 'error');
+return;
+}
+
+const entry = {
+id: Date.now(),
+tankId,
+date: new Date().toISOString(),
+ph: isNaN(ph) ? null : ph,
+do: isNaN(doVal) ? null : doVal, // Dissolved Oxygen
+ammonia: isNaN(ammonia) ? null : ammonia,
+salinity: isNaN(salinity) ? null : salinity,
+alkalinity: isNaN(alkalinity) ? null : alkalinity,
+nitrite: isNaN(nitrite) ? null : nitrite
+};
+
+this.state.waterQuality.push(entry);
+this.saveWaterQualityData();
+this.closeAllModals();
+this.openTankDetail(tankId); // Refresh detail view
+this.showToast('Water quality logged');
+}
+
+openApplicationModal(tankId) {
+this.editingTankId = tankId;
+document.getElementById('appItemName').value = '';
+document.getElementById('appAmount').value = '';
+document.getElementById('appUnit').value = 'kg';
+document.getElementById('appDate').value = this.currentDate;
+const dataList = document.getElementById('medicineListOptions');
+if (dataList) {
+const uniqueItems = [...new Set(this.state.medicineInventory.map(i => i.name))];
+dataList.innerHTML = uniqueItems.map(i => `<option value="${this.sanitizeHTML(i)}">`).join('');
+}
+document.getElementById('applicationModal').classList.add('active');
+}
+
+openDiseaseModal(tankId) {
+this.editingTankId = tankId;
+document.getElementById('diseaseDate').value = this.currentDate;
+document.getElementById('diseaseType').value = '';
+document.getElementById('diseaseSymptoms').value = '';
+document.getElementById('diseaseTreatment').value = '';
+document.getElementById('diseaseDose').value = '';
+document.getElementById('diseaseDuration').value = '';
+document.getElementById('diseaseOutcome').value = 'ongoing';
+document.getElementById('diseaseCost').value = '';
+document.getElementById('diseaseNotes').value = '';
+document.getElementById('diseaseModal').classList.add('active');
+}
+
+
+saveApplication() {
+const tankId = this.editingTankId;
+const itemName = document.getElementById('appItemName').value;
+const amount = parseFloat(document.getElementById('appAmount').value);
+const unit = document.getElementById('appUnit').value;
+const date = document.getElementById('appDate').value;
+
+if (!itemName || !amount) {
+this.showToast('Item name and amount are required', 'error');
+return;
+}
+
+if (!this.state.applications) this.state.applications = [];
+
+const entry = {
+id: Date.now(),
+tankId,
+date: date || new Date().toISOString(),
+itemName,
+amount,
+unit
+};
+
+this.state.applications.push(entry);
+this.saveApplications();
+this.closeAllModals();
+this.openTankDetail(tankId);
+this.showToast('Application logged');
+}
+
+saveDiseaseLog() {
+const tankId = this.editingTankId;
+const dateNoticed = document.getElementById('diseaseDate').value;
+const diseaseType = document.getElementById('diseaseType').value;
+const symptoms = document.getElementById('diseaseSymptoms').value;
+const treatment = document.getElementById('diseaseTreatment').value;
+const dose = document.getElementById('diseaseDose').value;
+const duration = parseInt(document.getElementById('diseaseDuration').value) || 0;
+const outcome = document.getElementById('diseaseOutcome').value;
+const cost = parseFloat(document.getElementById('diseaseCost').value) || 0;
+const notes = document.getElementById('diseaseNotes').value;
+
+if (!diseaseType || !dateNoticed) {
+this.showToast('Disease type and date are required', 'error');
+return;
+}
+
+if (!this.state.diseases) this.state.diseases = [];
+
+const entry = {
+id: Date.now(),
+tankId,
+dateNoticed,
+diseaseName: diseaseType,
+diseaseType,
+symptoms,
+treatment,
+dose,
+duration,
+outcome,
+cost,
+notes
+};
+
+this.state.diseases.push(entry);
+this.saveDiseases();
+this.closeAllModals();
+this.openTankDetail(tankId);
+this.showToast('Disease log recorded');
+}
+
+deleteDiseaseLog(entryId, tankId) {
+this.state.diseases = (this.state.diseases || []).filter(d => d.id !== entryId);
+this.saveDiseases();
+this.openTankDetail(tankId);
+this.showToast('Disease log deleted');
+}
+
+
+openApplicationHistory(tankId) {
+const tank = this.getTankById(tankId);
+if (!tank) return;
+
+const list = document.getElementById('applicationHistoryList');
+const entries = this.state.applications ? this.state.applications.filter(a => a.tankId === tankId).sort((a, b) => b.id - a.id) : [];
+
+if (entries.length === 0) {
+list.innerHTML = '<div class="empty-state" style="padding: 20px;"><p>No applications found.</p></div>';
+} else {
+list.innerHTML = entries.map(entry => {
+
+const entryItemName = entry.itemName || 'Unknown Item';
+const entryDate = entry.date || this.getFormattedDate();
+const entryAmount = typeof entry.amount === 'number' ? entry.amount : 0;
+const entryUnit = entry.unit || '';
+return `
+<div class="settings-item" style="align-items: center; margin-bottom: 8px;">
+<div style="flex: 1;">
+<div style="font-weight: 600;">${this.sanitizeHTML(entryItemName)}</div>
+<div style="font-size: 12px; color: var(--gray);">
+${new Date(entryDate).toLocaleDateString()} • ${entryAmount} ${this.sanitizeHTML(entryUnit)}
+</div>
+</div>
+<button class="btn-icon" style="color: var(--danger);" onclick="app.deleteApplication(${entry.id}, '${this.escapeAttribute(tankId)}')">
+<i class="fas fa-trash"></i>
+</button>
+</div>
+`;
+}).join('');
+}
+document.getElementById('applicationHistoryModal').classList.add('active');
+}
+
+deleteApplication(id, tankId) {
+
+this.showConfirmModal('Delete this application log?', 'Confirm Delete').then(confirmed => {
+if (confirmed) {
+this.state.applications = this.state.applications.filter(a => a.id !== id);
+this.saveApplications();
+this.openApplicationHistory(tankId);
+this.openTankDetail(tankId);
+this.showToast('Log deleted');
+}
+});
+}
+
+deleteFeedEntry() {
+if (!this.editingEntryId) return;
+
+this.showConfirmModal('Delete this feed entry?', 'Confirm Delete').then(confirmed => {
+if (confirmed) {
+const entryIndex = this.state.feedEntries.findIndex(e => e.id === this.editingEntryId);
+if (entryIndex === -1) return;
+const entry = this.state.feedEntries[entryIndex];
+const tankId = entry.tankId;
+// BUG #3 FIX: Restore inventory safely
+const currentInventory = this.state.inventory.totalKg || 0;
+const refundAmount = entry.amount || 0;
+// Validate refund amount is reasonable
+if (refundAmount > 0 && refundAmount <= 10000) {
+    this.state.inventory.totalKg = currentInventory + refundAmount;
+} else {
+    // If amount is invalid, just don't refund
+    console.warn('Skipping inventory refund for entry with invalid amount:', entry);
+}
+this.state.feedEntries.splice(entryIndex, 1);
+this.saveFeedEntries();
+this.saveInventory();
+this.recalculateTankBiomass(tankId);
+this.closeAllModals();
+this.renderAll();
+this.showToast('Feed entry deleted');
+this.editingEntryId = null;
+}
+});
+}
+
+adjustFeedAmount(delta) {
+const input = document.getElementById('logFeedAmount');
+let val = parseFloat(input.value) || 0;
+val += delta;
+if (val < 0) val = 0;
+input.value = val.toFixed(1);
+}
+
+setFeedAmount(type) {
+const input = document.getElementById('logFeedAmount');
+if (type === 'last') {
+const last = parseFloat(input.getAttribute('data-last')) || 0;
+input.value = last;
+} else if (type === 'suggested') {
+const sugg = parseFloat(input.getAttribute('data-sugg')) || 0;
+input.value = sugg;
+}
+this.showToast('Amount updated', 'info');
+}
+
+openLogFeedModal(tankId = null, prefillAmount = null, feedIndex = null, isFirstTrayFeed = false) {
+const currentFarmId = this.state.settings.currentFarmId;
+if (!currentFarmId) return;
+
+// LIFECYCLE CHECK: Prevent feed logging in certain states
+if (tankId) {
+const tank = this.getTankById(tankId);
+if (tank && !this.isFeatureAvailable(tank, 'canLogFeed')) {
+const lifecycleInfo = this.getLifecycleStateInfo(tank.lifecycleState || this.calculateLifecycleState(tank));
+this.showToast(`Cannot log feed: Pond is in ${lifecycleInfo.label} state`, 'warning');
+return;
+}
+}
+
+const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId && t.status !== 'inactive');
+if (tanks.length === 0) {
+this.showToast('No active tanks found', 'error');
+return;
+}
+
+// Determine selected tank
+let selectedId = tankId;
+if (!selectedId && this.activeLogTankId && document.getElementById('logScreen').classList.contains('active')) {
+selectedId = this.activeLogTankId;
+}
+if (!selectedId) selectedId = tanks[0].id;
+
+// Populate Dropdown
+const select = document.getElementById('logFeedTankSelect');
+select.innerHTML = tanks.map(t =>
+`<option value="${t.id}" ${t.id === selectedId ? 'selected' : ''}>${t.name}</option>`
+).join('');
+
+// Reset UI state
+document.getElementById('logFeedTankName').style.display = 'block';
+document.getElementById('logFeedTankSelect').style.display = 'none';
+document.getElementById('logFeedReason').value = '';
+// Render Supplements
+// Render Supplements
+const suppContainer = document.getElementById('logFeedSupplements');
+suppContainer.innerHTML = this.state.settings.supplements.map(s => `
+<div class="supplement-option" onclick="this.classList.toggle('selected')">
+<i class="fas fa-plus"></i> ${s}
+</div>
+`).join('');
+
+  // Reset health inputs
+  const healthCheckbox = document.getElementById('logHealthObserved');
+  if (healthCheckbox) healthCheckbox.checked = false;
+  const healthDetails = document.getElementById('logHealthDetails');
+  if (healthDetails) healthDetails.style.display = 'none';
+  const mortalityInput = document.getElementById('logMortalityCount');
+  if (mortalityInput) mortalityInput.value = '';
+  const diseaseSelect = document.getElementById('logDiseaseType');
+  if (diseaseSelect) diseaseSelect.value = '';
+
+// Update Context for selected tank
+this.updateLogFeedContext(selectedId);
+
+// Override with prefill amount if provided (from schedule click)
+if (prefillAmount !== null) {
+document.getElementById('logFeedAmount').value = prefillAmount;
+const btnSugg = document.getElementById('btnSuggestedAmt');
+if(btnSugg) btnSugg.textContent = `Plan: ${prefillAmount}kg`;
+// Update context to show which feed this is
+if (feedIndex !== null) {
+document.getElementById('logFeedContextText').textContent = `Feed ${feedIndex + 1} • ${prefillAmount}kg Planned`;
+}
+}
+
+// Show special indicator for first tray-based feed after blind transition
+const contextText = document.getElementById('logFeedContextText');
+if (isFirstTrayFeed && contextText) {
+const tank = this.getTankById(selectedId);
+const doc = tank ? this.getDaysOld(tank.stockingDate) : 0;
+contextText.innerHTML = `
+<span style="background: #e3f2fd; color: #1565C0; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; display: inline-block; margin-bottom: 4px;">
+<i class="fas fa-info-circle"></i> First Tray Check Required
+</span><br>
+<span style="color: var(--gray);">DOC ${doc} • Tray-based feeding active</span>
+`;
+}
+
+document.getElementById('feedRoundModal').classList.add('active');
+}
+
+onLogFeedTankChange() {
+const tankId = document.getElementById('logFeedTankSelect').value;
+this.updateLogFeedContext(tankId);
+}
+
+updateLogFeedContext(tankId) {
+const tank = this.getTankById(tankId);
+if (!tank) return;
+
+const entries = this.state.feedEntries.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
+const lastEntry = entries[0];
+const doc = this.getDaysOld(tank.stockingDate);
+
+const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
+
+// Calculate Suggestion
+let suggestion = 0;
+let reason = "Initial";
+if (lastEntry) {
+
+const lastAmount = (lastEntry?.amount) ?? 0;
+const lastTray = (lastEntry?.trayResult) ?? 'pending';
+let blindPlanAmount = null; // Holds the suggestion from the blind schedule
+
+// Check blind schedule if applicable
+if (tank.blindSchedule && doc <= blindDuration && !tank.hasTransitionedFromBlind) {
+const plan = tank.blindSchedule.find(s => s.doc === doc);
+if (plan) {
+// Determine which feed number based on time of day
+const hour = new Date().getHours();
+const feedsCount = plan.feeds ? plan.feeds.length : (this.state.settings.feedsPerDay || 4);
+// Generic logic for any number of feeds
+const startHour = 6; // 6 AM
+const endHour = 22; // 10 PM
+const window = endHour - startHour;
+const interval = window / Math.max(1, feedsCount);
+let feedIndex = Math.floor((hour - startHour) / interval);
+if (feedIndex < 0) feedIndex = 0;
+if (feedIndex >= feedsCount) feedIndex = feedsCount - 1;
+if (plan.feeds && plan.feeds[feedIndex] !== undefined) {
+blindPlanAmount = plan.feeds[feedIndex];
+} else {
+blindPlanAmount = parseFloat((plan.amount / feedsCount).toFixed(2));
+}
+}
+}
+
+if (blindPlanAmount !== null) {
+suggestion = blindPlanAmount;
+reason = `Blind Schedule (Day ${doc})`;
+} else {
+const res = this.calculateStrictFeed(lastAmount, lastTray, doc);
+suggestion = res.amount;
+reason = res.reason;
+}
+} else {
+suggestion = 2.0;
+}
+// If tank has a nextSuggestedFeed set from a tray check
+if (tank.nextSuggestedFeed) {
+suggestion = tank.nextSuggestedFeed;
+reason = "Based on recent tray check";
+}
+
+// Check FOR RECENT HEALTH ISSUES - REDUCE FEED IF HEALTH PROBLEMS
+const healthIssue = this.checkRecentHealthIssues(tankId);
+let originalSuggestion = suggestion;
+if (healthIssue) {
+suggestion = suggestion * 0.85; // Reduce by 15% if health issues
+suggestion = parseFloat(suggestion.toFixed(1));
+reason = healthIssue.reason;
+}
+// Determine how many feeds are expected for this DOC/day
+let totalFeedsForDay = this.state.settings.feedsPerDay || 4;
+if (tank.blindSchedule && doc <= blindDuration && !tank.hasTransitionedFromBlind) {
+  const scheduleDoc = doc === 0 ? 1 : doc;
+  const schedule = tank.blindSchedule.find(s => s.doc === scheduleDoc);
+  if (schedule) {
+    totalFeedsForDay = schedule.feeds ? schedule.feeds.length : (this.state.settings.feedsPerDay || 4);
+  }
+}
+
+// Count how many feeds already logged for THIS calendar date
+const todayEntries = this.state.feedEntries.filter(e => e.tankId === tankId && e.date === this.currentDate).sort((a, b) => a.id - b.id);
+
+const btnSugg = document.getElementById('btnSuggestedAmt');
+const healthWarningBanner = document.getElementById('healthWarningBanner');
+
+if (todayEntries.length >= totalFeedsForDay) {
+  // All feed rounds for today are complete — prepare suggestion for next day (DOC + 1)
+  const nextDoc = doc + 1;
+  let nextSuggestion = suggestion;
+  let nextReason = reason;
+
+  // If blind schedule applies to nextDoc, prefer its first feed
+  if (tank.blindSchedule && nextDoc <= blindDuration && !tank.hasTransitionedFromBlind) {
+    const scheduleDoc = nextDoc === 0 ? 1 : nextDoc;
+    const schedule = tank.blindSchedule.find(s => s.doc === scheduleDoc);
+    if (schedule) {
+      const feedsCount = schedule.feeds ? schedule.feeds.length : (this.state.settings.feedsPerDay || 4);
+      nextSuggestion = schedule.feeds ? schedule.feeds[0] : parseFloat((schedule.amount / feedsCount).toFixed(2));
+      nextReason = `Blind Schedule (Day ${nextDoc})`;
+    }
+  } else {
+    // Fallback: use strict feed calc for nextDoc
+    const resNext = this.calculateStrictFeed(((lastEntry?.amount) ?? suggestion), (lastEntry?.trayResult) ?? 'pending', nextDoc);
+    nextSuggestion = resNext.amount;
+    nextReason = resNext.reason;
+  }
+
+  // Apply health reduction if applicable
+  if (healthIssue) {
+    nextSuggestion = parseFloat((nextSuggestion * 0.85).toFixed(1));
+    nextReason = healthIssue.reason;
+  }
+
+  // Update UI to indicate next-day suggestion and set modal target date to tomorrow
+  document.getElementById('logFeedTankName').innerHTML = `${this.sanitizeHTML(tank.name)} <i class="fas fa-chevron-down" style="font-size: 16px; opacity: 0.5;\"></i>`;
+  document.getElementById('logFeedContextText').textContent = `All feeds done today • Suggest Day ${nextDoc}`;
+  btnSugg.textContent = `Next Day: ${nextSuggestion}kg`;
+  btnSugg.style.borderColor = healthIssue ? 'var(--warning)' : '';
+  btnSugg.style.color = healthIssue ? 'var(--warning-dark)' : '';
+
+  // Show health banner if relevant
+  if (healthIssue) {
+    healthWarningBanner.style.display = 'block';
+    document.getElementById('healthWarningTitle').textContent = healthIssue.type === 'mortality' ? `⚠️ Mortality Reported` : `⚠️ Disease Detected`;
+    document.getElementById('healthWarningText').textContent = healthIssue.reason.replace('⚠️ ', '').replace(' (-15% feed)', '');
+  } else {
+    healthWarningBanner.style.display = 'none';
+  }
+
+  // Set modal attribute so saveLogFeed knows to create the entry for the next calendar date
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().split('T')[0];
+  const feedModal = document.getElementById('feedRoundModal');
+  if (feedModal) feedModal.setAttribute('data-target-date', tomorrowStr);
+
+  document.getElementById('logFeedAmount').setAttribute('data-last', ((lastEntry?.amount) ?? 0));
+  document.getElementById('logFeedAmount').setAttribute('data-sugg', nextSuggestion);
+  document.getElementById('logFeedAmount').value = nextSuggestion;
+} else {
+  // Normal case: still feeds remaining today
+  // Ensure modal target date cleared
+  const feedModal = document.getElementById('feedRoundModal');
+  if (feedModal) feedModal.removeAttribute('data-target-date');
+
+  // Update New UI
+  document.getElementById('logFeedTankName').innerHTML = `${this.sanitizeHTML(tank.name)} <i class="fas fa-chevron-down" style="font-size: 16px; opacity: 0.5;\"></i>`;
+  const lastAmount = (lastEntry?.amount) ?? 0;
+  document.getElementById('logFeedContextText').textContent = `Last: ${lastAmount}kg • DOC ${doc}`;
+
+  // Show health warning if feed was reduced due to health issues
+  if (healthIssue) {
+    btnSugg.textContent = `Sugg: ${suggestion}kg ⚠️`;
+    btnSugg.style.borderColor = 'var(--warning)';
+    btnSugg.style.color = 'var(--warning-dark)';
+    // Show health warning banner
+    healthWarningBanner.style.display = 'block';
+    document.getElementById('healthWarningTitle').textContent = healthIssue.type === 'mortality' ? `⚠️ Mortality Reported` : `⚠️ Disease Detected`;
+    document.getElementById('healthWarningText').textContent = healthIssue.reason.replace('⚠️ ', '').replace(' (-15% feed)', '');
+  } else {
+    btnSugg.textContent = `Sugg: ${suggestion}kg`;
+    btnSugg.style.borderColor = '';
+    btnSugg.style.color = '';
+    healthWarningBanner.style.display = 'none';
+  }
+
+  document.getElementById('logFeedAmount').setAttribute('data-last', lastAmount);
+  document.getElementById('logFeedAmount').setAttribute('data-sugg', suggestion);
+  document.getElementById('logFeedAmount').value = suggestion;
+}
+}
+
+// STRICT FEED ALGORITHM (Ticket: Save Feed Waste)
+
+calculateStrictFeed(lastAmount, trayResult, doc) {
+// Validate inputs to prevent NaN propagation
+const amount = typeof lastAmount === 'number' && lastAmount > 0 ? lastAmount : 2.0; // Default to 2.0kg if invalid
+const validTrayResult = typeof trayResult === 'string' ? trayResult.toLowerCase() : 'pending';
+const validDoc = typeof doc === 'number' && doc >= 0 ? doc : 0;
+
+let suggestion = amount;
+let reason = "Maintain";
+let color = "var(--info)";
+// Strict Rules Matrix based on DOC & Tray Result
+if (validTrayResult === 'empty') {
+if (validDoc < 45) {
+suggestion = amount * 1.08; // +8% Early Growth
+reason = "Growth Phase (+8%)";
+color = "var(--success)";
+} else if (validDoc < 80) {
+suggestion = amount * 1.04; // +4% Mid Growth
+reason = "Standard (+4%)";
+color = "var(--success)";
+} else {
+suggestion = amount * 1.02; // +2% Late Stage
+reason = "Cautious (+2%)";
+color = "var(--success)";
+}
+} else if (validTrayResult === 'little') {
+if (validDoc < 60) {
+suggestion = amount; // Keep same
+reason = "Maintain";
+color = "var(--info)";
+} else {
+suggestion = amount * 0.95; // -5%
+reason = "Discipline (-5%)"; // Prevent sludge in later stages
+color = "var(--warning)";
+}
+} else if (validTrayResult === 'half') {
+suggestion = amount * 0.60; // -40% (Very strict)
+reason = "Waste Cut (-40%)";
+color = "var(--danger)";
+} else if (validTrayResult === 'too-much') {
+suggestion = amount * 0.30; // -70%
+reason = "Severe Cut (-70%)";
+color = "var(--danger)";
+} else if (validTrayResult === 'blind-fed') {
+suggestion = amount;
+reason = "Transition from Blind Phase";
+color = "var(--info)";
+} else {
+suggestion = amount;
+reason = "Pending Check";
+color = "var(--gray)";
+}
+
+// Ensure final amount is never NaN and never below reasonable minimum
+const finalAmount = parseFloat(suggestion.toFixed(1));
+return { amount: !isNaN(finalAmount) && finalAmount > 0 ? finalAmount : 2.0, reason, color };
+}
+
+// CHECK RECENT HEALTH ISSUES - Returns health issue info if found, null otherwise
+checkRecentHealthIssues(tankId) {
+const today = new Date();
+const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+
+// Check feed entries with logged mortality in last 24 hours
+const recentFeedsWithMortality = (this.state.feedEntries || [])
+.filter(e => e.tankId === tankId && e.mortality > 0)
+.filter(e => {
+  const entryDate = new Date(e.timestamp || 0);
+  return entryDate >= yesterday;
+});
+
+if (recentFeedsWithMortality.length > 0) {
+const totalMortality = recentFeedsWithMortality.reduce((sum, e) => sum + (e.mortality || 0), 0);
+return {
+  hasIssue: true,
+  reason: `Health Alert: ${totalMortality} deaths reported (-15% feed)`,
+  type: 'mortality',
+  count: totalMortality
+};
+}
+
+// Check disease logs in last 24 hours for this tank
+const recentDiseases = (this.state.diseases || [])
+.filter(d => d.tankId === tankId && d.outcome !== 'recovered')
+.filter(d => {
+  const noticeDate = new Date(d.dateNoticed);
+  return noticeDate >= yesterday;
+});
+
+if (recentDiseases.length > 0) {
+const diseaseNames = recentDiseases.map(d => d.diseaseName || d.diseaseType).join(', ');
+return {
+  hasIssue: true,
+  reason: `⚠️ Active Disease Detected: ${diseaseNames} (-15% feed)`,
+  type: 'disease',
+  diseases: diseaseNames
+};
+}
+
+return null; // No health issues
+}
+
+// NEW: Show Pending Modal
+showPendingModal() {
+const currentFarmId = this.state.settings.currentFarmId;
+if (!currentFarmId) return;
+
+const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
+const farmTankIds = farmTanks.map(t => t.id);
+const pendingEntries = this.state.feedEntries.filter(e =>
+farmTankIds.includes(e.tankId) && e.trayResult === 'pending'
+);
+
+// Workflow Improvement: If only 1 pending check, go directly to it
+if (pendingEntries.length === 1) {
+this.openTrayCheckPopup(pendingEntries[0].tankId, pendingEntries[0].id);
+return;
+}
+
+const list = document.getElementById('pendingList');
+list.innerHTML = '';
+
+if (pendingEntries.length === 0) {
+list.innerHTML = `<div class="empty-state"><i class="fas fa-check-circle"></i><h3>No Pending Checks</h3><p>All tray checks have been completed.</p></div>`;
+} else {
+pendingEntries.forEach(entry => {
+const tank = this.getTankById(entry.tankId);
+const item = document.createElement('div');
+item.className = 'pending-item';
+item.innerHTML = `
+<div class="pending-item-info">
+<h4>${tank.name} (${tank.checkTrays || 2} trays)</h4>
+<p>Fed ${entry.amount} kg @ ${entry.time}</p>
+</div>
+<button class="btn btn-primary btn-sm" onclick="app.openTrayCheckPopup('${entry.tankId}', ${entry.id})">
+Update <i class="fas fa-arrow-right"></i>
+</button>
+`;
+list.appendChild(item);
+});
+}
+document.getElementById('pendingModal').classList.add('active');
+}
+
+// NEW: Open Tray Check Popup
+openTrayCheckPopup(tankId, entryId) {
+const tank = this.getTankById(tankId);
+const entry = this.state.feedEntries.find(e => e.id === entryId);
+if (!tank || !entry) return;
+
+this.currentCheck = {
+tankId,
+entryId,
+trays: Array(tank.checkTrays || 2).fill(null).map((_, i) => ({ trayId: i, status: null, observations: [] })),
+activeTrayIndex: 0
+};
+
+    // Update header with tank and feed info
+const feedTime = entry.time || '6:00 AM';
+const feedAmount = entry.amount || 0;
+const feedIndex = this.state.feedEntries.filter(e => e.tankId === tankId && e.date === entry.date).findIndex(e => e.id === entryId) + 1;
+    const subtitleEl = document.getElementById('trayCheckSubtitle');
+    if (subtitleEl) {
+        const doc = this.getDaysOld(tank.stockingDate);
+        const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
+        let trayPhase = 'Tray Check';
+        if (doc <= blindDuration && !tank.hasTransitionedFromBlind) trayPhase = 'Tray Training';
+        else if (tank.hasTransitionedFromBlind) trayPhase = 'Tray Active';
+        subtitleEl.textContent = `${tank.name} · Feed ${feedIndex} (${feedTime} · ${feedAmount} kg) · ${trayPhase} · ${tank.checkTrays || 2} trays`;
+    }
+this.renderTrayCheckTabs();
+
+const saveBtn = document.getElementById('saveTrayResultsBtn');
+if (saveBtn) {
+saveBtn.disabled = true;
+saveBtn.textContent = 'Select Status for All Trays';
+}
+this.closeAllModals();
+const modal = document.getElementById('trayCheckModal');
+if (modal) modal.classList.add('active');
+}
+
+renderTrayCheckTabs() {
+const tabsContainer = document.getElementById('trayTabsContainer');
+const body = document.getElementById('trayCheckBody');
+if (!tabsContainer || !body) return;
+tabsContainer.innerHTML = '';
+body.innerHTML = '';
+const entry = this.state.feedEntries.find(e => e.id === this.currentCheck.entryId);
+const activeIndex = this.currentCheck.activeTrayIndex || 0;
+const tray = this.currentCheck.trays[activeIndex];
+
+// 1. Render Tray Tabs
+this.currentCheck.trays.forEach((t, idx) => {
+const isActive = idx === activeIndex;
+const isDone = t.status !== null;
+const tab = document.createElement('div');
+tab.className = 'tray-tab';
+if (isActive) tab.classList.add('active');
+if (isDone && !isActive) tab.classList.add('done');
+tab.textContent = `Tray ${idx + 1}`;
+tab.onclick = () => this.switchTrayTab(idx);
+tabsContainer.appendChild(tab);
+});
+
+// 2. Active Tray Content
+const isSel = (s) => tray.status === s ? 'selected' : '';
+const contentDiv = document.createElement('div');
+contentDiv.innerHTML = `
+<div class="section">
+<h2 class="tray-section-title">Tray Status</h2>
+<div class="tray-status-grid">
+<div class="tray-status ok ${isSel('empty')}" onclick="app.selectTrayStatusNew(${activeIndex}, 'empty')">
+✔<b>All Eaten</b>
+</div>
+<div class="tray-status little ${isSel('little')}" onclick="app.selectTrayStatusNew(${activeIndex}, 'little')">
+●<b>Little Left</b>
+</div>
+<div class="tray-status half ${isSel('half')}" onclick="app.selectTrayStatusNew(${activeIndex}, 'half')">
+◐<b>Half Left</b>
+</div>
+<div class="tray-status much ${isSel('too-much')}" onclick="app.selectTrayStatusNew(${activeIndex}, 'too-much')">
+✖<b>Too Much</b>
+</div>
+</div>
+</div>
+<div class="section">
+<h2 class="tray-section-title">Observations (Optional)</h2>
+<div class="tray-obs-grid">
+${['Red legs', 'White gut', 'Black gill', 'Soft shell', 'Weak movement', 'Moulting'].map(obs => `
+<div class="tray-obs-tag ${tray.observations.includes(obs) ? 'selected' : ''}" onclick="app.toggleObservation(${activeIndex}, '${obs}', this)">${obs}</div>
+`).join('')}
+</div>
+</div>
+`;
+
+body.appendChild(contentDiv);
+// Update button text
+const saveBtn = document.getElementById('saveTrayResultsBtn');
+if (saveBtn) {
+if (activeIndex < this.currentCheck.trays.length - 1) {
+saveBtn.textContent = 'Save & Next Tray';
+} else {
+saveBtn.textContent = 'Save Tray Results';
+}
+}
+}
+
+switchTrayTab(index) {
+this.currentCheck.activeTrayIndex = index;
+this.renderTrayCheckTabs();
+}
+
+toggleObservation(trayIndex, observation, element) {
+const tray = this.currentCheck.trays[trayIndex];
+if (!tray) return;
+const idx = tray.observations.indexOf(observation);
+if (idx === -1) {
+tray.observations.push(observation);
+element.classList.add('selected');
+} else {
+tray.observations.splice(idx, 1);
+element.classList.remove('selected');
+}
+}
+
+selectTrayStatusNew(trayIndex, status) {
+// Update state
+this.currentCheck.trays[trayIndex].status = status;
+
+// Re-render to update tabs
+this.renderTrayCheckTabs();
+
+// Validate
+const allSelected = this.currentCheck.trays.every(t => t.status !== null);
+const btn = document.getElementById('saveTrayResultsBtn');
+if (btn) {
+btn.disabled = !allSelected;
+if (allSelected) {
+if (trayIndex < this.currentCheck.trays.length - 1) {
+btn.textContent = 'Save & Next Tray';
+} else {
+btn.textContent = 'Save Tray Results';
+}
+} else {
+btn.textContent = 'Select Status for All Trays';
+}
+}
+}
+
+saveTrayResults() {
+// Calculate worst case
+const statusPriority = { 'empty': 0, 'little': 1, 'half': 2, 'too-much': 3 };
+let worstStatus = 'empty';
+this.currentCheck.trays.forEach(tray => {
+if (statusPriority[tray.status] > statusPriority[worstStatus]) {
+worstStatus = tray.status;
+}
+});
+
+// Calculate suggestion using Strict Algorithm
+const entry = this.state.feedEntries.find(e => e.id === this.currentCheck.entryId);
+const tank = this.getTankById(this.currentCheck.tankId);
+const doc = tank ? this.getDaysOld(tank.stockingDate) : 0;
+const lastAmount = entry.amount;
+const strictResult = this.calculateStrictFeed(lastAmount, worstStatus, doc);
+
+this.currentCheck.finalResult = worstStatus;
+this.currentCheck.suggestedFeed = strictResult.amount;
+
+// Show Summary
+const summary = document.getElementById('resultSummaryContent');
+summary.innerHTML = `
+<div class="result-summary">
+<div class="result-badge">${worstStatus.toUpperCase().replace('-', ' ')}</div>
+<p style="color: var(--gray-500); font-size: 14px;">Tray check results have been saved successfully.</p>
+<div class="next-feed-suggestion">
+<h3>Strict Rule Suggestion</h3>
+<div class="next-feed-amount">${strictResult.amount} kg</div>
+<div class="next-feed-note">${strictResult.reason}</div>
+</div>
+<p style="color: var(--gray-500); font-size: 13px;">Please confirm to update the feed plan.</p>
+</div>
+`;
+
+// Workflow Improvement: Check for next pending tank
+const currentFarmId = this.state.settings.currentFarmId;
+const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
+const farmTankIds = farmTanks.map(t => t.id);
+const otherPending = this.state.feedEntries.filter(e =>
+farmTankIds.includes(e.tankId) && e.trayResult === 'pending' && e.id !== this.currentCheck.entryId
+);
+
+const confirmBtn = document.querySelector('#resultModal .btn-primary');
+if (otherPending.length > 0) {
+confirmBtn.innerHTML = `<i class="fas fa-arrow-right"></i> Save & Next (${otherPending.length} left)`;
+} else {
+confirmBtn.innerHTML = `<i class="fas fa-check-circle"></i> Confirm & Finish`;
+}
+
+this.closeAllModals();
+document.getElementById('resultModal').classList.add('active');
+}
+
+    confirmAndFinish() {
+        const entry = this.state.feedEntries.find(e => e.id === this.currentCheck.entryId);
+        if (entry) {
+            entry.trayResult = this.currentCheck.finalResult;
+            entry.trayResults = this.currentCheck.trays.map(t => t.status);
+            entry.trayObservations = this.currentCheck.trays.map(t => t.observations);
+            this.saveFeedEntries();
+            // Update next suggested feed
+            const tank = this.getTankById(this.currentCheck.tankId);
+            if (tank) {
+                tank.nextSuggestedFeed = parseFloat(this.currentCheck.suggestedFeed);
+                this.saveTanks();
+            }
+        }
+        // Updated workflow: handle ONE feed's tray results at a time.
+        // Do not auto-open the next tank/entry; farmer will choose the next pending tray manually.
+        this.closeAllModals();
+        this.renderAll();
+        this.showToast('Tray results saved.', 'success');
+    }
+
+applySuggestion(entryId, suggestedAmount) {
+const entry = this.state.feedEntries.find(e => e.id === entryId);
+if (!entry) return;
+
+const tank = this.getTankById(entry.tankId);
+if (!tank) return;
+
+tank.nextSuggestedFeed = suggestedAmount;
+this.saveTanks();
+
+this.showToast(`Suggestion of ${suggestedAmount}kg applied for ${tank.name}`);
+
+const suggDiv = document.getElementById(`next-feed-sugg-${entryId}`);
+if (suggDiv) {
+const btn = suggDiv.querySelector('button');
+if (btn) {
+btn.innerHTML = '<i class="fas fa-check"></i> Applied';
+btn.className = 'btn btn-sm btn-success';
+btn.disabled = true;
+}
+}
+}
+
+saveLogFeed(loadNext = false) {
+const tankId = document.getElementById('logFeedTankSelect').value;
+const amount = parseFloat(document.getElementById('logFeedAmount').value);
+const reason = document.getElementById('logFeedReason').value;
+const supplements = Array.from(document.querySelectorAll('#logFeedSupplements .supplement-option.selected'))
+.map(el => el.textContent.trim());
+
+// Validate tank selection
+if (!tankId) {
+this.showToast('Please select a tank', 'error');
+return;
+}
+
+// Validate feed amount
+if (isNaN(amount) || amount <= 0 || amount > 1000) {
+this.showToast('Feed amount must be between 0.01 and 1000 kg', 'error');
+return;
+}
+
+// Validate reason if provided
+if (reason && reason.trim().length > 500) {
+this.showToast('Reason must be less than 500 characters', 'error');
+return;
+}
+
+// Read health/mortality inputs
+const healthObserved = document.getElementById('logHealthObserved') ? document.getElementById('logHealthObserved').checked : false;
+let mortality = 0;
+let diseaseType = null;
+if (healthObserved) {
+  mortality = parseInt(document.getElementById('logMortalityCount')?.value || 0, 10) || 0;
+  if (mortality < 0) mortality = 0;
+  diseaseType = document.getElementById('logDiseaseType') ? document.getElementById('logDiseaseType').value || null : null;
+}
+
+
+(async () => {
+// Check for feed jump (>20% increase)
+const tankEntries = this.state.feedEntries.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
+const lastEntry = tankEntries[0];
+if (lastEntry && lastEntry.amount > 0) {
+const increase = (amount - lastEntry.amount) / lastEntry.amount;
+if (increase > 0.20) {
+const proceedIncrease = await this.showConfirmModal(
+`High Feed Increase\n\n${lastEntry.amount}kg → ${amount}kg (+${Math.round(increase * 100)}%)\n\nProceed?`,
+'Confirm Action',
+'Yes, Proceed',
+'Cancel'
+);
+if (!proceedIncrease) return;
+}
+}
+
+const currentStock = this.state.inventory.totalKg || 0;
+if (amount > currentStock) {
+// BUG FIX: Changed from blocking confirmation to warning toast - allow users to log feed even with low inventory
+this.showToast(`⚠ Low Inventory: You have ${currentStock.toFixed(1)}kg in stock, feeding ${amount.toFixed(1)}kg.`, 'warning', 4000);
+}
+
+const tank = this.getTankById(tankId);
+// Check if this is the first tray-based feed after blind transition
+const isFirstTrayFeed = tank && tank.hasTransitionedFromBlind &&
+!this.state.feedEntries.some(e => e.tankId === tankId && e.trayResult && e.trayResult !== 'blind-fed' && e.trayResult !== 'pending');
+
+// Allow modal to override target date if we've moved to next day suggestion
+const feedModalEl = document.getElementById('feedRoundModal');
+const targetDateAttr = feedModalEl ? feedModalEl.getAttribute('data-target-date') : null;
+const entryDate = targetDateAttr || this.currentDate;
+
+const newEntry = {
+id: Date.now(),
+tankId,
+date: entryDate,
+time: new Date().toLocaleTimeString(),
+amount,
+trayResult: 'pending', // Always pending for tray-based feeding (requires tray check)
+supplements,
+reason: reason || null,
+            // Health report fields
+            healthObserved: !!healthObserved,
+            mortality: mortality || 0,
+            disease: diseaseType || null
+};
+
+this.state.feedEntries.push(newEntry);
+
+// BUG #3 FIX: Validate inventory won't go negative before deducting
+const currentInventory = this.state.inventory.totalKg || 0;
+const newInventoryTotal = currentInventory - amount;
+if (newInventoryTotal < 0) {
+    this.state.feedEntries.pop(); // Remove the entry we just added
+    this.showToast(`Cannot log ${amount}kg. Insufficient inventory. Current: ${currentInventory.toFixed(1)}kg`, 'error');
+    return;
+}
+
+this.state.inventory.totalKg = newInventoryTotal;
+
+// BUG #2 FIX: Use async save with proper sequencing
+(async () => {
+    try {
+        await this.saveFeedEntries();
+        await this.saveInventory();
+        this.recalculateTankBiomass(tankId, true); // Clear suggestion on log
+        this.updateTankLifecycleState(tankId);
+        this.renderAll();
+
+        // If modal had a target-date (we were logging next-day), clear it now
+        try {
+          const feedModalEl = document.getElementById('feedRoundModal');
+          if (feedModalEl && feedModalEl.hasAttribute('data-target-date')) {
+            feedModalEl.removeAttribute('data-target-date');
+          }
+        } catch (e) {
+          // ignore
+        }
+
+        // Close log feed modal first
+        this.closeAllModals();
+
+    // If health reported, reduce next suggested feed by 15%
+    if (healthObserved) {
+      try {
+        const tankObj = this.getTankById(tankId);
+        if (tankObj) {
+          const baseForNext = (tankObj.nextSuggestedFeed && typeof tankObj.nextSuggestedFeed === 'number') ? tankObj.nextSuggestedFeed : amount;
+          tankObj.nextSuggestedFeed = parseFloat((baseForNext * 0.85).toFixed(1));
+          await this.saveTanks();
+          this.showToast('Health noted — next feed auto-reduced by 15%', 'info');
+        }
+      } catch (e) {
+        console.error('Failed to apply health-based suggestion:', e);
+      }
+    }
+        // If this is the first tray-based feed after transition, DO NOT force-open tray check.
+        // Farmers usually check trays 1.5–2 hours later in real farms.
+        // Instead, show a gentle reminder and let them use the normal "Check Trays" flow when ready.
+        if (isFirstTrayFeed) {
+            this.showToast('📋 Feed saved. Remember to check trays in ~2 hours and update results.', 'info', 5000);
+            // Track feed logging with first_tray_feed flag
+            this.trackEvent('log_feed', {
+                pond_id: tankId,
+                amount: amount,
+                doc: this.getDaysOld(tank?.stockingDate),
+                first_tray_feed: true
+            });
+            // Do NOT return – allow normal next-pond / success flow below
+        }
+
+        // Check if all feeds for this tank are completed for today
+        const feedsPerDay = this.state.settings.feedsPerDay || 4;
+        const todayEntries = this.state.feedEntries.filter(e => 
+            e.tankId === tankId && e.date === this.currentDate
+        );
+        const completedFeeds = todayEntries.length;
+        
+        if (completedFeeds >= feedsPerDay) {
+            // All feeds completed for this tank today
+            const tankName = tank?.name || 'Tank';
+            this.showAlertModal(
+                `🎉 All ${feedsPerDay} feed rounds completed for ${tankName}!\n\nGreat work today. See you tomorrow! 🌅`,
+                '✅ Daily Feeding Complete'
+            );
+            this.showToast(`${tankName}: All feeds done for today!`, 'success', 4000);
+            return; // Don't proceed to next tank
+        }
+
+        if (loadNext) {
+            const currentFarmId = this.state.settings.currentFarmId;
+            const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId && t.status !== 'inactive');
+            const currentIndex = tanks.findIndex(t => t.id === tankId);
+            if (currentIndex !== -1 && currentIndex < tanks.length - 1) {
+                const nextTank = tanks[currentIndex + 1];
+                this.openLogFeedModal(nextTank.id);
+                this.showToast(`Saved. Loading ${nextTank.name}...`);
+                return; // Keep modal open
+            } else {
+                this.showToast('All ponds fed!', 'success');
+            }
+        }
+
+        this.showToast('Feed logged successfully');
+
+        this.trackEvent('log_feed', {
+            pond_id: tankId,
+            amount: amount,
+            doc: this.getDaysOld(tank?.stockingDate)
+        });
+
+        this.detectFeedJump(tankId, amount);
+    } catch (e) {
+        console.error('Failed to log feed:', e);
+        this.showToast('Failed to save feed log', 'error');
+    }
+})();
+})(); // Close outer async IIFE for BUG #9 confirm modal handling
+}
+
+skipFeed(tankId) {
+
+this.showConfirmModal('Skip this feed? It will be recorded as 0kg.', 'Skip Feed').then(confirmed => {
+if (confirmed) {
+const newEntry = {
+id: Date.now(),
+tankId,
+date: this.currentDate,
+time: new Date().toLocaleTimeString(),
+amount: 0,
+trayResult: 'skipped',
+supplements: []
+};
+this.state.feedEntries.push(newEntry);
+this.saveFeedEntries();
+this.renderAll();
+this.showToast('Feed skipped');
+}
+});
+}
+
+quickLogFeed(tankId, amount) {
+
+(async () => {
+const tank = this.getTankById(tankId);
+const doc = this.getDaysOld(tank.stockingDate);
+const blindDuration = this.state.settings.blindFeedingDuration || 30;
+
+const currentStock = this.state.inventory.totalKg || 0;
+if (amount > currentStock) {
+// BUG FIX: Changed from blocking confirmation to warning toast - allow users to log feed even with low inventory
+this.showToast(`⚠ Low Inventory: You have ${currentStock.toFixed(1)}kg in stock, feeding ${amount.toFixed(1)}kg.`, 'warning', 4000);
+}
+
+const newEntry = {
+id: Date.now(),
+tankId,
+date: this.currentDate,
+time: new Date().toLocaleTimeString(),
+amount,
+trayResult: doc <= blindDuration ? 'blind-fed' : 'pending', // Smart status: 'pending' for active tanks
+supplements: []
+};
+
+this.state.feedEntries.push(newEntry);
+
+// BUG #3 FIX: Validate inventory won't go negative before deducting
+const currentInventory = this.state.inventory.totalKg || 0;
+const newInventoryTotal = currentInventory - amount;
+if (newInventoryTotal < 0) {
+    this.state.feedEntries.pop(); // Remove the entry we just added
+    this.showToast(`Cannot feed ${amount}kg. Insufficient inventory. Current: ${currentInventory.toFixed(1)}kg`, 'error');
+    return;
+}
+
+this.state.inventory.totalKg = newInventoryTotal;
+
+// BUG #2 FIX: Use async save with proper sequencing
+try {
+    await this.saveFeedEntries();
+    await this.saveInventory();
+    this.recalculateTankBiomass(tankId, true); // Clear suggestion on log
+    this.updateTankLifecycleState(tankId);
+    this.renderAll();
+    this.showToast(`Fed ${amount}kg to ${tank.name}`);
+} catch (e) {
+    console.error('Failed to quick log feed:', e);
+    this.showToast('Failed to save feed log', 'error');
+}
+})();
+}
+
+recalculateTankBiomass(tankId, clearSuggestion = false) {
+const tank = this.getTankById(tankId);
+if (!tank) return;
+
+if (clearSuggestion) {
+tank.nextSuggestedFeed = null;
+}
+
+
+const entries = this.state.feedEntries.filter(e => e.tankId === tankId);
+// Validate each feed entry amount before summing
+const totalFeed = entries.reduce((sum, e) => {
+const amount = typeof e.amount === 'number' && e.amount >= 0 ? e.amount : 0;
+return sum + amount;
+}, 0);
+
+const tankHarvests = this.state.harvests.filter(h => h.tankId === tankId);
+// Validate each harvest weight before summing
+const totalHarvested = tankHarvests.reduce((sum, h) => {
+const weight = typeof h.weight === 'number' && h.weight >= 0 ? h.weight : 0;
+return sum + weight;
+}, 0);
+
+// Validate calculated values before using in FCR calculation
+if (isNaN(totalFeed) || totalFeed < 0 || isNaN(totalHarvested) || totalHarvested < 0) {
+// Log error but continue with safe defaults
+console.warn(`Invalid biomass data for tank ${tankId}: feed=${totalFeed}, harvested=${totalHarvested}`);
+tank.biomass = 0;
+this.saveTanks();
+return;
+}
+
+const estimatedFCR = 1.2;
+const biomassBefore = (totalFeed / estimatedFCR) - totalHarvested;
+// Ensure biomass is never negative and is a valid number
+const calculatedBiomass = !isNaN(biomassBefore) ? biomassBefore : 0;
+tank.biomass = Math.max(0, parseFloat(calculatedBiomass.toFixed(1)));
+this.saveTanks();
+}
+
+openFeedSchedule(tankId) {
+const tank = this.getTankById(tankId);
+if (!tank || !tank.blindSchedule) {
+this.showToast('No schedule available for this tank', 'error');
+return;
+}
+const duration = this.state.settings.blindFeedingDuration || 30;
+const titleEl = document.getElementById('blindScheduleTitle');
+if (titleEl) titleEl.textContent = `Blind Feeding Phase (DOC 1-${duration})`;
+
+this.editingScheduleTankId = tankId;
+const list = document.getElementById('feedScheduleList');
+const thead = document.querySelector('.schedule-table thead tr');
+list.innerHTML = '';
+
+// Determine current configuration from schedule
+const currentDuration = tank.blindSchedule ? tank.blindSchedule.length : 30;
+// Find max feeds count in schedule to determine columns
+let maxFeeds = 0;
+if (tank.blindSchedule) {
+tank.blindSchedule.forEach(item => {
+if (item.feeds && item.feeds.length > maxFeeds) maxFeeds = item.feeds.length;
+});
+}
+const feedsCount = maxFeeds || (this.state.settings.feedsPerDay || 4);
+
+
+// Update Header
+let headerHTML = `<th>DOC</th><th>Date</th>`;
+for(let i=0; i<feedsCount; i++) {
+headerHTML += `<th>Feed ${i+1}</th>`;
+}
+headerHTML += `<th>Total (kg)</th>`;
+thead.innerHTML = headerHTML;
+
+const stockingDate = new Date(tank.stockingDate);
+tank.blindSchedule.forEach((item, index) => {
+const date = new Date(stockingDate);
+date.setDate(date.getDate() + (item.doc - 1));
+const dateStr = date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+// Polyfill feeds array if missing
+if (!item.feeds) {
+const perFeed = parseFloat((item.amount / feedsCount).toFixed(2)); // Use max feeds for polyfill
+item.feeds = Array(feedsCount).fill(perFeed);
+}
+
+let feedsInputs = '';
+// Render inputs up to feedsCount. If item has fewer feeds, pad with empty or 0?
+// For simplicity, we assume uniform feeds per day for now, or we iterate up to feedsCount
+for (let fIdx = 0; fIdx < feedsCount; fIdx++) {
+const amt = item.feeds[fIdx] !== undefined ? item.feeds[fIdx] : 0;
+feedsInputs += `<td><input type="number" class="schedule-input" value="${amt}" step="0.01" id="sched-amount-${index}-${fIdx}" style="width: 50px;"></td>`;
+}
+
+const manualIndicator = item.status === 'manual'
+? ` <i class="fas fa-undo" style="color: var(--warning-dark); font-size: 10px; cursor: pointer;" title="Manually Edited - Click to Reset" onclick="app.resetScheduleRow(${index})"></i>`
+: '';
+
+const row = document.createElement('tr');
+if (item.status === 'manual') {
+row.style.background = '#fff3e0';
+}
+row.innerHTML = `
+<td>${item.doc}${manualIndicator}</td>
+<td>${dateStr}</td>
+${feedsInputs}
+<td style="font-weight:bold;">${item.amount.toFixed(2)}</td>
+`;
+list.appendChild(row);
+});
+document.getElementById('feedScheduleModal').classList.add('active');
+}
+
+saveFeedSchedule() {
+if (!this.editingScheduleTankId) return;
+const tank = this.getTankById(this.editingScheduleTankId);
+if (!tank) return;
+// We need to know how many columns were rendered.
+// We can infer this from the table header count minus 3 (DOC, Date, Total)
+const headerCells = document.querySelectorAll('.schedule-table thead th');
+const feedsCount = Math.max(1, headerCells.length - 3);
+
+tank.blindSchedule.forEach((item, index) => {
+let total = 0;
+const newFeeds = [];
+let changed = false;
+
+for(let i=0; i<feedsCount; i++) {
+const input = document.getElementById(`sched-amount-${index}-${i}`);
+if (input) {
+const val = parseFloat(input.value) || 0;
+newFeeds.push(val);
+total += val;
+if (val !== item.feeds[i]) changed = true;
+}
+}
+
+if (changed) {
+item.feeds = newFeeds;
+item.amount = parseFloat(total.toFixed(2));
+item.status = 'manual';
+}
+});
+this.saveTanks();
+this.closeAllModals();
+this.showToast('Schedule updated successfully');
+}
+
+regenerateSchedule() {
+if (!this.editingScheduleTankId) return;
+const tank = this.getTankById(this.editingScheduleTankId);
+if (!tank) return;
+const duration = tank.blindDuration || 30;
+const week1Freq = tank.blindWeek1 || 2;
+const stdFreq = tank.blindStd || 4;
+
+
+this.showConfirmModal('Reset schedule to defaults? Manual edits will be preserved.', 'Reset Schedule').then(confirmed => {
+if (confirmed) {
+const newSchedule = this.generateBlindFeedingSchedule(tank.initialSeed, tank.stockingDate, duration, week1Freq, stdFreq);
+// Merge existing manual entries
+if (tank.blindSchedule) {
+newSchedule.forEach((newItem, i) => {
+const existing = tank.blindSchedule.find(e => e.doc === newItem.doc);
+if (existing && existing.status === 'manual') {
+newSchedule[i] = existing;
+}
+});
+}
+
+tank.blindSchedule = newSchedule;
+this.saveTanks();
+this.openFeedSchedule(this.editingScheduleTankId);
+this.showToast('Schedule regenerated');
+}
+});
+}
+
+resetScheduleRow(index) {
+if (!this.editingScheduleTankId) return;
+const tank = this.getTankById(this.editingScheduleTankId);
+if (!tank || !tank.blindSchedule[index]) return;
+const item = tank.blindSchedule[index];
+const duration = Math.max(tank.blindDuration || 30, item.doc);
+const week1Freq = tank.blindWeek1 || 2;
+const stdFreq = tank.blindStd || 4;
+const tempSchedule = this.generateBlindFeedingSchedule(tank.initialSeed, tank.stockingDate, duration, week1Freq, stdFreq);
+const freshItem = tempSchedule.find(i => i.doc === item.doc);
+if (freshItem) {
+tank.blindSchedule[index] = freshItem;
+this.saveTanks();
+this.openFeedSchedule(this.editingScheduleTankId);
+this.showToast('Row reset to auto');
+}
+}
+
+checkBlindFeedingTransitions() {
+if (document.querySelector('.modal-overlay.active')) return;
+
+const currentFarmId = this.state.settings.currentFarmId;
+if (!currentFarmId) return;
+
+const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId && t.status === 'active');
+
+for (const tank of tanks) {
+const doc = this.getDaysOld(tank.stockingDate);
+const duration = tank.blindDuration || 30;
+// Trigger modal if DOC is past blind duration and tank hasn't been transitioned yet
+if (doc > duration && !tank.hasTransitionedFromBlind) {
+this.openBlindTransitionModal(tank);
+break; // Show one at a time
+}
+}
+}
+
+openBlindTransitionModal(tank) {
+this.transitionTankId = tank.id;
+document.getElementById('blindTransitionText').textContent = `${tank.name} has completed its blind feeding period (DOC ${this.getDaysOld(tank.stockingDate)}). Switch to check-tray based feeding?`;
+document.getElementById('blindTransitionModal').classList.add('active');
+}
+
+ignoreBlindTransition() {
+if (this.transitionTankId) {
+// This will only ignore for the current session. A page refresh will show the prompt again.
+this.ignoredBlindTransitions.add(this.transitionTankId);
+}
+this.closeAllModals();
+}
+
+confirmBlindTransition() {
+if (this.transitionTankId) {
+const tank = this.getTankById(this.transitionTankId);
+if (tank) {
+tank.hasTransitionedFromBlind = true;
+this.saveTanks();
+// Close transition modal first
+this.closeAllModals();
+// Show success message
+this.showToast(`${tank.name} switched to tray-based feeding!`, 'success');
+// Automatically open log feed modal for this tank
+// This provides smooth workflow: transition → log first feed with tray check
+setTimeout(() => {
+this.openLogFeedModal(this.transitionTankId, null, null, true);
+this.showToast(`📋 Tray check now required for ${tank.name}`, 'info', 5000);
+}, 400);
+}
+}
+this.renderAll();
+}
+
+openTankDetail(tankId) {
+const tank = this.getTankById(tankId);
+if (!tank) return;
+
+this.editingTankId = tankId;
+
+document.getElementById('tankDetailTitle').textContent = tank.name || 'Tank Details';
+
+const tabContainer = document.getElementById('tankDetailTabContainer');
+let tabsHTML = `<div class="tank-detail-tabs">`;
+tabsHTML += `<div class="tank-detail-tab active" onclick="app.switchTankDetailTab('${tankId}', 'overview')">Overview</div>`
+tabsHTML += `<div class="tank-detail-tab" onclick="app.switchTankDetailTab('${tankId}', 'logs')">Logs</div>`;
+tabsHTML += `<div class="tank-detail-tab" onclick="app.switchTankDetailTab('${tankId}', 'analytics')">Analytics</div>`;
+tabsHTML += `<div class="tank-detail-tab" onclick="app.switchTankDetailTab('${tankId}', 'actions')">Actions</div>`
+tabsHTML += `<div class="tank-detail-tab" onclick="app.switchTankDetailTab('${tankId}', 'settings')">Settings</div>`;
+tabsHTML += `</div>`;
+tabContainer.innerHTML = tabsHTML;
+
+// Default to first visible tab
+const firstTab = tabContainer.querySelector('.tank-detail-tab').textContent.toLowerCase();
+this.switchTankDetailTab(tankId, firstTab);
+
+document.getElementById('tankDetailModal').classList.add('active');
+}
+
+switchTankDetailTab(tankId, tabName) {
+const tank = this.getTankById(tankId);
+if (!tank) return;
+
+// Clean up analytics charts when switching away from analytics tab
+if (this.charts.tankGrowth) {
+this.charts.tankGrowth.destroy();
+delete this.charts.tankGrowth;
+}
+if (this.charts.tankFCR) {
+this.charts.tankFCR.destroy();
+delete this.charts.tankFCR;
+}
+
+// Update active tab
+const tabContainer = document.getElementById('tankDetailTabContainer');
+tabContainer.querySelectorAll('.tank-detail-tab').forEach(tab => {
+if (tab.textContent.toLowerCase() === tabName) {
+tab.classList.add('active');
+} else {
+tab.classList.remove('active');
+}
+});
+
+const content = document.getElementById('tankDetailContent');
+const footer = document.getElementById('tankDetailFooter');
+content.innerHTML = '';
+footer.innerHTML = '';
+footer.style.display = 'none';
+
+if (tabName === 'overview') {
+this.renderTankDetailOverview(tank, content);
+} else if (tabName === 'analytics') {
+this.renderTankDetailAnalytics(tank, content);
+} else if (tabName === 'logs') {
+this.renderTankDetailLogs(tank, content);
+} else if (tabName === 'actions') {
+this.renderTankDetailActions(tank, content);
+} else if (tabName === 'settings') {
+this.renderTankDetailEdit(tankId);
+}
+}
+
+renderTankDetailOverview(tank, container) {
+const entries = this.state.feedEntries.filter(e => e.tankId == tank.id);
+const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
+const todayFeed = entries.filter(e => e.date === this.currentDate).reduce((sum, e) => sum + e.amount, 0);
+const doc = this.getDaysOld(tank.stockingDate);
+const tankHarvests = this.state.harvests.filter(h => h.tankId === tank.id);
+const totalHarvested = tankHarvests.reduce((sum, h) => sum + h.weight, 0);
+const totalProduction = (tank.biomass || 0) + totalHarvested;
+    const estimatedFCR = totalProduction > 0 ? (totalFeed / totalProduction).toFixed(2) : '0.00';
+
+    // LIFECYCLE STATE INFO
+    const lifecycleState = tank.lifecycleState || this.calculateLifecycleState(tank);
+    const lifecycleInfo = this.getLifecycleStateInfo(lifecycleState);
+
+    // Simple phase + tray mode text for context
+    let phaseLabel = '';
+    if (doc <= 3) phaseLabel = 'Phase 1 · Stocking';
+    else if (doc <= 15) phaseLabel = 'Phase 2 · Stabilisation';
+    else if (doc <= 30) phaseLabel = 'Phase 3 · Biomass';
+
+    const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
+    let trayPhase = '';
+    if (doc <= blindDuration && !tank.hasTransitionedFromBlind) trayPhase = 'Blind Feed Mode';
+    else if (doc > blindDuration && !tank.hasTransitionedFromBlind) trayPhase = 'Tray Training';
+    else if (tank.hasTransitionedFromBlind) trayPhase = 'Tray Active';
+
+// Latest water quality
+const waterEntries = this.state.waterQuality.filter(w => w.tankId === tank.id).sort((a, b) => new Date(b.date) - new Date(a.date));
+const lastWater = waterEntries[0];
+let waterHTML = `<div class="text-muted text-center" style="padding: 20px 0;">No water quality logs.</div>`;
+if (lastWater) {
+waterHTML = `
+<div class="tank-summary-card" style="border-left: 4px solid var(--info);">
+<div class="tank-summary-header" style="margin-bottom: 8px;">
+<div class="tank-summary-name" style="font-size: 14px;">Latest Water Quality</div>
+<div style="font-size: 11px; color: var(--gray);">${new Date(lastWater.date).toLocaleDateString()}</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 8px; text-align: center;">
+<div><div class="tank-summary-label">pH</div><div class="tank-summary-value">${lastWater.ph !== null ? lastWater.ph : '-'}</div></div>
+<div><div class="tank-summary-label">Salinity</div><div class="tank-summary-value">${lastWater.salinity !== null ? lastWater.salinity : '-'}</div></div>
+<div><div class="tank-summary-label">D.O.</div><div class="tank-summary-value">${lastWater.do !== null ? lastWater.do : '-'}</div></div>
+<div><div class="tank-summary-label">Alkalinity</div><div class="tank-summary-value">${lastWater.alkalinity !== null ? lastWater.alkalinity : '-'}</div></div>
+<div><div class="tank-summary-label" style="color: ${lastWater.ammonia > 0.25 ? 'var(--danger)' : 'var(--dark)'};">Ammonia</div><div class="tank-summary-value" style="color: ${lastWater.ammonia > 0.25 ? 'var(--danger)' : 'var(--dark)'};">${lastWater.ammonia !== null ? lastWater.ammonia : '-'}</div></div>
+<div><div class="tank-summary-label" style="color: ${lastWater.nitrite > 0.2 ? 'var(--danger)' : 'var(--dark)'};">Nitrite</div><div class="tank-summary-value" style="color: ${lastWater.nitrite > 0.2 ? 'var(--danger)' : 'var(--dark)'};">${lastWater.nitrite !== null ? lastWater.nitrite : '-'}</div></div>
+</div>
+</div>
+`;
+}
+
+// Latest application
+const appEntries = (this.state.applications || []).filter(a => a.tankId === tank.id).sort((a, b) => new Date(b.date) - new Date(a.date));
+const lastApp = appEntries[0];
+let appHTML = `<div class="text-muted text-center" style="padding: 20px 0;">No applications logged.</div>`;
+if (lastApp) {
+appHTML = `
+<div class="tank-summary-card" style="border-left: 4px solid var(--warning);">
+<div class="tank-summary-header" style="margin-bottom: 8px;">
+<div class="tank-summary-name" style="font-size: 14px;">Last Application</div>
+<div style="font-size: 11px; color: var(--gray);">${new Date(lastApp.date).toLocaleDateString()}</div>
+</div>
+<div style="font-size: 14px; font-weight: 600; color: var(--dark);">${lastApp.itemName}</div>
+<div style="font-size: 12px; color: var(--gray);">${lastApp.amount} ${lastApp.unit || ''}</div>
+</div>
+`;
+}
+
+// Prepare Chart Data (Last 14 Days)
+const labels = [];
+const dataPoints = [];
+const today = new Date();
+for (let i = 13; i >= 0; i--) {
+const d = new Date(today);
+d.setDate(d.getDate() - i);
+const dateStr = this.getFormattedDate(d);
+labels.push(d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }));
+const dayEntries = this.state.feedEntries.filter(e => e.tankId === tank.id && e.date === dateStr);
+const dayTotal = dayEntries.reduce((sum, e) => sum + e.amount, 0);
+dataPoints.push(dayTotal);
+}
+
+container.innerHTML = `
+<div class="tank-detail-tab-content">
+<!-- LIFECYCLE STATE BANNER -->
+<div style="background: linear-gradient(135deg, ${lifecycleInfo.bgColor} 0%, ${lifecycleInfo.bgColor}dd 100%); border: 2px solid ${lifecycleInfo.color}; border-radius: 12px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+<div style="font-size: 32px;">${lifecycleInfo.icon}</div>
+<div style="flex: 1;">
+<div style="font-size: 16px; font-weight: 700; color: ${lifecycleInfo.color}; margin-bottom: 4px;">${lifecycleInfo.label}</div>
+<div style="font-size: 13px; color: ${lifecycleInfo.color}; opacity: 0.9;">${lifecycleInfo.description} • DOC ${doc}</div>
+</div>
+<div style="text-align: right; font-size: 12px; color: ${lifecycleInfo.color}; opacity: 0.8;">
+${phaseLabel || trayPhase || ''}
+</div>
+</div>
+<div class="detail-section">
+<div class="detail-section-header">
+<h3 class="detail-section-title">Feed History (14 Days)</h3>
+</div>
+<div style="background: white; padding: 10px; border-radius: 12px; border: 1px solid var(--border); height: 220px;">
+<canvas id="feedHistoryChart"></canvas>
+</div>
+</div>
+<div class="detail-section">
+<div class="detail-section-header">
+<h3 class="detail-section-title">Health & Mortality</h3>
+</div>
+<div class="tank-summary-card" style="display:flex; flex-direction:column; gap:12px;">
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap:12px;">
+<div>
+<div class="tank-summary-label">Dead Shrimp</div>
+<div class="tank-summary-value" style="color: ${tank.deadCount > 0 ? 'var(--danger)' : 'var(--success)'};">${tank.deadCount || 0}</div>
+</div>
+<div>
+<div class="tank-summary-label">Health Status</div>
+<div class="tank-summary-value" style="color: ${
+  (tank.healthStatus || 'healthy') === 'critical' ? 'var(--danger)' :
+  (tank.healthStatus || 'healthy') === 'concerns' ? 'var(--warning)' :
+  (tank.healthStatus || 'healthy') === 'normal' ? 'var(--info)' :
+  'var(--success)'
+}; font-weight: 600; text-transform: capitalize;">${(tank.healthStatus || 'healthy').replace('-', ' ')}</div>
+</div>
+</div>
+${tank.healthNotes ? `<div style="padding: 8px; background: #f8f9fa; border-radius: 8px; border-left: 3px solid var(--warning); font-size: 12px; color: var(--gray);">
+<strong>Notes:</strong> ${this.sanitizeHTML(tank.healthNotes)}
+</div>` : ''}
+${tank.lastHealthUpdate ? `<div style="font-size: 11px; color: var(--gray);">Last updated: ${tank.lastHealthUpdate}</div>` : ''}
+</div>
+</div>
+<div class="detail-section">
+<div class="detail-section-header">
+<h3 class="detail-section-title">Recent Activity</h3>
+</div>
+${waterHTML}
+<br>
+${appHTML}
+</div>
+</div>
+`;
+
+// Initialize Chart
+if (this.feedChart) {
+this.feedChart.destroy();
+}
+const canvas = document.getElementById('feedHistoryChart');
+if (!canvas) return;
+const ctx = canvas.getContext('2d');
+this.feedChart = new Chart(ctx, {
+type: 'bar',
+data: {
+labels: labels,
+datasets: [{
+label: 'Feed (kg)',
+data: dataPoints,
+backgroundColor: '#2196F3',
+borderRadius: 4,
+barThickness: 10
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: false,
+plugins: {
+legend: { display: false }
+},
+scales: {
+y: {
+beginAtZero: true,
+grid: { borderDash: [4, 4], drawBorder: false },
+ticks: { font: { size: 10 } }
+},
+x: {
+grid: { display: false },
+ticks: { font: { size: 10 }, maxRotation: 45, minRotation: 45 }
+}
+}
+}
+});
+}
+
+renderTankDetailAnalytics(tank, container) {
+// Filter data for this specific tank
+const tankEntries = this.state.feedEntries.filter(e => e.tankId === tank.id);
+const tankHarvests = this.state.harvests.filter(h => h.tankId === tank.id);
+
+// Calculate performance metrics
+const totalFeed = tankEntries.reduce((sum, e) => sum + e.amount, 0);
+const totalHarvested = tankHarvests.reduce((sum, h) => sum + h.weight, 0);
+const totalProduction = (tank.biomass || 0) + totalHarvested;
+const estimatedFCR = totalProduction > 0 ? (totalFeed / totalProduction).toFixed(2) : '0.00';
+const doc = this.getDaysOld(tank.stockingDate);
+
+container.innerHTML = `
+<div class="tank-detail-tab-content">
+<div class="detail-section">
+<div class="detail-section-header">
+<h3 class="detail-section-title">Performance Trends for ${tank.name}</h3>
+</div>
+<div class="chart-card" style="margin-bottom: 16px;">
+<div class="chart-header">
+<h3>Feed vs. Growth</h3>
+</div>
+<canvas id="tankGrowthChart" style="max-height: 250px;"></canvas>
+</div>
+<div class="chart-card">
+<div class="chart-header">
+<h3>FCR Trend</h3>
+</div>
+<canvas id="tankFCRChart" style="max-height: 250px;"></canvas>
+</div>
+</div>
+<div class="detail-section">
+<div class="detail-section-header">
+<h3 class="detail-section-title">Performance Metrics</h3>
+</div>
+<div class="detail-stat-grid">
+<div class="stat-card"><div class="stat-value">${doc}</div><div class="stat-label">Days of Culture</div></div>
+<div class="stat-card"><div class="stat-value">${(tank.biomass || 0).toFixed(0)} <span class="unit">kg</span></div><div class="stat-label">Est. Biomass</div></div>
+<div class="stat-card"><div class="stat-value">${estimatedFCR}</div><div class="stat-label">Est. FCR</div></div>
+<div class="stat-card"><div class="stat-value">${totalFeed.toFixed(1)} <span class="unit">kg</span></div><div class="stat-label">Total Feed</div></div>
+<div class="stat-card"><div class="stat-value">${totalHarvested.toFixed(1)} <span class="unit">kg</span></div><div class="stat-label">Total Harvested</div></div>
+</div>
+</div>
+</div>`;
+// Render charts after DOM is ready
+setTimeout(() => {
+this.renderTankGrowthChart(tank, tankEntries, tankHarvests);
+this.renderTankFCRChart(tank, tankEntries, tankHarvests);
+}, 100);
+}
+
+renderTankGrowthChart(tank, entries, harvests) {
+const canvas = document.getElementById('tankGrowthChart');
+if (!canvas) return;
+
+// Calculate daily feed and biomass over time
+const dailyData = {};
+const allDates = [...new Set(entries.map(e => e.date))].sort();
+// Initialize daily data
+allDates.forEach(date => {
+dailyData[date] = {
+feed: 0,
+biomass: 0
+};
+});
+
+// Calculate cumulative feed
+let cumulativeFeed = 0;
+allDates.forEach(date => {
+const dayEntries = entries.filter(e => e.date === date);
+cumulativeFeed += dayEntries.reduce((sum, e) => sum + e.amount, 0);
+dailyData[date].feed = cumulativeFeed;
+});
+
+// Calculate estimated biomass over time
+// Start with initial seed, add growth based on feed
+const stockingDate = tank.stockingDate || allDates[0];
+const initialSeed = tank.initialSeed || 0;
+allDates.forEach((date, index) => {
+if (date < stockingDate) {
+dailyData[date].biomass = 0;
+} else {
+// Simple growth estimation: assume 1.5 FCR (1.5kg feed = 1kg growth)
+const daysSinceStocking = Math.floor((new Date(date) - new Date(stockingDate)) / (1000 * 60 * 60 * 24));
+const feedSinceStocking = dailyData[date].feed;
+const estimatedGrowth = feedSinceStocking / 1.5; // Using 1.5 as average FCR
+dailyData[date].biomass = initialSeed + estimatedGrowth;
+}
+});
+
+const dates = Object.keys(dailyData).sort();
+const feedData = dates.map(date => dailyData[date].feed);
+const biomassData = dates.map(date => dailyData[date].biomass);
+
+// Destroy existing chart
+if (this.charts.tankGrowth) {
+this.charts.tankGrowth.destroy();
+}
+
+this.charts.tankGrowth = new Chart(canvas, {
+type: 'line',
+data: {
+labels: dates.map(d => {
+const date = new Date(d);
+return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+}),
+datasets: [{
+label: 'Cumulative Feed (kg)',
+data: feedData,
+borderColor: 'rgb(33, 150, 243)',
+backgroundColor: 'rgba(33, 150, 243, 0.1)',
+tension: 0.4,
+fill: false,
+borderWidth: 2,
+pointRadius: 3,
+yAxisID: 'y'
+}, {
+label: 'Estimated Biomass (kg)',
+data: biomassData,
+borderColor: 'rgb(76, 175, 80)',
+backgroundColor: 'rgba(76, 175, 80, 0.1)',
+tension: 0.4,
+fill: false,
+borderWidth: 2,
+pointRadius: 3,
+yAxisID: 'y1'
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: true,
+aspectRatio: 2,
+plugins: {
+legend: {
+display: true,
+position: 'top',
+labels: {
+font: { family: 'Roboto', size: 12 },
+padding: 15
+}
+},
+tooltip: {
+backgroundColor: 'rgba(0, 0, 0, 0.8)',
+padding: 12,
+titleFont: { family: 'Roboto', size: 13, weight: 'bold' },
+bodyFont: { family: 'Roboto', size: 12 },
+displayColors: true,
+callbacks: {
+label: function(context) {
+if (context.datasetIndex === 0) {
+return `Feed: ${context.parsed.y.toFixed(2)} kg`;
+} else {
+return `Biomass: ${context.parsed.y.toFixed(2)} kg`;
+}
+}
+}
+}
+},
+scales: {
+y: {
+type: 'linear',
+position: 'left',
+beginAtZero: true,
+title: {
+display: true,
+text: 'Feed (kg)',
+font: { family: 'Roboto', size: 12, weight: '600' }
+},
+grid: {
+color: 'rgba(0, 0, 0, 0.05)',
+drawBorder: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 },
+callback: function(value) {
+return value.toFixed(1) + ' kg';
+}
+}
+},
+y1: {
+type: 'linear',
+position: 'right',
+beginAtZero: true,
+title: {
+display: true,
+text: 'Biomass (kg)',
+font: { family: 'Roboto', size: 12, weight: '600' }
+},
+grid: {
+drawOnChartArea: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 },
+callback: function(value) {
+return value.toFixed(1) + ' kg';
+}
+}
+},
+x: {
+grid: {
+display: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 },
+maxRotation: 45,
+minRotation: 0
+}
+}
+}
+}
+});
+}
+
+renderTankFCRChart(tank, entries, harvests) {
+const canvas = document.getElementById('tankFCRChart');
+if (!canvas) return;
+
+// Calculate weekly FCR for this tank
+const weeklyData = {};
+const allDates = [...new Set(entries.map(e => e.date))].sort();
+allDates.forEach(date => {
+const weekStart = new Date(date);
+weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+const weekKey = weekStart.toISOString().split('T')[0];
+if (!weeklyData[weekKey]) {
+weeklyData[weekKey] = { feed: 0, production: 0, dates: [] };
+}
+weeklyData[weekKey].dates.push(date);
+});
+
+// Calculate feed and production for each week
+Object.keys(weeklyData).forEach(weekKey => {
+const weekDates = weeklyData[weekKey].dates;
+weeklyData[weekKey].feed = entries
+.filter(e => weekDates.includes(e.date))
+.reduce((sum, e) => sum + e.amount, 0);
+const weekHarvests = harvests.filter(h => weekDates.includes(h.date));
+const weekProduction = weekHarvests.reduce((sum, h) => sum + h.weight, 0);
+// Add current biomass if tank is active
+if (tank.status === 'active' && tank.biomass) {
+weeklyData[weekKey].production = weekProduction + (tank.biomass / Object.keys(weeklyData).length);
+} else {
+weeklyData[weekKey].production = weekProduction;
+}
+});
+
+const weeks = Object.keys(weeklyData).sort();
+const fcrValues = weeks.map(week => {
+const data = weeklyData[week];
+return data.production > 0 ? parseFloat((data.feed / data.production).toFixed(2)) : null;
+});
+
+// Destroy existing chart
+if (this.charts.tankFCR) {
+this.charts.tankFCR.destroy();
+}
+
+this.charts.tankFCR = new Chart(canvas, {
+type: 'line',
+data: {
+labels: weeks.map(w => {
+const date = new Date(w);
+return `Week ${date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`;
+}),
+datasets: [{
+label: 'FCR',
+data: fcrValues,
+borderColor: 'rgb(76, 175, 80)',
+backgroundColor: 'rgba(76, 175, 80, 0.1)',
+tension: 0.4,
+fill: true,
+borderWidth: 2,
+pointRadius: 5,
+pointBackgroundColor: 'rgb(76, 175, 80)',
+pointBorderColor: '#fff',
+pointBorderWidth: 2
+}, {
+label: 'Target (1.2)',
+data: weeks.map(() => 1.2),
+borderColor: 'rgba(255, 152, 0, 0.5)',
+borderDash: [5, 5],
+borderWidth: 1,
+pointRadius: 0,
+fill: false
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: true,
+aspectRatio: 2,
+plugins: {
+legend: {
+display: true,
+position: 'top',
+labels: {
+font: { family: 'Roboto', size: 12 },
+padding: 15
+}
+},
+tooltip: {
+backgroundColor: 'rgba(0, 0, 0, 0.8)',
+padding: 12,
+titleFont: { family: 'Roboto', size: 13, weight: 'bold' },
+bodyFont: { family: 'Roboto', size: 12 },
+displayColors: true,
+callbacks: {
+label: function(context) {
+if (context.datasetIndex === 0) {
+if (context.parsed.y === null) return 'FCR: N/A';
+return `FCR: ${context.parsed.y.toFixed(2)}`;
+} else {
+return `Target: ${context.parsed.y.toFixed(2)}`;
+}
+}
+}
+}
+},
+scales: {
+y: {
+beginAtZero: true,
+title: {
+display: true,
+text: 'FCR',
+font: { family: 'Roboto', size: 12, weight: '600' }
+},
+grid: {
+color: 'rgba(0, 0, 0, 0.05)',
+drawBorder: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 }
+}
+},
+x: {
+grid: {
+display: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 },
+maxRotation: 45,
+minRotation: 0
+}
+}
+}
+}
+});
+}
+
+renderTankDetailLogs(tank, container) {
+container.innerHTML = `
+<div class="tank-detail-tab-content" style="padding-top: 10px;">
+<div class="tank-detail-sub-tabs" id="tankLogSubTabs">
+<button class="tank-detail-sub-tab active" onclick="app.switchTankLogSubTab('${tank.id}', 'feed')">Feed & Harvest</button>
+<button class="tank-detail-sub-tab" onclick="app.switchTankLogSubTab('${tank.id}', 'water')">Water</button>
+<button class="tank-detail-sub-tab" onclick="app.switchTankLogSubTab('${tank.id}', 'apps')">Applications</button>
+<button class="tank-detail-sub-tab" onclick="app.switchTankLogSubTab('${tank.id}', 'disease')">Disease / Health</button>
+</div>
+<div id="tankLogSubTabContent">
+<!-- Sub-tab content will be loaded here -->
+</div>
+</div>
+`;
+// Default to feed tab
+this.renderTankLogFeed(tank, document.getElementById('tankLogSubTabContent'));
+}
+
+switchTankLogSubTab(tankId, subTabName) {
+const tank = this.getTankById(tankId);
+if (!tank) return;
+
+// Update active tab
+const subTabsContainer = document.getElementById('tankLogSubTabs');
+subTabsContainer.querySelectorAll('.tank-detail-sub-tab').forEach(tab => {
+if (tab.getAttribute('onclick').includes(`'${subTabName}'`)) {
+tab.classList.add('active');
+} else {
+tab.classList.remove('active');
+}
+});
+
+const contentContainer = document.getElementById('tankLogSubTabContent');
+contentContainer.innerHTML = ''; // Clear previous content
+
+if (subTabName === 'feed') {
+this.renderTankLogFeed(tank, contentContainer);
+} else if (subTabName === 'water') {
+this.renderTankLogWater(tank, contentContainer);
+} else if (subTabName === 'apps') {
+this.renderTankLogApplications(tank, contentContainer);
+} else if (subTabName === 'disease') {
+this.renderTankLogDiseases(tank, contentContainer);
+}
+}
+
+renderTankLogFeed(tank, container) {
+const feedEntries = this.state.feedEntries.filter(e => e.tankId === tank.id).sort((a, b) => b.id - a.id).slice(0, 20);
+const harvestEntries = this.state.harvests.filter(h => h.tankId === tank.id).sort((a, b) => b.id - a.id);
+
+container.innerHTML = `
+<div class="tank-detail-sub-tab-content">
+<div class="detail-section">
+<div class="detail-section-header">
+<h3 class="detail-section-title">Recent Feed History</h3>
+<button class="btn btn-sm btn-secondary" onclick="app.switchScreen('log'); app.switchLogTank('${this.escapeAttribute(tank.id)}'); app.closeAllModals();"><i class="fas fa-book"></i> Full Log</button>
+</div>
+${feedEntries.length > 0 ? feedEntries.map(e => `
+<div class="settings-item" style="margin-bottom: 8px;">
+<div>
+<div style="font-weight: 600;">${new Date(e.date).toLocaleDateString('en-IN', {day: 'numeric', month: 'short'})}: ${e.amount} kg</div>
+<div style="font-size: 12px; color: var(--gray);">Tray: <span class="log-status ${e.trayResult}">${e.trayResult || 'pending'}</span></div>
+</div>
+<button class="btn-icon" onclick="app.editFeedEntry(${e.id})"><i class="fas fa-edit"></i></button>
+</div>
+`).join('') : '<p class="text-muted">No feed entries.</p>'}
+</div>
+
+<div class="detail-section">
+<div class="detail-section-header">
+<h3 class="detail-section-title">Harvest History</h3>
+<button class="btn btn-sm btn-secondary" onclick="app.openCropHistory('${this.escapeAttribute(tank.id)}')"><i class="fas fa-history"></i> Full History</button>
+</div>
+${harvestEntries.length > 0 ? harvestEntries.map(h => `
+<div class="settings-item" style="margin-bottom: 8px;">
+<div>
+<div style="font-weight: 600;">${new Date(h.date).toLocaleDateString()}: ${h.weight} kg</div>
+<div style="font-size: 12px; color: var(--gray);">Count: ${h.count || '-'}</div>
+</div>
+</div>
+`).join('') : '<p class="text-muted">No harvests.</p>'}
+</div>
+</div>
+`;
+}
+
+renderTankLogWater(tank, container) {
+const waterEntries = this.state.waterQuality.filter(w => w.tankId == tank.id).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10);
+
+container.innerHTML = `
+<div class="tank-detail-sub-tab-content">
+<div class="detail-section">
+<div class="detail-section-header">
+<h3 class="detail-section-title">Recent Water Quality</h3>
+<button class="btn btn-sm btn-secondary" onclick="app.openWaterQualityHistory('${this.escapeAttribute(tank.id)}')"><i class="fas fa-history"></i> Full History</button>
+</div>
+${waterEntries.length > 0 ? waterEntries.map(entry => `
+<div class="settings-item" style="margin-bottom: 8px;">
+<div>
+<div style="font-weight: 600;">${new Date(entry.date).toLocaleDateString('en-IN', {day: 'numeric', month: 'short'})}</div>
+<div style="font-size: 12px; color: var(--gray); display: flex; gap: 12px; margin-top: 4px;">
+<span>pH: <strong>${entry.ph !== null ? entry.ph : '-'}</strong></span>
+<span>Salinity: <strong>${entry.salinity !== null ? entry.salinity : '-'}</strong></span>
+<span>D.O.: <strong>${entry.do !== null ? entry.do : '-'}</strong></span>
+<span>Alkalinity: <strong>${entry.alkalinity !== null ? entry.alkalinity : '-'}</strong></span>
+<span>NH₃: <strong>${entry.ammonia !== null ? entry.ammonia : '-'}</strong></span>
+<span>NO₂: <strong>${entry.nitrite !== null ? entry.nitrite : '-'}</strong></span>
+</div>
+</div>
+</div>
+`).join('') : '<p class="text-muted">No water quality logs.</p>'}
+</div>
+</div>
+`;
+}
+
+renderTankLogApplications(tank, container) {
+
+const appEntries = (this.state.applications || []).filter(a => a.tankId == tank.id).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10);
+
+container.innerHTML = `
+<div class="tank-detail-sub-tab-content">
+<div class="detail-section">
+<div class="detail-section-header">
+<h3 class="detail-section-title">Recent Applications</h3>
+<button class="btn btn-sm btn-secondary" onclick="app.openApplicationHistory('${this.escapeAttribute(tank.id)}')"><i class="fas fa-history"></i> Full History</button>
+</div>
+${appEntries.length > 0 ? appEntries.map(entry => `
+<div class="settings-item" style="margin-bottom: 8px;">
+<div>
+<div style="font-weight: 600;">${this.sanitizeHTML(entry.itemName)}</div>
+<div style="font-size: 12px; color: var(--gray); margin-top: 4px;">
+${new Date(entry.date).toLocaleDateString('en-IN', {day: 'numeric', month: 'short'})} &bull; ${entry.amount} ${entry.unit || ''}
+</div>
+</div>
+<button class="btn-icon" onclick="app.deleteApplication(${entry.id}, '${this.escapeAttribute(tank.id)}')"><i class="fas fa-trash"></i></button>
+</div>
+`).join('') : '<p class="text-muted">No applications logged.</p>'}
+</div>
+</div>
+`;
+}
+
+renderTankLogDiseases(tank, container) {
+const diseaseEntries = (this.state.diseases || []).filter(d => d.tankId === tank.id).sort((a, b) => new Date(b.dateNoticed) - new Date(a.dateNoticed));
+
+container.innerHTML = `
+<div class="tank-detail-sub-tab-content">
+<div class="detail-section">
+<div class="detail-section-header">
+<h3 class="detail-section-title">Disease / Health History</h3>
+<button class="btn btn-sm btn-secondary" onclick="app.openDiseaseModal('${this.escapeAttribute(tank.id)}')"><i class="fas fa-notes-medical"></i> Log Disease</button>
+</div>
+${diseaseEntries.length > 0 ? diseaseEntries.map(entry => `
+<div class="settings-item" style="border-left: 4px solid ${entry.outcome === 'recovered' ? 'var(--success)' : entry.outcome === 'culled' ? 'var(--danger)' : 'var(--warning)'}; padding-left: 12px; margin-bottom: 12px;">
+<div style="flex: 1;">
+<div style="font-weight: 600;">${this.sanitizeHTML(entry.diseaseName || entry.diseaseType)} <span style="background: #e3f2fd; color: #1565C0; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px;">${this.sanitizeHTML(entry.outcome || 'ongoing')}</span></div>
+<div style="font-size: 12px; color: var(--gray); margin-top: 4px;">
+<strong>Date:</strong> ${new Date(entry.dateNoticed).toLocaleDateString('en-IN', {day: 'numeric', month: 'short'})}<br>
+<strong>Symptoms:</strong> ${this.sanitizeHTML(entry.symptoms || '-') }<br>
+<strong>Treatment:</strong> ${this.sanitizeHTML(entry.treatment || '-') } ${entry.dose ? `(${this.sanitizeHTML(String(entry.dose))})` : ''}<br>
+${entry.duration ? `<strong>Duration:</strong> ${this.sanitizeHTML(String(entry.duration))} days<br>` : ''}
+${entry.cost ? `<strong>Cost:</strong> ₹${this.sanitizeHTML(String(entry.cost))}<br>` : ''}
+</div>
+</div>
+<button class="btn-icon" onclick="app.deleteDiseaseLog(${entry.id}, '${this.escapeAttribute(tank.id)}')"><i class="fas fa-trash"></i></button>
+</div>
+`).join('') : '<p class="text-muted">No disease logs. Tank appears healthy!</p>'}
+</div>
+</div>
+`;
+}
+
+
+renderTankDetailActions(tank, container) {
+const isInactive = tank.status === 'inactive';
+let actionsHTML = '';
+
+if (isInactive) {
+actionsHTML = `
+<button class="btn btn-success" style="width: 100%;" onclick="app.startNewCrop('${this.escapeAttribute(tank.id)}')">
+<i class="fas fa-sync-alt"></i> Start New Crop
+</button>
+`;
+} else {
+const ownerActions = this.hasPermission('manage_tanks') ? `
+<hr style="border: 0; border-top: 1px solid var(--border); margin: 10px 0;">
+<button class="btn btn-secondary" onclick="app.openPartialHarvestModal('${this.escapeAttribute(tank.id)}')"><i class="fas fa-fish"></i> Partial Harvest</button>
+<button class="btn btn-danger" onclick="app.endCrop('${this.escapeAttribute(tank.id)}')"><i class="fas fa-flag-checkered"></i> End Crop Cycle</button>
+` : '';
+
+actionsHTML = `
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<button class="btn btn-primary" onclick="app.openLogFeedModal('${this.escapeAttribute(tank.id)}')"><i class="fas fa-plus"></i> Log Feed</button>
+<button class="btn btn-info" style="background-color: var(--info); color: white;" onclick="app.openWaterQualityModal('${this.escapeAttribute(tank.id)}')"><i class="fas fa-flask"></i> Log Water Quality</button>
+<button class="btn btn-info" style="background-color: var(--warning); color: white;" onclick="app.openApplicationModal('${this.escapeAttribute(tank.id)}')"><i class="fas fa-syringe"></i> Log Application</button>
+${ownerActions}
+</div>
+`;
+}
+
+container.innerHTML = `
+<div class="tank-detail-tab-content">
+${actionsHTML}
+</div>
+`;
+}
+
+openCropHistory(tankId) {
+// Find archived tanks that start with tankId + '_crop_'
+const history = this.state.tanks.filter(t => t.id.startsWith(tankId + '_crop_'));
+const list = document.getElementById('cropHistoryList');
+list.innerHTML = '';
+if (history.length === 0) {
+list.innerHTML = '<div class="empty-state" style="padding: 20px;"><p>No history found for this tank.</p></div>';
+} else {
+// Sort by creation date (descending) - inferred from ID timestamp suffix
+history.sort((a, b) => {
+const timeA = parseInt(a.id.split('_crop_')[1]) || 0;
+const timeB = parseInt(b.id.split('_crop_')[1]) || 0;
+return timeB - timeA;
+});
+
+history.forEach(crop => {
+// Calculate stats for this crop
+const entries = this.state.feedEntries.filter(e => e.tankId === crop.id);
+const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
+const harvests = this.state.harvests.filter(h => h.tankId === crop.id);
+const totalHarvest = harvests.reduce((sum, h) => sum + h.weight, 0);
+const fcr = totalHarvest > 0 ? (totalFeed / totalHarvest).toFixed(2) : '0.00';
+const div = document.createElement('div');
+div.className = 'tank-summary-card'; // Reuse styling
+div.style.marginBottom = '12px';
+div.innerHTML = `
+<div class="tank-summary-header">
+<div class="tank-summary-name" style="font-size: 14px;">${crop.name}</div>
+</div>
+<div class="tank-summary-stats">
+<div class="tank-summary-stat">
+<span class="tank-summary-label">Total Feed</span>
+<span class="tank-summary-value">${totalFeed.toFixed(1)} kg</span>
+</div>
+<div class="tank-summary-stat">
+<span class="tank-summary-label">Total Harvest</span>
+<span class="tank-summary-value">${totalHarvest.toFixed(1)} kg</span>
+</div>
+</div>
+<div style="margin-top:8px; font-size:12px; text-align:right; color: var(--dark);">
+<strong>FCR: ${fcr}</strong>
+</div>
+`;
+list.appendChild(div);
+});
+}
+document.getElementById('cropHistoryModal').classList.add('active');
+}
+
+openPartialHarvestModal(tankId) {
+this.editingTankId = tankId;
+document.getElementById('harvestDate').value = this.currentDate;
+document.getElementById('harvestWeight').value = '';
+document.getElementById('harvestCount').value = '';
+document.getElementById('harvestPrice').value = '';
+document.getElementById('partialHarvestModal').classList.add('active');
+}
+
+saveHarvest() {
+const tankId = this.editingTankId;
+const date = document.getElementById('harvestDate').value;
+const weight = parseFloat(document.getElementById('harvestWeight').value);
+const count = parseFloat(document.getElementById('harvestCount').value);
+const price = parseFloat(document.getElementById('harvestPrice').value) || 0;
+
+if (!weight || weight <= 0) {
+this.showToast('Please enter valid weight', 'error');
+return;
+}
+
+const newHarvest = {
+id: Date.now(),
+tankId,
+date,
+weight,
+count,
+price
+};
+
+this.state.harvests.push(newHarvest);
+this.saveHarvests();
+this.recalculateTankBiomass(tankId);
+this.closeAllModals();
+this.renderAll();
+this.showToast(`Harvest of ${weight}kg recorded`);
+}
+
+endCrop(tankId) {
+const tank = this.getTankById(tankId);
+if (!tank) return;
+
+// Calculate metrics for summary
+const entries = this.state.feedEntries.filter(e => e.tankId == tankId);
+const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
+const harvests = this.state.harvests.filter(h => h.tankId === tankId);
+const totalHarvest = harvests.reduce((sum, h) => sum + h.weight, 0);
+const fcr = totalHarvest > 0 ? (totalFeed / totalHarvest).toFixed(2) : '0.00';
+const doc = this.getDaysOld(tank.stockingDate);
+// Estimate Survival
+let survival = '0%';
+if (tank.initialSeed > 0) {
+let totalHarvestCount = 0;
+let hasCountData = false;
+harvests.forEach(h => {
+if (h.count && h.weight) {
+totalHarvestCount += (h.weight * h.count);
+hasCountData = true;
+}
+});
+if (hasCountData) {
+survival = ((totalHarvestCount / tank.initialSeed) * 100).toFixed(1) + '%';
+} else {
+// Fallback estimate
+const estSurvivalRate = Math.max(0, 100 - ((doc/100) * 15));
+survival = '~' + estSurvivalRate.toFixed(0) + '%';
+}
+}
+
+// Populate Modal
+document.getElementById('endCropTankName').textContent = tank.name;
+document.getElementById('endCropDoc').textContent = `DOC: ${doc}`;
+document.getElementById('endCropTotalFeed').textContent = `${totalFeed.toFixed(1)} kg`;
+document.getElementById('endCropTotalHarvest').textContent = `${totalHarvest.toFixed(1)} kg`;
+document.getElementById('endCropFCR').textContent = fcr;
+document.getElementById('endCropSurvival').textContent = survival;
+// Bind Confirm Button
+document.getElementById('confirmEndCropBtn').onclick = () => this.executeEndCrop(tankId);
+this.closeAllModals();
+document.getElementById('endCropModal').classList.add('active');
+}
+
+executeEndCrop(tankId) {
+const tank = this.getTankById(tankId);
+if (!tank) return;
+
+tank.status = 'inactive';
+this.saveTanks();
+this.closeAllModals();
+this.renderAll();
+this.showToast('Crop cycle ended', 'success');
+}
+
+openWaterQualityHistory(tankId) {
+const tank = this.getTankById(tankId);
+if (!tank) return;
+
+const modal = document.getElementById('applicationHistoryModal');
+modal.querySelector('h3').innerHTML = '<i class="fas fa-history"></i> Water Quality History';
+const list = modal.querySelector('#applicationHistoryList');
+const entries = this.state.waterQuality.filter(w => w.tankId === tankId).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+if (entries.length === 0) {
+list.innerHTML = '<div class="empty-state" style="padding: 20px;"><p>No water quality logs found.</p></div>';
+} else {
+list.innerHTML = entries.map(entry => `
+<div class="settings-item" style="align-items: center; margin-bottom: 8px;">
+<div style="flex: 1;">
+<div style="font-weight: 600;">${new Date(entry.date).toLocaleDateString()}</div>
+<div style="font-size: 12px; color: var(--gray);">
+pH: ${entry.ph || '-'} | Salinity: ${entry.salinity || '-'} | DO: ${entry.do || '-'} | NH3: ${entry.ammonia || '-'}
+</div>
+</div>
+</div>
+`).join('');
+}
+modal.classList.add('active');
+}
+
+renderTankDetailEdit(tankId) {
+const tank = this.getTankById(tankId);
+if (!tank) return;
+
+this.editingTankId = tankId;
+
+const content = document.getElementById('tankDetailContent');
+const footer = document.getElementById('tankDetailFooter');
+const farm = this.getFarmById(tank.farmId);
+
+content.innerHTML = `
+<div class="tank-detail-tab-content">
+<div class="form-group">
+<label>Farm</label>
+<div class="form-control" style="background: #f8f9fa;">${farm ? farm.name : 'Unknown'}</div>
+<small class="text-muted">To change farm, edit the tank from the main screen.</small>
+</div>
+<div class="form-group">
+<label>Tank Name</label>
+<input type="text" id="detailTankNameInput" class="form-control" value="${tank.name}">
+</div>
+<div class="form-group">
+<label>Size (acres)</label>
+<input type="number" id="detailTankSize" class="form-control" value="${tank.size || ''}" step="0.1" min="0.1">
+</div>
+<div class="form-group">
+<label>Stocking Date</label>
+<input type="date" id="detailStockingDate" class="form-control" value="${tank.stockingDate}" required>
+</div>
+<div class="form-group">
+<label>Initial Seed Count</label>
+<input type="number" id="detailInitialSeed" class="form-control" value="${tank.initialSeed || ''}" min="0">
+</div>
+<div class="form-group">
+<label>Number of Check Trays</label>
+<select id="detailTankCheckTrays" class="form-control">
+<option value="1">1 Tray</option>
+<option value="2">2 Trays</option>
+<option value="3">3 Trays</option>
+<option value="4">4 Trays</option>
+</select>
+</div>
+<div class="form-group">
+<label>Blind Duration (Days)</label>
+<input type="number" id="detailTankBlindDuration" class="form-control" value="${tank.blindDuration || 30}">
+</div>
+<div class="form-group">
+<label>Dead Shrimp (Count)</label>
+<input type="number" id="detailTankDeadCount" class="form-control" value="${tank.deadCount || 0}" min="0" placeholder="Number of dead shrimp observed">
+</div>
+<div class="form-group">
+<label>Health Status</label>
+<select id="detailTankHealthStatus" class="form-control">
+<option value="healthy" ${(tank.healthStatus || 'healthy') === 'healthy' ? 'selected' : ''}>Healthy</option>
+<option value="normal" ${(tank.healthStatus || 'healthy') === 'normal' ? 'selected' : ''}>Normal (Minor issues)</option>
+<option value="concerns" ${(tank.healthStatus || 'healthy') === 'concerns' ? 'selected' : ''}>Health Concerns</option>
+<option value="critical" ${(tank.healthStatus || 'healthy') === 'critical' ? 'selected' : ''}>Critical</option>
+</select>
+</div>
+<div class="form-group">
+<label>Health Notes (Optional)</label>
+<textarea id="detailTankHealthNotes" class="form-control" rows="2" placeholder="e.g., Diseased gills, weak swimmers, unusual behavior..."></textarea>
+</div>
+<div class="form-group">
+<label>Week 1 Feeds</label>
+<select id="detailTankBlindWeek1" class="form-control">
+<option value="2" ${tank.blindWeek1 == 2 ? 'selected' : ''}>2 Feeds</option>
+<option value="3" ${tank.blindWeek1 == 3 ? 'selected' : ''}>3 Feeds</option>
+<option value="4" ${tank.blindWeek1 == 4 ? 'selected' : ''}>4 Feeds</option>
+</select>
+</div>
+<div class="form-group">
+<label>Std Feeds (After Week 1)</label>
+<select id="detailTankBlindStd" class="form-control">
+<option value="3" ${tank.blindStd == 3 ? 'selected' : ''}>3 Feeds</option>
+<option value="4" ${tank.blindStd == 4 ? 'selected' : ''}>4 Feeds</option>
+<option value="5" ${tank.blindStd == 5 ? 'selected' : ''}>5 Feeds</option>
+</select>
+</div>
+</div>
+`;
+document.getElementById('detailTankCheckTrays').value = tank.checkTrays || 2;
+document.getElementById('detailTankHealthNotes').value = tank.healthNotes || '';
+
+footer.style.display = 'flex';
+footer.innerHTML = `
+<button class="btn btn-secondary" onclick="app.switchTankDetailTab('${tankId}', 'overview')">Cancel</button>
+<button class="btn btn-success" onclick="app.saveTankFromDetail()"><i class="fas fa-save"></i> Save Changes</button>
+`;
+}
+
+saveTankFromDetail() {
+if (!this.editingTankId) return;
+
+const tank = this.getTankById(this.editingTankId);
+if (!tank) return;
+
+const name = document.getElementById('detailTankNameInput').value;
+if (!name) {
+this.showToast('Tank name is required', 'error');
+return;
+}
+
+const newInitialSeed = parseInt(document.getElementById('detailInitialSeed').value) || 0;
+const newStockingDate = document.getElementById('detailStockingDate').value;
+const blindDuration = parseInt(document.getElementById('detailTankBlindDuration').value) || 30;
+const blindWeek1 = parseInt(document.getElementById('detailTankBlindWeek1').value) || 2;
+const blindStd = parseInt(document.getElementById('detailTankBlindStd').value) || 4;
+
+if (!newStockingDate) {
+ this.showToast('Stocking date is required', 'error');
+ return;
+}
+
+// Regenerate blind schedule if critical parameters change
+if (tank.initialSeed !== newInitialSeed || tank.stockingDate !== newStockingDate ||
+tank.blindDuration !== blindDuration || tank.blindWeek1 !== blindWeek1 || tank.blindStd !== blindStd) {
+tank.blindSchedule = this.generateBlindFeedingSchedule(newInitialSeed, newStockingDate, blindDuration, blindWeek1, blindStd);
+this.showToast('Schedule updated for new density');
+} else {
+this.showToast('Tank updated successfully');
+}
+
+tank.name = name;
+tank.size = parseFloat(document.getElementById('detailTankSize').value);
+tank.stockingDate = newStockingDate;
+tank.initialSeed = newInitialSeed;
+tank.checkTrays = parseInt(document.getElementById('detailTankCheckTrays').value) || 2;
+tank.blindDuration = blindDuration;
+tank.deadCount = parseInt(document.getElementById('detailTankDeadCount').value) || 0;
+tank.healthStatus = document.getElementById('detailTankHealthStatus').value;
+tank.healthNotes = document.getElementById('detailTankHealthNotes').value || '';
+tank.lastHealthUpdate = this.currentDate;
+tank.blindWeek1 = blindWeek1;
+tank.blindStd = blindStd;
+this.saveTanks();
+// Re-render detail view to show changes
+this.openTankDetail(this.editingTankId);
+this.renderFarmsList();
+this.renderOverallStats();
+}
+
+startNewCrop(tankId) {
+const tank = this.getTankById(tankId);
+if (!tank) return;
+
+
+this.showConfirmModal(`Start new crop cycle for ${tank.name}? This will reset all data.`, 'Start New Crop').then(confirmed => {
+if (confirmed) {
+// Archive old data
+const archiveId = `${tank.id}_crop_${Date.now()}`;
+// Create archived tank record
+const archivedTank = JSON.parse(JSON.stringify(tank));
+archivedTank.id = archiveId;
+archivedTank.status = 'archived';
+archivedTank.farmId = `${tank.farmId}_archive`; // Hide from current farm lists
+archivedTank.name = `${tank.name} (Ended ${new Date().toLocaleDateString()})`;
+this.state.tanks.push(archivedTank);
+
+// Move feed entries to archive
+this.state.feedEntries.forEach(e => {
+if (e.tankId === tank.id) {
+e.tankId = archiveId;
+}
+});
+
+// Move harvests to archive
+this.state.harvests.forEach(h => {
+if (h.tankId === tank.id) {
+h.tankId = archiveId;
+}
+});
+
+tank.status = 'active';
+tank.stockingDate = this.currentDate;
+tank.initialSeed = 0;
+tank.currentSeed = 0;
+tank.biomass = 0;
+this.saveTanks();
+this.saveFeedEntries();
+this.saveHarvests();
+this.closeAllModals();
+this.renderAll();
+this.showToast('New crop cycle started. Old data archived.', 'success');
+}
+});
+}
+
+openSettingsModal() {
+const settingsBody = document.getElementById('settingsModal').querySelector('.modal-body');
+// Clear and rebuild
+settingsBody.innerHTML = `
+        <h4 style="margin-bottom: 12px; color: var(--dark);">General</h4>
+        <div class="form-group">
+            <label>Farm Type</label>
+            <select id="settingFarmType" class="form-control" onchange="app.updateFarmType(this.value)">
+                <option value="extensive">Extensive (Low Intensity)</option>
+                <option value="semi">Semi-Intensive</option>
+                <option value="intensive">Intensive / Super-Intensive</option>
+            </select>
+            <small style="font-size: 11px; color: var(--gray);">Used to pre-fill blind duration, feeds per day and tray start point.</small>
+        </div>
+<div class="form-group">
+<label>Feeds per Day</label>
+<select id="settingFeedsPerDay" class="form-control" onchange="app.updateFeedsPerDay(this.value)"></select>
+</div>
+<div class="form-group">
+<label>Feed Price (₹/kg)</label>
+<input type="number" id="settingFeedPrice" class="form-control" onchange="app.updateFeedPrice(this.value)">
+</div>
+<div class="form-group">
+<label>Blind Feeding Duration (days)</label>
+<input type="number" id="settingBlindDuration" class="form-control" onchange="app.updateBlindDuration(this.value)">
+</div>
+<div class="form-group">
+<label>Feed Jump Detection Threshold (%)</label>
+<input type="number" id="feedJumpThreshold" class="form-control" value="30" onchange="app.updateFeedJumpThreshold(this.value)">
+</div>
+<div class="form-group" id="feedTimesContainer">
+<!-- Populated by JS -->
+</div>
+<hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+<h4 style="margin-bottom: 12px; color: var(--dark);">Tray Check Calibration (% of Feed)</h4>
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+<div class="form-group"><label style="font-size: 11px;">DOC 30-60</label><input type="number" id="trayPctRange1" class="form-control" step="0.1" onchange="app.updateTrayPercentage('range1', this.value)"></div>
+<div class="form-group"><label style="font-size: 11px;">DOC 60-90</label><input type="number" id="trayPctRange2" class="form-control" step="0.1" onchange="app.updateTrayPercentage('range2', this.value)"></div>
+<div class="form-group"><label style="font-size: 11px;">DOC 90+</label><input type="number" id="trayPctRange3" class="form-control" step="0.1" onchange="app.updateTrayPercentage('range3', this.value)"></div>
+</div>
+<hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+<h4 style="margin-bottom: 12px; color: var(--dark);">Manage Supplements</h4>
+<div class="form-group" style="display: flex; gap: 8px;">
+<input type="text" id="newSupplementInput" class="form-control" placeholder="New supplement name">
+<button class="btn btn-primary" onclick="app.addNewSupplement()">Add</button>
+</div>
+<div class="settings-list" id="settingsSupplementsList"></div>
+<hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+<h4 style="margin-bottom: 12px; color: var(--dark);">Data Management</h4>
+<div class="alert-card" style="background: #e3f2fd; border-left-color: var(--info); margin-bottom: 15px;"><div style="font-size: 12px; color: var(--dark);"><i class="fas fa-info-circle"></i> Your data is stored on this device. Backup regularly to avoid data loss.</div></div>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+<button class="btn btn-secondary" onclick="app.exportData()"><i class="fas fa-download"></i> Backup Data</button>
+<button class="btn btn-secondary" onclick="document.getElementById('importFile').click()"><i class="fas fa-upload"></i> Restore Data</button>
+<input type="file" id="importFile" style="display: none;" accept=".json" onchange="app.importData(this)">
+</div>
+`;
+
+this.renderSettingsSupplements();
+
+        const farmTypeSelect = document.getElementById('settingFarmType');
+        if (farmTypeSelect) {
+            farmTypeSelect.value = this.state.settings.farmType || 'semi';
+        }
+
+        const feedsPerDaySelect = document.getElementById('settingFeedsPerDay');
+feedsPerDaySelect.innerHTML = [1,2,3,4,5,6].map(i => `<option value="${i}">${i} Feed${i > 1 ? 's' : ''}</option>`).join('');
+feedsPerDaySelect.value = this.state.settings.feedsPerDay || 4;
+
+document.getElementById('settingFeedsPerDay').value = this.state.settings.feedsPerDay || 4;
+document.getElementById('settingFeedPrice').value = this.state.settings.feedPrice || 90;
+document.getElementById('settingBlindDuration').value = this.state.settings.blindFeedingDuration || 30;
+document.getElementById('feedJumpThreshold').value = this.state.settings.feedJumpThreshold || 30;
+const traySettings = this.state.settings.trayCheckPercentages || { range1: 0.4, range2: 0.6, range3: 0.8 };
+document.getElementById('trayPctRange1').value = traySettings.range1;
+document.getElementById('trayPctRange2').value = traySettings.range2;
+document.getElementById('trayPctRange3').value = traySettings.range3;
+document.getElementById('settingsModal').classList.add('active');
+this.renderFeedTimeInputs();
+}
+
+renderFeedTimeInputs() {
+const container = document.getElementById('feedTimesContainer');
+if (!container) return;
+const feedsCount = this.state.settings.feedsPerDay || 4;
+let html = `<label>Feed Times (Schedule)</label><div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px;">`;
+if (!Array.isArray(this.state.settings.feedTimes) || this.state.settings.feedTimes.length !== feedsCount) {
+const start = 6;
+const interval = 16 / Math.max(1, feedsCount);
+this.state.settings.feedTimes = Array.from({length: feedsCount}, (_, i) => Math.floor(start + (i * interval)));
+}
+this.state.settings.feedTimes.forEach((time, index) => {
+html += `
+<div style="display: flex; flex-direction: column; gap: 4px;">
+<span style="font-size: 11px; color: var(--gray);">Feed ${index + 1}</span>
+<select class="form-control" style="padding: 4px;" onchange="app.updateFeedTime(${index}, this.value)">
+${Array.from({length: 24}, (_, i) => {
+const display = i === 0 ? '12 AM' : i === 12 ? '12 PM' : i > 12 ? `${i-12} PM` : `${i} AM`;
+return `<option value="${i}" ${time == i ? 'selected' : ''}>${display}</option>`;
+}).join('')}
+</select>
+</div>
+`;
+});
+html += `</div>`;
+container.innerHTML = html;
+}
+
+updateFeedTime(index, value) {
+if (!this.state.settings.feedTimes) this.state.settings.feedTimes = [];
+this.state.settings.feedTimes[index] = parseInt(value);
+this.saveSettings();
+}
+
+    updateFarmType(type) {
+        this.state.settings.farmType = type || 'semi';
+
+        // Apply lightweight presets for first 30 days only.
+        // These presets only adjust: feedsPerDay, blindFeedingDuration and an implicit tray-start DOC.
+        if (type === 'extensive') {
+            this.state.settings.feedsPerDay = 3;
+            this.state.settings.blindFeedingDuration = 20;
+            this.state.settings.trayStartDoc = 25;
+        } else if (type === 'semi') {
+            this.state.settings.feedsPerDay = 4;
+            this.state.settings.blindFeedingDuration = 25;
+            this.state.settings.trayStartDoc = 25;
+        } else if (type === 'intensive') {
+            this.state.settings.feedsPerDay = 5;
+            this.state.settings.blindFeedingDuration = 18;
+            this.state.settings.trayStartDoc = 18;
+        }
+
+        this.saveSettings();
+        // Re-render dependent UI (feed times and summary views) to reflect new defaults.
+        this.renderFeedTimeInputs();
+        this.renderAll();
+        this.showToast('Farm type preset applied', 'info');
+    }
+
+openComparisonModal() {
+const grid = document.getElementById('comparisonGrid');
+grid.innerHTML = '';
+const currentFarmId = this.state.settings.currentFarmId;
+const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId && t.status !== 'inactive');
+tanks.slice(0, 4).forEach(tank => {
+const entries = this.state.feedEntries.filter(e => e.tankId == tank.id);
+const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
+const todayFeed = entries.filter(e => e.date === this.currentDate).reduce((sum, e) => sum + e.amount, 0);
+const card = document.createElement('div');
+card.className = 'comparison-card';
+card.innerHTML = `
+<h4 style="margin-bottom: 12px;">${tank.name}</h4>
+<div style="font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 8px;">${todayFeed.toFixed(1)}kg</div>
+<div style="font-size: 12px; color: var(--gray);">Today's Feed</div>
+<div style="margin-top: 12px; font-size: 11px; color: var(--gray);">
+Total: ${totalFeed.toFixed(1)}kg • DOC: ${this.getDaysOld(tank.stockingDate)}
+</div>
+`;
+grid.appendChild(card);
+});
+document.getElementById('comparisonModal').classList.add('active');
+// Track comparison click
+this.trackEvent('click_compare_ponds');
+}
+
+
+openExportModal() {
+this.exportReportData();
+}
+
+exportReport() {
+this.openExportModal();
+}
+
+exportReportData() {
+// Generate report data
+const reportData = {
+farm: this.getFarmById(this.state.settings.currentFarmId),
+tanks: this.state.tanks.filter(t => t.farmId === this.state.settings.currentFarmId),
+feedEntries: this.state.feedEntries.filter(e => {
+const tank = this.getTankById(e.tankId);
+return tank && tank.farmId === this.state.settings.currentFarmId;
+}),
+harvests: this.state.harvests.filter(h => {
+const tank = this.getTankById(h.tankId);
+return tank && tank.farmId === this.state.settings.currentFarmId;
+}),
+generatedDate: new Date().toISOString(),
+reportType: 'efficiency_analysis'
+};
+// Create downloadable JSON file
+const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reportData, null, 2));
+const downloadAnchorNode = document.createElement('a');
+downloadAnchorNode.setAttribute("href", dataStr);
+downloadAnchorNode.setAttribute("download", `aquarythu_report_${this.currentDate}.json`);
+document.body.appendChild(downloadAnchorNode);
+downloadAnchorNode.click();
+downloadAnchorNode.remove();
+this.showToast('Report exported successfully');
+}
+
+renderSettingsSupplements() {
+const list = document.getElementById('settingsSupplementsList');
+list.innerHTML = this.state.settings.supplements.map(s => `
+<div class="settings-item">
+<span>${s}</span>
+<button class="btn-icon" style="color: var(--danger);" onclick="app.removeSupplement('${s}')">
+<i class="fas fa-trash"></i>
+</button>
+</div>
+`).join('');
+}
+
+updateFeedsPerDay(val) {
+this.state.settings.feedsPerDay = parseInt(val);
+this.saveSettings();
+this.renderLogBook();
+this.renderFeedTimeInputs();
+}
+
+updateFeedPrice(val) {
+this.state.settings.feedPrice = parseFloat(val) || 90;
+this.saveSettings();
+this.renderFeedWasteSummary();
+this.renderPerformanceScreen();
+}
+
+updateBlindDuration(val) {
+this.state.settings.blindFeedingDuration = parseInt(val) || 30;
+this.saveSettings();
+this.renderAll();
+}
+
+updateMarketPrice(val) {
+this.state.settings.marketPrice = parseFloat(val) || 0;
+this.saveSettings();
+this.renderPerformanceScreen();
+}
+
+updateFirstFeedTime(val) {
+this.state.settings.firstFeedTime = parseInt(val) || 6;
+this.saveSettings();
+this.renderLogBook();
+}
+updateTrayPercentage(range, value) {
+if (!this.state.settings.trayCheckPercentages) this.state.settings.trayCheckPercentages = { range1: 0.4, range2: 0.6, range3: 0.8 };
+this.state.settings.trayCheckPercentages[range] = parseFloat(value) || 0;
+this.saveSettings();
+}
+
+updateFeedJumpThreshold(val) {
+this.state.settings.feedJumpThreshold = parseFloat(val) || 30;
+this.saveSettings();
+this.showToast(`Feed jump threshold updated to ${val}%`);
+}
+
+addNewSupplement() {
+const input = document.getElementById('newSupplementInput');
+const name = input.value.trim();
+if (name && !this.state.settings.supplements.includes(name)) {
+this.state.settings.supplements.push(name);
+this.saveSettings();
+this.renderSettingsSupplements();
+input.value = '';
+}
+}
+
+removeSupplement(name) {
+this.state.settings.supplements = this.state.settings.supplements.filter(s => s !== name);
+this.saveSettings();
+this.renderSettingsSupplements();
+}
+
+exportData() {
+const data = {
+farms: this.state.farms,
+tanks: this.state.tanks,
+feedEntries: this.state.feedEntries,
+harvests: this.state.harvests,
+inventory: this.state.inventory,
+medicineInventory: this.state.medicineInventory,
+settings: this.state.settings,
+analyticsEvents: this.analyticsEvents,
+exportDate: new Date().toISOString(),
+version: '2.0'
+};
+
+// Update backup timestamp
+this.state.settings.lastBackupDate = new Date().toISOString();
+this.saveSettings();
+localStorage.setItem('aquabook_last_backup', this.state.settings.lastBackupDate);
+this.checkBackupStatus(); // Hide banner immediately
+
+const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+const url = URL.createObjectURL(blob);
+const downloadAnchorNode = document.createElement('a');
+downloadAnchorNode.setAttribute("href", url);
+downloadAnchorNode.setAttribute("download", "aquarythu_backup_" + this.getFormattedDate() + ".json");
+document.body.appendChild(downloadAnchorNode);
+downloadAnchorNode.click();
+downloadAnchorNode.remove();
+URL.revokeObjectURL(url);
+this.showToast('Backup file downloaded successfully');
+}
+
+importData(input) {
+const file = input.files[0];
+if (!file) return;
+
+const reader = new FileReader();
+reader.onload = (e) => {
+try {
+const data = JSON.parse(e.target.result);
+
+if (!data.farms || !data.tanks) {
+throw new Error("Invalid backup file format");
+}
+
+
+this.showConfirmModal(`Restore data from ${new Date(data.exportDate).toLocaleDateString()}? This will overwrite current data.`, 'Restore Data').then(confirmed => {
+if (confirmed) {
+localStorage.setItem('aquabook_farms', JSON.stringify(data.farms));
+localStorage.setItem('aquabook_tanks', JSON.stringify(data.tanks));
+localStorage.setItem('aquabook_entries', JSON.stringify(data.feedEntries));
+localStorage.setItem('aquabook_harvests', JSON.stringify(data.harvests || []));
+localStorage.setItem('aquabook_inventory', JSON.stringify(data.inventory || { totalKg: 0 }));
+localStorage.setItem('aquabook_medicine', JSON.stringify(data.medicineInventory || []));
+localStorage.setItem('aquabook_settings', JSON.stringify(data.settings || this.state.settings));
+if (data.analyticsEvents) {
+localStorage.setItem('aquabook_analytics', JSON.stringify(data.analyticsEvents));
+}
+
+this.showAlertModal('Data restored successfully! The app will now reload.', 'Restore Complete');
+window.location.reload();
+}
+});
+} catch (err) {
+console.error(err);
+this.showToast('Failed to restore data. Invalid file.', 'error');
+}
+input.value = '';
+};
+reader.readAsText(file);
+}
+
+setViewMode(mode) {
+this.viewMode = mode;
+document.querySelectorAll('.range-tab').forEach(t => {
+if (t.dataset.range === mode) t.classList.add('active');
+else t.classList.remove('active');
+});
+this.renderLogBook();
+}
+
+setupEventListeners() {
+document.querySelectorAll('.nav-btn').forEach(btn => {
+btn.addEventListener('click', () => this.switchScreen(btn.dataset.screen));
+});
+
+document.getElementById('addFirstFarmBtn').addEventListener('click', () => {
+this.openFarmModal();
+});
+
+document.getElementById('farmSelector').addEventListener('click', () => {
+this.openFarmSelector();
+});
+
+document.getElementById('addFarmFromSelector').addEventListener('click', () => {
+this.openFarmModal();
+});
+
+document.querySelectorAll('.close-modal').forEach(btn => {
+btn.addEventListener('click', () => this.closeAllModals());
+});
+
+document.getElementById('saveFarmBtn').addEventListener('click', () => this.saveFarm());
+document.getElementById('saveHarvestBtn').addEventListener('click', () => this.saveHarvest());
+
+document.querySelectorAll('.range-tab').forEach(tab => {
+tab.addEventListener('click', () => this.setViewMode(tab.dataset.range));
+});
+
+document.getElementById('saveStockBtn').addEventListener('click', () => this.saveStock());
+
+document.addEventListener('click', (e) => {
+if (!e.target.closest('.tank-action-menu')) {
+document.querySelectorAll('.tank-menu-dropdown').forEach(el => el.classList.remove('show'));
+}
+// Hide pond comparison tooltip
+if (!e.target.closest('.farm-selector')) {
+const tooltip = document.getElementById('pondComparisonTooltip');
+if (tooltip) tooltip.style.display = 'none';
+}
+});
+
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+const closeBtn = modal.querySelector('.close-modal');
+if (closeBtn) {
+closeBtn.addEventListener('click', () => this.closeAllModals());
+}
+});
+
+const farmSelector = document.getElementById('farmSelector');
+if (farmSelector) {
+farmSelector.addEventListener('click', () => {
+// Open farm selector functionality
+});
+}
+
+['tankBlindDuration', 'initialSeed', 'tankSize', 'tankBlindWeek1', 'tankBlindStd'].forEach(id => {
+const el = document.getElementById(id);
+if (el) {
+el.addEventListener('input', () => this.updateBlindFeedPreview());
+}
+});
+}
+
+// ===== CHART RENDERING FUNCTIONS =====
+switchChartTab(tabName) {
+this.currentChartTab = tabName;
+// Update tab buttons
+document.querySelectorAll('.chart-tab').forEach(tab => {
+if (tab.dataset.chart === tabName) {
+tab.classList.add('active');
+} else {
+tab.classList.remove('active');
+}
+});
+// Show/hide chart containers
+const containerMap = {
+'feed': 'chartFeed',
+'fcr': 'chartFcr',
+'waste': 'chartWaste',
+'water': 'chartWater',
+'growth': 'chartGrowth',
+'comparison': 'chartComparison'
+};
+Object.keys(containerMap).forEach(key => {
+const container = document.getElementById(containerMap[key]);
+if (container) {
+container.style.display = key === tabName ? 'block' : 'none';
+}
+});
+// Render the selected chart
+this.renderCharts();
+}
+
+updateCharts() {
+const rangeSelect = document.getElementById('chartDateRange');
+if (rangeSelect) {
+this.chartDateRange = rangeSelect.value === 'all' ? null : parseInt(rangeSelect.value);
+}
+this.renderCharts();
+}
+
+renderCharts() {
+const currentFarmId = this.state.settings.currentFarmId;
+if (!currentFarmId) return;
+
+const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId && t.status !== 'inactive');
+const farmTankIds = farmTanks.map(t => t.id);
+const farmFeedEntries = this.state.feedEntries.filter(e => farmTankIds.includes(e.tankId));
+const farmWaterQuality = this.state.waterQuality.filter(w => farmTankIds.includes(w.tankId));
+const farmHarvests = this.state.harvests.filter(h => farmTankIds.includes(h.tankId));
+
+// Calculate date range
+const endDate = new Date();
+const startDate = this.chartDateRange ? new Date(endDate.getTime() - (this.chartDateRange * 24 * 60 * 60 * 1000)) : null;
+
+// Filter data by date range
+const filterByDate = (entries) => {
+if (!startDate) return entries;
+return entries.filter(e => {
+const entryDate = new Date(e.date);
+return entryDate >= startDate && entryDate <= endDate;
+});
+};
+
+const filteredFeedEntries = filterByDate(farmFeedEntries);
+const filteredWaterQuality = filterByDate(farmWaterQuality);
+
+// Render active chart
+switch(this.currentChartTab) {
+case 'feed':
+this.renderFeedConsumptionChart(filteredFeedEntries);
+break;
+case 'fcr':
+this.renderFCRTrendChart(filteredFeedEntries, farmHarvests, farmTanks);
+break;
+case 'waste':
+this.renderWasteTrendChart(filteredFeedEntries);
+break;
+case 'water':
+this.renderWaterQualityChart(filteredWaterQuality);
+break;
+case 'growth':
+this.renderGrowthChart(farmTanks, filteredFeedEntries, farmHarvests);
+break;
+case 'comparison':
+this.renderComparisonChart(farmTanks, filteredFeedEntries, farmHarvests);
+break;
+}
+}
+
+renderFeedConsumptionChart(entries) {
+const canvas = document.getElementById('feedConsumptionChart');
+if (!canvas) return;
+
+// Group by date
+const dailyFeed = {};
+entries.forEach(entry => {
+if (!dailyFeed[entry.date]) {
+dailyFeed[entry.date] = 0;
+}
+dailyFeed[entry.date] += entry.amount;
+});
+
+// Sort dates
+const dates = Object.keys(dailyFeed).sort();
+const feedAmounts = dates.map(date => dailyFeed[date]);
+
+// Destroy existing chart
+if (this.charts.feedConsumption) {
+this.charts.feedConsumption.destroy();
+}
+
+this.charts.feedConsumption = new Chart(canvas, {
+type: 'line',
+data: {
+labels: dates.map(d => {
+const date = new Date(d);
+return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+}),
+datasets: [{
+label: 'Feed Consumption (kg)',
+data: feedAmounts,
+borderColor: 'rgb(33, 150, 243)',
+backgroundColor: 'rgba(33, 150, 243, 0.1)',
+tension: 0.4,
+fill: true,
+borderWidth: 2,
+pointRadius: 4,
+pointBackgroundColor: 'rgb(33, 150, 243)',
+pointBorderColor: '#fff',
+pointBorderWidth: 2
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: true,
+aspectRatio: 2,
+plugins: {
+legend: {
+display: true,
+position: 'top',
+labels: {
+font: { family: 'Roboto', size: 12 },
+padding: 15
+}
+},
+tooltip: {
+backgroundColor: 'rgba(0, 0, 0, 0.8)',
+padding: 12,
+titleFont: { family: 'Roboto', size: 13, weight: 'bold' },
+bodyFont: { family: 'Roboto', size: 12 },
+displayColors: false,
+callbacks: {
+label: function(context) {
+return `Feed: ${context.parsed.y.toFixed(2)} kg`;
+}
+}
+}
+},
+scales: {
+y: {
+beginAtZero: true,
+title: {
+display: true,
+text: 'Feed (kg)',
+font: { family: 'Roboto', size: 12, weight: '600' }
+},
+grid: {
+color: 'rgba(0, 0, 0, 0.05)',
+drawBorder: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 },
+callback: function(value) {
+return value + ' kg';
+}
+}
+},
+x: {
+grid: {
+display: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 },
+maxRotation: 45,
+minRotation: 0
+}
+}
+}
+}
+});
+}
+
+renderFCRTrendChart(entries, harvests, tanks) {
+const canvas = document.getElementById('fcrTrendChart');
+if (!canvas) return;
+
+// Calculate weekly FCR
+const weeklyData = {};
+const allDates = [...new Set(entries.map(e => e.date))].sort();
+allDates.forEach(date => {
+const weekStart = new Date(date);
+weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+const weekKey = weekStart.toISOString().split('T')[0];
+if (!weeklyData[weekKey]) {
+weeklyData[weekKey] = { feed: 0, production: 0, dates: [] };
+}
+weeklyData[weekKey].dates.push(date);
+});
+
+// Calculate feed and production for each week
+Object.keys(weeklyData).forEach(weekKey => {
+const weekDates = weeklyData[weekKey].dates;
+weeklyData[weekKey].feed = entries
+.filter(e => weekDates.includes(e.date))
+.reduce((sum, e) => sum + e.amount, 0);
+const weekHarvests = harvests.filter(h => weekDates.includes(h.date));
+const weekProduction = weekHarvests.reduce((sum, h) => sum + h.weight, 0);
+// Add biomass for active tanks
+const activeTanks = tanks.filter(t => t.status === 'active');
+const totalBiomass = activeTanks.reduce((sum, t) => sum + (t.biomass || 0), 0);
+weeklyData[weekKey].production = weekProduction + (totalBiomass / Object.keys(weeklyData).length);
+});
+
+const weeks = Object.keys(weeklyData).sort();
+const fcrValues = weeks.map(week => {
+const data = weeklyData[week];
+return data.production > 0 ? (data.feed / data.production).toFixed(2) : 0;
+});
+
+if (this.charts.fcrTrend) {
+this.charts.fcrTrend.destroy();
+}
+
+this.charts.fcrTrend = new Chart(canvas, {
+type: 'line',
+data: {
+labels: weeks.map(w => {
+const date = new Date(w);
+return `Week ${date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}`;
+}),
+datasets: [{
+label: 'FCR',
+data: fcrValues,
+borderColor: 'rgb(76, 175, 80)',
+backgroundColor: 'rgba(76, 175, 80, 0.1)',
+tension: 0.4,
+fill: true,
+borderWidth: 2,
+pointRadius: 5,
+pointBackgroundColor: 'rgb(76, 175, 80)',
+pointBorderColor: '#fff',
+pointBorderWidth: 2
+}, {
+label: 'Target (1.2)',
+data: weeks.map(() => 1.2),
+borderColor: 'rgba(255, 152, 0, 0.5)',
+borderDash: [5, 5],
+borderWidth: 1,
+pointRadius: 0,
+fill: false
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: true,
+aspectRatio: 2,
+plugins: {
+legend: {
+display: true,
+position: 'top',
+labels: {
+font: { family: 'Roboto', size: 12 },
+padding: 15
+}
+},
+tooltip: {
+backgroundColor: 'rgba(0, 0, 0, 0.8)',
+padding: 12,
+titleFont: { family: 'Roboto', size: 13, weight: 'bold' },
+bodyFont: { family: 'Roboto', size: 12 },
+callbacks: {
+label: function(context) {
+if (context.datasetIndex === 0) {
+return `FCR: ${context.parsed.y}`;
+}
+return 'Target: 1.2';
+}
+}
+}
+},
+scales: {
+y: {
+beginAtZero: false,
+min: 0.8,
+max: 2.0,
+title: {
+display: true,
+text: 'FCR',
+font: { family: 'Roboto', size: 12, weight: '600' }
+},
+grid: {
+color: 'rgba(0, 0, 0, 0.05)',
+drawBorder: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 }
+}
+},
+x: {
+grid: {
+display: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 },
+maxRotation: 45,
+minRotation: 0
+}
+}
+}
+}
+});
+}
+
+renderWasteTrendChart(entries) {
+const canvas = document.getElementById('wasteTrendChart');
+if (!canvas) return;
+
+// Group by date and calculate waste percentage
+const dailyWaste = {};
+entries.forEach(entry => {
+if (!entry.date) return;
+if (!dailyWaste[entry.date]) {
+dailyWaste[entry.date] = { total: 0, waste: 0 };
+}
+dailyWaste[entry.date].total++;
+if (entry.trayResult === 'half' || entry.trayResult === 'too-much') {
+dailyWaste[entry.date].waste++;
+}
+});
+
+const dates = Object.keys(dailyWaste).sort();
+const wastePercentages = dates.map(date => {
+const data = dailyWaste[date];
+return data.total > 0 ? ((data.waste / data.total) * 100).toFixed(1) : 0;
+});
+
+if (this.charts.wasteTrend) {
+this.charts.wasteTrend.destroy();
+}
+
+this.charts.wasteTrend = new Chart(canvas, {
+type: 'bar',
+data: {
+labels: dates.map(d => {
+const date = new Date(d);
+return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+}),
+datasets: [{
+label: 'Feed Waste %',
+data: wastePercentages,
+backgroundColor: function(context) {
+const value = context.parsed.y;
+if (value > 30) return 'rgba(244, 67, 54, 0.8)';
+if (value > 15) return 'rgba(255, 152, 0, 0.8)';
+return 'rgba(76, 175, 80, 0.8)';
+},
+borderColor: function(context) {
+const value = context.parsed.y;
+if (value > 30) return 'rgb(244, 67, 54)';
+if (value > 15) return 'rgb(255, 152, 0)';
+return 'rgb(76, 175, 80)';
+},
+borderWidth: 1,
+borderRadius: 4
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: true,
+aspectRatio: 2,
+plugins: {
+legend: {
+display: true,
+position: 'top',
+labels: {
+font: { family: 'Roboto', size: 12 },
+padding: 15
+}
+},
+tooltip: {
+backgroundColor: 'rgba(0, 0, 0, 0.8)',
+padding: 12,
+titleFont: { family: 'Roboto', size: 13, weight: 'bold' },
+bodyFont: { family: 'Roboto', size: 12 },
+displayColors: false,
+callbacks: {
+label: function(context) {
+return `Waste: ${context.parsed.y}%`;
+}
+}
+}
+},
+scales: {
+y: {
+beginAtZero: true,
+max: 100,
+title: {
+display: true,
+text: 'Waste Percentage (%)',
+font: { family: 'Roboto', size: 12, weight: '600' }
+},
+grid: {
+color: 'rgba(0, 0, 0, 0.05)',
+drawBorder: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 },
+callback: function(value) {
+return value + '%';
+}
+}
+},
+x: {
+grid: {
+display: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 },
+maxRotation: 45,
+minRotation: 0
+}
+}
+}
+}
+});
+}
+
+renderWaterQualityChart(waterEntries) {
+const canvas = document.getElementById('waterQualityChart');
+if (!canvas) return;
+
+// Sort by date
+const sorted = waterEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
+const dates = sorted.map(w => {
+const date = new Date(w.date);
+return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+});
+
+if (this.charts.waterQuality) {
+this.charts.waterQuality.destroy();
+}
+
+this.charts.waterQuality = new Chart(canvas, {
+type: 'line',
+data: {
+labels: dates,
+datasets: [
+{
+label: 'pH',
+data: sorted.map(w => w.ph || null),
+borderColor: 'rgb(33, 150, 243)',
+backgroundColor: 'rgba(33, 150, 243, 0.1)',
+tension: 0.4,
+borderWidth: 2,
+pointRadius: 3,
+yAxisID: 'y'
+},
+{
+label: 'DO (mg/L)',
+data: sorted.map(w => w.do || null),
+borderColor: 'rgb(76, 175, 80)',
+backgroundColor: 'rgba(76, 175, 80, 0.1)',
+tension: 0.4,
+borderWidth: 2,
+pointRadius: 3,
+yAxisID: 'y1'
+},
+{
+label: 'Ammonia (ppm)',
+data: sorted.map(w => w.ammonia || null),
+borderColor: 'rgb(255, 152, 0)',
+backgroundColor: 'rgba(255, 152, 0, 0.1)',
+tension: 0.4,
+borderWidth: 2,
+pointRadius: 3,
+yAxisID: 'y2'
+},
+{
+label: 'Nitrite (ppm)',
+data: sorted.map(w => w.nitrite || null),
+borderColor: 'rgb(156, 39, 176)',
+backgroundColor: 'rgba(156, 39, 176, 0.1)',
+tension: 0.4,
+borderWidth: 2,
+pointRadius: 3,
+yAxisID: 'y2'
+}
+]
+},
+options: {
+responsive: true,
+maintainAspectRatio: true,
+aspectRatio: 2,
+interaction: {
+mode: 'index',
+intersect: false,
+},
+plugins: {
+legend: {
+display: true,
+position: 'top',
+labels: {
+font: { family: 'Roboto', size: 12 },
+padding: 15
+}
+},
+tooltip: {
+backgroundColor: 'rgba(0, 0, 0, 0.8)',
+padding: 12,
+titleFont: { family: 'Roboto', size: 13, weight: 'bold' },
+bodyFont: { family: 'Roboto', size: 12 }
+}
+},
+scales: {
+y: {
+type: 'linear',
+display: true,
+position: 'left',
+title: {
+display: true,
+text: 'pH',
+font: { family: 'Roboto', size: 12, weight: '600' }
+},
+grid: {
+color: 'rgba(0, 0, 0, 0.05)',
+drawBorder: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 }
+}
+},
+y1: {
+type: 'linear',
+display: true,
+position: 'right',
+title: {
+display: true,
+text: 'DO (mg/L)',
+font: { family: 'Roboto', size: 12, weight: '600' }
+},
+grid: {
+drawOnChartArea: false,
+},
+ticks: {
+font: { family: 'Roboto', size: 11 }
+}
+},
+y2: {
+type: 'linear',
+display: true,
+position: 'right',
+title: {
+display: true,
+text: 'Ammonia/Nitrite (ppm)',
+font: { family: 'Roboto', size: 12, weight: '600' }
+},
+grid: {
+drawOnChartArea: false,
+},
+ticks: {
+font: { family: 'Roboto', size: 11 }
+}
+},
+x: {
+grid: {
+display: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 },
+maxRotation: 45,
+minRotation: 0
+}
+}
+}
+}
+});
+}
+
+renderGrowthChart(tanks, entries, harvests) {
+const canvas = document.getElementById('growthChart');
+if (!canvas) return;
+
+// Calculate biomass over time
+const dates = [...new Set(entries.map(e => e.date))].sort();
+const biomassData = dates.map(date => {
+let totalBiomass = 0;
+tanks.forEach(tank => {
+if (tank.status === 'active') {
+const tankEntries = entries.filter(e => e.tankId === tank.id && e.date <= date);
+const tankHarvests = harvests.filter(h => h.tankId === tank.id && h.date <= date);
+const totalFeed = tankEntries.reduce((sum, e) => sum + e.amount, 0);
+const totalHarvested = tankHarvests.reduce((sum, h) => sum + h.weight, 0);
+const estimatedFCR = 1.2;
+const biomass = Math.max(0, (totalFeed / estimatedFCR) - totalHarvested);
+totalBiomass += biomass;
+}
+});
+return totalBiomass;
+});
+
+if (this.charts.growth) {
+this.charts.growth.destroy();
+}
+
+this.charts.growth = new Chart(canvas, {
+type: 'line',
+data: {
+labels: dates.map(d => {
+const date = new Date(d);
+return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+}),
+datasets: [{
+label: 'Total Biomass (kg)',
+data: biomassData,
+borderColor: 'rgb(156, 39, 176)',
+backgroundColor: 'rgba(156, 39, 176, 0.1)',
+tension: 0.4,
+fill: true,
+borderWidth: 2,
+pointRadius: 3,
+pointBackgroundColor: 'rgb(156, 39, 176)',
+pointBorderColor: '#fff',
+pointBorderWidth: 2
+}]
+},
+options: {
+responsive: true,
+maintainAspectRatio: true,
+aspectRatio: 2,
+plugins: {
+legend: {
+display: true,
+position: 'top',
+labels: {
+font: { family: 'Roboto', size: 12 },
+padding: 15
+}
+},
+tooltip: {
+backgroundColor: 'rgba(0, 0, 0, 0.8)',
+padding: 12,
+titleFont: { family: 'Roboto', size: 13, weight: 'bold' },
+bodyFont: { family: 'Roboto', size: 12 },
+displayColors: false,
+callbacks: {
+label: function(context) {
+return `Biomass: ${context.parsed.y.toFixed(1)} kg`;
+}
+}
+}
+},
+scales: {
+y: {
+beginAtZero: true,
+title: {
+display: true,
+text: 'Biomass (kg)',
+font: { family: 'Roboto', size: 12, weight: '600' }
+},
+grid: {
+color: 'rgba(0, 0, 0, 0.05)',
+drawBorder: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 },
+callback: function(value) {
+return value + ' kg';
+}
+}
+},
+x: {
+grid: {
+display: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 },
+maxRotation: 45,
+minRotation: 0
+}
+}
+}
+}
+});
+}
+
+renderComparisonChart(tanks, entries, harvests) {
+const canvas = document.getElementById('comparisonChart');
+if (!canvas) return;
+
+// Calculate metrics for each tank
+const tankMetrics = tanks.map(tank => {
+const tankEntries = entries.filter(e => e.tankId === tank.id);
+const tankHarvests = harvests.filter(h => h.tankId === tank.id);
+const totalFeed = tankEntries.reduce((sum, e) => sum + e.amount, 0);
+const totalHarvested = tankHarvests.reduce((sum, h) => sum + h.weight, 0);
+const biomass = tank.biomass || 0;
+const totalProduction = biomass + totalHarvested;
+const fcr = totalProduction > 0 ? (totalFeed / totalProduction).toFixed(2) : 0;
+const validChecks = tankEntries.filter(e => ['empty', 'little', 'half', 'too-much'].includes(e.trayResult));
+const wasteChecks = validChecks.filter(e => ['half', 'too-much'].includes(e.trayResult));
+const efficiency = validChecks.length > 0 ? (100 - ((wasteChecks.length / validChecks.length) * 100)).toFixed(0) : 0;
+return {
+name: tank.name,
+fcr: parseFloat(fcr),
+efficiency: parseFloat(efficiency),
+feed: totalFeed
+};
+});
+
+if (this.charts.comparison) {
+this.charts.comparison.destroy();
+}
+
+this.charts.comparison = new Chart(canvas, {
+type: 'bar',
+data: {
+labels: tankMetrics.map(t => t.name),
+datasets: [
+{
+label: 'FCR',
+data: tankMetrics.map(t => t.fcr),
+backgroundColor: 'rgba(33, 150, 243, 0.8)',
+borderColor: 'rgb(33, 150, 243)',
+borderWidth: 1,
+borderRadius: 4,
+yAxisID: 'y'
+},
+{
+label: 'Efficiency (%)',
+data: tankMetrics.map(t => t.efficiency),
+backgroundColor: 'rgba(76, 175, 80, 0.8)',
+borderColor: 'rgb(76, 175, 80)',
+borderWidth: 1,
+borderRadius: 4,
+yAxisID: 'y1'
+}
+]
+},
+options: {
+responsive: true,
+maintainAspectRatio: true,
+aspectRatio: 2,
+plugins: {
+legend: {
+display: true,
+position: 'top',
+labels: {
+font: { family: 'Roboto', size: 12 },
+padding: 15
+}
+},
+tooltip: {
+backgroundColor: 'rgba(0, 0, 0, 0.8)',
+padding: 12,
+titleFont: { family: 'Roboto', size: 13, weight: 'bold' },
+bodyFont: { family: 'Roboto', size: 12 },
+callbacks: {
+label: function(context) {
+if (context.datasetIndex === 0) {
+return `FCR: ${context.parsed.y}`;
+}
+return `Efficiency: ${context.parsed.y}%`;
+}
+}
+}
+},
+scales: {
+y: {
+beginAtZero: true,
+position: 'left',
+title: {
+display: true,
+text: 'FCR',
+font: { family: 'Roboto', size: 12, weight: '600' }
+},
+grid: {
+color: 'rgba(0, 0, 0, 0.05)',
+drawBorder: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 }
+}
+},
+y1: {
+beginAtZero: true,
+max: 100,
+position: 'right',
+title: {
+display: true,
+text: 'Efficiency (%)',
+font: { family: 'Roboto', size: 12, weight: '600' }
+},
+grid: {
+drawOnChartArea: false,
+},
+ticks: {
+font: { family: 'Roboto', size: 11 },
+callback: function(value) {
+return value + '%';
+}
+}
+},
+x: {
+grid: {
+display: false
+},
+ticks: {
+font: { family: 'Roboto', size: 11 }
+}
+}
+}
+}
+});
+}
+
+exportCharts() {
+// Export chart data as JSON
+const currentFarmId = this.state.settings.currentFarmId;
+if (!currentFarmId) return;
+
+const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
+const farmTankIds = farmTanks.map(t => t.id);
+const farmFeedEntries = this.state.feedEntries.filter(e => farmTankIds.includes(e.tankId));
+const farmWaterQuality = this.state.waterQuality.filter(w => farmTankIds.includes(w.tankId));
+const farmHarvests = this.state.harvests.filter(h => farmTankIds.includes(h.tankId));
+
+const chartData = {
+feedConsumption: this.getFeedConsumptionData(farmFeedEntries),
+fcrTrend: this.getFCRTrendData(farmFeedEntries, farmHarvests, farmTanks),
+wasteTrend: this.getWasteTrendData(farmFeedEntries),
+waterQuality: farmWaterQuality,
+exportDate: new Date().toISOString()
+};
+
+const blob = new Blob([JSON.stringify(chartData, null, 2)], { type: 'application/json' });
+const url = URL.createObjectURL(blob);
+const downloadAnchorNode = document.createElement('a');
+downloadAnchorNode.setAttribute("href", url);
+downloadAnchorNode.setAttribute("download", `aquarythu_charts_${this.getFormattedDate()}.json`);
+document.body.appendChild(downloadAnchorNode);
+downloadAnchorNode.click();
+downloadAnchorNode.remove();
+URL.revokeObjectURL(url);
+this.showToast('Chart data exported successfully');
+}
+
+getFeedConsumptionData(entries) {
+const dailyFeed = {};
+entries.forEach(entry => {
+if (!dailyFeed[entry.date]) {
+dailyFeed[entry.date] = 0;
+}
+dailyFeed[entry.date] += entry.amount;
+});
+return dailyFeed;
+}
+
+getFCRTrendData(entries, harvests, tanks) {
+// Simplified - return weekly FCR data
+return { message: 'FCR trend data calculated weekly' };
+}
+
+getWasteTrendData(entries) {
+const dailyWaste = {};
+entries.forEach(entry => {
+if (!entry.date) return;
+if (!dailyWaste[entry.date]) {
+dailyWaste[entry.date] = { total: 0, waste: 0 };
+}
+dailyWaste[entry.date].total++;
+if (entry.trayResult === 'half' || entry.trayResult === 'too-much') {
+dailyWaste[entry.date].waste++;
+}
+});
+return dailyWaste;
+}
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+window.app = new AquaRythu();
+});
+
+// Register Service Worker for offline support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => console.log('Service Worker registered'))
+      .catch(error => console.log('Service Worker registration failed:', error));
+  });
+}
