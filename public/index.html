@@ -710,8 +710,9 @@ box-shadow: var(--shadow-md);
 background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
 padding: var(--spacing-lg) var(--spacing-xl);
 display: flex;
-justify-content: space-between;
 align-items: center;
+gap: 12px;
+flex-wrap: nowrap;
 border-bottom: 1px solid var(--border);
 }
 
@@ -724,6 +725,11 @@ display: flex;
 align-items: center;
 gap: var(--spacing-sm);
 letter-spacing: -0.01em;
+flex: 1;
+min-width: 0;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
 }
 
 .farm-stats {
@@ -732,6 +738,8 @@ gap: var(--spacing-xl);
 font-size: var(--font-size-sm);
 font-family: var(--font-family);
 color: var(--gray-600);
+flex-shrink: 0;
+white-space: nowrap;
 }
 
 .farm-stat {
@@ -2269,6 +2277,12 @@ padding: var(--spacing-lg);
 }
 .chart-container canvas {
 max-height: 300px;
+}
+.action-label {
+display: none;
+}
+.farm-header {
+padding: var(--spacing-md) var(--spacing-lg);
 }
 }
 
@@ -5107,24 +5121,23 @@ headerContainer.innerHTML = `
 <div class="farm-header" style="border: 2px solid var(--border); border-radius: var(--radius);">
 <div class="farm-name">
 <i class="fas fa-tractor"></i>
-${farm.name}
-<span class="plan-badge FREE">V1</span>
+<span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${farm.name}</span>
 </div>
-<div style="display: flex; align-items: center; gap: 12px;">
 <div class="farm-stats">
 <div class="farm-stat">
 <span class="farm-stat-value">${farmTanks.length}</span>
 Tanks
 </div>
 </div>
-<button class="btn btn-sm" style="border: 1px solid var(--border); background: white; color: var(--gray);" onclick="app.openSettingsModal()">
-<i class="fas fa-cog"></i> Farm Settings
+<div class="farm-actions" style="display: flex; gap: 8px; flex-shrink: 0;">
+<button class="btn btn-sm" style="border: 1px solid var(--border); background: white; color: var(--gray); min-width: 44px; min-height: 44px;" onclick="app.openSettingsModal()">
+<i class="fas fa-cog"></i><span class="action-label" style="margin-left: 6px;">Farm Settings</span>
 </button>
-<button class="btn btn-sm btn-secondary" onclick="app.editFarm('${farm.id}')">
-<i class="fas fa-edit"></i> Edit Farm
+<button class="btn btn-sm btn-secondary" style="min-width: 44px; min-height: 44px;" onclick="app.editFarm('${farm.id}')">
+<i class="fas fa-edit"></i><span class="action-label" style="margin-left: 6px;">Edit Farm</span>
 </button>
-<button class="btn btn-sm btn-primary" onclick="app.openTankModal('${farm.id}')">
-<i class="fas fa-plus"></i> Add Tank
+<button class="btn btn-sm btn-primary" style="min-width: 44px; min-height: 44px;" onclick="app.openTankModal('${farm.id}')">
+<i class="fas fa-plus"></i><span class="action-label" style="margin-left: 6px;">Add Tank</span>
 </button>
 </div>
 </div>
