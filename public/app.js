@@ -3260,6 +3260,20 @@ const tankId = document.getElementById('logFeedTankSelect').value;
 this.updateLogFeedContext(tankId);
 }
 
+// ===== DIFFERENTIATED FEED FLOW: BLIND MODE vs TRAY MODE =====
+// 🌱 BLIND MODE (DOC 1-25/30):
+//    - Auto-suggest from blind schedule
+//    - Show round number and planned amount
+//    - No tray checks required (trayResult = 'blind-fed')
+//    - Track discipline only (planned vs given)
+//    - NO FCR, NO efficiency graphs, NO overfeeding alerts
+//
+// 🍽️ TRAY MODE (DOC 30+):
+//    - Show last round summary with tray status
+//    - Tray status triggers next feed suggestion
+//    - Farmer/Supervisor sets final feed amount
+//    - Worker executes exactly as set
+//    - Track execution accuracy
 updateLogFeedContext(tankId) {
 const tank = this.getTankById(tankId);
 if (!tank) return;
@@ -3269,6 +3283,8 @@ const lastEntry = entries[0];
 const doc = this.getDaysOld(tank.stockingDate);
 
 const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
+const isBlindMode = doc <= blindDuration && !tank.hasTransitionedFromBlind;
+const isTrayMode = !isBlindMode;
 
 // Calculate Suggestion
 let suggestion = 0;
@@ -3279,8 +3295,8 @@ const lastAmount = (lastEntry?.amount) ?? 0;
 const lastTray = (lastEntry?.trayResult) ?? 'pending';
 let blindPlanAmount = null; // Holds the suggestion from the blind schedule
 
-// Check blind schedule if applicable
-if (tank.blindSchedule && doc <= blindDuration && !tank.hasTransitionedFromBlind) {
+// BLIND MODE: Check blind schedule if applicable
+if (isBlindMode && tank.blindSchedule) {
 const plan = tank.blindSchedule.find(s => s.doc === doc);
 if (plan) {
 // Determine which feed number based on time of day
@@ -3305,16 +3321,21 @@ blindPlanAmount = parseFloat((plan.amount / feedsCount).toFixed(2));
 if (blindPlanAmount !== null) {
 suggestion = blindPlanAmount;
 reason = `Blind Schedule (Day ${doc})`;
-} else {
+} else if (isTrayMode) {
+// TRAY MODE: Use tray-based calculation
 const res = this.calculateStrictFeed(lastAmount, lastTray, doc);
 suggestion = res.amount;
 reason = res.reason;
+} else {
+// Fallback
+suggestion = lastAmount > 0 ? lastAmount : 2.0;
+reason = "Continue";
 }
 } else {
 suggestion = 2.0;
 }
-// If tank has a nextSuggestedFeed set from a tray check
-if (tank.nextSuggestedFeed) {
+// TRAY MODE: If tank has a nextSuggestedFeed set from a tray check, use it
+if (isTrayMode && tank.nextSuggestedFeed) {
 suggestion = tank.nextSuggestedFeed;
 reason = "Based on recent tray check";
 }
@@ -3329,7 +3350,7 @@ reason = healthIssue.reason;
 }
 // Determine how many feeds are expected for this DOC/day
 let totalFeedsForDay = this.state.settings.feedsPerDay || 4;
-if (tank.blindSchedule && doc <= blindDuration && !tank.hasTransitionedFromBlind) {
+if (isBlindMode && tank.blindSchedule) {
   const scheduleDoc = doc === 0 ? 1 : doc;
   const schedule = tank.blindSchedule.find(s => s.doc === scheduleDoc);
   if (schedule) {
@@ -3340,17 +3361,21 @@ if (tank.blindSchedule && doc <= blindDuration && !tank.hasTransitionedFromBlind
 // Count how many feeds already logged for THIS calendar date
 const todayEntries = this.state.feedEntries.filter(e => e.tankId === tankId && e.date === this.currentDate).sort((a, b) => a.id - b.id);
 
+// BLIND MODE vs TRAY MODE: Different UI context
+const feedRoundNumber = todayEntries.length + 1;
+
 const btnSugg = document.getElementById('btnSuggestedAmt');
 const healthWarningBanner = document.getElementById('healthWarningBanner');
 
 if (todayEntries.length >= totalFeedsForDay) {
-  // All feed rounds for today are complete — prepare suggestion for next day (DOC + 1)
+  // ❗ HARD RULE: All feed rounds completed for today
+  // Show status message and prepare for next day
   const nextDoc = doc + 1;
   let nextSuggestion = suggestion;
   let nextReason = reason;
 
   // If blind schedule applies to nextDoc, prefer its first feed
-  if (tank.blindSchedule && nextDoc <= blindDuration && !tank.hasTransitionedFromBlind) {
+  if (isBlindMode && tank.blindSchedule) {
     const scheduleDoc = nextDoc === 0 ? 1 : nextDoc;
     const schedule = tank.blindSchedule.find(s => s.doc === scheduleDoc);
     if (schedule) {
@@ -3358,7 +3383,7 @@ if (todayEntries.length >= totalFeedsForDay) {
       nextSuggestion = schedule.feeds ? schedule.feeds[0] : parseFloat((schedule.amount / feedsCount).toFixed(2));
       nextReason = `Blind Schedule (Day ${nextDoc})`;
     }
-  } else {
+  } else if (isTrayMode) {
     // Fallback: use strict feed calc for nextDoc
     const resNext = this.calculateStrictFeed(((lastEntry?.amount) ?? suggestion), (lastEntry?.trayResult) ?? 'pending', nextDoc);
     nextSuggestion = resNext.amount;
@@ -3373,7 +3398,7 @@ if (todayEntries.length >= totalFeedsForDay) {
 
   // Update UI to indicate next-day suggestion and set modal target date to tomorrow
   document.getElementById('logFeedTankName').innerHTML = `${this.sanitizeHTML(tank.name)} <i class="fas fa-chevron-down" style="font-size: 16px; opacity: 0.5;\"></i>`;
-  document.getElementById('logFeedContextText').textContent = `All feeds done today • Suggest Day ${nextDoc}`;
+  document.getElementById('logFeedContextText').innerHTML = `<span style="color: var(--success); font-weight: 600;">✅ Today's feeding completed</span><br><span style="font-size: 12px; color: var(--gray);">Next: Day ${nextDoc}</span>`;
   btnSugg.textContent = `Next Day: ${nextSuggestion}kg`;
   btnSugg.style.borderColor = healthIssue ? 'var(--warning)' : '';
   btnSugg.style.color = healthIssue ? 'var(--warning-dark)' : '';
@@ -3403,14 +3428,58 @@ if (todayEntries.length >= totalFeedsForDay) {
   const feedModal = document.getElementById('feedRoundModal');
   if (feedModal) feedModal.removeAttribute('data-target-date');
 
-  // Update New UI
+  // Update UI based on BLIND MODE vs TRAY MODE
   document.getElementById('logFeedTankName').innerHTML = `${this.sanitizeHTML(tank.name)} <i class="fas fa-chevron-down" style="font-size: 16px; opacity: 0.5;\"></i>`;
   const lastAmount = (lastEntry?.amount) ?? 0;
-  document.getElementById('logFeedContextText').textContent = `Last: ${lastAmount}kg • DOC ${doc}`;
+  
+  // DIFFERENTIATED CONTEXT DISPLAY
+  if (isBlindMode) {
+    // 🌱 BLIND MODE: Show feed round number and planned amount
+    document.getElementById('logFeedContextText').innerHTML = `
+      <span style="background: #FFF3E0; color: #F57C00; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-block; margin-bottom: 4px;">
+        🌱 BLIND MODE
+      </span><br>
+      <span style="color: var(--dark); font-weight: 600;">Round ${feedRoundNumber} of ${totalFeedsForDay}</span> • DOC ${doc}
+    `;
+    btnSugg.textContent = `Plan: ${suggestion}kg`;
+  } else {
+    // 🍽️ TRAY MODE: Show last round summary with tray status
+    const lastTrayStatus = lastEntry?.trayResult || 'pending';
+    let trayIcon = '⏳';
+    let trayText = 'Pending';
+    let trayColor = 'var(--warning)';
+    
+    if (lastTrayStatus === 'empty') {
+      trayIcon = '✅';
+      trayText = 'Empty';
+      trayColor = 'var(--success)';
+    } else if (lastTrayStatus === 'little') {
+      trayIcon = '⚠️';
+      trayText = 'Little';
+      trayColor = 'var(--warning)';
+    } else if (lastTrayStatus === 'half') {
+      trayIcon = '◐';
+      trayText = 'Half';
+      trayColor = 'var(--error)';
+    } else if (lastTrayStatus === 'too-much') {
+      trayIcon = '❌';
+      trayText = 'Too Much';
+      trayColor = 'var(--error)';
+    }
+    
+    document.getElementById('logFeedContextText').innerHTML = `
+      <span style="background: #E3F2FD; color: #1565C0; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: inline-block; margin-bottom: 4px;">
+        🍽️ TRAY MODE
+      </span><br>
+      <span style="color: var(--dark); font-weight: 600;">Last Round: ${lastAmount}kg</span> • Tray: <span style="color: ${trayColor};">${trayIcon} ${trayText}</span><br>
+      <span style="font-size: 12px; color: var(--gray);">Round ${feedRoundNumber} of ${totalFeedsForDay} • DOC ${doc}</span>
+    `;
+    btnSugg.textContent = `Sugg: ${suggestion}kg`;
+  }
 
   // Show health warning if feed was reduced due to health issues
   if (healthIssue) {
-    btnSugg.textContent = `Sugg: ${suggestion}kg ⚠️`;
+    btnSugg.textContent = btnSugg.textContent + ' ⚠️';
     btnSugg.style.borderColor = 'var(--warning)';
     btnSugg.style.color = 'var(--warning-dark)';
     // Show health warning banner
@@ -3418,7 +3487,6 @@ if (todayEntries.length >= totalFeedsForDay) {
     document.getElementById('healthWarningTitle').textContent = healthIssue.type === 'mortality' ? `⚠️ Mortality Reported` : `⚠️ Disease Detected`;
     document.getElementById('healthWarningText').textContent = healthIssue.reason.replace('⚠️ ', '').replace(' (-15% feed)', '');
   } else {
-    btnSugg.textContent = `Sugg: ${suggestion}kg`;
     btnSugg.style.borderColor = '';
     btnSugg.style.color = '';
     healthWarningBanner.style.display = 'none';
@@ -3947,11 +4015,13 @@ summary.innerHTML = `
 <div class="result-badge">${worstStatus.toUpperCase().replace('-', ' ')}</div>
 <p style="color: var(--gray-500); font-size: 14px;">Tray check results have been saved successfully.</p>
 <div class="next-feed-suggestion">
-<h3>Strict Rule Suggestion</h3>
+<h3>Next Feed Suggestion</h3>
 <div class="next-feed-amount">${strictResult.amount} kg</div>
 <div class="next-feed-note">${strictResult.reason}</div>
 </div>
-<p style="color: var(--gray-500); font-size: 13px;">Please confirm to update the feed plan.</p>
+<div style="background: #FFF3E0; border-left: 4px solid #F57C00; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 13px;">
+<p style="margin: 0; color: var(--dark);"><strong>⚠️ Authority Rule:</strong> Farmer/Supervisor will set the final feed amount when logging. This is a suggestion based on tray response.</p>
+</div>
 </div>
 `;
 
@@ -4018,6 +4088,10 @@ btn.disabled = true;
 }
 }
 
+// ❗ AUTHORITY RULE: Farmer/Supervisor sets the final feed amount
+// Worker executes exactly as set. The amount entered here becomes the FINAL FEED.
+// In TRAY MODE: Suggestion is shown but farmer can accept/edit
+// In BLIND MODE: Plan is shown but farmer can adjust if needed
 saveLogFeed(loadNext = false) {
 const tankId = document.getElementById('logFeedTankSelect').value;
 const amount = parseFloat(document.getElementById('logFeedAmount').value);
@@ -4099,7 +4173,7 @@ tankId,
 date: entryDate,
 time: new Date().toLocaleTimeString(),
 amount,
-trayResult: 'pending', // Always pending for tray-based feeding (requires tray check)
+trayResult: feedingMode === 'BLIND' ? 'blind-fed' : 'pending', // Blind mode: no tray check needed, Tray mode: pending check
 supplements,
 reason: reason || null,
             // Health report fields
@@ -4527,7 +4601,27 @@ break; // Show one at a time
 
 openBlindTransitionModal(tank) {
 this.transitionTankId = tank.id;
-document.getElementById('blindTransitionText').textContent = `${this.sanitizeHTML(tank.name)} has completed its blind feeding period (DOC ${this.getDaysOld(tank.stockingDate)}). Switch to check-tray based feeding?`;
+const doc = this.getDaysOld(tank.stockingDate);
+document.getElementById('blindTransitionText').innerHTML = `
+<div style="text-align: center; margin-bottom: 20px;">
+<div style="font-size: 48px; margin-bottom: 10px;">🍽️</div>
+<h3 style="margin: 0 0 10px 0; color: var(--dark);">Ready for Tray-Based Feeding</h3>
+<p style="color: var(--gray); margin: 0;">${this.sanitizeHTML(tank.name)} • DOC ${doc}</p>
+</div>
+<div style="background: #FFF3E0; border-left: 4px solid #F57C00; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+<p style="margin: 0 0 10px 0; font-weight: 600; color: var(--dark);">You are moving from Blind Feeding to Tray-Based Feeding.</p>
+<p style="margin: 0; color: var(--gray); font-size: 14px;">Feed suggestions will now depend on tray response instead of the pre-set schedule.</p>
+</div>
+<div style="background: #E3F2FD; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+<h4 style="margin: 0 0 10px 0; font-size: 14px; color: var(--dark);">What changes:</h4>
+<ul style="margin: 0; padding-left: 20px; color: var(--gray); font-size: 13px; line-height: 1.8;">
+<li>Tray checks required after each feed</li>
+<li>Feed amounts adjust based on tray status</li>
+<li>Blind schedule will be frozen</li>
+<li>More precise feeding control</li>
+</ul>
+</div>
+`;
 document.getElementById('blindTransitionModal').classList.add('active');
 }
 
