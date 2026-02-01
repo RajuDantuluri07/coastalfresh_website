@@ -1507,6 +1507,7 @@ let planSourceTooltip = '';
 // Check Blind Schedule (and ensure not transitioned)
 if (tank.blindSchedule && doc <= blindDuration && !tank.hasTransitionedFromBlind) {
 // Show Day 1 schedule for Day 0 (stocking day)
+// Note: scheduleDoc is used to look up the schedule, but actual DOC should be displayed
 const scheduleDoc = doc === 0 ? 1 : doc;
 const schedule = tank.blindSchedule.find(s => s.doc === scheduleDoc);
 if (schedule) {
