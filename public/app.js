@@ -1690,91 +1690,78 @@ heroHTML = `
 }
 
         let scheduleHTML = '';
-        // BLIND MODE: Show schedule
+        // BLIND MODE: Show simplified schedule
         if (doc <= blindDuration && !tank.hasTransitionedFromBlind) {
-// Render Daily Schedule List
+// Simplified Daily Blind Feeding Screen
+const perFeedAmount = feedsToday.length > 0 ? (planAmount / feedsToday.length).toFixed(1) : 0;
 scheduleHTML = `
-<div class="daily-schedule-card">
-<div class="schedule-header">
-<div>
-<h4 style="margin:0; color:#0D47A1; font-size:15px;">Day ${doc} Plan</h4>
-<small style="color:#1565C0; font-weight:500;" ${planSourceTooltip ? `title="${planSourceTooltip}" style="cursor: help;"` : ''}>
-${planSource}
-${planSourceTooltip ? ` <i class="fas fa-info-circle" style="font-size: 10px; opacity: 0.7;"></i>` : ''}
-</small>
-<div style="margin-top: 4px;">
-${doc <= blindDuration ? `<button class="btn btn-secondary" onclick="app.openFeedSchedule('${tankId}')" style="background: #1565C0; border: none; color: white; padding: 10px 16px; font-size: 13px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);"><i class="fas fa-calendar-alt"></i> Feed Plan</button>` : ''}
+<div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+<h3 style="margin: 0 0 16px 0; color: var(--dark); font-size: 18px; font-weight: 600;">
+${this.sanitizeHTML(tank.name)} (DOC ${doc}) – Blind Feeding
+</h3>
+
+<div style="background: var(--gray-50); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+<div style="font-size: 14px; font-weight: 600; color: var(--dark); margin-bottom: 8px;">Today's plan:</div>
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 13px; color: var(--gray);">
+<div><strong style="color: var(--dark);">Total:</strong> ${planAmount.toFixed(1)} kg</div>
+<div><strong style="color: var(--dark);">Feeds:</strong> ${feedsToday.length}</div>
+<div><strong style="color: var(--dark);">Per feed:</strong> ${perFeedAmount} kg</div>
 </div>
 </div>
-<div style="text-align:right;">
-<div style="font-size:20px; font-weight:800; color:#0D47A1;">${planAmount.toFixed(1)} <span style="font-size:12px;">kg</span></div>
-<small style="color:#1565C0;">Total Target</small>
-</div>
-</div>
-<div class="schedule-list">
+
+<div style="margin-bottom: 16px;">
+<div style="font-size: 14px; font-weight: 600; color: var(--dark); margin-bottom: 12px;">Feed status:</div>
+<div style="display: flex; flex-direction: column; gap: 8px;">
 `;
 
 feedsToday.forEach((amount, index) => {
 const entry = todayEntries[index];
-const feedNum = index + 1;
 const isDone = !!entry;
-const isNext = !isDone && index === todayEntries.length;
-// Estimate time label based on feed count
-let timeLabel = '';
+
+// Get time label
 const count = feedsToday.length;
 let scheduleTimes = this.state.settings[`feedSchedule${count}`];
-// Fallback if specific schedule not found
 if (!scheduleTimes || scheduleTimes.length !== count) {
-// Use legacy feedTimes if length matches, else generate default
 if (this.state.settings.feedTimes && this.state.settings.feedTimes.length === count) scheduleTimes = this.state.settings.feedTimes;
 else scheduleTimes = Array.from({length: count}, (_, i) => Math.floor(6 + (i * (16/Math.max(1, count)))));
 }
 
 const hour = scheduleTimes[index] !== undefined ? scheduleTimes[index] : (6 + (index * 4));
 const ampm = hour >= 12 ? 'PM' : 'AM';
-const displayHour = hour > 12 ? hour - 12 : hour;
-timeLabel = `${displayHour}:00 ${ampm}`;
+const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
+const timeLabel = `${displayHour}:00 ${ampm}`;
 
-// Simplified schedule row (since Hero Card handles the active action)
-let statusIcon, actionContent, rowClass = 'schedule-row';
+// Simple status display
+let statusIcon = '';
+let statusText = '';
 if (isDone) {
 if (entry.trayResult === 'skipped') {
-statusIcon = `<div class="step-circle done" style="background: #f5f5f5; border-color: #e0e0e0; color: #9e9e9e;"><i class="fas fa-ban"></i></div>`;
-rowClass += ' done skipped';
-actionContent = `
-<div style="text-align:right;">
-<div style="font-weight:700; color:var(--gray);">Skipped</div>
-<div class="logged-time">${entry.time}</div>
-</div>`;
+statusIcon = '⏭️';
+statusText = `<span style="color: var(--gray);">${timeLabel} – Skipped</span>`;
 } else {
-statusIcon = `<div class="step-circle done"><i class="fas fa-check"></i></div>`;
-rowClass += ' done';
-actionContent = `
-<div style="text-align:right;">
-<div style="font-weight:700; color:var(--success);">${entry.amount} kg</div>
-<div class="logged-time">${entry.time}</div>
-</div>`;
+statusIcon = '✅';
+statusText = `<span style="color: var(--dark);">${timeLabel} – ${entry.amount} kg</span>`;
 }
 } else {
-statusIcon = `<div class="step-circle">${feedNum}</div>`;
-rowClass += ' upcoming';
-actionContent = `<span class="upcoming-amt">${amount} kg</span>`;
+statusIcon = '⏱️';
+statusText = `<span style="color: var(--gray);">${timeLabel} – ${amount} kg</span>`;
 }
 
 scheduleHTML += `
-<div class="${rowClass}">
-<div class="schedule-left">
-${statusIcon}
-<div>
-<div class="feed-label">Feed ${feedNum}</div>
-<div style="font-size: 11px; color: var(--gray);">${timeLabel}</div>
-</div>
-</div>
-<div class="schedule-right">${actionContent}</div>
+<div style="padding: 8px 0; font-size: 14px;">
+${statusIcon} ${statusText}
 </div>
 `;
 });
-scheduleHTML += `</div></div>`;
+
+scheduleHTML += `
+</div>
+</div>
+<button class="btn btn-primary" onclick="app.openLogFeedModal('${tankId}')" style="width: 100%; padding: 14px; font-size: 16px; margin-top: 8px;">
+<i class="fas fa-plus-circle"></i> Log Feed
+</button>
+</div>
+`;
 } else {
 // TRAY PHASE: Show Last Feed Context instead of Schedule Plan
 const allEntries = this.state.feedEntries.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
@@ -3566,6 +3553,66 @@ canShowNextFeedSuggestion(tankId, date = this.currentDate) {
   return lastRound.hasTrayStatus;
 }
 
+// ===== TRAY MODE STATE MACHINE INTEGRATION =====
+// Get current tray mode state for a tank
+getTrayModeState(tankId, date = this.currentDate) {
+  const tank = this.getTankById(tankId);
+  if (!tank) return { state: null, isTrayMode: false };
+  
+  const doc = this.getDaysOld(tank.stockingDate);
+  const feedsPerDay = this.state.settings.feedsPerDay || 4;
+  
+  // Use state machine from tray-mode-state-machine.js
+  if (typeof getTrayModeState === 'function') {
+    return getTrayModeState(tank, this.state.feedEntries, date, feedsPerDay);
+  }
+  
+  // Fallback if state machine not loaded
+  return { state: null, isTrayMode: false };
+}
+
+// Get planned feed amount for current round (Tray Mode)
+getPlannedFeedAmount(tankId, roundNumber, date = this.currentDate) {
+  const tank = this.getTankById(tankId);
+  if (!tank) return 2.0;
+  
+  // Use state machine from tray-mode-state-machine.js
+  if (typeof getPlannedFeedForRound === 'function') {
+    return getPlannedFeedForRound(tank, this.state.feedEntries, date, roundNumber);
+  }
+  
+  // Fallback
+  return 2.0;
+}
+
+// Calculate next feed from tray results (Tray Mode)
+calculateNextFeedFromTrayResults(currentAmount, trayResults) {
+  // Use state machine from tray-mode-state-machine.js
+  if (typeof calculateNextFeedFromTray === 'function') {
+    return calculateNextFeedFromTray(currentAmount, trayResults);
+  }
+  
+  // Fallback
+  return {
+    suggestedKg: currentAmount,
+    reason: 'Maintaining current amount',
+    adjustment: 0
+  };
+}
+
+// Check if feed can be logged (Tray Mode state validation)
+canLogFeedNow(tankId, date = this.currentDate) {
+  const state = this.getTrayModeState(tankId, date);
+  
+  // Use state machine from tray-mode-state-machine.js
+  if (typeof canLogFeed === 'function') {
+    return canLogFeed(state);
+  }
+  
+  // Fallback - allow if not in tray mode
+  return { canLog: !state.isTrayMode || state.state === 'READY_TO_FEED', reason: '' };
+}
+
 // Check if all planned rounds are completed for today
 areAllRoundsCompleted(tankId, date = this.currentDate) {
   const tank = this.getTankById(tankId);
@@ -4067,11 +4114,18 @@ document.getElementById('resultModal').classList.add('active');
             entry.trayResult = this.currentCheck.finalResult;
             entry.trayResults = this.currentCheck.trays.map(t => t.status);
             entry.trayObservations = this.currentCheck.trays.map(t => t.observations);
+            
+            // ===== TRAY MODE: Save decision for next round =====
+            // This is critical for per-round workflow
+            const suggestedKg = parseFloat(this.currentCheck.suggestedFeed);
+            entry.decisionKgForNextRound = suggestedKg;
+            
             this.saveFeedEntries();
-            // Update next suggested feed
+            
+            // Also update tank's nextSuggestedFeed for backward compatibility
             const tank = this.getTankById(this.currentCheck.tankId);
             if (tank) {
-                tank.nextSuggestedFeed = parseFloat(this.currentCheck.suggestedFeed);
+                tank.nextSuggestedFeed = suggestedKg;
                 this.saveTanks();
             }
         }
@@ -4079,7 +4133,7 @@ document.getElementById('resultModal').classList.add('active');
         // Do not auto-open the next tank/entry; farmer will choose the next pending tray manually.
         this.closeAllModals();
         this.renderAll();
-        this.showToast('Tray results saved.', 'success');
+        this.showToast('Tray results saved. Next feed amount set.', 'success');
     }
 
 applySuggestion(entryId, suggestedAmount) {
@@ -4107,7 +4161,7 @@ btn.disabled = true;
 
 // ❗ AUTHORITY RULE: Farmer/Supervisor sets the final feed amount
 // Worker executes exactly as set. The amount entered here becomes the FINAL FEED.
-// In TRAY MODE: Suggestion is shown but farmer can accept/edit
+// In TRAY MODE: Planned kg shown (from previous decision), farmer confirms
 // In BLIND MODE: Plan is shown but farmer can adjust if needed
 // One pond at a time to avoid mistakes with wrong tanks
 saveLogFeed() {
@@ -4121,6 +4175,21 @@ const supplements = Array.from(document.querySelectorAll('#logFeedSupplements .s
 if (!tankId) {
 this.showToast('Please select a tank', 'error');
 return;
+}
+
+// ===== TRAY MODE STATE VALIDATION =====
+const tank = this.getTankById(tankId);
+const doc = tank ? this.getDaysOld(tank.stockingDate) : 0;
+const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
+const isTrayMode = doc >= 30 && tank.hasTransitionedFromBlind;
+
+if (isTrayMode) {
+  // Check if feed can be logged in current state
+  const stateCheck = this.canLogFeedNow(tankId);
+  if (!stateCheck.canLog) {
+    this.showToast(`Cannot log feed: ${stateCheck.reason}`, 'error', 5000);
+    return;
+  }
 }
 
 // Validate feed amount
