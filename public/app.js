@@ -1746,21 +1746,19 @@ buttonHTML = `<button class="blind-log-feed-btn skipped" disabled>⏭ Skipped</b
 buttonHTML = `<button class="blind-log-feed-btn done" disabled>✓ Done (${entry.amount} kg)</button>`;
 }
 } else {
-buttonHTML = `<button class="blind-log-feed-btn" onclick="app.quickLogBlindFeed('${tankId}', ${amount}, ${index})">📝 Log Feed</button>`;
+buttonHTML = `<button class="blind-log-feed-btn" onclick="app.quickLogBlindFeed('${tankId}', ${amount}, ${index})">Log</button>`;
 }
 
 feedItemsHTML += `
 <div class="blind-feed-item">
 <div class="blind-feed-item-row">
-<div class="blind-feed-number">${index + 1}</div>
 <div class="blind-feed-details">
-<div class="blind-feed-name">Feed ${index + 1}</div>
-<div class="blind-feed-time">${timeLabel}</div>
+<div class="blind-feed-name">Feed ${index + 1} · ${timeLabel}</div>
 </div>
-<div class="blind-feed-amount">${amount.toFixed(2)} kg</div>
-</div>
-<div class="blind-feed-item-actions">
+<div class="blind-feed-action">
+<div class="blind-feed-amount">${amount.toFixed(2)} <span class="unit">kg</span></div>
 ${buttonHTML}
+</div>
 </div>
 </div>
 `;
@@ -7636,17 +7634,20 @@ ${trayChipsHTML}
 renderNextFeedCardSimple(tankId, roundNumber, suggestedAmount, reasonText, timeStr) {
 return `
 <div class="feed-card">
-<h3 class="card-title">Next Feed (Round ${roundNumber})</h3>
-<div class="muted">Suggested Time: ${timeStr}</div>
-<div class="feed-control">
-<button class="btn-stepper" onclick="app.adjustTrayFeed(-0.1)">−</button>
-<div class="feed-value" id="trayFeedAmount">${suggestedAmount.toFixed(1)} kg</div>
-<button class="btn-stepper" onclick="app.adjustTrayFeed(0.1)">+</button>
-</div>
-<div class="muted" id="reasonText">${reasonText}</div>
-<button class="btn-primary-feed" id="logTrayFeedBtn" onclick="app.logTrayFeed('${this.escapeAttribute(String(tankId))}', ${roundNumber})">
-Log Feed
+<div class="feed-round-header">
+<div class="feed-round-info">Feed ${roundNumber} · ${timeStr}</div>
+<div class="feed-round-action-row">
+<div class="feed-amount-dominant" id="trayFeedAmount">${suggestedAmount.toFixed(2)} <span class="unit">kg</span></div>
+<button class="btn-log-compact" id="logTrayFeedBtn" onclick="app.logTrayFeed('${this.escapeAttribute(String(tankId))}', ${roundNumber})">
+Log
 </button>
+</div>
+</div>
+<div class="feed-stepper-row">
+<button class="btn-stepper-sm" onclick="app.adjustTrayFeed(-0.1)">−</button>
+<div class="muted" id="reasonText">${reasonText}</div>
+<button class="btn-stepper-sm" onclick="app.adjustTrayFeed(0.1)">+</button>
+</div>
 <div class="status-text" id="feedLoggedStatus" style="display: none;">
 ✔ Feed logged. Waiting for tray check
 </div>

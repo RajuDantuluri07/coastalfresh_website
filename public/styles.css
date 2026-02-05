@@ -2813,18 +2813,112 @@ min-width: 80px;
 text-align: center;
 }
 
+.feed-value .unit {
+font-size: 12px;
+font-weight: 600;
+color: #6b7280;
+}
+
+/* ===== COMPACT TRAY FEED LAYOUT (Mobile-First) ===== */
+.feed-round-header {
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+.feed-round-info {
+font-size: 14px;
+font-weight: 600;
+color: #0f172a;
+}
+
+.feed-round-action-row {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 12px;
+}
+
+.feed-amount-dominant {
+font-size: 24px;
+font-weight: 700;
+color: #0f172a;
+flex-shrink: 0;
+}
+
+.feed-amount-dominant .unit {
+font-size: 14px;
+font-weight: 600;
+color: #6b7280;
+margin-left: 2px;
+}
+
+.btn-log-compact {
+background: var(--primary);
+color: white;
+border: none;
+border-radius: 6px;
+padding: 8px 16px;
+font-size: 13px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.2s;
+height: 34px;
+white-space: nowrap;
+flex-shrink: 0;
+}
+
+.btn-log-compact:hover {
+background: var(--primary-dark);
+}
+
+.feed-stepper-row {
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 12px;
+margin-top: 10px;
+padding-top: 10px;
+border-top: 1px solid #f0f0f0;
+}
+
+.btn-stepper-sm {
+width: 28px;
+height: 28px;
+border-radius: 6px;
+border: 1px solid #d1d5db;
+font-size: 14px;
+background: #fff;
+cursor: pointer;
+color: #374151;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.btn-stepper-sm:hover {
+background: #f3f4f6;
+}
+
+.feed-round-action {
+display: flex;
+flex-direction: column;
+gap: 6px;
+}
+
 /* Primary Button */
 .btn-primary-feed {
-width: 100%;
+width: auto;
 background: #3b4cff;
 color: #fff;
 border: none;
-padding: 12px;
-font-size: 15px;
+padding: 8px 12px;
+font-size: 12px;
 font-weight: 600;
 border-radius: 10px;
 cursor: pointer;
-margin-top: 12px;
+height: 34px;
+align-self: flex-end;
 transition: all 0.2s;
 }
 
@@ -3024,94 +3118,91 @@ margin-top: 15px;
 }
 
 .blind-feed-item {
-display: flex;
-align-items: center;
-padding: 15px;
-border-bottom: 1px solid #f0f0f0;
-flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .blind-feed-item:last-child {
-border-bottom: none;
+  border-bottom: none;
 }
 
 .blind-feed-item-row {
-display: flex;
-align-items: center;
-width: 100%;
-}
-
-.blind-feed-item-actions {
-width: 100%;
-margin-top: 10px;
-}
-
-.blind-feed-number {
-width: 35px;
-height: 35px;
-background: #f5f7fa;
-border-radius: 8px;
-display: flex;
-align-items: center;
-justify-content: center;
-font-weight: 600;
-color: #5a6c7d;
-margin-right: 15px;
-flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .blind-feed-details {
-flex: 1;
-}
-
-.blind-feed-name {
-font-weight: 600;
-color: #1e3c72;
-margin-bottom: 3px;
-}
-
-.blind-feed-time {
-font-size: 13px;
-color: #8899a6;
+  flex: 1;
+  min-width: 0;
 }
 
 .blind-feed-amount {
-font-weight: 700;
-color: #1e3c72;
-font-size: 16px;
+  font-weight: 700;
+  color: #1e3c72;
+  font-size: 22px;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.blind-feed-amount .unit {
+  font-size: 12px;
+  font-weight: 600;
+  color: #5a6c7d;
+}
+
+.blind-feed-name {
+  font-weight: 600;
+  color: #1e3c72;
+  font-size: 13px;
+}
+
+.blind-feed-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .blind-log-feed-btn {
-background: #00b4d8;
-color: white;
-border: none;
-border-radius: 8px;
-padding: 10px 16px;
-font-size: 13px;
-font-weight: 600;
-cursor: pointer;
-transition: all 0.2s;
-width: 100%;
+  background: #00b4d8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  height: 34px;
+  min-width: 64px;
 }
 
 .blind-log-feed-btn:hover {
-background: #0096c7;
-transform: translateY(-1px);
+  background: #0096c7;
 }
 
 .blind-log-feed-btn.done {
-background: #27ae60;
-cursor: default;
+  background: #27ae60;
+  cursor: default;
+  padding: 8px 12px;
+  font-size: 12px;
 }
 
 .blind-log-feed-btn.done:hover {
-background: #27ae60;
-transform: none;
+  background: #27ae60;
 }
 
 .blind-log-feed-btn.skipped {
-background: #9ca3af;
-cursor: default;
+  background: #9ca3af;
+  cursor: default;
+  padding: 8px 12px;
+  font-size: 12px;
 }
 
 .blind-feed-completion-message {
@@ -3211,6 +3302,13 @@ padding: 12px 8px;
 border-radius: 8px;
 font-size: 13px;
 background: #f5f7fa;
+}
+
+.blind-feed-slot .blind-feed-name {
+font-weight: 600;
+color: #1e3c72;
+margin-bottom: 3px;
+font-size: 13px;
 }
 
 .blind-feed-slot .slot-amount {
