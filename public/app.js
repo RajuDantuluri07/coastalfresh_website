@@ -889,30 +889,38 @@ if (primaryBtn) primaryBtn.focus();
 // Shows a custom confirmation modal (returns Promise)
 showConfirmModal(message, title = 'Confirm', confirmText = 'Yes', cancelText = 'Cancel') {
 return new Promise((resolve) => {
+const modalId = 'confirmModal_' + Date.now();
 const modal = document.createElement('div');
 modal.className = 'modal-overlay active';
-modal.id = 'confirmModal_' + Date.now();
+modal.id = modalId;
 modal.innerHTML = `
 <div class="modal-content" style="max-width: 400px;">
 <div class="modal-header">
 <h3>${this.sanitizeHTML(title)}</h3>
-<button class="close-modal" onclick="document.getElementById('${modal.id}').removeAttribute('class'); setTimeout(() => document.getElementById('${modal.id}').remove(), 300);">×</button>
+<button class="close-modal" data-modal-id="${modalId}">×</button>
 </div>
 <div class="modal-body">
 <p style="margin: 0; line-height: 1.6; color: var(--gray-700);">${this.sanitizeHTML(message)}</p>
 </div>
 <div class="modal-footer">
-<button class="btn btn-secondary" onclick="document.getElementById('${modal.id}').removeAttribute('class'); setTimeout(() => { document.getElementById('${modal.id}').remove(); }, 300);">${this.sanitizeHTML(cancelText)}</button>
-<button class="btn btn-primary" onclick="document.getElementById('${modal.id}').removeAttribute('class'); setTimeout(() => { document.getElementById('${modal.id}').remove(); }, 300);">${this.sanitizeHTML(confirmText)}</button>
+<button class="btn btn-secondary" data-action="cancel">${this.sanitizeHTML(cancelText)}</button>
+<button class="btn btn-primary" data-action="confirm">${this.sanitizeHTML(confirmText)}</button>
 </div>
 </div>
 `;
 document.body.appendChild(modal);
-const confirmBtn = modal.querySelectorAll('.btn-primary')[0];
+
+const confirmBtn = modal.querySelector('.btn-primary');
 const cancelBtn = modal.querySelector('.btn-secondary');
+const closeBtn = modal.querySelector('.close-modal');
+
 const closeModal = () => {
-modal.removeAttribute('class');
-setTimeout(() => { modal.remove(); }, 300);
+modal.classList.remove('active');
+setTimeout(() => {
+        modal.remove();
+        const idx = this.dynamicModals.indexOf(modal);
+        if (idx > -1) this.dynamicModals.splice(idx, 1);
+      }, 300);
 };
 confirmBtn.onclick = () => {
 closeModal();
@@ -922,6 +930,11 @@ cancelBtn.onclick = () => {
 closeModal();
 resolve(false);
 };
+    closeBtn.onclick = () => {
+      closeModal();
+      resolve(false); // Closing is equivalent to cancelling
+    };
+
 confirmBtn.focus();
 });
 }
@@ -1690,35 +1703,13 @@ heroHTML = `
 }
 
         let scheduleHTML = '';
-        // BLIND MODE: Show simplified schedule
+        // BLIND MODE: Show new blind feed log book UI matching user's mockup
         if (doc <= blindDuration && !tank.hasTransitionedFromBlind) {
-// Simplified Daily Blind Feeding Screen
-const perFeedAmount = feedsToday.length > 0 ? (planAmount / feedsToday.length).toFixed(1) : 0;
-scheduleHTML = `
-<div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-<h3 style="margin: 0 0 16px 0; color: var(--dark); font-size: 18px; font-weight: 600;">
-${this.sanitizeHTML(tank.name)} (DOC ${doc}) – Blind Feeding
-</h3>
+// New Blind Feed Log Book UI
+const perFeedAmount = feedsToday.length > 0 ? (planAmount / feedsToday.length).toFixed(2) : 0;
+const allFeedsCompleted = todayEntries.length >= feedsToday.length;
 
-<div style="background: var(--gray-50); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-<div style="font-size: 14px; font-weight: 600; color: var(--dark); margin-bottom: 8px;">Today's plan:</div>
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; font-size: 13px; color: var(--gray);">
-<div><strong style="color: var(--dark);">Total:</strong> ${planAmount.toFixed(1)} kg</div>
-<div><strong style="color: var(--dark);">Feeds:</strong> ${feedsToday.length}</div>
-<div><strong style="color: var(--dark);">Per feed:</strong> ${perFeedAmount} kg</div>
-</div>
-</div>
-
-<div style="margin-bottom: 16px;">
-<div style="font-size: 14px; font-weight: 600; color: var(--dark); margin-bottom: 12px;">Feed status:</div>
-<div style="display: flex; flex-direction: column; gap: 8px;">
-`;
-
-feedsToday.forEach((amount, index) => {
-const entry = todayEntries[index];
-const isDone = !!entry;
-
-// Get time label
+// Get time labels for feeds
 const count = feedsToday.length;
 let scheduleTimes = this.state.settings[`feedSchedule${count}`];
 if (!scheduleTimes || scheduleTimes.length !== count) {
@@ -1726,40 +1717,79 @@ if (this.state.settings.feedTimes && this.state.settings.feedTimes.length === co
 else scheduleTimes = Array.from({length: count}, (_, i) => Math.floor(6 + (i * (16/Math.max(1, count)))));
 }
 
+// Completion message if all feeds done
+let completionHTML = '';
+if (allFeedsCompleted) {
+completionHTML = `
+<div class="blind-feed-completion-message">
+<h3>🎉 All Feeds Completed Today!</h3>
+<p>Great job! See you tomorrow for the next feeding cycle.</p>
+</div>
+`;
+}
+
+// Build feed items HTML
+let feedItemsHTML = '';
+feedsToday.forEach((amount, index) => {
+const entry = todayEntries[index];
+const isDone = !!entry;
 const hour = scheduleTimes[index] !== undefined ? scheduleTimes[index] : (6 + (index * 4));
 const ampm = hour >= 12 ? 'PM' : 'AM';
 const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
 const timeLabel = `${displayHour}:00 ${ampm}`;
 
-// Simple status display
-let statusIcon = '';
-let statusText = '';
+let buttonHTML = '';
 if (isDone) {
 if (entry.trayResult === 'skipped') {
-statusIcon = '⏭️';
-statusText = `<span style="color: var(--gray);">${timeLabel} – Skipped</span>`;
+buttonHTML = `<button class="blind-log-feed-btn skipped" disabled>⏭ Skipped</button>`;
 } else {
-statusIcon = '✅';
-statusText = `<span style="color: var(--dark);">${timeLabel} – ${entry.amount} kg</span>`;
+buttonHTML = `<button class="blind-log-feed-btn done" disabled>✓ Done (${entry.amount} kg)</button>`;
 }
 } else {
-statusIcon = '⏱️';
-statusText = `<span style="color: var(--gray);">${timeLabel} – ${amount} kg</span>`;
+buttonHTML = `<button class="blind-log-feed-btn" onclick="app.quickLogBlindFeed('${tankId}', ${amount}, ${index})">📝 Log Feed</button>`;
 }
 
-scheduleHTML += `
-<div style="padding: 8px 0; font-size: 14px;">
-${statusIcon} ${statusText}
+feedItemsHTML += `
+<div class="blind-feed-item">
+<div class="blind-feed-item-row">
+<div class="blind-feed-number">${index + 1}</div>
+<div class="blind-feed-details">
+<div class="blind-feed-name">Feed ${index + 1}</div>
+<div class="blind-feed-time">${timeLabel}</div>
+</div>
+<div class="blind-feed-amount">${amount.toFixed(2)} kg</div>
+</div>
+<div class="blind-feed-item-actions">
+${buttonHTML}
+</div>
 </div>
 `;
 });
 
-scheduleHTML += `
+scheduleHTML = `
+${completionHTML}
+<div class="blind-feed-plan-card">
+<div class="blind-feed-plan-header">
+<div class="blind-feed-plan-title">
+<h2>Day 0-${blindDuration} Blind Feed Plan</h2>
+<div class="blind-feed-plan-subtitle">
+Feed based on PL count estimation
+<span class="info-icon" title="Based on stocking density: ${tank.initialSeed ? Math.round(tank.initialSeed / (tank.size || 1)).toLocaleString() : 'N/A'} PL/acre">i</span>
 </div>
 </div>
-<button class="btn btn-primary" onclick="app.openLogFeedModal('${tankId}')" style="width: 100%; padding: 14px; font-size: 16px; margin-top: 8px;">
-<i class="fas fa-plus-circle"></i> Log Feed
+<div class="blind-feed-total-target">
+<div class="target-value">${planAmount.toFixed(1)} <small style="font-size: 16px;">kg</small></div>
+<div class="target-label">Total Target</div>
+</div>
+</div>
+
+<button class="blind-feed-plan-btn" onclick="app.openFeedSchedule('${tankId}')">
+📋 Feed Plan
 </button>
+
+<div class="blind-feed-schedule" id="blindFeedSchedule_${tankId}">
+${feedItemsHTML}
+</div>
 </div>
 `;
 } else {
@@ -1840,28 +1870,16 @@ ${suppHTML}
 }
 
         const isBlindMode = doc <= blindDuration && !tank.hasTransitionedFromBlind;
-        if (isBlindMode) {
-            // Blind feeding: only show the plan card.
-            planContainer.innerHTML = scheduleHTML;
-        } else {
-            // Tray mode: show Last Feed Round Summary + warnings + hero card + history header
-            planContainer.innerHTML = lastRoundSummaryHTML + trayStatusWarningHTML + allRoundsWarningHTML + heroHTML + `
-            <div class="history-section-header">
-                <div class="history-title">Recent Activity</div>
-            </div>
-            `;
-        }
+if (isBlindMode) {
+    // Blind feeding: only show the plan card.
+    planContainer.innerHTML = scheduleHTML;
+} else {
+    // TRAY MODE: Use simplified design matching user mockup
+    planContainer.innerHTML = this.renderTrayFeedLogBookSimple(tankId, tank, doc);
+}
 
 const container = document.getElementById('logTimelineContainer');
 if (!container) return;
-
-// Add a context bar similar to the user's example
-const contextHTML = `
-<div class="context" style="border-bottom: 1px solid var(--border);">
-<div class="chip">DOC ${doc}</div>
-<div class="chip">${doc <= blindDuration && !tank.hasTransitionedFromBlind ? 'Blind Feeding' : 'Tray Feeding'}</div>
-</div>
-`;
 
 // Filter entries based on the viewMode selected in the log-toolbar
 const today = new Date();
@@ -1889,6 +1907,21 @@ endDate = this.getFormattedDate(today);
 
 const isDateInRange = (d) => d >= startDate && d <= endDate;
 const tankEntries = this.state.feedEntries.filter(e => e.tankId === tankId && isDateInRange(e.date));
+
+// Check if blind mode for different rendering
+if (isBlindMode) {
+// BLIND MODE: Render simpler log entries matching user's mockup
+container.innerHTML = this.renderBlindFeedLogEntries(tankId, tankEntries, blindDuration);
+return;
+}
+
+// TRAY MODE: Existing register-style rendering
+const contextHTML = `
+<div class="context" style="border-bottom: 1px solid var(--border);">
+<div class="chip">DOC ${doc}</div>
+<div class="chip">Tray Feeding</div>
+</div>
+`;
 
 if (tankEntries.length === 0) {
 container.innerHTML = contextHTML + `
@@ -1979,6 +2012,88 @@ registerHTML += `</div>`;
 
 registerHTML += `</div>`;
 container.innerHTML = contextHTML + registerHTML;
+}
+
+renderBlindFeedLogEntries(tankId, tankEntries, blindDuration) {
+// Render blind feed log entries matching user's mockup
+const tank = this.getTankById(tankId);
+const doc = this.getDaysOld(tank.stockingDate);
+const feedsCount = this.state.settings.feedsPerDay || 4;
+
+if (tankEntries.length === 0) {
+return `
+<div class="blind-feed-log-entries">
+<div class="empty-state" style="padding: 40px 20px; background: #fff; border: 1px solid var(--border); border-radius: 12px; text-align: center;">
+<i class="fas fa-clipboard-list" style="font-size: 32px; opacity: 0.3; margin-bottom: 12px;"></i>
+<p style="color: var(--gray);">No feed logs for this period.</p>
+</div>
+</div>
+`;
+}
+
+// Group entries by date
+const entriesByDate = {};
+tankEntries.forEach(e => { 
+if (!entriesByDate[e.date]) entriesByDate[e.date] = []; 
+entriesByDate[e.date].push(e); 
+});
+
+const sortedDates = Object.keys(entriesByDate).sort().reverse();
+
+let logEntriesHTML = `<div class="blind-feed-log-entries">`;
+
+sortedDates.forEach(date => {
+const dateObj = new Date(date);
+const month = dateObj.toLocaleDateString('en-US', { month: 'short' });
+const day = dateObj.getDate();
+
+const entries = entriesByDate[date].sort((a, b) => a.id - b.id);
+
+// Build feed slots HTML
+let slotsHTML = '';
+for (let i = 0; i < feedsCount; i++) {
+const entry = entries[i];
+if (entry) {
+let statusClass = 'status-done';
+let statusText = 'fed';
+if (entry.trayResult === 'skipped') {
+statusClass = 'status-skipped';
+statusText = 'skipped';
+} else if (entry.trayResult === 'blind-fed') {
+statusClass = 'status-done';
+statusText = 'fed';
+}
+slotsHTML += `
+<div class="blind-feed-slot ${statusClass}" onclick="app.editFeedEntry(${entry.id})" style="cursor: pointer;">
+<div class="slot-amount">${entry.amount} kg</div>
+<div class="slot-status">${statusText}</div>
+</div>
+`;
+} else {
+slotsHTML += `
+<div class="blind-feed-slot status-pending">
+<div class="slot-amount">-</div>
+<div class="slot-status">pending</div>
+</div>
+`;
+}
+}
+
+logEntriesHTML += `
+<div class="blind-feed-log-entry">
+<div class="blind-feed-date-badge">
+<div class="blind-feed-date-day">${month}</div>
+<div class="blind-feed-date-number">${day}</div>
+</div>
+<div class="blind-feed-slots">
+${slotsHTML}
+</div>
+</div>
+`;
+});
+
+logEntriesHTML += `</div>`;
+return logEntriesHTML;
 }
 
 /*
@@ -4453,6 +4568,70 @@ try {
 } catch (e) {
     console.error('Failed to quick log feed:', e);
     this.showToast('Failed to save feed log', 'error');
+}
+})();
+}
+
+quickLogBlindFeed(tankId, amount, feedIndex) {
+// Quick log for blind feed mode - similar to quickLogFeed but simpler
+(async () => {
+const tank = this.getTankById(tankId);
+if (!tank) return;
+
+const doc = this.getDaysOld(tank.stockingDate);
+const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
+
+// Check inventory
+const currentStock = this.state.inventory.totalKg || 0;
+if (amount > currentStock) {
+this.showToast(`⚠ Low Inventory: You have ${currentStock.toFixed(1)}kg in stock, feeding ${amount.toFixed(1)}kg.`, 'warning', 4000);
+}
+
+const feedRoundNumber = feedIndex + 1;
+const todayEntries = this.state.feedEntries.filter(e => e.tankId === tankId && e.date === this.currentDate);
+const isExtraFeed = todayEntries.length >= (tank.blindSchedule ? tank.blindSchedule.find(s => s.doc === (doc === 0 ? 1 : doc))?.feeds?.length || 4 : 4);
+
+const newEntry = {
+id: Date.now(),
+tankId,
+date: this.currentDate,
+time: new Date().toLocaleTimeString(),
+amount,
+trayResult: 'blind-fed',
+supplements: [],
+feed_round_number: feedRoundNumber,
+feeding_mode: 'BLIND',
+is_extra_feed: isExtraFeed
+};
+
+this.state.feedEntries.push(newEntry);
+
+// Validate inventory won't go negative before deducting
+const currentInventory = this.state.inventory.totalKg || 0;
+const newInventoryTotal = currentInventory - amount;
+if (newInventoryTotal < 0) {
+this.state.feedEntries.pop();
+this.showToast(`Cannot feed ${amount}kg. Insufficient inventory. Current: ${currentInventory.toFixed(1)}kg`, 'error');
+return;
+}
+
+this.state.inventory.totalKg = newInventoryTotal;
+
+try {
+await this.saveFeedEntries();
+await this.saveInventory();
+this.recalculateTankBiomass(tankId, true);
+this.updateTankLifecycleState(tankId);
+this.renderAll();
+
+if (isExtraFeed) {
+this.showToast(`⚠️ Extra feed logged: ${amount}kg to ${this.sanitizeHTML(tank.name)}. This may impact FCR.`, 'warning');
+} else {
+this.showToast(`✓ Feed ${feedRoundNumber} logged: ${amount}kg to ${this.sanitizeHTML(tank.name)}`);
+}
+} catch (e) {
+console.error('Failed to quick log blind feed:', e);
+this.showToast('Failed to save feed log', 'error');
 }
 })();
 }
@@ -7186,6 +7365,413 @@ dailyWaste[entry.date].waste++;
 });
 return dailyWaste;
 }
+
+// ===== TRAY FEED LOG BOOK HELPERS =====
+
+adjustTrayFeed(delta) {
+const amountEl = document.getElementById('trayFeedAmount');
+if (!amountEl) return;
+let current = parseFloat(amountEl.textContent) || 0;
+current = Math.max(0, +(current + delta).toFixed(1));
+amountEl.textContent = current + ' kg';
+}
+
+logTrayFeed(tankId, roundNumber) {
+const amountEl = document.getElementById('trayFeedAmount');
+if (!amountEl) {
+this.showToast('Error: Feed amount not found', 'error');
+return;
+}
+
+const amount = parseFloat(amountEl.textContent) || 0;
+
+if (amount <= 0) {
+this.showToast('Please enter a valid feed amount', 'error');
+return;
+}
+
+const now = new Date();
+const entry = {
+id: Date.now(),
+tankId: tankId,
+date: this.getFormattedDate(now),
+time: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+amount: amount,
+trayResult: 'pending',
+trayResults: [],
+supplements: [],
+feeding_mode: 'TRAY',
+feed_round_number: roundNumber
+};
+
+this.state.feedEntries.push(entry);
+this.saveFeedEntries();
+
+// Update UI elements if they exist
+const logBtn = document.getElementById('logTrayFeedBtn');
+const statusEl = document.getElementById('feedLoggedStatus');
+
+if (logBtn) logBtn.style.display = 'none';
+if (statusEl) statusEl.style.display = 'block';
+
+document.querySelectorAll('.btn-stepper').forEach(btn => btn.disabled = true);
+
+this.showToast('Feed logged successfully', 'success');
+
+// Refresh the view after a short delay
+setTimeout(() => {
+const tank = this.getTankById(tankId);
+if (tank) {
+const planContainer = document.getElementById('logFeedPlanContainer');
+if (planContainer) {
+const doc = this.getDaysOld(tank.stockingDate);
+planContainer.innerHTML = this.renderTrayFeedLogBookSimple(tankId, tank, doc);
+}
+}
+}, 500);
+}
+
+switchHistoryTab(tab, clickedEl) {
+// Reset all tabs
+document.querySelectorAll('.history-tab').forEach(t => {
+t.classList.remove('active');
+t.style.background = '#f3f4f6';
+t.style.color = '#6b7280';
+});
+
+// Style the clicked tab or find by text content
+const tabEl = clickedEl || Array.from(document.querySelectorAll('.history-tab')).find(t => 
+t.textContent.toLowerCase().includes(tab === '7days' ? '7' : tab)
+);
+if (tabEl) {
+tabEl.classList.add('active');
+tabEl.style.background = '#3b4cff';
+tabEl.style.color = '#fff';
+}
+
+// Hide all content
+document.querySelectorAll('.history-content').forEach(c => c.style.display = 'none');
+
+// Show selected content
+const contentId = tab === 'today' ? 'historyToday' : 
+tab === 'yesterday' ? 'historyYesterday' : 'historyLast7Days';
+const content = document.getElementById(contentId);
+if (content) content.style.display = 'block';
+}
+
+toggleHistoryDetails(entryId) {
+const details = document.getElementById('historyDetails' + entryId);
+if (!details) return;
+
+const isVisible = details.style.display !== 'none';
+details.style.display = isVisible ? 'none' : 'block';
+
+const row = details.parentElement;
+const chevron = row.querySelector('.fa-chevron-down');
+if (chevron) {
+chevron.style.transform = isVisible ? 'rotate(0deg)' : 'rotate(180deg)';
+chevron.style.transition = 'transform 0.2s';
+}
+}
+
+// ===== SIMPLIFIED TRAY FEED LOG BOOK (Matching User Design) =====
+
+renderTrayFeedLogBookSimple(tankId, tank, doc) {
+const todayEntries = this.state.feedEntries.filter(e => 
+e.tankId === tankId && e.date === this.currentDate
+).sort((a, b) => a.id - b.id);
+
+const totalRounds = this.state.settings.feedsPerDay || 4;
+const currentRound = todayEntries.length + 1;
+const lastTodayEntry = todayEntries[todayEntries.length - 1];
+
+// Get the LAST entry from ANY day for this tank (for calculating suggestion)
+const allEntries = this.state.feedEntries.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
+const lastEntryEver = allEntries[0];
+
+// For UI locking, only check today's last entry
+const hasTrayStatus = lastTodayEntry && (
+(lastTodayEntry.trayResults && lastTodayEntry.trayResults.length > 0) ||
+lastTodayEntry.trayResult !== 'pending'
+);
+const canShowNextFeed = !lastTodayEntry || hasTrayStatus;
+const isLocked = lastTodayEntry && !hasTrayStatus && currentRound <= totalRounds;
+
+// Calculate suggested feed based on LAST tray results (from any day)
+let suggestedAmount = 2.0;
+let reasonText = 'Starting amount';
+
+// Use the most recent entry with tray results for calculation
+const entryForSuggestion = lastEntryEver;
+
+if (entryForSuggestion) {
+const lastAmount = entryForSuggestion.amount;
+const trayResults = entryForSuggestion.trayResults || [];
+const trayStatus = entryForSuggestion.trayResult;
+
+// Check if this entry has valid tray results
+const hasValidTrayResult = (trayResults.length > 0) || 
+(trayStatus && trayStatus !== 'pending' && trayStatus !== 'blind-fed');
+
+if (trayResults.length > 0) {
+// Count tray results
+const tooMuchCount = trayResults.filter(r => r === 'too-much').length;
+const halfCount = trayResults.filter(r => r === 'half').length;
+const emptyCount = trayResults.filter(r => r === 'empty').length;
+const littleCount = trayResults.filter(r => r === 'little').length;
+const totalTrays = trayResults.length;
+
+if (tooMuchCount > 0) {
+suggestedAmount = +(lastAmount * 0.8).toFixed(1);
+reasonText = '⬇ Reduced 20% – leftover feed detected';
+} else if (halfCount > 0) {
+suggestedAmount = +(lastAmount * 0.9).toFixed(1);
+reasonText = '⬇ Reduced 10% – half feed left';
+} else if (emptyCount === totalTrays) {
+suggestedAmount = +(lastAmount * 1.1).toFixed(1);
+reasonText = '⬆ Increased 10% – all trays empty';
+} else if (emptyCount > 0 && littleCount > 0) {
+suggestedAmount = lastAmount;
+reasonText = '➡ Same – mixed empty/little results';
+} else {
+suggestedAmount = lastAmount;
+reasonText = '➡ Same as previous feed';
+}
+} else if (trayStatus === 'too-much') {
+suggestedAmount = +(lastAmount * 0.8).toFixed(1);
+reasonText = '⬇ Reduced 20% – leftover feed';
+} else if (trayStatus === 'half') {
+suggestedAmount = +(lastAmount * 0.9).toFixed(1);
+reasonText = '⬇ Reduced 10% – half feed left';
+} else if (trayStatus === 'little') {
+suggestedAmount = lastAmount;
+reasonText = '➡ Same – little left is OK';
+} else if (trayStatus === 'empty') {
+suggestedAmount = +(lastAmount * 1.1).toFixed(1);
+reasonText = '⬆ Increased 10% – all eaten';
+} else {
+// No tray result yet or pending - use same amount
+suggestedAmount = lastAmount;
+reasonText = '➡ Continue with previous amount';
+}
+}
+
+// Get suggested time for next feed
+const feedTimes = this.state.settings.feedTimes || [6, 10, 14, 18];
+const nextFeedHour = feedTimes[currentRound - 1] || 12;
+const nextTime = new Date();
+nextTime.setHours(nextFeedHour, 0, 0);
+const timeStr = nextTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+let html = '';
+
+// LAST FEED ROUND CARD - show today's last entry
+if (lastTodayEntry) {
+html += this.renderLastFeedRoundCardSimple(lastTodayEntry, todayEntries.length);
+}
+
+// NEXT FEED SUGGESTION CARD
+if (currentRound <= totalRounds) {
+if (canShowNextFeed) {
+html += this.renderNextFeedCardSimple(tankId, currentRound, suggestedAmount, reasonText, timeStr);
+} else {
+html += this.renderTrayCheckRequiredCardSimple(tankId, lastTodayEntry);
+}
+} else {
+html += this.renderAllRoundsCompletedCardSimple(totalRounds);
+}
+
+// FEED HISTORY
+html += this.renderFeedHistorySimple(tankId);
+
+return html;
+}
+
+renderLastFeedRoundCardSimple(entry, roundNumber) {
+// Format time
+const timeStr = entry.time || '--:--';
+
+// Build supplements text
+let supplementsText = 'None';
+if (entry.supplements && entry.supplements.length > 0) {
+supplementsText = entry.supplements.join(' · ');
+}
+
+// Build tray chips
+let trayChipsHTML = '';
+if (entry.trayResults && entry.trayResults.length > 0) {
+entry.trayResults.forEach((status, i) => {
+let chipClass = 'ok';
+let chipText = `✓`;
+if (status === 'half') { chipClass = 'half'; chipText = '◔'; }
+else if (status === 'too-much') { chipClass = 'left'; chipText = '✕'; }
+else if (status === 'little') { chipClass = 'half'; chipText = '●'; }
+
+trayChipsHTML += `<div class="tray-chip ${chipClass}">Tray ${i + 1} ${chipText}</div>`;
+});
+} else if (entry.trayResult && entry.trayResult !== 'pending') {
+let chipClass = 'ok';
+let chipText = '✓';
+if (entry.trayResult === 'half') { chipClass = 'half'; chipText = '◔'; }
+else if (entry.trayResult === 'too-much') { chipClass = 'left'; chipText = '✕'; }
+else if (entry.trayResult === 'little') { chipClass = 'half'; chipText = '●'; }
+trayChipsHTML = `<div class="tray-chip ${chipClass}">Tray ${chipText}</div>`;
+}
+
+return `
+<div class="feed-card">
+<h3 class="card-title">Last Feed Round</h3>
+<div class="feed-row">
+<span>⏰ ${timeStr}</span>
+<strong>${entry.amount} kg</strong>
+</div>
+<div class="muted">Supplements: ${supplementsText}</div>
+<div class="tray-chips">
+${trayChipsHTML}
+</div>
+</div>
+`;
+}
+
+renderNextFeedCardSimple(tankId, roundNumber, suggestedAmount, reasonText, timeStr) {
+return `
+<div class="feed-card">
+<h3 class="card-title">Next Feed (Round ${roundNumber})</h3>
+<div class="muted">Suggested Time: ${timeStr}</div>
+<div class="feed-control">
+<button class="btn-stepper" onclick="app.adjustTrayFeed(-0.1)">−</button>
+<div class="feed-value" id="trayFeedAmount">${suggestedAmount.toFixed(1)} kg</div>
+<button class="btn-stepper" onclick="app.adjustTrayFeed(0.1)">+</button>
+</div>
+<div class="muted" id="reasonText">${reasonText}</div>
+<button class="btn-primary-feed" id="logTrayFeedBtn" onclick="app.logTrayFeed('${this.escapeAttribute(String(tankId))}', ${roundNumber})">
+Log Feed
+</button>
+<div class="status-text" id="feedLoggedStatus" style="display: none;">
+✔ Feed logged. Waiting for tray check
+</div>
+</div>
+`;
+}
+
+renderTrayCheckRequiredCardSimple(tankId, lastEntry) {
+return `
+<div class="feed-card locked">
+<h3 class="card-title">Next Feed Locked 🔒</h3>
+<div class="locked-message">
+<i class="fas fa-lock" style="font-size: 32px; color: #f59e0b; margin-bottom: 12px;"></i>
+<p>Update tray status for the last feed before proceeding.</p>
+<button class="btn-warning-feed" onclick="app.openTrayCheckPopup('${this.escapeAttribute(String(tankId))}', ${lastEntry.id})">
+Update Tray Status
+</button>
+</div>
+</div>
+`;
+}
+
+renderAllRoundsCompletedCardSimple(totalRounds) {
+return `
+<div class="feed-card completed">
+<h3 class="card-title">All Rounds Completed ✓</h3>
+<div class="completed-message">
+<i class="fas fa-check-circle" style="font-size: 32px; color: var(--success); margin-bottom: 12px;"></i>
+<p>You have completed all ${totalRounds} feeding rounds for today.</p>
+</div>
+</div>
+`;
+}
+
+renderFeedHistorySimple(tankId) {
+// Get entries for different time periods
+const today = this.currentDate;
+const yesterday = this.getFormattedDate(new Date(Date.now() - 86400000));
+
+const todayEntries = this.state.feedEntries.filter(e => 
+e.tankId === tankId && e.date === today
+).sort((a, b) => b.id - a.id);
+
+const yesterdayEntries = this.state.feedEntries.filter(e => 
+e.tankId === tankId && e.date === yesterday
+).sort((a, b) => b.id - a.id);
+
+const last7DaysEntries = this.state.feedEntries.filter(e => {
+if (e.tankId !== tankId) return false;
+const entryDate = new Date(e.date);
+const sevenDaysAgo = new Date();
+sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+return entryDate >= sevenDaysAgo;
+}).sort((a, b) => b.id - a.id);
+
+// Build history rows for today (default view)
+let todayRowsHTML = '';
+if (todayEntries.length === 0) {
+todayRowsHTML = '<div class="history-empty">No feeds logged today</div>';
+} else {
+todayEntries.forEach(entry => {
+todayRowsHTML += `
+<div class="history-row">
+<span>${entry.time || '--:--'}</span>
+<span>${entry.amount} kg</span>
+<span class="muted">${entry.feeding_mode === 'TRAY' ? 'Tray' : 'Blind'}</span>
+</div>
+`;
+});
+}
+
+// Build yesterday rows
+let yesterdayRowsHTML = '';
+if (yesterdayEntries.length === 0) {
+yesterdayRowsHTML = '<div class="history-empty">No feeds yesterday</div>';
+} else {
+yesterdayEntries.forEach(entry => {
+yesterdayRowsHTML += `
+<div class="history-row">
+<span>${entry.time || '--:--'}</span>
+<span>${entry.amount} kg</span>
+<span class="muted">${entry.feeding_mode === 'TRAY' ? 'Tray' : 'Blind'}</span>
+</div>
+`;
+});
+}
+
+// Build last 7 days rows
+let last7RowsHTML = '';
+if (last7DaysEntries.length === 0) {
+last7RowsHTML = '<div class="history-empty">No feeds in last 7 days</div>';
+} else {
+last7DaysEntries.slice(0, 20).forEach(entry => {
+const dateDisplay = new Date(entry.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+last7RowsHTML += `
+<div class="history-row">
+<span>${dateDisplay} ${entry.time || '--:--'}</span>
+<span>${entry.amount} kg</span>
+<span class="muted">${entry.feeding_mode === 'TRAY' ? 'Tray' : 'Blind'}</span>
+</div>
+`;
+});
+}
+
+return `
+<div class="feed-card">
+<h3 class="card-title">Feed History</h3>
+<div class="history-tabs">
+<div class="history-tab active" onclick="app.switchHistoryTab('today', this)">Today</div>
+<div class="history-tab" onclick="app.switchHistoryTab('yesterday', this)">Yesterday</div>
+<div class="history-tab" onclick="app.switchHistoryTab('7days', this)">Last 7 Days</div>
+</div>
+<div class="history-content" id="historyToday" style="display: block;">
+${todayRowsHTML}
+</div>
+<div class="history-content" id="historyYesterday" style="display: none;">
+${yesterdayRowsHTML}
+</div>
+<div class="history-content" id="historyLast7Days" style="display: none;">
+${last7RowsHTML}
+</div>
+</div>
+`;
+}
+
 }
 
 document.addEventListener('DOMContentLoaded', () => {
