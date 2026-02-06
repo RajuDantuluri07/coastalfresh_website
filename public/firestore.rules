@@ -1,0 +1,33 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can read and write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+
+    // Farms - single owner only
+    match /farms/{farmId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.ownerUid;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.ownerUid;
+    }
+
+    // Feed logs - owner-based access
+    match /feedLogs/{logId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.createdBy;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.createdBy;
+    }
+
+    // Farm daily summaries - authenticated users only
+    match /farmDaily/{farmId_date} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Legacy collections - restricted to owner for migration
+    match /{collection}/{docId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.createdBy;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.createdBy;
+    }
+  }
+}

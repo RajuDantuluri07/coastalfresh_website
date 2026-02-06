@@ -1,7 +1,18 @@
-// ===== CENTRAL APP STATE (Prepared for future use) =====
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCCeLy8PNUK480m_o-GpRWbdRB59R3UTqw",
+  authDomain: "coastal-fresh---sea-foods.firebaseapp.com",
+  projectId: "coastal-fresh---sea-foods",
+  storageBucket: "coastal-fresh---sea-foods.firebasestorage.app",
+  messagingSenderId: "782759620106",
+  appId: "1:782759620106:web:960ec7c125faa30675f9f3",
+  measurementId: "G-468VYWGBHM"
+};
+
+// ===== COST-LOCKED V1 STATE =====
 const appState = {
-  currentFarmId: null,
-  currentTankId: null,
+  farmId: null, // Single farm per user
+  tankId: null, // Current tank
   feedingMode: 'BLIND', // BLIND | TRAY
   todayFeedLogs: []
 };
@@ -9,9 +20,9 @@ const appState = {
 class AquaRythu {
 constructor() {
 this.state = {
-farms: [],
+farm: null, // Single farm object
 tanks: [],
-feedEntries: [],
+feedLogs: [], // Renamed from feedEntries
 harvests: [],
 waterQuality: [],
 applications: [],
@@ -20,12 +31,12 @@ inventory: { totalKg: 0 },
             diseases: [],
 medicineInventory: [],
             settings: {
-currentFarmId: null,
+farmId: null, // Single farm
 feedsPerDay: 4,
 feedPrice: 90,
 marketPrice: 350,
 feedJumpThreshold: 30,
-analyticsEnabled: true,
+analyticsEnabled: false, // Disabled for cost lock
             feedTimes: [6, 10, 14, 18], // Default feed times
             trayCheckPercentages: { range1: 0.3, range2: 0.6, range3: 1.0 }, // 3g to 10g per kg
             farmType: 'semi',          // extensive | semi | intensive
@@ -56,6 +67,8 @@ this.chartDateRange = 30;
 this.isSaving = false;
 this.saveQueue = [];
 this.dynamicModals = [];
+this.db = null;
+// Removed multi-farm listeners for cost lock
 
 if (document.readyState === 'loading') {
 document.addEventListener('DOMContentLoaded', () => this.init());
@@ -464,82 +477,163 @@ this.analyticsEvents = [];
 }
 
 loadAllData() {
-const safeParse = (key, fallback) => {
-try {
-const data = localStorage.getItem(key);
-const parsed = data ? JSON.parse(data) : fallback;
-return parsed !== null ? parsed : fallback;
-} catch (e) {
-console.error(`Error parsing ${key}:`, e);
-return fallback;
-}
-};
+  if (!this.db || !this.userId) return;
 
-const safeArray = (data) => Array.isArray(data) ? data.filter(item => item !== null && item !== undefined) : [];
+  this.showLoading(true);
 
-this.state.users = safeArray(safeParse('aquabook_users', []));
-this.state.farms = safeArray(safeParse('aquabook_farms', []));
-this.state.tanks = safeArray(safeParse('aquabook_tanks', []));
-this.state.feedEntries = safeArray(safeParse('aquabook_entries', []));
-this.state.harvests = safeArray(safeParse('aquabook_harvests', []));
-this.state.waterQuality = safeArray(safeParse('aquabook_water_quality', []));
-this.state.applications = safeArray(safeParse('aquabook_applications', []));
-this.state.inventory = safeParse('aquabook_inventory', { totalKg: 0 });
-this.state.medicineInventory = safeArray(safeParse('aquabook_medicine', []));
-this.state.diseases = safeArray(safeParse('aquabook_diseases', []));
+  // COST-LOCKED V1: Summary-first loading strategy
+  
+  // 1. Load user settings
+  if (this.unsubscribeSettings) this.unsubscribeSettings();
+  this.unsubscribeSettings = this.db.collection('users').doc(this.userId)
+    .onSnapshot(doc => {
+      if (doc.exists && doc.data().settings) {
+        this.state.settings = { ...this.state.settings, ...doc.data().settings };
+        this.renderAll();
+      }
+    });
 
-const savedSettings = safeParse('aquabook_settings', null);
-if (savedSettings && typeof savedSettings === 'object') {
-this.state.settings = { ...this.state.settings, ...savedSettings };
-if (!this.state.settings.supplements || !Array.isArray(this.state.settings.supplements)) {
-this.state.settings.supplements = ['Probiotic', 'Mineral Mix', 'Vitamin C'];
-}
-if (!this.state.settings.feedsPerDay) {
-this.state.settings.feedsPerDay = 4;
-}
-if (!this.state.settings.blindFeedingDuration) this.state.settings.blindFeedingDuration = 30;
-if (!this.state.settings.feedPrice) {
-this.state.settings.feedPrice = 90;
-}
-if (!this.state.settings.marketPrice) {
-this.state.settings.marketPrice = 350;
-}
-if (!this.state.settings.feedJumpThreshold) {
-this.state.settings.feedJumpThreshold = 30;
-}
-if (!this.state.settings.trayCheckPercentages) {
-this.state.settings.trayCheckPercentages = { range1: 0.3, range2: 0.6, range3: 1.0 };
-}
-if (!this.state.settings.feedTimes || this.state.settings.feedTimes.length === 0) {
-// Migration: Create default times based on old firstFeedTime or default
-const start = this.state.settings.firstFeedTime || 6;
-const count = this.state.settings.feedsPerDay || 4;
-const interval = 16 / Math.max(1, count);
-this.state.settings.feedTimes = Array.from({length: count}, (_, i) => Math.floor(start + (i * interval)));
-}
-} else {
-this.saveSettings();
+  // 2. Load single farm (owner-based)
+  if (this.unsubscribeFarm) this.unsubscribeFarm();
+  this.unsubscribeFarm = this.db.collection('farms')
+    .where('ownerUid', '==', this.userId)
+    .limit(1) // Only one farm per user in V1
+    .onSnapshot(snapshot => {
+      const farms = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      if (farms.length > 0) {
+        this.state.farm = farms[0];
+        this.state.settings.farmId = farms[0].id;
+        this.loadFarmSummary(farms[0].id);
+      } else {
+        // No farm found - clear state
+        this.state.farm = null;
+        this.state.tanks = [];
+        this.state.feedLogs = [];
+        this.state.feedEntries = []; // Legacy compatibility
+        this.state.harvests = [];
+        this.state.waterQuality = [];
+        this.state.applications = [];
+        this.state.diseases = [];
+        this.renderAll();
+        this.showLoading(false);
+        this.checkFirstTimeUser();
+      }
+    }, error => {
+      console.error("Error loading farm:", error);
+      this.showToast('Error syncing data', 'error');
+      this.showLoading(false);
+    });
 }
 
-// Load backup date separately if not in settings object (migration)
-if (!this.state.settings.lastBackupDate) {
-this.state.settings.lastBackupDate = safeParse('aquabook_last_backup', null);
+// COST-LOCKED V1: Load farm daily summary instead of full history
+loadFarmSummary(farmId) {
+  if (!farmId) return;
+  
+  // Load today's farm daily summary (1 read)
+  const today = new Date().toISOString().split('T')[0];
+  const farmDailyId = `${farmId}_${today.replace(/-/g, '_')}`;
+  
+  this.db.collection('farmDaily').doc(farmDailyId)
+    .onSnapshot(doc => {
+      if (doc.exists) {
+        const data = doc.data();
+        // Use summary for UI instead of loading all feed logs
+        this.state.todaySummary = data;
+        this.renderSummaryScreen();
+      }
+      this.showLoading(false);
+    });
+  
+  // Load tanks for the farm (minimal data)
+  this.loadTanksForFarm(farmId);
 }
 
-// LIFECYCLE MIGRATION: Initialize lifecycle states for existing tanks
-this.state.tanks.forEach(tank => {
-if (!tank.lifecycleState) {
-tank.lifecycleState = this.calculateLifecycleState(tank);
-tank.lifecycleStateUpdatedAt = new Date().toISOString();
+// COST-LOCKED V1: Render summary screen instead of full history
+renderSummaryScreen() {
+  if (!this.state.todaySummary) {
+    // Fallback to tank-based rendering if no summary available
+    this.renderLogBook();
+    return;
+  }
+
+  const summary = this.state.todaySummary;
+  const farmTanks = this.state.tanks || [];
+  
+  // Update UI with summary data
+  const totalFeedEl = document.getElementById('totalFeedToday');
+  const roundsDoneEl = document.getElementById('roundsCompletedToday');
+  const lastFeedEl = document.getElementById('lastFeedAmount');
+  
+  if (totalFeedEl) totalFeedEl.textContent = `${summary.totalFeedKg?.toFixed(1) || 0} kg`;
+  if (roundsDoneEl) roundsDoneEl.textContent = summary.roundsDone || 0;
+  if (lastFeedEl) lastFeedEl.textContent = `${summary.lastFeedKg?.toFixed(1) || 0} kg`;
+  
+  // Render tank list with minimal data
+  this.renderTankList(farmTanks);
 }
-});
+
+renderTankList(tanks) {
+  const container = document.getElementById('tankList');
+  if (!container) return;
+  
+  if (tanks.length === 0) {
+    container.innerHTML = '<div class="empty-state">No tanks found</div>';
+    return;
+  }
+  
+  container.innerHTML = tanks.map(tank => `
+    <div class="tank-card" onclick="app.openTankDetail('${tank.id}')">
+      <h4>${this.sanitizeHTML(tank.name)}</h4>
+      <div class="tank-status">${tank.status || 'Active'}</div>
+      <div class="tank-biomass">${tank.biomass?.toFixed(1) || 0} kg</div>
+    </div>
+  `).join('');
+}
+
+loadTanksForFarm(farmId) {
+  if (this.unsubscribeTanks) this.unsubscribeTanks();
+  this.unsubscribeTanks = this.db.collection('tanks')
+    .where('farmId', '==', farmId)
+    .onSnapshot(snapshot => {
+      this.state.tanks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      this.renderAll();
+    });
 }
 
 init() {
+if (typeof firebase !== 'undefined') {
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  this.db = firebase.firestore();
+  this.db.enablePersistence().catch(err => {
+    if (err.code == 'failed-precondition') {
+      console.warn('Multiple tabs open, persistence can only be enabled in one tab at a a time.');
+    } else if (err.code == 'unimplemented') {
+      console.warn('The current browser does not support all of the features required to enable persistence');
+    }
+  });
+
+  // COST-LOCKED V1: Auth listener with simplified state
+  firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+      this.userId = user.uid;
+      this.loadAllData();
+    } else {
+      // User is signed out
+      this.userId = null;
+      this.state.farm = null;
+      this.state.tanks = [];
+      this.state.feedLogs = [];
+      this.state.feedEntries = [];
+      this.renderAll();
+      this.showLoading(false);
+    }
+  });
+}
 try {
 this.showLoading(true);
-this.loadAllData();
-this.updateAllLifecycleStates();
 this.setupUI();
 this.checkFirstTimeUser();
 this.renderAll();
@@ -576,9 +670,10 @@ this.showToast("Something went wrong. Please refresh.", "error");
 saveAllData() {
 return this.enqueueSave(() => {
 try {
-localStorage.setItem('aquabook_farms', JSON.stringify(this.state.farms));
+localStorage.setItem('aquabook_farm', JSON.stringify(this.state.farm));
 localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
-localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
+localStorage.setItem('aquabook_feedLogs', JSON.stringify(this.state.feedLogs));
+localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries)); // Legacy compatibility
 localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
 localStorage.setItem('aquabook_water_quality', JSON.stringify(this.state.waterQuality));
 localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
@@ -623,182 +718,216 @@ this.isSaving = false;
 }
 }
 
-saveFarms() { 
-  return this.enqueueSave(() => {
+async saveFarm() { 
+  return this.enqueueSave(async () => {
     try {
-      localStorage.setItem('aquabook_farms', JSON.stringify(this.state.farms));
-    } catch (e) {
-      console.error('Failed to save farms:', e);
-      if (e.name === 'QuotaExceededError') {
-        this.showToast('Storage full! Please export and clear old data.', 'error');
-      } else if (e instanceof TypeError) {
-        this.showToast('Failed to save farms: Data format error.', 'error');
+      if (this.db && this.userId && this.state.farm) {
+        await this.db.collection('farms').doc(this.state.farm.id).set(this.state.farm, { merge: true });
       } else {
-        this.showToast('Failed to save farms. Check browser storage settings.', 'error');
+        localStorage.setItem('aquabook_farm', JSON.stringify(this.state.farm));
       }
+    } catch (e) {
+      console.error('Failed to save farm:', e);
+      this.showToast('Failed to save farm.', 'error');
       throw e;
     }
   });
 }
 
-saveTanks() { 
-  return this.enqueueSave(() => {
+async saveTank(tank) {
+  if (!tank || !tank.id) return;
+  // The .set() method with { merge: true } will create or update the document.
+  return this.db.collection('tanks').doc(tank.id).set(tank, { merge: true });
+}
+
+async saveTanks() { // This function can now be used to save all tanks in a batch
+  return this.enqueueSave(async () => {
     try {
-      localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
+      if (this.db && this.userId) {
+        const batch = this.db.batch();
+        this.state.tanks.forEach(tank => {
+            if (tank.id) {
+                const ref = this.db.collection('tanks').doc(tank.id);
+                batch.set(ref, tank, { merge: true });
+            }
+        });
+        await batch.commit();
+      } else {
+        localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
+      }
     } catch (e) {
       console.error('Failed to save tanks:', e);
-      if (e.name === 'QuotaExceededError') {
-        this.showToast('Storage full! Please export and clear old data.', 'error');
-      } else if (e instanceof TypeError) {
-        this.showToast('Failed to save tanks: Data format error.', 'error');
-      } else {
-        this.showToast('Failed to save tanks. Check browser storage settings.', 'error');
-      }
+      this.showToast('Failed to save tanks.', 'error');
       throw e;
     }
   });
 }
 
-saveFeedEntries() { 
-  return this.enqueueSave(() => {
+async saveFeedEntry(entry) {
+  return this.enqueueSave(async () => {
     try {
-      localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
+      if (this.db && this.userId) {
+        if (entry && entry.id) {
+          if (!entry.farmId) {
+             const tank = this.getTankById(entry.tankId);
+             entry.farmId = tank ? tank.farmId : this.state.settings.currentFarmId;
+          }
+          await this.db.collection('feedEntries').doc(String(entry.id)).set(entry, { merge: true });
+        }
+      } else {
+        localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
+      }
     } catch (e) {
       console.error('Failed to save feed entries:', e);
-      if (e.name === 'QuotaExceededError') {
-        this.showToast('Storage full! Please export and clear old data.', 'error');
-      } else if (e instanceof TypeError) {
-        this.showToast('Failed to save feed entries: Data format error.', 'error');
-      } else {
-        this.showToast('Failed to save feed entries. Check browser storage settings.', 'error');
-      }
+      this.showToast('Failed to save feed entry.', 'error');
       throw e;
     }
   });
 }
 
-saveHarvests() { 
-  return this.enqueueSave(() => {
+async saveHarvest(harvest) { 
+  return this.enqueueSave(async () => {
     try {
-      localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
+      if (this.db && this.userId) {
+        if (harvest && harvest.id) {
+           if (!harvest.farmId) {
+             const tank = this.getTankById(harvest.tankId);
+             harvest.farmId = tank ? tank.farmId : this.state.settings.currentFarmId;
+           }
+           await this.db.collection('harvests').doc(String(harvest.id)).set(harvest, { merge: true });
+        }
+      } else {
+        localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
+      }
     } catch (e) {
-      console.error('Failed to save harvests:', e);
-      if (e.name === 'QuotaExceededError') {
-        this.showToast('Storage full! Please export and clear old data.', 'error');
-      } else if (e instanceof TypeError) {
-        this.showToast('Failed to save harvests: Data format error.', 'error');
-      } else {
-        this.showToast('Failed to save harvests. Check browser storage settings.', 'error');
-      }
+      console.error('Failed to save harvest:', e);
+      this.showToast('Failed to save harvest.', 'error');
       throw e;
     }
   });
 }
 
-saveWaterQualityData() { 
-  return this.enqueueSave(() => {
+async saveWaterQualityData(entry) { 
+  return this.enqueueSave(async () => {
     try {
-      localStorage.setItem('aquabook_water_quality', JSON.stringify(this.state.waterQuality));
+      if (this.db && this.userId) {
+        if (entry && entry.id) {
+           if (!entry.farmId) {
+             const tank = this.getTankById(entry.tankId);
+             entry.farmId = tank ? tank.farmId : this.state.settings.currentFarmId;
+           }
+           await this.db.collection('waterQuality').doc(String(entry.id)).set(entry, { merge: true });
+        }
+      } else {
+        localStorage.setItem('aquabook_water_quality', JSON.stringify(this.state.waterQuality));
+      }
     } catch (e) {
       console.error('Failed to save water quality data:', e);
-      if (e.name === 'QuotaExceededError') {
-        this.showToast('Storage full! Please export and clear old data.', 'error');
-      } else if (e instanceof TypeError) {
-        this.showToast('Failed to save water quality data: Data format error.', 'error');
-      } else {
-        this.showToast('Failed to save water quality data. Check browser storage settings.', 'error');
-      }
+      this.showToast('Failed to save water quality data.', 'error');
       throw e;
     }
   });
 }
 
-saveApplications() { 
-  return this.enqueueSave(() => {
+async saveApplications(entry) { 
+  return this.enqueueSave(async () => {
     try {
-      localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
+      if (this.db && this.userId) {
+        if (entry && entry.id) {
+           if (!entry.farmId) {
+             const tank = this.getTankById(entry.tankId);
+             entry.farmId = tank ? tank.farmId : this.state.settings.currentFarmId;
+           }
+           await this.db.collection('applications').doc(String(entry.id)).set(entry, { merge: true });
+        }
+      } else {
+        localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
+      }
     } catch (e) {
       console.error('Failed to save applications:', e);
-      if (e.name === 'QuotaExceededError') {
-        this.showToast('Storage full! Please export and clear old data.', 'error');
-      } else if (e instanceof TypeError) {
-        this.showToast('Failed to save applications: Data format error.', 'error');
-      } else {
-        this.showToast('Failed to save applications. Check browser storage settings.', 'error');
-      }
+      this.showToast('Failed to save application.', 'error');
       throw e;
     }
   });
 }
 
-saveInventory() { 
-  return this.enqueueSave(() => {
+async saveInventory() { 
+  return this.enqueueSave(async () => {
     try {
-      localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
+      if (this.db && this.userId) {
+        const farmId = this.state.settings.currentFarmId;
+        if (farmId) {
+            await this.db.collection('inventory').doc(farmId).set({
+                totalKg: this.state.inventory.totalKg
+            }, { merge: true });
+        }
+      } else {
+        localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
+      }
     } catch (e) {
       console.error('Failed to save inventory:', e);
-      if (e.name === 'QuotaExceededError') {
-        this.showToast('Storage full! Please export and clear old data.', 'error');
-      } else if (e instanceof TypeError) {
-        this.showToast('Failed to save inventory: Data format error.', 'error');
-      } else {
-        this.showToast('Failed to save inventory. Check browser storage settings.', 'error');
-      }
+      this.showToast('Failed to save inventory.', 'error');
       throw e;
     }
   });
 }
 
-saveMedicineInventory() { 
-  return this.enqueueSave(() => {
+async saveMedicineInventory() { 
+  return this.enqueueSave(async () => {
     try {
-      localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
+      if (this.db && this.userId) {
+        const farmId = this.state.settings.currentFarmId;
+        if (farmId) {
+            await this.db.collection('inventory').doc(farmId).set({
+                medicine: this.state.medicineInventory
+            }, { merge: true });
+        }
+      } else {
+        localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
+      }
     } catch (e) {
-
       console.error('Failed to save medicine inventory:', e);
-      if (e.name === 'QuotaExceededError') {
-        this.showToast('Storage full! Please export and clear old data.', 'error');
-      } else if (e instanceof TypeError) {
-        this.showToast('Failed to save medicine inventory: Data format error.', 'error');
-      } else {
-        this.showToast('Failed to save medicine inventory. Check browser storage settings.', 'error');
-      }
+      this.showToast('Failed to save medicine inventory.', 'error');
       throw e;
     }
   });
 }
 
-saveDiseases() {
-  return this.enqueueSave(() => {
+async saveDiseases(entry) {
+  return this.enqueueSave(async () => {
     try {
-      localStorage.setItem('aquabook_diseases', JSON.stringify(this.state.diseases || []));
+      if (this.db && this.userId) {
+        if (entry && entry.id) {
+           if (!entry.farmId) {
+             const tank = this.getTankById(entry.tankId);
+             entry.farmId = tank ? tank.farmId : this.state.settings.currentFarmId;
+           }
+           await this.db.collection('diseases').doc(String(entry.id)).set(entry, { merge: true });
+        }
+      } else {
+        localStorage.setItem('aquabook_diseases', JSON.stringify(this.state.diseases || []));
+      }
     } catch (e) {
-      console.error('Failed to save diseases:', e);
-      if (e.name === 'QuotaExceededError') {
-        this.showToast('Storage full! Please export and clear old data.', 'error');
-      } else if (e instanceof TypeError) {
-        this.showToast('Failed to save diseases: Data format error.', 'error');
-      } else {
-        this.showToast('Failed to save diseases. Check browser storage settings.', 'error');
-      }
+      console.error('Failed to save disease log:', e);
+      this.showToast('Failed to save disease log.', 'error');
       throw e;
     }
   });
 }
 
-saveSettings() { 
-  return this.enqueueSave(() => {
+async saveSettings() { 
+  return this.enqueueSave(async () => {
     try {
-      localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
+      if (this.db && this.userId) {
+        await this.db.collection('users').doc(this.userId).set({
+          settings: this.state.settings
+        }, { merge: true });
+      } else {
+        localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
+      }
     } catch (e) {
       console.error('Failed to save settings:', e);
-      if (e.name === 'QuotaExceededError') {
-        this.showToast('Storage full! Please export and clear old data.', 'error');
-      } else if (e instanceof TypeError) {
-        this.showToast('Failed to save settings: Data format error.', 'error');
-      } else {
-        this.showToast('Failed to save settings. Check browser storage settings.', 'error');
-      }
+      this.showToast('Failed to save settings.', 'error');
       throw e;
     }
   });
@@ -1016,13 +1145,13 @@ return { isEvent: false };
 }
 
 checkFirstTimeUser() {
-const hasFarms = this.state.farms.length > 0;
+const hasFarm = !!this.state.farm;
 const lock = document.getElementById('firstTimeLock');
 const navTabs = document.querySelector('.nav-tabs');
 const mainApp = document.getElementById('app');
 const stickyBtn = document.getElementById('stickyLogFeedBtn');
 
-if (!hasFarms) {
+if (!hasFarm) {
 lock.classList.remove('hidden');
 if (navTabs) navTabs.style.display = 'none';
 if (mainApp) mainApp.style.opacity = '0.5';
@@ -1104,10 +1233,10 @@ const text = document.getElementById('recommendationText');
 const action = document.getElementById('recommendationAction');
 if (!card || !text || !action) { return; }
 
-const currentFarmId = this.state.settings.currentFarmId;
-if (!currentFarmId) return;
+const farmId = this.state.settings.farmId;
+if (!farmId) return;
 
-const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId && t.status !== 'inactive');
+const tanks = this.state.tanks.filter(t => t.farmId === farmId && t.status !== 'inactive');
 if (tanks.length === 0) {
 card.style.display = 'none';
 return;
@@ -1166,11 +1295,11 @@ action.style.color = 'var(--primary-dark)';
 renderOverallStats() {
 document.querySelectorAll('.overall-stats .stat-card').forEach(el => el.classList.remove('loading'));
 
-const currentFarmId = this.state.settings.currentFarmId;
-const farmTanks = currentFarmId ? this.state.tanks.filter(t => t.farmId === currentFarmId) : [];
+const farmId = this.state.settings.farmId;
+const farmTanks = farmId ? this.state.tanks.filter(t => t.farmId === farmId) : [];
 const farmTankIds = farmTanks.map(t => t.id);
-const farmFeedEntries = currentFarmId ? this.state.feedEntries.filter(e => farmTankIds.some(id => id === e.tankId)) : [];
-const farmHarvests = currentFarmId ? this.state.harvests.filter(h => farmTankIds.includes(h.tankId)) : [];
+const farmFeedEntries = farmId ? this.state.feedEntries.filter(e => farmTankIds.some(id => id === e.tankId)) : [];
+const farmHarvests = farmId ? this.state.harvests.filter(h => farmTankIds.includes(h.tankId)) : [];
 const totalHarvested = farmHarvests.reduce((sum, h) => sum + h.weight, 0);
 
 document.getElementById('totalTanks').textContent = farmTanks.length;
@@ -1242,24 +1371,20 @@ const headerContainer = document.getElementById('farmHeaderContainer');
 container.innerHTML = '';
 if (headerContainer) headerContainer.innerHTML = '';
 
-if (this.state.farms.length === 0) {
+if (!this.state.farm) {
 container.innerHTML = `<div class="empty-state">
 <i class="fas fa-water"></i>
-<h3>No Farms Found</h3>
-<p>Add your first farm to start tracking.</p>
+<h3>No Farm Found</h3>
+<p>Create your first farm to get started</p>
+<button class="btn btn-primary" onclick="app.openFarmModal()"><i class="fas fa-plus"></i> Add Farm</button>
 </div>`;
 return;
 }
 
-const currentFarmId = this.state.settings.currentFarmId;
-let farmToRender = this.state.farms.find(f => f.id === currentFarmId);
-
-if (!farmToRender && this.state.farms.length > 0) {
-farmToRender = this.state.farms[0];
-this.state.settings.currentFarmId = farmToRender.id;
+const farmToRender = this.state.farm;
+this.state.settings.farmId = farmToRender.id;
 this.saveSettings();
 this.updateFarmSelector();
-}
 
 if (!farmToRender) return;
 
@@ -1437,8 +1562,8 @@ ${this.sanitizeHTML(tank.name)}
 renderLogBook() {
 // 1. Setup Container and Tabs
 const logScreen = document.getElementById('logScreen');
-const currentFarmId = this.state.settings.currentFarmId;
-const farmTanks = currentFarmId ? this.state.tanks.filter(t => t.farmId === currentFarmId) : [];
+const farmId = this.state.settings.farmId;
+const farmTanks = farmId ? this.state.tanks.filter(t => t.farmId === farmId) : [];
 // Handle Empty State
 const emptyState = document.getElementById('emptyLog');
 if (farmTanks.length === 0) {
@@ -2220,9 +2345,9 @@ tableBody.appendChild(row);
 } */
 
 renderPerformanceScreen() {
-const currentFarmId = this.state.settings.currentFarmId;
-if (!currentFarmId) return;
-const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
+const farmId = this.state.settings.farmId;
+if (!farmId) return;
+const farmTanks = this.state.tanks.filter(t => t.farmId === farmId);
 const farmTankIds = farmTanks.map(t => t.id);
 const farmFeedEntries = this.state.feedEntries.filter(e => farmTankIds.some(id => id === e.tankId));
 const farmHarvests = this.state.harvests.filter(h => farmTankIds.includes(h.tankId));
@@ -2371,13 +2496,11 @@ this.handlePerformanceTabOpen();
 
 updateFarmSelector() {
 const selector = document.getElementById('currentFarmName');
-if (this.state.farms.length > 0) {
-const currentFarm = this.state.settings.currentFarmId
-? this.state.farms.find(f => f.id === this.state.settings.currentFarmId) : this.state.farms[0];
-
+if (this.state.farm) {
+const currentFarm = this.state.farm;
 if (currentFarm) {
 selector.innerHTML = `${this.sanitizeHTML(currentFarm.name)}`;
-this.state.settings.currentFarmId = currentFarm.id;
+this.state.settings.farmId = currentFarm.id;
 this.saveSettings();
 }
 } else {
@@ -2390,7 +2513,7 @@ return this.state.tanks.find(t => t.id === id);
 }
 
 getFarmById(id) {
-return this.state.farms.find(f => f.id === id);
+return this.state.farm && this.state.farm.id === id ? this.state.farm : null;
 }
 
 closeAllModals() {
@@ -2437,76 +2560,79 @@ if (farmModal) farmModal.classList.add('active');
 }
 
 openFarmSelector() {
-const list = document.getElementById('farmsListModal');
-list.innerHTML = '';
-this.state.farms.forEach(farm => {
-// Calculate number of tanks/ponds and average DOC
-const farmTanks = this.state.tanks.filter(t => t.farmId === farm.id && t.status !== 'inactive');
-const pondCount = farmTanks.length;
-const avgDoc = farmTanks.length > 0 
-  ? Math.round(farmTanks.reduce((sum, t) => sum + this.getDaysOld(t.stockingDate), 0) / farmTanks.length)
-  : 0;
+  // COST-LOCKED V1: Only one farm, so show farm info instead of selector
+  if (!this.state.farm) {
+    this.openFarmModal();
+    return;
+  }
+  
+  const list = document.getElementById('farmsListModal');
+  const farm = this.state.farm;
+  const farmTanks = this.state.tanks.filter(t => t.farmId === farm.id && t.status !== 'inactive');
+  const pondCount = farmTanks.length;
+  const avgDoc = farmTanks.length > 0 
+    ? Math.round(farmTanks.reduce((sum, t) => sum + this.getDaysOld(t.stockingDate), 0) / farmTanks.length)
+    : 0;
 
-const div = document.createElement('div');
-div.className = 'feed-schedule-item';
-if (farm.id === this.state.settings.currentFarmId) div.classList.add('completed');
-div.innerHTML = `
-<div style="display: flex; flex-direction: column; gap: 4px;">
-  <div class="feed-time" style="font-weight: 600; font-size: 14px;">${this.sanitizeHTML(farm.name)}</div>
-  <div class="feed-label" style="font-size: 12px; color: var(--gray);">
-    <i class="fas fa-water"></i> ${pondCount} ${pondCount === 1 ? 'Pond' : 'Ponds'} | Avg DOC ${avgDoc}
-  </div>
-  ${farm.location ? `<div class="feed-label" style="font-size: 11px; color: var(--gray-500);">${this.sanitizeHTML(farm.location)}</div>` : ''}
-</div>
-`;
-div.onclick = () => {
-this.state.settings.currentFarmId = farm.id;
-this.saveSettings();
-this.renderAll();
-this.closeAllModals();
-};
-list.appendChild(div);
-});
-document.getElementById('farmSelectorModal').classList.add('active');
+  list.innerHTML = `
+    <div style="padding: 20px; text-align: center;">
+      <h3>${this.sanitizeHTML(farm.name)}</h3>
+      <p style="color: var(--gray); margin: 10px 0;">
+        <i class="fas fa-water"></i> ${pondCount} ${pondCount === 1 ? 'Pond' : 'Ponds'} | Avg DOC ${avgDoc}
+      </p>
+      ${farm.location ? `<p style="color: var(--gray-500); font-size: 12px;">${this.sanitizeHTML(farm.location)}</p>` : ''}
+      <button class="btn btn-secondary" onclick="app.closeAllModals()" style="margin-top: 15px;">
+        Close
+      </button>
+    </div>
+  `;
+  document.getElementById('farmSelectorModal').classList.add('active');
 }
 
 openTankModal(farmId) {
-this.editingTankId = null;
-const tankNameInput = document.getElementById('tankNameInput');
-const tankSize = document.getElementById('tankSize');
-const stockingDate = document.getElementById('stockingDate');
-const initialSeed = document.getElementById('initialSeed');
-const tankCheckTrays = document.getElementById('tankCheckTrays');
-const tankBlindDuration = document.getElementById('tankBlindDuration');
-const tankBlindWeek1 = document.getElementById('tankBlindWeek1');
-const tankBlindStd = document.getElementById('tankBlindStd');
-const titleEl = document.getElementById('tankModalTitle');
-const select = document.getElementById('tankFarmSelect');
-const btn = document.getElementById('saveTankBtn');
-const tankModal = document.getElementById('tankModal');
-if (tankNameInput) tankNameInput.value = '';
-if (tankSize) tankSize.value = '';
-if (stockingDate) stockingDate.value = '';
-if (initialSeed) initialSeed.value = '';
-if (tankCheckTrays) tankCheckTrays.value = 2;
-if (tankBlindDuration) tankBlindDuration.value = 30;
-if (tankBlindWeek1) tankBlindWeek1.value = 2;
-if (tankBlindStd) tankBlindStd.value = 4;
-if (titleEl) titleEl.innerHTML = '<i class="fas fa-water"></i> Add New Tank';
+  // COST-LOCKED V1: Use single farm ID
+  const actualFarmId = this.state.settings.farmId;
+  if (!actualFarmId) {
+    this.showToast('Please create a farm first', 'error');
+    return;
+  }
 
-if (select) {
-select.innerHTML = '';
-this.state.farms.forEach(farm => {
-const option = document.createElement('option');
-option.value = farm.id;
-option.textContent = farm.name;
-if (farm.id === farmId) option.selected = true;
-select.appendChild(option);
-});
-}
-if(btn) btn.textContent = 'Save Tank & Generate Feed Plan';
-if (tankModal) tankModal.classList.add('active');
-this.updateBlindFeedPreview();
+  this.editingTankId = null;
+  const tankNameInput = document.getElementById('tankNameInput');
+  const tankSize = document.getElementById('tankSize');
+  const stockingDate = document.getElementById('stockingDate');
+  const initialSeed = document.getElementById('initialSeed');
+  const tankCheckTrays = document.getElementById('tankCheckTrays');
+  const tankBlindDuration = document.getElementById('tankBlindDuration');
+  const tankBlindWeek1 = document.getElementById('tankBlindWeek1');
+  const tankBlindStd = document.getElementById('tankBlindStd');
+  const titleEl = document.getElementById('tankModalTitle');
+  const select = document.getElementById('tankFarmSelect');
+  const btn = document.getElementById('saveTankBtn');
+  const tankModal = document.getElementById('tankModal');
+  
+  if (tankNameInput) tankNameInput.value = '';
+  if (tankSize) tankSize.value = '';
+  if (stockingDate) stockingDate.value = '';
+  if (initialSeed) initialSeed.value = '';
+  if (tankCheckTrays) tankCheckTrays.value = 2;
+  if (tankBlindDuration) tankBlindDuration.value = 30;
+  if (tankBlindWeek1) tankBlindWeek1.value = 2;
+  if (tankBlindStd) tankBlindStd.value = 4;
+  if (titleEl) titleEl.innerHTML = '<i class="fas fa-water"></i> Add New Tank';
+
+  // COST-LOCKED V1: Hide farm selector since only one farm
+  if (select) {
+    select.style.display = 'none';
+    const label = select.previousElementSibling;
+    if (label && label.textContent.includes('Farm')) {
+      label.style.display = 'none';
+    }
+  }
+  
+  if(btn) btn.textContent = 'Save Tank & Generate Feed Plan';
+  if (tankModal) tankModal.classList.add('active');
+  this.updateBlindFeedPreview();
 }
 
 saveFarm() {
@@ -2530,25 +2656,29 @@ farm.phone = phone;
 this.showToast('Farm updated successfully');
 }
 } else {
+// COST-LOCKED V1: Single farm per user, no members field
+if (this.state.farm) {
+this.showToast('Only one farm allowed per user in V1', 'error');
+return;
+}
+
 const newFarm = {
 id: Date.now().toString(),
 name,
 location,
 contact,
 phone,
+ownerUid: this.userId, // Single owner only
 created: new Date().toISOString()
 };
 
-this.state.farms.push(newFarm);
-
-if (this.state.farms.length === 1) {
-this.state.settings.currentFarmId = newFarm.id;
+this.state.farm = newFarm;
+this.state.settings.farmId = newFarm.id;
 this.saveSettings();
-}
 this.showToast('Farm added successfully');
 }
 
-this.saveFarms();
+this.saveFarm();
 this.closeAllModals();
 this.checkFirstTimeUser();
 this.renderAll();
@@ -2609,20 +2739,13 @@ return schedule;
 }
 
     async saveTank() {
-        // Robustly determine farmId for the new/edited tank
-        let farmId = '';
-        const farmSelect = document.getElementById('tankFarmSelect');
-        if (farmSelect) {
-            farmId = farmSelect.value;
-        }
-        // Fallback 1: if nothing selected but a current farm is set, use that
-        if (!farmId && this.state && this.state.settings && this.state.settings.currentFarmId) {
-            farmId = this.state.settings.currentFarmId;
-        }
-        // Fallback 2: if still nothing but exactly one farm exists, auto‑attach to it
-        if (!farmId && Array.isArray(this.state?.farms) && this.state.farms.length === 1) {
-            farmId = this.state.farms[0].id;
-        }
+    // COST-LOCKED V1: Use single farm ID
+    const farmId = this.state.settings.farmId;
+    
+    if (!farmId) {
+        this.showToast('Please create a farm before adding a tank', 'error');
+        return;
+    }
 const name = document.getElementById('tankNameInput').value;
 const size = parseFloat(document.getElementById('tankSize').value);
 const stockingDate = document.getElementById('stockingDate').value;
@@ -2741,12 +2864,12 @@ newTank.lifecycleStateUpdatedAt = new Date().toISOString();
 this.showToast('Tank added & Blind Schedule generated!');
 }
 
-  try {
-    await this.saveTanks();
-  } catch (e) {
-    console.error('Failed to save tanks:', e);
-    this.showToast('Failed to save tank data. Changes may not be persisted.', 'error');
-  }
+    try {
+        await this.saveTank(this.editingTankId ? tank : newTank);
+    } catch (e) {
+        this.reportError(e, { context: 'saveTank' });
+        this.showToast('Failed to save tank data. Changes may not be persisted.', 'error');
+    }
   this.closeAllModals();
   this.renderAll();
 this.editingTankId = null;
@@ -3004,7 +3127,7 @@ this.state.feedEntries[entryIndex].reason = reason || null;
 // BUG #2 FIX: Use async save with proper sequencing
 (async () => {
     try {
-        await this.saveFeedEntries();
+        await this.saveFeedEntry(this.state.feedEntries[entryIndex]);
         await this.saveInventory();
         this.recalculateTankBiomass(tankId);
         this.closeAllModals();
@@ -3056,7 +3179,7 @@ nitrite: isNaN(nitrite) ? null : nitrite
 };
 
 this.state.waterQuality.push(entry);
-this.saveWaterQualityData();
+this.saveWaterQualityData(entry);
 this.closeAllModals();
 this.openTankDetail(tankId); // Refresh detail view
 this.showToast('Water quality logged');
@@ -3115,7 +3238,7 @@ unit
 };
 
 this.state.applications.push(entry);
-this.saveApplications();
+this.saveApplications(entry);
 this.closeAllModals();
 this.openTankDetail(tankId);
 this.showToast('Application logged');
@@ -3156,7 +3279,7 @@ notes
 };
 
 this.state.diseases.push(entry);
-this.saveDiseases();
+this.saveDiseases(entry);
 this.closeAllModals();
 this.openTankDetail(tankId);
 this.showToast('Disease log recorded');
@@ -3164,7 +3287,11 @@ this.showToast('Disease log recorded');
 
 deleteDiseaseLog(entryId, tankId) {
 this.state.diseases = (this.state.diseases || []).filter(d => d.id !== entryId);
-this.saveDiseases();
+if (this.db && this.userId) {
+    this.db.collection('diseases').doc(String(entryId)).delete();
+} else {
+    this.saveDiseases(null);
+}
 this.openTankDetail(tankId);
 this.showToast('Disease log deleted');
 }
@@ -3209,7 +3336,11 @@ deleteApplication(id, tankId) {
 this.showConfirmModal('Delete this application log?', 'Confirm Delete').then(confirmed => {
 if (confirmed) {
 this.state.applications = this.state.applications.filter(a => a.id !== id);
-this.saveApplications();
+if (this.db && this.userId) {
+    this.db.collection('applications').doc(String(id)).delete();
+} else {
+    this.saveApplications(null);
+}
 this.openApplicationHistory(tankId);
 this.openTankDetail(tankId);
 this.showToast('Log deleted');
@@ -3237,7 +3368,11 @@ if (refundAmount > 0 && refundAmount <= 10000) {
     console.warn('Skipping inventory refund for entry with invalid amount:', entry);
 }
 this.state.feedEntries.splice(entryIndex, 1);
-this.saveFeedEntries();
+if (this.db && this.userId) {
+    this.db.collection('feedEntries').doc(String(entry.id)).delete();
+} else {
+    this.saveFeedEntry(null);
+}
 this.saveInventory();
 this.recalculateTankBiomass(tankId);
 this.closeAllModals();
@@ -3271,8 +3406,8 @@ this.showToast('Amount updated', 'info');
 }
 
 openLogFeedModal(tankId = null, prefillAmount = null, feedIndex = null, isFirstTrayFeed = false) {
-const currentFarmId = this.state.settings.currentFarmId;
-if (!currentFarmId) return;
+const farmId = this.state.settings.farmId;
+if (!farmId) return;
 
 // LIFECYCLE CHECK: Prevent feed logging in certain states
 if (tankId) {
@@ -3284,7 +3419,7 @@ return;
 }
 }
 
-const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId && t.status !== 'inactive');
+const tanks = this.state.tanks.filter(t => t.farmId === farmId && t.status !== 'inactive');
 if (tanks.length === 0) {
 this.showToast('No active tanks found', 'error');
 return;
@@ -4233,7 +4368,7 @@ document.getElementById('resultModal').classList.add('active');
             const suggestedKg = parseFloat(this.currentCheck.suggestedFeed);
             entry.decisionKgForNextRound = suggestedKg;
             
-            this.saveFeedEntries();
+            this.saveFeedEntry(entry);
             
             // Also update tank's nextSuggestedFeed for backward compatibility
             const tank = this.getTankById(this.currentCheck.tankId);
@@ -4368,22 +4503,28 @@ const feedingMode = doc <= blindDuration && !tank.hasTransitionedFromBlind ? 'BL
 const isExtraFeed = this.areAllRoundsCompleted(tankId, entryDate);
 
 const newEntry = {
+// COST-LOCKED V1: Minimal required fields only
 id: Date.now(),
-tankId,
+farmId: this.state.settings.farmId,
+pondId: tankId, // Renamed from tankId for cost lock
+doc: this.getDaysOld(tank.stockingDate),
+round: feedRoundNumber,
+feedKg: amount,
+createdBy: this.userId,
+createdAt: new Date().toISOString(),
+// Legacy fields for migration compatibility
 date: entryDate,
 time: new Date().toLocaleTimeString(),
 amount,
-trayResult: feedingMode === 'BLIND' ? 'blind-fed' : 'pending', // Blind mode: no tray check needed, Tray mode: pending check
+trayResult: feedingMode === 'BLIND' ? 'blind-fed' : 'pending',
 supplements,
 reason: reason || null,
-            // Health report fields
-            healthObserved: !!healthObserved,
-            mortality: mortality || 0,
-            disease: diseaseType || null,
-            // Tray Active Mode fields
-            feed_round_number: feedRoundNumber,
-            feeding_mode: feedingMode,
-            is_extra_feed: isExtraFeed
+healthObserved: !!healthObserved,
+mortality: mortality || 0,
+disease: diseaseType || null,
+feed_round_number: feedRoundNumber,
+feeding_mode: feedingMode,
+is_extra_feed: isExtraFeed
 };
 
 this.state.feedEntries.push(newEntry);
@@ -4399,12 +4540,47 @@ if (newInventoryTotal < 0) {
 
 this.state.inventory.totalKg = newInventoryTotal;
 
-// BUG #2 FIX: Use async save with proper sequencing
+// COST-LOCKED V1: Batched write to feedLogs and farmDaily
 (async () => {
     try {
-        await this.saveFeedEntries();
+        // Batch write: feedLogs document + farmDaily summary
+        const batch = this.db.batch();
+        
+        // Add feed log
+        const feedLogRef = this.db.collection('feedLogs').doc(String(newEntry.id));
+        batch.set(feedLogRef, {
+            farmId: newEntry.farmId,
+            pondId: newEntry.pondId,
+            doc: newEntry.doc,
+            round: newEntry.round,
+            feedKg: newEntry.feedKg,
+            createdBy: newEntry.createdBy,
+            createdAt: newEntry.createdAt
+        });
+        
+        // Update farm daily summary
+        const farmDailyId = `${newEntry.farmId}_${entryDate.replace(/-/g, '_')}`;
+        const farmDailyRef = this.db.collection('farmDaily').doc(farmDailyId);
+        
+        // Get current daily data or create new
+        const todayLogs = this.state.feedEntries.filter(e => e.date === entryDate);
+        const totalFeedKg = todayLogs.reduce((sum, e) => sum + (e.feedKg || e.amount || 0), 0);
+        const roundsDone = new Set(todayLogs.map(e => `${e.pondId || e.tankId}_${e.round || e.feed_round_number}`)).size;
+        
+        batch.set(farmDailyRef, {
+            totalFeedKg,
+            roundsDone,
+            lastFeedKg: newEntry.feedKg,
+            updatedAt: new Date().toISOString()
+        }, { merge: true });
+        
+        // Commit batch
+        await batch.commit();
+        
+        // Update local state
+        this.state.feedLogs.push(newEntry);
         await this.saveInventory();
-        this.recalculateTankBiomass(tankId, true); // Clear suggestion on log
+        this.recalculateTankBiomass(tankId, true);
         this.updateTankLifecycleState(tankId);
         this.renderAll();
 
@@ -4499,7 +4675,7 @@ trayResult: 'skipped',
 supplements: []
 };
 this.state.feedEntries.push(newEntry);
-this.saveFeedEntries();
+this.saveFeedEntry(newEntry);
 this.renderAll();
 this.showToast('Feed skipped');
 }
@@ -4551,7 +4727,7 @@ this.state.inventory.totalKg = newInventoryTotal;
 
 // BUG #2 FIX: Use async save with proper sequencing
 try {
-    await this.saveFeedEntries();
+    await this.saveFeedEntry(newEntry);
     await this.saveInventory();
     this.recalculateTankBiomass(tankId, true); // Clear suggestion on log
     this.updateTankLifecycleState(tankId);
@@ -4616,7 +4792,7 @@ return;
 this.state.inventory.totalKg = newInventoryTotal;
 
 try {
-await this.saveFeedEntries();
+await this.saveFeedEntry(newEntry);
 await this.saveInventory();
 this.recalculateTankBiomass(tankId, true);
 this.updateTankLifecycleState(tankId);
@@ -4671,7 +4847,7 @@ const biomassBefore = (totalFeed / estimatedFCR) - totalHarvested;
 // Ensure biomass is never negative and is a valid number
 const calculatedBiomass = !isNaN(biomassBefore) ? biomassBefore : 0;
 tank.biomass = Math.max(0, parseFloat(calculatedBiomass.toFixed(1)));
-this.saveTanks();
+this.saveTank(tank);
 }
 
 openFeedSchedule(tankId) {
@@ -5786,7 +5962,7 @@ price
 };
 
 this.state.harvests.push(newHarvest);
-this.saveHarvests();
+this.saveHarvest(newHarvest);
 this.recalculateTankBiomass(tankId);
 this.closeAllModals();
 this.renderAll();
@@ -6034,16 +6210,20 @@ archivedTank.name = `${this.sanitizeHTML(tank.name)} (Ended ${new Date().toLocal
 this.state.tanks.push(archivedTank);
 
 // Move feed entries to archive
+const entriesToUpdate = [];
 this.state.feedEntries.forEach(e => {
 if (e.tankId === tank.id) {
 e.tankId = archiveId;
+entriesToUpdate.push(e);
 }
 });
 
 // Move harvests to archive
+const harvestsToUpdate = [];
 this.state.harvests.forEach(h => {
 if (h.tankId === tank.id) {
 h.tankId = archiveId;
+harvestsToUpdate.push(h);
 }
 });
 
@@ -6052,9 +6232,10 @@ tank.stockingDate = this.currentDate;
 tank.initialSeed = 0;
 tank.currentSeed = 0;
 tank.biomass = 0;
-this.saveTanks();
-this.saveFeedEntries();
-this.saveHarvests();
+this.saveTank(tank);
+this.saveTank(archivedTank);
+entriesToUpdate.forEach(e => this.saveFeedEntry(e));
+harvestsToUpdate.forEach(h => this.saveHarvest(h));
 this.closeAllModals();
 this.renderAll();
 this.showToast('New crop cycle started. Old data archived.', 'success');
@@ -7403,7 +7584,7 @@ feed_round_number: roundNumber
 };
 
 this.state.feedEntries.push(entry);
-this.saveFeedEntries();
+this.saveFeedEntry(entry);
 
 // Update UI elements if they exist
 const logBtn = document.getElementById('logTrayFeedBtn');
