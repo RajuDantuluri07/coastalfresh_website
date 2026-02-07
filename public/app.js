@@ -406,6 +406,16 @@ showLoginScreen() {
           <button class="btn btn-secondary" onclick="app.signUp()" style="width: 100%;">
             <i class="fas fa-user-plus"></i> Create New Account
           </button>
+          
+          <div style="margin-top: 15px; text-align: center; position: relative;">
+            <hr style="margin: 0; border: 0; border-top: 1px solid var(--border);">
+            <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: white; padding: 0 10px; color: var(--gray); font-size: 12px;">OR</span>
+          </div>
+
+          <button class="btn" onclick="app.signInWithGoogle()" style="width: 100%; margin-top: 15px; background: white; border: 1px solid var(--border); color: var(--dark); display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 18px; height: 18px;">
+            Sign in with Google
+          </button>
         </div>
       </div>
     `;
@@ -483,6 +493,29 @@ async signUp() {
   } catch (error) {
     errorEl.textContent = this.getAuthErrorMessage(error.code);
     errorEl.style.display = 'block';
+  }
+}
+
+async signInWithGoogle() {
+  const errorEl = document.getElementById('loginError');
+  
+  if (!this.auth) {
+    if (errorEl) {
+      errorEl.textContent = 'System Error: Firebase Auth not initialized.';
+      errorEl.style.display = 'block';
+    }
+    return;
+  }
+  
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await this.auth.signInWithPopup(provider);
+    // Auth state listener will handle the rest
+  } catch (error) {
+    if (errorEl) {
+      errorEl.textContent = this.getAuthErrorMessage(error.code);
+      errorEl.style.display = 'block';
+    }
   }
 }
 
