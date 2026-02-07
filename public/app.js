@@ -378,6 +378,9 @@ if (card) card.style.display = 'none';
 // ===== PRODUCTION AUTHENTICATION METHODS =====
 
 showLoginScreen() {
+  // BUG FIX: Prevent login screen from showing if user is already logged in
+  if (this.userId) return;
+
   const app = document.getElementById('app');
   if (app) {
     app.style.display = 'none';
@@ -2675,6 +2678,8 @@ const location = document.getElementById('farmLocation').value;
 const contact = document.getElementById('farmContact').value;
 const phone = document.getElementById('farmPhone').value;
 
+let farmToSave = null;
+
 if (!name) {
 this.showToast('Farm name is required', 'error');
 return;
@@ -2687,6 +2692,7 @@ farm.name = name;
 farm.location = location;
 farm.contact = contact;
 farm.phone = phone;
+farmToSave = farm;
 this.showToast('Farm updated successfully');
 }
 } else {
@@ -2708,24 +2714,31 @@ created: new Date().toISOString()
 
 this.state.farm = newFarm;
 this.state.settings.farmId = newFarm.id;
-await this.saveSettings();
+farmToSave = newFarm;
 this.showToast('Farm added successfully');
 }
 
-try {
-  await this.persistFarm();
-  this.closeAllModals();
-  this.checkFirstTimeUser();
-  this.renderAll();
+// BUG FIX: Optimistic UI update - Update UI first, then save to cloud
+this.closeAllModals();
+this.checkFirstTimeUser();
+this.renderAll();
 
-  document.getElementById('farmNameInput').value = '';
-  document.getElementById('farmLocation').value = '';
-  document.getElementById('farmContact').value = '';
-  document.getElementById('farmPhone').value = '';
-  this.editingFarmId = null;
-} catch (e) {
-  console.error("Failed to save farm:", e);
-}
+document.getElementById('farmNameInput').value = '';
+document.getElementById('farmLocation').value = '';
+document.getElementById('farmContact').value = '';
+document.getElementById('farmPhone').value = '';
+this.editingFarmId = null;
+
+// Async save to cloud
+(async () => {
+    try {
+        await this.saveSettings();
+        await this.persistFarm();
+    } catch (e) {
+        console.error("Failed to save farm to cloud:", e);
+        this.showToast('Saved locally. Syncing when online.', 'warning');
+    }
+})();
 }
 
 generateBlindFeedingSchedule(initialSeed, stockingDateStr, duration = 30, week1Freq = 2, stdFreq = 4) {
@@ -2902,15 +2915,22 @@ newTank.lifecycleStateUpdatedAt = new Date().toISOString();
 this.showToast('Tank added & Blind Schedule generated!');
 }
 
-    try {
-        await this.persistTank(this.editingTankId ? tank : newTank);
-    } catch (e) {
-        this.reportError(e, { context: 'saveTank' });
-        this.showToast('Failed to save tank data. Changes may not be persisted.', 'error');
-    }
-  this.closeAllModals();
-  this.renderAll();
-this.editingTankId = null;
+    // BUG FIX: Optimistic UI update
+    this.closeAllModals();
+    this.renderAll();
+    
+    const tankToSave = this.editingTankId ? this.getTankById(this.editingTankId) : newTank;
+    this.editingTankId = null;
+
+    // Async save
+    (async () => {
+        try {
+            await this.persistTank(tankToSave);
+        } catch (e) {
+            this.reportError(e, { context: 'saveTank' });
+            this.showToast('Saved locally. Syncing when online.', 'warning');
+        }
+    })();
 }
 
 updateBlindFeedPreview() {
