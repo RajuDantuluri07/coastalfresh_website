@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link rel="manifest" href="/manifest.json">
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
 </head>
 <body>
 
@@ -26,7 +28,10 @@
             <div class="hero-content">
                 <h1>Stop Guessing, Start Growing.</h1>
                 <p class="subtitle">The simple, powerful app for shrimp farmers to reduce feed waste, improve FCR, and increase profits. Works offline, built for the field.</p>
-                <a href="/app.html?intent=signup" class="btn btn-primary btn-large">Start Managing Your Farm for Free</a>
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
+                    <a href="/app.html?intent=signup" class="btn btn-primary btn-large">Start Managing Your Farm for Free</a>
+                    <a href="/download.html" class="btn btn-download btn-large"><i class="fas fa-download"></i> Download App</a>
+                </div>
                 <small>No credit card required. Free forever for single-user farms.</small>
             </div>
         </div>

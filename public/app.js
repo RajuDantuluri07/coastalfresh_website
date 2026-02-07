@@ -383,6 +383,10 @@ showLoginScreen() {
     app.style.display = 'none';
   }
   
+  // Ensure first time lock is hidden so it doesn't overlap
+  const lock = document.getElementById('firstTimeLock');
+  if (lock) lock.classList.add('hidden');
+  
   // Create login modal if it doesn't exist
   let loginModal = document.getElementById('loginModal');
   if (!loginModal) {
@@ -390,47 +394,45 @@ showLoginScreen() {
     loginModal.id = 'loginModal';
     loginModal.className = 'modal-overlay active';
     loginModal.innerHTML = `
-      <div class="modal-content" style="max-width: 400px;">
-        <div class="modal-header">
-          <h2><i class="fas fa-farm"></i> AquaRythu Login</h2>
+      <div class="modal-content" style="max-width: 400px; border-radius: 20px; overflow: hidden; padding: 0;">
+        <div class="modal-header" style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%); color: white; padding: 40px 20px; text-align: center; display: block; border: none;">
+          <div style="font-size: 56px; margin-bottom: 10px; text-shadow: 0 4px 10px rgba(0,0,0,0.1);">🐟</div>
+          <h2 style="margin: 0; font-size: 24px; font-weight: 700;">AquaRythu</h2>
+          <p style="margin: 5px 0 0; opacity: 0.9; font-size: 14px;">Smart Aquaculture Management</p>
         </div>
-        <div class="modal-body">
-          <div style="text-align: center; margin-bottom: 20px;">
-            <div style="font-size: 48px; margin-bottom: 10px;">🐟</div>
-            <p style="color: var(--gray);">Sign in to manage your aquaculture farm</p>
-          </div>
+        <div class="modal-body" style="padding: 30px;">
           
-          <div id="loginError" class="error-message" style="display: none; margin-bottom: 15px; color: var(--danger);"></div>
+          <div id="loginError" class="error-message" style="display: none; margin-bottom: 20px; color: #d32f2f; background: #ffebee; padding: 10px; border-radius: 8px; font-size: 13px; text-align: center;"></div>
           
           <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="loginEmail" placeholder="Enter your email" class="form-control" onkeydown="if(event.key==='Enter') app.signIn()">
+            <label style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #757575;">Email Address</label>
+            <input type="email" id="loginEmail" placeholder="name@example.com" class="form-control" style="height: 48px; background: #f9fafb;" onkeydown="if(event.key==='Enter') app.signIn()">
           </div>
           
           <div class="form-group">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
-              <label style="margin-bottom: 0;">Password</label>
-              <a href="#" onclick="app.resetPassword(); return false;" style="font-size: 12px; color: var(--primary);">Forgot Password?</a>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label style="margin-bottom: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #757575;">Password</label>
+              <a href="#" onclick="app.resetPassword(); return false;" style="font-size: 12px; color: #2196F3; font-weight: 600;">Forgot?</a>
             </div>
-            <input type="password" id="loginPassword" placeholder="Enter your password" class="form-control" onkeydown="if(event.key==='Enter') app.signIn()">
+            <input type="password" id="loginPassword" placeholder="••••••••" class="form-control" style="height: 48px; background: #f9fafb;" onkeydown="if(event.key==='Enter') app.signIn()">
           </div>
           
-          <button class="btn btn-primary" onclick="app.signIn()" style="width: 100%; margin-bottom: 10px;">
-            <i class="fas fa-sign-in-alt"></i> Sign In
+          <button class="btn btn-primary" onclick="app.signIn()" style="width: 100%; margin-bottom: 12px; height: 48px; font-size: 16px; background: #2196F3; border: none; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);">
+            Sign In
           </button>
           
-          <button class="btn btn-secondary" onclick="app.signUp()" style="width: 100%;">
-            <i class="fas fa-user-plus"></i> Create New Account
+          <button class="btn" onclick="app.signUp()" style="width: 100%; height: 48px; background: white; border: 2px solid #e0e0e0; color: #616161;">
+            Create Account
           </button>
           
-          <div style="margin-top: 15px; text-align: center; position: relative;">
-            <hr style="margin: 0; border: 0; border-top: 1px solid var(--border);">
-            <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: white; padding: 0 10px; color: var(--gray); font-size: 12px;">OR</span>
+          <div style="margin: 24px 0; text-align: center; position: relative;">
+            <hr style="margin: 0; border: 0; border-top: 1px solid #e0e0e0;">
+            <span style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: white; padding: 0 10px; color: #9e9e9e; font-size: 12px; font-weight: 500;">OR CONTINUE WITH</span>
           </div>
 
-          <button class="btn" onclick="app.signInWithGoogle()" style="width: 100%; margin-top: 15px; background: white; border: 1px solid var(--border); color: var(--dark); display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 18px; height: 18px;">
-            Sign in with Google
+          <button class="btn" onclick="app.signInWithGoogle()" style="width: 100%; height: 48px; background: white; border: 1px solid #e0e0e0; color: #424242; display: flex; align-items: center; justify-content: center; gap: 12px; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 20px; height: 20px;">
+            Google
           </button>
         </div>
       </div>
@@ -724,6 +726,7 @@ loadAllData() {
         this.state.farm = farms[0]; // Set the farm
         this.state.settings.farmId = farms[0].id; // Update settings
         this.loadTanksForFarm(farms[0].id); // Load tanks directly
+        this.checkFirstTimeUser(); // Ensure UI unlocks if farm exists
       } else {
         // No farm found - clear state
         this.state.farm = null;
@@ -1379,6 +1382,12 @@ const lock = document.getElementById('firstTimeLock');
 const navTabs = document.querySelector('.nav-tabs');
 const mainApp = document.getElementById('app');
 const stickyBtn = document.getElementById('stickyLogFeedBtn');
+
+// If user is not logged in, hide the lock screen (Login screen takes precedence)
+if (!this.userId) {
+    if (lock) lock.classList.add('hidden');
+    return;
+}
 
 if (!hasFarm) {
 lock.classList.remove('hidden');
