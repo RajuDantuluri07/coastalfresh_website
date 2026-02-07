@@ -22,6 +22,16 @@ box-sizing: border-box;
 --info: #00BCD4;
 --info-dark: #0097A7;
 --info-light: #E0F7FA;
+--purple: #764ba2;
+--purple-light: #f3e5f5;
+
+/* Lifecycle States */
+--lifecycle-pre-stock-color: var(--info); --lifecycle-pre-stock-bg: var(--info-light);
+--lifecycle-blind-feed-color: var(--warning); --lifecycle-blind-feed-bg: var(--warning-light);
+--lifecycle-tray-active-color: var(--primary); --lifecycle-tray-active-bg: var(--primary-light);
+--lifecycle-optimization-color: var(--purple); --lifecycle-optimization-bg: var(--purple-light);
+--lifecycle-harvest-ready-color: var(--success); --lifecycle-harvest-ready-bg: var(--success-light);
+--lifecycle-harvested-color: var(--gray-500); --lifecycle-harvested-bg: var(--gray-100);
 /* Grays */
 --gray-50: #FAFAFA;
 --gray-100: #F5F5F5;

@@ -14,11 +14,11 @@
 <link rel="stylesheet" href="styles.css">
 <!-- Font Awesome Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
 </head>
 <body>
 <!-- Loading Overlay -->
@@ -57,6 +57,9 @@ Add Your First Farm
 </div>
 <div style="display: flex; align-items: center; gap: 10px;">
 <div class="current-date" id="currentDate"></div>
+<button class="btn btn-sm btn-secondary" onclick="app.signOut()" style="padding: 5px 10px; font-size: 12px;">
+<i class="fas fa-sign-out-alt"></i> Sign Out
+</button>
 </div>
 </div>
 </header>

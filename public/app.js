@@ -9,16 +9,12 @@ const firebaseConfig = {
   measurementId: "G-468VYWGBHM"
 };
 
-// ===== COST-LOCKED V1 STATE =====
-const appState = {
-  farmId: null, // Single farm per user
-  tankId: null, // Current tank
-  feedingMode: 'BLIND', // BLIND | TRAY
-  todayFeedLogs: []
-};
-
 class AquaRythu {
 constructor() {
+// Initialize Firebase Auth reference
+this.auth = null;
+this.userId = null;
+
 this.state = {
 farm: null, // Single farm object
 tanks: [],
@@ -55,7 +51,7 @@ this.activeLogTankId = null;
 this.currentCheck = {};
 this.viewMode = 'today';
 this.analyticsEvents = [];
-this.userId = this.getOrCreateUserId();
+this.userId = null; // Will be set by Firebase Auth
 this.feedJumpDetected = {};
 this.pondSwitchCount = 0;
 this.lastPondSwitchTime = null;
@@ -173,7 +169,7 @@ if (doc <= blindDuration && !hasTransitioned) {
 return this.LIFECYCLE_STATES.BLIND_FEED;
 }
 
-const trayEntries = this.state.feedEntries.filter(e => 
+const trayEntries = this.state.feedLogs.filter(e => 
 e.tankId === tank.id && 
 e.trayResult && 
 e.trayResult !== 'pending' && 
@@ -366,13 +362,161 @@ const card = document.getElementById('feedWasteCard');
 if (card) card.style.display = 'none';
 }
 
-getOrCreateUserId() {
-let userId = localStorage.getItem('aquabook_user_id');
-if (!userId) {
-userId = 'user_' + Math.random().toString(36).substring(2, 11);
-localStorage.setItem('aquabook_user_id', userId);
+// ===== PRODUCTION AUTHENTICATION METHODS =====
+
+showLoginScreen() {
+  const app = document.getElementById('app');
+  if (app) {
+    app.style.display = 'none';
+  }
+  
+  // Create login modal if it doesn't exist
+  let loginModal = document.getElementById('loginModal');
+  if (!loginModal) {
+    loginModal = document.createElement('div');
+    loginModal.id = 'loginModal';
+    loginModal.className = 'modal active';
+    loginModal.innerHTML = `
+      <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+          <h2><i class="fas fa-farm"></i> AquaRythu Login</h2>
+        </div>
+        <div class="modal-body">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <div style="font-size: 48px; margin-bottom: 10px;">🐟</div>
+            <p style="color: var(--gray);">Sign in to manage your aquaculture farm</p>
+          </div>
+          
+          <div id="loginError" class="error-message" style="display: none; margin-bottom: 15px;"></div>
+          
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="loginEmail" placeholder="Enter your email" class="form-control" onkeydown="if(event.key==='Enter') app.signIn()">
+          </div>
+          
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter your password" class="form-control" onkeydown="if(event.key==='Enter') app.signIn()">
+          </div>
+          
+          <button class="btn btn-primary" onclick="app.signIn()" style="width: 100%; margin-bottom: 10px;">
+            <i class="fas fa-sign-in-alt"></i> Sign In
+          </button>
+          
+          <button class="btn btn-secondary" onclick="app.signUp()" style="width: 100%;">
+            <i class="fas fa-user-plus"></i> Create New Account
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(loginModal);
+  }
+  
+  // Handle Intent from URL (Login vs Signup)
+  const params = new URLSearchParams(window.location.search);
+  const intent = params.get('intent');
+  const titleEl = loginModal.querySelector('.modal-header h2');
+  if (titleEl) {
+    if (intent === 'signup') {
+      titleEl.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
+    } else {
+      titleEl.innerHTML = '<i class="fas fa-farm"></i> AquaRythu Login';
+    }
+  }
+  
+  loginModal.classList.add('active');
+  this.showLoading(false);
 }
-return userId;
+
+async signIn() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  const errorEl = document.getElementById('loginError');
+  
+  if (!this.auth) {
+    errorEl.textContent = 'System Error: Firebase Auth not initialized.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if (!email || !password) {
+    errorEl.textContent = 'Please enter email and password';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  try {
+    await this.auth.signInWithEmailAndPassword(email, password);
+    // Auth state listener will handle the rest
+  } catch (error) {
+    errorEl.textContent = this.getAuthErrorMessage(error.code);
+    errorEl.style.display = 'block';
+  }
+}
+
+async signUp() {
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  const errorEl = document.getElementById('loginError');
+  
+  if (!this.auth) {
+    errorEl.textContent = 'System Error: Firebase Auth not initialized.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  if (!email || !password) {
+    errorEl.textContent = 'Please enter email and password';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  if (password.length < 6) {
+    errorEl.textContent = 'Password must be at least 6 characters';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  try {
+    await this.auth.createUserWithEmailAndPassword(email, password);
+    // Auth state listener will handle the rest
+  } catch (error) {
+    errorEl.textContent = this.getAuthErrorMessage(error.code);
+    errorEl.style.display = 'block';
+  }
+}
+
+async signOut() {
+  try {
+    // COST-SAFETY: Unsubscribe from all real-time listeners to stop read costs
+    if (this.unsubscribeSettings) this.unsubscribeSettings();
+    if (this.unsubscribeFarm) this.unsubscribeFarm();
+    if (this.unsubscribeTanks) this.unsubscribeTanks();
+    
+    await this.auth.signOut();
+  } catch (error) {
+    console.error('Sign out error:', error);
+  }
+}
+
+getAuthErrorMessage(errorCode) {
+  if (!errorCode) return 'An unknown error occurred.';
+  const errorMessages = {
+    'auth/user-not-found': 'No account found with this email',
+    'auth/wrong-password': 'Incorrect password',
+    'auth/email-already-in-use': 'An account with this email already exists',
+    'auth/weak-password': 'Password must be at least 6 characters',
+    'auth/invalid-email': 'Please enter a valid email address',
+    'auth/too-many-requests': 'Too many failed attempts. Please try again later',
+    'default': 'An error occurred. Please try again.'
+  };
+  return errorMessages[errorCode] || errorMessages['default'];
+}
+
+// Remove fake auth method
+getOrCreateUserId() {
+  // DEPRECATED: Use real Firebase Auth instead
+  return null;
 }
 
 hasPermission(perm) { return true; }
@@ -405,10 +549,10 @@ if (!tank) return false;
 const yesterday = new Date();
 yesterday.setDate(yesterday.getDate() - 1);
 const yesterdayStr = this.getFormattedDate(yesterday);
-const todayEntries = this.state.feedEntries.filter(e =>
+const todayEntries = this.state.feedLogs.filter(e =>
 e.tankId === tankId && e.date === this.currentDate
 );
-const yesterdayEntries = this.state.feedEntries.filter(e =>
+const yesterdayEntries = this.state.feedLogs.filter(e =>
 e.tankId === tankId && e.date === yesterdayStr
 );
 const todayTotal = todayEntries.reduce((sum, e) => sum + e.amount, 0);
@@ -510,7 +654,6 @@ loadAllData() {
         this.state.farm = null;
         this.state.tanks = [];
         this.state.feedLogs = [];
-        this.state.feedEntries = []; // Legacy compatibility
         this.state.harvests = [];
         this.state.waterQuality = [];
         this.state.applications = [];
@@ -531,7 +674,7 @@ loadFarmSummary(farmId) {
   if (!farmId) return;
   
   // Load today's farm daily summary (1 read)
-  const today = new Date().toISOString().split('T')[0];
+  const today = this.getFormattedDate();
   const farmDailyId = `${farmId}_${today.replace(/-/g, '_')}`;
   
   this.db.collection('farmDaily').doc(farmDailyId)
@@ -595,10 +738,38 @@ loadTanksForFarm(farmId) {
   if (this.unsubscribeTanks) this.unsubscribeTanks();
   this.unsubscribeTanks = this.db.collection('tanks')
     .where('farmId', '==', farmId)
+    .limit(50) // COST-SAFETY: Limit tank loading to prevent runaway reads
     .onSnapshot(snapshot => {
       this.state.tanks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       this.renderAll();
     });
+}
+
+// COST-SAFETY: Use this method instead of loading all logs
+async loadRecentLogsSafe(tankId) {
+  if (!this.db || !this.userId) return;
+  
+  // Only load last 7 days of logs
+  const dateLimit = new Date();
+  dateLimit.setDate(dateLimit.getDate() - 7);
+  const dateStr = this.getFormattedDate(dateLimit);
+
+  try {
+    const snapshot = await this.db.collection('feedLogs')
+      .where('tankId', '==', tankId)
+      .where('date', '>=', dateStr)
+      .orderBy('date', 'desc')
+      .limit(50) // Hard limit to ensure you never read thousands of docs at once
+      .get();
+      
+    const logs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Merge into state...
+    console.log(`Loaded ${logs.length} logs safely.`);
+    return logs;
+  } catch (e) {
+    console.error("Error loading logs:", e);
+    return [];
+  }
 }
 
 init() {
@@ -607,6 +778,22 @@ if (typeof firebase !== 'undefined') {
     firebase.initializeApp(firebaseConfig);
   }
   this.db = firebase.firestore();
+  this.auth = firebase.auth(); // Initialize Firebase Auth
+  
+  // COST-SAFETY: Connect to Emulators when running locally
+  // Run 'firebase emulators:start' in your terminal to use this
+  // DISABLED by default to ensure login works with live DB if emulators aren't running
+  /* if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+    console.log("🔧 Localhost detected: Connecting to Firebase Emulators to save costs.");
+    try {
+      this.db.useEmulator("localhost", 8080);
+      this.auth.useEmulator("http://localhost:9099");
+      // If you use Functions: firebase.functions().useEmulator("localhost", 5001);
+    } catch (e) {
+      console.warn("Emulator connection failed (ignore if using live DB for testing)", e);
+    }
+  } */
+
   this.db.enablePersistence().catch(err => {
     if (err.code == 'failed-precondition') {
       console.warn('Multiple tabs open, persistence can only be enabled in one tab at a a time.');
@@ -615,19 +802,27 @@ if (typeof firebase !== 'undefined') {
     }
   });
 
-  // COST-LOCKED V1: Auth listener with simplified state
-  firebase.auth().onAuthStateChanged(user => {
+  // COST-LOCKED V1: Real Firebase Auth listener
+  this.auth.onAuthStateChanged(user => {
     if (user) {
       this.userId = user.uid;
+      // Hide login modal and show app
+      const loginModal = document.getElementById('loginModal');
+      if (loginModal) {
+        loginModal.classList.remove('active');
+      }
+      const app = document.getElementById('app');
+      if (app) {
+        app.style.display = 'block';
+      }
       this.loadAllData();
     } else {
-      // User is signed out
+      // User is signed out - show login screen
       this.userId = null;
       this.state.farm = null;
       this.state.tanks = [];
       this.state.feedLogs = [];
-      this.state.feedEntries = [];
-      this.renderAll();
+      this.showLoginScreen();
       this.showLoading(false);
     }
   });
@@ -673,7 +868,8 @@ try {
 localStorage.setItem('aquabook_farm', JSON.stringify(this.state.farm));
 localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
 localStorage.setItem('aquabook_feedLogs', JSON.stringify(this.state.feedLogs));
-localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries)); // Legacy compatibility
+// Legacy compatibility
+localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedLogs));
 localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
 localStorage.setItem('aquabook_water_quality', JSON.stringify(this.state.waterQuality));
 localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
@@ -770,12 +966,12 @@ async saveFeedEntry(entry) {
         if (entry && entry.id) {
           if (!entry.farmId) {
              const tank = this.getTankById(entry.tankId);
-             entry.farmId = tank ? tank.farmId : this.state.settings.currentFarmId;
+             entry.farmId = tank ? tank.farmId : this.state.settings.farmId;
           }
-          await this.db.collection('feedEntries').doc(String(entry.id)).set(entry, { merge: true });
+          await this.db.collection('feedLogs').doc(String(entry.id)).set(entry, { merge: true });
         }
       } else {
-        localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedEntries));
+        localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedLogs));
       }
     } catch (e) {
       console.error('Failed to save feed entries:', e);
@@ -1254,7 +1450,7 @@ const doc = this.getDaysOld(tank.stockingDate);
 const blindDuration = this.state.settings.blindFeedingDuration || 30;
 if (doc <= blindDuration) return;
 
-const entries = this.state.feedEntries.filter(e => e.tankId === tank.id).sort((a, b) => b.id - a.id);
+const entries = this.state.feedLogs.filter(e => e.tankId === tank.id).sort((a, b) => b.id - a.id);
 const lastEntry = entries[0];
 // Only consider valid tray checks (exclude pending, skipped, blind-fed)
 if (lastEntry && lastEntry.trayResult && !['pending', 'skipped', 'blind-fed'].includes(lastEntry.trayResult)) {
@@ -1298,7 +1494,7 @@ document.querySelectorAll('.overall-stats .stat-card').forEach(el => el.classLis
 const farmId = this.state.settings.farmId;
 const farmTanks = farmId ? this.state.tanks.filter(t => t.farmId === farmId) : [];
 const farmTankIds = farmTanks.map(t => t.id);
-const farmFeedEntries = farmId ? this.state.feedEntries.filter(e => farmTankIds.some(id => id === e.tankId)) : [];
+const farmFeedEntries = farmId ? this.state.feedLogs.filter(e => farmTankIds.some(id => id === e.tankId)) : [];
 const farmHarvests = farmId ? this.state.harvests.filter(h => farmTankIds.includes(h.tankId)) : [];
 const totalHarvested = farmHarvests.reduce((sum, h) => sum + h.weight, 0);
 
@@ -1458,7 +1654,7 @@ const status = doc > 75 ? 'danger' : doc > 50 ? 'warning' : 'good';
     // LIFECYCLE STATE BADGE
     const lifecycleState = tank.lifecycleState || this.calculateLifecycleState(tank);
     const lifecycleInfo = this.getLifecycleStateInfo(lifecycleState);
-    const lifecycleBadge = `<span style="background:${lifecycleInfo.bgColor}; color:${lifecycleInfo.color}; font-size:11px; padding:3px 8px; border-radius:999px; font-weight:600; display:inline-flex; align-items:center; gap:4px;">${lifecycleInfo.icon} ${lifecycleInfo.label}</span>`;
+    const lifecycleBadge = `<span class="lifecycle-badge ${lifecycleState}">${lifecycleInfo.icon} ${lifecycleInfo.label}</span>`;
     
     // Phase labels for first 30 DOC
     let phaseLabel = '';
@@ -1478,7 +1674,7 @@ const status = doc > 75 ? 'danger' : doc > 50 ? 'warning' : 'good';
         }
     }
 
-const allTankEntries = this.state.feedEntries.filter(e => e.tankId === tank.id);
+const allTankEntries = this.state.feedLogs.filter(e => e.tankId === tank.id);
 
 const totalFeed = allTankEntries.reduce((sum, e) => {
 const amount = typeof e.amount === 'number' && e.amount >= 0 ? e.amount : 0;
@@ -1510,7 +1706,7 @@ statusDot = `<div class="tank-feed-status ${statusClass}" title="Last Feed: ${la
 }
 
     return `
-    <div class="tank-summary-card ${status} ${isInactive ? 'inactive' : ''}" onclick="app.openTankDetail('${this.escapeAttribute(tank.id)}')">
+    <div class="tank-summary-card ${status} ${isInactive ? 'inactive' : ''} state-${lifecycleState}" onclick="app.openTankDetail('${this.escapeAttribute(tank.id)}')">
 ${statusDot}
 <div class="tank-summary-header">
 <div class="tank-summary-name">
@@ -1667,7 +1863,7 @@ planSub = `${feedsToday.length} feeds: ${feedsToday.map(f => f + 'kg').join(', '
 }
 // If no blind schedule or past day 30, check last feed/tray
 if (planAmount === 0) {
-const entries = this.state.feedEntries.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
+const entries = this.state.feedLogs.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
 const lastEntry = entries[0];
 const feedsPerDay = this.state.settings.feedsPerDay || 4;
 
@@ -1688,9 +1884,6 @@ planSub = 'Start with base amount';
 }
 }
 
-        // 4a. Simplified reminders: do not push water-test / minerals / frequency reminders here.
-        const remindersDiv = document.createElement('div');
-        remindersDiv.style.display = 'none';
 
 // Check if tank is in Tray Active mode
 const isTrayActive = this.isTrayActiveMode(tank);
@@ -1746,7 +1939,7 @@ if (allRoundsCompleted) {
 }
 
 // HERO CARD: "One big number" & "Confirm X kg"
-const todayEntries = this.state.feedEntries.filter(e => e.tankId === tankId && e.date === this.currentDate).sort((a, b) => a.id - b.id);
+const todayEntries = this.state.feedLogs.filter(e => e.tankId === tankId && e.date === this.currentDate).sort((a, b) => a.id - b.id);
 const nextFeedIndex = todayEntries.length;
 const totalFeedsForDay = feedsToday.length;
         let heroHTML = '';
@@ -1755,10 +1948,11 @@ const totalFeedsForDay = feedsToday.length;
         const amount = feedsToday[nextFeedIndex];
         const isBlind = doc <= blindDuration && !tank.hasTransitionedFromBlind;
 let explanation = '';
+let trayFeedGrams = 0;
 if (isBlind) {
 explanation = `Blind feeding (Day ${doc} based on stocking)`;
 } else {
-const entries = this.state.feedEntries.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
+const entries = this.state.feedLogs.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
 const lastEntry = entries[0];
 let lastResult = lastEntry ? (lastEntry.trayResult || 'None') : 'None';
 if (lastResult === 'too-much') lastResult = 'Too Much';
@@ -1917,7 +2111,7 @@ ${feedItemsHTML}
 `;
 } else {
 // TRAY PHASE: Show Last Feed Context instead of Schedule Plan
-const allEntries = this.state.feedEntries.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
+const allEntries = this.state.feedLogs.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
 const lastEntry = allEntries[0];
 if (lastEntry) {
 let trayDetails = '';
@@ -2029,7 +2223,7 @@ endDate = this.getFormattedDate(today);
 }
 
 const isDateInRange = (d) => d >= startDate && d <= endDate;
-const tankEntries = this.state.feedEntries.filter(e => e.tankId === tankId && isDateInRange(e.date));
+const tankEntries = this.state.feedLogs.filter(e => e.tankId === tankId && isDateInRange(e.date));
 
 // Check if blind mode for different rendering
 if (isBlindMode) {
@@ -2231,7 +2425,7 @@ const colTotals = [0, 0, 0, 0, 0, 0];
 
 tanksToShow.forEach(tank => {
 const farm = this.getFarmById(tank.farmId);
-const entries = this.state.feedEntries
+const entries = this.state.feedLogs
 .filter(e => e.tankId === tank.id && e.date === dateStr)
 .sort((a, b) => a.id - b.id);
 
@@ -2272,7 +2466,7 @@ tableBody.appendChild(row);
 });
 } else {
 tanksToShow.forEach(tank => {
-const tankEntries = this.state.feedEntries
+const tankEntries = this.state.feedLogs
 .filter(e => e.tankId === tank.id && isDateInRange(e.date));
 
 if (tankEntries.length === 0) return;
@@ -2349,7 +2543,7 @@ const farmId = this.state.settings.farmId;
 if (!farmId) return;
 const farmTanks = this.state.tanks.filter(t => t.farmId === farmId);
 const farmTankIds = farmTanks.map(t => t.id);
-const farmFeedEntries = this.state.feedEntries.filter(e => farmTankIds.some(id => id === e.tankId));
+const farmFeedEntries = this.state.feedLogs.filter(e => farmTankIds.some(id => id === e.tankId));
 const farmHarvests = this.state.harvests.filter(h => farmTankIds.includes(h.tankId));
 // Calculate FCR with input validation (BUG FIX #8)
 const totalFeed = farmFeedEntries.reduce((sum, e) => {
@@ -2946,7 +3140,7 @@ document.getElementById('confirmationModal').classList.add('active');
 executeDeleteTank() {
 const tankId = String(this.pendingDeleteTankId);
 this.state.tanks = this.state.tanks.filter(t => t.id !== tankId);
-this.state.feedEntries = this.state.feedEntries.filter(e => e.tankId !== tankId);
+this.state.feedLogs = this.state.feedLogs.filter(e => e.tankId !== tankId);
 this.state.harvests = this.state.harvests.filter(h => h.tankId !== tankId);
 this.state.waterQuality = this.state.waterQuality.filter(w => w.tankId !== tankId);
 this.state.applications = this.state.applications.filter(a => a.tankId !== tankId);
@@ -3059,7 +3253,7 @@ this.renderInventorySummary();
 }
 
 editFeedEntry(id) {
-const entry = this.state.feedEntries.find(e => e.id === id);
+const entry = this.state.feedLogs.find(e => e.id === id);
 if (!entry) return;
 
 
@@ -3104,11 +3298,11 @@ if (reason && reason.trim().length > 500) {
     return;
 }
 
-const entryIndex = this.state.feedEntries.findIndex(e => e.id === this.editingEntryId);
+const entryIndex = this.state.feedLogs.findIndex(e => e.id === this.editingEntryId);
 if (entryIndex === -1) return;
 
-const oldAmount = this.state.feedEntries[entryIndex].amount;
-const tankId = this.state.feedEntries[entryIndex].tankId;
+const oldAmount = this.state.feedLogs[entryIndex].amount;
+const tankId = this.state.feedLogs[entryIndex].tankId;
 // BUG #3 FIX: Update inventory with validation to prevent negative inventory
 const diff = amount - oldAmount;
 const newInventoryTotal = (this.state.inventory.totalKg || 0) - diff;
@@ -3120,14 +3314,14 @@ if (newInventoryTotal < 0) {
 }
 
 this.state.inventory.totalKg = newInventoryTotal;
-this.state.feedEntries[entryIndex].amount = amount;
-this.state.feedEntries[entryIndex].trayResult = trayResult;
-this.state.feedEntries[entryIndex].reason = reason || null;
+this.state.feedLogs[entryIndex].amount = amount;
+this.state.feedLogs[entryIndex].trayResult = trayResult;
+this.state.feedLogs[entryIndex].reason = reason || null;
 
 // BUG #2 FIX: Use async save with proper sequencing
 (async () => {
     try {
-        await this.saveFeedEntry(this.state.feedEntries[entryIndex]);
+        await this.saveFeedEntry(this.state.feedLogs[entryIndex]);
         await this.saveInventory();
         this.recalculateTankBiomass(tankId);
         this.closeAllModals();
@@ -3353,9 +3547,9 @@ if (!this.editingEntryId) return;
 
 this.showConfirmModal('Delete this feed entry?', 'Confirm Delete').then(confirmed => {
 if (confirmed) {
-const entryIndex = this.state.feedEntries.findIndex(e => e.id === this.editingEntryId);
+const entryIndex = this.state.feedLogs.findIndex(e => e.id === this.editingEntryId);
 if (entryIndex === -1) return;
-const entry = this.state.feedEntries[entryIndex];
+const entry = this.state.feedLogs[entryIndex];
 const tankId = entry.tankId;
 // BUG #3 FIX: Restore inventory safely
 const currentInventory = this.state.inventory.totalKg || 0;
@@ -3367,9 +3561,9 @@ if (refundAmount > 0 && refundAmount <= 10000) {
     // If amount is invalid, just don't refund
     console.warn('Skipping inventory refund for entry with invalid amount:', entry);
 }
-this.state.feedEntries.splice(entryIndex, 1);
+this.state.feedLogs.splice(entryIndex, 1);
 if (this.db && this.userId) {
-    this.db.collection('feedEntries').doc(String(entry.id)).delete();
+    this.db.collection('feedLogs').doc(String(entry.id)).delete();
 } else {
     this.saveFeedEntry(null);
 }
@@ -3514,7 +3708,7 @@ updateLogFeedContext(tankId) {
 const tank = this.getTankById(tankId);
 if (!tank) return;
 
-const entries = this.state.feedEntries.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
+const entries = this.state.feedLogs.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
 const lastEntry = entries[0];
 const doc = this.getDaysOld(tank.stockingDate);
 
@@ -3595,7 +3789,7 @@ if (isBlindMode && tank.blindSchedule) {
 }
 
 // Count how many feeds already logged for THIS calendar date
-const todayEntries = this.state.feedEntries.filter(e => e.tankId === tankId && e.date === this.currentDate).sort((a, b) => a.id - b.id);
+const todayEntries = this.state.feedLogs.filter(e => e.tankId === tankId && e.date === this.currentDate).sort((a, b) => a.id - b.id);
 
 // BLIND MODE vs TRAY MODE: Different UI context
 const feedRoundNumber = todayEntries.length + 1;
@@ -3633,7 +3827,7 @@ if (todayEntries.length >= totalFeedsForDay) {
   }
 
   // Update UI to indicate next-day suggestion and set modal target date to tomorrow
-  document.getElementById('logFeedTankName').innerHTML = `${this.sanitizeHTML(tank.name)} <i class="fas fa-chevron-down" style="font-size: 16px; opacity: 0.5;\"></i>`;
+  document.getElementById('logFeedTankName').innerHTML = `${this.sanitizeHTML(tank.name)} <i class="fas fa-chevron-down" style="font-size: 16px; opacity: 0.5;"></i>`;
   document.getElementById('logFeedContextText').innerHTML = `<span style="color: var(--success); font-weight: 600;">✅ Today's feeding completed</span><br><span style="font-size: 12px; color: var(--gray);">Next: Day ${nextDoc}</span>`;
   btnSugg.textContent = `Next Day: ${nextSuggestion}kg`;
   btnSugg.style.borderColor = healthIssue ? 'var(--warning)' : '';
@@ -3665,7 +3859,7 @@ if (todayEntries.length >= totalFeedsForDay) {
   if (feedModal) feedModal.removeAttribute('data-target-date');
 
   // Update UI based on BLIND MODE vs TRAY MODE
-  document.getElementById('logFeedTankName').innerHTML = `${this.sanitizeHTML(tank.name)} <i class="fas fa-chevron-down" style="font-size: 16px; opacity: 0.5;\"></i>`;
+  document.getElementById('logFeedTankName').innerHTML = `${this.sanitizeHTML(tank.name)} <i class="fas fa-chevron-down" style="font-size: 16px; opacity: 0.5;"></i>`;
   const lastAmount = (lastEntry?.amount) ?? 0;
   
   // DIFFERENTIATED CONTEXT DISPLAY
@@ -3762,7 +3956,7 @@ isTrayActiveMode(tank) {
 
 // Get feed round number for a new feed entry
 getFeedRoundNumber(tankId, date = this.currentDate) {
-  const todayEntries = this.state.feedEntries.filter(e => 
+  const todayEntries = this.state.feedLogs.filter(e => 
     e.tankId === tankId && e.date === date
   ).sort((a, b) => a.id - b.id);
   return todayEntries.length + 1;
@@ -3770,7 +3964,7 @@ getFeedRoundNumber(tankId, date = this.currentDate) {
 
 // Get last completed feed round for today
 getLastCompletedRound(tankId, date = this.currentDate) {
-  const todayEntries = this.state.feedEntries.filter(e => 
+  const todayEntries = this.state.feedLogs.filter(e => 
     e.tankId === tankId && e.date === date
   ).sort((a, b) => b.id - a.id);
   
@@ -3812,7 +4006,7 @@ getTrayModeState(tankId, date = this.currentDate) {
   
   // Use state machine from tray-mode-state-machine.js
   if (typeof getTrayModeState === 'function') {
-    return getTrayModeState(tank, this.state.feedEntries, date, feedsPerDay);
+    return getTrayModeState(tank, this.state.feedLogs, date, feedsPerDay);
   }
   
   // Fallback if state machine not loaded
@@ -3826,7 +4020,7 @@ getPlannedFeedAmount(tankId, roundNumber, date = this.currentDate) {
   
   // Use state machine from tray-mode-state-machine.js
   if (typeof getPlannedFeedForRound === 'function') {
-    return getPlannedFeedForRound(tank, this.state.feedEntries, date, roundNumber);
+    return getPlannedFeedForRound(tank, this.state.feedLogs, date, roundNumber);
   }
   
   // Fallback
@@ -3880,7 +4074,7 @@ areAllRoundsCompleted(tankId, date = this.currentDate) {
     }
   }
   
-  const todayEntries = this.state.feedEntries.filter(e => 
+  const todayEntries = this.state.feedLogs.filter(e => 
     e.tankId === tankId && e.date === date
   );
   
@@ -4074,7 +4268,7 @@ const today = new Date();
 const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
 
 // Check feed entries with logged mortality in last 24 hours
-const recentFeedsWithMortality = (this.state.feedEntries || [])
+const recentFeedsWithMortality = (this.state.feedLogs || [])
 .filter(e => e.tankId === tankId && e.mortality > 0)
 .filter(e => {
   const entryDate = new Date(e.timestamp || 0);
@@ -4114,12 +4308,12 @@ return null; // No health issues
 
 // NEW: Show Pending Modal
 showPendingModal() {
-const currentFarmId = this.state.settings.currentFarmId;
-if (!currentFarmId) return;
+const farmId = this.state.settings.farmId;
+if (!farmId) return;
 
-const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
+const farmTanks = this.state.tanks.filter(t => t.farmId === farmId);
 const farmTankIds = farmTanks.map(t => t.id);
-const pendingEntries = this.state.feedEntries.filter(e =>
+const pendingEntries = this.state.feedLogs.filter(e =>
 farmTankIds.includes(e.tankId) && e.trayResult === 'pending'
 );
 
@@ -4157,7 +4351,7 @@ document.getElementById('pendingModal').classList.add('active');
 // NEW: Open Tray Check Popup
 openTrayCheckPopup(tankId, entryId) {
 const tank = this.getTankById(tankId);
-const entry = this.state.feedEntries.find(e => e.id === entryId);
+const entry = this.state.feedLogs.find(e => e.id === entryId);
 if (!tank || !entry) return;
 
 this.currentCheck = {
@@ -4170,7 +4364,7 @@ activeTrayIndex: 0
     // Update header with tank and feed info
 const feedTime = entry.time || '6:00 AM';
 const feedAmount = entry.amount || 0;
-const feedIndex = this.state.feedEntries.filter(e => e.tankId === tankId && e.date === entry.date).findIndex(e => e.id === entryId) + 1;
+const feedIndex = this.state.feedLogs.filter(e => e.tankId === tankId && e.date === entry.date).findIndex(e => e.id === entryId) + 1;
     const subtitleEl = document.getElementById('trayCheckSubtitle');
     if (subtitleEl) {
         const doc = this.getDaysOld(tank.stockingDate);
@@ -4198,7 +4392,7 @@ const body = document.getElementById('trayCheckBody');
 if (!tabsContainer || !body) return;
 tabsContainer.innerHTML = '';
 body.innerHTML = '';
-const entry = this.state.feedEntries.find(e => e.id === this.currentCheck.entryId);
+const entry = this.state.feedLogs.find(e => e.id === this.currentCheck.entryId);
 const activeIndex = this.currentCheck.activeTrayIndex || 0;
 const tray = this.currentCheck.trays[activeIndex];
 
@@ -4311,7 +4505,7 @@ worstStatus = tray.status;
 });
 
 // Calculate suggestion using Strict Algorithm
-const entry = this.state.feedEntries.find(e => e.id === this.currentCheck.entryId);
+const entry = this.state.feedLogs.find(e => e.id === this.currentCheck.entryId);
 const tank = this.getTankById(this.currentCheck.tankId);
 const doc = tank ? this.getDaysOld(tank.stockingDate) : 0;
 const lastAmount = entry.amount;
@@ -4338,10 +4532,10 @@ summary.innerHTML = `
 `;
 
 // Workflow Improvement: Check for next pending tank
-const currentFarmId = this.state.settings.currentFarmId;
-const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
+const farmId = this.state.settings.farmId;
+const farmTanks = this.state.tanks.filter(t => t.farmId === farmId);
 const farmTankIds = farmTanks.map(t => t.id);
-const otherPending = this.state.feedEntries.filter(e =>
+const otherPending = this.state.feedLogs.filter(e =>
 farmTankIds.includes(e.tankId) && e.trayResult === 'pending' && e.id !== this.currentCheck.entryId
 );
 
@@ -4357,7 +4551,7 @@ document.getElementById('resultModal').classList.add('active');
 }
 
     confirmAndFinish() {
-        const entry = this.state.feedEntries.find(e => e.id === this.currentCheck.entryId);
+        const entry = this.state.feedLogs.find(e => e.id === this.currentCheck.entryId);
         if (entry) {
             entry.trayResult = this.currentCheck.finalResult;
             entry.trayResults = this.currentCheck.trays.map(t => t.status);
@@ -4385,7 +4579,7 @@ document.getElementById('resultModal').classList.add('active');
     }
 
 applySuggestion(entryId, suggestedAmount) {
-const entry = this.state.feedEntries.find(e => e.id === entryId);
+const entry = this.state.feedLogs.find(e => e.id === entryId);
 if (!entry) return;
 
 const tank = this.getTankById(entry.tankId);
@@ -4412,13 +4606,19 @@ btn.disabled = true;
 // In TRAY MODE: Planned kg shown (from previous decision), farmer confirms
 // In BLIND MODE: Plan is shown but farmer can adjust if needed
 // One pond at a time to avoid mistakes with wrong tanks
-saveLogFeed() {
+async saveLogFeed() {
 const tankId = document.getElementById('logFeedTankSelect').value;
 const amount = parseFloat(document.getElementById('logFeedAmount').value);
 const reason = document.getElementById('logFeedReason').value;
 const supplements = Array.from(document.querySelectorAll('#logFeedSupplements .supplement-option.selected'))
 .map(el => el.textContent.trim());
 
+// Prevent double submission
+const saveBtn = document.querySelector('#feedRoundModal .btn-primary');
+if (saveBtn && saveBtn.disabled) return; // Already saving
+if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...'; }
+
+try {
 // Validate tank selection
 if (!tankId) {
 this.showToast('Please select a tank', 'error');
@@ -4428,8 +4628,8 @@ return;
 // ===== TRAY MODE STATE VALIDATION =====
 const tank = this.getTankById(tankId);
 const doc = tank ? this.getDaysOld(tank.stockingDate) : 0;
-const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
-const isTrayMode = doc >= 30 && tank.hasTransitionedFromBlind;
+const blindDuration = (tank && tank.blindDuration) || this.state.settings.blindFeedingDuration || 30;
+const isTrayMode = doc > blindDuration && tank.hasTransitionedFromBlind;
 
 if (isTrayMode) {
   // Check if feed can be logged in current state
@@ -4462,10 +4662,9 @@ if (healthObserved) {
   diseaseType = document.getElementById('logDiseaseType') ? document.getElementById('logDiseaseType').value || null : null;
 }
 
-
-(async () => {
 // Check for feed jump (>20% increase)
-const tankEntries = this.state.feedEntries.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
+// Check for feed jump (>20% increase)
+const tankEntries = this.state.feedLogs.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
 const lastEntry = tankEntries[0];
 if (lastEntry && lastEntry.amount > 0) {
 const increase = (amount - lastEntry.amount) / lastEntry.amount;
@@ -4486,22 +4685,20 @@ if (amount > currentStock) {
 this.showToast(`⚠ Low Inventory: You have ${currentStock.toFixed(1)}kg in stock, feeding ${amount.toFixed(1)}kg.`, 'warning', 4000);
 }
 
-const tank = this.getTankById(tankId);
 // Check if this is the first tray-based feed after blind transition
 const isFirstTrayFeed = tank && tank.hasTransitionedFromBlind &&
-!this.state.feedEntries.some(e => e.tankId === tankId && e.trayResult && e.trayResult !== 'blind-fed' && e.trayResult !== 'pending');
+!this.state.feedLogs.some(e => e.tankId === tankId && e.trayResult && e.trayResult !== 'blind-fed' && e.trayResult !== 'pending');
 
 // Allow modal to override target date if we've moved to next day suggestion
 const feedModalEl = document.getElementById('feedRoundModal');
 const targetDateAttr = feedModalEl ? feedModalEl.getAttribute('data-target-date') : null;
 const entryDate = targetDateAttr || this.currentDate;
 
-const doc = this.getDaysOld(tank.stockingDate);
-const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
 const feedRoundNumber = this.getFeedRoundNumber(tankId, entryDate);
 const feedingMode = doc <= blindDuration && !tank.hasTransitionedFromBlind ? 'BLIND' : 'TRAY';
 const isExtraFeed = this.areAllRoundsCompleted(tankId, entryDate);
 
+const previousInventory = this.state.inventory.totalKg || 0;
 const newEntry = {
 // COST-LOCKED V1: Minimal required fields only
 id: Date.now(),
@@ -4527,21 +4724,18 @@ feeding_mode: feedingMode,
 is_extra_feed: isExtraFeed
 };
 
-this.state.feedEntries.push(newEntry);
+this.state.feedLogs.push(newEntry);
 
 // BUG #3 FIX: Validate inventory won't go negative before deducting
-const currentInventory = this.state.inventory.totalKg || 0;
-const newInventoryTotal = currentInventory - amount;
+const newInventoryTotal = previousInventory - amount;
 if (newInventoryTotal < 0) {
-    this.state.feedEntries.pop(); // Remove the entry we just added
-    this.showToast(`Cannot log ${amount}kg. Insufficient inventory. Current: ${currentInventory.toFixed(1)}kg`, 'error');
+    this.state.feedLogs.pop(); // Remove the entry we just added
+    this.showToast(`Cannot log ${amount}kg. Insufficient inventory. Current: ${previousInventory.toFixed(1)}kg`, 'error');
     return;
 }
 
 this.state.inventory.totalKg = newInventoryTotal;
 
-// COST-LOCKED V1: Batched write to feedLogs and farmDaily
-(async () => {
     try {
         // Batch write: feedLogs document + farmDaily summary
         const batch = this.db.batch();
@@ -4563,7 +4757,7 @@ this.state.inventory.totalKg = newInventoryTotal;
         const farmDailyRef = this.db.collection('farmDaily').doc(farmDailyId);
         
         // Get current daily data or create new
-        const todayLogs = this.state.feedEntries.filter(e => e.date === entryDate);
+        const todayLogs = this.state.feedLogs.filter(e => e.date === entryDate);
         const totalFeedKg = todayLogs.reduce((sum, e) => sum + (e.feedKg || e.amount || 0), 0);
         const roundsDone = new Set(todayLogs.map(e => `${e.pondId || e.tankId}_${e.round || e.feed_round_number}`)).size;
         
@@ -4628,7 +4822,7 @@ this.state.inventory.totalKg = newInventoryTotal;
 
         // Check if all feeds for this tank are completed for today
         const feedsPerDay = this.state.settings.feedsPerDay || 4;
-        const todayEntries = this.state.feedEntries.filter(e => 
+        const todayEntries = this.state.feedLogs.filter(e => 
             e.tankId === tankId && e.date === this.currentDate
         );
         const completedFeeds = todayEntries.length;
@@ -4655,10 +4849,16 @@ this.state.inventory.totalKg = newInventoryTotal;
         this.detectFeedJump(tankId, amount);
     } catch (e) {
         console.error('Failed to log feed:', e);
+        // ROLLBACK STATE ON FAILURE
+        this.state.feedLogs.pop();
+        this.state.inventory.totalKg = previousInventory;
+        this.recalculateTankBiomass(tankId, true); 
+        this.renderAll();
         this.showToast('Failed to save feed log', 'error');
     }
-})();
-})(); // Close outer async IIFE for BUG #9 confirm modal handling
+} finally {
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<i class="fas fa-check"></i> Save Feed'; }
+}
 }
 
 skipFeed(tankId) {
@@ -4674,7 +4874,7 @@ amount: 0,
 trayResult: 'skipped',
 supplements: []
 };
-this.state.feedEntries.push(newEntry);
+this.state.feedLogs.push(newEntry);
 this.saveFeedEntry(newEntry);
 this.renderAll();
 this.showToast('Feed skipped');
@@ -4688,6 +4888,22 @@ quickLogFeed(tankId, amount) {
 const tank = this.getTankById(tankId);
 const doc = this.getDaysOld(tank.stockingDate);
 const blindDuration = this.state.settings.blindFeedingDuration || 30;
+const isTrayMode = doc > blindDuration || tank.hasTransitionedFromBlind;
+
+// HARD LOCK: Check if previous round for today has pending tray status (Tray Mode only)
+if (isTrayMode) {
+    const todayEntries = this.state.feedLogs.filter(e => 
+        e.tankId === tankId && e.date === this.currentDate
+    ).sort((a, b) => a.id - b.id);
+
+    if (todayEntries.length > 0) {
+        const lastEntry = todayEntries[todayEntries.length - 1];
+        if (lastEntry.trayResult === 'pending') {
+            this.showToast('⚠️ Locked: Complete previous tray check first.', 'error');
+            return;
+        }
+    }
+}
 
 const currentStock = this.state.inventory.totalKg || 0;
 if (amount > currentStock) {
@@ -4712,13 +4928,13 @@ feeding_mode: feedingMode,
 is_extra_feed: isExtraFeed
 };
 
-this.state.feedEntries.push(newEntry);
+this.state.feedLogs.push(newEntry);
 
 // BUG #3 FIX: Validate inventory won't go negative before deducting
 const currentInventory = this.state.inventory.totalKg || 0;
 const newInventoryTotal = currentInventory - amount;
 if (newInventoryTotal < 0) {
-    this.state.feedEntries.pop(); // Remove the entry we just added
+    this.state.feedLogs.pop(); // Remove the entry we just added
     this.showToast(`Cannot feed ${amount}kg. Insufficient inventory. Current: ${currentInventory.toFixed(1)}kg`, 'error');
     return;
 }
@@ -4762,7 +4978,7 @@ this.showToast(`⚠ Low Inventory: You have ${currentStock.toFixed(1)}kg in stoc
 }
 
 const feedRoundNumber = feedIndex + 1;
-const todayEntries = this.state.feedEntries.filter(e => e.tankId === tankId && e.date === this.currentDate);
+const todayEntries = this.state.feedLogs.filter(e => e.tankId === tankId && e.date === this.currentDate);
 const isExtraFeed = todayEntries.length >= (tank.blindSchedule ? tank.blindSchedule.find(s => s.doc === (doc === 0 ? 1 : doc))?.feeds?.length || 4 : 4);
 
 const newEntry = {
@@ -4778,13 +4994,13 @@ feeding_mode: 'BLIND',
 is_extra_feed: isExtraFeed
 };
 
-this.state.feedEntries.push(newEntry);
+this.state.feedLogs.push(newEntry);
 
 // Validate inventory won't go negative before deducting
 const currentInventory = this.state.inventory.totalKg || 0;
 const newInventoryTotal = currentInventory - amount;
 if (newInventoryTotal < 0) {
-this.state.feedEntries.pop();
+this.state.feedLogs.pop();
 this.showToast(`Cannot feed ${amount}kg. Insufficient inventory. Current: ${currentInventory.toFixed(1)}kg`, 'error');
 return;
 }
@@ -4819,7 +5035,7 @@ tank.nextSuggestedFeed = null;
 }
 
 
-const entries = this.state.feedEntries.filter(e => e.tankId === tankId);
+const entries = this.state.feedLogs.filter(e => e.tankId === tankId);
 // Validate each feed entry amount before summing
 const totalFeed = entries.reduce((sum, e) => {
 const amount = typeof e.amount === 'number' && e.amount >= 0 ? e.amount : 0;
@@ -5149,7 +5365,7 @@ this.renderTankDetailEdit(tankId);
 }
 
 renderTankDetailOverview(tank, container) {
-const entries = this.state.feedEntries.filter(e => e.tankId == tank.id);
+const entries = this.state.feedLogs.filter(e => e.tankId == tank.id);
 const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
 const todayFeed = entries.filter(e => e.date === this.currentDate).reduce((sum, e) => sum + e.amount, 0);
 const doc = this.getDaysOld(tank.stockingDate);
@@ -5223,7 +5439,7 @@ const d = new Date(today);
 d.setDate(d.getDate() - i);
 const dateStr = this.getFormattedDate(d);
 labels.push(d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }));
-const dayEntries = this.state.feedEntries.filter(e => e.tankId === tank.id && e.date === dateStr);
+const dayEntries = this.state.feedLogs.filter(e => e.tankId === tank.id && e.date === dateStr);
 const dayTotal = dayEntries.reduce((sum, e) => sum + e.amount, 0);
 dataPoints.push(dayTotal);
 }
@@ -5328,7 +5544,7 @@ ticks: { font: { size: 10 }, maxRotation: 45, minRotation: 45 }
 
 renderTankDetailAnalytics(tank, container) {
 // Filter data for this specific tank
-const tankEntries = this.state.feedEntries.filter(e => e.tankId === tank.id);
+const tankEntries = this.state.feedLogs.filter(e => e.tankId === tank.id);
 const tankHarvests = this.state.harvests.filter(h => h.tankId === tank.id);
 
 // Calculate performance metrics
@@ -5721,7 +5937,7 @@ this.renderTankLogDiseases(tank, contentContainer);
 }
 
 renderTankLogFeed(tank, container) {
-const feedEntries = this.state.feedEntries.filter(e => e.tankId === tank.id).sort((a, b) => b.id - a.id).slice(0, 20);
+const feedEntries = this.state.feedLogs.filter(e => e.tankId === tank.id).sort((a, b) => b.id - a.id).slice(0, 20);
 const harvestEntries = this.state.harvests.filter(h => h.tankId === tank.id).sort((a, b) => b.id - a.id);
 
 container.innerHTML = `
@@ -5899,7 +6115,7 @@ return timeB - timeA;
 
 history.forEach(crop => {
 // Calculate stats for this crop
-const entries = this.state.feedEntries.filter(e => e.tankId === crop.id);
+const entries = this.state.feedLogs.filter(e => e.tankId === crop.id);
 const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
 const harvests = this.state.harvests.filter(h => h.tankId === crop.id);
 const totalHarvest = harvests.reduce((sum, h) => sum + h.weight, 0);
@@ -5974,7 +6190,7 @@ const tank = this.getTankById(tankId);
 if (!tank) return;
 
 // Calculate metrics for summary
-const entries = this.state.feedEntries.filter(e => e.tankId == tankId);
+const entries = this.state.feedLogs.filter(e => e.tankId == tankId);
 const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
 const harvests = this.state.harvests.filter(h => h.tankId === tankId);
 const totalHarvest = harvests.reduce((sum, h) => sum + h.weight, 0);
@@ -6211,7 +6427,7 @@ this.state.tanks.push(archivedTank);
 
 // Move feed entries to archive
 const entriesToUpdate = [];
-this.state.feedEntries.forEach(e => {
+this.state.feedLogs.forEach(e => {
 if (e.tankId === tank.id) {
 e.tankId = archiveId;
 entriesToUpdate.push(e);
@@ -6385,10 +6601,10 @@ this.saveSettings();
 openComparisonModal() {
 const grid = document.getElementById('comparisonGrid');
 grid.innerHTML = '';
-const currentFarmId = this.state.settings.currentFarmId;
-const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId && t.status !== 'inactive');
+const farmId = this.state.settings.farmId;
+const tanks = this.state.tanks.filter(t => t.farmId === farmId && t.status !== 'inactive');
 tanks.slice(0, 4).forEach(tank => {
-const entries = this.state.feedEntries.filter(e => e.tankId == tank.id);
+const entries = this.state.feedLogs.filter(e => e.tankId == tank.id);
 const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
 const todayFeed = entries.filter(e => e.date === this.currentDate).reduce((sum, e) => sum + e.amount, 0);
 const card = document.createElement('div');
@@ -6420,15 +6636,15 @@ this.openExportModal();
 exportReportData() {
 // Generate report data
 const reportData = {
-farm: this.getFarmById(this.state.settings.currentFarmId),
-tanks: this.state.tanks.filter(t => t.farmId === this.state.settings.currentFarmId),
-feedEntries: this.state.feedEntries.filter(e => {
+farm: this.state.farm,
+tanks: this.state.tanks.filter(t => t.farmId === this.state.settings.farmId),
+feedEntries: this.state.feedLogs.filter(e => {
 const tank = this.getTankById(e.tankId);
-return tank && tank.farmId === this.state.settings.currentFarmId;
+return tank && tank.farmId === this.state.settings.farmId;
 }),
 harvests: this.state.harvests.filter(h => {
 const tank = this.getTankById(h.tankId);
-return tank && tank.farmId === this.state.settings.currentFarmId;
+return tank && tank.farmId === this.state.settings.farmId;
 }),
 generatedDate: new Date().toISOString(),
 reportType: 'efficiency_analysis'
@@ -6518,9 +6734,9 @@ this.renderSettingsSupplements();
 
 exportData() {
 const data = {
-farms: this.state.farms,
+farm: this.state.farm,
 tanks: this.state.tanks,
-feedEntries: this.state.feedEntries,
+feedEntries: this.state.feedLogs,
 harvests: this.state.harvests,
 inventory: this.state.inventory,
 medicineInventory: this.state.medicineInventory,
@@ -6699,12 +6915,12 @@ this.renderCharts();
 }
 
 renderCharts() {
-const currentFarmId = this.state.settings.currentFarmId;
-if (!currentFarmId) return;
+const farmId = this.state.settings.farmId;
+if (!farmId) return;
 
-const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId && t.status !== 'inactive');
+const farmTanks = this.state.tanks.filter(t => t.farmId === farmId && t.status !== 'inactive');
 const farmTankIds = farmTanks.map(t => t.id);
-const farmFeedEntries = this.state.feedEntries.filter(e => farmTankIds.includes(e.tankId));
+const farmFeedEntries = this.state.feedLogs.filter(e => farmTankIds.includes(e.tankId));
 const farmWaterQuality = this.state.waterQuality.filter(w => farmTankIds.includes(w.tankId));
 const farmHarvests = this.state.harvests.filter(h => farmTankIds.includes(h.tankId));
 
@@ -7485,12 +7701,12 @@ font: { family: 'Roboto', size: 11 }
 
 exportCharts() {
 // Export chart data as JSON
-const currentFarmId = this.state.settings.currentFarmId;
-if (!currentFarmId) return;
+const farmId = this.state.settings.farmId;
+if (!farmId) return;
 
-const farmTanks = this.state.tanks.filter(t => t.farmId === currentFarmId);
+const farmTanks = this.state.tanks.filter(t => t.farmId === farmId);
 const farmTankIds = farmTanks.map(t => t.id);
-const farmFeedEntries = this.state.feedEntries.filter(e => farmTankIds.includes(e.tankId));
+const farmFeedEntries = this.state.feedLogs.filter(e => farmTankIds.includes(e.tankId));
 const farmWaterQuality = this.state.waterQuality.filter(w => farmTankIds.includes(w.tankId));
 const farmHarvests = this.state.harvests.filter(h => farmTankIds.includes(h.tankId));
 
@@ -7545,99 +7761,6 @@ dailyWaste[entry.date].waste++;
 return dailyWaste;
 }
 
-// ===== TRAY FEED LOG BOOK HELPERS =====
-
-adjustTrayFeed(delta) {
-const amountEl = document.getElementById('trayFeedAmount');
-if (!amountEl) return;
-let current = parseFloat(amountEl.textContent) || 0;
-current = Math.max(0, +(current + delta).toFixed(1));
-amountEl.textContent = current + ' kg';
-}
-
-logTrayFeed(tankId, roundNumber) {
-const amountEl = document.getElementById('trayFeedAmount');
-if (!amountEl) {
-this.showToast('Error: Feed amount not found', 'error');
-return;
-}
-
-const amount = parseFloat(amountEl.textContent) || 0;
-
-if (amount <= 0) {
-this.showToast('Please enter a valid feed amount', 'error');
-return;
-}
-
-const now = new Date();
-const entry = {
-id: Date.now(),
-tankId: tankId,
-date: this.getFormattedDate(now),
-time: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
-amount: amount,
-trayResult: 'pending',
-trayResults: [],
-supplements: [],
-feeding_mode: 'TRAY',
-feed_round_number: roundNumber
-};
-
-this.state.feedEntries.push(entry);
-this.saveFeedEntry(entry);
-
-// Update UI elements if they exist
-const logBtn = document.getElementById('logTrayFeedBtn');
-const statusEl = document.getElementById('feedLoggedStatus');
-
-if (logBtn) logBtn.style.display = 'none';
-if (statusEl) statusEl.style.display = 'block';
-
-document.querySelectorAll('.btn-stepper').forEach(btn => btn.disabled = true);
-
-this.showToast('Feed logged successfully', 'success');
-
-// Refresh the view after a short delay
-setTimeout(() => {
-const tank = this.getTankById(tankId);
-if (tank) {
-const planContainer = document.getElementById('logFeedPlanContainer');
-if (planContainer) {
-const doc = this.getDaysOld(tank.stockingDate);
-planContainer.innerHTML = this.renderTrayFeedLogBookSimple(tankId, tank, doc);
-}
-}
-}, 500);
-}
-
-switchHistoryTab(tab, clickedEl) {
-// Reset all tabs
-document.querySelectorAll('.history-tab').forEach(t => {
-t.classList.remove('active');
-t.style.background = '#f3f4f6';
-t.style.color = '#6b7280';
-});
-
-// Style the clicked tab or find by text content
-const tabEl = clickedEl || Array.from(document.querySelectorAll('.history-tab')).find(t => 
-t.textContent.toLowerCase().includes(tab === '7days' ? '7' : tab)
-);
-if (tabEl) {
-tabEl.classList.add('active');
-tabEl.style.background = '#3b4cff';
-tabEl.style.color = '#fff';
-}
-
-// Hide all content
-document.querySelectorAll('.history-content').forEach(c => c.style.display = 'none');
-
-// Show selected content
-const contentId = tab === 'today' ? 'historyToday' : 
-tab === 'yesterday' ? 'historyYesterday' : 'historyLast7Days';
-const content = document.getElementById(contentId);
-if (content) content.style.display = 'block';
-}
-
 toggleHistoryDetails(entryId) {
 const details = document.getElementById('historyDetails' + entryId);
 if (!details) return;
@@ -7653,10 +7776,216 @@ chevron.style.transition = 'transform 0.2s';
 }
 }
 
+// ===== TRAY FEED LOG BOOK HELPERS =====
+
+adjustTrayFeed(delta) {
+    const amountEl = document.getElementById('trayFeedAmount');
+    if (!amountEl) return;
+    
+    let current = 0;
+    if (amountEl.tagName === 'INPUT') {
+        current = parseFloat(amountEl.value) || 0;
+    } else {
+        current = parseFloat(amountEl.textContent) || 0;
+    }
+    
+    current = Math.max(0, +(current + delta).toFixed(1));
+    
+    if (amountEl.tagName === 'INPUT') {
+        amountEl.value = current.toFixed(2);
+    } else {
+        amountEl.innerHTML = `${current.toFixed(2)} <span class="unit">kg</span>`;
+    }
+}
+
+async logTrayFeed(tankId, roundNumber) {
+    const amountEl = document.getElementById('trayFeedAmount');
+    if (!amountEl) return;
+    
+    let amount = 0;
+    if (amountEl.tagName === 'INPUT') {
+        amount = parseFloat(amountEl.value) || 0;
+    } else {
+        amount = parseFloat(amountEl.textContent) || 0;
+    }
+
+    if (amount <= 0) {
+        this.showToast('Please enter a valid feed amount', 'error');
+        return;
+    }
+
+    // HARD LOCK: Check if previous round for today has pending tray status
+    const tank = this.getTankById(tankId);
+    if (!tank) return;
+
+    const now = new Date();
+    const dateStr = this.getFormattedDate(now);
+    
+    const todayEntries = this.state.feedLogs.filter(e => 
+        e.tankId === tankId && e.date === dateStr
+    ).sort((a, b) => a.id - b.id);
+
+    if (todayEntries.length > 0) {
+        const lastEntry = todayEntries[todayEntries.length - 1];
+        if (lastEntry.trayResult === 'pending') {
+            this.showToast('⚠️ Locked: Complete previous tray check first.', 'error');
+            // Refresh UI to show lock card
+            const planContainer = document.getElementById('logFeedPlanContainer');
+            if (planContainer) {
+                const doc = this.getDaysOld(tank.stockingDate);
+                planContainer.innerHTML = this.renderTrayFeedLogBookSimple(tankId, tank, doc);
+            }
+            return;
+        }
+    }
+
+    const currentStock = this.state.inventory.totalKg || 0;
+    if (amount > currentStock) {
+         this.showToast(`⚠ Low Inventory: You have ${currentStock.toFixed(1)}kg in stock.`, 'warning', 4000);
+    }
+    
+    const newInventoryTotal = currentStock - amount;
+    if (newInventoryTotal < 0) {
+        this.showToast(`Cannot feed ${amount}kg. Insufficient inventory.`, 'error');
+        return;
+    }
+
+    const confirmed = await this.showConfirmModal(
+        `Log ${amount.toFixed(2)} kg for Round ${roundNumber}?`,
+        'Confirm Feed',
+        'Log Feed',
+        'Cancel'
+    );
+
+    if (!confirmed) return;
+
+    const doc = this.getDaysOld(tank.stockingDate);
+
+    const newEntry = {
+        id: Date.now(),
+        tankId: tankId,
+        pondId: tankId,
+        farmId: this.state.settings.farmId,
+        date: dateStr,
+        time: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
+        amount: amount,
+        feedKg: amount,
+        doc: doc,
+        round: roundNumber,
+        feed_round_number: roundNumber,
+        trayResult: 'pending',
+        trayResults: [],
+        supplements: [],
+        feeding_mode: 'TRAY',
+        createdBy: this.userId,
+        createdAt: now.toISOString(),
+        is_extra_feed: false
+    };
+
+    this.state.feedLogs.push(newEntry);
+    this.state.inventory.totalKg = newInventoryTotal;
+
+    const logBtn = document.getElementById('logTrayFeedBtn');
+    if (logBtn) {
+        logBtn.disabled = true;
+        logBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+    document.querySelectorAll('.btn-stepper-sm').forEach(btn => btn.disabled = true);
+
+    try {
+        if (this.db && this.userId) {
+            const batch = this.db.batch();
+            const feedLogRef = this.db.collection('feedLogs').doc(String(newEntry.id));
+            
+            const firestoreEntry = {
+                farmId: newEntry.farmId,
+                pondId: newEntry.pondId,
+                doc: newEntry.doc,
+                round: newEntry.round,
+                feedKg: newEntry.feedKg,
+                createdBy: newEntry.createdBy,
+                createdAt: newEntry.createdAt,
+                date: newEntry.date,
+                time: newEntry.time,
+                amount: newEntry.amount,
+                trayResult: newEntry.trayResult,
+                feeding_mode: newEntry.feeding_mode,
+                feed_round_number: newEntry.feed_round_number
+            };
+            
+            batch.set(feedLogRef, firestoreEntry);
+
+            const farmDailyId = `${newEntry.farmId}_${dateStr.replace(/-/g, '_')}`;
+            const farmDailyRef = this.db.collection('farmDaily').doc(farmDailyId);
+            
+            const todayLogs = this.state.feedLogs.filter(e => e.date === dateStr);
+            const totalFeedKg = todayLogs.reduce((sum, e) => sum + (e.feedKg || e.amount || 0), 0);
+            const roundsDone = new Set(todayLogs.map(e => `${e.pondId || e.tankId}_${e.round || e.feed_round_number}`)).size;
+
+            batch.set(farmDailyRef, {
+                totalFeedKg,
+                roundsDone,
+                lastFeedKg: newEntry.feedKg,
+                updatedAt: now.toISOString()
+            }, { merge: true });
+
+            const inventoryRef = this.db.collection('inventory').doc(this.state.settings.farmId);
+            batch.set(inventoryRef, { totalKg: newInventoryTotal }, { merge: true });
+
+            await batch.commit();
+        } else {
+            this.saveFeedEntry(newEntry);
+            this.saveInventory();
+        }
+
+        this.recalculateTankBiomass(tankId, true);
+        this.updateTankLifecycleState(tankId);
+        this.detectFeedJump(tankId, amount);
+        
+        this.showToast('Feed logged successfully', 'success');
+        
+        if (logBtn) logBtn.style.display = 'none';
+        const statusEl = document.getElementById('feedLoggedStatus');
+        if (statusEl) statusEl.style.display = 'block';
+
+        setTimeout(() => {
+            const planContainer = document.getElementById('logFeedPlanContainer');
+            if (planContainer) {
+                planContainer.innerHTML = this.renderTrayFeedLogBookSimple(tankId, tank, doc);
+            }
+        }, 1000);
+
+    } catch (e) {
+        console.error('Failed to log tray feed:', e);
+        this.state.feedLogs.pop();
+        this.state.inventory.totalKg = currentStock;
+        this.showToast('Failed to save feed. Please try again.', 'error');
+        if (logBtn) {
+            logBtn.disabled = false;
+            logBtn.textContent = 'Log';
+        }
+        document.querySelectorAll('.btn-stepper-sm').forEach(btn => btn.disabled = false);
+    }
+}
+
+switchHistoryTab(tab, clickedEl) {
+    document.querySelectorAll('.history-tab').forEach(t => {
+        t.classList.remove('active');
+    });
+    if (clickedEl) clickedEl.classList.add('active');
+    
+    document.querySelectorAll('.history-content').forEach(c => c.style.display = 'none');
+    
+    const contentId = tab === 'today' ? 'historyToday' : 
+                      tab === 'yesterday' ? 'historyYesterday' : 'historyLast7Days';
+    const content = document.getElementById(contentId);
+    if (content) content.style.display = 'block';
+}
+
 // ===== SIMPLIFIED TRAY FEED LOG BOOK (Matching User Design) =====
 
 renderTrayFeedLogBookSimple(tankId, tank, doc) {
-const todayEntries = this.state.feedEntries.filter(e => 
+const todayEntries = this.state.feedLogs.filter(e => 
 e.tankId === tankId && e.date === this.currentDate
 ).sort((a, b) => a.id - b.id);
 
@@ -7665,7 +7994,7 @@ const currentRound = todayEntries.length + 1;
 const lastTodayEntry = todayEntries[todayEntries.length - 1];
 
 // Get the LAST entry from ANY day for this tank (for calculating suggestion)
-const allEntries = this.state.feedEntries.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
+const allEntries = this.state.feedLogs.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
 const lastEntryEver = allEntries[0];
 
 // For UI locking, only check today's last entry
@@ -7703,18 +8032,18 @@ const totalTrays = trayResults.length;
 if (tooMuchCount > 0) {
 suggestedAmount = +(lastAmount * 0.8).toFixed(1);
 reasonText = '⬇ Reduced 20% – leftover feed detected';
-} else if (halfCount > 0) {
+} else if (halfCount / totalTrays > 0.5) {
 suggestedAmount = +(lastAmount * 0.9).toFixed(1);
-reasonText = '⬇ Reduced 10% – half feed left';
+reasonText = '⬇ Reduced 10% – half feed left in majority';
 } else if (emptyCount === totalTrays) {
 suggestedAmount = +(lastAmount * 1.1).toFixed(1);
 reasonText = '⬆ Increased 10% – all trays empty';
-} else if (emptyCount > 0 && littleCount > 0) {
+} else if (emptyCount + littleCount === totalTrays) {
 suggestedAmount = lastAmount;
-reasonText = '➡ Same – mixed empty/little results';
+reasonText = '➡ Same – good consumption';
 } else {
 suggestedAmount = lastAmount;
-reasonText = '➡ Same as previous feed';
+reasonText = '➡ Same – mixed tray results';
 }
 } else if (trayStatus === 'too-much') {
 suggestedAmount = +(lastAmount * 0.8).toFixed(1);
@@ -7728,12 +8057,17 @@ reasonText = '➡ Same – little left is OK';
 } else if (trayStatus === 'empty') {
 suggestedAmount = +(lastAmount * 1.1).toFixed(1);
 reasonText = '⬆ Increased 10% – all eaten';
+} else if (trayStatus === 'blind-fed') {
+suggestedAmount = lastAmount;
+reasonText = '➡ Transition from Blind Phase';
 } else {
 // No tray result yet or pending - use same amount
 suggestedAmount = lastAmount;
 reasonText = '➡ Continue with previous amount';
 }
 }
+
+suggestedAmount = Math.max(0.1, suggestedAmount);
 
 // Get suggested time for next feed
 const feedTimes = this.state.settings.feedTimes || [6, 10, 14, 18];
@@ -7818,7 +8152,11 @@ return `
 <div class="feed-round-header">
 <div class="feed-round-info">Feed ${roundNumber} · ${timeStr}</div>
 <div class="feed-round-action-row">
-<div class="feed-amount-dominant" id="trayFeedAmount">${suggestedAmount.toFixed(2)} <span class="unit">kg</span></div>
+<div style="display:flex; align-items:baseline; gap:4px;">
+    <input type="number" id="trayFeedAmount" value="${suggestedAmount.toFixed(2)}" step="0.1" min="0" onfocus="this.select()"
+           style="font-size: 24px; font-weight: 800; color: var(--primary); width: 100px; border: none; border-bottom: 2px solid var(--border); text-align: right; padding: 0; background: transparent; -moz-appearance: textfield;">
+    <span class="unit" style="font-size: 14px; color: var(--gray); font-weight: 600;">kg</span>
+</div>
 <button class="btn-log-compact" id="logTrayFeedBtn" onclick="app.logTrayFeed('${this.escapeAttribute(String(tankId))}', ${roundNumber})">
 Log
 </button>
@@ -7868,15 +8206,15 @@ renderFeedHistorySimple(tankId) {
 const today = this.currentDate;
 const yesterday = this.getFormattedDate(new Date(Date.now() - 86400000));
 
-const todayEntries = this.state.feedEntries.filter(e => 
+const todayEntries = this.state.feedLogs.filter(e => 
 e.tankId === tankId && e.date === today
 ).sort((a, b) => b.id - a.id);
 
-const yesterdayEntries = this.state.feedEntries.filter(e => 
+const yesterdayEntries = this.state.feedLogs.filter(e => 
 e.tankId === tankId && e.date === yesterday
 ).sort((a, b) => b.id - a.id);
 
-const last7DaysEntries = this.state.feedEntries.filter(e => {
+const last7DaysEntries = this.state.feedLogs.filter(e => {
 if (e.tankId !== tankId) return false;
 const entryDate = new Date(e.date);
 const sevenDaysAgo = new Date();

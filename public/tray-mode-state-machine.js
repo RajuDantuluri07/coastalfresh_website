@@ -36,10 +36,11 @@ const DIGESTION_WAIT_HOURS = 2; // Minimum wait time before tray check
  * @returns {Object} State object with state, roundNumber, and metadata
  */
 function getTrayModeState(tank, feedEntries, currentDate, feedsPerDay = 4) {
-  const doc = getDaysOld(tank.stockingDate);
+  const doc = getDaysOld(tank.stockingDate, currentDate);
+  const blindDuration = tank.blindDuration || 30;
   
   // Not in tray mode
-  if (doc < 30 || !tank.hasTransitionedFromBlind) {
+  if (doc <= blindDuration || !tank.hasTransitionedFromBlind) {
     return { state: null, roundNumber: 0, isTrayMode: false };
   }
   
@@ -80,7 +81,7 @@ function getTrayModeState(tank, feedEntries, currentDate, feedsPerDay = 4) {
     lastEntry.trayResult !== 'blind-fed';
   
   // Check if enough time has passed for tray check (2 hours)
-  const feedTime = new Date(`${currentDate} ${lastEntry.time}`);
+  const feedTime = new Date(`${currentDate}T${lastEntry.time}`);
   const now = new Date();
   const hoursSinceFeed = (now - feedTime) / (1000 * 60 * 60);
   const canCheckTray = hoursSinceFeed >= DIGESTION_WAIT_HOURS;
@@ -137,9 +138,9 @@ function getTrayModeState(tank, feedEntries, currentDate, feedsPerDay = 4) {
 function getPlannedFeedForRound(tank, feedEntries, currentDate, roundNumber) {
   // Round 1: Get from yesterday's last decision or default
   if (roundNumber === 1) {
-    const yesterday = new Date(currentDate);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = formatDate(yesterday);
+    // Fix: Use local date construction to avoid timezone off-by-one errors
+    const [y, m, d] = currentDate.split('-').map(Number);
+    const yesterdayStr = formatDate(new Date(y, m - 1, d - 1));
     
     const yesterdayEntries = feedEntries
       .filter(e => e.tankId === tank.id && e.date === yesterdayStr)
@@ -148,7 +149,10 @@ function getPlannedFeedForRound(tank, feedEntries, currentDate, roundNumber) {
     if (yesterdayEntries.length > 0) {
       const lastEntry = yesterdayEntries[0];
       // Use decisionKgForNextRound if available, otherwise use last amount
-      return lastEntry.decisionKgForNextRound || lastEntry.amount || 2.0;
+      if (lastEntry.decisionKgForNextRound !== undefined && lastEntry.decisionKgForNextRound !== null) {
+        return lastEntry.decisionKgForNextRound;
+      }
+      return lastEntry.amount || 2.0;
     }
     
     // Default starting amount
@@ -161,7 +165,7 @@ function getPlannedFeedForRound(tank, feedEntries, currentDate, roundNumber) {
     .sort((a, b) => a.id - b.id);
   
   const previousEntry = todayEntries[roundNumber - 2]; // -2 because array is 0-indexed
-  if (previousEntry && previousEntry.decisionKgForNextRound) {
+  if (previousEntry && previousEntry.decisionKgForNextRound !== undefined && previousEntry.decisionKgForNextRound !== null) {
     return previousEntry.decisionKgForNextRound;
   }
   
@@ -281,10 +285,10 @@ function canLogFeed(state) {
 }
 
 // Helper function to calculate days old
-function getDaysOld(stockingDate) {
+function getDaysOld(stockingDate, currentDateStr) {
   if (!stockingDate) return 0;
   const stocking = new Date(stockingDate);
-  const today = new Date();
+  const today = currentDateStr ? new Date(currentDateStr) : new Date();
   const diff = today - stocking;
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }

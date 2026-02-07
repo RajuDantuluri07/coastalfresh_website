@@ -3,6 +3,8 @@ const CACHE_NAME = 'aquarythu-v1';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
+  '/landing.html',
+  '/landing.css',
   '/styles.css',
   '/app.js',
   '/manifest.json'

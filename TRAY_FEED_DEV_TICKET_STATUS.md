@@ -111,7 +111,7 @@ Add these helper functions:
 - [x] Feed logging with state machine enforcement
 - [x] History tab switching (Today/Yesterday/Last 7 Days)
 - [x] Collapsible history details
-- [ ] Tray status blocking (hard lock)
+- [x] Tray status blocking (hard lock)
 - [ ] Farmer confirmation mandatory
 - [ ] Auto-calculated suggestions based on tray results
 
