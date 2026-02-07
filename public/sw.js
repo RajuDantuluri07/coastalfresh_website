@@ -6,8 +6,17 @@ const STATIC_ASSETS = [
   '/landing.html',
   '/landing.css',
   '/styles.css',
+  '/tray-mode-state-machine.js',
   '/app.js',
-  '/manifest.json'
+  '/manifest.json',
+  // External Libraries (Critical for Offline)
+  'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&display=swap',
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+  'https://cdn.jsdelivr.net/npm/chart.js',
+  'https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js',
+  'https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js',
+  'https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js',
+  'https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js'
 ];
 
 // Install event

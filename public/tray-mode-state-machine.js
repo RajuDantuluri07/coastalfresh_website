@@ -227,8 +227,8 @@ function calculateNextFeedFromTray(currentAmount, trayResults) {
     adjustment = -0.10;
     reason = 'Half left in most trays - slight reduction';
   } else if (counts.empty === total) {
-    // All EMPTY → increase by 10-15%
-    adjustment = 0.125; // Average of 10-15%
+    // All EMPTY → increase by 5%
+    adjustment = 0.05; 
     reason = 'All trays empty - increasing feed';
   } else if (counts.empty + counts.little === total) {
     // Mix of EMPTY + LITTLE → keep same

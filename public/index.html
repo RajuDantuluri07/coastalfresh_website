@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="landing.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
 
@@ -15,7 +16,12 @@
         <div class="container">
             <nav>
                 <div class="logo">🐟 AquaRythu</div>
-                <a href="/app.html?intent=login" class="btn btn-secondary">Login</a>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="installAppBtn" class="btn btn-download" style="display: none;">
+                        <i class="fas fa-download"></i> Download App
+                    </button>
+                    <a href="/app.html?intent=login" class="btn btn-secondary">Login</a>
+                </div>
             </nav>
             <div class="hero-content">
                 <h1>Stop Guessing, Start Growing.</h1>

@@ -31,8 +31,8 @@ farmId: null, // Single farm
 feedsPerDay: 4,
 feedPrice: 90,
 marketPrice: 350,
-feedJumpThreshold: 30,
-analyticsEnabled: false, // Disabled for cost lock
+feedJumpThreshold: 20,
+analyticsEnabled: true, // Enabled for monitoring
             feedTimes: [6, 10, 14, 18], // Default feed times
             trayCheckPercentages: { range1: 0.3, range2: 0.6, range3: 1.0 }, // 3g to 10g per kg
             farmType: 'semi',          // extensive | semi | intensive
@@ -289,6 +289,10 @@ this.analyticsEvents.push(event);
 // Save events to localStorage
 this.saveAnalyticsEvents();
 this.handleAnalyticsEvent(eventName, metadata);
+
+if (this.analytics) {
+  this.analytics.logEvent(eventName, metadata);
+}
 }
 
 saveAnalyticsEvents() {
@@ -328,6 +332,15 @@ reportError(err, context = {}) {
       // fallback: just console.log
       console.warn('Error reported (no endpoint):', payload);
     }
+    
+    // Monitor: Log critical errors to Firestore for remote debugging
+    if (this.db && this.userId && navigator.onLine) {
+      this.db.collection('client_errors').add({
+        ...payload,
+        serverTimestamp: firebase.firestore.FieldValue.serverTimestamp()
+      }).catch(e => console.warn('Failed to log error to DB', e));
+    }
+
     // Attempt to persist analytics (non-blocking)
     try { this.saveAnalyticsEvents(); } catch (e) { /* ignore */ }
   } catch (e) {
@@ -548,6 +561,12 @@ async signOut() {
     if (this.unsubscribeSettings) this.unsubscribeSettings();
     if (this.unsubscribeFarm) this.unsubscribeFarm();
     if (this.unsubscribeTanks) this.unsubscribeTanks();
+    if (this.unsubscribeFeedLogs) this.unsubscribeFeedLogs();
+    if (this.unsubscribeHarvests) this.unsubscribeHarvests();
+    if (this.unsubscribeWater) this.unsubscribeWater();
+    if (this.unsubscribeInventory) this.unsubscribeInventory();
+    if (this.unsubscribeDiseases) this.unsubscribeDiseases();
+    if (this.unsubscribeApplications) this.unsubscribeApplications();
     
     await this.auth.signOut();
   } catch (error) {
@@ -615,7 +634,7 @@ const todayTotal = todayEntries.reduce((sum, e) => sum + e.amount, 0);
 const yesterdayTotal = yesterdayEntries.reduce((sum, e) => sum + e.amount, 0);
 if (yesterdayTotal === 0) return false;
 const increasePercentage = ((todayTotal - yesterdayTotal) / yesterdayTotal) * 100;
-const threshold = this.state.settings.feedJumpThreshold || 30;
+const threshold = this.state.settings.feedJumpThreshold || 20;
 if (increasePercentage >= threshold) {
 // Check if we already detected a jump today
 const key = `${tankId}_${this.currentDate}`;
@@ -702,9 +721,9 @@ loadAllData() {
       const farms = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       
       if (farms.length > 0) {
-        this.state.farm = farms[0];
-        this.state.settings.farmId = farms[0].id;
-        this.loadFarmSummary(farms[0].id);
+        this.state.farm = farms[0]; // Set the farm
+        this.state.settings.farmId = farms[0].id; // Update settings
+        this.loadTanksForFarm(farms[0].id); // Load tanks directly
       } else {
         // No farm found - clear state
         this.state.farm = null;
@@ -725,71 +744,6 @@ loadAllData() {
     });
 }
 
-// COST-LOCKED V1: Load farm daily summary instead of full history
-loadFarmSummary(farmId) {
-  if (!farmId) return;
-  
-  // Load today's farm daily summary (1 read)
-  const today = this.getFormattedDate();
-  const farmDailyId = `${farmId}_${today.replace(/-/g, '_')}`;
-  
-  this.db.collection('farmDaily').doc(farmDailyId)
-    .onSnapshot(doc => {
-      if (doc.exists) {
-        const data = doc.data();
-        // Use summary for UI instead of loading all feed logs
-        this.state.todaySummary = data;
-        this.renderSummaryScreen();
-      }
-      this.showLoading(false);
-    });
-  
-  // Load tanks for the farm (minimal data)
-  this.loadTanksForFarm(farmId);
-}
-
-// COST-LOCKED V1: Render summary screen instead of full history
-renderSummaryScreen() {
-  if (!this.state.todaySummary) {
-    // Fallback to tank-based rendering if no summary available
-    this.renderLogBook();
-    return;
-  }
-
-  const summary = this.state.todaySummary;
-  const farmTanks = this.state.tanks || [];
-  
-  // Update UI with summary data
-  const totalFeedEl = document.getElementById('totalFeedToday');
-  const roundsDoneEl = document.getElementById('roundsCompletedToday');
-  const lastFeedEl = document.getElementById('lastFeedAmount');
-  
-  if (totalFeedEl) totalFeedEl.textContent = `${summary.totalFeedKg?.toFixed(1) || 0} kg`;
-  if (roundsDoneEl) roundsDoneEl.textContent = summary.roundsDone || 0;
-  if (lastFeedEl) lastFeedEl.textContent = `${summary.lastFeedKg?.toFixed(1) || 0} kg`;
-  
-  // Render tank list with minimal data
-  this.renderTankList(farmTanks);
-}
-
-renderTankList(tanks) {
-  const container = document.getElementById('tankList');
-  if (!container) return;
-  
-  if (tanks.length === 0) {
-    container.innerHTML = '<div class="empty-state">No tanks found</div>';
-    return;
-  }
-  
-  container.innerHTML = tanks.map(tank => `
-    <div class="tank-card" onclick="app.openTankDetail('${tank.id}')">
-      <h4>${this.sanitizeHTML(tank.name)}</h4>
-      <div class="tank-status">${tank.status || 'Active'}</div>
-      <div class="tank-biomass">${tank.biomass?.toFixed(1) || 0} kg</div>
-    </div>
-  `).join('');
-}
-
 loadTanksForFarm(farmId) {
   if (this.unsubscribeTanks) this.unsubscribeTanks();
   this.unsubscribeTanks = this.db.collection('tanks')
@@ -798,34 +752,81 @@ loadTanksForFarm(farmId) {
     .onSnapshot(snapshot => {
       this.state.tanks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       this.renderAll();
+      this.showLoading(false);
+      // Trigger loading of related data (Feed logs, harvest, etc.)
+      this.loadFarmRelatedData(farmId);
     });
 }
 
-// COST-SAFETY: Use this method instead of loading all logs
-async loadRecentLogsSafe(tankId) {
-  if (!this.db || !this.userId) return;
-  
-  // Only load last 7 days of logs
-  const dateLimit = new Date();
-  dateLimit.setDate(dateLimit.getDate() - 7);
-  const dateStr = this.getFormattedDate(dateLimit);
+loadFarmRelatedData(farmId) {
+    // 1. Load Feed Logs (Last 30 days to keep initial load light)
+    const dateLimit = new Date();
+    dateLimit.setDate(dateLimit.getDate() - 30);
+    const dateStr = this.getFormattedDate(dateLimit);
 
-  try {
-    const snapshot = await this.db.collection('feedLogs')
-      .where('tankId', '==', tankId)
-      .where('date', '>=', dateStr)
-      .orderBy('date', 'desc')
-      .limit(50) // Hard limit to ensure you never read thousands of docs at once
-      .get();
-      
-    const logs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    // Merge into state...
-    console.log(`Loaded ${logs.length} logs safely.`);
-    return logs;
-  } catch (e) {
-    console.error("Error loading logs:", e);
-    return [];
-  }
+    if (this.unsubscribeFeedLogs) this.unsubscribeFeedLogs();
+    this.unsubscribeFeedLogs = this.db.collection('feedLogs')
+        .where('farmId', '==', farmId)
+        .where('date', '>=', dateStr)
+        .orderBy('date', 'desc')
+        .limit(500)
+        .onSnapshot(snapshot => {
+            this.state.feedLogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            this.renderAll();
+        }, e => console.error("Feed logs load error:", e));
+
+    // 2. Load Harvests
+    if (this.unsubscribeHarvests) this.unsubscribeHarvests();
+    this.unsubscribeHarvests = this.db.collection('harvests')
+        .where('farmId', '==', farmId)
+        .onSnapshot(snapshot => {
+            this.state.harvests = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            this.renderAll();
+        }, e => console.error("Harvests load error:", e));
+        
+    // 3. Load Water Quality
+    if (this.unsubscribeWater) this.unsubscribeWater();
+    this.unsubscribeWater = this.db.collection('waterQuality')
+        .where('farmId', '==', farmId)
+        .where('date', '>=', dateStr)
+        .orderBy('date', 'desc')
+        .limit(100)
+        .onSnapshot(snapshot => {
+            this.state.waterQuality = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            this.renderAll();
+        }, e => console.error("Water quality load error:", e));
+
+    // 4. Load Inventory
+    if (this.unsubscribeInventory) this.unsubscribeInventory();
+    this.unsubscribeInventory = this.db.collection('inventory').doc(farmId)
+        .onSnapshot(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                this.state.inventory.totalKg = data.totalKg || 0;
+                this.state.medicineInventory = data.medicine || [];
+                this.renderAll();
+            }
+        }, e => console.error("Inventory load error:", e));
+    
+    // 5. Load Diseases
+    if (this.unsubscribeDiseases) this.unsubscribeDiseases();
+    this.unsubscribeDiseases = this.db.collection('diseases')
+        .where('farmId', '==', farmId)
+        .limit(50)
+        .onSnapshot(snapshot => {
+            this.state.diseases = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            this.renderAll();
+        }, e => console.error("Diseases load error:", e));
+        
+    // 6. Load Applications
+    if (this.unsubscribeApplications) this.unsubscribeApplications();
+    this.unsubscribeApplications = this.db.collection('applications')
+        .where('farmId', '==', farmId)
+        .limit(50)
+        .onSnapshot(snapshot => {
+            this.state.applications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            this.renderAll();
+        }, e => console.error("Applications load error:", e));
 }
 
 init() {
@@ -835,6 +836,7 @@ if (typeof firebase !== 'undefined') {
   }
   this.db = firebase.firestore();
   this.auth = firebase.auth(); // Initialize Firebase Auth
+  this.analytics = firebase.analytics(); // Initialize Google Analytics
 
   // Handle redirect result (for mobile Google Sign-In)
   this.auth.getRedirectResult().catch(error => {
@@ -930,30 +932,6 @@ this.reportError(error, { phase: 'init' });
 this.showLoading(false);
 this.showToast("Something went wrong. Please refresh.", "error");
 }
-}
-
-saveAllData() {
-return this.enqueueSave(() => {
-try {
-localStorage.setItem('aquabook_farm', JSON.stringify(this.state.farm));
-localStorage.setItem('aquabook_tanks', JSON.stringify(this.state.tanks));
-localStorage.setItem('aquabook_feedLogs', JSON.stringify(this.state.feedLogs));
-// Legacy compatibility
-localStorage.setItem('aquabook_entries', JSON.stringify(this.state.feedLogs));
-localStorage.setItem('aquabook_harvests', JSON.stringify(this.state.harvests));
-localStorage.setItem('aquabook_water_quality', JSON.stringify(this.state.waterQuality));
-localStorage.setItem('aquabook_applications', JSON.stringify(this.state.applications));
-localStorage.setItem('aquabook_inventory', JSON.stringify(this.state.inventory));
-localStorage.setItem('aquabook_medicine', JSON.stringify(this.state.medicineInventory));
-localStorage.setItem('aquabook_diseases', JSON.stringify(this.state.diseases || []));
-localStorage.setItem('aquabook_settings', JSON.stringify(this.state.settings));
-this.saveAnalyticsEvents();
-} catch (e) {
-console.error('Failed to save all data:', e);
-this.showToast('Failed to save data. Check storage.', 'error');
-throw e;
-}
-});
 }
 
 // BUG #2 FIX: Queue-based save system to prevent race conditions
@@ -1367,33 +1345,18 @@ return `${year}-${month}-${day}`;
 
 // BUG FIX #10: Proper timezone-aware date comparison for DOC calculation
 getDaysOld(dateStr = new Date()) {
-// If dateStr is a Date object, use getFormattedDate to get normalized string
-const normalizedDateStr = typeof dateStr === 'string' ? dateStr : this.getFormattedDate(dateStr);
-// Parse the date string as local midnight (not UTC)
-const parts = normalizedDateStr.split('-');
-if (parts.length === 3) {
-const year = parseInt(parts[0], 10);
-const month = parseInt(parts[1], 10) - 1;
-const day = parseInt(parts[2], 10);
-// Create date in local timezone
-const targetDate = new Date(year, month, day, 0, 0, 0, 0);
-// Get today's date at local midnight
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-// Calculate difference in days
-const diffTime = today - targetDate;
-const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-return Math.max(0, diffDays); // Never negative
-} else {
-// Fallback for non-string dates
-const d = dateStr instanceof Date ? dateStr : new Date(dateStr);
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-d.setHours(0, 0, 0, 0);
-const diffTime = today - d;
-const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-return Math.max(0, diffDays);
-}
+    if (!dateStr) return 0;
+    // Create a date object from the string, ensuring it's interpreted as local time by adding T00:00:00
+    const targetDate = new Date(dateStr + 'T00:00:00');
+    
+    // Get today's date at local midnight for an accurate comparison
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const diffTime = today - targetDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    return Math.max(0, diffDays); // DOC cannot be negative
 }
 
 getLunarPhase(date = new Date()) {
@@ -1964,142 +1927,6 @@ planSub = 'Start with base amount';
 }
 
 
-// Check if tank is in Tray Active mode
-const isTrayActive = this.isTrayActiveMode(tank);
-
-// TRAY ACTIVE MODE: Show Last Feed Round Summary
-let lastRoundSummaryHTML = '';
-if (isTrayActive) {
-  lastRoundSummaryHTML = this.renderLastFeedRoundSummary(tankId, this.currentDate);
-}
-
-// Check if we can show next feed suggestion
-const canShowSuggestion = this.canShowNextFeedSuggestion(tankId, this.currentDate);
-const allRoundsCompleted = this.areAllRoundsCompleted(tankId, this.currentDate);
-
-// Warning banner for tray status not updated (Tray Active mode only)
-let trayStatusWarningHTML = '';
-if (isTrayActive && !canShowSuggestion && !allRoundsCompleted) {
-  const lastRound = this.getLastCompletedRound(tankId, this.currentDate);
-  if (lastRound) {
-    trayStatusWarningHTML = `
-      <div style="background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; padding: 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
-        <i class="fas fa-exclamation-triangle" style="font-size: 24px; color: #f59e0b;"></i>
-        <div style="flex: 1;">
-          <div style="font-size: 14px; font-weight: 700; color: #f59e0b; margin-bottom: 4px;">Update Tray Status to Continue</div>
-          <div style="font-size: 13px; color: var(--gray);">You must update the tray status for Round ${lastRound.roundNumber} before the next feed suggestion can be shown.</div>
-        </div>
-        <button class="btn btn-warning" onclick="app.openTrayCheckPopup('${tankId}', ${lastRound.entry.id})" style="padding: 10px 16px; font-size: 13px; white-space: nowrap;">
-          <i class="fas fa-edit"></i> Update Tray Status
-        </button>
-      </div>
-    `;
-  }
-}
-
-// Warning banner for all rounds completed
-let allRoundsWarningHTML = '';
-if (allRoundsCompleted) {
-  const totalRounds = this.state.settings.feedsPerDay || 4;
-  allRoundsWarningHTML = `
-    <div style="background: #ffebee; border-left: 4px solid var(--danger); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-        <i class="fas fa-times-circle" style="font-size: 24px; color: var(--danger);"></i>
-        <div style="font-size: 16px; font-weight: 700; color: var(--danger);">All Feeding Rounds Completed for Today</div>
-      </div>
-      <div style="font-size: 13px; color: var(--gray); margin-bottom: 12px;">
-        You have completed all ${totalRounds} planned feeding rounds for today. Feeding more may cause overfeeding and feed waste.
-      </div>
-      <div style="background: white; border: 1px solid #ffcdd2; border-radius: 6px; padding: 10px; font-size: 12px; color: var(--gray);">
-        <strong style="color: var(--danger);">⚠️ Warning:</strong> Any additional feed logged today will be marked as <strong>"Extra Feed"</strong> and may negatively impact your FCR.
-      </div>
-    </div>
-  `;
-}
-
-// HERO CARD: "One big number" & "Confirm X kg"
-const todayEntries = this.state.feedLogs.filter(e => e.tankId === tankId && e.date === this.currentDate).sort((a, b) => a.id - b.id);
-const nextFeedIndex = todayEntries.length;
-const totalFeedsForDay = feedsToday.length;
-        let heroHTML = '';
-        // Only show hero card if we can show suggestion (or in blind mode)
-        if (nextFeedIndex < totalFeedsForDay && (canShowSuggestion || !isTrayActive)) {
-        const amount = feedsToday[nextFeedIndex];
-        const isBlind = doc <= blindDuration && !tank.hasTransitionedFromBlind;
-let explanation = '';
-let trayFeedGrams = 0;
-if (isBlind) {
-explanation = `Blind feeding (Day ${doc} based on stocking)`;
-} else {
-const entries = this.state.feedLogs.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
-const lastEntry = entries[0];
-let lastResult = lastEntry ? (lastEntry.trayResult || 'None') : 'None';
-if (lastResult === 'too-much') lastResult = 'Too Much';
-else if (lastResult === 'blind-fed') lastResult = 'Blind Fed (Transition)';
-else if (lastResult === 'pending') lastResult = 'Pending Check';
-explanation = `Based on last tray check: <span style="text-transform: capitalize; font-weight: 600;">${lastResult}</span>`;
-
-const traySettings = this.state.settings.trayCheckPercentages || { range1: 0.3, range2: 0.6, range3: 1.0 };
-let pct = traySettings.range1;
-if (doc >= 90) {
-    pct = traySettings.range3;
-} else if (doc >= 60) {
-    pct = traySettings.range2;
-}
-const trayFeedKg = amount * (pct / 100);
-trayFeedGrams = Math.round(trayFeedKg * 1000);
-
-}
-
-heroHTML = `
-<div style="background: white; border: 2px solid ${isBlind ? 'var(--primary)' : 'var(--success)'}; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-<div style="background: ${isBlind ? 'var(--primary)' : 'var(--success)'}; color: white; padding: 6px 12px; border-radius: 20px; font-weight: 700; font-size: 14px;">
-DOC ${doc}
-</div>
-<div style="font-size: 12px; font-weight: 600; color: var(--gray); text-transform: uppercase;">
-${isBlind ? 'Blind Phase' : 'Tray Phase'}
-</div>
-</div>
-<div style="text-align: center; margin-bottom: 20px;">
-<div style="font-size: 13px; color: var(--gray); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Suggested Feed</div>
-<div style="font-size: 56px; font-weight: 800; color: var(--dark); line-height: 1;">
-${amount} <span style="font-size: 20px; color: var(--gray); font-weight: 600;">kg</span>
-</div>
-${!isBlind && trayFeedGrams > 0 ? `
-<div style="margin-top: 8px; font-size: 16px; font-weight: 600; color: var(--success-dark);">
-    <i class="fas fa-balance-scale"></i>
-    ${trayFeedGrams} grams / check tray
-</div>
-` : ''}
-<div style="font-size: 14px; color: var(--primary); margin-top: 8px; font-weight: 500;">
-${explanation}
-</div>
-</div>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 8px;">
-<button class="btn btn-secondary" onclick="app.skipFeed('${tankId}')" style="justify-content: center; border: 2px solid var(--border); color: var(--gray); padding: 12px 0; width: 100%;">
-Skip
-</button>
-<button class="btn btn-secondary" onclick="app.openLogFeedModal('${tankId}', ${amount}, ${nextFeedIndex})" style="justify-content: center; border: 2px solid var(--border); padding: 12px 0; width: 100%;">
-Edit
-</button>
-<button class="btn btn-primary" onclick="app.quickLogFeed('${tankId}', ${amount})" style="justify-content: center; font-size: 16px; background: ${isBlind ? 'var(--primary)' : 'var(--success)'}; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); width: 100%;">
-Confirm ${amount} kg
-</button>
-</div>
-</div>
-`;
-} else {
-heroHTML = `
-<div style="background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 20px;">
-<i class="fas fa-check-circle" style="font-size: 48px; color: var(--success); margin-bottom: 12px;"></i>
-<h3 style="color: var(--success-dark); margin-bottom: 4px;">All Feeds Completed</h3>
-<p style="color: var(--success-dark); opacity: 0.8; font-size: 14px;">Great job! See you tomorrow.</p>
-</div>
-`;
-}
-
         let scheduleHTML = '';
         // BLIND MODE: Show new blind feed log book UI matching user's mockup
         if (doc <= blindDuration && !tank.hasTransitionedFromBlind) {
@@ -2188,81 +2015,6 @@ ${feedItemsHTML}
 </div>
 </div>
 `;
-} else {
-// TRAY PHASE: Show Last Feed Context instead of Schedule Plan
-const allEntries = this.state.feedLogs.filter(e => e.tankId === tankId).sort((a, b) => b.id - a.id);
-const lastEntry = allEntries[0];
-if (lastEntry) {
-let trayDetails = '';
-            if (lastEntry.trayResults && lastEntry.trayResults.length > 0) {
-trayDetails = `<div style="display:flex; gap:12px; margin-top:8px;">`;
-lastEntry.trayResults.forEach((status, i) => {
-let icon = 'question';
-let color = 'var(--gray)';
-let label = 'Pending';
-if (status === 'empty') { icon = 'check'; color = 'var(--success)'; label = 'Empty'; }
-else if (status === 'little') { icon = 'utensils'; color = 'var(--info)'; label = 'Little'; }
-else if (status === 'half') { icon = 'adjust'; color = 'var(--warning)'; label = 'Half'; }
-else if (status === 'too-much') { icon = 'exclamation-triangle'; color = 'var(--danger)'; label = 'Full'; }
-trayDetails += `
-<div style="text-align:center;">
-<div style="width:32px; height:32px; border-radius:50%; background:${color}20; color:${color}; display:flex; align-items:center; justify-content:center; margin:0 auto 4px auto;">
-<i class="fas fa-${icon}" style="font-size:14px;"></i>
-</div>
-<div style="font-size:10px; color:var(--gray); font-weight:600;">Tray ${i+1}</div>
-<div style="font-size:10px; color:${color};">${label}</div>
-</div>
-`;
-});
-trayDetails += `</div>`;
-            } else {
-                // Simple text result line; if still pending, also show a CTA to update trays now.
-                const isPending = !lastEntry.trayResult || lastEntry.trayResult === 'pending';
-                const baseLabel = lastEntry.trayResult || 'Pending';
-                const updateCTA = isPending
-                    ? `<button class="btn btn-sm btn-secondary" style="margin-left:8px; padding:4px 10px; font-size:11px;"
-                               onclick="event.stopPropagation(); app.openTrayCheckPopup('${tankId}', ${lastEntry.id});">
-                           Update
-                       </button>`
-                    : '';
-                trayDetails = `<div style="font-size:13px; color:var(--gray); margin-top:4px; display:flex; align-items:center;">
-                                   Result: <strong style="text-transform:capitalize; margin-left:4px;">${baseLabel}</strong>
-                                   ${updateCTA}
-                               </div>`;
-}
-
-let suppHTML = '';
-if (lastEntry.supplements && lastEntry.supplements.length > 0) {
-suppHTML = `
-<div style="margin-top:12px; padding-top:12px; border-top:1px solid #eee;">
-<div style="font-size:11px; color:var(--gray); margin-bottom:6px; font-weight:600; text-transform:uppercase;">Supplements Used</div>
-<div style="display:flex; flex-wrap:wrap; gap:6px;">
-${lastEntry.supplements.map(s => `<span style="background:var(--info-light); color:var(--info-dark); padding:4px 10px; border-radius:12px; font-size:11px; font-weight:500;">${s}</span>`).join('')}
-</div>
-</div>
-`;
-}
-
-scheduleHTML = `
-<div class="daily-schedule-card" style="padding: 16px;">
-<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #eee;">
-<div>
-<h4 style="margin:0; color:var(--dark); font-size:15px;">Previous Feed</h4>
-<div style="font-size:12px; color:var(--gray); margin-top:2px;">${new Date(lastEntry.date).toLocaleDateString()} &bull; ${lastEntry.time}</div>
-</div>
-<div style="text-align:right;">
-<div style="font-size:20px; font-weight:800; color:var(--dark);">${lastEntry.amount} <span style="font-size:12px; font-weight:600; color:var(--gray);">kg</span></div>
-</div>
-</div>
-<div style="background:var(--light); border-radius:12px; padding:12px;">
-<div style="font-size:12px; font-weight:600; color:var(--dark); margin-bottom:4px;">Tray Check Results</div>
-${trayDetails}
-</div>
-
-${suppHTML}
-</div>
-`;
-}
 }
 
         const isBlindMode = doc <= blindDuration && !tank.hasTransitionedFromBlind;
@@ -3224,7 +2976,7 @@ executeDeleteTank() {
 const tankId = String(this.pendingDeleteTankId);
 this.state.tanks = this.state.tanks.filter(t => t.id !== tankId);
 this.state.feedLogs = this.state.feedLogs.filter(e => e.tankId !== tankId);
-this.state.harvests = this.state.harvests.filter(h => h.tankId !== tankId);
+this.state.harvests = this.state.harvests.filter(h => String(h.tankId) !== tankId);
 this.state.waterQuality = this.state.waterQuality.filter(w => w.tankId !== tankId);
 this.state.applications = this.state.applications.filter(a => a.tankId !== tankId);
 
@@ -3635,7 +3387,7 @@ const entry = this.state.feedLogs[entryIndex];
 const tankId = entry.tankId;
 // BUG #3 FIX: Restore inventory safely
 const currentInventory = this.state.inventory.totalKg || 0;
-const refundAmount = entry.amount || 0;
+const refundAmount = Number(entry.amount) || 0;
 // Validate refund amount is reasonable
 if (refundAmount > 0 && refundAmount <= 10000) {
     this.state.inventory.totalKg = currentInventory + refundAmount;
@@ -6619,7 +6371,7 @@ feedsPerDaySelect.value = this.state.settings.feedsPerDay || 4;
 document.getElementById('settingFeedsPerDay').value = this.state.settings.feedsPerDay || 4;
 document.getElementById('settingFeedPrice').value = this.state.settings.feedPrice || 90;
 document.getElementById('settingBlindDuration').value = this.state.settings.blindFeedingDuration || 30;
-document.getElementById('feedJumpThreshold').value = this.state.settings.feedJumpThreshold || 30;
+document.getElementById('feedJumpThreshold').value = this.state.settings.feedJumpThreshold || 20;
 const traySettings = this.state.settings.trayCheckPercentages || { range1: 0.4, range2: 0.6, range3: 0.8 };
 document.getElementById('trayPctRange1').value = traySettings.range1;
 document.getElementById('trayPctRange2').value = traySettings.range2;
@@ -6799,7 +6551,7 @@ this.saveSettings();
 }
 
 updateFeedJumpThreshold(val) {
-this.state.settings.feedJumpThreshold = parseFloat(val) || 30;
+this.state.settings.feedJumpThreshold = parseFloat(val) || 20;
 this.saveSettings();
 this.showToast(`Feed jump threshold updated to ${val}%`);
 }
@@ -8152,8 +7904,8 @@ reasonText = '⬇ Reduced 20% – leftover feed detected';
 suggestedAmount = +(lastAmount * 0.9).toFixed(1);
 reasonText = '⬇ Reduced 10% – half feed left in majority';
 } else if (emptyCount === totalTrays) {
-suggestedAmount = +(lastAmount * 1.1).toFixed(1);
-reasonText = '⬆ Increased 10% – all trays empty';
+suggestedAmount = +(lastAmount * 1.05).toFixed(1);
+reasonText = '⬆ Increased 5% – all trays empty';
 } else if (emptyCount + littleCount === totalTrays) {
 suggestedAmount = lastAmount;
 reasonText = '➡ Same – good consumption';
@@ -8171,8 +7923,8 @@ reasonText = '⬇ Reduced 10% – half feed left';
 suggestedAmount = lastAmount;
 reasonText = '➡ Same – little left is OK';
 } else if (trayStatus === 'empty') {
-suggestedAmount = +(lastAmount * 1.1).toFixed(1);
-reasonText = '⬆ Increased 10% – all eaten';
+suggestedAmount = +(lastAmount * 1.05).toFixed(1);
+reasonText = '⬆ Increased 5% – all eaten';
 } else if (trayStatus === 'blind-fed') {
 suggestedAmount = lastAmount;
 reasonText = '➡ Transition from Blind Phase';
