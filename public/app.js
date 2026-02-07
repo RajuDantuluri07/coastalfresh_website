@@ -375,7 +375,7 @@ showLoginScreen() {
   if (!loginModal) {
     loginModal = document.createElement('div');
     loginModal.id = 'loginModal';
-    loginModal.className = 'modal active';
+    loginModal.className = 'modal-overlay active';
     loginModal.innerHTML = `
       <div class="modal-content" style="max-width: 400px;">
         <div class="modal-header">
@@ -387,7 +387,7 @@ showLoginScreen() {
             <p style="color: var(--gray);">Sign in to manage your aquaculture farm</p>
           </div>
           
-          <div id="loginError" class="error-message" style="display: none; margin-bottom: 15px;"></div>
+          <div id="loginError" class="error-message" style="display: none; margin-bottom: 15px; color: var(--danger);"></div>
           
           <div class="form-group">
             <label>Email</label>
