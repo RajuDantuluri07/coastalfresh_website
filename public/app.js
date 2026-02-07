@@ -395,7 +395,10 @@ showLoginScreen() {
           </div>
           
           <div class="form-group">
-            <label>Password</label>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
+              <label style="margin-bottom: 0;">Password</label>
+              <a href="#" onclick="app.resetPassword(); return false;" style="font-size: 12px; color: var(--primary);">Forgot Password?</a>
+            </div>
             <input type="password" id="loginPassword" placeholder="Enter your password" class="form-control" onkeydown="if(event.key==='Enter') app.signIn()">
           </div>
           
@@ -496,6 +499,25 @@ async signUp() {
   }
 }
 
+async resetPassword() {
+  const email = document.getElementById('loginEmail').value;
+  const errorEl = document.getElementById('loginError');
+  
+  if (!email) {
+    errorEl.textContent = 'Please enter your email address above to reset password.';
+    errorEl.style.display = 'block';
+    return;
+  }
+  
+  try {
+    await this.auth.sendPasswordResetEmail(email);
+    this.showToast('Password reset email sent. Check your inbox.', 'success');
+  } catch (error) {
+    errorEl.textContent = this.getAuthErrorMessage(error.code);
+    errorEl.style.display = 'block';
+  }
+}
+
 async signInWithGoogle() {
   const errorEl = document.getElementById('loginError');
   
@@ -509,7 +531,8 @@ async signInWithGoogle() {
   
   try {
     const provider = new firebase.auth.GoogleAuthProvider();
-    await this.auth.signInWithPopup(provider);
+    // Use signInWithRedirect for better mobile support
+    await this.auth.signInWithRedirect(provider);
     // Auth state listener will handle the rest
   } catch (error) {
     if (errorEl) {
@@ -812,6 +835,19 @@ if (typeof firebase !== 'undefined') {
   }
   this.db = firebase.firestore();
   this.auth = firebase.auth(); // Initialize Firebase Auth
+
+  // Handle redirect result (for mobile Google Sign-In)
+  this.auth.getRedirectResult().catch(error => {
+    console.error("Redirect auth error:", error);
+    const errorEl = document.getElementById('loginError');
+    if (errorEl) {
+      errorEl.textContent = this.getAuthErrorMessage(error.code);
+      errorEl.style.display = 'block';
+    } else {
+      // Fallback if login modal isn't open
+      if (this.showToast) this.showToast(this.getAuthErrorMessage(error.code), 'error');
+    }
+  });
   
   // COST-SAFETY: Connect to Emulators when running locally
   // Run 'firebase emulators:start' in your terminal to use this
@@ -876,6 +912,7 @@ this.initialized = true;
 this.showToast(`Welcome to AquaRythu!`, 'success');
 // Track app open
 this.trackEvent('app_open');
+this.checkIosInstall();
     // Global error capture for client-side issues
     try {
       window.addEventListener('error', (ev) => {
@@ -947,7 +984,7 @@ this.isSaving = false;
 }
 }
 
-async saveFarm() { 
+async persistFarm() { 
   return this.enqueueSave(async () => {
     try {
       if (this.db && this.userId && this.state.farm) {
@@ -963,7 +1000,7 @@ async saveFarm() {
   });
 }
 
-async saveTank(tank) {
+async persistTank(tank) {
   if (!tank || !tank.id) return;
   // The .set() method with { merge: true } will create or update the document.
   return this.db.collection('tanks').doc(tank.id).set(tank, { merge: true });
@@ -1014,7 +1051,7 @@ async saveFeedEntry(entry) {
   });
 }
 
-async saveHarvest(harvest) { 
+async persistHarvest(harvest) { 
   return this.enqueueSave(async () => {
     try {
       if (this.db && this.userId) {
@@ -1590,7 +1627,16 @@ renderInventorySummary() {
 const feedStock = this.state.inventory.totalKg || 0;
 const displayFeedStock = document.getElementById('displayFeedStock');
 const displayMedStock = document.getElementById('displayMedStock');
-if (displayFeedStock) displayFeedStock.innerHTML = `${feedStock.toFixed(1)} <span class="unit">kg</span>`;
+if (displayFeedStock) {
+  displayFeedStock.innerHTML = `${feedStock.toFixed(1)} <span class="unit">kg</span>`;
+  // Visual warning for negative stock
+  if (feedStock < 0) {
+    displayFeedStock.style.color = 'var(--danger)';
+    displayFeedStock.innerHTML += ` <i class="fas fa-exclamation-circle" style="font-size: 14px;" title="Negative Stock"></i>`;
+  } else {
+    displayFeedStock.style.color = '';
+  }
+}
 if (displayMedStock) displayMedStock.innerHTML = `${this.state.medicineInventory.length} <span class="unit">Items</span>`;
 }
 
@@ -2862,7 +2908,7 @@ openTankModal(farmId) {
   this.updateBlindFeedPreview();
 }
 
-saveFarm() {
+async saveFarm() {
 const name = document.getElementById('farmNameInput').value;
 const location = document.getElementById('farmLocation').value;
 const contact = document.getElementById('farmContact').value;
@@ -2901,20 +2947,24 @@ created: new Date().toISOString()
 
 this.state.farm = newFarm;
 this.state.settings.farmId = newFarm.id;
-this.saveSettings();
+await this.saveSettings();
 this.showToast('Farm added successfully');
 }
 
-this.saveFarm();
-this.closeAllModals();
-this.checkFirstTimeUser();
-this.renderAll();
+try {
+  await this.persistFarm();
+  this.closeAllModals();
+  this.checkFirstTimeUser();
+  this.renderAll();
 
-document.getElementById('farmNameInput').value = '';
-document.getElementById('farmLocation').value = '';
-document.getElementById('farmContact').value = '';
-document.getElementById('farmPhone').value = '';
-this.editingFarmId = null;
+  document.getElementById('farmNameInput').value = '';
+  document.getElementById('farmLocation').value = '';
+  document.getElementById('farmContact').value = '';
+  document.getElementById('farmPhone').value = '';
+  this.editingFarmId = null;
+} catch (e) {
+  console.error("Failed to save farm:", e);
+}
 }
 
 generateBlindFeedingSchedule(initialSeed, stockingDateStr, duration = 30, week1Freq = 2, stdFreq = 4) {
@@ -3092,7 +3142,7 @@ this.showToast('Tank added & Blind Schedule generated!');
 }
 
     try {
-        await this.saveTank(this.editingTankId ? tank : newTank);
+        await this.persistTank(this.editingTankId ? tank : newTank);
     } catch (e) {
         this.reportError(e, { context: 'saveTank' });
         this.showToast('Failed to save tank data. Changes may not be persisted.', 'error');
@@ -3342,8 +3392,7 @@ const newInventoryTotal = (this.state.inventory.totalKg || 0) - diff;
 
 // Validate inventory won't go negative
 if (newInventoryTotal < 0) {
-    this.showToast(`Cannot reduce amount. Insufficient inventory. Current: ${this.state.inventory.totalKg.toFixed(1)}kg, Diff: ${diff.toFixed(1)}kg`, 'error');
-    return;
+    this.showToast(`⚠ Inventory will be negative: ${newInventoryTotal.toFixed(1)}kg`, 'warning');
 }
 
 this.state.inventory.totalKg = newInventoryTotal;
@@ -4761,11 +4810,12 @@ this.state.feedLogs.push(newEntry);
 
 // BUG #3 FIX: Validate inventory won't go negative before deducting
 const newInventoryTotal = previousInventory - amount;
-if (newInventoryTotal < 0) {
-    this.state.feedLogs.pop(); // Remove the entry we just added
-    this.showToast(`Cannot log ${amount}kg. Insufficient inventory. Current: ${previousInventory.toFixed(1)}kg`, 'error');
-    return;
-}
+// Allow negative inventory (warning only)
+// if (newInventoryTotal < 0) {
+//     this.state.feedLogs.pop(); // Remove the entry we just added
+//     this.showToast(`Cannot log ${amount}kg. Insufficient inventory. Current: ${previousInventory.toFixed(1)}kg`, 'error');
+//     return;
+// }
 
 this.state.inventory.totalKg = newInventoryTotal;
 
@@ -4966,11 +5016,12 @@ this.state.feedLogs.push(newEntry);
 // BUG #3 FIX: Validate inventory won't go negative before deducting
 const currentInventory = this.state.inventory.totalKg || 0;
 const newInventoryTotal = currentInventory - amount;
-if (newInventoryTotal < 0) {
-    this.state.feedLogs.pop(); // Remove the entry we just added
-    this.showToast(`Cannot feed ${amount}kg. Insufficient inventory. Current: ${currentInventory.toFixed(1)}kg`, 'error');
-    return;
-}
+// Allow negative inventory
+// if (newInventoryTotal < 0) {
+//     this.state.feedLogs.pop(); // Remove the entry we just added
+//     this.showToast(`Cannot feed ${amount}kg. Insufficient inventory. Current: ${currentInventory.toFixed(1)}kg`, 'error');
+//     return;
+// }
 
 this.state.inventory.totalKg = newInventoryTotal;
 
@@ -5032,11 +5083,12 @@ this.state.feedLogs.push(newEntry);
 // Validate inventory won't go negative before deducting
 const currentInventory = this.state.inventory.totalKg || 0;
 const newInventoryTotal = currentInventory - amount;
-if (newInventoryTotal < 0) {
-this.state.feedLogs.pop();
-this.showToast(`Cannot feed ${amount}kg. Insufficient inventory. Current: ${currentInventory.toFixed(1)}kg`, 'error');
-return;
-}
+// Allow negative inventory
+// if (newInventoryTotal < 0) {
+// this.state.feedLogs.pop();
+// this.showToast(`Cannot feed ${amount}kg. Insufficient inventory. Current: ${currentInventory.toFixed(1)}kg`, 'error');
+// return;
+// }
 
 this.state.inventory.totalKg = newInventoryTotal;
 
@@ -5096,7 +5148,7 @@ const biomassBefore = (totalFeed / estimatedFCR) - totalHarvested;
 // Ensure biomass is never negative and is a valid number
 const calculatedBiomass = !isNaN(biomassBefore) ? biomassBefore : 0;
 tank.biomass = Math.max(0, parseFloat(calculatedBiomass.toFixed(1)));
-this.saveTank(tank);
+this.persistTank(tank);
 }
 
 openFeedSchedule(tankId) {
@@ -6189,7 +6241,7 @@ document.getElementById('harvestPrice').value = '';
 document.getElementById('partialHarvestModal').classList.add('active');
 }
 
-saveHarvest() {
+async saveHarvest() {
 const tankId = this.editingTankId;
 const date = document.getElementById('harvestDate').value;
 const weight = parseFloat(document.getElementById('harvestWeight').value);
@@ -6211,11 +6263,15 @@ price
 };
 
 this.state.harvests.push(newHarvest);
-this.saveHarvest(newHarvest);
-this.recalculateTankBiomass(tankId);
-this.closeAllModals();
-this.renderAll();
-this.showToast(`Harvest of ${weight}kg recorded`);
+try {
+  await this.persistHarvest(newHarvest);
+  this.recalculateTankBiomass(tankId);
+  this.closeAllModals();
+  this.renderAll();
+  this.showToast(`Harvest of ${weight}kg recorded`);
+} catch (e) {
+  console.error("Failed to save harvest:", e);
+}
 }
 
 endCrop(tankId) {
@@ -6481,8 +6537,8 @@ tank.stockingDate = this.currentDate;
 tank.initialSeed = 0;
 tank.currentSeed = 0;
 tank.biomass = 0;
-this.saveTank(tank);
-this.saveTank(archivedTank);
+this.persistTank(tank);
+this.persistTank(archivedTank);
 entriesToUpdate.forEach(e => this.saveFeedEntry(e));
 harvestsToUpdate.forEach(h => this.saveHarvest(h));
 this.closeAllModals();
@@ -7763,6 +7819,32 @@ URL.revokeObjectURL(url);
 this.showToast('Chart data exported successfully');
 }
 
+checkIosInstall() {
+    // Detect iOS (iPhone, iPad, iPod)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    // Detect if already in standalone mode (installed)
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    
+    // Check if user previously dismissed the banner
+    const isDismissed = localStorage.getItem('aquabook_ios_install_dismissed');
+
+    // Show banner if on iOS, not installed, and not dismissed
+    if (isIOS && !isStandalone && !isDismissed) {
+        const banner = document.getElementById('iosInstallBanner');
+        if (banner) banner.style.display = 'block';
+    }
+}
+
+showIosInstallInstructions() {
+    document.getElementById('iosInstallModal').classList.add('active');
+}
+
+dismissIosInstallBanner() {
+    const banner = document.getElementById('iosInstallBanner');
+    if (banner) banner.style.display = 'none';
+    localStorage.setItem('aquabook_ios_install_dismissed', 'true');
+}
+
 getFeedConsumptionData(entries) {
 const dailyFeed = {};
 entries.forEach(entry => {
@@ -7878,10 +7960,11 @@ async logTrayFeed(tankId, roundNumber) {
     }
     
     const newInventoryTotal = currentStock - amount;
-    if (newInventoryTotal < 0) {
-        this.showToast(`Cannot feed ${amount}kg. Insufficient inventory.`, 'error');
-        return;
-    }
+    // Allow negative inventory
+    // if (newInventoryTotal < 0) {
+    //     this.showToast(`Cannot feed ${amount}kg. Insufficient inventory.`, 'error');
+    //     return;
+    // }
 
     const confirmed = await this.showConfirmModal(
         `Log ${amount.toFixed(2)} kg for Round ${roundNumber}?`,

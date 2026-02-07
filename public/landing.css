@@ -52,6 +52,17 @@ body {
     background-color: #e3f2fd;
 }
 
+.btn-download {
+    background-color: #4CAF50;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.btn-download:hover {
+    background-color: #388E3C;
+    transform: translateY(-2px);
+}
+
 .btn-large {
     padding: 15px 35px;
     font-size: 18px;

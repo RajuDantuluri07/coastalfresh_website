@@ -3356,3 +3356,31 @@ background: #f5f5f5;
 .blind-feed-slot.status-skipped .slot-status {
 color: #9ca3af;
 }
+
+/* ===== iOS INSTALL BANNER ===== */
+.ios-install-banner {
+    position: fixed;
+    bottom: 80px; /* Above nav bar */
+    left: 16px;
+    right: 16px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    z-index: 9999;
+    padding: 12px;
+    border: 1px solid var(--border);
+    animation: slideUp 0.3s ease;
+}
+.ios-banner-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.close-banner {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--gray);
+    cursor: pointer;
+    padding: 0 4px;
+}

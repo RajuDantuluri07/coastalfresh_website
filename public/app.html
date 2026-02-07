@@ -35,8 +35,8 @@
 <div class="lock-message">
 <h2>Welcome to AquaRythu! 🎉</h2>
 <p>To get started, you need to add your first farm. This will unlock all features including feed tracking, applications, and price monitoring.</p>
-<p style="margin-top: 15px; font-size: 12px; color: var(--warning-dark); background: var(--warning-light); padding: 10px; border-radius: var(--radius-md);">
-    <i class="fas fa-exclamation-triangle"></i> <strong>Important:</strong> All data is stored locally on this device only. Please use the backup feature regularly.
+<p style="margin-top: 15px; font-size: 12px; color: var(--info-dark); background: var(--info-light); padding: 10px; border-radius: var(--radius-md);">
+    <i class="fas fa-cloud-upload-alt"></i> <strong>Cloud Sync:</strong> Your data is securely synced to the cloud when online. Offline changes will sync automatically when connection is restored.
 </p>
 </div>
 <button class="btn btn-primary" id="addFirstFarmBtn">
@@ -1128,7 +1128,7 @@ Save & Next Tray
 <h4 style="margin-bottom: 12px; color: var(--dark);">Data Management</h4>
 <div class="alert-card" style="background: #e3f2fd; border-left-color: var(--info); margin-bottom: 15px;">
 <div style="font-size: 12px; color: var(--dark);">
-<i class="fas fa-info-circle"></i> Your data is stored on this device. Backup regularly to avoid data loss.
+<i class="fas fa-cloud-upload-alt"></i> Data is automatically synced to the cloud. You can also create manual backups here.
 </div>
 </div>
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -1331,6 +1331,44 @@ This schedule is auto-generated based on your stocking density. You can edit spe
 <div class="toast" id="errorToast">
 <i class="fas fa-exclamation-circle"></i>
 <span id="errorMessage">Error! Please try again.</span>
+</div>
+
+<!-- iOS Install Banner -->
+<div id="iosInstallBanner" class="ios-install-banner" style="display: none;">
+    <div class="ios-banner-content">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 40px; height: 40px; background: #e3f2fd; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px;">🐟</div>
+            <div>
+                <div style="font-weight: 700; font-size: 14px;">Install AquaRythu</div>
+                <div style="font-size: 11px; color: var(--gray);">Add to Home Screen for offline use</div>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn btn-sm btn-primary" onclick="app.showIosInstallInstructions()">Install</button>
+            <button class="close-banner" onclick="app.dismissIosInstallBanner()">&times;</button>
+        </div>
+    </div>
+</div>
+
+<!-- iOS Install Instructions Modal -->
+<div class="modal-overlay" id="iosInstallModal">
+    <div class="modal-content" style="max-width: 350px;">
+        <div class="modal-header">
+            <h3>Install on iOS</h3>
+            <button class="close-modal" onclick="app.closeAllModals()">&times;</button>
+        </div>
+        <div class="modal-body" style="text-align: center;">
+            <p style="margin-bottom: 20px; color: var(--gray);">To install AquaRythu on your iPhone or iPad:</p>
+            <div style="text-align: left; background: var(--light); padding: 15px; border-radius: 12px; font-size: 14px; line-height: 1.6;">
+                <div style="margin-bottom: 10px;">1. Tap the <strong>Share</strong> button <i class="fas fa-share-square" style="color: var(--primary);"></i> in Safari.</div>
+                <div style="margin-bottom: 10px;">2. Scroll down and tap <strong>Add to Home Screen</strong> <i class="fas fa-plus-square" style="color: var(--dark);"></i>.</div>
+                <div>3. Tap <strong>Add</strong> in the top right corner.</div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" style="width: 100%;" onclick="app.closeAllModals()">Got it</button>
+        </div>
+    </div>
 </div>
 
 <!-- JavaScript Application -->
