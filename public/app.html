@@ -29,19 +29,24 @@
 
 <!-- First Time User Lock -->
 <div class="first-time-lock hidden" id="firstTimeLock">
-<div class="lock-icon">
-<i class="fas fa-farm"></i>
+<div class="lock-icon" style="background: var(--primary-light); border-color: var(--primary);">
+<i class="fas fa-water" style="color: var(--primary);"></i>
 </div>
 <div class="lock-message">
-<h2>Welcome to AquaRythu! 🎉</h2>
-<p>To get started, you need to add your first farm. This will unlock all features including feed tracking, applications, and price monitoring.</p>
-<p style="margin-top: 15px; font-size: 12px; color: var(--info-dark); background: var(--info-light); padding: 10px; border-radius: var(--radius-md);">
-    <i class="fas fa-cloud-upload-alt"></i> <strong>Cloud Sync:</strong> Your data is securely synced to the cloud when online. Offline changes will sync automatically when connection is restored.
-</p>
+<h2 style="color: var(--primary-dark);">Welcome to AquaRythu! 🌊</h2>
+<p>Your smart companion for shrimp farming success.</p>
+
+<div style="text-align: left; background: var(--gray-50); padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid var(--border);">
+<div style="margin-bottom: 8px;"><i class="fas fa-check-circle" style="color: var(--success);"></i> <strong>Track Feed & FCR</strong> daily</div>
+<div style="margin-bottom: 8px;"><i class="fas fa-check-circle" style="color: var(--success);"></i> <strong>Monitor Water Quality</strong> trends</div>
+<div><i class="fas fa-check-circle" style="color: var(--success);"></i> <strong>Optimize Growth</strong> & profits</div>
 </div>
-<button class="btn btn-primary" id="addFirstFarmBtn">
-<i class="fas fa-plus"></i>
-Add Your First Farm
+
+<p style="font-size: 13px; color: var(--gray);">Let's set up your first farm to get started.</p>
+</div>
+<button class="btn btn-primary" id="addFirstFarmBtn" style="padding: 12px 24px; font-size: 16px; box-shadow: 0 4px 14px rgba(33, 150, 243, 0.4);">
+<i class="fas fa-plus-circle"></i>
+Create My Farm
 </button>
 </div>
 

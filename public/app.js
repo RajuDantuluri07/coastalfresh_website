@@ -478,6 +478,7 @@ async signIn(e) {
   }
   
   try {
+    await this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     await this.auth.signInWithEmailAndPassword(email, password);
     // Auth state listener will handle the rest
     // Force hide modal
@@ -514,6 +515,7 @@ async signUp(e) {
   }
   
   try {
+    await this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     await this.auth.createUserWithEmailAndPassword(email, password);
     // Auth state listener will handle the rest
     // Force hide modal
@@ -556,6 +558,7 @@ async signInWithGoogle() {
   }
   
   try {
+    await this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     const provider = new firebase.auth.GoogleAuthProvider();
     // Use signInWithRedirect for better mobile support
     await this.auth.signInWithRedirect(provider);
@@ -872,7 +875,7 @@ if (typeof firebase !== 'undefined') {
   // COST-SAFETY: Connect to Emulators when running locally
   // Run 'firebase emulators:start' in your terminal to use this
   // DISABLED by default to ensure login works with live DB if emulators aren't running
-  if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+  /* if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
     console.log("🔧 Localhost detected: Connecting to Firebase Emulators to save costs.");
     try {
       this.db.useEmulator("localhost", 8080);
@@ -881,7 +884,7 @@ if (typeof firebase !== 'undefined') {
     } catch (e) {
       console.warn("Emulator connection failed (ignore if using live DB for testing)", e);
     }
-  }
+  } */
 
   this.db.enablePersistence().catch(err => {
     if (err.code == 'failed-precondition') {
@@ -914,7 +917,7 @@ if (typeof firebase !== 'undefined') {
       this.state.farm = null;
       this.state.tanks = [];
       this.state.feedLogs = [];
-      this.showLoginScreen(false); // Keep loading spinner if active to prevent flash
+      this.showLoginScreen(true); // Hide loading spinner and show login
     }
   });
 }
@@ -929,7 +932,7 @@ this.setupEventListeners();
 this.loadAnalyticsEvents();
 
 setTimeout(() => {
-this.showLoading(false);
+// this.showLoading(false); // Handled by Auth State listener to prevent flash
 this.initialized = true;
 this.showToast(`Welcome to AquaRythu!`, 'success');
 // Track app open
