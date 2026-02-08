@@ -316,6 +316,9 @@ Analytics & Trends
 <button class="chart-tab" data-chart="comparison" onclick="app.switchChartTab('comparison')">
 <i class="fas fa-balance-scale"></i> Tank Comparison
 </button>
+<button class="chart-tab" data-chart="daily" onclick="app.switchChartTab('daily')">
+<i class="fas fa-calendar-day"></i> Daily Summary
+</button>
 </div>
 
 <!-- Feed Consumption Chart -->
@@ -381,6 +384,17 @@ Analytics & Trends
 <p class="chart-subtitle">Compare FCR, efficiency, and feed consumption across tanks</p>
 </div>
 <canvas id="comparisonChart"></canvas>
+</div>
+</div>
+
+<!-- Farm Daily Summary Chart -->
+<div class="chart-container" id="chartDaily" style="display: none;">
+<div class="chart-card">
+<div class="chart-header">
+<h3>Farm Daily Summary</h3>
+<p class="chart-subtitle">Daily feed volume vs. cumulative total</p>
+</div>
+<canvas id="dailySummaryChart"></canvas>
 </div>
 </div>
 

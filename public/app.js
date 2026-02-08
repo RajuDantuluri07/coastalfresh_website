@@ -377,9 +377,9 @@ if (card) card.style.display = 'none';
 
 // ===== PRODUCTION AUTHENTICATION METHODS =====
 
-showLoginScreen() {
+showLoginScreen(hideLoading = true) {
   // BUG FIX: Prevent login screen from showing if user is already logged in
-  if (this.userId) return;
+  if (this.userId || (this.auth && this.auth.currentUser)) return;
 
   const app = document.getElementById('app');
   if (app) {
@@ -409,7 +409,7 @@ showLoginScreen() {
           
           <div class="form-group">
             <label style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #757575;">Email Address</label>
-            <input type="email" id="loginEmail" placeholder="name@example.com" class="form-control" style="height: 48px; background: #f9fafb;" onkeydown="if(event.key==='Enter') app.signIn()">
+            <input type="email" id="loginEmail" placeholder="name@example.com" class="form-control" style="height: 48px; background: #f9fafb;" onkeydown="if(event.key==='Enter') { event.preventDefault(); app.signIn(); }">
           </div>
           
           <div class="form-group">
@@ -417,14 +417,14 @@ showLoginScreen() {
               <label style="margin-bottom: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #757575;">Password</label>
               <a href="#" onclick="app.resetPassword(); return false;" style="font-size: 12px; color: #2196F3; font-weight: 600;">Forgot?</a>
             </div>
-            <input type="password" id="loginPassword" placeholder="••••••••" class="form-control" style="height: 48px; background: #f9fafb;" onkeydown="if(event.key==='Enter') app.signIn()">
+            <input type="password" id="loginPassword" placeholder="••••••••" class="form-control" style="height: 48px; background: #f9fafb;" onkeydown="if(event.key==='Enter') { event.preventDefault(); app.signIn(); }">
           </div>
           
-          <button class="btn btn-primary" onclick="app.signIn()" style="width: 100%; margin-bottom: 12px; height: 48px; font-size: 16px; background: #2196F3; border: none; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);">
+          <button class="btn btn-primary" onclick="app.signIn(event)" style="width: 100%; margin-bottom: 12px; height: 48px; font-size: 16px; background: #2196F3; border: none; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);">
             Sign In
           </button>
           
-          <button class="btn" onclick="app.signUp()" style="width: 100%; height: 48px; background: white; border: 2px solid #e0e0e0; color: #616161;">
+          <button class="btn" onclick="app.signUp(event)" style="width: 100%; height: 48px; background: white; border: 2px solid #e0e0e0; color: #616161;">
             Create Account
           </button>
           
@@ -456,10 +456,11 @@ showLoginScreen() {
   }
   
   loginModal.classList.add('active');
-  this.showLoading(false);
+  if (hideLoading) this.showLoading(false);
 }
 
-async signIn() {
+async signIn(e) {
+  if (e) e.preventDefault();
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
   const errorEl = document.getElementById('loginError');
@@ -479,13 +480,17 @@ async signIn() {
   try {
     await this.auth.signInWithEmailAndPassword(email, password);
     // Auth state listener will handle the rest
+    // Force hide modal
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal) loginModal.classList.remove('active');
   } catch (error) {
     errorEl.textContent = this.getAuthErrorMessage(error.code);
     errorEl.style.display = 'block';
   }
 }
 
-async signUp() {
+async signUp(e) {
+  if (e) e.preventDefault();
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
   const errorEl = document.getElementById('loginError');
@@ -511,6 +516,9 @@ async signUp() {
   try {
     await this.auth.createUserWithEmailAndPassword(email, password);
     // Auth state listener will handle the rest
+    // Force hide modal
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal) loginModal.classList.remove('active');
   } catch (error) {
     errorEl.textContent = this.getAuthErrorMessage(error.code);
     errorEl.style.display = 'block';
@@ -561,6 +569,9 @@ async signInWithGoogle() {
 }
 
 async signOut() {
+  const confirmed = await this.showConfirmModal('Are you sure you want to sign out?', 'Sign Out');
+  if (!confirmed) return;
+
   try {
     // COST-SAFETY: Unsubscribe from all real-time listeners to stop read costs
     if (this.unsubscribeSettings) this.unsubscribeSettings();
@@ -574,6 +585,7 @@ async signOut() {
     if (this.unsubscribeApplications) this.unsubscribeApplications();
     
     await this.auth.signOut();
+    this.showToast('Signed out successfully');
   } catch (error) {
     console.error('Sign out error:', error);
   }
@@ -860,7 +872,7 @@ if (typeof firebase !== 'undefined') {
   // COST-SAFETY: Connect to Emulators when running locally
   // Run 'firebase emulators:start' in your terminal to use this
   // DISABLED by default to ensure login works with live DB if emulators aren't running
-  /* if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+  if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
     console.log("🔧 Localhost detected: Connecting to Firebase Emulators to save costs.");
     try {
       this.db.useEmulator("localhost", 8080);
@@ -869,7 +881,7 @@ if (typeof firebase !== 'undefined') {
     } catch (e) {
       console.warn("Emulator connection failed (ignore if using live DB for testing)", e);
     }
-  } */
+  }
 
   this.db.enablePersistence().catch(err => {
     if (err.code == 'failed-precondition') {
@@ -881,12 +893,15 @@ if (typeof firebase !== 'undefined') {
 
   // COST-LOCKED V1: Real Firebase Auth listener
   this.auth.onAuthStateChanged(user => {
+    console.log("Auth State Changed:", user ? "User Logged In" : "User Signed Out", user ? user.uid : "");
     if (user) {
       this.userId = user.uid;
       // Hide login modal and show app
       const loginModal = document.getElementById('loginModal');
       if (loginModal) {
         loginModal.classList.remove('active');
+        const errorEl = document.getElementById('loginError');
+        if (errorEl) errorEl.style.display = 'none';
       }
       const app = document.getElementById('app');
       if (app) {
@@ -899,8 +914,7 @@ if (typeof firebase !== 'undefined') {
       this.state.farm = null;
       this.state.tanks = [];
       this.state.feedLogs = [];
-      this.showLoginScreen();
-      this.showLoading(false);
+      this.showLoginScreen(false); // Keep loading spinner if active to prevent flash
     }
   });
 }
@@ -1042,7 +1056,7 @@ async persistHarvest(harvest) {
         if (harvest && harvest.id) {
            if (!harvest.farmId) {
              const tank = this.getTankById(harvest.tankId);
-             harvest.farmId = tank ? tank.farmId : this.state.settings.currentFarmId;
+             harvest.farmId = tank ? tank.farmId : this.state.settings.farmId;
            }
            await this.db.collection('harvests').doc(String(harvest.id)).set(harvest, { merge: true });
         }
@@ -1064,7 +1078,7 @@ async saveWaterQualityData(entry) {
         if (entry && entry.id) {
            if (!entry.farmId) {
              const tank = this.getTankById(entry.tankId);
-             entry.farmId = tank ? tank.farmId : this.state.settings.currentFarmId;
+             entry.farmId = tank ? tank.farmId : this.state.settings.farmId;
            }
            await this.db.collection('waterQuality').doc(String(entry.id)).set(entry, { merge: true });
         }
@@ -1086,7 +1100,7 @@ async saveApplications(entry) {
         if (entry && entry.id) {
            if (!entry.farmId) {
              const tank = this.getTankById(entry.tankId);
-             entry.farmId = tank ? tank.farmId : this.state.settings.currentFarmId;
+             entry.farmId = tank ? tank.farmId : this.state.settings.farmId;
            }
            await this.db.collection('applications').doc(String(entry.id)).set(entry, { merge: true });
         }
@@ -1105,7 +1119,7 @@ async saveInventory() {
   return this.enqueueSave(async () => {
     try {
       if (this.db && this.userId) {
-        const farmId = this.state.settings.currentFarmId;
+        const farmId = this.state.settings.farmId;
         if (farmId) {
             await this.db.collection('inventory').doc(farmId).set({
                 totalKg: this.state.inventory.totalKg
@@ -1126,7 +1140,7 @@ async saveMedicineInventory() {
   return this.enqueueSave(async () => {
     try {
       if (this.db && this.userId) {
-        const farmId = this.state.settings.currentFarmId;
+        const farmId = this.state.settings.farmId;
         if (farmId) {
             await this.db.collection('inventory').doc(farmId).set({
                 medicine: this.state.medicineInventory
@@ -1150,7 +1164,7 @@ async saveDiseases(entry) {
         if (entry && entry.id) {
            if (!entry.farmId) {
              const tank = this.getTankById(entry.tankId);
-             entry.farmId = tank ? tank.farmId : this.state.settings.currentFarmId;
+             entry.farmId = tank ? tank.farmId : this.state.settings.farmId;
            }
            await this.db.collection('diseases').doc(String(entry.id)).set(entry, { merge: true });
         }
@@ -1391,6 +1405,10 @@ if (!this.userId) {
     if (lock) lock.classList.add('hidden');
     return;
 }
+
+// Ensure login modal is hidden if we are checking first time user (means we are logged in)
+const loginModal = document.getElementById('loginModal');
+if (loginModal) loginModal.classList.remove('active');
 
 if (!hasFarm) {
 lock.classList.remove('hidden');
@@ -4542,12 +4560,6 @@ if (!proceedIncrease) return;
 }
 }
 
-const currentStock = this.state.inventory.totalKg || 0;
-if (amount > currentStock) {
-// BUG FIX: Changed from blocking confirmation to warning toast - allow users to log feed even with low inventory
-this.showToast(`⚠ Low Inventory: You have ${currentStock.toFixed(1)}kg in stock, feeding ${amount.toFixed(1)}kg.`, 'warning', 4000);
-}
-
 // Check if this is the first tray-based feed after blind transition
 const isFirstTrayFeed = tank && tank.hasTransitionedFromBlind &&
 !this.state.feedLogs.some(e => e.tankId === tankId && e.trayResult && e.trayResult !== 'blind-fed' && e.trayResult !== 'pending');
@@ -4562,11 +4574,17 @@ const feedingMode = doc <= blindDuration && !tank.hasTransitionedFromBlind ? 'BL
 const isExtraFeed = this.areAllRoundsCompleted(tankId, entryDate);
 
 const previousInventory = this.state.inventory.totalKg || 0;
+const newInventoryTotal = previousInventory - amount;
+if (newInventoryTotal < 0) {
+    this.showToast(`⚠ Low Inventory: You have ${previousInventory.toFixed(1)}kg in stock, feeding ${amount.toFixed(1)}kg.`, 'warning', 4000);
+}
+
 const newEntry = {
 // COST-LOCKED V1: Minimal required fields only
 id: Date.now(),
 farmId: this.state.settings.farmId,
 pondId: tankId, // Renamed from tankId for cost lock
+tankId: tankId, // Required for app compatibility
 doc: this.getDaysOld(tank.stockingDate),
 round: feedRoundNumber,
 feedKg: amount,
@@ -4587,34 +4605,13 @@ feeding_mode: feedingMode,
 is_extra_feed: isExtraFeed
 };
 
-this.state.feedLogs.push(newEntry);
-
-// BUG #3 FIX: Validate inventory won't go negative before deducting
-const newInventoryTotal = previousInventory - amount;
-// Allow negative inventory (warning only)
-// if (newInventoryTotal < 0) {
-//     this.state.feedLogs.pop(); // Remove the entry we just added
-//     this.showToast(`Cannot log ${amount}kg. Insufficient inventory. Current: ${previousInventory.toFixed(1)}kg`, 'error');
-//     return;
-// }
-
-this.state.inventory.totalKg = newInventoryTotal;
-
     try {
         // Batch write: feedLogs document + farmDaily summary
         const batch = this.db.batch();
         
         // Add feed log
         const feedLogRef = this.db.collection('feedLogs').doc(String(newEntry.id));
-        batch.set(feedLogRef, {
-            farmId: newEntry.farmId,
-            pondId: newEntry.pondId,
-            doc: newEntry.doc,
-            round: newEntry.round,
-            feedKg: newEntry.feedKg,
-            createdBy: newEntry.createdBy,
-            createdAt: newEntry.createdAt
-        });
+        batch.set(feedLogRef, newEntry);
         
         // Update farm daily summary
         const farmDailyId = `${newEntry.farmId}_${entryDate.replace(/-/g, '_')}`;
@@ -4632,12 +4629,18 @@ this.state.inventory.totalKg = newInventoryTotal;
             updatedAt: new Date().toISOString()
         }, { merge: true });
         
+        // ATOMICITY FIX: Include inventory update in the same batch
+        const inventoryRef = this.db.collection('inventory').doc(newEntry.farmId);
+        batch.set(inventoryRef, {
+            totalKg: newInventoryTotal
+        }, { merge: true });
+        
         // Commit batch
         await batch.commit();
         
-        // Update local state
+        // On success, update local state
         this.state.feedLogs.push(newEntry);
-        await this.saveInventory();
+        this.state.inventory.totalKg = newInventoryTotal;
         this.recalculateTankBiomass(tankId, true);
         this.updateTankLifecycleState(tankId);
         this.renderAll();
@@ -4714,10 +4717,6 @@ this.state.inventory.totalKg = newInventoryTotal;
     } catch (e) {
         console.error('Failed to log feed:', e);
         // ROLLBACK STATE ON FAILURE
-        this.state.feedLogs.pop();
-        this.state.inventory.totalKg = previousInventory;
-        this.recalculateTankBiomass(tankId, true); 
-        this.renderAll();
         this.showToast('Failed to save feed log', 'error');
     }
 } finally {
@@ -4731,15 +4730,39 @@ this.showConfirmModal('Skip this feed? It will be recorded as 0kg.', 'Skip Feed'
 if (confirmed) {
 const newEntry = {
 id: Date.now(),
+farmId: this.state.settings.farmId,
+pondId: tankId,
 tankId,
+doc: this.getDaysOld(this.getTankById(tankId)?.stockingDate),
+round: this.getFeedRoundNumber(tankId, this.currentDate),
+feedKg: 0,
 date: this.currentDate,
 time: new Date().toLocaleTimeString(),
 amount: 0,
 trayResult: 'skipped',
-supplements: []
+supplements: [],
+createdBy: this.userId,
+createdAt: new Date().toISOString()
 };
 this.state.feedLogs.push(newEntry);
-this.saveFeedEntry(newEntry);
+
+if (this.db && this.userId) {
+    const batch = this.db.batch();
+    const feedLogRef = this.db.collection('feedLogs').doc(String(newEntry.id));
+    batch.set(feedLogRef, newEntry);
+    
+    const farmDailyId = `${newEntry.farmId}_${newEntry.date.replace(/-/g, '_')}`;
+    const farmDailyRef = this.db.collection('farmDaily').doc(farmDailyId);
+    // Update daily summary (count skipped rounds)
+    const todayLogs = this.state.feedLogs.filter(e => e.date === newEntry.date);
+    const roundsDone = new Set(todayLogs.map(e => `${e.pondId || e.tankId}_${e.round || e.feed_round_number}`)).size;
+    
+    batch.set(farmDailyRef, { roundsDone, updatedAt: new Date().toISOString() }, { merge: true });
+    batch.commit().catch(e => console.error("Skip feed batch failed", e));
+} else {
+    this.saveFeedEntry(newEntry);
+}
+
 this.renderAll();
 this.showToast('Feed skipped');
 }
@@ -4781,7 +4804,12 @@ const isExtraFeed = this.areAllRoundsCompleted(tankId, this.currentDate);
 
 const newEntry = {
 id: Date.now(),
+farmId: this.state.settings.farmId,
+pondId: tankId,
 tankId,
+doc: doc,
+round: feedRoundNumber,
+feedKg: amount,
 date: this.currentDate,
 time: new Date().toLocaleTimeString(),
 amount,
@@ -4789,7 +4817,9 @@ trayResult: doc <= blindDuration ? 'blind-fed' : 'pending', // Smart status: 'pe
 supplements: [],
 feed_round_number: feedRoundNumber,
 feeding_mode: feedingMode,
-is_extra_feed: isExtraFeed
+is_extra_feed: isExtraFeed,
+createdBy: this.userId,
+createdAt: new Date().toISOString()
 };
 
 this.state.feedLogs.push(newEntry);
@@ -4808,8 +4838,29 @@ this.state.inventory.totalKg = newInventoryTotal;
 
 // BUG #2 FIX: Use async save with proper sequencing
 try {
-    await this.saveFeedEntry(newEntry);
-    await this.saveInventory();
+    if (this.db && this.userId) {
+        const batch = this.db.batch();
+        const feedLogRef = this.db.collection('feedLogs').doc(String(newEntry.id));
+        batch.set(feedLogRef, newEntry);
+
+        const farmDailyId = `${newEntry.farmId}_${newEntry.date.replace(/-/g, '_')}`;
+        const farmDailyRef = this.db.collection('farmDaily').doc(farmDailyId);
+        
+        const todayLogs = this.state.feedLogs.filter(e => e.date === newEntry.date);
+        const totalFeedKg = todayLogs.reduce((sum, e) => sum + (e.feedKg || e.amount || 0), 0);
+        const roundsDone = new Set(todayLogs.map(e => `${e.pondId || e.tankId}_${e.round || e.feed_round_number}`)).size;
+
+        batch.set(farmDailyRef, { totalFeedKg, roundsDone, lastFeedKg: amount, updatedAt: new Date().toISOString() }, { merge: true });
+
+        const inventoryRef = this.db.collection('inventory').doc(newEntry.farmId);
+        batch.set(inventoryRef, { totalKg: newInventoryTotal }, { merge: true });
+
+        await batch.commit();
+    } else {
+        await this.saveFeedEntry(newEntry);
+        await this.saveInventory();
+    }
+
     this.recalculateTankBiomass(tankId, true); // Clear suggestion on log
     this.updateTankLifecycleState(tankId);
     this.renderAll();
@@ -4820,6 +4871,12 @@ try {
     } else {
         this.showToast(`Fed ${amount}kg to ${this.sanitizeHTML(tank.name)}`);
     }
+    
+    this.trackEvent('log_feed', {
+        pond_id: tankId,
+        amount: amount,
+        doc: doc
+    });
 } catch (e) {
     console.error('Failed to quick log feed:', e);
     this.showToast('Failed to save feed log', 'error');
@@ -4848,7 +4905,12 @@ const isExtraFeed = todayEntries.length >= (tank.blindSchedule ? tank.blindSched
 
 const newEntry = {
 id: Date.now(),
+farmId: this.state.settings.farmId,
+pondId: tankId,
 tankId,
+doc: doc,
+round: feedRoundNumber,
+feedKg: amount,
 date: this.currentDate,
 time: new Date().toLocaleTimeString(),
 amount,
@@ -4856,7 +4918,9 @@ trayResult: 'blind-fed',
 supplements: [],
 feed_round_number: feedRoundNumber,
 feeding_mode: 'BLIND',
-is_extra_feed: isExtraFeed
+is_extra_feed: isExtraFeed,
+createdBy: this.userId,
+createdAt: new Date().toISOString()
 };
 
 this.state.feedLogs.push(newEntry);
@@ -4874,8 +4938,29 @@ const newInventoryTotal = currentInventory - amount;
 this.state.inventory.totalKg = newInventoryTotal;
 
 try {
-await this.saveFeedEntry(newEntry);
-await this.saveInventory();
+if (this.db && this.userId) {
+    const batch = this.db.batch();
+    const feedLogRef = this.db.collection('feedLogs').doc(String(newEntry.id));
+    batch.set(feedLogRef, newEntry);
+
+    const farmDailyId = `${newEntry.farmId}_${newEntry.date.replace(/-/g, '_')}`;
+    const farmDailyRef = this.db.collection('farmDaily').doc(farmDailyId);
+    
+    const todayLogs = this.state.feedLogs.filter(e => e.date === newEntry.date);
+    const totalFeedKg = todayLogs.reduce((sum, e) => sum + (e.feedKg || e.amount || 0), 0);
+    const roundsDone = new Set(todayLogs.map(e => `${e.pondId || e.tankId}_${e.round || e.feed_round_number}`)).size;
+
+    batch.set(farmDailyRef, { totalFeedKg, roundsDone, lastFeedKg: amount, updatedAt: new Date().toISOString() }, { merge: true });
+
+    const inventoryRef = this.db.collection('inventory').doc(newEntry.farmId);
+    batch.set(inventoryRef, { totalKg: newInventoryTotal }, { merge: true });
+
+    await batch.commit();
+} else {
+    await this.saveFeedEntry(newEntry);
+    await this.saveInventory();
+}
+
 this.recalculateTankBiomass(tankId, true);
 this.updateTankLifecycleState(tankId);
 this.renderAll();
@@ -4885,6 +4970,12 @@ this.showToast(`⚠️ Extra feed logged: ${amount}kg to ${this.sanitizeHTML(tan
 } else {
 this.showToast(`✓ Feed ${feedRoundNumber} logged: ${amount}kg to ${this.sanitizeHTML(tank.name)}`);
 }
+
+this.trackEvent('log_feed', {
+    pond_id: tankId,
+    amount: amount,
+    doc: doc
+});
 } catch (e) {
 console.error('Failed to quick log blind feed:', e);
 this.showToast('Failed to save feed log', 'error');
@@ -5091,7 +5182,7 @@ this.showToast('Row reset to auto');
 checkBlindFeedingTransitions() {
 if (document.querySelector('.modal-overlay.active')) return;
 
-const currentFarmId = this.state.settings.currentFarmId;
+const currentFarmId = this.state.settings.farmId;
 if (!currentFarmId) return;
 
 const tanks = this.state.tanks.filter(t => t.farmId === currentFarmId && t.status === 'active');
@@ -6764,7 +6855,8 @@ const containerMap = {
 'waste': 'chartWaste',
 'water': 'chartWater',
 'growth': 'chartGrowth',
-'comparison': 'chartComparison'
+'comparison': 'chartComparison',
+'daily': 'chartDaily'
 };
 Object.keys(containerMap).forEach(key => {
 const container = document.getElementById(containerMap[key]);
@@ -6829,6 +6921,9 @@ this.renderGrowthChart(farmTanks, filteredFeedEntries, farmHarvests);
 break;
 case 'comparison':
 this.renderComparisonChart(farmTanks, filteredFeedEntries, farmHarvests);
+break;
+case 'daily':
+this.renderFarmDailySummaryChart(filteredFeedEntries);
 break;
 }
 }
@@ -7569,6 +7664,79 @@ font: { family: 'Roboto', size: 11 }
 });
 }
 
+renderFarmDailySummaryChart(entries) {
+const canvas = document.getElementById('dailySummaryChart');
+if (!canvas) return;
+
+// Group by date
+const dailyData = {};
+entries.forEach(entry => {
+if (!dailyData[entry.date]) {
+dailyData[entry.date] = 0;
+}
+dailyData[entry.date] += entry.amount;
+});
+
+const dates = Object.keys(dailyData).sort();
+const dailyFeeds = dates.map(d => dailyData[d]);
+
+// Calculate cumulative
+let cumulative = 0;
+const cumulativeFeeds = dailyFeeds.map(val => {
+cumulative += val;
+return cumulative;
+});
+
+if (this.charts.dailySummary) {
+this.charts.dailySummary.destroy();
+}
+
+this.charts.dailySummary = new Chart(canvas, {
+type: 'bar',
+data: {
+labels: dates.map(d => {
+const date = new Date(d);
+return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+}),
+datasets: [
+{
+label: 'Daily Feed (kg)',
+data: dailyFeeds,
+backgroundColor: 'rgba(33, 150, 243, 0.7)',
+borderColor: 'rgb(33, 150, 243)',
+borderWidth: 1,
+order: 2,
+yAxisID: 'y'
+},
+{
+label: 'Cumulative Feed (kg)',
+data: cumulativeFeeds,
+type: 'line',
+borderColor: 'rgb(255, 152, 0)',
+backgroundColor: 'rgba(255, 152, 0, 0.1)',
+borderWidth: 2,
+pointRadius: 0,
+tension: 0.4,
+order: 1,
+yAxisID: 'y1'
+}
+]
+},
+options: {
+responsive: true,
+maintainAspectRatio: true,
+aspectRatio: 2,
+interaction: { mode: 'index', intersect: false },
+plugins: { legend: { display: true } },
+scales: {
+y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Daily (kg)' }, beginAtZero: true },
+y1: { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Cumulative (kg)' }, beginAtZero: true, grid: { drawOnChartArea: false } },
+x: { grid: { display: false } }
+}
+}
+});
+}
+
 exportCharts() {
 // Export chart data as JSON
 const farmId = this.state.settings.farmId;
@@ -7807,7 +7975,8 @@ async logTrayFeed(tankId, roundNumber) {
                 amount: newEntry.amount,
                 trayResult: newEntry.trayResult,
                 feeding_mode: newEntry.feeding_mode,
-                feed_round_number: newEntry.feed_round_number
+                feed_round_number: newEntry.feed_round_number,
+                tankId: newEntry.tankId
             };
             
             batch.set(feedLogRef, firestoreEntry);
@@ -7838,6 +8007,12 @@ async logTrayFeed(tankId, roundNumber) {
         this.recalculateTankBiomass(tankId, true);
         this.updateTankLifecycleState(tankId);
         this.detectFeedJump(tankId, amount);
+        
+        this.trackEvent('log_feed', {
+            pond_id: tankId,
+            amount: amount,
+            doc: doc
+        });
         
         this.showToast('Feed logged successfully', 'success');
         
