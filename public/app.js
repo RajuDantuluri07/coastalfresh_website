@@ -948,7 +948,11 @@ this.setupEventListeners();
 this.loadAnalyticsEvents();
 
 setTimeout(() => {
-// this.showLoading(false); // Handled by Auth State listener to prevent flash
+  // Safety: If loading is still active after 800ms and we are not logged in, ensure login screen is shown
+  // This prevents getting stuck on spinner if Auth listener is slow
+  if (!this.userId && document.getElementById('loading').classList.contains('active') && !document.getElementById('loginModal').classList.contains('active')) {
+     // Let the Auth listener handle it normally, but this is a fallback
+  }
 this.initialized = true;
 this.showToast(`Welcome to AquaRythu!`, 'success');
 // Track app open
@@ -1418,6 +1422,7 @@ const lock = document.getElementById('firstTimeLock');
 const navTabs = document.querySelector('.nav-tabs');
 const mainApp = document.getElementById('app');
 const stickyBtn = document.getElementById('stickyLogFeedBtn');
+const farmSelector = document.getElementById('farmSelector');
 
 // If user is not logged in, hide the lock screen (Login screen takes precedence)
 if (!this.userId) {
@@ -1425,31 +1430,23 @@ if (!this.userId) {
     return;
 }
 
-// Ensure login modal is hidden if we are checking first time user (means we are logged in)
 const loginModal = document.getElementById('loginModal');
 if (loginModal) loginModal.classList.remove('active');
 
-if (!hasFarm) {
-lock.classList.remove('hidden');
-if (navTabs) navTabs.style.display = 'none';
-if (mainApp) mainApp.style.opacity = '0.5';
-if (stickyBtn) stickyBtn.style.display = 'none';
-const farmSelector = document.getElementById('farmSelector');
-if (farmSelector) farmSelector.style.pointerEvents = 'none';
-document.querySelectorAll('.nav-btn').forEach(btn => {
-btn.classList.add('disabled');
-});
-} else {
-lock.classList.add('hidden');
-if (navTabs) navTabs.style.display = 'grid';
-if (mainApp) mainApp.style.opacity = '1';
-if (stickyBtn) stickyBtn.style.display = 'inline-flex';
-const farmSelector = document.getElementById('farmSelector');
-if (farmSelector) farmSelector.style.pointerEvents = 'auto';
-document.querySelectorAll('.nav-btn').forEach(btn => {
-btn.classList.remove('disabled');
-});
-}
+    // Always hide the lock screen. The overview page will handle the empty state.
+    if (lock) lock.classList.add('hidden');
+    if (navTabs) navTabs.style.display = 'grid';
+    if (mainApp) mainApp.style.opacity = '1';
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('disabled'));
+
+    // Toggle features based on farm existence
+    if (hasFarm) {
+        if (stickyBtn) stickyBtn.style.display = 'inline-flex';
+        if (farmSelector) farmSelector.style.pointerEvents = 'auto';
+    } else {
+        if (stickyBtn) stickyBtn.style.display = 'none';
+        if (farmSelector) farmSelector.style.pointerEvents = 'none';
+    }
 }
 
 setupUI() {
@@ -2716,6 +2713,7 @@ const contact = document.getElementById('farmContact').value;
 const phone = document.getElementById('farmPhone').value;
 
 let farmToSave = null;
+let isNewFarm = false;
 
 if (!name) {
 this.showToast('Farm name is required', 'error');
@@ -2733,6 +2731,7 @@ farmToSave = farm;
 this.showToast('Farm updated successfully');
 }
 } else {
+isNewFarm = true;
 // COST-LOCKED V1: Single farm per user, no members field
 if (this.state.farm) {
 this.showToast('Only one farm allowed per user in V1', 'error');
@@ -2776,6 +2775,19 @@ this.editingFarmId = null;
         this.showToast('Saved locally. Syncing when online.', 'warning');
     }
 })();
+
+    // Prompt to add a tank if it's a new farm
+    if (isNewFarm && farmToSave) {
+        const confirmed = await this.showConfirmModal(
+            'Great! Your farm is set up. Add your first tank now to start tracking.', 
+            'Next Step: Add a Tank',
+            'Add Tank',
+            'Later'
+        );
+        if (confirmed) {
+            this.openTankModal(farmToSave.id);
+        }
+    }
 }
 
 generateBlindFeedingSchedule(initialSeed, stockingDateStr, duration = 30, week1Freq = 2, stdFreq = 4) {
