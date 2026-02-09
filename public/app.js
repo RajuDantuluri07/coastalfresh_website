@@ -947,6 +947,10 @@ if (typeof firebase !== 'undefined') {
       }
       this.loadAllData();
       this.checkFirstTimeUser(); // BUG FIX: Check for first time user only after auth is confirmed
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+
     } else {
       // User is signed out - show login screen
       this.userId = null;
@@ -1042,8 +1046,10 @@ async persistFarm() {
 
 async persistTank(tank) {
   if (!tank || !tank.id) return;
-  // The .set() method with { merge: true } will create or update the document.
-  return this.db.collection('tanks').doc(tank.id).set(tank, { merge: true });
+  return this.enqueueSave(() => {
+    // The .set() method with { merge: true } will create or update the document.
+    return this.db.collection('tanks').doc(tank.id).set(tank, { merge: true });
+  });
 }
 
 async saveTanks() { // This function can now be used to save all tanks in a batch
@@ -3075,10 +3081,7 @@ const tankId = String(this.pendingDeleteTankId);
 this.state.tanks = this.state.tanks.filter(t => t.id !== tankId);
 this.state.feedLogs = this.state.feedLogs.filter(e => e.tankId !== tankId);
 this.state.harvests = this.state.harvests.filter(h => String(h.tankId) !== tankId);
-this.state.waterQuality = this.state.waterQuality.filter(w => w.tankId !== tankId);
-this.state.applications = this.state.applications.filter(a => a.tankId !== tankId);
 
-this.saveAllData();
 this.renderAll();
 this.closeAllModals();
 this.showToast('Tank deleted', 'warning');
@@ -5117,8 +5120,7 @@ const biomassBefore = (totalFeed / estimatedFCR) - totalHarvested;
 // Ensure biomass is never negative and is a valid number
 const calculatedBiomass = !isNaN(biomassBefore) ? biomassBefore : 0;
 tank.biomass = Math.max(0, parseFloat(calculatedBiomass.toFixed(1)));
-this.persistTank(tank);
-}
+this.enqueueSave(() => this.persistTank(tank));}
 
 openFeedSchedule(tankId) {
 const tank = this.getTankById(tankId);
@@ -6475,54 +6477,57 @@ this.renderOverallStats();
 }
 
 startNewCrop(tankId) {
-const tank = this.getTankById(tankId);
-if (!tank) return;
+    const tank = this.getTankById(tankId);
+    if (!tank) return;
 
+    this.showConfirmModal(`Start new crop cycle for ${this.sanitizeHTML(tank.name)}? This will reset all data.`, 'Start New Crop').then(async (confirmed) => {
+        if (confirmed) {
+            // Archive old data
+            const archiveId = `${tank.id}_crop_${Date.now()}`;
+            // Create archived tank record
+            const archivedTank = JSON.parse(JSON.stringify(tank));
+            archivedTank.id = archiveId;
+            archivedTank.status = 'archived';
+            archivedTank.farmId = `${tank.farmId}_archive`; // Hide from current farm lists
+            archivedTank.name = `${this.sanitizeHTML(tank.name)} (Ended ${new Date().toLocaleDateString()})`;
+            this.state.tanks.push(archivedTank);
 
-this.showConfirmModal(`Start new crop cycle for ${this.sanitizeHTML(tank.name)}? This will reset all data.`, 'Start New Crop').then(confirmed => {
-if (confirmed) {
-// Archive old data
-const archiveId = `${tank.id}_crop_${Date.now()}`;
-// Create archived tank record
-const archivedTank = JSON.parse(JSON.stringify(tank));
-archivedTank.id = archiveId;
-archivedTank.status = 'archived';
-archivedTank.farmId = `${tank.farmId}_archive`; // Hide from current farm lists
-archivedTank.name = `${this.sanitizeHTML(tank.name)} (Ended ${new Date().toLocaleDateString()})`;
-this.state.tanks.push(archivedTank);
+            // Move feed entries to archive
+            const entriesToUpdate = [];
+            this.state.feedLogs.forEach(e => {
+                if (e.tankId === tank.id) {
+                    e.tankId = archiveId;
+                    entriesToUpdate.push(e);
+                }
+            });
 
-// Move feed entries to archive
-const entriesToUpdate = [];
-this.state.feedLogs.forEach(e => {
-if (e.tankId === tank.id) {
-e.tankId = archiveId;
-entriesToUpdate.push(e);
-}
-});
+            // Move harvests to archive
+            const harvestsToUpdate = [];
+            this.state.harvests.forEach(h => {
+                if (h.tankId === tank.id) {
+                    h.tankId = archiveId;
+                    harvestsToUpdate.push(h);
+                }
+            });
 
-// Move harvests to archive
-const harvestsToUpdate = [];
-this.state.harvests.forEach(h => {
-if (h.tankId === tank.id) {
-h.tankId = archiveId;
-harvestsToUpdate.push(h);
-}
-});
+            tank.status = 'active';
+            tank.stockingDate = this.currentDate;
+            tank.initialSeed = 0;
+            tank.currentSeed = 0;
+            tank.biomass = 0;
 
-tank.status = 'active';
-tank.stockingDate = this.currentDate;
-tank.initialSeed = 0;
-tank.currentSeed = 0;
-tank.biomass = 0;
-this.persistTank(tank);
-this.persistTank(archivedTank);
-entriesToUpdate.forEach(e => this.saveFeedEntry(e));
-harvestsToUpdate.forEach(h => this.saveHarvest(h));
-this.closeAllModals();
-this.renderAll();
-this.showToast('New crop cycle started. Old data archived.', 'success');
-}
-});
+            await this.enqueueSave(async () => {
+                await this.persistTank(tank);
+                await this.persistTank(archivedTank);
+                await Promise.all(entriesToUpdate.map(e => this.saveFeedEntry(e)));
+                await Promise.all(harvestsToUpdate.map(h => this.persistHarvest(h)));
+            });
+
+            this.closeAllModals();
+            this.renderAll();
+            this.showToast('New crop cycle started. Old data archived.', 'success');
+        }
+    });
 }
 
 openSettingsModal() {
