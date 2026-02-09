@@ -1,5 +1,5 @@
 // AquaRythu Service Worker - Offline Support
-const CACHE_NAME = 'aquarythu-v4';
+const CACHE_NAME = 'aquarythu-v5';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

@@ -941,7 +941,7 @@ try {
 this.showLoading(true);
 this.setupUI();
 this.checkFirstTimeUser();
-this.renderAll();
+// this.renderAll(); // Removed to prevent FOUC - waits for Auth
 this.setupEventListeners();
 
 // Load analytics events
