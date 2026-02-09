@@ -507,6 +507,12 @@ async signIn(e) {
 
 async signUp(e) {
   if (e) e.preventDefault();
+
+  // UI Feedback: Disable button to prevent double-clicks
+  const signUpBtn = e?.target.closest('button');
+  const originalText = signUpBtn ? signUpBtn.innerHTML : 'Create Account';
+  if (signUpBtn) { signUpBtn.disabled = true; signUpBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...'; }
+
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
   const errorEl = document.getElementById('loginError');
@@ -514,18 +520,21 @@ async signUp(e) {
   if (!this.auth) {
     errorEl.textContent = 'System Error: Firebase Auth not initialized.';
     errorEl.style.display = 'block';
+    if (signUpBtn) { signUpBtn.disabled = false; signUpBtn.innerHTML = originalText; }
     return;
   }
 
   if (!email || !password) {
     errorEl.textContent = 'Please enter email and password';
     errorEl.style.display = 'block';
+    if (signUpBtn) { signUpBtn.disabled = false; signUpBtn.innerHTML = originalText; }
     return;
   }
   
   if (password.length < 6) {
     errorEl.textContent = 'Password must be at least 6 characters';
     errorEl.style.display = 'block';
+    if (signUpBtn) { signUpBtn.disabled = false; signUpBtn.innerHTML = originalText; }
     return;
   }
   
@@ -533,12 +542,12 @@ async signUp(e) {
     await this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     await this.auth.createUserWithEmailAndPassword(email, password);
     // Auth state listener will handle the rest
-    // Force hide modal
     const loginModal = document.getElementById('loginModal');
     if (loginModal) loginModal.classList.remove('active');
   } catch (error) {
     errorEl.textContent = this.getAuthErrorMessage(error.code);
     errorEl.style.display = 'block';
+    if (signUpBtn) { signUpBtn.disabled = false; signUpBtn.innerHTML = originalText; }
   }
 }
 
@@ -573,12 +582,17 @@ async signInWithGoogle() {
   }
   
   try {
+    console.log("Starting Google sign-in...");
     await this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     const provider = new firebase.auth.GoogleAuthProvider();
+    provider.addScope('email');
+    provider.addScope('profile');
+    console.log("Redirecting to Google...");
     // Use signInWithRedirect for better mobile support
     await this.auth.signInWithRedirect(provider);
     // Auth state listener will handle the rest
   } catch (error) {
+    console.error("Google sign-in error:", error);
     if (errorEl) {
       errorEl.textContent = this.getAuthErrorMessage(error.code);
       errorEl.style.display = 'block';
@@ -876,7 +890,12 @@ if (typeof firebase !== 'undefined') {
   this.analytics = firebase.analytics(); // Initialize Google Analytics
 
   // Handle redirect result (for mobile Google Sign-In)
-  this.auth.getRedirectResult().catch(error => {
+  this.auth.getRedirectResult().then(result => {
+    if (result.user) {
+      console.log("Redirect sign-in successful:", result.user.uid);
+      // Auth state listener will handle the rest
+    }
+  }).catch(error => {
     console.error("Redirect auth error:", error);
     const errorEl = document.getElementById('loginError');
     if (errorEl) {
@@ -927,6 +946,7 @@ if (typeof firebase !== 'undefined') {
         app.style.display = 'block';
       }
       this.loadAllData();
+      this.checkFirstTimeUser(); // BUG FIX: Check for first time user only after auth is confirmed
     } else {
       // User is signed out - show login screen
       this.userId = null;
@@ -940,7 +960,6 @@ if (typeof firebase !== 'undefined') {
 try {
 this.showLoading(true);
 this.setupUI();
-this.checkFirstTimeUser();
 // this.renderAll(); // Removed to prevent FOUC - waits for Auth
 this.setupEventListeners();
 
@@ -2942,6 +2961,7 @@ const blindSchedule = this.generateBlindFeedingSchedule(initialSeed || 0, stocki
 const newTank = {
 id: Date.now().toString(),
 farmId,
+ownerUid: this.userId, // BUG FIX: Add owner UID for security rules
 name,
 size,
 stockingDate: stockingDate,
@@ -3229,6 +3249,8 @@ this.state.inventory.totalKg = newInventoryTotal;
 this.state.feedLogs[entryIndex].amount = amount;
 this.state.feedLogs[entryIndex].trayResult = trayResult;
 this.state.feedLogs[entryIndex].reason = reason || null;
+// BUG FIX: Ensure ownership data is present for security rules
+this.state.feedLogs[entryIndex].ownerUid = this.userId;
 
 // BUG #2 FIX: Use async save with proper sequencing
 (async () => {
@@ -3260,6 +3282,12 @@ document.getElementById('waterQualityModal').classList.add('active');
 
 saveWaterQuality() {
 const tankId = this.editingTankId;
+const tank = this.getTankById(tankId);
+if (!tank) {
+    this.showToast('Error: Tank not found.', 'error');
+    return;
+}
+
 const ph = parseFloat(document.getElementById('waterPh').value);
 const doVal = parseFloat(document.getElementById('waterDo').value);
 const ammonia = parseFloat(document.getElementById('waterAmmonia').value);
@@ -3275,6 +3303,8 @@ return;
 const entry = {
 id: Date.now(),
 tankId,
+farmId: tank.farmId, // Explicitly add farmId
+ownerUid: this.userId, // BUG FIX: Add owner UID for security rules
 date: new Date().toISOString(),
 ph: isNaN(ph) ? null : ph,
 do: isNaN(doVal) ? null : doVal, // Dissolved Oxygen
@@ -3322,6 +3352,12 @@ document.getElementById('diseaseModal').classList.add('active');
 
 saveApplication() {
 const tankId = this.editingTankId;
+const tank = this.getTankById(tankId);
+if (!tank) {
+    this.showToast('Error: Tank not found.', 'error');
+    return;
+}
+
 const itemName = document.getElementById('appItemName').value;
 const amount = parseFloat(document.getElementById('appAmount').value);
 const unit = document.getElementById('appUnit').value;
@@ -3337,6 +3373,8 @@ if (!this.state.applications) this.state.applications = [];
 const entry = {
 id: Date.now(),
 tankId,
+farmId: tank.farmId, // Explicitly add farmId
+ownerUid: this.userId, // BUG FIX: Add owner UID for security rules
 date: date || new Date().toISOString(),
 itemName,
 amount,
@@ -3352,6 +3390,12 @@ this.showToast('Application logged');
 
 saveDiseaseLog() {
 const tankId = this.editingTankId;
+const tank = this.getTankById(tankId);
+if (!tank) {
+    this.showToast('Error: Tank not found.', 'error');
+    return;
+}
+
 const dateNoticed = document.getElementById('diseaseDate').value;
 const diseaseType = document.getElementById('diseaseType').value;
 const symptoms = document.getElementById('diseaseSymptoms').value;
@@ -3372,6 +3416,8 @@ if (!this.state.diseases) this.state.diseases = [];
 const entry = {
 id: Date.now(),
 tankId,
+farmId: tank.farmId, // Explicitly add farmId
+ownerUid: this.userId, // BUG FIX: Add owner UID for security rules
 dateNoticed,
 diseaseName: diseaseType,
 diseaseType,
@@ -4629,6 +4675,7 @@ const newEntry = {
 // COST-LOCKED V1: Minimal required fields only
 id: Date.now(),
 farmId: this.state.settings.farmId,
+ownerUid: this.userId, // BUG FIX: Add owner UID for security rules
 pondId: tankId, // Renamed from tankId for cost lock
 tankId: tankId, // Required for app compatibility
 doc: this.getDaysOld(tank.stockingDate),
@@ -6165,6 +6212,12 @@ document.getElementById('partialHarvestModal').classList.add('active');
 
 async saveHarvest() {
 const tankId = this.editingTankId;
+const tank = this.getTankById(tankId);
+if (!tank) {
+    this.showToast('Error: Tank not found.', 'error');
+    return;
+}
+
 const date = document.getElementById('harvestDate').value;
 const weight = parseFloat(document.getElementById('harvestWeight').value);
 const count = parseFloat(document.getElementById('harvestCount').value);
@@ -6178,6 +6231,8 @@ return;
 const newHarvest = {
 id: Date.now(),
 tankId,
+farmId: tank.farmId, // Explicitly add farmId
+ownerUid: this.userId, // BUG FIX: Add owner UID for security rules
 date,
 weight,
 count,
