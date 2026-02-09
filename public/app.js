@@ -407,24 +407,26 @@ showLoginScreen(hideLoading = true) {
           
           <div id="loginError" class="error-message" style="display: none; margin-bottom: 20px; color: #d32f2f; background: #ffebee; padding: 10px; border-radius: 8px; font-size: 13px; text-align: center;"></div>
           
-          <div class="form-group">
-            <label style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #757575;">Email Address</label>
-            <input type="email" id="loginEmail" placeholder="name@example.com" class="form-control" style="height: 48px; background: #f9fafb;" onkeydown="if(event.key==='Enter') { event.preventDefault(); app.signIn(); }">
-          </div>
-          
-          <div class="form-group">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-              <label style="margin-bottom: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #757575;">Password</label>
-              <a href="#" onclick="app.resetPassword(); return false;" style="font-size: 12px; color: #2196F3; font-weight: 600;">Forgot?</a>
+          <form onsubmit="app.signIn(event)">
+            <div class="form-group">
+              <label style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #757575;">Email Address</label>
+              <input type="email" id="loginEmail" placeholder="name@example.com" class="form-control" style="height: 48px; background: #f9fafb;">
             </div>
-            <input type="password" id="loginPassword" placeholder="••••••••" class="form-control" style="height: 48px; background: #f9fafb;" onkeydown="if(event.key==='Enter') { event.preventDefault(); app.signIn(); }">
-          </div>
+            
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="margin-bottom: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; color: #757575;">Password</label>
+                <a href="#" onclick="app.resetPassword(); return false;" style="font-size: 12px; color: #2196F3; font-weight: 600;">Forgot?</a>
+              </div>
+              <input type="password" id="loginPassword" placeholder="••••••••" class="form-control" style="height: 48px; background: #f9fafb;">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 12px; height: 48px; font-size: 16px; background: #2196F3; border: none; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);">
+              Sign In
+            </button>
+          </form>
           
-          <button class="btn btn-primary" onclick="app.signIn(event)" style="width: 100%; margin-bottom: 12px; height: 48px; font-size: 16px; background: #2196F3; border: none; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);">
-            Sign In
-          </button>
-          
-          <button class="btn" onclick="app.signUp(event)" style="width: 100%; height: 48px; background: white; border: 2px solid #e0e0e0; color: #616161;">
+          <button type="button" class="btn" onclick="app.signUp(event)" style="width: 100%; height: 48px; background: white; border: 2px solid #e0e0e0; color: #616161;">
             Create Account
           </button>
           
@@ -461,6 +463,16 @@ showLoginScreen(hideLoading = true) {
 
 async signIn(e) {
   if (e) e.preventDefault();
+  
+  // UI Feedback: Disable button to prevent double-clicks
+  let btn = e?.target;
+  // If triggered by form submit, find the submit button inside
+  if (btn && btn.tagName === 'FORM') {
+    btn = btn.querySelector('button[type="submit"]');
+  }
+  const originalText = btn ? btn.innerHTML : 'Sign In';
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...'; }
+
   const email = document.getElementById('loginEmail').value;
   const password = document.getElementById('loginPassword').value;
   const errorEl = document.getElementById('loginError');
@@ -468,12 +480,14 @@ async signIn(e) {
   if (!this.auth) {
     errorEl.textContent = 'System Error: Firebase Auth not initialized.';
     errorEl.style.display = 'block';
+    if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
     return;
   }
 
   if (!email || !password) {
     errorEl.textContent = 'Please enter email and password';
     errorEl.style.display = 'block';
+    if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
     return;
   }
   
@@ -487,6 +501,7 @@ async signIn(e) {
   } catch (error) {
     errorEl.textContent = this.getAuthErrorMessage(error.code);
     errorEl.style.display = 'block';
+    if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
   }
 }
 
@@ -851,6 +866,7 @@ loadFarmRelatedData(farmId) {
 }
 
 init() {
+console.log("🐟 AquaRythu v3.0 Initializing..."); // Version check
 if (typeof firebase !== 'undefined') {
   if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
@@ -3637,7 +3653,7 @@ suggestion = blindPlanAmount;
 reason = `Blind Schedule (Day ${doc})`;
 } else if (isTrayMode) {
 // TRAY MODE: Use tray-based calculation
-const res = this.calculateStrictFeed(lastAmount, lastTray, doc);
+const res = this.calculateStrictFeed(tankId, lastAmount, lastTray, doc);
 suggestion = res.amount;
 reason = res.reason;
 } else {
@@ -4089,9 +4105,24 @@ renderLastFeedRoundSummary(tankId, date = this.currentDate) {
 
 // STRICT FEED ALGORITHM (Ticket: Save Feed Waste)
 
-calculateStrictFeed(lastAmount, trayResult, doc) {
-// Validate inputs to prevent NaN propagation
-const amount = typeof lastAmount === 'number' && lastAmount > 0 ? lastAmount : 2.0; // Default to 2.0kg if invalid
+calculateStrictFeed(tankId, lastAmount, trayResult, doc) {
+    let baseAmount = typeof lastAmount === 'number' && lastAmount > 0 ? lastAmount : 0;
+
+    // If the last feed was skipped or invalid, find the last *actual* feed amount to use as a base.
+    if (baseAmount <= 0) {
+        const lastValidEntry = this.state.feedLogs
+            .filter(e => e.tankId === tankId && e.amount > 0)
+            .sort((a, b) => b.id - a.id)[0];
+        
+        if (lastValidEntry) {
+            baseAmount = lastValidEntry.amount;
+        } else {
+            // No valid previous entries for this tank, use a safe, small default.
+            baseAmount = 1.0; // Safer default than 2.0kg
+        }
+    }
+
+const amount = baseAmount;
 const validTrayResult = typeof trayResult === 'string' ? trayResult.toLowerCase() : 'pending';
 const validDoc = typeof doc === 'number' && doc >= 0 ? doc : 0;
 
@@ -4393,7 +4424,7 @@ const entry = this.state.feedLogs.find(e => e.id === this.currentCheck.entryId);
 const tank = this.getTankById(this.currentCheck.tankId);
 const doc = tank ? this.getDaysOld(tank.stockingDate) : 0;
 const lastAmount = entry.amount;
-const strictResult = this.calculateStrictFeed(lastAmount, worstStatus, doc);
+const strictResult = this.calculateStrictFeed(tank.id, lastAmount, worstStatus, doc);
 
 this.currentCheck.finalResult = worstStatus;
 this.currentCheck.suggestedFeed = strictResult.amount;
@@ -4882,6 +4913,10 @@ try {
     });
 } catch (e) {
     console.error('Failed to quick log feed:', e);
+    // ROLLBACK STATE ON FAILURE
+    this.state.feedLogs.pop();
+    this.state.inventory.totalKg = currentInventory;
+    this.renderAll();
     this.showToast('Failed to save feed log', 'error');
 }
 })();
