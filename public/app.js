@@ -933,26 +933,23 @@ if (typeof firebase !== 'undefined') {
   this.auth.onAuthStateChanged(user => {
     console.log("Auth State Changed:", user ? "User Logged In" : "User Signed Out", user ? user.uid : "");
     if (user) {
-      this.userId = user.uid;
-      // Hide login modal and show app
-      const loginModal = document.getElementById('loginModal');
-      if (loginModal) {
-        loginModal.classList.remove('active');
-        const errorEl = document.getElementById('loginError');
-        if (errorEl) errorEl.style.display = 'none';
-      }
-      const app = document.getElementById('app');
-      if (app) {
-        app.style.display = 'block';
-      }
-      this.loadAllData();
-      this.checkFirstTimeUser(); // BUG FIX: Check for first time user only after auth is confirmed
-      
-      // Clean up URL
-      if (window.location.search.includes('intent')) {
-        window.location.href = '/';
-      }
-
+        this.userId = user.uid;
+        if (window.location.search) {
+            window.location.href = '/app.html';
+            return;
+        }
+        
+        const app = document.getElementById('app');
+        if (app) {
+            app.style.display = 'block';
+        }
+        this.loadAllData();
+        this.checkFirstTimeUser();
+        
+        const loginModal = document.getElementById('loginModal');
+        if (loginModal) {
+            loginModal.classList.remove('active');
+        }
     } else {
       // User is signed out - show login screen
       this.userId = null;
