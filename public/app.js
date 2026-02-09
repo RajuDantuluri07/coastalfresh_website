@@ -949,7 +949,9 @@ if (typeof firebase !== 'undefined') {
       this.checkFirstTimeUser(); // BUG FIX: Check for first time user only after auth is confirmed
       
       // Clean up URL
-      window.history.replaceState({}, document.title, window.location.pathname);
+      if (window.location.search.includes('intent')) {
+        window.location.href = '/';
+      }
 
     } else {
       // User is signed out - show login screen
