@@ -1687,11 +1687,13 @@ if (displayMedStock) displayMedStock.innerHTML = `${this.state.medicineInventory
 renderFarmsList() {
 const container = document.getElementById('farmsList');
 const headerContainer = document.getElementById('farmHeaderContainer');
+const statsContainer = document.querySelector('.overall-stats');
 container.innerHTML = '';
 if (headerContainer) headerContainer.innerHTML = '';
 
 // SCENARIO 1: NO FARM (Step 1 of Onboarding)
 if (!this.state.farm) {
+if (statsContainer) statsContainer.style.display = 'none';
 container.innerHTML = `
 <div class="onboarding-card" style="background: white; border-radius: 16px; padding: 30px 20px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 24px; border: 1px solid var(--border);">
 <div style="width: 70px; height: 70px; background: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
@@ -1721,8 +1723,10 @@ return;
 }
 
 const farmToRender = this.state.farm;
-this.state.settings.farmId = farmToRender.id;
-this.saveSettings();
+if (this.state.settings.farmId !== farmToRender.id) {
+    this.state.settings.farmId = farmToRender.id;
+    this.saveSettings();
+}
 this.updateFarmSelector();
 
 const farm = farmToRender;
@@ -1745,11 +1749,11 @@ Tanks
 <button class="btn btn-sm" style="border: 1px solid var(--border); background: white; color: var(--gray); min-width: 44px; min-height: 44px;" onclick="app.openSettingsModal()">
 <i class="fas fa-cog"></i><span class="action-label" style="margin-left: 6px;">Settings</span>
 </button>
-<button class="btn btn-sm btn-secondary" style="min-width: 44px; min-height: 44px;" onclick="app.editFarm('${farm.id}')">
+<button class="btn btn-sm btn-secondary" style="min-width: 44px; min-height: 44px;" onclick="app.editFarm('${this.escapeAttribute(farm.id)}')">
 <i class="fas fa-edit"></i><span class="action-label" style="margin-left: 6px;">Edit</span>
 </button>
 ${farmTanks.length > 0 ? `
-<button class="btn btn-sm btn-primary" style="min-width: 44px; min-height: 44px;" onclick="app.openTankModal('${farm.id}')">
+<button class="btn btn-sm btn-primary" style="min-width: 44px; min-height: 44px;" onclick="app.openTankModal('${this.escapeAttribute(farm.id)}')">
 <i class="fas fa-plus"></i><span class="action-label" style="margin-left: 6px;">Add Tank</span>
 </button>` : ''}
 </div>
@@ -1759,6 +1763,7 @@ ${farmTanks.length > 0 ? `
 
 // SCENARIO 2: FARM EXISTS, NO TANKS (Step 2 of Onboarding)
 if (farmTanks.length === 0) {
+if (statsContainer) statsContainer.style.display = 'none';
 container.innerHTML = `
 <div class="onboarding-card" style="background: white; border-radius: 16px; padding: 30px 20px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 24px; border: 1px solid var(--border);">
 <div style="width: 70px; height: 70px; background: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
@@ -1780,15 +1785,16 @@ container.innerHTML = `
 </div>
 </div>
 
-<button class="btn btn-primary" onclick="app.openTankModal('${farm.id}')" style="width: 100%; max-width: 300px; padding: 16px; font-size: 16px; border-radius: 12px; font-weight: 600; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3); transition: transform 0.2s;">
+<button class="btn btn-primary" onclick="app.openTankModal('${this.escapeAttribute(farm.id)}')" style="width: 100%; max-width: 300px; padding: 16px; font-size: 16px; border-radius: 12px; font-weight: 600; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3); transition: transform 0.2s;">
 <i class="fas fa-plus"></i> Add First Pond
 </button>
 </div>
 `;
 } else {
+if (statsContainer) statsContainer.style.display = '';
 // Add "Add Tank" card to the grid for easier access
 const addTankCard = `
-<div class="tank-summary-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed var(--border); cursor: pointer; min-height: 180px; background: var(--light);" onclick="app.openTankModal('${farm.id}')">
+<div class="tank-summary-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed var(--border); cursor: pointer; min-height: 180px; background: var(--light);" onclick="app.openTankModal('${this.escapeAttribute(farm.id)}')">
 <div style="width: 50px; height: 50px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
 <i class="fas fa-plus" style="color: var(--primary); font-size: 20px;"></i>
 </div>
@@ -6631,6 +6637,9 @@ settingsBody.innerHTML = `
 <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()"><i class="fas fa-upload"></i> Restore Data</button>
 <input type="file" id="importFile" style="display: none;" accept=".json" onchange="app.importData(this)">
 </div>
+<div style="margin-top: 10px;">
+<button class="btn btn-danger" style="width: 100%;" onclick="app.resetAccountData()"><i class="fas fa-trash-alt"></i> Reset Account (Start Over)</button>
+</div>
 `;
 
 this.renderSettingsSupplements();
@@ -6919,6 +6928,25 @@ this.showToast('Failed to restore data. Invalid file.', 'error');
 input.value = '';
 };
 reader.readAsText(file);
+}
+
+resetAccountData() {
+    this.showConfirmModal('This will delete your farm and all data to start fresh. Are you sure?', 'Reset Account').then(async (confirmed) => {
+        if (confirmed) {
+            this.showLoading(true);
+            try {
+                if (this.state.farm) {
+                    await this.db.collection('farms').doc(this.state.farm.id).delete();
+                }
+                this.showToast('Account reset. Reloading...', 'success');
+                setTimeout(() => window.location.reload(), 1500);
+            } catch (e) {
+                console.error(e);
+                this.showToast('Error resetting data', 'error');
+                this.showLoading(false);
+            }
+        }
+    });
 }
 
 setViewMode(mode) {
