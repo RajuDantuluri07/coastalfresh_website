@@ -791,7 +791,7 @@ loadAllData() {
       }
     }, error => {
       console.error("Error loading farm:", error);
-      this.showToast('Error syncing data', 'error');
+      this.showToast(`Error loading data: ${error.message}`, 'error');
       this.showLoading(false);
     });
 }
@@ -1690,12 +1690,32 @@ const headerContainer = document.getElementById('farmHeaderContainer');
 container.innerHTML = '';
 if (headerContainer) headerContainer.innerHTML = '';
 
+// SCENARIO 1: NO FARM (Step 1 of Onboarding)
 if (!this.state.farm) {
-container.innerHTML = `<div class="empty-state">
-<i class="fas fa-water"></i>
-<h3>No Farm Found</h3>
-<p>Create your first farm to get started</p>
-<button class="btn btn-primary" onclick="app.openFarmModal()"><i class="fas fa-plus"></i> Add Farm</button>
+container.innerHTML = `
+<div class="onboarding-card" style="background: white; border-radius: 16px; padding: 30px 20px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 24px; border: 1px solid var(--border);">
+<div style="width: 70px; height: 70px; background: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+<i class="fas fa-tractor" style="font-size: 30px; color: var(--primary);"></i>
+</div>
+<h2 style="font-size: 22px; margin-bottom: 10px; color: var(--dark); font-weight: 700;">Welcome to AquaRythu! 👋</h2>
+<p style="color: var(--gray); font-size: 15px; margin-bottom: 30px; line-height: 1.5; max-width: 300px; margin-left: auto; margin-right: auto;">Let's set up your digital farm to start tracking feed and growth.</p>
+
+<!-- Progress Steps -->
+<div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 30px;">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 1;">
+<div style="width: 32px; height: 32px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(33, 150, 243, 0.4);">1</div>
+<span style="font-size: 12px; font-weight: 600; color: var(--dark);">Create Farm</span>
+</div>
+<div style="width: 50px; height: 2px; background: #eee; margin-top: -20px;"></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0.4;">
+<div style="width: 32px; height: 32px; background: #eee; color: var(--gray); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;">2</div>
+<span style="font-size: 12px; font-weight: 600; color: var(--gray);">Add Pond</span>
+</div>
+</div>
+
+<button class="btn btn-primary" onclick="app.openFarmModal()" style="width: 100%; max-width: 300px; padding: 16px; font-size: 16px; border-radius: 12px; font-weight: 600; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3); transition: transform 0.2s;">
+<i class="fas fa-plus-circle"></i> Setup My Farm
+</button>
 </div>`;
 return;
 }
@@ -1704,8 +1724,6 @@ const farmToRender = this.state.farm;
 this.state.settings.farmId = farmToRender.id;
 this.saveSettings();
 this.updateFarmSelector();
-
-if (!farmToRender) return;
 
 const farm = farmToRender;
 const farmTanks = this.state.tanks.filter(tank => tank.farmId === farm.id);
@@ -1725,27 +1743,45 @@ Tanks
 </div>
 <div class="farm-actions" style="display: flex; gap: 8px; flex-shrink: 0;">
 <button class="btn btn-sm" style="border: 1px solid var(--border); background: white; color: var(--gray); min-width: 44px; min-height: 44px;" onclick="app.openSettingsModal()">
-<i class="fas fa-cog"></i><span class="action-label" style="margin-left: 6px;">Farm Settings</span>
+<i class="fas fa-cog"></i><span class="action-label" style="margin-left: 6px;">Settings</span>
 </button>
 <button class="btn btn-sm btn-secondary" style="min-width: 44px; min-height: 44px;" onclick="app.editFarm('${farm.id}')">
-<i class="fas fa-edit"></i><span class="action-label" style="margin-left: 6px;">Edit Farm</span>
+<i class="fas fa-edit"></i><span class="action-label" style="margin-left: 6px;">Edit</span>
 </button>
+${farmTanks.length > 0 ? `
 <button class="btn btn-sm btn-primary" style="min-width: 44px; min-height: 44px;" onclick="app.openTankModal('${farm.id}')">
 <i class="fas fa-plus"></i><span class="action-label" style="margin-left: 6px;">Add Tank</span>
-</button>
+</button>` : ''}
 </div>
 </div>
 `;
 }
 
+// SCENARIO 2: FARM EXISTS, NO TANKS (Step 2 of Onboarding)
 if (farmTanks.length === 0) {
 container.innerHTML = `
-<div class="empty-state" style="padding: 30px 20px;">
-<i class="fas fa-water" style="font-size: 32px; margin-bottom: 12px; opacity: 0.5;"></i>
-<h3 style="font-size: 16px; margin-bottom: 8px;">No Tanks Yet</h3>
-<p style="font-size: 13px; margin-bottom: 16px;">Add your first tank to start tracking.</p>
-<button class="btn btn-primary" onclick="app.openTankModal('${farm.id}')">
-<i class="fas fa-plus"></i> Add New Tank
+<div class="onboarding-card" style="background: white; border-radius: 16px; padding: 30px 20px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08); margin-bottom: 24px; border: 1px solid var(--border);">
+<div style="width: 70px; height: 70px; background: #e8f5e9; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+<i class="fas fa-check" style="font-size: 30px; color: var(--success);"></i>
+</div>
+<h2 style="font-size: 22px; margin-bottom: 10px; color: var(--dark); font-weight: 700;">Farm Created! 🎉</h2>
+<p style="color: var(--gray); font-size: 15px; margin-bottom: 30px; line-height: 1.5; max-width: 300px; margin-left: auto; margin-right: auto;">You're halfway there! Add your first pond to complete the setup.</p>
+
+<!-- Progress Steps -->
+<div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 30px;">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0.6;">
+<div style="width: 32px; height: 32px; background: var(--success); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold;">✓</div>
+<span style="font-size: 12px; font-weight: 600; color: var(--success);">Farm Ready</span>
+</div>
+<div style="width: 50px; height: 2px; background: var(--success); margin-top: -20px;"></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 1;">
+<div style="width: 32px; height: 32px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; box-shadow: 0 2px 8px rgba(33, 150, 243, 0.4);">2</div>
+<span style="font-size: 12px; font-weight: 600; color: var(--dark);">Add Pond</span>
+</div>
+</div>
+
+<button class="btn btn-primary" onclick="app.openTankModal('${farm.id}')" style="width: 100%; max-width: 300px; padding: 16px; font-size: 16px; border-radius: 12px; font-weight: 600; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3); transition: transform 0.2s;">
+<i class="fas fa-plus"></i> Add First Pond
 </button>
 </div>
 `;
