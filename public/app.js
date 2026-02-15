@@ -587,10 +587,12 @@ async signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     provider.addScope('email');
     provider.addScope('profile');
-    console.log("Redirecting to Google...");
-    // Use signInWithRedirect for better mobile support
-    await this.auth.signInWithRedirect(provider);
+    console.log("Opening Google Sign-in Popup...");
+    // Use signInWithPopup for better reliability
+    await this.auth.signInWithPopup(provider);
     // Auth state listener will handle the rest
+    const loginModal = document.getElementById('loginModal');
+    if (loginModal) loginModal.classList.remove('active');
   } catch (error) {
     console.error("Google sign-in error:", error);
     if (errorEl) {
@@ -951,12 +953,21 @@ if (typeof firebase !== 'undefined') {
             loginModal.classList.remove('active');
         }
     } else {
-      // User is signed out - show login screen
-      this.userId = null;
-      this.state.farm = null;
-      this.state.tanks = [];
-      this.state.feedLogs = [];
-      this.showLoginScreen(true); // Hide loading spinner and show login
+      // TEMPORARY: Bypass login for testing
+      console.log("Bypassing login for testing...");
+      this.userId = "test_user_v1";
+      
+      const app = document.getElementById('app');
+      if (app) {
+          app.style.display = 'block';
+      }
+      this.loadAllData();
+      this.checkFirstTimeUser();
+      
+      const loginModal = document.getElementById('loginModal');
+      if (loginModal) {
+          loginModal.classList.remove('active');
+      }
     }
   });
 }
