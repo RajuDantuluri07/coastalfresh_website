@@ -3,118 +3,1299 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AquaRythu - Smart Shrimp Farm Management</title>
-    <link rel="stylesheet" href="landing.css">
+    <title>AquaRythu - Smart Shrimp Farm Management for Indian Farmers</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <meta name="description" content="AquaRythu helps shrimp farmers reduce feed waste, improve FCR, and increase profits. Works offline, built for Indian farmers.">
+    <meta name="robots" content="index,follow">
+    <meta property="og:title" content="AquaRythu - Smart Shrimp Farm Management">
+    <meta property="og:description" content="Stop guessing, start growing. The simple, powerful app for shrimp farmers.">
+    <meta property="og:image" content="https://aquarythu.com/og-image.jpg">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://aquarythu.com">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="manifest" href="/manifest.json">
-    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            background-color: #ffffff;
+            scroll-behavior: smooth;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #0284c7, #0e7baf);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #475569;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: #0284c7;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 100px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0284c7, #0b5e8a);
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(2, 132, 199, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: #fff;
+            color: #0284c7;
+            border: 2px solid #0284c7;
+        }
+
+        .btn-secondary:hover {
+            background-color: #f0f9ff;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-large {
+            padding: 16px 32px;
+            font-size: 18px;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 40px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path fill="%230284c7" fill-opacity="0.05" d="M45.3,-68.1C58.2,-59.9,68.1,-46.5,74.3,-31.5C80.5,-16.5,83,0.1,78.7,14.1C74.4,28.1,63.3,39.6,50.1,48.7C36.9,57.8,21.6,64.5,4.2,62.2C-13.1,59.9,-32.5,48.5,-46.3,35.1C-60.1,21.7,-68.3,6.3,-68.6,-9.5C-68.9,-25.2,-61.2,-41.3,-48.5,-50.5C-35.8,-59.7,-17.9,-61.9,-1.5,-59.8C14.9,-57.7,32.4,-76.3,45.3,-68.1Z" transform="translate(100 100)" /></svg>') no-repeat;
+            background-size: cover;
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            background: linear-gradient(135deg, #0284c7, #0e7baf);
+            color: white;
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        .hero-content h1 {
+            font-size: 56px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 24px;
+            color: #0f172a;
+        }
+
+        .hero-highlight {
+            color: #0284c7;
+            position: relative;
+            display: inline-block;
+        }
+
+        .hero-highlight::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            height: 12px;
+            background: rgba(2, 132, 199, 0.2);
+            z-index: -1;
+        }
+
+        .hero-content .subtitle {
+            font-size: 20px;
+            color: #475569;
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            margin: 50px 0 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: #0284c7;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .hero-image {
+            margin-top: 60px;
+            position: relative;
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .trust-badges {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin: 40px 0 0;
+            flex-wrap: wrap;
+        }
+
+        .trust-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .trust-badge i {
+            color: #10b981;
+            font-size: 18px;
+        }
+
+        /* Section Headers */
+        section {
+            padding: 100px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-size: 40px;
+            font-weight: 800;
+            margin-bottom: 16px;
+            color: #0f172a;
+        }
+
+        .section-header p {
+            font-size: 18px;
+            color: #64748b;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Features Section */
+        .features {
+            background-color: #ffffff;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: #ffffff;
+            padding: 40px 30px;
+            border-radius: 24px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -2px rgba(0,0,0,0.05);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: #0284c7;
+            box-shadow: 0 20px 25px -5px rgba(2, 132, 199, 0.1);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #dbeafe, #eff6ff);
+            color: #0284c7;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin: 0 auto 25px;
+        }
+
+        .feature-card h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #0f172a;
+        }
+
+        .feature-card p {
+            color: #64748b;
+        }
+
+        /* Showcase Section */
+        .showcase {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+        }
+
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .showcase-content h2 {
+            font-size: 36px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            color: #0f172a;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 30px 0;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 18px;
+        }
+
+        .feature-list li i {
+            color: #10b981;
+            font-size: 24px;
+        }
+
+        .showcase-image {
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+        }
+
+        .showcase-image img {
+            width: 100%;
+            border-radius: 20px;
+            display: block;
+        }
+
+        /* How It Works */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .step {
+            position: relative;
+            padding: 30px;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #0284c7, #0e7baf);
+            color: #fff;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 auto 25px;
+        }
+
+        .step h3 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #0f172a;
+        }
+
+        .step p {
+            color: #64748b;
+        }
+
+        /* Testimonials */
+        .testimonials {
+            background: #ffffff;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .testimonial-card {
+            background: #f8fafc;
+            padding: 30px;
+            border-radius: 24px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stars {
+            color: #fbbf24;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .testimonial-card p {
+            font-size: 16px;
+            color: #1e293b;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .farmer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .farmer-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #0284c7, #0e7baf);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .farmer-details strong {
+            display: block;
+            color: #0f172a;
+        }
+
+        .farmer-details span {
+            font-size: 14px;
+            color: #64748b;
+        }
+
+        /* Pricing Section */
+        .pricing {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            padding: 100px 0;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 32px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            position: relative;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+        }
+
+        /* Plan Colors */
+        .pricing-card.free {
+            border-top: 4px solid #10b981;
+        }
+
+        .pricing-card.basic {
+            border-top: 4px solid #3b82f6;
+        }
+
+        .pricing-card.pro {
+            border-top: 4px solid #8b5cf6;
+        }
+
+        .pricing-card.popular {
+            transform: scale(1.05);
+            border: 2px solid #8b5cf6;
+            box-shadow: 0 25px 50px -12px rgba(139, 92, 246, 0.3);
+        }
+
+        .pricing-card.popular:hover {
+            transform: scale(1.05) translateY(-8px);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            padding: 6px 20px;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .pricing-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .plan-icon {
+            font-size: 32px;
+            line-height: 1;
+        }
+
+        .pricing-header h3 {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .pricing-card.free .pricing-header h3 {
+            color: #059669;
+        }
+
+        .pricing-card.basic .pricing-header h3 {
+            color: #2563eb;
+        }
+
+        .pricing-card.pro .pricing-header h3 {
+            color: #7c3aed;
+        }
+
+        .price {
+            font-size: 42px;
+            font-weight: 800;
+            margin: 20px 0 25px;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .pricing-card.free .price {
+            color: #059669;
+        }
+
+        .pricing-card.basic .price {
+            color: #2563eb;
+        }
+
+        .pricing-card.pro .price {
+            color: #7c3aed;
+        }
+
+        .price-period {
+            font-size: 16px;
+            font-weight: 400;
+            color: #64748b;
+            margin-left: 5px;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 0 0 30px 0;
+            flex-grow: 1;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list li i {
+            font-size: 18px;
+            min-width: 20px;
+        }
+
+        .pricing-card.free .feature-list li i {
+            color: #10b981;
+        }
+
+        .pricing-card.basic .feature-list li i {
+            color: #3b82f6;
+        }
+
+        .pricing-card.pro .feature-list li i {
+            color: #8b5cf6;
+        }
+
+        .feature-list li:first-child {
+            font-weight: 600;
+            color: #0f172a;
+            background: #f8fafc;
+            margin: -10px -30px 0 -30px;
+            padding: 15px 30px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .pricing-card .btn {
+            width: 100%;
+            padding: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 14px;
+        }
+
+        /* FAQ Section */
+        .faq {
+            background: #ffffff;
+        }
+
+        .faq-grid {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .faq-item h4 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .faq-item h4 i {
+            color: #0284c7;
+        }
+
+        .faq-item p {
+            color: #64748b;
+            margin-left: 28px;
+        }
+
+        /* CTA Section */
+        .cta {
+            background: linear-gradient(135deg, #0284c7, #0e7baf);
+            color: white;
+            text-align: center;
+            padding: 80px 0;
+            margin: 0;
+        }
+
+        .cta h2 {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .cta p {
+            font-size: 20px;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta .btn-primary {
+            background: white;
+            color: #0284c7;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+        }
+
+        .cta .btn-primary:hover {
+            background: #f8fafc;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #0f172a;
+            color: #94a3b8;
+            padding: 60px 0 30px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-col h4 {
+            color: white;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-col ul li a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-col ul li a:hover {
+            color: white;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-links a {
+            color: #94a3b8;
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid #334155;
+            font-size: 14px;
+        }
+
+        /* WhatsApp Float */
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #25d366, #128C7E);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 10px 20px rgba(37, 211, 102, 0.3);
+            transition: all 0.3s ease;
+            z-index: 100;
+            text-decoration: none;
+        }
+
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 30px rgba(37, 211, 102, 0.4);
+        }
+
+        .whatsapp-float span {
+            display: none;
+            position: absolute;
+            right: 70px;
+            background: white;
+            color: #075e54;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            white-space: nowrap;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .whatsapp-float:hover span {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .showcase-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .pricing-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .nav-links {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+            
+            .nav-buttons {
+                justify-content: center;
+            }
+            
+            .hero-content h1 {
+                font-size: 40px;
+            }
+            
+            .hero-stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .pricing-grid {
+                grid-template-columns: 1fr;
+                max-width: 450px;
+            }
+            
+            .pricing-card.popular {
+                transform: scale(1);
+            }
+            
+            .pricing-card.popular:hover {
+                transform: translateY(-8px);
+            }
+            
+            .section-header h2 {
+                font-size: 32px;
+            }
+            
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .whatsapp-float span {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- WhatsApp Float Button -->
+    <a href="https://wa.me/918132551419?text=Hi%20AquaRythu%2C%20I%27m%20interested%20in%20your%20app" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+        <span>Chat with us</span>
+    </a>
 
     <!-- Header -->
     <header class="hero">
         <div class="container">
             <nav>
-                <div class="logo">🐟 AquaRythu</div>
-                <div style="display: flex; gap: 10px; align-items: center;">
+                <div class="logo">
+                    <i class="fas fa-fish"></i> AquaRythu
+                </div>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#how-it-works">How It Works</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#faq">FAQ</a>
+                    <a href="/blog">Blog</a>
+                </div>
+                <div class="nav-buttons">
                     <button id="installAppBtn" class="btn btn-download" style="display: none;">
                         <i class="fas fa-download"></i> Download App
                     </button>
-                    <a href="/app.html?intent=login" class="btn btn-secondary">Login</a>
                 </div>
             </nav>
+
             <div class="hero-content">
-                <h1>Stop Guessing, Start Growing.</h1>
-                <p class="subtitle">The simple, powerful app for shrimp farmers to reduce feed waste, improve FCR, and increase profits. Works offline, built for the field.</p>
+                <div class="hero-badge">
+                    <i class="fas fa-check-circle"></i> Trusted by 500+ Farmers
+                </div>
+                <h1>
+                    Stop Guessing, <span class="hero-highlight">Start Growing</span>
+                </h1>
+                <p class="subtitle">The simple, powerful app for shrimp farmers to reduce feed waste, improve FCR, and increase profits. Works offline, built for Indian farmers.</p>
+                
                 <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 15px;">
-                    <a href="/app.html?intent=signup" class="btn btn-primary btn-large">Start Managing Your Farm for Free</a>
+                    <a href="/app.html?intent=signup" class="btn btn-primary btn-large">Start Free - No Credit Card</a>
                     <a href="/download.html" class="btn btn-download btn-large"><i class="fas fa-download"></i> Download App</a>
                 </div>
-                <small>No credit card required. Free forever for single-user farms.</small>
+
+                <div class="trust-badges">
+                    <div class="trust-badge">
+                        <i class="fas fa-wifi-slash"></i> Works Offline
+                    </div>
+                    <div class="trust-badge">
+                        <i class="fas fa-language"></i> English & తెలుగు
+                    </div>
+                    <div class="trust-badge">
+                        <i class="fas fa-headset"></i> WhatsApp Support
+                    </div>
+                </div>
+
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <div class="stat-number">15%</div>
+                        <div class="stat-label">Avg Feed Savings</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">₹25K+</div>
+                        <div class="stat-label">Extra Profit/Crop</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">500+</div>
+                        <div class="stat-label">Happy Farmers</div>
+                    </div>
+                </div>
+
+                <div class="hero-image">
+                    <img src="/api/placeholder/900/500" alt="AquaRythu App Dashboard showing pond management and analytics">
+                </div>
             </div>
         </div>
     </header>
 
     <!-- Features Section -->
-    <section class="features">
+    <section id="features" class="features">
         <div class="container">
             <div class="section-header">
-                <h2>Finally, an App Built for the Indian Shrimp Farmer</h2>
+                <h2>Finally, an App Built for Indian Shrimp Farmers</h2>
                 <p>AquaRythu helps you make data-driven decisions every day, right from your pond-side.</p>
             </div>
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="feature-icon"><i class="fas fa-rupee-sign"></i></div>
                     <h3>Reduce Feed Costs</h3>
-                    <p>Our smart tray-based suggestions help you avoid overfeeding, cutting your biggest operational cost and improving your FCR.</p>
+                    <p>Smart tray-based suggestions help you avoid overfeeding, cutting your biggest operational cost and improving FCR by up to 15%.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
-                    <h3>Increase Profits</h3>
-                    <p>Track biomass, monitor growth trends, and calculate your estimated profit in real-time. Know your numbers, maximize your harvest.</p>
+                    <h3>Real-Time Profit Tracking</h3>
+                    <p>Track biomass, monitor growth trends, and calculate estimated profit daily. Know your numbers before harvest.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon"><i class="fas fa-wifi"></i></div>
-                    <h3>Works Offline</h3>
-                    <p>No internet at the farm? No problem. AquaRythu works perfectly offline and syncs your data when you're back online.</p>
+                    <h3>100% Offline First</h3>
+                    <p>No internet at the farm? No problem. Log everything offline, syncs automatically when you're back online.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-water"></i></div>
+                    <h3>Water Quality Tracking</h3>
+                    <p>Monitor pH, salinity, ammonia and get alerts when parameters go out of range.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+                    <h3>Smart Feeding Schedule</h3>
+                    <p>Automatic feeding charts based on DOC and biomass. Never guess the feed amount again.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-file-export"></i></div>
+                    <h3>Export Reports</h3>
+                    <p>Generate crop reports for bankers, consultants, or your own records in one click.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- How It Works Section -->
-    <section class="how-it-works">
+    <!-- Feature Showcase -->
+    <section class="showcase">
+        <div class="container">
+            <div class="showcase-grid">
+                <div class="showcase-content">
+                    <h2>Track Everything That Matters, All in One Place</h2>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> Daily feed logging with smart tray-based suggestions</li>
+                        <li><i class="fas fa-check-circle"></i> Real-time FCR and biomass tracking</li>
+                        <li><i class="fas fa-check-circle"></i> Water quality trends & early warning alerts</li>
+                        <li><i class="fas fa-check-circle"></i> Harvest forecasting & profit calculator</li>
+                        <li><i class="fas fa-check-circle"></i> Multi-pond management dashboard</li>
+                        <li><i class="fas fa-check-circle"></i> Export detailed crop reports</li>
+                    </ul>
+                    <a href="/app.html?intent=demo" class="btn btn-primary" style="margin-top: 20px;">
+                        <i class="fas fa-play-circle"></i> See Live Demo
+                    </a>
+                </div>
+                <div class="showcase-image">
+                    <img src="/api/placeholder/500/400" alt="AquaRythu Dashboard Preview">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="how-it-works">
         <div class="container">
             <div class="section-header">
                 <h2>Get Started in 3 Simple Steps</h2>
+                <p>From first stocking to harvest day, AquaRythu guides you at every step.</p>
             </div>
             <div class="steps-grid">
                 <div class="step">
                     <div class="step-number">1</div>
                     <h3>Set Up Your Pond</h3>
-                    <p>Add your pond details and stocking information. Our app automatically creates a blind feeding schedule for you.</p>
+                    <p>Add pond details, stocking date, and count. We automatically create a blind feeding schedule based on standard tables.</p>
                 </div>
                 <div class="step">
                     <div class="step-number">2</div>
-                    <h3>Log Your Daily Feed</h3>
-                    <p>Use our simple interface to log feed for each round. Get smart suggestions based on DOC and tray check results.</p>
+                    <h3>Log Daily Activities</h3>
+                    <p>Quick 2-minute daily logging for feed, mortality, and water quality. Get smart feeding suggestions based on tray checks.</p>
                 </div>
                 <div class="step">
                     <div class="step-number">3</div>
-                    <h3>Track & Grow</h3>
-                    <p>Monitor your FCR, biomass, and water quality from the dashboard. Make informed decisions to ensure a profitable crop.</p>
+                    <h3>Track & Optimize</h3>
+                    <p>Monitor FCR, growth trends, and projected harvest. Make informed decisions to maximize your profits.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Final CTA Section -->
+    <!-- Testimonials -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2>What Farmers Are Saying</h2>
+                <p>Join 500+ farmers who've transformed their shrimp farming with AquaRythu</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"Earlier I used to guess feed amounts. Now AquaRythu tells me exactly how much to feed based on tray checks. Saved ₹15,000 in one crop!"</p>
+                    <div class="farmer-info">
+                        <div class="farmer-avatar">R</div>
+                        <div class="farmer-details">
+                            <strong>Ramesh Naidu</strong>
+                            <span>Nellore, Andhra Pradesh</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"The offline feature is a lifesaver. No signal at my farm, but I never miss a day of logging. My FCR improved from 1.8 to 1.5."</p>
+                    <div class="farmer-info">
+                        <div class="farmer-avatar">S</div>
+                        <div class="farmer-details">
+                            <strong>Satish Kumar</strong>
+                            <span>Ongole, Andhra Pradesh</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"I manage 8 ponds. This app helps me track all of them from my phone. The profit calculator helps me decide when to harvest."</p>
+                    <div class="farmer-info">
+                        <div class="farmer-avatar">P</div>
+                        <div class="farmer-details">
+                            <strong>Prabhu</strong>
+                            <span>Chennai, Tamil Nadu</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="pricing">
+        <div class="container">
+            <div class="section-header">
+                <h2>Simple, Transparent Pricing</h2>
+                <p>Choose the plan that fits your farm size. No hidden fees.</p>
+            </div>
+            <div class="pricing-grid">
+                <!-- FREE Plan - Green -->
+                <div class="pricing-card free">
+                    <div class="pricing-header">
+                        <span class="plan-icon">🟢</span>
+                        <h3>FREE</h3>
+                    </div>
+                    <div class="price">₹0 <span class="price-period">Forever</span></div>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> Unlimited farms</li>
+                        <li><i class="fas fa-check-circle"></i> Unlimited ponds</li>
+                        <li><i class="fas fa-check-circle"></i> Daily feed logging</li>
+                        <li><i class="fas fa-check-circle"></i> DOC tracking</li>
+                        <li><i class="fas fa-check-circle"></i> Blind feeding auto schedule</li>
+                        <li><i class="fas fa-check-circle"></i> Raw history</li>
+                    </ul>
+                    <a href="/app.html?signup=free" class="btn btn-secondary">Start Free Forever</a>
+                </div>
+
+                <!-- BASIC Plan - Blue -->
+                <div class="pricing-card basic">
+                    <div class="pricing-header">
+                        <span class="plan-icon">🔵</span>
+                        <h3>BASIC</h3>
+                    </div>
+                    <div class="price">₹199 <span class="price-period">/ month</span></div>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> Everything in Free +</li>
+                        <li><i class="fas fa-check-circle"></i> Feed increase/decrease guidance</li>
+                        <li><i class="fas fa-check-circle"></i> Overfeeding warnings</li>
+                        <li><i class="fas fa-check-circle"></i> Underfeeding alerts</li>
+                        <li><i class="fas fa-check-circle"></i> Ideal feed range</li>
+                        <li><i class="fas fa-check-circle"></i> Feed trend interpretation</li>
+                    </ul>
+                    <a href="/app.html?signup=basic" class="btn btn-primary">Choose BASIC</a>
+                </div>
+
+                <!-- PRO Plan - Purple -->
+                <div class="pricing-card pro popular">
+                    <div class="popular-badge">MOST POPULAR</div>
+                    <div class="pricing-header">
+                        <span class="plan-icon">🟣</span>
+                        <h3>PRO</h3>
+                    </div>
+                    <div class="price">₹499 <span class="price-period">/ month</span></div>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-check-circle"></i> Everything in Basic +</li>
+                        <li><i class="fas fa-check-circle"></i> FCR (after ~30 DOC)</li>
+                        <li><i class="fas fa-check-circle"></i> Feed efficiency score</li>
+                        <li><i class="fas fa-check-circle"></i> Pond comparison</li>
+                        <li><i class="fas fa-check-circle"></i> Abnormal feed alerts</li>
+                        <li><i class="fas fa-check-circle"></i> Survival estimation</li>
+                        <li><i class="fas fa-check-circle"></i> Harvest readiness</li>
+                        <li><i class="fas fa-check-circle"></i> Reports</li>
+                        <li><i class="fas fa-check-circle"></i> Owner / Partner / Supervisor / Worker Roles</li>
+                    </ul>
+                    <a href="/app.html?signup=pro" class="btn btn-primary">Go PRO</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq">
+        <div class="container">
+            <div class="section-header">
+                <h2>Frequently Asked Questions</h2>
+                <p>Everything you need to know about AquaRythu</p>
+            </div>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h4><i class="fas fa-question-circle"></i> Can I use it without internet?</h4>
+                    <p>Yes! AquaRythu is built to work 100% offline at the pond. You can log all data without internet, and it will automatically sync to the cloud when you're back online.</p>
+                </div>
+                <div class="faq-item">
+                    <h4><i class="fas fa-question-circle"></i> What's the difference between Basic and Pro?</h4>
+                    <p>Basic adds feed guidance and alerts. Pro adds advanced analytics like FCR tracking, pond comparison, survival estimation, and multi-user roles for your team.</p>
+                </div>
+                <div class="faq-item">
+                    <h4><i class="fas fa-question-circle"></i> Is my data safe?</h4>
+                    <p>Absolutely. Your farm data is encrypted and backed up daily. Only you and people you authorize can access your data.</p>
+                </div>
+                <div class="faq-item">
+                    <h4><i class="fas fa-question-circle"></i> Do you support multiple languages?</h4>
+                    <p>Currently we support English and Telugu. Tamil support is coming soon!</p>
+                </div>
+                <div class="faq-item">
+                    <h4><i class="fas fa-question-circle"></i> How do I get started?</h4>
+                    <p>Simply click "Start Free Forever" and create your account. You can add your first pond and start logging within 5 minutes. No credit card required.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA -->
     <section class="cta">
         <div class="container">
-            <h2>Ready to Take Control of Your Farm?</h2>
-            <p>Join hundreds of farmers who are saving money and increasing their harvest yields with AquaRythu.</p>
-            <a href="/app.html?intent=signup" class="btn btn-primary btn-large">Get Started Now - It's Free!</a>v
+            <h2>Ready to Transform Your Shrimp Farming?</h2>
+            <p>Join 500+ farmers who are saving money and increasing harvest yields with AquaRythu.</p>
+            <a href="/app.html?intent=signup" class="btn btn-primary btn-large">Get Started Now - It's Free!</a>
+        </div>
     </section>
 
     <!-- Footer -->
     <footer>
         <div class="container">
-            <p>&copy; 2026 AquaRythu. All rights reserved. Made with ❤️ for the Indian farming community.</p>
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <div class="logo" style="color: white; -webkit-text-fill-color: white; margin-bottom: 20px;">
+                        <i class="fas fa-fish"></i> AquaRythu
+                    </div>
+                    <p style="color: #94a3b8; margin-bottom: 20px;">Smart shrimp farm management for Indian farmers. Built with ❤️ in India.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                        <li><a href="/download">Download App</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="/about">About Us</a></li>
+                        <li><a href="/blog">Blog</a></li>
+                        <li><a href="/careers">Careers</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/terms">Terms of Service</a></li>
+                        <li><a href="/refund">Refund Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 AquaRythu. All rights reserved. Made for the Indian farming community.</p>
+            </div>
         </div>
     </footer>
 
     <script>
-        // Initialize Firebase Analytics
+        // Firebase Analytics
         const firebaseConfig = {
-          apiKey: "AIzaSyCCeLy8PNUK480m_o-GpRWbdRB59R3UTqw",
-          authDomain: "coastal-fresh---sea-foods.firebaseapp.com",
-          projectId: "coastal-fresh---sea-foods",
-          storageBucket: "coastal-fresh---sea-foods.firebasestorage.app",
-          messagingSenderId: "782759620106",
-          appId: "1:782759620106:web:960ec7c125faa30675f9f3",
-          measurementId: "G-468VYWGBHM"
+            apiKey: "AIzaSyCCeLy8PNUK480m_o-GpRWbdRB59R3UTqw",
+            authDomain: "coastal-fresh---sea-foods.firebaseapp.com",
+            projectId: "coastal-fresh---sea-foods",
+            storageBucket: "coastal-fresh---sea-foods.firebasestorage.app",
+            messagingSenderId: "782759620106",
+            appId: "1:782759620106:web:960ec7c125faa30675f9f3",
+            measurementId: "G-468VYWGBHM"
         };
         
         let analytics;
@@ -122,32 +1303,51 @@
             if (typeof firebase !== 'undefined') {
                 firebase.initializeApp(firebaseConfig);
                 analytics = firebase.analytics();
+                
+                // Track page view
+                analytics.logEvent('page_view', { page_title: 'Landing Page', page_location: window.location.href });
             }
+
+            // Track all button clicks
+            document.querySelectorAll('.btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const btnText = e.target.innerText || e.target.closest('.btn')?.innerText;
+                    if (analytics) analytics.logEvent('button_click', { button_text: btnText, page: 'landing' });
+                });
+            });
+
+            // Track pricing card clicks
+            document.querySelectorAll('.pricing-card .btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const card = e.target.closest('.pricing-card');
+                    const plan = card.querySelector('h3')?.innerText || 'unknown';
+                    if (analytics) analytics.logEvent('click_pricing', { plan: plan, source: 'landing_page' });
+                });
+            });
         });
 
         // PWA Install Logic
         let deferredPrompt;
         const installBtn = document.getElementById('installAppBtn');
 
-        // 1. Check if already installed (Standalone mode)
+        // Check if already installed
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
         
-        // 2. Listen for install prompt (Android/Desktop Chrome)
+        // Listen for install prompt
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             if (!isStandalone) installBtn.style.display = 'inline-flex';
         });
 
-        // 3. Handle iOS (doesn't fire beforeinstallprompt)
+        // Handle iOS
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
         if (isIOS && !isStandalone) {
             installBtn.style.display = 'inline-flex';
         }
 
-        // 4. Handle Click
+        // Handle Click
         installBtn.addEventListener('click', async () => {
-            // Track PWA Install Click
             if (analytics) analytics.logEvent('click_pwa_install', { source: 'landing_nav' });
 
             if (deferredPrompt) {
@@ -160,13 +1360,26 @@
             }
         });
 
-        // Track Hero Download Button
-        const heroDownloadBtn = document.querySelector('a[href="/download.html"]');
-        if (heroDownloadBtn) {
-            heroDownloadBtn.addEventListener('click', () => {
-                if (analytics) analytics.logEvent('click_download_page', { source: 'landing_hero' });
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const href = this.getAttribute('href');
+                if (href && href !== '#') {
+                    try {
+                        const target = document.querySelector(href);
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    } catch (err) {
+                        console.warn('Invalid selector:', href);
+                    }
+                }
             });
-        }
+        });
     </script>
+    <!-- Load Firebase after initial page load -->
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-analytics.js"></script>
 </body>
 </html>
