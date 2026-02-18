@@ -5701,90 +5701,67 @@ startDate = tank.stockingDate;
 endDate = this.getFormattedDate(today);
 }
 
-const isDateInRange = (d) => d >= startDate && d <= endDate;
-const tankEntries = this.state.feedEntries.filter(e => e.tankId === tankId && isDateInRange(e.date));
+        const isDateInRange = (d) => d >= startDate && d <= endDate;
+        const tankEntries = this.state.feedEntries.filter(e => e.tankId === tankId && isDateInRange(e.date));
 
-if (tankEntries.length === 0) {
-container.innerHTML = contextHTML + `
-<div class="empty-state" style="padding: 40px 20px; margin: 0 12px 12px; background: #fff; border: 1px solid var(--border); border-radius: 12px;">
-<i class="fas fa-clipboard-list" style="font-size: 32px; opacity: 0.3; margin-bottom: 12px;"></i>
-<p style="color: var(--gray);">No feed logs for this period.</p>
-</div>
-`;
-return;
-}
+        if (tankEntries.length === 0) {
+            container.innerHTML = contextHTML + `
+            <div class="empty-state" style="padding: 40px 20px; margin: 0 12px 12px; background: #fff; border: 1px solid var(--border); border-radius: 12px;">
+                <i class="fas fa-clipboard-list" style="font-size: 32px; opacity: 0.3; margin-bottom: 12px;"></i>
+                <p style="color: var(--gray);">No feed logs for this period.</p>
+            </div>
+            `;
+            return;
+        }
 
-const entriesByDate = {};
-tankEntries.forEach(e => { if (!entriesByDate[e.date]) entriesByDate[e.date] = []; entriesByDate[e.date].push(e); });
+        const entriesByDate = {};
+        tankEntries.forEach(e => { if (!entriesByDate[e.date]) entriesByDate[e.date] = []; entriesByDate[e.date].push(e); });
 
-const sortedDates = Object.keys(entriesByDate).sort().reverse();
+        const sortedDates = Object.keys(entriesByDate).sort().reverse();
 
-let registerHTML = `
-<div class="register">
-<div style="padding:10px 12px;font-size:11px;background:#f8fafc;border-bottom:1px solid var(--border)">
-Tray status:
-<b style="color:var(--success)">Completed</b> ·
-<b style="color:var(--warn, #f59e0b)">Little Left</b> ·
-<b style="color:var(--danger)">Half Left</b> ·
-<b style="color:#64748b">Not Checked</b>
-</div>
-`;
+        let timelineHTML = '<div class="log-timeline">';
+        sortedDates.forEach(date => {
+            const dateObj = new Date(date);
+            const isToday = date === this.currentDate;
+            const isYesterday = date === this.getFormattedDate(new Date(new Date().setDate(new Date().getDate() - 1)));
+            let dateDisplay = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toUpperCase();
+            if (isToday) dateDisplay = `TODAY · ${dateDisplay}`;
+            else if (isYesterday) dateDisplay = `YESTERDAY · ${dateDisplay}`;
 
-const feedsCount = this.state.settings.feedsPerDay || 4;
-const feedLabels = ['Morning', 'Late Morning', 'Afternoon', 'Evening', 'Night 1', 'Night 2'].slice(0, feedsCount);
+            timelineHTML += `<div class="log-date-header">${dateDisplay}</div>`;
 
-sortedDates.forEach(date => {
-const dateObj = new Date(date);
-const isToday = date === this.currentDate;
-const isYesterday = date === this.getFormattedDate(new Date(new Date().setDate(new Date().getDate() - 1)));
-let dateDisplay = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' }).toUpperCase();
-if (isToday) dateDisplay = `TODAY · ${dateDisplay}`;
-if (isYesterday) dateDisplay = `YESTERDAY · ${dateDisplay}`;
+            const entries = entriesByDate[date].sort((a, b) => a.id - b.id); // Oldest first for the day
+            entries.forEach(entry => {
+                let statusClass = entry.trayResult || 'pending';
+                let statusText = (entry.trayResult || 'pending').replace('-', ' ');
+                if (statusText === 'too much') statusText = 'too much left';
 
-registerHTML += `<div style="padding:10px 12px;background:#f1f5f9;font-size:12px;font-weight:600">${dateDisplay}</div>`;
-registerHTML += `<div class="row head" style="grid-template-columns: repeat(${feedsCount}, 1fr);">`;
-feedLabels.forEach(label => { registerHTML += `<div class="cell">${label}</div>`; });
-registerHTML += `</div>`;
+                const isPending = entry.trayResult === 'pending';
+                const actionButton = isPending
+                    ? `<button class="btn-check-tray" onclick="event.stopPropagation(); app.openTrayCheckPopup('${this.escapeAttribute(entry.tankId)}', ${entry.id})"><i class="fas fa-clipboard-check"></i> Check Tray</button>`
+                    : '';
+                
+                const supplementsHTML = (entry.supplements && entry.supplements.length > 0)
+                    ? `<div style="font-size: 11px; color: var(--gray); margin-top: 6px;">+ ${this.sanitizeHTML(entry.supplements.join(', '))}</div>`
+                    : '';
 
-const entries = entriesByDate[date].sort((a, b) => a.id - b.id);
-const entryMap = new Map();
-entries.forEach((entry, index) => { entryMap.set(index, entry); });
-
-registerHTML += `<div class="row" style="grid-template-columns: repeat(${feedsCount}, 1fr);">`;
-
-for (let i = 0; i < feedsCount; i++) {
-const entry = entryMap.get(i);
-if (entry) {
-let statusColor = '#64748b', statusText = '– Not Checked', highlightClass = '';
-
-if (entry.trayResult === 'empty') { statusColor = 'var(--success)'; statusText = '✔ Completed'; }
-else if (entry.trayResult === 'little') { statusColor = 'var(--warn, #f59e0b)'; statusText = '● Little Left'; }
-else if (entry.trayResult === 'half') { statusColor = 'var(--danger)'; statusText = '◐ Half Left'; highlightClass = 'highlight'; }
-else if (entry.trayResult === 'too-much') { statusColor = 'var(--danger)'; statusText = '✖ Too Much'; highlightClass = 'highlight'; }
-else if (entry.trayResult === 'pending') { statusText = 'Pending Check'; }
-else if (entry.trayResult === 'skipped') { statusText = 'Skipped'; }
-else if (entry.trayResult === 'blind-fed') { statusText = 'Blind Fed'; }
-
-const mixHTML = (entry.supplements && entry.supplements.length > 0) ? `<div class="mix">${entry.supplements.map(s => `<span>${this.sanitizeHTML(s)}</span>`).join('')}</div>` : '';
-const reasonHTML = entry.reason ? `<div class="reason">${this.sanitizeHTML(entry.reason)}</div>` : '';
-
-registerHTML += `
-<div class="cell ${highlightClass}" onclick="app.editFeedEntry(${entry.id})" style="cursor: pointer;">
-<span class="qty">${entry.amount} kg</span>
-${reasonHTML}
-${mixHTML}
-<span style="color:${statusColor};font-size:11px;font-weight:600;">${statusText}</span>
-</div>
-`;
-} else {
-registerHTML += `<div class="cell done">-</div>`;
-}
-}
-registerHTML += `</div>`;
-});
-
-registerHTML += `</div>`;
-container.innerHTML = contextHTML + registerHTML;
+                timelineHTML += `
+                <div class="log-entry-card" onclick="app.editFeedEntry(${entry.id})">
+                    <div class="log-entry-left">
+                        <div class="log-entry-amount">${entry.amount} <span>kg</span></div>
+                        <div class="log-entry-time"><i class="far fa-clock"></i> ${entry.time}</div>
+                        ${supplementsHTML}
+                    </div>
+                    <div class="log-entry-right">
+                        <div class="status-pill ${statusClass}" style="text-transform: capitalize;">${statusText}</div>
+                        ${actionButton}
+                    </div>
+                </div>
+                `;
+            });
+        });
+        timelineHTML += '</div>';
+        container.innerHTML = contextHTML + timelineHTML;
 }
 
 /*
@@ -7269,7 +7246,7 @@ const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
 const recentFeedsWithMortality = (this.state.feedEntries || [])
 .filter(e => e.tankId === tankId && e.mortality > 0)
 .filter(e => {
-  const entryDate = new Date(e.timestamp || 0);
+      const entryDate = new Date(e.id || 0);
   return entryDate >= yesterday;
 });
 
@@ -8151,166 +8128,152 @@ this.renderTankDetailEdit(tankId);
 }
 
 renderTankDetailOverview(tank, container) {
-const entries = this.state.feedEntries.filter(e => e.tankId == tank.id);
-const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
-const todayFeed = entries.filter(e => e.date === this.currentDate).reduce((sum, e) => sum + e.amount, 0);
-const doc = this.getDaysOld(tank.stockingDate);
-const tankHarvests = this.state.harvests.filter(h => h.tankId === tank.id);
-const totalHarvested = tankHarvests.reduce((sum, h) => sum + h.weight, 0);
-const totalProduction = (tank.biomass || 0) + totalHarvested;
+    const entries = this.state.feedEntries.filter(e => e.tankId == tank.id);
+    const totalFeed = entries.reduce((sum, e) => sum + e.amount, 0);
+    const todayFeed = entries.filter(e => e.date === this.currentDate).reduce((sum, e) => sum + e.amount, 0);
+    const doc = this.getDaysOld(tank.stockingDate);
+    const tankHarvests = this.state.harvests.filter(h => h.tankId === tank.id);
+    const totalHarvested = tankHarvests.reduce((sum, h) => sum + h.weight, 0);
+    const totalProduction = (tank.biomass || 0) + totalHarvested;
     const estimatedFCR = totalProduction > 0 ? (totalFeed / totalProduction).toFixed(2) : '0.00';
 
-    // Simple phase + tray mode text for context
-    let phaseLabel = '';
-    if (doc <= 3) phaseLabel = 'Phase 1 · Stocking';
-    else if (doc <= 15) phaseLabel = 'Phase 2 · Stabilisation';
-    else if (doc <= 30) phaseLabel = 'Phase 3 · Biomass';
+    // Health Status
+    const healthStatus = tank.healthStatus || 'healthy';
+    const healthColor = healthStatus === 'critical' ? 'var(--danger)' : healthStatus === 'concerns' ? 'var(--warning)' : healthStatus === 'normal' ? 'var(--info)' : 'var(--success)';
 
-    const blindDuration = tank.blindDuration || this.state.settings.blindFeedingDuration || 30;
-    let trayPhase = '';
-    if (doc <= blindDuration && !tank.hasTransitionedFromBlind) trayPhase = 'Blind Feed Mode';
-    else if (doc > blindDuration && !tank.hasTransitionedFromBlind) trayPhase = 'Tray Training';
-    else if (tank.hasTransitionedFromBlind) trayPhase = 'Tray Active';
+    // Latest water quality
+    const waterEntries = this.state.waterQuality.filter(w => w.tankId === tank.id).sort((a, b) => new Date(b.date) - new Date(a.date));
+    const lastWater = waterEntries[0];
+    let waterHTML = `<div class="text-muted text-center" style="padding: 20px 0;">No water quality logs.</div>`;
+    if (lastWater) {
+        const isAmmoniaHigh = lastWater.ammonia > 0.25;
+        const isNitriteHigh = lastWater.nitrite > 0.2;
+        waterHTML = `
+        <div class="settings-item" style="flex-direction: column; align-items: flex-start; gap: 12px;">
+            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-weight: 600;">Latest Water Quality</div>
+                <div style="font-size: 12px; color: var(--gray);">${new Date(lastWater.date).toLocaleDateString()}</div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; text-align: center;">
+                <div><div class="tank-summary-label">pH</div><div class="tank-summary-value">${lastWater.ph ?? '-'}</div></div>
+                <div><div class="tank-summary-label">Salinity</div><div class="tank-summary-value">${lastWater.salinity ?? '-'}</div></div>
+                <div><div class="tank-summary-label">D.O.</div><div class="tank-summary-value">${lastWater.do ?? '-'}</div></div>
+                <div><div class="tank-summary-label" style="color: ${isAmmoniaHigh ? 'var(--danger)' : 'inherit'};">Ammonia</div><div class="tank-summary-value" style="color: ${isAmmoniaHigh ? 'var(--danger)' : 'inherit'};">${lastWater.ammonia ?? '-'}</div></div>
+                <div><div class="tank-summary-label" style="color: ${isNitriteHigh ? 'var(--danger)' : 'inherit'};">Nitrite</div><div class="tank-summary-value" style="color: ${isNitriteHigh ? 'var(--danger)' : 'inherit'};">${lastWater.nitrite ?? '-'}</div></div>
+                <div><div class="tank-summary-label">Alkalinity</div><div class="tank-summary-value">${lastWater.alkalinity ?? '-'}</div></div>
+            </div>
+        </div>
+        `;
+    }
 
-// Latest water quality
-const waterEntries = this.state.waterQuality.filter(w => w.tankId === tank.id).sort((a, b) => new Date(b.date) - new Date(a.date));
-const lastWater = waterEntries[0];
-let waterHTML = `<div class="text-muted text-center" style="padding: 20px 0;">No water quality logs.</div>`;
-if (lastWater) {
-waterHTML = `
-<div class="tank-summary-card" style="border-left: 4px solid var(--info);">
-<div class="tank-summary-header" style="margin-bottom: 8px;">
-<div class="tank-summary-name" style="font-size: 14px;">Latest Water Quality</div>
-<div style="font-size: 11px; color: var(--gray);">${new Date(lastWater.date).toLocaleDateString()}</div>
-</div>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: 8px; text-align: center;">
-<div><div class="tank-summary-label">pH</div><div class="tank-summary-value">${lastWater.ph !== null ? lastWater.ph : '-'}</div></div>
-<div><div class="tank-summary-label">Salinity</div><div class="tank-summary-value">${lastWater.salinity !== null ? lastWater.salinity : '-'}</div></div>
-<div><div class="tank-summary-label">D.O.</div><div class="tank-summary-value">${lastWater.do !== null ? lastWater.do : '-'}</div></div>
-<div><div class="tank-summary-label">Alkalinity</div><div class="tank-summary-value">${lastWater.alkalinity !== null ? lastWater.alkalinity : '-'}</div></div>
-<div><div class="tank-summary-label" style="color: ${lastWater.ammonia > 0.25 ? 'var(--danger)' : 'var(--dark)'};">Ammonia</div><div class="tank-summary-value" style="color: ${lastWater.ammonia > 0.25 ? 'var(--danger)' : 'var(--dark)'};">${lastWater.ammonia !== null ? lastWater.ammonia : '-'}</div></div>
-<div><div class="tank-summary-label" style="color: ${lastWater.nitrite > 0.2 ? 'var(--danger)' : 'var(--dark)'};">Nitrite</div><div class="tank-summary-value" style="color: ${lastWater.nitrite > 0.2 ? 'var(--danger)' : 'var(--dark)'};">${lastWater.nitrite !== null ? lastWater.nitrite : '-'}</div></div>
-</div>
-</div>
-`;
-}
+    // Prepare Chart Data (Last 14 Days)
+    const labels = [];
+    const dataPoints = [];
+    const today = new Date();
+    for (let i = 13; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const dateStr = this.getFormattedDate(d);
+        labels.push(d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }));
+        const dayEntries = this.state.feedEntries.filter(e => e.tankId === tank.id && e.date === dateStr);
+        const dayTotal = dayEntries.reduce((sum, e) => sum + e.amount, 0);
+        dataPoints.push(dayTotal);
+    }
 
-// Latest application
-const appEntries = (this.state.applications || []).filter(a => a.tankId === tank.id).sort((a, b) => new Date(b.date) - new Date(a.date));
-const lastApp = appEntries[0];
-let appHTML = `<div class="text-muted text-center" style="padding: 20px 0;">No applications logged.</div>`;
-if (lastApp) {
-appHTML = `
-<div class="tank-summary-card" style="border-left: 4px solid var(--warning);">
-<div class="tank-summary-header" style="margin-bottom: 8px;">
-<div class="tank-summary-name" style="font-size: 14px;">Last Application</div>
-<div style="font-size: 11px; color: var(--gray);">${new Date(lastApp.date).toLocaleDateString()}</div>
-</div>
-<div style="font-size: 14px; font-weight: 600; color: var(--dark);">${lastApp.itemName}</div>
-<div style="font-size: 12px; color: var(--gray);">${lastApp.amount} ${lastApp.unit || ''}</div>
-</div>
-`;
-}
+    container.innerHTML = `
+    <div class="tank-detail-tab-content" style="background: #f8f9fa;">
+        <!-- Key Metrics Grid -->
+        <div class="detail-section" style="margin-bottom: 16px;">
+            <div class="detail-stat-grid" style="grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                <div class="stat-card" style="min-height: 70px; padding: 12px;">
+                    <div class="stat-value" style="font-size: 20px;">${(tank.biomass || 0).toFixed(0)} <span class="unit">kg</span></div>
+                    <div class="stat-label">Est. Biomass</div>
+                </div>
+                <div class="stat-card" style="min-height: 70px; padding: 12px;">
+                    <div class="stat-value" style="font-size: 20px;">${estimatedFCR}</div>
+                    <div class="stat-label">Est. FCR</div>
+                </div>
+                <div class="stat-card" style="min-height: 70px; padding: 12px;">
+                    <div class="stat-value" style="font-size: 20px;">${doc}</div>
+                    <div class="stat-label">DOC</div>
+                </div>
+            </div>
+        </div>
 
-// Prepare Chart Data (Last 14 Days)
-const labels = [];
-const dataPoints = [];
-const today = new Date();
-for (let i = 13; i >= 0; i--) {
-const d = new Date(today);
-d.setDate(d.getDate() - i);
-const dateStr = this.getFormattedDate(d);
-labels.push(d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }));
-const dayEntries = this.state.feedEntries.filter(e => e.tankId === tank.id && e.date === dateStr);
-const dayTotal = dayEntries.reduce((sum, e) => sum + e.amount, 0);
-dataPoints.push(dayTotal);
-}
+        <!-- Feed History Chart -->
+        <div class="detail-section">
+            <div class="detail-section-header" style="margin-bottom: 8px;">
+                <h3 class="detail-section-title">Feed History (14 Days)</h3>
+            </div>
+            <div style="background: white; padding: 16px; border-radius: 12px; border: 1px solid var(--border); height: 200px;">
+                <canvas id="feedHistoryChart"></canvas>
+            </div>
+        </div>
 
-container.innerHTML = `
-<div class="tank-detail-tab-content">
-<div class="detail-section">
-<div class="detail-section-header">
-<h3 class="detail-section-title">Feed History (14 Days)</h3>
-</div>
-<div style="background: white; padding: 10px; border-radius: 12px; border: 1px solid var(--border); height: 220px;">
-<canvas id="feedHistoryChart"></canvas>
-</div>
-</div>
-<div class="detail-section">
-<div class="detail-section-header">
-<h3 class="detail-section-title">Health & Mortality</h3>
-</div>
-<div class="tank-summary-card" style="display:flex; flex-direction:column; gap:12px;">
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap:12px;">
-<div>
-<div class="tank-summary-label">Dead Shrimp</div>
-<div class="tank-summary-value" style="color: ${tank.deadCount > 0 ? 'var(--danger)' : 'var(--success)'};">${tank.deadCount || 0}</div>
-</div>
-<div>
-<div class="tank-summary-label">Health Status</div>
-<div class="tank-summary-value" style="color: ${
-  (tank.healthStatus || 'healthy') === 'critical' ? 'var(--danger)' :
-  (tank.healthStatus || 'healthy') === 'concerns' ? 'var(--warning)' :
-  (tank.healthStatus || 'healthy') === 'normal' ? 'var(--info)' :
-  'var(--success)'
-}; font-weight: 600; text-transform: capitalize;">${(tank.healthStatus || 'healthy').replace('-', ' ')}</div>
-</div>
-</div>
-${tank.healthNotes ? `<div style="padding: 8px; background: #f8f9fa; border-radius: 8px; border-left: 3px solid var(--warning); font-size: 12px; color: var(--gray);">
-<strong>Notes:</strong> ${this.sanitizeHTML(tank.healthNotes)}
-</div>` : ''}
-${tank.lastHealthUpdate ? `<div style="font-size: 11px; color: var(--gray);">Last updated: ${tank.lastHealthUpdate}</div>` : ''}
-</div>
-</div>
-<div class="detail-section">
-<div class="detail-section-header">
-<h3 class="detail-section-title">Recent Activity</h3>
-</div>
-${waterHTML}
-<br>
-${appHTML}
-</div>
-</div>
-`;
+        <!-- Health & Water Quality -->
+        <div class="detail-section">
+             <div class="detail-section-header" style="margin-bottom: 8px;">
+                <h3 class="detail-section-title">Health & Environment</h3>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="settings-item" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+                     <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="font-weight: 600;">Health Status</div>
+                        <div style="font-size: 13px; font-weight: 700; text-transform: capitalize; color: ${healthColor};">${healthStatus.replace('-', ' ')}</div>
+                    </div>
+                    ${tank.healthNotes ? `<div style="font-size: 12px; color: var(--gray);">${this.sanitizeHTML(tank.healthNotes)}</div>` : ''}
+                    <div style="font-size: 12px; color: var(--gray);">Mortality Today: <strong>${tank.deadCount || 0}</strong></div>
+                </div>
+                ${waterHTML}
+            </div>
+        </div>
+    </div>
+    `;
 
-// Initialize Chart
-if (this.feedChart) {
-this.feedChart.destroy();
-}
-const canvas = document.getElementById('feedHistoryChart');
-if (!canvas) return;
-const ctx = canvas.getContext('2d');
-this.feedChart = new Chart(ctx, {
-type: 'bar',
-data: {
-labels: labels,
-datasets: [{
-label: 'Feed (kg)',
-data: dataPoints,
-backgroundColor: '#2196F3',
-borderRadius: 4,
-barThickness: 10
-}]
-},
-options: {
-responsive: true,
-maintainAspectRatio: false,
-plugins: {
-legend: { display: false }
-},
-scales: {
-y: {
-beginAtZero: true,
-grid: { borderDash: [4, 4], drawBorder: false },
-ticks: { font: { size: 10 } }
-},
-x: {
-grid: { display: false },
-ticks: { font: { size: 10 }, maxRotation: 45, minRotation: 45 }
-}
-}
-}
-});
+    // Initialize Chart
+    if (this.feedChart) {
+        this.feedChart.destroy();
+    }
+    const canvas = document.getElementById('feedHistoryChart');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    this.feedChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Feed (kg)',
+                data: dataPoints,
+                backgroundColor: 'rgba(33, 150, 243, 0.75)',
+                borderRadius: 4,
+                barThickness: 'flex',
+                maxBarThickness: 12,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => `${context.raw.toFixed(1)} kg`
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { borderDash: [2, 2], drawBorder: false },
+                    ticks: { font: { size: 10 } }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 10 } }
+                }
+            }
+        }
+    });
 }
 
 renderTankDetailAnalytics(tank, container) {
